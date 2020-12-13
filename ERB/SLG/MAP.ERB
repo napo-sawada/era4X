@@ -1,0 +1,146 @@
+﻿;-------------------------------------------------
+; MAP初期化
+;-------------------------------------------------
+@INIT_MAP
+#DIM CONST X座標分割数 = MAP_WIDTH / 5
+#DIM CONST Y座標分割数 = MAP_HEIGHT / 5
+#DIM 星系座標X, 星系数
+#DIM 星系座標Y, 星系数
+#DIM ITER
+#DIM X_POS
+#DIM Y_POS
+ITER = 0
+PRINTL 星系製作中……
+WHILE ITER < 星系数
+	FOR Y_POS, 0, Y座標分割数 - 1
+		 FOR X_POS, 0, X座標分割数 - 1
+		 	; もっとスマートな計算方法はないものか...
+		 	IF ITER < 星系数 && RAND(星系数 - ITER) == 0 && MAP:(X_POS * 5 + 3):(Y_POS * 5 + 3) != 星
+			 	MAP:(X_POS * 5 + 3):(Y_POS * 5 + 3) = 星
+			 	CALL POS2ID(X_POS * 5 + 3, Y_POS * 5 + 3)
+			 	星系座標ID:ITER = RESULT
+				ITER ++
+			ENDIF
+		 NEXT
+	NEXT
+WEND
+PRINTL 完了!
+
+;-------------------------------------------------
+; MAP描画
+;-------------------------------------------------
+@DRAW_MAP(MODE)
+#DIM MODE
+#DIM X_POS
+#DIM Y_POS
+DRAWLINE
+FOR Y_POS, 0, MAP_HEIGHT
+	FOR X_POS, 0, MAP_WIDTH
+		IF CLEARMAP:X_POS:Y_POS == 0
+			CALL ID2TILE(0)
+		ELSE
+			CALL ID2TILE(MAP:X_POS:Y_POS == 0 ? 1 # MAP:X_POS:Y_POS)
+			; 星以外では船を表示する
+			IF MAP:X_POS:Y_POS != 星 && MAP:X_POS:Y_POS != 自星
+				CALL GET_SHIP_TILE(X_POS, Y_POS)
+				IF RESULT > 0
+					CALL ID2TILE(RESULT)
+				ELSE
+					CALL ID2TILE(MAP:X_POS:Y_POS == 0 ? 1 # MAP:X_POS:Y_POS)
+				ENDIF
+			ELSE
+				CALL ID2TILE(MAP:X_POS:Y_POS == 0 ? 1 # MAP:X_POS:Y_POS)
+			ENDIF
+		ENDIF
+		CALL POS2ID(X_POS, Y_POS)
+		SIF RESULT == PLAYER_POSITION
+			SETCOLOR 0xAAFFAA
+		PRINTBUTTON @"%RESULTS:0%", X_POS * 100 + Y_POS
+		RESETCOLOR
+	NEXT
+	PRINTL 
+NEXT
+DRAWLINE
+
+
+;-------------------------------------------------
+; 探索済みマップの結果返却
+;-------------------------------------------------
+@GET_MAP(X_POS, Y_POS)
+#FUNCTION
+#DIM X_POS
+#DIM Y_POS
+
+IF CLEARMAP:X_POS:Y_POS == 0
+	RETURNF 0
+ELSE
+	RETURNF MAP:X_POS:Y_POS == 0 ? 1 # MAP:X_POS:Y_POS
+ENDIF
+;-------------------------------------------------
+; MAPのタイル返却
+;-------------------------------------------------
+@ID2TILE(TILE_ID)
+#DIM TILE_ID
+SELECTCASE TILE_ID
+	CASE 無
+		RESULTS:0 = ■
+	CASE 明瞭
+		RESULTS:0 = □
+	CASE 星
+		RESULTS:0 = 星
+	CASE 自星
+		SETCOLOR 0x00FF00
+		RESULTS:0 = 星
+	CASE ANOMALY
+		RESULTS:0 = ！
+	CASE 資源
+		RESULTS:0 = ＃
+	CASE 中立軍
+		RESULTS:0 = ▲
+	CASE 自軍
+		SETCOLOR 0X00FF00
+		RESULTS:0 = ▲
+	CASE 敵軍
+		SETCOLOR 0XFF0000
+		RESULTS:0 = ▲
+ENDSELECT
+RETURN
+
+;-------------------------------------------------
+; IDから座標を返却 RESULT:0 = 異常値チェック(0:OUT, 1:SAFE) RESULT:1 = X, RESULT:2 = Y
+;-------------------------------------------------
+@ID2POS(ID)
+#DIM ID
+#DIM X_POS
+#DIM Y_POS
+
+X_POS = ID / 100
+Y_POS = ID % 100
+RESULT:1 = X_POS
+IF X_POS < 0 && X_POS >= MAP_WIDTH
+	RESULT = 0
+	RETURN
+ENDIF
+RESULT:2 = Y_POS
+IF Y_POS < 0 && Y_POS >= MAP_HEIGHT
+	RESULT = 0
+ELSE
+	RESULT = 1
+ENDIF
+
+;-------------------------------------------------
+; 座標からIDを取得
+;-------------------------------------------------
+@POS2ID(X_POS, Y_POS)
+#DIM X_POS
+#DIM Y_POS
+RETURN Y_POS + X_POS * 100
+
+;-------------------------------------------------
+; IDから座標を返却
+;-------------------------------------------------
+@ID_TO_POS(ID)
+#FUNCTION
+#DIM ID
+RESULT:1 = ID/100
+RESULT:2 = ID%100

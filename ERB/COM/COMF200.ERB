@@ -1,0 +1,370 @@
+﻿;-------------------------------------------------
+;犯させる
+;セックス系コマンド、レベル1
+;-------------------------------------------------
+@COM200
+PRINTL 犯させる
+
+;-------------------------------------------------
+;実行判定処理
+;-------------------------------------------------
+;共通処理
+CALL COM_ORDER_COMMON
+SIF RESULT == 0
+	RETURN 0
+	
+
+;-------------------------------------------------
+;実行決定
+;-------------------------------------------------
+
+STR:0 = 犯させる
+CALL KOJO_MESSAGE_COM
+
+;-------------------------------------------------
+;射精ゲージチェック
+;-------------------------------------------------
+B = 1000
+
+;ABL:調教者の技巧をみる
+IF ABL:PLAYER:2 == 0
+	TIMES B , 1.00
+ELSEIF ABL:PLAYER:2 == 1
+	TIMES B , 1.20
+ELSEIF ABL:PLAYER:2 == 2
+	TIMES B , 1.40
+ELSEIF ABL:PLAYER:2 == 3
+	TIMES B , 1.60
+ELSEIF ABL:PLAYER:2 == 4
+	TIMES B , 1.80
+ELSE
+	TIMES B , 2.00
+ENDIF
+
+;ABL:従順をみる
+IF ABL:0 == 0
+	TIMES B , 0.80
+ELSEIF ABL:0 == 1
+	TIMES B , 0.90
+ELSEIF ABL:0 == 2
+	TIMES B , 1.00
+ELSEIF ABL:0 == 3
+	TIMES B , 1.10
+ELSEIF ABL:0 == 4
+	TIMES B , 1.20
+ELSE
+	TIMES B , 1.30
+ENDIF
+
+;ABL:欲望をみる
+IF ABL:1 == 0
+	TIMES B , 1.00
+ELSEIF ABL:1 == 1
+	TIMES B , 1.10
+ELSEIF ABL:1 == 2
+	TIMES B , 1.20
+ELSEIF ABL:1 == 3
+	TIMES B , 1.30
+ELSEIF ABL:1 == 4
+	TIMES B , 1.40
+ELSE
+	TIMES B , 1.50
+ENDIF
+
+;プレイヤーのABL:V感覚をみる
+IF ABL:PLAYER:4 == 0
+	TIMES B , 0.50
+ELSEIF ABL:PLAYER:4 == 1
+	TIMES B , 0.80
+ELSEIF ABL:PLAYER:4 == 2
+	TIMES B , 1.00
+ELSEIF ABL:PLAYER:4 == 3
+	TIMES B , 1.20
+ELSEIF ABL:PLAYER:4 == 4
+	TIMES B , 1.50
+ELSE
+	TIMES B , 2.00
+ENDIF
+
+;プレイヤーのEXP:Ｖ経験をみる
+IF EXP:PLAYER:Ｖ経験 < EXPLV:1
+	TIMES B , 0.20
+ELSEIF EXP:PLAYER:Ｖ経験 < EXPLV:2
+	TIMES B , 0.50
+ELSEIF EXP:PLAYER:Ｖ経験 < EXPLV:3
+	TIMES B , 0.80
+ELSEIF EXP:PLAYER:Ｖ経験 < EXPLV:4
+	TIMES B , 1.00
+ELSEIF EXP:PLAYER:Ｖ経験 < EXPLV:5
+	TIMES B , 1.20
+ELSE
+	TIMES B , 1.40
+ENDIF
+
+;プレイヤーのABL:Ｃ感覚をみる
+IF ABL:PLAYER:3 == 0
+	TIMES B , 1.00
+ELSEIF ABL:PLAYER:3 == 1
+	TIMES B , 1.50
+ELSEIF ABL:PLAYER:3 == 2
+	TIMES B , 2.00
+ELSEIF ABL:PLAYER:3 == 3
+	TIMES B , 2.50
+ELSEIF ABL:PLAYER:3 == 4
+	TIMES B , 3.50
+ELSE
+	TIMES B , 5.00
+ENDIF
+
+;再装填処理中は射精ゲージは20分の1に
+SIF CFLAG:PLAYER:24 > 0
+	B /= 20
+
+
+SIF TALENT:PLAYER:半人半妖 || TALENT:PLAYER:ふたなり || TALENT:PLAYER:オトコ
+	BASE:PLAYER:2 += B
+
+;-------------------------------------------------
+;ソース追加処理
+;-------------------------------------------------
+;消費体力、気力
+LOSEBASE:1 += 60
+LOSEBASE:1 += 200
+
+SOURCE:0 = 400
+SOURCE:5 = 500
+SOURCE:6 = 400
+SOURCE:14 = 700
+SOURCE:17 = 500
+SOURCE:18 = 500
+
+;上のほうで計算した汚れデータ
+SOURCE:15 = Y*10 + 60
+
+;-------------------------------------------------
+;特殊ソース処理
+;-------------------------------------------------
+;抑圧、抵抗持ちには、抑鬱ソース追加
+SIF TALENT:抑圧 || TALENT:抵抗
+	SOURCE:16 += 700
+
+;調教者が処女か再生処女（一回のみ）
+IF (TALENT:PLAYER:処女 == 1 || TALENT:PLAYER:再生処女 == 1) && CFLAG:8 == 0
+	TIMES SOURCE:13 , 20.00
+	TIMES SOURCE:14 , 3.00
+	TALENT:PLAYER:処女 = 0
+	PRINTFORML ＜%CALLNAME:PLAYER%は処女を失いました＞
+	;異常経験追加
+	EXP:異常経験 += 1
+	PRINTFORML %EXPNAME:50%＋１
+	CFLAG:8 = 1
+ENDIF
+
+
+;-------------------------------------------------
+;射精チェック
+;-------------------------------------------------
+CALL SAMEN_CHECK
+
+;射精時の処理
+IF E >= 1
+	;射精先タイプの設定
+	TFLAG:703 = 9
+	;射精先選択の可・不可
+	TFLAG:704 = 0
+	;汎用的な処理はこの関数で行う
+	;（射精ゲージの再計算や射精経験の上昇と共通部分の表示）
+	CALL SAMEN_SHOOT
+ENDIF
+
+;-------------------------------------------------
+;汚れの処理
+;-------------------------------------------------
+IF TALENT:半人半妖 || TALENT:ふたなり || TALENT:オトコ
+	;奴隷のＰ⇔調教者の膣内の汚れが移動
+	STAIN:2 |= STAIN:PLAYER:6
+	STAIN:PLAYER:6 |= STAIN:2
+ENDIF
+
+;-------------------------------------------------
+;経験の処理
+;-------------------------------------------------
+;調教者のV経験
+EXP:PLAYER:Ｖ経験 += 1
+
+;レズ経験
+A = 4
+B = NO:PLAYER + 899
+IF TALENT:オトコ == 0 && TALENT:PLAYER:オトコ == 0
+	PRINTFORML %EXPNAME:40%+{A}
+	EXP:レズ経験 += A
+	CFLAG:B += A
+ELSEIF TALENT:オトコ && TALENT:PLAYER:オトコ
+	PRINTFORML %EXPNAME:41%+{A}
+	EXP:ゲイ経験 += A
+	CFLAG:B += A
+ENDIF
+
+;依存度ベクトル
+TFLAG:33 = 1
+
+;依存度補正値(主人かつ恋慕、淫乱、服従で1。親愛、娼婦、隷属で2）
+IF (TALENT:恋慕 || TALENT:淫乱 || TALENT:服従) && ASSIPLAY == 0
+	TFLAG:30 += 1
+ELSEIF (TALENT:親愛 || TALENT:娼婦 || TALENT:隷属) && ASSIPLAY == 0
+	TFLAG:30 += 2
+ENDIF
+
+;奉仕快楽フラグ
+TFLAG:100 = 1
+
+RETURN 1
+
+;-------------------------------------------------
+;固有の実行判定
+;-------------------------------------------------
+@COM_ORDER_200
+A = 0
+S = 0
+
+;すべての命令に共通の要素を考慮
+;(従順が高いと命令に従いやすいなど)
+CALL COM_ORDER
+
+
+;ABL:欲望
+IF ABL:1
+	SIF S
+		PRINT  + 
+	A += ABL:1 * 2
+	PRINTS ABLNAME:1
+	PRINTV 'LV,ABL:1,'(,ABL:1 * 2,')
+	S = 1
+ENDIF
+
+IF MARK:1
+	SIF S
+		PRINT  + 
+	A += MARK:1 * 2
+	PRINTS MARKNAME:1
+	PRINTV 'LV,MARK:1,'(,MARK:1 * 2,')
+	S = 1
+ENDIF
+
+;PALAM:欲情
+IF PALAM:6 < PALAMLV:1
+	L = 0
+ELSEIF PALAM:6 < PALAMLV:2
+	L = 1
+ELSEIF PALAM:6 < PALAMLV:3
+	L = 2
+ELSEIF PALAM:6 < PALAMLV:4
+	L = 3
+ELSEIF PALAM:6 < PALAMLV:5
+	L = 4
+ELSE
+	L = 5
+ENDIF
+IF L
+	SIF S
+		PRINT  + 
+	A += L * 2
+	PRINTS PALAMNAME:6
+	PRINTV 'LV,L,'(,L * 2,')
+	S = 1
+ENDIF
+
+;快感に素直
+IF TALENT:快感に素直
+	SIF S
+		PRINT  + 
+	A += 2
+	PRINTS TALENTNAME:70
+	PRINTV '(,2,')
+	S = 1
+ENDIF
+;快感の否定（淫乱、娼婦で無効）
+IF TALENT:快感の否定 && (TALENT:淫乱 == 0 && TALENT:娼婦 == 0)
+	PRINT  - 
+	A -= 2
+	PRINTS TALENTNAME:71
+	PRINTV '(,2,')
+	S = 1
+ENDIF
+;淫乱
+IF TALENT:淫乱 && ASSIPLAY == 0
+	SIF S
+		PRINT  + 
+	A += 5
+	PRINTS TALENTNAME:4
+	PRINTV '(,5,')
+	S = 5
+ENDIF
+;娼婦
+IF TALENT:娼婦 && ASSIPLAY == 0
+	SIF S
+		PRINT  + 
+	A += 10
+	PRINTS TALENTNAME:7
+	PRINTV '(,10,')
+	S = 10
+ENDIF
+
+;調教者が処女
+IF EXP:PLAYER:Ｖ経験 == 0
+	PRINT  - 
+	A -= 15
+	PRINTFORM %NAME:PLAYER%が処女
+	PRINTV '(,15,')
+	S = 1
+ENDIF
+
+;調教者が貞操観念
+IF TALENT:PLAYER:貞操観念
+	PRINT  - 
+	A -= 10
+	PRINTFORM %NAME:PLAYER%が貞操観念
+	PRINTV '(,10,')
+	S = 1
+ENDIF
+
+;調教者が貞操無頓着
+IF TALENT:PLAYER:貞操無頓着
+	PRINT  + 
+	A += 5
+	PRINTFORM %NAME:PLAYER%が貞操無頓着
+	PRINTV '(,5,')
+	S = 1
+ENDIF
+
+;調教者のABL:技巧
+IF ABL:PLAYER:2
+	SIF S
+		PRINT  + 
+	A += ABL:PLAYER:2 * 4
+	PRINTFORM %NAME:PLAYER%の
+	PRINTS ABLNAME:2
+	PRINTV 'LV,ABL:PLAYER:2,'(,ABL:PLAYER:2 * 4,')
+	S = 1
+ENDIF
+
+;合計を表示(15以上で実行)
+PRINT  = 
+PRINTV A
+
+V = 15
+SIF A < V
+	PRINT  < 
+SIF A == V
+	PRINT  = 
+SIF A > V
+	PRINT  > 
+PRINT 実行値
+PRINTV V
+
+WAIT
+
+;実行できない
+SIF A < V
+	RETURN 0
+RETURN 1

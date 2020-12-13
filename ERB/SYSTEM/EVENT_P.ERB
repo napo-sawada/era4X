@@ -1,0 +1,538 @@
+﻿;EVENT_P、EVENT_PREGNANCY、妊娠関連のイベント
+;---------------------------------------------------------
+;中田氏・妊娠フラグチェック
+;---------------------------------------------------------
+@IN_VAGINA
+REPEAT CHARANUM
+	T = COUNT
+	;主人の中田氏による妊娠判定
+	IF CFLAG:T:101 > 0
+		P = 1
+		CALL NAKADASHI_CHECK
+	ENDIF
+	;助手→奴隷への中田氏による妊娠判定
+	IF CFLAG:T:103 > 0
+		P = 2
+		CALL NAKADASHI_CHECK
+	ENDIF
+	;奴隷→助手への中田氏による妊娠判定
+	IF CFLAG:T:104 > 0
+		P = 3
+		CALL NAKADASHI_CHECK
+	ENDIF
+	;娼館やレンタル時に客に膣射された場合の妊娠判定
+	IF CFLAG:T:105 > 0
+		P = 4
+		CALL NAKADASHI_CHECK
+	ENDIF
+REND
+
+;妊娠確定時の処理
+REPEAT CHARANUM
+	T = COUNT
+	;妊娠確定時の処理
+	IF TALENT:T:妊娠 == 0 && CFLAG:T:102 != 0 && CFLAG:T:110 == 0
+		CFLAG:T:110 = DAY + 20 + RAND:6
+		;父親が主人
+		SIF CFLAG:T:102 == 1
+			CFLAG:T:111 = NO:MASTER
+		;父親が助手
+		SIF CFLAG:T:102 == 2
+			CFLAG:T:111 = NO:ASSI
+		;父親が奴隷
+		SIF CFLAG:T:102 == 3
+			CFLAG:T:111 = NO:TARGET
+		;父親が顧客
+		SIF CFLAG:T:102 == 4
+			CFLAG:T:111 = -1
+	ENDIF
+REND
+
+@NAKADASHI_CHECK
+;中出しされた精子量に応じて確率処理
+;チェックするフラグ設定
+F = 101 + P
+SIF P == 1
+	F = 101
+
+;中だしされてないなら関数終了
+SIF CFLAG:T:F == 0
+	RETURN 0
+
+;対象が男なら関数終了
+IF TALENT:T:オトコ
+	CFLAG:T:F = 0
+	RETURN 0
+ENDIF
+
+;妊娠が既に確定している場合は関数終了
+IF CFLAG:T:110 > 0
+	CFLAG:T:F = 0
+	RETURN 0
+ENDIF
+
+;妊娠中もしくは育児中は関数終了
+IF TALENT:T:妊娠 || TALENT:T:育児中
+	CFLAG:T:F = 0
+	RETURN 0
+ENDIF
+
+;排卵剤の有無による定数設定
+C = 3 - (CFLAG:T:109 * 2)
+
+IF CFLAG:T:F >= 50
+	SIF RAND:((1 + TALENT:T:小柄体型 * 2) * C) == 0
+		CFLAG:T:102 = P
+ELSEIF CFLAG:T:F >= 30
+	SIF RAND:((2 + TALENT:T:小柄体型 * 2) * C) == 0
+		CFLAG:T:102 = P
+ELSEIF CFLAG:T:F >= 20
+	SIF RAND:((3 + TALENT:T:小柄体型 * 2) * C) == 0
+		CFLAG:T:102 = P
+ELSEIF CFLAG:T:F >= 15
+	SIF RAND:((4 + TALENT:T:小柄体型 * 2) * C) == 0
+		CFLAG:T:102 = P
+ELSEIF CFLAG:T:F >= 5
+	SIF RAND:((5 + TALENT:T:小柄体型 * 2) * C) == 0
+		CFLAG:T:102 = P
+ELSEIF CFLAG:T:F >= 1
+	SIF RAND:((6 + TALENT:T:小柄体型 * 2) * C) == 0
+		CFLAG:T:102 = P
+ENDIF
+
+;判定を行った膣射のリセット
+CFLAG:T:F = 0
+
+
+;妊娠処理
+@GET_CHILD
+REPEAT CHARANUM
+	IF TALENT:COUNT:妊娠 == 0 && CFLAG:COUNT:102 > 0 && CFLAG:COUNT:110 <= DAY+15 && CFLAG:COUNT:12 == 0
+		T = COUNT
+		A = CFLAG:T:111
+		CALL GET_CHILD_MESSAGE
+	ENDIF
+REND
+
+@GET_CHILD_MESSAGE
+REPEAT CHARANUM
+	SIF NO:COUNT == A
+		C = COUNT
+REND
+PRINTFORMW %CALLNAME:T%の様子がおかしい……
+IF CFLAG:T:111 != -1
+	PRINTFORML %CALLNAME:T%は%CALLNAME:C%の子供を身篭った様だ
+ELSE
+	PRINTFORML %CALLNAME:T%は名も知らぬ男の子供を身篭った様だ
+ENDIF
+PRINTS NAME:T
+PRINT は
+PRINT [
+PRINTS TALENTNAME:153
+PRINT ]
+PRINTW した
+TALENT:T:妊娠 = 1
+CALL CHANGE_N_STATUS
+
+
+
+@CHANGE_N_STATUS
+;妊娠時のステータスの変化
+;共通処理
+;体力上限を減らす
+;体力が上限超えることもあるので、体力501以上なら500にする
+MAXBASE:T:0 -= 500
+SIF BASE:T:0 >= 501
+	BASE:T:0 = 500
+
+;乳がワンランクパワーアップする
+;絶→貧　貧→普　普→巨　巨・爆→そのまま
+IF TALENT:T:絶壁 == 1
+	PRINTFORMW %CALLNAME:T%の胸が
+	PRINT [
+	PRINTS TALENTNAME:110
+	PRINT ]
+	PRINT から
+	PRINT [
+	PRINTS TALENTNAME:109
+	PRINT ]
+	PRINTFORMW ぐらいに大きくなった
+	TALENT:T:絶壁 = 0
+	TALENT:T:貧乳 = 1
+ELSEIF TALENT:T:貧乳 == 1
+	PRINTFORMW %CALLNAME:T%の胸が
+	PRINT [
+	PRINTS TALENTNAME:109
+	PRINT ]
+	PRINTW から普通程度に大きくになった
+	PRINTFORMW 　
+	TALENT:T:貧乳 = 0
+ELSEIF TALENT:T:巨乳 == 0 && TALENT:T:爆乳 == 0
+	PRINTFORMW %CALLNAME:T%の胸が普通程度から
+	PRINT [
+	PRINTS TALENTNAME:111
+	PRINT ]
+	PRINTW ぐらいに大きくなった
+	PRINTFORMW 　
+	TALENT:T:巨乳 = 1
+ENDIF
+
+;母乳出るようになる
+IF TALENT:T:母乳体質 == 0
+	PRINTFORMW %CALLNAME:T%は母乳が出るようになった
+	PRINTFORMW 　
+	TALENT:T:母乳体質 = 1
+ENDIF
+
+
+;ストレス値の処理
+B = 100
+;父親が主人
+IF CFLAG:T:102 == 1
+	;恋慕もしくは親愛
+	SIF TALENT:T:恋慕 || TALENT:T:親愛
+		B -= 100
+	;淫乱もしくは娼婦
+	SIF TALENT:T:淫乱 || TALENT:T:娼婦
+		B -= 40
+	;服従もしくは隷属
+	SIF TALENT:T:服従 || TALENT:T:隷属
+		B -= 70
+;父親が奴隷または助手
+ELSEIF CFLAG:T:102 == 2 || CFLAG:T:102 == 3
+	;恋慕もしくは親愛
+	SIF TALENT:T:恋慕 || TALENT:T:親愛
+		B -= 40
+	;淫乱もしくは娼婦
+	SIF TALENT:T:淫乱 || TALENT:T:娼婦
+		B -= 70
+	;服従もしくは隷属
+	SIF TALENT:T:服従 || TALENT:T:隷属
+		B -= 60
+;父親が顧客
+ELSEIF CFLAG:T:102 == 4
+	;恋慕もしくは親愛
+	SIF TALENT:T:恋慕 || TALENT:T:親愛
+		B -= 10
+	;淫乱もしくは娼婦
+	SIF TALENT:T:淫乱 || TALENT:T:娼婦
+		B -= 40
+	;服従もしくは隷属
+	SIF TALENT:T:服従 || TALENT:T:隷属
+		B -= 60
+ENDIF
+
+;相性による変動
+IF A != -1
+	IF RELATION:T:A != 0
+		B *= RELATION:T:A
+		B /= 100
+	ENDIF
+ENDIF
+
+;その他素質による補正
+;気丈
+SIF TALENT:T:気丈
+	B -= 10
+;無関心
+SIF TALENT:T:無関心
+	B -= 5
+;感情乏しい
+SIF TALENT:T:感情乏しい
+	B -= 10
+;楽観的
+SIF TALENT:T:楽観的
+	B -= 5
+;悲観的
+SIF TALENT:T:悲観的
+	B += 5
+;貞操観念
+SIF TALENT:T:貞操観念
+	B += 10
+;貞操無頓着
+SIF TALENT:T:貞操無頓着
+	B -= 10
+
+SIF B < 0
+	B = 0
+
+CFLAG:T:10 += B
+
+
+;ストレス値の累積が100を超えた場合
+IF CFLAG:T:10 >= 100 && TALENT:T:崩壊 == 0
+	PRINTFORMW %CALLNAME:T%は呆然とした面持ちをしている
+	PRINTFORMW %CALLNAME:T%の中で何かが壊れてしまったようだ
+	PRINTFORM %CALLNAME:T%は[
+	PRINTS TALENTNAME:9
+	PRINTW ]してしまった
+	PRINTL 
+	IF TALENT:T:恋慕 || TALENT:T:淫乱 || TALENT:T:服従 || TALENT:T:親愛 || TALENT:T:娼婦 || TALENT:T:隷属
+		PRINTFORM %CALLNAME:T%は[
+		SIF TALENT:T:恋慕
+			PRINTS TALENTNAME:3
+		SIF TALENT:T:淫乱
+			PRINTS TALENTNAME:4
+		SIF TALENT:T:服従
+			PRINTS TALENTNAME:5
+		SIF TALENT:T:親愛
+			PRINTS TALENTNAME:6
+		SIF TALENT:T:娼婦
+			PRINTS TALENTNAME:7
+		SIF TALENT:T:隷属
+			PRINTS TALENTNAME:8
+		PRINTW ]を失った
+		SIF TALENT:T:恋慕
+			TALENT:T:恋慕 = 0
+		SIF TALENT:T:淫乱
+			TALENT:T:淫乱 = 0
+		SIF TALENT:T:服従
+			TALENT:T:服従 = 0
+		SIF TALENT:T:親愛
+			TALENT:T:親愛 = 0
+		SIF TALENT:T:娼婦
+			TALENT:T:娼婦 = 0
+		SIF TALENT:T:隷属
+			TALENT:T:隷属 = 0
+	ENDIF
+	TALENT:T:崩壊 = 1
+ENDIF
+
+V = TARGET
+TARGET = T
+U = 0
+IF ASSI
+	IF ASSI == T
+		U = 1
+		W = ASSI
+	ENDIF
+ENDIF
+;妊娠発覚時のイベント口上
+TFLAG:13 = 11
+CALL KOJO_MESSAGE_EVENT
+TARGET = V
+SIF U
+	ASSI = W
+
+
+;臨月到達
+@REACH_FULL_TERM
+PRINTFORML %CALLNAME:C%は臨月を迎えました
+PRINTFORMW %CALLNAME:C%は出産に備え育児室へ移動します
+SIF TARGET == C
+	TARGET = -1
+SIF ASSI == C
+	ASSI = -1
+
+;出産
+@CHILD_BIRTH
+T = TARGET
+REPEAT CHARANUM
+	SIF NO:COUNT == CFLAG:C:111
+		F = COUNT
+REND
+IF CFLAG:C:111 >= 0
+	PRINTFORMW %CALLNAME:C%は、%CALLNAME:F%の子供を無事出産しました
+ELSE
+	PRINTFORMW %CALLNAME:C%は子供を無事出産しました
+ENDIF
+U = 0
+IF ASSI >= 0
+	SIF ASSI == C
+		U = 1
+ENDIF
+TARGET = C
+;出産時のイベント口上
+TFLAG:13 = 12
+CALL KOJO_MESSAGE_EVENT
+TARGET = T
+SIF U
+	ASSI = C
+
+;妊娠を失う
+TALENT:C:妊娠 = 0
+
+$INPUT_LOOP
+;育児放棄をした場合
+IF TALENT:C:崩壊
+	;育児放棄の際の赤子の処置
+	A = 0
+	REPEAT CHARANUM
+		SIF TALENT:COUNT:妊娠 == 0 && (TALENT:COUNT:育児中 || TALENT:COUNT:母性) && CFLAG:COUNT:12 == 0
+			A += 1
+	REND
+	IF A > 0
+		PRINTFORMW 産まれた赤ん坊を他の奴隷に任せるか、里子に出すかを選択してください
+		PRINTW 
+		PRINTL 誰に任せますか？
+		REPEAT CHARANUM
+			;現在[妊娠]状態でなく、[育児中]か[母性]持ちで労役中でないキャラを羅列
+			IF TALENT:COUNT:妊娠 == 0 && (TALENT:COUNT:育児中 || TALENT:COUNT:母性) && CFLAG:COUNT:12 == 0
+				IF COUNT < 10
+					PRINTFORML [ {COUNT}]%NAME:COUNT% 
+				ELSE
+					PRINTFORML [{COUNT}]%NAME:COUNT% 
+				ENDIF
+			ENDIF
+		REND
+			PRINTFORML  [100]里子に出す
+		INPUT
+		IF RESULT < 0 || RESULT >= CHARANUM
+			GOTO INPUT_LOOP
+		ELSEIF TALENT:RESULT:妊娠 == 1 || (TALENT:RESULT:育児中 == 0 && TALENT:RESULT:母性 == 0) && CFLAG:RESULT:12 == 0
+			GOTO INPUT_LOOP
+		ENDIF
+		IF RESULT == 100
+			PRINTFORMW %CALLNAME:MASTER%はやむなく、赤ん坊を里子に出しました
+		ELSE
+			PRINTFORMW %CALLNAME:MASTER%は%CALLNAME:RESULT%に乳母をやってもらうことにしました
+			;育児期間を設定する
+			CFLAG:RESULT:110 = DAY+5
+			IF TALENT:RESULT:育児中 == 0
+				TALENT:RESULT:育児中 = 1
+				SIF RESULT == TARGET
+					TARGET = -1
+				SIF RESULT == ASSI
+					TARGET = -1
+			ENDIF
+		ENDIF
+	ELSE
+		PRINTFORMW %CALLNAME:MASTER%はやむなく、赤ん坊を里子に出しました
+	ENDIF
+	;妊娠時に減った体力の最大値が回復
+	MAXBASE:C:0 += 500
+	CALL CLEAR_FLAG
+	;妊娠時に大きくなった胸のサイズを一段小さくする
+	CALL REVERSE_B_SIZE
+;育児に入った場合
+ELSE
+	PRINTFORML %CALLNAME:C%は育児室で育児を始めた
+	CFLAG:C:101 = 0
+	CFLAG:C:102 = 0
+	CFLAG:C:103 = 0
+	CFLAG:C:104 = 0
+	CFLAG:C:105 = 0
+	TALENT:C:育児中 = 1
+	;恋慕･親愛持ちで父親が主人
+	IF (TALENT:C:恋慕 || TALENT:C:親愛) && CFLAG:C:111 == NO:MASTER && TALENT:C:母性 == 0
+		PRINT どうやら
+		PRINTFORM %CALLNAME:C%は[
+		PRINTS TALENTNAME:155
+		PRINTW ]に目覚めたようだ
+		TALENT:C:母性 = 1
+	ENDIF
+ENDIF
+
+@CHILD_CARE_ROOM_SELECT
+PRINTFORML %CALLNAME:C%の様子を見に行きますか？
+PRINTL [0] - 育児室へ行く
+PRINTL [1] - 育児室へ行かない
+$INPUT_LOOP
+INPUT
+IF RESULT == 0
+	TFLAG:700 = 1
+	TFLAG:701 = DAY
+	TFLAG:702 = TIME
+	CALL CHILD_CARE_ROOM
+ELSEIF RESULT == 1
+	DRAWLINE
+ELSE
+	GOTO INPUT_LOOP
+ENDIF
+
+@CHILD_CARE_ROOM
+PRINTL どの部屋へ様子を見に行きますか？
+
+REPEAT CHARANUM
+	IF COUNT == MASTER
+		CONTINUE
+	;現在臨月か[育児中]のキャラを羅列
+	ELSEIF  (TALENT:COUNT:妊娠 && (CFLAG:COUNT:110 - 3) <= DAY) || TALENT:COUNT:育児中
+		IF COUNT < 10
+			PRINTFORML [ {COUNT}]%NAME:COUNT% 
+		ELSE
+			PRINTFORML [{COUNT}]%NAME:COUNT% 
+		ENDIF
+	ENDIF
+REND
+PRINTFORML [100]戻る
+
+$INPUT_LOOP
+INPUT
+IF RESULT == 100
+	RETURN 0
+ELSEIF RESULT < 0 || RESULT >= CHARANUM
+	GOTO INPUT_LOOP
+ELSEIF RESULT == MASTER
+	GOTO INPUT_LOOP
+ELSEIF TALENT:RESULT:妊娠 == 0 && (CFLAG:RESULT:110 - 3) <= DAY && TALENT:RESULT:育児中 == 0
+	GOTO INPUT_LOOP
+ELSE
+	PRINTFORML %CALLNAME:MASTER%は%CALLNAME:RESULT%のところへ向かった
+	PRINTW 
+	;育児室のイベント口上
+	A = TARGET
+	TARGET = RESULT
+	TFLAG:13 = 13
+	CALL KOJO_MESSAGE_EVENT
+	TARGET = A
+	PRINTL 
+	RESTART
+ENDIF
+
+
+RETURN 1
+
+
+;親離れ
+@DEPEARENT
+PRINTFORML %CALLNAME:C%の育てていた子供が親離れしました
+PRINTW 
+PRINTFORMW %CALLNAME:C%は再び調教可能になりました
+;妊娠時に減った体力の最大値が回復
+MAXBASE:C:0 += 500
+TALENT:C:育児中 = 0
+IF TALENT:C:貧乳 == 0 && TALENT:C:絶壁 == 0
+	PRINTFORMW %CALLNAME:C%の胸は母乳を与える役割を終えたことで小さくなりました
+	;妊娠時に大きくなった胸のサイズを一段小さくする
+	CALL REVERSE_B_SIZE
+ENDIF
+CALL CLEAR_FLAG
+
+;親離れ時のイベント口上
+A = TARGET
+TARGET = C
+TFLAG:13 = 14
+CALL KOJO_MESSAGE_EVENT
+TARGET = A
+
+;妊娠まわりのフラグをリセット
+@CLEAR_FLAG
+CFLAG:C:101 = 0
+CFLAG:C:102 = 0
+CFLAG:C:103 = 0
+CFLAG:C:104 = 0
+CFLAG:C:105 = 0
+CFLAG:C:110 = 0
+CFLAG:C:111 = 0
+
+;子育て終了or妊娠強制終了時の胸サイズの縮小処理
+@REVERSE_B_SIZE
+;爆→巨　巨→普　普→貧　貧・絶→そのまま
+IF TALENT:C:爆乳
+	TALENT:C:爆乳 = 0
+	TALENT:C:巨乳 = 1
+ELSEIF TALENT:C:巨乳
+	TALENT:C:巨乳 = 0
+ELSEIF TALENT:C:貧乳 == 0 && TALENT:C:絶壁 == 0
+	TALENT:C:貧乳 = 1
+ENDIF
+
+;育児室にいるかの判定
+@CHECK_CHILD_CARE
+SIF (TALENT:C:妊娠 && CFLAG:C:110 - 3 <= DAY) || TALENT:C:育児中
+	RETURN 1
+
+RETURN 0
+
+

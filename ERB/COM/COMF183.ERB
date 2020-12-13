@@ -1,0 +1,198 @@
+﻿;-------------------------------------------------
+;ビデオカメラ
+;特殊コマンド
+;-------------------------------------------------
+@COM183
+;カウントは10回とする
+K = 10
+
+;撮影者の処理
+$INPUT_LOOP
+IF TEQUIP:28 == 0 && ASSI >= 0
+	PRINTL 撮影者を選択してください　途中変更はできません
+	PRINTL （撮影者を変更する場合、一度撮影を終了してください）
+	PRINTL 
+	PRINTFORML [0] %CALLNAME:MASTER%
+	PRINTFORML [1] %CALLNAME:ASSI%
+	PRINTFORML 
+	INPUT
+	IF RESULT == 0
+		FLAG:22 = 1
+		PRINTFORML 撮影者は%CALLNAME:MASTER%です
+	ELSEIF RESULT == 1 && ASSI > 0
+		FLAG:22 = 2
+		PRINTFORML 撮影者は%CALLNAME:ASSI%です
+	ELSE
+		GOTO INPUT_LOOP
+	ENDIF
+ELSEIF TEQUIP:28 == 0
+	FLAG:22 = 1
+	PRINTFORML 撮影者は%CALLNAME:MASTER%です
+ENDIF
+
+
+STR:0 = ビデオカメラ
+CALL KOJO_MESSAGE_COM
+
+
+;着脱の処理
+IF TEQUIP:28
+;ビデオ撮影がされていれば終了させる
+;テープは終了時に数を減らす、さらにこれまでの値段と経験を加算する
+	TEQUIP:28 = 0
+	ITEM:43 -= 1
+	CALL PRICE_VIDEO
+	PRINTW ★★★ビデオ撮影を終了します★★★
+ELSE
+;ビデオ撮影してなければ初期化して開始
+;TODO 起動条件を作成する
+	TEQUIP:28 = 1
+	TFLAG:70 = 0
+	REPEAT K
+		S = COUNT + 11
+		FLAG:S = 0
+	REND
+	PRINTW ★★★ビデオ撮影を開始します★★★
+ENDIF
+
+;依存度ベクトル
+TFLAG:33 = 0
+
+
+RETURN 1
+
+;-------------------------------------------------
+;装着継続の処理
+;-------------------------------------------------
+@EQUIP_COM183
+;撮影開始時はカウントに入れない
+IF TFLAG:70 == 0
+	TFLAG:70 += 1
+	RETURN 1
+ENDIF
+
+;-------------------------------------------------
+;ソース追加処理
+;-------------------------------------------------
+;消費体力、気力
+LOSEBASE:0 += 0
+LOSEBASE:1 += 50
+
+SOURCE:8 += 1000
+SOURCE:17 += 400
+SOURCE:18 += 700
+
+
+;-------------------------------------------------
+;特殊ソース処理
+;-------------------------------------------------
+;抑圧、抵抗持ちには、抑鬱ソース追加
+SIF TALENT:抑圧 || TALENT:抵抗
+	SOURCE:16 += 700
+
+;苦痛を伴わないマゾっ気及びマゾの処理は先にしておく
+;マゾっ気を見る
+A = 1000
+IF ABL:9 == 0
+	TIMES A , 0.80
+	SOURCE:10 += 0
+	SOURCE:11 += 0
+ELSEIF ABL:9 == 1
+	TIMES A , 1.00
+	SOURCE:10 += 20
+	SOURCE:11 += 30
+ELSEIF ABL:9 == 2
+	TIMES A , 1.20
+	SOURCE:10 += 40
+	SOURCE:11 += 70
+ELSEIF ABL:9 == 3
+	TIMES A , 1.40
+	SOURCE:10 += 70
+	SOURCE:11 += 120
+ELSEIF ABL:9 == 4
+	TIMES A , 1.50
+	SOURCE:10 += 110
+	SOURCE:11 += 180
+ELSEIF ABL:9 == 5
+	TIMES A , 1.70
+	SOURCE:10 += 150
+	SOURCE:11 += 250
+ELSEIF ABL:9 == 6
+	TIMES A , 1.90
+	SOURCE:10 += 200
+	SOURCE:11 += 300
+ELSEIF ABL:9 == 7
+	TIMES A , 2.10
+	SOURCE:10 += 250
+	SOURCE:11 += 350
+ELSEIF ABL:9 == 8
+	TIMES A , 2.30
+	SOURCE:10 += 300
+	SOURCE:11 += 400
+ELSEIF ABL:9 == 9
+	TIMES A , 2.50
+	SOURCE:10 += 350
+	SOURCE:11 += 450
+ELSEIF ABL:9 >= 10
+	TIMES A , 3.00
+	SOURCE:10 += 500
+	SOURCE:11 += 500
+ENDIF
+SOURCE:13 += A
+
+
+;-------------------------------------------------
+;経験の処理
+;-------------------------------------------------
+IF FLAG:22 == 1
+	EXP:MASTER:撮影経験 += 1
+	PRINTL 主人撮影経験＋１
+ELSEIF FLAG:22 == 2
+	EXP:ASSI:撮影経験 += 1
+	PRINTL 助手撮影経験＋１
+ENDIF
+EXP:TARGET:被写経験 += 1
+PRINTL 奴隷被写経験＋１
+
+;依存度ベクトルを強制的に変更
+SIF TFLAG:33 == 1 || TFLAG:33 == 2
+	TFLAG:33 = 3
+
+;依存度補正値(服従で1、隷属で2　強制変更なのでリセット）
+IF TALENT:服従 && ASSIPLAY == 0
+	TFLAG:30 = 1
+ELSEIF TALENT:隷属 && ASSIPLAY == 0
+	TFLAG:30 = 2
+ENDIF
+
+
+;-------------------------------------------------
+;ビデオの処理
+;-------------------------------------------------
+;カウントは10回とします
+K = 10
+
+;テープ残量がなくなると強制的にEQUIPフラグを外す、さらにビデオの値段と経験の処理をする
+IF TFLAG:70 <= 0 || TFLAG:70 >= K
+	TEQUIP:28 = 0
+	ITEM:43 -= 1
+	;撮影内容の保存
+	S = TFLAG:70+10
+	FLAG:S = SELECTCOM
+	TFLAG:70 += 1
+	CALL PRICE_VIDEO
+	PRINTL ＜テープの残量がなくなりました　ビデオ撮影を終了します＞
+	RETURN 1
+ELSE
+	PRINTFORML ＜ビデオ撮影中{TFLAG:70}/{K}＞
+ENDIF
+
+;撮影内容の保存
+S = TFLAG:70+10
+FLAG:S = SELECTCOM
+TFLAG:70 += 1
+
+
+RETURN 1
+
+

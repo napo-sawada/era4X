@@ -1,0 +1,88 @@
+﻿;-------------------------------------------------
+;放尿
+;ハードな調教コマンド、レベル2
+;-------------------------------------------------
+@COM144
+PRINTL 放尿
+STR:0 = 放尿
+CALL KOJO_MESSAGE_COM
+
+;-------------------------------------------------
+;ソース追加処理
+;-------------------------------------------------
+;消費体力、気力
+LOSEBASE:0 += 10
+LOSEBASE:1 += 200
+
+SOURCE:8 = 200
+SOURCE:13 = 800
+SOURCE:14 = 500
+SOURCE:17 = 700
+SOURCE:18 = 700
+
+
+;-------------------------------------------------
+;特殊ソース処理
+;-------------------------------------------------
+;抑圧、抵抗持ちには、抑鬱ソース追加
+SIF TALENT:抑圧 || TALENT:抵抗
+	SOURCE:16 += 700
+
+;場所によって逸脱のソースが上下
+;野外
+IF TEQUIP:29
+	TIMES SOURCE:17 , 2.50
+;鏡の前（羞恥プレイ）
+ELSEIF TEQUIP:30
+	TIMES SOURCE:17 , 1.50
+;風呂場
+ELSEIF TEQUIP:31
+	TIMES SOURCE:17 , 0.50
+ENDIF
+
+
+;-------------------------------------------------
+;経験の処理
+;-------------------------------------------------
+;放尿経験
+PRINTFORML %EXPNAME:31%＋２
+EXP:放尿経験 += 2
+
+;レズ経験
+A = 1
+B = NO:PLAYER + 899
+IF TALENT:オトコ == 0 && TALENT:PLAYER:オトコ == 0
+	PRINTFORML %EXPNAME:40%+{A}
+	EXP:レズ経験 += A
+	CFLAG:B += A
+ELSEIF TALENT:オトコ && TALENT:PLAYER:オトコ
+	PRINTFORML %EXPNAME:41%+{A}
+	EXP:ゲイ経験 += A
+	CFLAG:B += A
+ENDIF
+
+;野外放尿で異常経験
+IF TEQUIP:29 && CFLAG:5 == 0
+	PRINTFORML %EXPNAME:50%＋１
+	EXP:異常経験 += 1
+	CFLAG:5 = 1
+ENDIF
+
+;利尿剤解除
+IF TEQUIP:27
+	TEQUIP:27 = 0
+ENDIF
+
+;依存度ベクトル
+TFLAG:33 = 5
+
+;依存度補正値(服従で1、隷属で2）
+IF TALENT:服従 && ASSIPLAY == 0
+	TFLAG:30 += 1
+ELSEIF TALENT:隷属 && ASSIPLAY == 0
+	TFLAG:30 += 2
+ENDIF
+
+
+RETURN 1
+

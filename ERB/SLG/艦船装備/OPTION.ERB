@@ -1,0 +1,26 @@
+﻿;-----------------------------------
+; オプション
+;-----------------------------------
+@GET_OPTION(ID)
+#DIM ID
+
+SELECTCASE ID
+	CASE 1
+		EQUIP_NAME = 小型移乗コンテナ
+	CASEELSE
+		EQUIP_NAME = ---
+ENDSELECT
+
+;-----------------------------------
+; オプションの説明
+;-----------------------------------
+@GET_OPTION_DESCRIPTION(ID)
+#DIM ID
+CALL GET_OPTION(ID)
+SELECTCASE ID
+	CASE 1
+		PRINTFORML %EQUIP_NAME%
+		PRINTFORML 一人乗りの移乗コンテナ。完全放棄された艦船を乗っ取るのに使う。
+	CASEELSE
+		PRINTFORML = ---
+ENDSELECT

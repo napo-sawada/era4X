@@ -1,0 +1,61 @@
+﻿;-----------------------------------
+; サブウェポン
+;-----------------------------------
+@GET_SUB_WEAPON(ID)
+#DIM ID
+
+SELECTCASE ID
+	CASE 1
+		DAMAGE = 1
+		FIRE_RATE = 10
+		ANTI_AIR = 10
+		HIT_RATE = 90
+		FIRE_RANGE = 1
+		SIZE = 1
+		EQUIP_NAME = TIER1対空ガトリング
+	CASE 2
+		DAMAGE = 1
+		FIRE_RATE = 10
+		ANTI_AIR = 15
+		HIT_RATE = 80
+		FIRE_RANGE = 1
+		SIZE = 1
+		EQUIP_NAME = TIER2対空ガトリング
+	CASE 3
+		DAMAGE = 5
+		FIRE_RATE = 10
+		ANTI_AIR = 40
+		HIT_RATE = 80
+		FIRE_RANGE = 1
+		SIZE = 1
+		EQUIP_NAME = TIER3対空ガトリング
+	CASE 4
+		DAMAGE = 100
+		FIRE_RATE = 10
+		ANTI_AIR = 10
+		HIT_RATE = 80
+		FIRE_RANGE = 1
+		SIZE = 4
+		EQUIP_NAME = TIER1汎用ホーミングレーザー
+	CASEELSE
+		EQUIP_NAME = ---
+ENDSELECT
+
+;-----------------------------------
+; サブウェポンの説明
+;-----------------------------------
+@GET_SUB_WEAPON_DESCRIPTION(ID)
+#DIM ID
+CALL GET_SUB_WEAPON(ID)
+SELECTCASE ID
+	CASE 1 TO 4
+		PRINTFORML %EQUIP_NAME%
+		PRINTFORML ダメージ  : {DAMAGE}
+		PRINTFORML 射撃レート: {FIRE_RATE}発/ターン
+		PRINTFORML 対空攻撃力: {ANTI_AIR}
+		PRINTFORML 命中率    : {HIT_RATE}
+		PRINTFORML 有効距離  : {FIRE_RANGE}
+		PRINTFORML サイズ    : {SIZE}
+	CASEELSE
+		PRINTFORML = ---
+ENDSELECT

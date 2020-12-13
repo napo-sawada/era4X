@@ -1,0 +1,76 @@
+﻿;-----------------------------------
+; エンジン
+;-----------------------------------
+@GET_ENGIN(ID)
+#DIM ID
+
+SELECTCASE ID
+	CASE 1
+		SPEED = 1
+		AVOID = 10
+		SIZE = 1
+		EQUIP_NAME = TIER1汎用小型エンジン
+	CASE 2
+		SPEED = 1
+		AVOID = 10
+		SIZE = 2
+		EQUIP_NAME = TIER1汎用中型エンジン
+	CASE 3
+		SPEED = 1
+		AVOID = 10
+		SIZE = 3
+		EQUIP_NAME = TIER1汎用大型エンジン
+	CASE 4
+		SPEED = 1
+		AVOID = 20
+		SIZE = 1
+		EQUIP_NAME = TIER2汎用小型エンジン
+	CASE 5
+		SPEED = 1
+		AVOID = 20
+		SIZE = 2
+		EQUIP_NAME = TIER2汎用中型エンジン
+	CASE 6
+		SPEED = 1
+		AVOID = 20
+		SIZE = 3
+		EQUIP_NAME = TIER2汎用大型エンジン
+	CASE 7
+		SPEED = 2
+		AVOID = 5
+		SIZE = 1
+		EQUIP_NAME = TIER3汎用小型高速エンジン
+	CASE 8
+		SPEED = 2
+		AVOID = 5
+		SIZE = 2
+		EQUIP_NAME = TIER2汎用中型高速エンジン
+	CASE 9
+		SPEED = 2
+		AVOID = 5
+		SIZE = 3
+		EQUIP_NAME = TIER2汎用大型高速エンジン
+	CASE 10
+		SPEED = 1
+		AVOID = 10
+		SIZE = 4
+		EQUIP_NAME = TIER1汎用超大型エンジン
+	CASEELSE
+		EQUIP_NAME = ---
+ENDSELECT
+
+;-----------------------------------
+; エンジンの説明
+;-----------------------------------
+@GET_ENGIN_DESCRIPTION(ID)
+#DIM ID
+CALL GET_ENGIN(ID)
+SELECTCASE ID
+	CASE 1 TO 10
+		PRINTFORML %EQUIP_NAME%
+		PRINTFORML スピード  : {SPEED}
+		PRINTFORML 回避      : {AVOID}
+		PRINTFORML サイズ    : {SIZE}
+	CASEELSE
+		PRINTFORML = ---
+ENDSELECT

@@ -1,0 +1,8 @@
+*.sav
+git-diff.bat
+*.dat
+*.log
+*.lnk
+debug.config
+sav
+debug

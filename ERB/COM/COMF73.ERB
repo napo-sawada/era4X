@@ -1,0 +1,473 @@
+﻿;-------------------------------------------------
+;下着ずらし挿入アナル
+;セックス系コマンド、レベル1
+;-------------------------------------------------
+@COM73
+PRINTL 下着ずらし挿入アナル
+;-------------------------------------------------
+;実行判定処理（正常位アナルのものを使用）
+;-------------------------------------------------
+;共通処理
+CALL COM_ORDER_COMMON
+SIF RESULT == 0
+	RETURN 0
+
+;-------------------------------------------------
+;実行決定
+;-------------------------------------------------
+STR:0 = 下着ずらし挿入アナル
+CALL KOJO_MESSAGE_COM
+
+;-------------------------------------------------
+;射精ゲージチェック
+;-------------------------------------------------
+B = 1500
+
+;ABL:調教者の技巧をみる
+IF ABL:PLAYER:2 == 0
+	TIMES B , 1.00
+ELSEIF ABL:PLAYER:2 == 1
+	TIMES B , 1.20
+ELSEIF ABL:PLAYER:2 == 2
+	TIMES B , 1.40
+ELSEIF ABL:PLAYER:2 == 3
+	TIMES B , 1.60
+ELSEIF ABL:PLAYER:2 == 4
+	TIMES B , 1.80
+ELSE
+	TIMES B , 2.00
+ENDIF
+
+;ABL:従順をみる
+IF ABL:0 == 0
+	TIMES B , 0.80
+ELSEIF ABL:0 == 1
+	TIMES B , 0.90
+ELSEIF ABL:0 == 2
+	TIMES B , 1.00
+ELSEIF ABL:0 == 3
+	TIMES B , 1.10
+ELSEIF ABL:0 == 4
+	TIMES B , 1.20
+ELSE
+	TIMES B , 1.30
+ENDIF
+
+;ABL:欲望をみる
+IF ABL:1 == 0
+	TIMES B , 1.00
+ELSEIF ABL:1 == 1
+	TIMES B , 1.10
+ELSEIF ABL:1 == 2
+	TIMES B , 1.20
+ELSEIF ABL:1 == 3
+	TIMES B , 1.30
+ELSEIF ABL:1 == 4
+	TIMES B , 1.40
+ELSE
+	TIMES B , 1.50
+ENDIF
+
+;PALAM:潤滑をみる
+IF PALAM:4 < PALAMLV:1
+	TIMES B , 0.60
+ELSEIF PALAM:4 < PALAMLV:2
+	TIMES B , 0.80
+ELSEIF PALAM:4 < PALAMLV:3
+	TIMES B , 1.00
+ELSEIF PALAM:4 < PALAMLV:4
+	TIMES B , 1.20
+ELSEIF PALAM:4 >= PALAMLV:4
+	TIMES B , 1.40
+ENDIF
+
+;プレイヤーのABL:Ｃ感覚をみる
+IF ABL:PLAYER:3 == 0
+	TIMES B , 1.00
+ELSEIF ABL:PLAYER:3 == 1
+	TIMES B , 1.50
+ELSEIF ABL:PLAYER:3 == 2
+	TIMES B , 2.00
+ELSEIF ABL:PLAYER:3 == 3
+	TIMES B , 2.50
+ELSEIF ABL:PLAYER:3 == 4
+	TIMES B , 3.50
+ELSE
+	TIMES B , 5.00
+ENDIF
+
+;再装填処理中は射精ゲージは20分の1に
+SIF CFLAG:PLAYER:24 > 0
+	B /= 20
+
+
+SIF TALENT:PLAYER:半人半妖 || TALENT:PLAYER:ふたなり || TALENT:PLAYER:オトコ
+	BASE:PLAYER:2 += B
+
+;-------------------------------------------------
+;ソース追加処理
+;-------------------------------------------------
+;消費体力、気力
+LOSEBASE:0 += 100
+LOSEBASE:1 += 120
+
+SOURCE:2 = 350
+SOURCE:4 = 200
+SOURCE:7 = 700
+SOURCE:9 = 200
+SOURCE:13 = 20
+SOURCE:17 = 200
+SOURCE:18 = 500
+
+;上のほうで計算した汚れデータ
+SOURCE:15 = Y*10 + 60
+
+;-------------------------------------------------
+;特殊ソース処理
+;-------------------------------------------------
+;抑圧、抵抗持ちには、抑鬱ソース追加
+SIF TALENT:抑圧 || TALENT:抵抗
+	SOURCE:16 += 500
+
+;Aへの苦痛は先に処理しておく
+;EXP:Ａ経験をみる
+IF EXP:Ａ経験 < EXPLV:1
+	TIMES SOURCE:7 , 3.00
+	TIMES SOURCE:18 , 3.00
+ELSEIF EXP:Ａ経験 < EXPLV:2
+	TIMES SOURCE:7 , 1.20
+	TIMES SOURCE:18 , 2.00
+ELSEIF EXP:Ａ経験 < EXPLV:3
+	TIMES SOURCE:7 , 0.80
+	TIMES SOURCE:18 , 1.50
+ELSEIF EXP:Ａ経験 < EXPLV:4
+	TIMES SOURCE:7 , 0.60
+	TIMES SOURCE:18 , 1.20
+ELSEIF EXP:Ａ経験 < EXPLV:5
+	TIMES SOURCE:7 , 0.40
+ELSEIF EXP:Ａ経験 >= EXPLV:5
+	TIMES SOURCE:7 , 0.20
+ENDIF
+
+;PALAM:潤滑をみる
+IF PALAM:4 < PALAMLV:1
+	TIMES SOURCE:7 , 1.20
+	TIMES SOURCE:18 , 2.00
+ELSEIF PALAM:4 < PALAMLV:2
+	TIMES SOURCE:7 , 1.00
+	TIMES SOURCE:18 , 1.50
+ELSEIF PALAM:4 < PALAMLV:3
+	TIMES SOURCE:7 , 0.60
+ELSEIF PALAM:4 < PALAMLV:4
+	TIMES SOURCE:7 , 0.30
+ELSEIF PALAM:4 >= PALAMLV:4
+	TIMES SOURCE:7 , 0.20
+ENDIF
+
+;中毒による中毒充足のソースは先に処理しておく
+;セックス中毒を見る
+IF ABL:18 == 1
+	TIMES SOURCE:9 , 0.00
+ELSEIF ABL:18 == 2
+	TIMES SOURCE:9 , 0.30
+ELSEIF ABL:18 == 3
+	TIMES SOURCE:9 , 0.60
+ELSEIF ABL:18 == 4
+	TIMES SOURCE:9 , 0.90
+ELSEIF ABL:18 == 5
+	TIMES SOURCE:9 , 1.20
+ELSEIF ABL:18 == 6
+	TIMES SOURCE:9 , 1.50
+ELSEIF ABL:18 == 7
+	TIMES SOURCE:9 , 1.80
+ELSEIF ABL:18 == 8
+	TIMES SOURCE:9 , 2.30
+ELSEIF ABL:18 == 9
+	TIMES SOURCE:9 , 3.00
+ELSEIF ABL:18 >= 10
+	TIMES SOURCE:9 , 5.00
+ENDIF
+
+;-------------------------------------------------
+;射精チェック
+;-------------------------------------------------
+CALL SAMEN_CHECK
+
+;射精時の処理
+IF E >= 1
+	;射精先タイプの設定
+	TFLAG:703 = 2
+	;射精先選択の可・不可
+	TFLAG:704 = 1
+	;汎用的な処理はこの関数で行う
+	;（射精ゲージの再計算や射精経験の上昇と共通部分の表示）
+	CALL SAMEN_SHOOT
+	;コマンドごとに固有の処理はこの下に書く
+ENDIF
+
+;-------------------------------------------------
+;汚れの処理
+;-------------------------------------------------
+;射精に関係なく行われる処理はここから
+;奴隷のＡ⇔調教者のＰの汚れが移動
+STAIN:4 |= STAIN:PLAYER:2
+STAIN:PLAYER:2 |= STAIN:4
+
+;-------------------------------------------------
+;経験の処理
+;-------------------------------------------------
+;A経験
+EXP:Ａ経験 += 2
+PRINTL Ａ経験＋２
+
+;性交経験
+EXP:性交経験 += 1
+PRINTS EXPNAME:4
+PRINTL +1
+
+;レズ経験
+A = 4
+B = NO:PLAYER + 899
+IF TALENT:オトコ == 0 && TALENT:PLAYER:オトコ == 0
+	PRINTFORML %EXPNAME:40%+{A}
+	EXP:レズ経験 += A
+	CFLAG:B += A
+ELSEIF TALENT:オトコ && TALENT:PLAYER:オトコ
+	PRINTFORML %EXPNAME:41%+{A}
+	EXP:ゲイ経験 += A
+	CFLAG:B += A
+ENDIF
+
+;愛情経験
+IF TALENT:恋慕 == 1 && ASSIPLAY == 0
+	PRINTS EXPNAME:23
+	PRINTL +1
+	EXP:愛情経験 += 1
+ELSEIF TALENT:親愛 == 1 && ASSIPLAY == 0
+	PRINTS EXPNAME:23
+	PRINTL +2
+	EXP:愛情経験 += 2
+ENDIF
+
+;依存度ベクトル
+TFLAG:33 = 1
+
+;依存度補正値(服従で1、隷属で2）
+IF TALENT:服従 && ASSIPLAY == 0
+	TFLAG:30 += 1
+ELSEIF TALENT:隷属 && ASSIPLAY == 0
+	TFLAG:30 += 2
+ENDIF
+
+RETURN 1
+
+;-------------------------------------------------
+;固有の実行判定
+;-------------------------------------------------
+@COM_ORDER_73
+
+;縄で縛られている場合は無視（縄が無い時のみ実行判定を行う）
+IF TEQUIP:19 == 0
+	A = 0
+	S = 0
+	;すべての命令に共通の要素を考慮
+	;(従順が高いと命令に従いやすいなど)
+	CALL COM_ORDER
+
+	;ABL:欲望
+	IF ABL:1
+		SIF S
+			PRINT  + 
+		A += ABL:1 * 3
+		PRINTS ABLNAME:1
+		PRINTV 'LV,ABL:1,'(,ABL:1 * 3,')
+		S = 1
+	ENDIF
+	;ABL:Ａ感覚
+	IF ABL:5
+		SIF S
+			PRINT  + 
+		A += ABL:5 * 2
+		PRINTS ABLNAME:5
+		PRINTV 'LV,ABL:5,'(,ABL:5 * 2,')
+		S = 1
+	ENDIF
+	;ABL:セックス中毒
+	IF ABL:18
+		SIF S
+			PRINT  + 
+		A += ABL:18 * 1
+		PRINTS ABLNAME:18
+		PRINTV 'LV,ABL:18,'(,ABL:18 * 1,')
+		S = 1
+	ENDIF
+	;快楽刻印
+	IF MARK:1
+		SIF S
+			PRINT  + 
+		A += MARK:1 * 3
+		PRINTS MARKNAME:1
+		PRINTV 'LV,MARK:1,'(,MARK:1 * 3,')
+		S = 1
+	ENDIF
+	;PALAM:潤滑（の不足）
+	IF PALAM:4 < PALAMLV:3
+		PRINT  - 
+		A -= 5
+		PRINT 潤滑不足
+		PRINTV '(,5,')
+		S = 1
+	ENDIF
+	;PALAM:欲情
+	IF PALAM:6 < PALAMLV:1
+		L = 0
+	ELSEIF PALAM:6 < PALAMLV:2
+		L = 1
+	ELSEIF PALAM:6 < PALAMLV:3
+		L = 2
+	ELSEIF PALAM:6 < PALAMLV:4
+		L = 3
+	ELSEIF PALAM:6 < PALAMLV:5
+		L = 4
+	ELSE
+		L = 5
+	ENDIF
+	IF L
+		SIF S
+			PRINT  + 
+		A += L * 3
+		PRINTS PALAMNAME:6
+		PRINTV 'LV,L,'(,L * 3,')
+		S = 1
+	ENDIF
+	;恥じらい
+	IF TALENT:恥じらい
+		PRINT  - 
+		A -= 2
+		PRINTS TALENTNAME:35
+		PRINTV '(,2,')
+		S = 1
+	ENDIF
+	;快感の否定
+	IF TALENT:快感の否定
+		PRINT  - 
+		A -= 5
+		PRINTS TALENTNAME:71
+		PRINTV '(,5,')
+		S = 1
+	ENDIF
+	;男嫌い（恋慕、親愛で無効）
+	IF TALENT:男嫌い && TALENT:PLAYER:オトコ && ((TALENT:恋慕 == 0 && TALENT:親愛 == 0) || PLAYER != MASTER)
+		PRINT  - 
+		A -= 12
+		PRINTS TALENTNAME:82
+		PRINTV '(,12,')
+		S = 1
+	ENDIF
+	;淫乱
+	IF TALENT:淫乱 && ASSIPLAY == 0
+		SIF S
+			PRINT  + 
+		A += 15
+		PRINTS TALENTNAME:4
+		PRINTV '(,15,')
+		S = 15
+	ENDIF
+	;娼婦
+	IF TALENT:娼婦 && ASSIPLAY == 0
+		SIF S
+			PRINT  + 
+		A += 20
+		PRINTS TALENTNAME:7
+		PRINTV '(,20,')
+		S = 20
+	ENDIF
+	;A経験
+	IF EXP:Ａ経験 < EXPLV:2
+		PRINT  - 
+		A -= 30
+		PRINTS EXPNAME:1
+		PRINT 不足
+		PRINTV '(,30,')
+		S = 1
+	ENDIF
+
+	;調教者がふたなり
+	IF TALENT:PLAYER:ふたなり
+		SIF S
+			PRINT  + 
+		A += 4
+		PRINTS TALENTNAME:139
+		PRINTV '(,4,')
+		S = 1
+	ENDIF
+
+	;媚薬
+	IF TEQUIP:26
+		SIF S
+			PRINT  + 
+		A += 6
+		PRINTS ITEMNAME:41
+		PRINTV '(,6,')
+		S = 1
+	ENDIF
+
+	Y = 0
+	;愛液の汚れ
+	SIF STAIN:PLAYER:2 & 1
+		Y += 1
+	;精液の汚れ
+	SIF STAIN:PLAYER:2 & 4
+		Y += 3
+	;アナルの汚れ
+	SIF STAIN:PLAYER:2 & 8
+		Y += 7
+	SIF STAIN:PLAYER:2 & 16
+		Y += 15
+
+	SIF TALENT:汚臭鈍感
+		Y /= 3
+	SIF TALENT:汚臭敏感
+		Y *= 2
+
+	;汚れあり
+	IF Y
+		PRINT  - 
+		A -= Y
+		;汚臭鈍感
+		IF TALENT:汚臭鈍感
+			PRINT 汚れあり、
+			PRINTS TALENTNAME:61
+		ELSEIF TALENT:汚臭敏感
+			PRINT 汚れあり、
+			PRINTS TALENTNAME:62
+		ELSE
+			PRINT 汚れあり
+		ENDIF
+		PRINTV '(,Y,')
+		S = 1
+	ENDIF
+
+	;合計を表示(30以上で実行)
+	PRINT  = 
+	PRINTV A
+
+	V = 30
+	SIF A < V
+		PRINT  < 
+	SIF A == V
+		PRINT  = 
+	SIF A > V
+		PRINT  > 
+	PRINT 実行値
+	PRINTV V
+
+	WAIT
+
+	;実行できない
+	SIF A < V
+		RETURN 0
+ENDIF
+
+RETURN 1
+

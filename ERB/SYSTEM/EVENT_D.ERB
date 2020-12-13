@@ -1,0 +1,263 @@
+﻿;-------------------------------------------------
+;EVENT_D.ERB、EVENT_DEPENDENCE、依存度システムの処理
+;依存度はプラスに大きいと主人に対して慕う形で依存し、
+;マイナスに大きいと主人を畏怖する形で依存していく
+;依存度ベクトルは各調教コマンドごとで指示されており、増加と減少で処理は異なっている
+;-------------------------------------------------
+@MASTER_DEPENDENCE_CHECK
+
+;依存度のベクトル処理
+;0は関数終了、崩壊も依存度は変化しない
+IF TFLAG:33 == 0 || TALENT:崩壊 == 1
+	PRINTL <依存度変化無し>
+	RETURN 0
+;1は依存度が0以上で増加、0未満で減少
+ELSEIF TFLAG:33 == 1
+	SIF CFLAG:2 >= 0
+		CALL MASTER_DEPENDENCE_PLUS
+	SIF CFLAG:2 < 0
+		CALL MASTER_DEPENDENCE_MINUS
+;2は増加、但し服従、隷属持ちは減少
+ELSEIF TFLAG:33 == 2
+	IF TALENT:服従 || TALENT:隷属
+		CALL MASTER_DEPENDENCE_MINUS
+	ELSE
+		CALL MASTER_DEPENDENCE_PLUS
+	ENDIF
+;3は減少、但し恋慕、親愛持ちは増加
+ELSEIF TFLAG:33 == 3
+	IF TALENT:恋慕 || TALENT:親愛
+		CALL MASTER_DEPENDENCE_PLUS
+	ELSE
+		CALL MASTER_DEPENDENCE_MINUS
+	ENDIF
+;4は強制増加
+ELSEIF TFLAG:33 == 4
+	CALL MASTER_DEPENDENCE_PLUS
+;5は強制減少
+ELSEIF TFLAG:33 == 5
+	CALL MASTER_DEPENDENCE_MINUS
+ENDIF
+
+RETURN 0
+
+
+;依存度増加処理
+@MASTER_DEPENDENCE_PLUS
+
+R = 0
+
+;ABL:従順をみる
+R += ABL:0*2
+
+;ABL:奉仕精神をみる
+R += ABL:7
+
+;難易度を見る
+;EASY
+IF FLAG:4 == 1
+	R += 1
+;NORMAL
+ELSEIF FLAG:4 == 2
+	R += 0
+;HARD
+ELSEIF FLAG:4 == 3
+	R -= 1
+ENDIF
+
+;素質による増減
+;陥落素質
+;恋慕
+SIF TALENT:恋慕
+	R += 5
+;親愛
+SIF TALENT:淫乱
+	R += 7
+;淫乱
+M = NO:MASTER
+SIF TALENT:服従 && RELATION:M > 100
+	R += 3
+;娼婦
+SIF TALENT:親愛 && RELATION:M > 100
+	R += 5
+;服従
+SIF TALENT:娼婦
+	R += 10
+;隷属
+SIF TALENT:隷属
+	R += 20
+
+;その他素質
+;自慰狂い
+SIF TALENT:自慰狂い
+	R += 1
+;セックス狂
+SIF TALENT:セックス狂
+	R += 1
+;尻穴狂い
+SIF TALENT:尻穴狂い
+	R += 1
+;淫乳
+SIF TALENT:淫乳
+	R += 1
+;妄信
+SIF TALENT:妄信
+	R += 2
+
+
+;主人の魅力
+SIF TALENT:MASTER:魅力
+	R += 2
+;主人の魅惑
+SIF TALENT:MASTER:魅惑
+	R += 3
+;主人の謎の魅力
+SIF TALENT:MASTER:謎の魅力
+	R += 5
+;主人の治療
+SIF TALENT:MASTER:治療
+	R += 2
+;主人の鼓舞
+SIF TALENT:MASTER:鼓舞
+	R += 2
+;主人の人気
+SIF TALENT:MASTER:人気
+	R += 3
+
+
+
+;依存度補正を加算
+R += TFLAG:30
+
+;結果が0未満の場合は0にする
+SIF R < 0
+	R = 0
+
+CFLAG:2 += R
+
+IF R > 0
+	PRINTL <依存度増加>
+ELSE
+	PRINTL <依存度変化無し>
+ENDIF
+
+R = 0
+TFLAG:30 = 0
+
+
+RETURN 0
+
+
+
+;依存度減少処理
+@MASTER_DEPENDENCE_MINUS
+
+R = 0
+
+;ABL:従順をみる
+R += ABL:0*2
+
+;ABL:マゾっ気をみる
+R += ABL:9
+
+;難易度を見る
+;EASY
+IF FLAG:4 == 1
+	R += 1
+;NORMAL
+ELSEIF FLAG:4 == 2
+	R += 0
+;HARD
+ELSEIF FLAG:4 == 3
+	R -= 1
+ENDIF
+
+;素質による増減
+;陥落素質
+;恋慕
+SIF TALENT:恋慕
+	R += 10
+;親愛
+SIF TALENT:淫乱
+	R += 20
+;淫乱
+M = NO:MASTER
+SIF TALENT:服従 && RELATION:M > 100
+	R += 3
+;娼婦
+SIF TALENT:親愛 && RELATION:M > 100
+	R += 5
+;服従
+SIF TALENT:娼婦
+	R += 5
+;隷属
+SIF TALENT:隷属
+	R += 7
+
+;その他素質
+;自慰狂い
+SIF TALENT:自慰狂い
+	R += 1
+;セックス狂
+SIF TALENT:セックス狂
+	R += 1
+;尻穴狂い
+SIF TALENT:尻穴狂い
+	R += 1
+;淫乳
+SIF TALENT:淫乳
+	R += 1
+;サド
+SIF TALENT:サド
+	R -= 1
+;マゾ
+SIF TALENT:マゾ
+	R += 1
+;妄信
+SIF TALENT:妄信
+	R += 2
+
+
+;主人の魅力
+SIF TALENT:MASTER:魅力
+	R += 2
+;主人の魅惑
+SIF TALENT:MASTER:魅惑
+	R += 3
+;主人の謎の魅力
+SIF TALENT:MASTER:謎の魅力
+	R += 5
+;主人の治療
+SIF TALENT:MASTER:治療
+	R += 2
+;主人の鼓舞
+SIF TALENT:MASTER:鼓舞
+	R += 2
+;主人の人気
+SIF TALENT:MASTER:人気
+	R += 3
+
+
+;依存度補正を加算
+R += TFLAG:30
+
+;結果が0未満の場合は0にする
+SIF R < 0
+	R = 0
+
+CFLAG:2 -= R
+
+IF R > 0
+	PRINTL <依存度減少>
+ELSE
+	PRINTL <依存度変化無し>
+ENDIF
+
+R = 0
+TFLAG:30 = 0
+
+
+RETURN 0
+
+
+

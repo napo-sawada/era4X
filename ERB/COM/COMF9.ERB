@@ -1,0 +1,282 @@
+﻿;-------------------------------------------------
+;秘貝開帳
+;愛撫系コマンド、レベル2
+;-------------------------------------------------
+@COM9
+;-------------------------------------------------
+;実行できるかの判定
+;-------------------------------------------------
+;共通処理
+CALL COM_ORDER_COMMON
+SIF RESULT == 0
+	RETURN 0
+
+PRINTL 秘貝開帳
+STR:0 = 秘貝開帳
+CALL KOJO_MESSAGE_COM
+
+;実行者が奴隷であるフラグ
+TFLAG:28 = 1
+
+
+;-------------------------------------------------
+;ソース追加処理
+;-------------------------------------------------
+;消費体力、気力
+LOSEBASE:0 += 50
+LOSEBASE:1 += 90
+
+SOURCE:0 = 43
+SOURCE:6 = 20
+SOURCE:8 = 120
+SOURCE:10 = 10
+SOURCE:13 = 300
+SOURCE:14 = 450
+SOURCE:17 = 150
+SOURCE:18 = 150
+
+
+;-------------------------------------------------
+;特殊ソース処理
+;-------------------------------------------------
+;抑圧、抵抗持ちには、抑鬱ソース追加
+SIF TALENT:抑圧 || TALENT:抵抗
+	SOURCE:16 += 150
+
+;処女、貞操観念
+IF TALENT:処女
+	TIMES SOURCE:8 , 1.20
+	TIMES SOURCE:14 , 1.20
+	TIMES SOURCE:18 , 1.20
+	SOURCE:13 += 300
+	IF TALENT:貞操観念
+		TIMES SOURCE:13 , 2.00
+		TIMES SOURCE:17 , 2.00
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;汚れの処理
+;-------------------------------------------------
+;奴隷のＶ⇔指の汚れが移動
+STAIN:3 |= STAIN:1
+STAIN:1 |= STAIN:3
+
+;-------------------------------------------------
+;経験の処理
+;-------------------------------------------------
+;露出癖Lv3以上で自慰経験加算
+IF ABL:8 >= 3
+	EXP:自慰経験 += 1
+	PRINTL 自慰経験＋１
+ENDIF
+
+A = 1
+B = NO:PLAYER + 899
+IF TALENT:オトコ == 0 && TALENT:PLAYER:オトコ == 0
+	PRINTFORML %EXPNAME:40%+{A}
+	EXP:レズ経験 += A
+	CFLAG:B += A
+ELSEIF TALENT:オトコ && TALENT:PLAYER:オトコ
+	PRINTFORML %EXPNAME:41%+{A}
+	EXP:ゲイ経験 += A
+	CFLAG:B += A
+ENDIF
+
+;依存度ベクトル
+TFLAG:33 = 3
+
+;依存度補正値(服従で1、隷属で2）
+IF TALENT:服従 && ASSIPLAY == 0
+	TFLAG:30 += 1
+ELSEIF TALENT:隷属 && ASSIPLAY == 0
+	TFLAG:30 += 2
+ENDIF
+
+
+RETURN 1
+
+
+
+
+
+
+
+;-------------------------------------------------
+;固有の実行判定
+;-------------------------------------------------
+@COM_ORDER_9
+A = 0
+S = 0
+
+;すべての命令に共通の要素を考慮
+;(従順が高いと命令に従いやすいなど)
+CALL COM_ORDER
+
+;ABL:欲望
+IF ABL:1
+	SIF S
+		PRINT  + 
+	A += ABL:1 * 3
+	PRINTS ABLNAME:1
+	PRINTV 'LV,ABL:1,'(,ABL:1 * 3,')
+	S = 1
+ENDIF
+;ABL:Ｖ感覚
+IF ABL:4
+	SIF S
+		PRINT  + 
+	A += ABL:4 * 2
+	PRINTS ABLNAME:4
+	PRINTV 'LV,ABL:4,'(,ABL:4 * 2,')
+	S = 1
+ENDIF
+;ABL:奉仕精神
+IF ABL:7
+	SIF S
+		PRINT  + 
+	A += ABL:7 * 4
+	PRINTS ABLNAME:7
+	PRINTV 'LV,ABL:7,'(,ABL:7 * 4,')
+	S = 1
+ENDIF
+;ABL:露出癖
+IF ABL:8
+	SIF S
+		PRINT  + 
+	A += ABL:7 * 3
+	PRINTS ABLNAME:7
+	PRINTV 'LV,ABL:7,'(,ABL:7 * 3,')
+	S = 1
+ENDIF
+;ABL:自慰中毒
+IF ABL:15
+	SIF S
+		PRINT  + 
+	A += ABL:15 * 3
+	PRINTS ABLNAME:15
+	PRINTV 'LV,ABL:15,'(,ABL:15 * 3,')
+	S = 1
+ENDIF
+
+IF MARK:1
+	SIF S
+		PRINT  + 
+	A += MARK:1 * 3
+	PRINTS MARKNAME:1
+	PRINTV 'LV,MARK:1,'(,MARK:1 * 3,')
+	S = 1
+ENDIF
+
+;PALAM:潤滑（の不足）
+IF PALAM:4 < PALAMLV:3
+	PRINT  - 
+	A -= 5
+	PRINT 潤滑不足
+	PRINTV '(,5,')
+	S = 1
+ENDIF
+;PALAM:欲情
+IF PALAM:6 < PALAMLV:1
+	L = 0
+ELSEIF PALAM:6 < PALAMLV:2
+	L = 1
+ELSEIF PALAM:6 < PALAMLV:3
+	L = 2
+ELSEIF PALAM:6 < PALAMLV:4
+	L = 3
+ELSEIF PALAM:6 < PALAMLV:5
+	L = 4
+ELSE
+	L = 5
+ENDIF
+IF L
+	SIF S
+		PRINT  + 
+	A += L * 3
+	PRINTS PALAMNAME:5
+	PRINTV 'LV,L,'(,L * 3,')
+	S = 1
+ENDIF
+
+;恥じらい
+IF TALENT:恥じらい
+	PRINT  - 
+	A -= 2
+	PRINTS TALENTNAME:35
+	PRINTV '(,2,')
+	S = 1
+ENDIF
+;快感の否定（淫乱、娼婦で無効）
+IF TALENT:快感の否定 && (TALENT:淫乱 == 0 && TALENT:娼婦 == 0)
+	PRINT  - 
+	A -= 5
+	PRINTS TALENTNAME:71
+	PRINTV '(,5,')
+	S = 1
+ENDIF
+;男嫌い（恋慕、親愛で無効）
+IF TALENT:男嫌い && TALENT:PLAYER:オトコ && ((TALENT:恋慕 == 0 && TALENT:親愛 == 0) || PLAYER != MASTER)
+	PRINT  - 
+	A -= 12
+	PRINTS TALENTNAME:82
+	PRINTV '(,12,')
+	S = 1
+ENDIF
+
+;処女
+IF TALENT:処女
+	PRINT  - 
+	A -= 20
+	PRINTS TALENTNAME:0
+	PRINTV '(,20,')
+	S = 1
+ELSEIF EXP:Ｖ経験 < EXPLV:2
+	PRINT  - 
+	A -= 5
+	PRINTS EXPNAME:0
+	PRINT 不足
+	PRINTV '(,5,')
+	S = 1
+ENDIF
+
+;調教者がふたなり
+IF TALENT:PLAYER:ふたなり
+	PRINT  - 
+	A -= 4
+	PRINTS TALENTNAME:139
+	PRINTV '(,4,')
+	S = 1
+ENDIF
+
+;媚薬
+IF TEQUIP:26
+	SIF S
+		PRINT  + 
+	A += 6
+	PRINTS ITEMNAME:41
+	PRINTV '(,6,')
+	S = 1
+ENDIF
+
+;'合計を表示(18以上で実行)
+PRINT  = 
+PRINTV A
+
+V = 18
+SIF A < V
+	PRINT  < 
+SIF A == V
+	PRINT  = 
+SIF A > V
+	PRINT  > 
+PRINT 実行値
+PRINTV V
+
+WAIT
+
+;実行できない
+SIF A < V
+	RETURN 0
+;実行できる
+RETURN 1

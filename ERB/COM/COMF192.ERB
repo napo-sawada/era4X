@@ -1,0 +1,261 @@
+﻿;-------------------------------------------------
+;コンドーム精飲(奴隷)
+;特殊コマンド
+;-------------------------------------------------
+@COM192
+PRINTL コンドーム精飲(奴隷)
+;-------------------------------------------------
+;実行判定処理
+;-------------------------------------------------
+;共通処理
+CALL COM_ORDER_COMMON
+SIF RESULT == 0
+	RETURN 0
+	
+
+;-------------------------------------------------
+;実行決定
+;-------------------------------------------------
+STR:0 = コンドーム精飲(奴隷)
+CALL KOJO_MESSAGE_COM
+
+;-------------------------------------------------
+;ソース追加処理
+;-------------------------------------------------
+;消費体力、気力
+LOSEBASE:0 += 0
+LOSEBASE:1 += 100
+
+SOURCE:5 = 420
+SOURCE:6 = 150
+SOURCE:14 = 500
+SOURCE:17 = 300
+SOURCE:18 = 300
+
+;上のほうで計算した汚れデータ
+SOURCE:15 = Y*40 + 100
+
+
+;-------------------------------------------------
+;特殊ソース処理
+;-------------------------------------------------
+;抑圧、抵抗持ちには、抑鬱ソース追加
+SIF TALENT:抑圧 || TALENT:抵抗
+	SOURCE:16 += 100
+
+;-------------------------------------------------
+;汚れの処理
+;-------------------------------------------------
+;奴隷の口に汚れ移動
+STAIN:0 |= 4
+
+;-------------------------------------------------
+;経験の処理
+;-------------------------------------------------
+;コンドームの精液を初期化
+CFLAG:107 = 0
+RETURN 1
+
+;-------------------------------------------------
+;固有の実行判定
+;-------------------------------------------------
+@COM_ORDER_192
+A = 0
+S = 0
+
+;すべての命令に共通の要素を考慮
+;(従順が高いと命令に従いやすいなど)
+CALL COM_ORDER
+
+;ABL:欲望
+IF ABL:1
+	SIF S
+		PRINT  + 
+	A += ABL:1 * 1
+	PRINTS ABLNAME:1
+	PRINTV 'LV,ABL:1,'(,ABL:1 * 1,')
+	S = 1
+ENDIF
+;ABL:奉仕精神
+IF ABL:7
+	SIF S
+		PRINT  + 
+	A += ABL:7 * 4
+	PRINTS ABLNAME:7
+	PRINTV 'LV,ABL:7,'(,ABL:7 * 4,')
+	S = 1
+ENDIF
+;ABL:精液中毒
+IF ABL:16
+	SIF S
+		PRINT  + 
+	A += ABL:16 * 3
+	PRINTS ABLNAME:16
+	PRINTV 'LV,ABL:16,'(,ABL:16 * 3,')
+	S = 1
+ENDIF
+
+IF MARK:1
+	SIF S
+		PRINT  + 
+	A += MARK:1 * 1
+	PRINTS MARKNAME:1
+	PRINTV 'LV,MARK:1,'(,MARK:1 * 1,')
+	S = 1
+ENDIF
+
+
+;PALAM:欲情
+IF PALAM:6 < PALAMLV:1
+	L = 0
+ELSEIF PALAM:6 < PALAMLV:2
+	L = 1
+ELSEIF PALAM:6 < PALAMLV:3
+	L = 2
+ELSEIF PALAM:6 < PALAMLV:4
+	L = 3
+ELSEIF PALAM:6 < PALAMLV:5
+	L = 4
+ELSE
+	L = 5
+ENDIF
+IF L
+	SIF S
+		PRINT  + 
+	A += L * 1
+	PRINTS PALAMNAME:6
+	PRINTV 'LV,L,'(,L * 1,')
+	S = 1
+ENDIF
+
+;汚臭鈍感
+IF TALENT:汚臭鈍感
+	SIF S
+		PRINT  + 
+	A += 1
+	PRINTS TALENTNAME:61
+	PRINTV '(,1,')
+	S = 1
+ENDIF
+;汚臭敏感
+IF TALENT:汚臭敏感
+	PRINT  - 
+	A -= 3
+	PRINTS TALENTNAME:62
+	PRINTV '(,3,')
+	S = 1
+ENDIF
+;献身的
+IF TALENT:献身的
+	SIF S
+		PRINT  + 
+	A += 6
+	PRINTS TALENTNAME:63
+	PRINTV '(,6,')
+	S = 1
+ENDIF
+;快感の否定（淫乱、娼婦で無効）
+IF TALENT:快感の否定 && (TALENT:淫乱 == 0 && TALENT:娼婦 == 0)
+	PRINT  - 
+	A -= 1
+	PRINTS TALENTNAME:71
+	PRINTV '(,1,')
+	S = 1
+ENDIF
+;男嫌い（恋慕、親愛で無効）
+IF TALENT:男嫌い && TALENT:PLAYER:オトコ && ((TALENT:恋慕 == 0 && TALENT:親愛 == 0) || PLAYER != MASTER)
+	PRINT  - 
+	A -= 12
+	PRINTS TALENTNAME:82
+	PRINTV '(,12,')
+	S = 1
+ENDIF
+;恋慕
+IF TALENT:恋慕 && ASSIPLAY == 0
+	SIF S
+		PRINT  + 
+	A += 5
+	PRINTS TALENTNAME:3
+	PRINTV '(,5,')
+	S = 5
+ENDIF
+;親愛
+IF TALENT:親愛 && ASSIPLAY == 0
+	SIF S
+		PRINT  + 
+	A += 10
+	PRINTS TALENTNAME:6
+	PRINTV '(,10,')
+	S = 10
+ENDIF
+;調教者がふたなり
+IF TALENT:PLAYER:ふたなり
+	SIF S
+		PRINT  + 
+	A += 8
+	PRINTS TALENTNAME:139
+	PRINTV '(,8,')
+	S = 1
+ENDIF
+
+Y = 0
+;愛液の汚れ
+SIF STAIN:PLAYER:2 & 1
+	Y += 1
+;精液の汚れ
+SIF STAIN:PLAYER:2 & 4
+	Y += 3
+;アナルの汚れ
+SIF STAIN:PLAYER:2 & 8
+	Y += 7
+SIF STAIN:PLAYER:2 & 16
+	Y += 15
+
+SIF TALENT:汚臭鈍感
+	Y /= 3
+SIF TALENT:汚臭敏感
+	Y *= 2
+
+
+
+;汚れあり
+IF Y
+	PRINT  - 
+	A -= Y
+	;汚臭鈍感
+	IF TALENT:汚臭鈍感
+		PRINT 汚れあり、
+		PRINTS TALENTNAME:61
+	ELSEIF TALENT:汚臭敏感
+		PRINT 汚れあり、
+		PRINTS TALENTNAME:62
+	ELSE
+		PRINT 汚れあり
+	ENDIF
+	PRINTV '(,Y,')
+	S = 1
+ENDIF
+
+;合計を表示(24以上で実行)
+PRINT  = 
+PRINTV A
+
+V = 24
+SIF A < V
+	PRINT  < 
+SIF A == V
+	PRINT  = 
+SIF A > V
+	PRINT  > 
+PRINT 実行値
+PRINTV V
+
+WAIT
+
+;実行できない
+SIF A < V
+	RETURN 0
+
+
+RETURN 1
+

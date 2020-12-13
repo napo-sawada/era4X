@@ -1,0 +1,816 @@
+﻿;射精関係の処理
+
+;TFLAG:703　～　デフォルト射精先設定一時変数
+;1=膣内射精、2=アナル射精、3=手淫関係、4=フェラ・パイズリ、5=手と口以外（素股など）、
+;6=助手（主人から）、7=クンニ、8=助手(奴隷から)
+;追加:9=逆レイプ
+;TFLAG:704　～　射精箇所選択可能か否か
+;0=不可、1=可
+;---------------------------------------------------------
+;射精処理関数
+;---------------------------------------------------------
+@COMMAND_CHECK
+;そのまま射精時の処理の分岐
+;コマンドによる処理ターゲットの確認と分岐
+IF TFLAG:703 == 1
+	;膣内射精
+	CALL SAMEN_SHOOT_OLD_SEX
+	CALL IN_VAGINA_CHECK
+ELSEIF TFLAG:703 == 2
+	;アナル射精
+	CALL SAMEN_SHOOT_OLD_SEX2
+ELSEIF TFLAG:703 == 3
+	;手淫
+	CALL SAMEN_SHOOT_OLD_FINGER
+ELSEIF TFLAG:703 == 4
+	;フェラ・パイズリ
+	CALL SAMEN_SHOOT_OLD_ORAL
+ELSEIF TFLAG:703 == 5
+	;手と口以外（素股など）
+	CALL SAMEN_SHOOT_OLD_SUMATA
+ELSEIF TFLAG:703 == 6
+	;助手を犯す
+	CALL SAMEN_SHOOT_OLD_ASSISTANT
+	CALL IN_VAGINA_CHECK
+ELSEIF TFLAG:703 == 7
+	;クンニ強制
+	CALL SAMEN_SHOOT_OLD_PUSSY
+ELSEIF TFLAG:703 == 8
+	;助手を犯させるで射精
+	CALL SAMEN_SHOOT_OLD_TO_ASSISTANT
+ELSEIF TFLAG:703 == 9
+	;逆レイプ
+	CALL SAMEN_SHOOT_OLD_RAPED
+ELSEIF TFLAG:703 == 11
+	;3P助手射精
+	CALL SAMEN_SHOOT_OLD_TO_ASSISTANT_3P
+	CALL IN_VAGINA_CHECK
+ENDIF
+
+;---------------------------------------------------------
+;射精するかのチェック
+;---------------------------------------------------------
+@SAMEN_CHECK
+;汎用的な関数なので、将来的にはすべての調教コマンドの射精チェックをここでやることも可能
+S = BASE:PLAYER:2
+EJAC = MAXBASE:PLAYER:2
+
+;射精限界が来ている場合は、射精ゲージは強制的に0にする
+IF CFLAG:PLAYER:11 == 0
+	S = 0
+	BASE:PLAYER:2 = 0
+ENDIF
+
+IF  S > EJAC * 2
+	E = 2
+ELSEIF S > EJAC
+	E = 1
+ELSE
+	E = 0
+ENDIF
+
+@SAMEN_CHECK_M
+;調教者と対象が異なる場合（主人）
+S = BASE:MASTER:2
+EJAC = MAXBASE:MASTER:2
+
+;射精限界が来ている場合は、射精ゲージは強制的に0にする
+IF CFLAG:MASTER:11 == 0
+	S = 0
+	BASE:MASTER:2 = 0
+ENDIF
+
+;射精フラグはここで初期化
+CFLAG:TARGET:106 = 0
+
+IF  S > EJAC * 2
+	E = 2
+ELSEIF S > EJAC
+	E = 1
+ELSE
+	E = 0
+ENDIF
+
+@SAMEN_CHECK_A
+;調教者と対象が異なる場合（助手）
+S = BASE:ASSI:2
+EJAC = MAXBASE:ASSI:2
+
+;射精限界が来ている場合は、射精ゲージは強制的に0にする
+IF CFLAG:ASSI:11 == 0
+	S = 0
+	BASE:ASSI:2 = 0
+ENDIF
+
+IF  S > EJAC * 2
+	E = 2
+ELSEIF S > EJAC
+	E = 1
+ELSE
+	E = 0
+ENDIF
+
+;---------------------------------------------------------
+;射精場所選択
+;---------------------------------------------------------
+@SAMEN_SHOOT
+;ぶっかけ選択
+;[0] 髪 手コキ区分
+;[1] 顔	手コキ区分
+;[2] 胸	フェラ・パイズリ区分
+;[3] 腹	フェラ・パイズリ区分
+;[4] 腋 フェラ・パイズリ2区分
+;[5] 腿 セックス2区分
+;[6] 割れ目 セックス2区分
+;[7] ゴム射・中田氏
+
+;射精した人物の設定
+IF SELECTCOM == 124 || SELECTCOM == 125
+	P = MASTER
+;逆レイプの場合
+;ELSEIF SELECTCOM == 64 || SELECTCOM == 200
+;	P = TARGET
+ELSE
+	P = PLAYER
+ENDIF
+
+;射精する対象の設定
+IF SELECTCOM == 185
+	T = ASSI
+;逆レイプの場合
+;ELSEIF SELECTCOM == 64 || SELECTCOM == 200
+;	T = PLAYER
+ELSE
+	T = TARGET
+ENDIF
+
+;---------------------------------------------------------
+;追加部分、射精箇所選択機能をOFFにした際にコンドームを含めた通常の射精処理を行う
+;また、状況的に射精箇所の選択を行えないであろうコマンドの場合もここで通常処理に飛ばす
+;---------------------------------------------------------
+$INPUT_LOOP
+IF FLAG:99 == 8 || TFLAG:704 == 0
+	;コンドーム装備中
+	IF TEQUIP:P:35 == 1
+		CFLAG:T:106 = 9
+		CALL IN_VAGINA_CHECK
+	;通常射精
+	ELSE
+		CALL COMMAND_CHECK
+	ENDIF
+	TEQUIP:P:35 = 0
+ELSEIF FLAG:99 < 8
+	IF FLAG:99 == 0
+		CFLAG:T:106 = 1
+		CALL SAMEN_SHOOT_OLD_FINGER
+	ELSEIF FLAG:99 == 1
+		CFLAG:T:106 = 2
+		CALL SAMEN_SHOOT_OLD_FINGER
+	ELSEIF FLAG:99 == 2
+		CFLAG:T:106 = 3
+		CALL SAMEN_SHOOT_OLD_ORAL
+	ELSEIF FLAG:99 == 3
+		CFLAG:T:106 = 4
+		CALL SAMEN_SHOOT_OLD_ORAL
+	ELSEIF FLAG:99 == 4
+		CFLAG:T:106 = 5
+		CALL SAMEN_SHOOT_OLD_ORAL
+	ELSEIF FLAG:99 == 5
+		CFLAG:T:106 = 6
+		CALL SAMEN_SHOOT_OLD_SEX3
+	ELSEIF FLAG:99 == 6
+		CFLAG:T:106 = 7
+		CALL SAMEN_SHOOT_OLD_SEX3
+	ELSEIF FLAG:99 == 7
+		CFLAG:T:106 = 8
+		CALL SAMEN_SHOOT_OLD_SEX3
+	ELSEIF FLAG:99 == 8
+		;コンドーム付きの場合
+		IF TEQUIP:P:35 == 1
+			CFLAG:T:106 = 9
+			CALL IN_VAGINA_CHECK
+		ELSE
+			CALL COMMAND_CHECK
+		ENDIF
+	ENDIF
+ELSE
+	PRINTFORMW %CALLNAME:P%のペニスは限界まで膨張し、もう射精寸前だ……
+	PRINTFORMW 　
+	PRINTFORMW %CALLNAME:T%のどこに射精しますか？
+	PRINTL [0] 「髪」
+	PRINTL [1] 「顔」
+	PRINTL [2] 「胸」
+	PRINTL [3] 「腹」
+	PRINTL [4] 「腋」
+	PRINTL [5] 「太もも」
+	PRINTL [6] 「割れ目」
+	PRINTL [7] 「尻」
+	IF TEQUIP:P:35
+		PRINTL [8] 「コンドームに射精する」
+	ELSE
+		PRINTL [8] 「そのまま射精する」
+	ENDIF
+
+	INPUT
+	IF RESULT == 0
+		CFLAG:T:106 = 1
+		CALL SAMEN_SHOOT_OLD_FINGER
+	ELSEIF RESULT == 1
+		CFLAG:T:106 = 2
+		CALL SAMEN_SHOOT_OLD_FINGER
+	ELSEIF RESULT == 2
+		CFLAG:T:106 = 3
+		CALL SAMEN_SHOOT_OLD_ORAL
+	ELSEIF RESULT == 3
+		CFLAG:T:106 = 4
+		CALL SAMEN_SHOOT_OLD_ORAL
+	ELSEIF RESULT == 4
+		CFLAG:T:106 = 5
+		CALL SAMEN_SHOOT_OLD_ORAL
+	ELSEIF RESULT == 5
+		CFLAG:T:106 = 6
+		CALL SAMEN_SHOOT_OLD_SEX3
+	ELSEIF RESULT == 6
+		CFLAG:T:106 = 7
+		CALL SAMEN_SHOOT_OLD_SEX3
+	ELSEIF RESULT == 7
+		CFLAG:T:106 = 8
+		CALL SAMEN_SHOOT_OLD_SEX3
+	ELSEIF RESULT == 8
+		;コンドーム付きの場合
+		IF TEQUIP:P:35 == 1
+			CFLAG:T:106 = 9
+			CALL IN_VAGINA_CHECK
+		ELSE
+			CALL COMMAND_CHECK
+		ENDIF
+	ELSE
+		GOTO INPUT_LOOP
+	ENDIF
+ENDIF
+
+;コンドームは脱げる
+TEQUIP:P:35 = 0
+
+;コンドーム自動装着処理
+IF (FLAG:98 & 4) && P == MASTER
+	IF ITEM:45 > 0
+		ITEM:45 -= 1
+		TEQUIP:P:35 = 1
+	ENDIF
+	IF ITEM:45 == 0
+		PRINT <コンドームが無くなったので、自動装着を解除します>
+		FLAG:98 = 0
+	ENDIF
+ELSEIF (FLAG:98 & 2) && P == ASSI
+	IF ITEM:45 > 0
+		ITEM:45 -= 1
+		TEQUIP:P:35 = 1
+	ENDIF
+	IF ITEM:45 == 0
+		PRINT <コンドームが無くなったので、自動装着を解除します>
+		FLAG:98 = 0
+	ENDIF
+ENDIF
+
+
+@IN_VAGINA_CHECK
+;@IN_VAGINA_CHECK
+;プレイや及び助手の各コマンドでの中田氏チェック
+;各コマンドへの影響を小さくするのが目的（関数を呼ぶ、もしくはオミットするだけで良い）
+;TFLAG:2（中田氏）とTEQUIP:35（コンドーム）を条件に膣射を増やす処理を持つ
+
+;コマンドごとの分岐
+;通常セックス系
+IF TFLAG:703 == 1
+	;マスターによる奴隷への中田氏
+	IF ASSIPLAY == 0
+		IF TFLAG:2 == 2
+			PRINTL 膣内大量射精
+			TFLAG:38 = 2
+			IF CFLAG:108
+				PRINTL <避妊結界>
+			ELSE
+				PRINTL 膣射経験+２
+				EXP:TARGET:膣射経験 += 2
+				CFLAG:TARGET:101 += 2
+				;妊娠していないのであれば中田氏時の恐怖判定等
+				SIF TALENT:T:妊娠 == 0 && T == TARGET
+					CALL SAMEN_SHOOT_SOURCE
+			ENDIF
+		ELSEIF TFLAG:2 == 1
+			PRINTL 膣内射精
+			TFLAG:38 = 1
+			IF CFLAG:108
+				PRINTL <避妊結界>
+			ELSE
+				PRINTL 膣射経験+１
+				EXP:TARGET:膣射経験 += 1
+				CFLAG:TARGET:101 += 1
+				;妊娠していないのであれば中田氏時の恐怖判定等
+				SIF TALENT:T:妊娠 == 0 && T == TARGET
+					CALL SAMEN_SHOOT_SOURCE
+			ENDIF
+		ELSEIF TEQUIP:MASTER:35 == 1
+			PRINTL コンドーム射精
+			CALL SAMEN_SHOOT_CONDOM
+		ENDIF
+	;助手による奴隷への中田氏
+	ELSE
+		IF TFLAG:2 == 2
+			PRINTL 膣内大量射精
+			TFLAG:38 = 2
+			IF CFLAG:108
+				PRINTL <避妊結界>
+			ELSE
+				PRINTL 膣射経験+２
+				EXP:TARGET:膣射経験 += 2
+				CFLAG:TARGET:103 += 2
+				;妊娠していないのであれば中田氏時の恐怖判定等
+				SIF TALENT:T:妊娠 == 0 && T == TARGET
+					CALL SAMEN_SHOOT_SOURCE
+			ENDIF
+		ELSEIF TFLAG:2 == 1
+			PRINTL 膣内射精
+			TFLAG:38 = 1
+			IF CFLAG:108
+				PRINTL <避妊結界>
+			ELSE
+				PRINTL 膣射経験+１
+				EXP:TARGET:膣射経験 += 1
+				CFLAG:TARGET:103 += 1
+				;妊娠していないのであれば中田氏時の恐怖判定等
+				SIF TALENT:T:妊娠 == 0 && T == TARGET
+					CALL SAMEN_SHOOT_SOURCE
+			ENDIF
+		ELSEIF TEQUIP:ASSI:35 == 1
+			PRINTL コンドーム射精
+			CALL SAMEN_SHOOT_CONDOM
+		ENDIF
+	ENDIF
+;アナル系
+ELSEIF TFLAG:703 == 2
+	IF ASSIPLAY == 0
+		IF TEQUIP:MASTER:35 == 1
+			PRINTL コンドーム射精
+			CALL SAMEN_SHOOT_CONDOM
+		ENDIF
+	ELSE
+		IF TEQUIP:ASSI:35 == 1
+			PRINTL コンドーム射精
+			CALL SAMEN_SHOOT_CONDOM
+		ENDIF
+	ENDIF
+;奉仕系
+ELSEIF TFLAG:703 >= 3 && TFLAG:703 <= 5
+	IF ASSIPLAY == 0
+		IF TEQUIP:MASTER:35 == 1
+			PRINTL コンドーム射精
+			CALL SAMEN_SHOOT_CONDOM
+		ENDIF
+	ELSE
+		IF TEQUIP:ASSI:35 == 1
+			PRINTL コンドーム射精
+			CALL SAMEN_SHOOT_CONDOM
+		ENDIF
+	ENDIF
+;３P時の助手
+ELSEIF TFLAG:703 == 11 || TFLAG:41 == 1
+	IF TFLAG:2 == 2
+		PRINTL 膣内大量射精
+		IF CFLAG:108
+			PRINTL <避妊結界>
+		ELSE
+			PRINTL 膣射経験+２
+			EXP:TARGET:膣射経験 += 2
+			CFLAG:TARGET:103 += 2
+		ENDIF
+	ELSEIF TFLAG:2 == 1
+		PRINTL 膣内射精
+		IF CFLAG:108
+			PRINTL <避妊結界>
+		ELSE
+			PRINTL 膣射経験+１
+			EXP:TARGET:膣射経験 += 1
+			CFLAG:TARGET:103 += 1
+		ENDIF
+	ELSEIF TEQUIP:ASSI:35 == 1
+		PRINTL コンドーム射精
+		CALL SAMEN_SHOOT_CONDOM
+	ENDIF
+ENDIF
+
+@IN_VAGINA_CHECK_T
+;奴隷の各コマンドでの中田氏チェック
+;各コマンドへの影響を小さくするのが目的（関数を呼ぶ、もしくはオミットするだけで良い）
+;TFLAG:2（中田氏）とTEQOIP:35（コンドーム）を条件に膣射を増やす処理を持つ
+
+;まずコンドームで分岐
+IF TEQUIP:TARGET:35 == 1
+	PRINTL 奴隷コンドーム射精
+	TEQUIP:TARGET:35 = 0
+	;コンドーム自動装着処理
+	IF (FLAG:98 & 1)
+		IF ITEM:45 > 0
+			ITEM:45 -= 1
+			TEQUIP:TARGET:35 = 1
+		ENDIF
+		IF ITEM:45 == 0
+			PRINT <コンドームが無くなったので、自動装着を解除します>
+			FLAG:98 = 0
+		ENDIF
+	ENDIF
+	CFLAG:107 = 3
+;コンドームをしてないかつセックス系コマンドなら中出し
+ELSEIF FLAG:98 < 3 && ASSIPLAY && ((SELECTCOM == 64 || SELECTCOM == 200) || SELECTCOM == 122)
+	IF ASSIPLAY == 0
+		IF E == 2
+			PRINTL 膣内大量射精
+			IF CFLAG:MASTER:108
+				PRINTL <避妊結界>
+			ELSE
+				PRINTL 主人の膣射経験+２
+				EXP:MASTER:膣射経験 += 2
+				CFLAG:MASTER:104 += 2
+			ENDIF
+		ELSEIF E == 1
+			PRINTL 膣内射精
+			IF CFLAG:MASTER:108
+				PRINTL <避妊結界>
+			ELSE
+				PRINTL 主人の膣射経験+１
+				EXP:MASTER:膣射経験 += 1
+				CFLAG:MASTER:104 += 1
+			ENDIF
+		ENDIF
+	ELSE
+		IF E == 2
+			PRINTL 膣内大量射精
+			IF CFLAG:ASSI:108
+				PRINTL <避妊結界>
+			ELSE
+				PRINTL 助手の膣射経験+２
+				EXP:ASSI:膣射経験 += 2
+				CFLAG:ASSI:104 += 2
+			ENDIF
+		ELSEIF E == 1
+			PRINTL 膣内射精
+			IF CFLAG:ASSI:108
+				PRINTL <避妊結界>
+			ELSE
+				PRINTL 助手の膣射経験+１
+				EXP:ASSI:膣射経験 += 1
+				CFLAG:ASSI:104 += 1
+			ENDIF
+		ENDIF
+	ENDIF
+ENDIF
+
+
+;---------------------------------------------------------
+;各射精タイプごとの処理関数
+;---------------------------------------------------------
+;今後はCOMF内では処理せず、必要に応じてここから呼び出す。
+;汚れ移動等の処理は各COMF内でやってくれるので移動の必要無し
+
+@SAMEN_SHOOT_CONDOM
+;ゴム射精の処理
+;ほとんど他の射精と一緒だが、TFLAGを立てず（膣射阻止）、精液経験も増やさない
+;コンドーム関連のフラグもできるだけここで扱う。
+
+CALL SAMEN_SHOOT_CALC
+
+;コンドームに精液溜まる（主人:1、助手:2、奴隷:3）
+IF P == MASTER
+	CFLAG:107 = 1
+ELSE
+	CFLAG:107 = 2
+ENDIF
+
+@SAMEN_SHOOT_OLD_SEX
+;これまでCOMF内で使用されていたセックス射精の処理
+
+CALL SAMEN_SHOOT_CALC
+
+SIF T != TARGET
+	RETURN 0
+
+;大量射精
+IF E == 2
+	EXP:精液経験 += 1
+	PRINTL 精液経験＋１
+
+	;セックスで射精フラグ
+	TFLAG:2 = 2
+;通常の射精
+ELSEIF E == 1
+	;セックスで射精フラグ
+	TFLAG:2 = 1
+ENDIF
+
+@SAMEN_SHOOT_OLD_SEX2
+;これまでCOMF内で使用されていたセックス射精の処理を改造。
+;アナルセックス系コマンドに使用する。
+
+CALL SAMEN_SHOOT_CALC
+
+SIF T != TARGET 
+	RETURN 0
+
+;大量射精
+IF E == 2
+	EXP:精液経験 += 2
+	PRINTL 精液経験＋２
+	;セックスで射精フラグ
+	TFLAG:2 = 2
+ELSEIF E == 1
+	IF SELECTCOM == 67
+		EXP:精液経験 += 1
+		PRINTL 精液経験＋１
+	ENDIF
+	;セックスで射精フラグ
+	TFLAG:2 = 1
+ENDIF
+
+@SAMEN_SHOOT_OLD_SEX3
+;これまでCOMF内で使用されていたセックス射精の処理を改造。
+;太もも、割れ目、尻に使用する。
+;精液経験は増えるがセックス射精のフラグは立てない（立てると中田氏口上が出たり膣射経験が増えてしまう）
+
+CALL SAMEN_SHOOT_CALC
+
+SIF T != TARGET 
+	RETURN 0
+
+;大量射精
+IF E == 2
+	IF SELECTCOM == 67
+		EXP:精液経験 += 2
+		PRINTL 精液経験＋２
+	ELSE
+		EXP:精液経験 += 1
+		PRINTL 精液経験＋１
+	ENDIF
+ELSEIF E == 1
+	IF SELECTCOM == 67
+		EXP:精液経験 += 1
+		PRINTL 精液経験＋１
+	ENDIF
+ENDIF
+
+
+@SAMEN_SHOOT_OLD_FINGER
+;これまでCOMF内で使用されていた手コキ射精の処理
+
+CALL SAMEN_SHOOT_CALC
+
+SIF T != TARGET 
+	RETURN 0
+
+;大量射精
+IF E == 2
+	EXP:精液経験 += 3
+	PRINTL 精液経験＋３
+	;手で射精させたフラグ
+	TFLAG:1 = 2
+;通常の射精
+ELSEIF E == 1
+	EXP:精液経験 += 1
+	PRINTL 精液経験＋１
+	;手で射精させたフラグ
+	TFLAG:1 = 1
+ENDIF
+
+@SAMEN_SHOOT_OLD_ORAL
+;これまでCOMF内で使用されていたフェラ・パイズリ射精の処理
+
+CALL SAMEN_SHOOT_CALC
+
+SIF T != TARGET 
+	RETURN 0
+
+;大量射精
+IF E == 2
+	EXP:精液経験 += 9
+	PRINTL 精液経験＋９
+	;口で射精させたフラグ
+	TFLAG:0 = 2
+;通常の射精
+ELSEIF E == 1
+	EXP:精液経験 += 3
+	PRINTL 精液経験＋３
+	;口で射精させたフラグ
+	TFLAG:0 = 1
+ENDIF
+
+@SAMEN_SHOOT_OLD_SUMATA
+;これまでCOMF内で使用されていた手と口以外（素股など）射精の処理
+
+CALL SAMEN_SHOOT_CALC
+
+SIF T != TARGET 
+	RETURN 0
+
+;大量射精
+IF E == 2
+	EXP:精液経験 += 2
+	PRINTL 精液経験＋２
+	;手と口以外（素股など）で射精させたフラグ
+	TFLAG:9 = 2
+;通常の射精
+ELSEIF E == 1
+	EXP:精液経験 += 1
+	PRINTL 精液経験＋１
+	;手と口以外（素股など）で射精させたフラグ
+	TFLAG:9 = 1
+ENDIF
+
+@SAMEN_SHOOT_OLD_ASSISTANT
+;これまでCOMF内で使用されていた助手を犯した時の射精の処理
+
+CALL SAMEN_SHOOT_CALC
+
+SIF T != TARGET 
+	RETURN 0
+
+;大量射精
+IF E == 2
+	EXP:精液経験 += 1
+	PRINTL 精液経験＋１
+	;助手を犯すで射精したフラグ
+	TFLAG:7 = 2
+;通常の射精
+ELSEIF E == 1
+	;精液汚れ
+	STAIN:MASTER:2 |= 4
+	;助手を犯すで射精したフラグ
+	TFLAG:7 = 1
+ENDIF
+
+@SAMEN_SHOOT_OLD_PUSSY
+;これまでCOMF内で使用されていたクンニ強制時の射精の処理
+
+CALL SAMEN_SHOOT_CALC
+
+SIF T != TARGET 
+	RETURN 0
+
+;大量射精
+IF E == 2
+	EXP:精液経験 += 4
+	PRINTL 精液経験＋４
+	;クンニで射精させたフラグ
+	TFLAG:5 = 2
+;通常の射精
+ELSEIF E == 1
+	EXP:精液経験 += 1
+	PRINTL 精液経験＋１
+	;クンニで射精させたフラグ
+	TFLAG:5 = 1
+ENDIF
+
+@SAMEN_SHOOT_OLD_TO_ASSISTANT
+;これまでCOMF内で使用されていた助手を犯させた時の助手の射精の処理
+
+CALL SAMEN_SHOOT_CALC
+
+;大量射精
+IF E == 2
+	EXP:精液経験 += 1
+	PRINTL 精液経験＋１
+	;助手が射精フラグ
+	TFLAG:6 = 2
+;通常の射精
+ELSEIF E == 1
+	;助手が射精フラグ
+	TFLAG:6 = 1
+ENDIF
+
+@SAMEN_SHOOT_OLD_RAPED
+;これまでCOMF内で使用されていた逆レイプで射精の時の処理
+
+CALL SAMEN_SHOOT_CALC
+
+IF E == 2
+	EXP:精液経験 += 1
+	PRINTL 精液経験＋１
+	;逆レイプで射精させたフラグ
+	TFLAG:12 = 2
+;通常の射精
+ELSEIF E == 1
+	;逆レイプで射精させたフラグ
+	TFLAG:12 = 1
+ENDIF
+
+@SAMEN_SHOOT_OLD_TO_ASSISTANT_3P
+;これまでCOMF内で使用されていた3P時の助手の射精の処理
+
+CALL SAMEN_SHOOT_CALC
+
+;大量射精
+IF E == 2
+	EXP:精液経験 += 1
+	PRINTL 精液経験＋1
+	;助手が射精フラグ
+	TFLAG:6 = 2
+;通常の射精
+ELSEIF E == 1
+	;助手が射精フラグ
+	TFLAG:6 = 1
+ENDIF
+
+@SAMEN_SHOOT_CALC
+;射精時の共通処理
+;精液汚れの設定
+STAIN:P:2 |= 4
+
+;大量射精
+IF E == 2
+	EXP:P:射精経験 += 2
+	PRINTL 大量射精
+
+	BASE:P:2 -= EJAC*2
+	SIF BASE:P:2 >= EJAC
+		BASE:P:2 = EJAC-1
+;通常の射精
+ELSEIF E == 1
+	EXP:P:射精経験 += 1
+	PRINTL 射精
+
+	BASE:P:2 -= EJAC
+	SIF BASE:P:2 >= EJAC
+		BASE:P:2 = EJAC-1
+ENDIF
+
+;射精時に中毒充足のソースを追加
+;通常射精時
+SIF E == 1
+	A = 200
+;大量射精時
+SIF E == 2
+	A = 500
+
+IF E > 0
+	;精液中毒を見る
+	IF ABL:16 == 1
+		TIMES A , 0.00
+	ELSEIF ABL:16 == 2
+		TIMES A , 0.30
+	ELSEIF ABL:16 == 3
+		TIMES A , 0.60
+	ELSEIF ABL:16 == 4
+		TIMES A , 0.90
+	ELSEIF ABL:16 == 5
+		TIMES A , 1.20
+	ELSEIF ABL:16 == 6
+		TIMES A , 1.50
+	ELSEIF ABL:16 == 7
+		TIMES A , 1.80
+	ELSEIF ABL:16 == 8
+		TIMES A , 2.30
+	ELSEIF ABL:16 == 9
+		TIMES A , 3.00
+	ELSEIF ABL:16 == 10
+		TIMES A , 5.00
+	ENDIF
+ENDIF
+
+SOURCE:9 += A
+
+;射精後は再装填の時間を設ける
+IF SELECTCOM == 124 || SELECTCOM == 125
+	;通常射精時
+	SIF E == 1
+		CFLAG:MASTER:24 = 3
+	;大量射精時
+	SIF E == 2
+		CFLAG:MASTER:24 = 5
+	CFLAG:MASTER:11 -= 1
+ELSE
+	;通常射精時
+	SIF E == 1
+		CFLAG:PLAYER:24 = 3
+	;大量射精時
+	SIF E == 2
+		CFLAG:PLAYER:24 = 5
+	CFLAG:PLAYER:11 -= 1
+ENDIF
+
+
+@SAMEN_SHOOT_SOURCE
+;-------------------------------------------------
+;ソースの計算
+;-------------------------------------------------
+;恋慕、親愛持ちで射精者が主人の場合は達成感のソースが増加する
+IF (TALENT:恋慕 || TALENT:親愛) && P == MASTER
+	SOURCE:6 += 1500
+ELSE
+	SOURCE:8 += 1500
+	SOURCE:18 += 500
+ENDIF
+
+;陥落素質が無い場合は反発増加
+SIF TALENT:恋慕 == 0 && TALENT:淫乱 == 0 && TALENT:服従 == 0 && TALENT:親愛 == 0 && TALENT:娼婦 == 0 && TALENT:隷属 == 0
+	SOURCE:18 += 1000
+
+

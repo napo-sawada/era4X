@@ -1,0 +1,143 @@
+﻿;欲望の可否
+@ISABLUP1
+;恋慕、親愛、淫乱、娼婦はMAXLV10
+IF ABL:1 >= 10
+	RETURN 0
+ELSEIF ABL:1 >= 5 && TALENT:恋慕 == 0 && TALENT:親愛 == 0 && TALENT:淫乱 == 0 && TALENT:娼婦 == 0
+	RETURN 0
+ENDIF
+
+CALL DECIDE_ABLUP1
+
+IF Z == 0
+	RETURN 0
+ELSE
+	RETURN 1
+ENDIF
+
+;欲望
+@ABLUP1
+DRAWLINE
+;恋慕、親愛、服従、隷属はMAXLV10
+IF ABL:1 >= 10
+	PRINTW 既にMAXです
+	RETURN 0
+ELSEIF ABL:1 >= 5 && TALENT:恋慕 == 0 && TALENT:親愛 == 0 && TALENT:淫乱 == 0 && TALENT:娼婦 == 0
+	PRINTW 既にMAXです
+	RETURN 0
+ENDIF
+
+CALL DECIDE_ABLUP1
+
+;ＬＶ４から５に上げるときは異常経験必要（素質：[快感に素直][淫乱][娼婦]なら無視できる）
+IF ABL:1 == 4 && TALENT:快感に素直 == 0 && TALENT:淫乱 == 0 && TALENT:娼婦 == 0
+	PRINTS EXPNAME:50
+	PRINTL あり、かつ
+;ＬＶ７から８に上げるときは異常経験3以上必要（素質：[快感に素直][淫乱][娼婦]なら無視できる）
+ELSEIF ABL:1 == 7 && TALENT:快感に素直 == 0 && TALENT:淫乱 == 0 && TALENT:娼婦 == 0
+	PRINTS EXPNAME:50
+	PRINTL 3以上、かつ
+ENDIF
+
+PRINT [0] - 
+PRINTS PALAMNAME:6
+PRINT の珠×
+PRINTV A
+PRINT ……
+IF I == 0
+	PRINT ＯＫ
+ELSE
+	SIF I & 1
+		PRINT 珠不足 
+	SIF I & 2
+		PRINT 経験不足 
+ENDIF
+PRINTL 
+
+PRINTL [100] - やめる
+
+
+INPUT
+IF (RESULT < 0 || RESULT > 0) && RESULT != 100
+	RESTART
+ELSEIF I != 0 && RESULT == 0
+	PRINTL 条件を満たしていません
+	RESTART
+ELSEIF RESULT == 100
+	RETURN 0
+ENDIF
+
+ABL:1 += 1
+
+IF RESULT == 0
+	JUEL:6 -= A
+ENDIF
+
+PRINTS ABLNAME:1
+PRINT のレベルが
+PRINTV ABL:1
+PRINTW になりました
+
+CALL YOKUBO_UP_CHECK
+
+;欲望LvUP判定
+@DECIDE_ABLUP1
+;条件別にＯＫかダメかを記録する
+I = 0
+;能力アップ可能なら1にする
+Z = 0
+
+IF ABL:1 == 0
+	A = 1
+ELSEIF ABL:1 == 1
+	A = 20
+ELSEIF ABL:1 == 2
+	A = 1000
+ELSEIF ABL:1 == 3
+	A = 8000
+ELSEIF ABL:1 == 4
+	A = 24000
+ELSEIF ABL:1 == 5
+	A = 30000
+ELSEIF ABL:1 == 6
+	A = 36000
+ELSEIF ABL:1 == 7
+	A = 45000
+ELSEIF ABL:1 == 8
+	A = 55000
+ELSEIF ABL:1 == 9
+	A = 70000
+ENDIF
+
+;一線越えない
+IF TALENT:一線越えない && (TALENT:恋慕 == 0 && TALENT:淫乱 == 0 && TALENT:服従 == 0 && TALENT:親愛 == 0 && TALENT:娼婦 == 0 && TALENT:隷属 == 0)
+	TIMES A , 2.00
+ENDIF
+
+;ＬＶ４から５に上げるときは異常経験必要（素質：[快感に素直][淫乱][娼婦]なら無視できる）
+IF ABL:1 == 4 && TALENT:快感に素直 == 0 && TALENT:淫乱 == 0 && TALENT:娼婦 == 0
+	IF EXP:異常経験 == 0
+		;異常経験がない
+		I |= 2
+	ENDIF
+;ＬＶ７から８に上げるときは異常経験3以上必要（素質：[快感に素直][淫乱][娼婦]なら無視できる）
+ELSEIF ABL:1 == 7 && TALENT:快感に素直 == 0 && TALENT:淫乱 == 0 && TALENT:娼婦 == 0
+	IF EXP:異常経験 < 3
+		;異常経験が3未満
+		I |= 2
+	ENDIF
+ENDIF
+
+;0になった場合は1にする
+SIF A == 0
+	A = 1
+
+;欲情の珠で上げる
+SIF JUEL:6 < A
+	I |= 1
+
+IF I == 0
+	Z = 1
+ENDIF
+RETURN 1
+

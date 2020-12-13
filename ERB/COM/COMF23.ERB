@@ -1,0 +1,111 @@
+﻿;-------------------------------------------------
+;プレゼント
+;コミュニケーション系コマンド、レベル3
+;-------------------------------------------------
+@COM23
+PRINTL プレゼント
+
+PRINTFORML 何を贈りますか？
+PRINTFORML [0] スマイル（タダ）
+SIF MONEY >= 1000
+	PRINTFORML [1] お菓子($2000)
+SIF MONEY >= 5000
+	PRINTFORML [2] 日用品($7500)
+SIF MONEY >= 2000
+	PRINTFORML [3] アクセサリ($30000)
+SIF MONEY >= 30000
+	PRINTFORML [4] 服($75000)
+SIF MONEY >= 100000
+	;eratohoAでは$150000のお酒だった
+	PRINTFORML [5] 高級菓子($300000)
+PRINTFORML [100] やっぱりやめる
+
+INPUT
+IF RESULT != 100 && (RESULT < 0 || RESULT > 6)
+	RESTART
+ELSEIF RESULT == 1 && MONEY < 2000
+	RESTART
+ELSEIF RESULT == 2 && MONEY < 7500
+	RESTART
+ELSEIF RESULT == 3 && MONEY < 30000
+	RESTART
+ELSEIF RESULT == 4 && MONEY < 75000
+	RESTART
+ELSEIF RESULT == 5 && MONEY < 300000
+	RESTART
+ELSEIF RESULT == 0
+	;スマイルをプレゼント
+	TFLAG:17 = 0
+ELSEIF RESULT == 1
+	;酒をプレゼント
+	TFLAG:17 = 1
+	MONEY -= 3000
+ELSEIF RESULT == 2
+	;日用品をプレゼント
+	TFLAG:17 = 2
+	MONEY -= 7500
+ELSEIF RESULT == 3
+	;アクセサリをプレゼント
+	TFLAG:17 = 3
+	MONEY -= 30000
+ELSEIF RESULT == 4
+	;服をプレゼント
+	TFLAG:17 = 4
+	MONEY -= 75000
+ELSEIF RESULT == 5
+	;高級菓子をプレゼント
+	TFLAG:17 = 5
+	MONEY -= 300000
+ELSEIF RESULT >= 100
+	PRINTFORMW プレゼントを渡すのを止めました
+	RETURN 0
+ENDIF
+
+STR:0 = プレゼント
+CALL KOJO_MESSAGE_COM
+
+;-------------------------------------------------
+;ソース追加処理
+;-------------------------------------------------
+;消費体力、気力
+LOSEBASE:0 += 10
+LOSEBASE:1 += 20
+
+IF TFLAG:17 == 0
+	SOURCE:12 = 1000
+	SOURCE:17 = 100
+ELSEIF TFLAG:17 == 1
+	SOURCE:12 = 1500
+	SOURCE:17 = 150
+ELSEIF TFLAG:17 == 2
+	SOURCE:12 = 2500
+	SOURCE:17 = 250
+ELSEIF TFLAG:17 == 3
+	SOURCE:12 = 3500
+	SOURCE:17 = 350
+ELSEIF TFLAG:17 == 4
+	SOURCE:12 = 5000
+	SOURCE:17 = 500
+ELSEIF TFLAG:17 == 5
+	SOURCE:12 = 7000
+	SOURCE:17 = 700
+ENDIF
+
+;愛情経験
+IF (TALENT:恋慕 == 1 || TALENT:親愛 == 1) && ASSIPLAY == 0 && TFLAG:17 > 0
+	A = TFLAG:17
+	PRINTS EXPNAME:23
+	PRINTVL +A
+	EXP:愛情経験 += A
+ENDIF
+
+;依存度ベクトル
+TFLAG:33 = 4
+
+;依存度補正値
+SIF (TALENT:恋慕 == 1 || TALENT:親愛 == 1) && ASSIPLAY == 0
+	TFLAG:30 += TFLAG:17
+
+
+RETURN 1
+

@@ -1,0 +1,262 @@
+﻿;噴乳中毒可否
+@ISABLUP19
+;恋慕、親愛、淫乱、娼婦はMAXLV10
+IF ABL:19 >= 10
+	RETURN 0
+ELSEIF ABL:19 >= 5 && TALENT:恋慕 == 0 && TALENT:親愛 == 0 && TALENT:淫乱 == 0 && TALENT:娼婦 == 0
+	RETURN 0
+ENDIF
+
+CALL DECIDE_ABLUP19
+
+IF Z == 0
+	RETURN 0
+ELSE
+	RETURN 1
+ENDIF
+
+
+;噴乳中毒
+@ABLUP19
+DRAWLINE
+;恋慕、親愛、淫乱、娼婦はMAXLV10
+IF ABL:19 >= 10
+	PRINTW 既にMAXです
+	RETURN 0
+ELSEIF ABL:19 >= 5 && TALENT:恋慕 == 0 && TALENT:親愛 == 0 && TALENT:淫乱 == 0 && TALENT:娼婦 == 0
+	PRINTW 既にMAXです
+	RETURN 0
+ENDIF
+
+CALL DECIDE_ABLUP19
+
+
+;ＬＶ２から３に上げるときは異常経験必要（素質：[中毒しやすい][淫乳]なら無視できる）
+IF ABL:19 == 2 && TALENT:中毒しやすい == 0 && TALENT:淫乳 == 0
+	PRINTS EXPNAME:50
+	PRINTL あり、かつ
+;ＬＶ３から４に上げるときは異常経験2以上必要（素質：[中毒しやすい][淫乳]なら無視できる）
+ELSEIF ABL:19 == 3 && TALENT:中毒しやすい == 0 && TALENT:淫乳 == 0
+	PRINTS EXPNAME:50
+	PRINTL 2以上、かつ
+;ＬＶ４から５に上げるときは異常経験3以上必要（素質：[中毒しやすい][淫乳]なら無視できる）
+ELSEIF ABL:19 == 4 && TALENT:中毒しやすい == 0 && TALENT:淫乳 == 0
+	PRINTS EXPNAME:50
+	PRINTL 3以上、かつ
+;ＬＶ８から９に上げるときは異常経験7以上必要（素質：[中毒しやすい][淫乳]なら無視できる）
+ELSEIF ABL:19 == 8 && TALENT:中毒しやすい == 0 && TALENT:淫乳 == 0
+	PRINTS EXPNAME:50
+	PRINTL 7以上、かつ
+ENDIF
+
+
+;B感覚が必要
+PRINTS ABLNAME:6
+PRINTV ABL:19 + 1
+PRINTL LV以上、かつ
+
+PRINT [0] - 
+PRINTS PALAMNAME:6
+PRINT の珠×
+PRINTV A
+PRINT 、
+PRINTS PALAMNAME:3
+PRINT の珠×
+PRINTV B
+PRINT 、
+PRINTS PALAMNAME:7
+PRINT の珠×
+PRINTV C
+PRINT 、
+PRINTS EXPNAME:54
+PRINTV D
+PRINT 以上
+PRINT ……
+
+IF I == 0
+	PRINT ＯＫ
+ELSE
+	SIF I & 1
+		PRINT 珠不足 
+	SIF I & 2
+		PRINT 経験不足 
+	SIF I & 4
+		PRINT 能力不足 
+ENDIF
+PRINTL 
+
+
+
+PRINTL [100] - やめる
+
+
+INPUT
+IF (RESULT < 0 || RESULT > 1) && RESULT != 100
+	RESTART
+ELSEIF I != 0 && RESULT == 0
+	PRINTL 条件を満たしていません
+	RESTART
+ELSEIF J != 0 && RESULT == 1
+	PRINTL 条件を満たしていません
+	RESTART
+ELSEIF RESULT == 100
+	RETURN 0
+ENDIF
+
+ABL:19 += 1
+
+IF RESULT == 0 || RESULT == 1
+	JUEL:6 -= A
+	JUEL:3 -= B
+	JUEL:7 -= C
+ENDIF
+
+PRINTS ABLNAME:19
+PRINT のレベルが
+PRINTV ABL:19
+PRINTW になりました
+
+
+;噴乳中毒LVUP判定
+@DECIDE_ABLUP19
+;条件別にＯＫかダメかを記録する
+I = 0
+;能力アップ可能なら1にする
+Z = 0
+
+IF ABL:19 == 0
+	A = 2500
+	B = 6000
+	C = 1000
+	D = 10
+ELSEIF ABL:19 == 1
+	A = 5000
+	B = 14000
+	C = 2500
+	D = 25
+ELSEIF ABL:19 == 2
+	A = 9000
+	B = 27000
+	C = 4800
+	D = 80
+ELSEIF ABL:19 == 3
+	A = 17000
+	B = 65000
+	C = 10000
+	D = 150
+ELSEIF ABL:19 == 4
+	A = 30000
+	B = 80000
+	C = 25000
+	D = 250
+ELSEIF ABL:19 == 5
+	A = 35000
+	B = 100000
+	C = 30000
+	D = 350
+ELSEIF ABL:19 == 6
+	A = 40000
+	B = 120000
+	C = 35000
+	D = 500
+ELSEIF ABL:19 == 7
+	A = 45000
+	B = 140000
+	C = 40000
+	D = 600
+ELSEIF ABL:19 == 8
+	A = 50000
+	B = 160000
+	C = 45000
+	D = 700
+ELSEIF ABL:19 == 9
+	A = 60000
+	B = 200000
+	C = 50000
+	D = 800
+ENDIF
+
+;一線越えない
+IF TALENT:一線越えない && (TALENT:恋慕 == 0 && TALENT:淫乱 == 0 && TALENT:服従 == 0 && TALENT:親愛 == 0 && TALENT:娼婦 == 0 && TALENT:隷属 == 0)
+	TIMES A , 2.00
+	TIMES B , 2.00
+	TIMES C , 2.00
+	TIMES D , 2.00
+ENDIF
+;中毒しやすい
+IF TALENT:中毒しやすい
+	TIMES A , 0.50
+	TIMES B , 0.50
+	TIMES C , 0.50
+	TIMES D , 0.50
+ENDIF
+;貧乳
+IF TALENT:貧乳
+	TIMES B , 0.90
+ENDIF
+;絶壁
+IF TALENT:絶壁
+	TIMES B , 0.70
+ENDIF
+;巨乳
+IF TALENT:巨乳
+	TIMES B , 1.10
+ENDIF
+;爆乳
+IF TALENT:爆乳
+	TIMES B , 1.30
+ENDIF
+
+;ＬＶ２から３に上げるときは異常経験必要（素質：[中毒しやすい][淫乳]なら無視できる）
+IF ABL:19 == 2 && TALENT:中毒しやすい == 0 && TALENT:淫乳 == 0
+	IF EXP:異常経験 == 0
+		;異常経験が不足
+		I |= 2
+		J |= 2
+	ENDIF
+;ＬＶ３から４に上げるときは異常経験2以上必要（素質：[中毒しやすい][淫乳]なら無視できる）
+ELSEIF ABL:19 == 3 && TALENT:中毒しやすい == 0 && TALENT:淫乳 == 0
+	IF EXP:異常経験 < 2
+		;異常経験が不足
+		I |= 2
+		J |= 2
+	ENDIF
+;ＬＶ４から５に上げるときは異常経験3以上必要（素質：[中毒しやすい][淫乳]なら無視できる）
+ELSEIF ABL:19 == 4 && TALENT:中毒しやすい == 0 && TALENT:淫乳 == 0
+	IF EXP:異常経験 < 3
+		;異常経験が不足
+		I |= 2
+		J |= 2
+	ENDIF
+;ＬＶ８から９に上げるときは異常経験7以上必要（素質：[中毒しやすい][淫乳]なら無視できる）
+ELSEIF ABL:19 == 8 && TALENT:中毒しやすい == 0 && TALENT:淫乳 == 0
+	IF EXP:異常経験 < 7
+		;異常経験が不足
+		I |= 2
+		J |= 2
+	ENDIF
+ENDIF
+
+;B感覚が必要
+IF ABL:6 < ABL:19 + 1
+	I |= 4
+	J |= 4
+ENDIF
+
+;欲情の珠で上げる
+SIF JUEL:6 < A
+	I |= 1
+;快Bの珠で上げる
+SIF JUEL:3 < B
+	I |= 1
+;屈服の珠で上げる
+SIF JUEL:7 < C
+	I |= 1
+;噴乳経験が必要
+SIF EXP:噴乳経験 < D
+	I |= 2
+IF I == 0
+	Z = 1
+ENDIF
+RETURN 1
+

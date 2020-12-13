@@ -1,0 +1,185 @@
+﻿;露出癖の可否
+@ISABLUP8
+;恋慕、親愛、淫乱、娼婦はMAXLV10
+IF ABL:8 >= 10
+	RETURN 0
+ELSEIF ABL:8 >= 5 && TALENT:恋慕 == 0 && TALENT:親愛 == 0 && TALENT:淫乱 == 0 && TALENT:娼婦 == 0
+	RETURN 0
+ENDIF
+
+CALL DECIDE_ABLUP8
+
+IF Z == 0
+	RETURN 0
+ELSE
+	RETURN 1
+ENDIF
+
+
+;露出癖
+@ABLUP8
+DRAWLINE
+IF ABL:8 >= 10
+	PRINTW 既にMAXです
+	RETURN 0
+ELSEIF ABL:8 >= 5 && TALENT:恋慕 == 0 && TALENT:親愛 == 0 && TALENT:淫乱 == 0 && TALENT:娼婦 == 0
+	PRINTW 既にMAXです
+	RETURN 0
+ENDIF
+
+CALL DECIDE_ABLUP8
+
+;ＬＶ３から４に上げるときは異常経験必要（素質：[目立ちたがり]なら無視できる）
+IF ABL:8 == 3 && TALENT:目立ちたがり == 0
+	PRINTS EXPNAME:50
+	PRINTL あり、かつ
+;ＬＶ４から５に上げるときは異常経験3以上必要（素質：[目立ちたがり]なら無視できる）
+ELSEIF ABL:8 == 4 && TALENT:目立ちたがり == 0
+	PRINTS EXPNAME:50
+	PRINTL 3以上、かつ
+;ＬＶ８から９に上げるときは異常経験5以上必要（素質：[目立ちたがり]なら無視できる）
+ELSEIF ABL:8 == 8 && TALENT:目立ちたがり == 0
+	PRINTS EXPNAME:50
+	PRINTL 5以上、かつ
+ENDIF
+
+;欲望が必要
+PRINTS ABLNAME:1
+PRINTV ABL:8 + 1
+PRINTL LV以上、かつ
+
+PRINT [0] - 
+PRINTS PALAMNAME:9
+PRINT の珠×
+PRINTV A
+IF ABL:8 < 2
+	PRINT 、
+	PRINTS EXPNAME:2
+	PRINTV 1
+	PRINT 以上
+ELSE
+	PRINT 、
+	PRINTS EXPNAME:11
+	PRINTV 1
+	PRINT 以上
+ENDIF
+PRINT ……
+
+IF I == 0
+	PRINT ＯＫ
+ELSE
+	SIF I & 1
+		PRINT 珠不足 
+	SIF I & 2
+		PRINT 経験不足 
+	SIF I & 4
+		PRINT 能力不足 
+ENDIF
+PRINTL 
+
+
+PRINTL [100] - やめる
+
+
+INPUT
+IF (RESULT < 0 || RESULT > 0) && RESULT != 100
+	RESTART
+ELSEIF I != 0 && RESULT == 0
+	PRINTL 条件を満たしていません
+	RESTART
+ELSEIF RESULT == 100
+	RETURN 0
+ENDIF
+
+ABL:8 += 1
+
+IF RESULT == 0
+	JUEL:9 -= A
+ENDIF
+
+PRINTS ABLNAME:8
+PRINT のレベルが
+PRINTV ABL:8
+PRINTW になりました
+
+;露出癖LVUP判定
+@DECIDE_ABLUP8
+;条件別にＯＫかダメかを記録する
+I = 0
+J = 0
+K = 0
+;能力アップ可能なら1にする
+Z = 0
+
+IF ABL:8 == 0
+	A = 100
+ELSEIF ABL:8 == 1
+	A = 1000
+ELSEIF ABL:8 == 2
+	A = 5000
+ELSEIF ABL:8 == 3
+	A = 15000
+ELSEIF ABL:8 == 4
+	A = 35000
+ELSEIF ABL:8 == 5
+	A = 35000
+ELSEIF ABL:8 == 6
+	A = 35000
+ELSEIF ABL:8 == 7
+	A = 35000
+ELSEIF ABL:8 == 8
+	A = 35000
+ELSEIF ABL:8 == 9
+	A = 35000
+ENDIF
+
+;一線越えない
+IF TALENT:一線越えない && (TALENT:恋慕 == 0 && TALENT:淫乱 == 0 && TALENT:服従 == 0 && TALENT:親愛 == 0 && TALENT:娼婦 == 0 && TALENT:隷属 == 0)
+	TIMES A , 2.00
+ENDIF
+
+;欲望が露出癖＋１レベルでないといけない
+IF ABL:1 < ABL:8+1
+	;欲望が不足
+	I |= 4
+ENDIF
+
+;ＬＶ３から４に上げるときは異常経験必要（素質：[目立ちたがり]なら無視できる）
+IF ABL:8 == 3 && TALENT:目立ちたがり == 0
+	IF EXP:異常経験 == 0
+		;異常経験が不足
+		I |= 2
+	ENDIF
+;ＬＶ４から５に上げるときは異常経験3以上必要（素質：[目立ちたがり]なら無視できる）
+ELSEIF ABL:8 == 4 && TALENT:目立ちたがり == 0
+	IF EXP:異常経験 < 3
+		;異常経験が不足
+		I |= 2
+	ENDIF
+;ＬＶ８から９に上げるときは異常経験5以上必要（素質：[目立ちたがり]なら無視できる）
+ELSEIF ABL:8 == 8 && TALENT:目立ちたがり == 0
+	IF EXP:異常経験 < 5
+		;異常経験が不足
+		I |= 2
+	ENDIF
+ENDIF
+
+;恥情の珠で上げる
+SIF JUEL:9 < A
+	I |= 1
+IF ABL:8 < 2
+	;絶頂経験が必要
+	SIF EXP:絶頂経験 == 0
+		I |= 2
+ELSE
+	;調教自慰経験が必要
+	SIF EXP:調教自慰経験 == 0
+		I |= 2
+ENDIF
+
+IF I == 0
+	Z = 1
+ENDIF
+
+RETURN 1
+

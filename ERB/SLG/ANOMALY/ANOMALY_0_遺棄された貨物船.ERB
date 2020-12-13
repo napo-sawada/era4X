@@ -1,0 +1,71 @@
+﻿;--------------------------
+; 遺棄された貨物船
+;--------------------------
+@INIT_ANOMALY_0
+#DIM TASK_COMPLETE
+#DIM POS_X
+#DIM POS_Y
+; 遺棄された貨物船
+WHILE TASK_COMPLETE == 0
+	POS_X = RAND:(MAP_WIDTH)
+	POS_Y = RAND:(MAP_HEIGHT)
+	SIF MAP:POS_X:POS_Y != 無
+		CONTINUE
+	MAP:POS_X:POS_Y = ANOMALY
+	ANOMALY_MAP:POS_X:POS_Y = 遺棄された貨物船
+	CALL POS2ID(POS_X, POS_Y)
+	ANOMALY_POSITIONID:0 = RESULT
+	TASK_COMPLETE = 1
+WEND
+
+;--------------------------
+; ANOMALY本体
+;--------------------------
+@ANOMALY_BODY_遺棄された貨物船
+#DIM ITER
+#DIM SHIP_ID
+
+SELECTCASE ANOMALY_PROGRESS:0
+	CASE 0
+		PRINTFORML 宙域にポツンと古いタイプの輸送船が漂っている。
+		PRINTFORML 何者かに攻撃されたのか、装甲がボロボロだ。
+		PRINTFORML 貨物部分に空いた人工的な人型サイズの穴を見るに、接舷されて乗り込み攻撃をされたようだ。
+		PRINTFORML だがエンジンとコントロール部分は比較的無傷で、乗り込めばまだ使えるようだ。
+		PRINTFORMW 搭乗ポッドで乗り込めれば自分のものにできそうだ。
+		PRINTL
+		ANOMALY_PROGRESS:0 = 1
+	CASE 1
+		PRINTFORML 自分のものにできそうなボロボロな輸送船が浮かんでいる……
+ENDSELECT
+
+FOR ITER, 0, CHARANUM
+	SHIP_ID = RIDING_WITH:ITER
+	SIF SHIP_ID == -1
+		CONTINUE
+	SIF SHIP_EQUIP:オプション:SHIP_ID != 1
+		CONTINUE
+	CALL RIDE_ADANDONMENT_SHIP(ITER)
+
+	BREAK
+NEXT
+
+;--------------------------
+; ANOMALY本体
+;--------------------------
+@RIDE_ADANDONMENT_SHIP(ITER)
+#DIM ITER
+PRINTFORML %CALLNAME:ITER%を移乗コンテナで遺棄船に射出した。
+PRINTFORML どうやらうまくいったようだ。
+PRINTFORMW %CALLNAME:MASTER%は新しい輸送船を手に入れた。
+
+; プレイヤーの初期艦
+CALL INIT_PRESET_SHIP(PLAYER_COUNTRY, ANOMALY_POSITIONID:0, 輸送船, "ぼろぼの輸送船", 輸送船)
+BOARDING_SHIP_ID:ITER = RESULT
+RIDING_WITH:ITER = -1
+SHIP_DAMAGE:RESULT = 250
+
+ANOMALY_PROGRESS:0 = 2
+CALL ID2POS(ANOMALY_POSITIONID:0)
+ANOMALY_MAP:(RESULT:1):(RESULT:2) = %""%
+MAP:(RESULT:1):(RESULT:2) = 無
+

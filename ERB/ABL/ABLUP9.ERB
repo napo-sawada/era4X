@@ -1,0 +1,298 @@
+﻿;マゾっ気の可否
+@ISABLUP9
+;恋慕、親愛、服従、隷属はMAXLV10
+IF ABL:9 >= 10
+	RETURN 0
+ELSEIF ABL:9 >= 5 && TALENT:恋慕 == 0 && TALENT:親愛 == 0 && TALENT:服従 == 0 && TALENT:隷属 == 0
+	RETURN 0
+ENDIF
+
+CALL DECIDE_ABLUP9
+
+IF Z == 0
+	RETURN 0
+ELSE
+	RETURN 1
+ENDIF
+
+
+;マゾっ気
+@ABLUP9
+DRAWLINE
+;恋慕、親愛、服従、隷属はMAXLV10
+IF ABL:9 >= 10
+	PRINTW 既にMAXです
+	RETURN 0
+ELSEIF ABL:9 >= 5 && TALENT:恋慕 == 0 && TALENT:親愛 == 0 && TALENT:服従 == 0 && TALENT:隷属 == 0
+	PRINTW 既にMAXです
+	RETURN 0
+ENDIF
+
+CALL DECIDE_ABLUP9
+
+;ＬＶ３から４に上げるときは異常経験必要（素質：[解放]なら無視できる）
+IF ABL:9 == 3 && TALENT:解放 == 0
+	PRINTS EXPNAME:50
+	PRINTL あり、かつ
+;ＬＶ４から５に上げるときは異常経験3以上必要（素質：[解放]なら無視できる）
+ELSEIF ABL:9 == 4 && TALENT:解放 == 0
+	PRINTS EXPNAME:50
+	PRINTL 3以上、かつ
+;ＬＶ８から９に上げるときは異常経験5以上必要（素質：[解放]なら無視できる）
+ELSEIF ABL:9 == 4 && TALENT:解放 == 0
+	PRINTS EXPNAME:50
+	PRINTL 5以上、かつ
+ENDIF
+
+IF B > 0
+	PRINT [0] - 
+	PRINTS PALAMNAME:10
+	PRINT の珠×
+	PRINTV A
+	PRINT 、
+	PRINTS PALAMNAME:6
+	PRINT の珠×
+	PRINTV B
+	IF C > 0
+		PRINT 、
+		PRINTS EXPNAME:30
+		PRINTV C
+		PRINT 以上
+	ENDIF
+	PRINT ……
+
+	IF I == 0
+		PRINT ＯＫ
+	ELSE
+		SIF I & 1
+			PRINT 珠不足 
+		SIF I & 2
+			PRINT 経験不足 
+		SIF I & 4
+			PRINT 能力不足 
+	ENDIF
+	PRINTL 
+ELSE
+	I = 256
+ENDIF
+
+IF D > 0
+	PRINT [1] - 
+	PRINTS PALAMNAME:10
+	PRINT の珠×
+	PRINTV D
+	PRINT 、
+	PRINTS PALAMNAME:7
+	PRINT の珠×
+	PRINTV E
+	IF C > 0
+		PRINT 、
+		PRINTS EXPNAME:30
+		PRINTV C
+		PRINT 以上
+	ENDIF
+	PRINT 、
+	PRINTS EXPNAME:2
+	PRINTV 1
+	PRINT 以上
+	PRINT ……
+	
+	IF J == 0
+		PRINT ＯＫ
+	ELSE
+		SIF J & 1
+			PRINT 珠不足 
+		SIF J & 2
+			PRINT 経験不足 
+		SIF J & 4
+			PRINT 能力不足 
+	ENDIF
+	PRINTL 
+ELSE
+	J = 256
+ENDIF
+
+PRINTL [100] - やめる
+
+
+INPUT
+IF (RESULT < 0 || RESULT > 1) && RESULT != 100
+	RESTART
+ELSEIF I != 0 && RESULT == 0
+	PRINTL 条件を満たしていません
+	RESTART
+ELSEIF J == 256 && RESULT == 1
+	RESTART
+ELSEIF J != 0 && RESULT == 1
+	PRINTL 条件を満たしていません
+	RESTART
+ELSEIF RESULT == 100
+	RETURN 0
+ENDIF
+
+ABL:9 += 1
+
+IF RESULT == 0
+	JUEL:10 -= A
+	JUEL:6 -= B
+ELSEIF RESULT == 1
+	JUEL:10 -= D
+	JUEL:7 -= E
+ENDIF
+
+PRINTS ABLNAME:9
+PRINT のレベルが
+PRINTV ABL:9
+PRINTW になりました
+
+;マゾっ気LVUP判定
+@DECIDE_ABLUP9
+;条件別にＯＫかダメかを記録する
+I = 0
+J = 0
+;能力アップ可能なら1にする
+Z = 0
+
+IF ABL:9 == 0
+	A = 100
+	B = 100
+	C = 0
+	D = 100
+	E = 100
+ELSEIF ABL:9 == 1
+	A = 500
+	B = 500
+	C = 0
+	D = 500
+	E = 300
+ELSEIF ABL:9 == 2
+	A = 1200
+	B = 1000
+	C = 0
+	D = 1500
+	E = 1000
+ELSEIF ABL:9 == 3
+	A = 0
+	B = 0
+	C = 10
+	D = 3000
+	E = 6000
+ELSEIF ABL:9 == 4
+	A = 0
+	B = 0
+	C = 50
+	D = 5000
+	E = 12000
+ELSEIF ABL:9 == 5
+	A = 0
+	B = 0
+	C = 100
+	D = 8000
+	E = 15000
+ELSEIF ABL:9 == 6
+	A = 0
+	B = 0
+	C = 150
+	D = 12000
+	E = 20000
+ELSEIF ABL:9 == 7
+	A = 0
+	B = 0
+	C = 200
+	D = 15000
+	E = 25000
+ELSEIF ABL:9 == 8
+	A = 0
+	B = 0
+	C = 250
+	D = 25000
+	E = 35000
+ELSEIF ABL:9 == 9
+	A = 0
+	B = 0
+	C = 350
+	D = 30000
+	E = 40000
+ENDIF
+
+;一線越えない
+IF TALENT:一線越えない && (TALENT:恋慕 == 0 && TALENT:淫乱 == 0 && TALENT:服従 == 0 && TALENT:親愛 == 0 && TALENT:娼婦 == 0 && TALENT:隷属 == 0)
+	TIMES A , 2.00
+	TIMES B , 2.00
+	TIMES C , 2.00
+	TIMES D , 2.00
+	TIMES E , 2.00
+ENDIF
+;マゾ
+IF TALENT:マゾ
+	TIMES A , 0.50
+	TIMES B , 0.50
+	TIMES C , 0.50
+	TIMES D , 0.50
+	TIMES E , 0.50
+ENDIF
+
+
+;ＬＶ３から４に上げるときは異常経験必要（素質：[解放]なら無視できる）
+IF ABL:9 == 3 && TALENT:解放 == 0
+	IF EXP:異常経験 == 0
+		;異常経験が不足
+		I |= 2
+		J |= 2
+	ENDIF
+;ＬＶ４から５に上げるときは異常経験3以上必要（素質：[解放]なら無視できる）
+ELSEIF ABL:9 == 4 && TALENT:解放 == 0
+	IF EXP:異常経験 < 3
+		;異常経験が不足
+		I |= 2
+		J |= 2
+	ENDIF
+;ＬＶ８から９に上げるときは異常経験5以上必要（素質：[解放]なら無視できる）
+ELSEIF ABL:9 == 8 && TALENT:解放 == 0
+	IF EXP:異常経験 < 5
+		;異常経験が不足
+		I |= 2
+		J |= 2
+	ENDIF
+ENDIF
+
+IF B > 0
+	;苦痛の珠で上げる
+	SIF JUEL:10 < A
+		I |= 1
+	;欲情の珠で上げる
+	SIF JUEL:6 < B
+		I |= 1
+	;苦痛快楽経験が必要な場合
+	SIF EXP:苦痛快楽経験 < C
+		I |= 2
+
+	IF I == 0
+		Z = 1
+	ENDIF
+ELSE
+	I = 256
+ENDIF
+
+IF D > 0
+	;苦痛の珠で上げる
+	SIF JUEL:10 < D
+		J |= 1
+	;屈服の珠で上げる
+	SIF JUEL:7 < E
+		J |= 1
+	;この場合苦痛快楽経験が必要なことあり
+	SIF EXP:苦痛快楽経験 < C
+		J |= 2
+	;この場合絶頂経験が１以上必要
+	SIF EXP:絶頂経験 < 1
+		J |= 2
+	
+	IF J == 0
+		Z = 1
+	ENDIF
+ELSE
+	J = 256
+ENDIF
+RETURN 1
+

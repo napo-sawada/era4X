@@ -1,0 +1,70 @@
+﻿;-----------------------------------
+; シールド
+;-----------------------------------
+@GET_SIELD(ID)
+#DIM ID
+
+SELECTCASE ID
+	CASE 1
+		SIELD = 100
+		SIELD_RECOVER = 2
+		SIZE = 1
+		EQUIP_NAME = TIER1小型シールド
+	CASE 2
+		SIELD = 200
+		SIELD_RECOVER = 4
+		SIZE = 2
+		EQUIP_NAME = TIER1中型シールド
+	CASE 3
+		SIELD = 500
+		SIELD_RECOVER = 10
+		SIZE = 3
+		EQUIP_NAME = TIER1大型シールド
+	CASE 4
+		SIELD = 100
+		SIELD_RECOVER = 10
+		SIZE = 1
+		EQUIP_NAME = TIER2小型シールド
+	CASE 5
+		SIELD = 200
+		SIELD_RECOVER = 20
+		SIZE = 2
+		EQUIP_NAME = TIER2中型シールド
+	CASE 6
+		SIELD = 500
+		SIELD_RECOVER = 40
+		SIZE = 3
+		EQUIP_NAME = TIER2大型シールド
+	CASE 7
+		SIELD = 200
+		SIELD_RECOVER = 10
+		SIZE = 1
+		EQUIP_NAME = TIER3小型シールド
+	CASE 8
+		SIELD = 400
+		SIELD_RECOVER = 20
+		SIZE = 2
+		EQUIP_NAME = TIER3中型シールド
+	CASE 9
+		SIELD = 1000
+		SIELD_RECOVER = 40
+		SIZE = 3
+		EQUIP_NAME = TIER3大型シールド
+	CASEELSE
+		EQUIP_NAME = ---
+ENDSELECT
+;-----------------------------------
+; シールドの説明
+;-----------------------------------
+@GET_SIELD_DESCRIPTION(ID)
+#DIM ID
+CALL GET_SIELD(ID)
+SELECTCASE ID
+	CASE 1 TO 9
+		PRINTFORML %EQUIP_NAME%
+		PRINTFORML シールド    : {SIELD}
+		PRINTFORML シールド回復: {SIELD_RECOVER}発/ターン
+		PRINTFORML サイズ      : {SIZE}
+	CASEELSE
+		PRINTFORML = ---
+ENDSELECT

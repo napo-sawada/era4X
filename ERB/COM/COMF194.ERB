@@ -1,0 +1,98 @@
+﻿;-------------------------------------------------
+;ザーメンキス
+;特殊コマンド
+;-------------------------------------------------
+@COM194
+PRINTL ザーメンキス
+STR:0 = ザーメンキス
+CALL KOJO_MESSAGE_COM
+
+
+;汚れの計算
+Y = 0
+;愛液の汚れ
+SIF STAIN:PLAYER:2 & 1
+	Y += 1
+;精液の汚れ
+SIF STAIN:PLAYER:2 & 4
+	Y += 3
+;アナルの汚れ
+SIF STAIN:PLAYER:2 & 8
+	Y += 7
+SIF STAIN:PLAYER:2 & 16
+	Y += 15
+
+SIF TALENT:汚臭鈍感
+	Y /= 3
+SIF TALENT:汚臭敏感
+	Y *= 2
+
+
+;-------------------------------------------------
+;ソース追加処理
+;-------------------------------------------------
+;消費体力、気力
+LOSEBASE:0 += 0
+LOSEBASE:1 += 80
+
+SOURCE:5 = 420
+SOURCE:6 = 150
+SOURCE:14 = 1200
+SOURCE:17 = 500
+SOURCE:18 = 500
+
+;上のほうで計算した汚れデータ
+SOURCE:15 = Y*40 + 100
+
+
+;-------------------------------------------------
+;特殊ソース処理
+;-------------------------------------------------
+;抑圧、抵抗持ちには、抑鬱ソース追加
+SIF TALENT:抑圧 || TALENT:抵抗
+	SOURCE:16 += 300
+
+;助手と奴隷の相性によって、全体のソースが変化
+IF ASSI >= 0
+	T = NO:TARGET
+	A = NO:PLAYER
+	SOURCE:4 *= RELATION:A
+	SOURCE:10 *= RELATION:A
+	SOURCE:14 *= RELATION:A
+	SOURCE:16 *= RELATION:A
+	SOURCE:17 *= RELATION:A
+	SOURCE:18 *= RELATION:A
+	SOURCE:4 /= 100
+	SOURCE:10 /= 100
+	SOURCE:14 /= 100
+	SOURCE:16 /= 100
+	SOURCE:17 /= 100
+	SOURCE:18 /= 100
+ENDIF
+
+;-------------------------------------------------
+;汚れの処理
+;-------------------------------------------------
+;調教者の口の汚れと奴隷の口の汚れを処理
+S = STAIN:PLAYER:0
+STAIN:PLAYER:0 |= STAIN:0
+STAIN:0 |= S
+
+;-------------------------------------------------
+;経験の処理
+;-------------------------------------------------
+A = 5
+B = NO:PLAYER + 899
+IF TALENT:オトコ == 0 && TALENT:PLAYER:オトコ == 0
+	PRINTFORML %EXPNAME:40%+{A}
+	EXP:レズ経験 += A
+	CFLAG:B += A
+ELSEIF TALENT:オトコ && TALENT:PLAYER:オトコ
+	PRINTFORML %EXPNAME:41%+{A}
+	EXP:ゲイ経験 += A
+	CFLAG:B += A
+ENDIF
+
+
+RETURN 1
+

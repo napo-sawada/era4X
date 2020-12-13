@@ -1,0 +1,101 @@
+﻿;-------------------------------------------------
+;歌唱トレーニング
+;コミュニケーション系コマンド、レベル4
+;-------------------------------------------------
+@COM27
+PRINTL 歌唱トレーニング
+STR:0 = 歌唱トレーニング
+CALL KOJO_MESSAGE_COM
+
+;実行者が奴隷であるフラグ
+TFLAG:28 = 1
+
+;-------------------------------------------------
+;ソース追加処理
+;-------------------------------------------------
+;消費体力、気力
+LOSEBASE:0 += 50
+LOSEBASE:1 += 50
+
+SOURCE:5 = 200
+SOURCE:12 = 50
+SOURCE:14 = 100
+SOURCE:17 = 100
+SOURCE:18 = 100
+
+
+;-------------------------------------------------
+;特殊ソース処理
+;-------------------------------------------------
+;歌唱技能は先に処理しておく
+IF ABL:14 == 0
+	TIMES SOURCE:5 , 0.50
+	TIMES SOURCE:12 , 0.50
+	TIMES SOURCE:17 , 2.50
+	TIMES SOURCE:18 , 2.50
+ELSEIF ABL:14 == 1
+	TIMES SOURCE:5 , 0.70
+	TIMES SOURCE:12 , 0.70
+	TIMES SOURCE:17 , 1.20
+	TIMES SOURCE:18 , 1.20
+ELSEIF ABL:14 == 2
+	TIMES SOURCE:5 , 0.90
+	TIMES SOURCE:12 , 0.90
+	TIMES SOURCE:17 , 0.90
+	TIMES SOURCE:18 , 0.90
+ELSEIF ABL:14 == 3
+	TIMES SOURCE:5 , 1.10
+	TIMES SOURCE:12 , 1.10
+	TIMES SOURCE:17 , 0.60
+	TIMES SOURCE:18 , 0.60
+ELSEIF ABL:14 == 4
+	TIMES SOURCE:5 , 1.30
+	TIMES SOURCE:12 , 1.30
+	TIMES SOURCE:17 , 0.30
+	TIMES SOURCE:18 , 0.30
+ELSEIF ABL:14 == 5
+	TIMES SOURCE:5 , 1.50
+	TIMES SOURCE:12 , 1.50
+	TIMES SOURCE:17 , 0.10
+	TIMES SOURCE:18 , 0.10
+ELSEIF ABL:14 == 6
+	TIMES SOURCE:5 , 1.70
+	TIMES SOURCE:12 , 1.70
+	TIMES SOURCE:17 , 0.10
+	TIMES SOURCE:18 , 0.10
+ELSEIF ABL:14 == 7
+	TIMES SOURCE:5 , 1.90
+	TIMES SOURCE:12 , 1.90
+	TIMES SOURCE:17 , 0.10
+	TIMES SOURCE:18 , 0.10
+ELSEIF ABL:14 == 8
+	TIMES SOURCE:5 , 2.30
+	TIMES SOURCE:12 , 2.30
+	TIMES SOURCE:17 , 0.10
+	TIMES SOURCE:18 , 0.10
+ELSEIF ABL:14 == 9
+	TIMES SOURCE:5 , 2.70
+	TIMES SOURCE:12 , 2.70
+	TIMES SOURCE:17 , 0.10
+	TIMES SOURCE:18 , 0.10
+ELSEIF ABL:14 >= 10
+	TIMES SOURCE:5 , 4.00
+	TIMES SOURCE:12 , 4.00
+	TIMES SOURCE:17 , 0.10
+	TIMES SOURCE:18 , 0.10
+ENDIF
+
+
+;-------------------------------------------------
+;経験の処理
+;-------------------------------------------------
+;歌唱経験
+PRINTFORML %EXPNAME:64%＋１
+EXP:歌唱経験 += 1
+
+;依存度ベクトル
+TFLAG:33 = 1
+
+
+RETURN 1
+

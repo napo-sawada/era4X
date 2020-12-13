@@ -1,0 +1,9 @@
+﻿;--------------------------
+; ANOMALY初期化
+;--------------------------
+@INIT_ANOMALY
+#DIM ITER
+FOR ITER, 0, ANOMALY_LENGTH
+	TRYCALLFORM INIT_ANOMALY_{ITER}
+NEXT
+

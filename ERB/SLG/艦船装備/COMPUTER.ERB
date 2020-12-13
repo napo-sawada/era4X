@@ -1,0 +1,27 @@
+﻿;-----------------------------------
+; コンピューター
+;-----------------------------------
+@GET_COMPUTER(ID)
+#DIM ID
+
+SELECTCASE ID
+	CASE 1
+		AVOID = 5
+		EQUIP_NAME = TIER1汎用艦船管理AI
+	CASEELSE
+		EQUIP_NAME = ---
+ENDSELECT
+
+;-----------------------------------
+; コンピューターの説明
+;-----------------------------------
+@GET_COMPUTER_DESCRIPTION(ID)
+#DIM ID
+CALL GET_COMPUTER(ID)
+SELECTCASE ID
+	CASE 1
+		PRINTFORML %EQUIP_NAME%
+		PRINTFORML 回避    : {AVOID}
+	CASEELSE
+		PRINTFORML = ---
+ENDSELECT

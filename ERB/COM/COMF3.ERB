@@ -1,0 +1,139 @@
+﻿;-------------------------------------------------
+;指挿入れ
+;愛撫系コマンド、レベル1
+;-------------------------------------------------
+@COM3
+;-------------------------------------------------
+;特殊派生処理
+;-------------------------------------------------
+;非処女で前回の調教が指挿入れかつプレイヤの技巧３以上だとＧスポット刺激に
+IF PREVCOM == 3 && ABL:PLAYER:2 >= 3 && TALENT:処女 == 0 && TALENT:再生処女 == 0
+	CALL COM_ABLE503
+	SIF RESULT == 1
+		JUMP COM503
+ENDIF
+
+;非処女で前回の調教がGスポットならさらにＧスポット刺激に
+IF PREVCOM == 503 && TALENT:処女 == 0 && TALENT:再生処女 == 0
+	CALL COM_ABLE503
+	SIF RESULT == 1
+		JUMP COM503
+ENDIF
+
+
+PRINTL 指挿入れ
+STR:0 = 指挿入れ
+CALL KOJO_MESSAGE_COM
+
+;V経験を伴うコマンドのフラグ(処女膜再生対応)
+SIF TALENT:処女 == 0 && TALENT:再生処女 == 0
+	TFLAG:19 = 1
+
+;-------------------------------------------------
+;ソース追加処理
+;-------------------------------------------------
+;消費体力、気力
+LOSEBASE:0 += 30
+LOSEBASE:1 += 80
+
+
+IF TALENT:処女 == 0 && TALENT:再生処女 == 0
+	SOURCE:1 = 120
+	SOURCE:7 = 15
+	SOURCE:13 = 10
+	SOURCE:17 = 20
+	SOURCE:18 = 20
+;V経験が0の時はV経験を伴わない物に派生
+;Vの珠は入らないが、快Vが高いと慣らしてあるため処女喪失時に影響
+ELSE
+	SIF PALAM:1 < 100
+		SOURCE:1 = 60
+	SOURCE:7 = 10
+	SOURCE:13 = 30
+	SOURCE:17 = 30
+	SOURCE:18 = 30
+ENDIF
+
+
+;-------------------------------------------------
+;特殊ソース処理
+;-------------------------------------------------
+;抑圧、抵抗持ちには、抑鬱ソース追加
+IF TALENT:抑圧 || TALENT:抵抗
+	SOURCE:16 += 20
+	;処女
+	SIF TALENT:処女
+		SOURCE:16 += 10
+ENDIF
+
+;Vへの苦痛は先に処理しておく
+;EXP:Ｖ経験をみる（処女の反感は別途処理済みなので省略）
+IF EXP:Ｖ経験 < EXPLV:1
+	TIMES SOURCE:7 , 2.50
+ELSEIF EXP:Ｖ経験 < EXPLV:2
+	TIMES SOURCE:7 , 0.80
+	TIMES SOURCE:18 , 1.20
+ELSEIF EXP:Ｖ経験 < EXPLV:3
+	TIMES SOURCE:7 , 0.40
+ELSEIF EXP:Ｖ経験 < EXPLV:4
+	TIMES SOURCE:7 , 0.10
+ELSEIF EXP:Ｖ経験 < EXPLV:5
+	TIMES SOURCE:7 , 0.00
+ELSEIF EXP:Ｖ経験 >= EXPLV:5
+	TIMES SOURCE:7 , 0.00
+ENDIF
+
+;PALAM:潤滑をみる
+IF PALAM:4 < PALAMLV:1
+	TIMES SOURCE:7 , 1.20
+	TIMES SOURCE:18 , 1.50
+ELSEIF PALAM:4 < PALAMLV:2
+	TIMES SOURCE:7 , 0.70
+	TIMES SOURCE:18 , 1.20
+ELSEIF PALAM:4 < PALAMLV:3
+	TIMES SOURCE:7 , 0.40
+ELSEIF PALAM:4 < PALAMLV:4
+	TIMES SOURCE:7 , 0.10
+ELSEIF PALAM:4 >= PALAMLV:4
+	TIMES SOURCE:7 , 0.10
+ENDIF
+
+;-------------------------------------------------
+;汚れの処理
+;-------------------------------------------------
+;奴隷の膣内⇔調教者の指の汚れが移動
+	STAIN:6 |= STAIN:PLAYER:1
+	STAIN:PLAYER:1 |= STAIN:6
+
+;-------------------------------------------------
+;経験の処理
+;-------------------------------------------------
+;V経験
+IF TALENT:処女 == 0 && TALENT:再生処女 == 0
+	EXP:Ｖ経験 += 1
+	PRINTL Ｖ経験＋１
+ENDIF
+
+;レズ経験
+A = 1
+B = NO:PLAYER + 899
+IF TALENT:オトコ == 0 && TALENT:PLAYER:オトコ == 0
+	PRINTFORML %EXPNAME:40%+{A}
+	EXP:レズ経験 += A
+	CFLAG:B += A
+ELSEIF TALENT:オトコ && TALENT:PLAYER:オトコ
+	PRINTFORML %EXPNAME:41%+{A}
+	EXP:ゲイ経験 += A
+	CFLAG:B += A
+ENDIF
+
+;依存度ベクトル
+IF TALENT:処女
+	TFLAG:33 = 3
+ELSE
+	TFLAG:33 = 1
+ENDIF
+
+
+RETURN 1
+

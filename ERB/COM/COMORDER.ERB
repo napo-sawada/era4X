@@ -1,0 +1,458 @@
+﻿;eratohoJ+より移植
+;実行できないコマンドは灰色表示にする、というのを実装するためにコマンド判定部分を分離
+;-------------------------------------------------
+;コマンドを実行できるか判定の処理
+;-------------------------------------------------
+@COM_ORDER_COMMON
+;各コマンドの固有実行判定
+TRYCALLFORM COM_ORDER_{SELECTCOM}
+
+;実行できない場合
+IF A < V
+	;実行判定失敗口上呼び出し
+	;CALL SELF_KOJO
+	;実行判定非表示にしている場合下記の文章が表示されないと実行できない場合が分かり難いため文章表示;
+	;	PRINTFORMW %CALLNAME:TARGET%の合意を得られませんでした;
+	RETURN 0
+ENDIF
+;実行できる場合はRETURN 1で終了
+RETURN 1
+
+;-------------------------------------------------
+;すべての命令に共通の要素を考慮
+;(従順が高いと命令に従いやすいなど)
+;-------------------------------------------------
+
+
+@COM_ORDER
+
+;ABL:従順
+IF ABL:0
+	A += ABL:0 * 4
+	PRINTS ABLNAME:0
+	PRINTV 'LV,ABL:0,'(,ABL:0 * 4,')
+	S = 1
+ENDIF
+;ABL:マゾっ気
+IF ABL:9
+	SIF S
+		PRINT  + 
+	A += ABL:9*2
+	PRINTS ABLNAME:9
+	PRINTV 'LV,ABL:9,'(,ABL:9*2,')
+	S = 1
+ENDIF
+
+;レズ調教
+IF TALENT:PLAYER:オトコ == 0 && TALENT:TARGET:オトコ == 0
+	;ABL:レズっ気
+	IF ABL:11
+		SIF S
+			PRINT  + 
+		A += ABL:11*3
+		PRINTS ABLNAME:11
+		PRINTV 'LV,ABL:11,'(,ABL:11*3,')
+		S = 1
+	ENDIF
+	;ABL:レズ中毒
+	IF ABL:17
+		SIF S
+			PRINT  + 
+		A += ABL:17*3
+		PRINTS ABLNAME:17
+		PRINTV 'LV,ABL:17,'(,ABL:17*3,')
+		S = 1
+	ENDIF
+	;TALENT:両刀
+	IF TALENT:両刀
+		SIF S
+			PRINT  + 
+		A += 10
+		PRINTS TALENTNAME:81
+		PRINTV '(,10,')
+		S = 1
+	ENDIF
+	;好奇心
+	IF TALENT:好奇心
+		SIF S
+			PRINT  + 
+		A += 7
+		PRINTS TALENTNAME:23
+		PRINTV '(,7,')
+		S = 1
+	ENDIF
+	;保守的
+	IF TALENT:保守的
+		PRINT  - 
+		A -= 13
+		PRINTS TALENTNAME:24
+		PRINTV '(,13,')
+		S = 1
+	ENDIF
+;ゲイ調教
+ELSEIF TALENT:PLAYER:オトコ && TALENT:TARGET:オトコ
+	;ABL:ホモっ気
+	IF ABL:20
+		SIF S
+			PRINT  + 
+		A += ABL:20*3
+		PRINTS ABLNAME:20
+		PRINTV 'LV,ABL:20,'(,ABL:20*3,')
+		S = 1
+	ENDIF
+	;ABL:ゲイ中毒
+	IF ABL:21
+		SIF S
+			PRINT  + 
+		A += ABL:21*3
+		PRINTS ABLNAME:21
+		PRINTV 'LV,ABL:21,'(,ABL:21*3,')
+		S = 1
+	ENDIF
+	;TALENT:両刀
+	IF TALENT:両刀
+		SIF S
+			PRINT  + 
+		A += 10
+		PRINTS TALENTNAME:81
+		PRINTV '(,10,')
+		S = 1
+	ENDIF
+	;好奇心
+	IF TALENT:好奇心
+		SIF S
+			PRINT  + 
+		A += 7
+		PRINTS TALENTNAME:23
+		PRINTV '(,7,')
+		S = 1
+	ENDIF
+	;保守的
+	IF TALENT:保守的
+		PRINT  - 
+		A -= 13
+		PRINTS TALENTNAME:24
+		PRINTV '(,13,')
+		S = 1
+	ENDIF
+ELSE
+	;好奇心
+	IF TALENT:好奇心
+		SIF S
+			PRINT  + 
+		A += 5
+		PRINTS TALENTNAME:23
+		PRINTV '(,5,')
+		S = 1
+	ENDIF
+	;保守的
+	IF TALENT:保守的
+		PRINT  - 
+		A -= 10
+		PRINTS TALENTNAME:24
+		PRINTV '(,10,')
+		S = 1
+	ENDIF
+ENDIF
+
+;刻印チェック
+IF MARK:0
+	SIF S
+		PRINT  + 
+	A += MARK:0 * 5
+	PRINTS MARKNAME:0
+	PRINTV 'LV,MARK:0,'(,MARK:0 * 5,')
+	S = 1
+ENDIF
+
+IF TALENT:プライド高い
+	T = 4
+ELSEIF TALENT:プライド低い
+	T = 1
+ELSE
+	T = 2
+ENDIF
+
+;屈服刻印および反発刻印
+IF MARK:2
+	SIF S
+		PRINT  + 
+	A += MARK:2 * 3 * T
+	PRINTS MARKNAME:2
+	PRINTV 'LV,MARK:2,'(,MARK:2 * 3 * T,')
+	S = 1
+ENDIF
+IF MARK:3
+	PRINT  - 
+	A -= MARK:3 * 2 * T
+	PRINTS MARKNAME:3
+	PRINTV 'LV,MARK:3,'(,MARK:3 * 2 * T,')
+	S = 1
+ENDIF
+
+;PALAM:恭順
+IF PALAM:5 < PALAMLV:1
+	L = 0
+ELSEIF PALAM:5 < PALAMLV:2
+	L = 1
+ELSEIF PALAM:5 < PALAMLV:3
+	L = 2
+ELSEIF PALAM:5 < PALAMLV:4
+	L = 3
+ELSEIF PALAM:5 < PALAMLV:5
+	L = 4
+ELSE
+	L = 5
+ENDIF
+IF L
+	SIF S
+		PRINT  + 
+	A += L * 3
+	PRINTS PALAMNAME:5
+	PRINTV 'LV,L,'(,L * 3,')
+	S = 1
+ENDIF
+
+;PALAM:恐怖
+IF PALAM:11 < PALAMLV:1
+	L = 0
+ELSEIF PALAM:11 < PALAMLV:2
+	L = 1
+ELSEIF PALAM:11 < PALAMLV:3
+	L = 2
+ELSEIF PALAM:11 < PALAMLV:4
+	L = 3
+ELSEIF PALAM:11 < PALAMLV:5
+	L = 4
+ELSE
+	L = 5
+ENDIF
+IF L
+	SIF S
+		PRINT  + 
+	A += L * 3
+	PRINTS PALAMNAME:11
+	PRINTV 'LV,L,'(,L * 3,')
+	S = 1
+ENDIF
+;'(文字色調整用)
+;服従
+IF TALENT:服従
+	SIF S
+		PRINT  + 
+	A += 10
+	PRINTS TALENTNAME:5
+	PRINTV '(,10,')
+	S = 1
+ENDIF
+;隷属
+IF TALENT:隷属
+	SIF S
+		PRINT  + 
+	A += 20
+	PRINTS TALENTNAME:8
+	PRINTV '(,20,')
+	S = 1
+ENDIF
+;反抗的（服従、隷属で無効）
+IF TALENT:反抗的 && (TALENT:服従 == 0 && TALENT:隷属 == 0)
+	PRINT  - 
+	A -= 5
+	PRINTS TALENTNAME:11
+	PRINTV '(,5,')
+	S = 1
+ENDIF
+;気丈
+IF TALENT:気丈
+	PRINT  - 
+	A -= 5
+	PRINTS TALENTNAME:12
+	PRINTV '(,5,')
+	S = 1
+ENDIF
+;素直
+IF TALENT:素直
+	SIF S
+		PRINT  + 
+	A += 5
+	PRINTS TALENTNAME:13
+	PRINTV '(,5,')
+	S = 1
+ENDIF
+;自尊心
+IF TALENT:プライド高い
+	PRINT  - 
+	A -= 15
+	PRINTS TALENTNAME:15
+	PRINTV '(,15,')
+	S = 1
+ENDIF
+;プライド低い
+IF TALENT:プライド低い
+	SIF S
+		PRINT  + 
+	A += 5
+	PRINTS TALENTNAME:17
+	PRINTV '(,5,')
+	S = 1
+ENDIF
+;目立ちたがり
+IF TALENT:目立ちたがり
+	SIF S
+		PRINT  + 
+	A += 2
+	PRINTS TALENTNAME:28
+	PRINTV '(,2,')
+	S = 1
+ENDIF
+;抑圧
+IF TALENT:抑圧
+	PRINT  - 
+	A -= 10
+	PRINTS TALENTNAME:32
+	PRINTV '(,10,')
+	S = 1
+ENDIF
+;抵抗
+IF TALENT:抵抗
+	PRINT  - 
+	A -= 10
+	PRINTS TALENTNAME:34
+	PRINTV '(,10,')
+	S = 1
+ENDIF
+;弱味
+IF TALENT:弱味
+	SIF S
+		PRINT  + 
+	A += 12
+	PRINTS TALENTNAME:37
+	PRINTV '(,12,')
+	S = 1
+ENDIF
+;即落ち
+IF TALENT:即落ち
+	SIF S
+		PRINT  + 
+	A += 10
+	PRINTS TALENTNAME:73
+	PRINTV '(,10,')
+	S = 1
+ENDIF
+;妄信
+IF TALENT:妄信
+	SIF S
+		PRINT  + 
+	A += 8
+	PRINTS TALENTNAME:86
+	PRINTV '(,8,')
+	S = 1
+ENDIF
+
+;調教者の能力、素質
+;ABL:サドっ気
+IF ABL:PLAYER:10
+	SIF S
+		PRINT  + 
+	A += ABL:PLAYER:10*2
+	PRINT 調教者の
+	PRINTS ABLNAME:10
+	PRINTV 'LV,ABL:PLAYER:10,'(,ABL:PLAYER:10*2,')
+	S = 1
+ENDIF
+;魅惑
+IF TALENT:PLAYER:魅惑
+	SIF S
+		PRINT  + 
+	A += 6
+	PRINT 調教者の
+	PRINTS TALENTNAME:93
+	PRINTV '(,6,')
+	S = 1
+ENDIF
+;謎の魅力
+IF TALENT:PLAYER:謎の魅力
+	SIF S
+		PRINT  + 
+	A += 8
+	PRINT 調教者の
+	PRINTS TALENTNAME:94
+	PRINTV '(,8,')
+	S = 1
+ENDIF
+;サド
+IF TALENT:PLAYER:サド
+	SIF S
+		PRINT  + 
+	A += 3
+	PRINT 調教者の
+	PRINTS TALENTNAME:83
+	PRINTV '(,3,')
+	S = 1
+ENDIF
+;狂気の目発動中
+;IF TFLAG:72 == 1
+;	PRINT  - 
+;	A -= 15
+;	PRINT 調教者の
+;	PRINT 狂気の目発動中
+;	PRINTV '(,15,')
+;	S = 1
+;ENDIF
+
+;助手の素質
+;鼓舞
+IF ASSI > 0
+	IF TALENT:ASSI:鼓舞
+		SIF S
+			PRINT  + 
+		A += 1
+		PRINT 助手が鼓舞
+		PRINTV '(,1,')
+		S = 1
+	ENDIF
+ENDIF
+
+
+;相性チェック
+R = NO:PLAYER
+IF RELATION:R > 0 && RELATION:R < 30
+	PRINT  - 
+	A -= 10
+	PRINT 相性最悪
+	PRINTV '(,10,')
+	S = 1
+ELSEIF RELATION:R > 0 && RELATION:R < 70
+	PRINT  - 
+	A -= 6
+	PRINT 相性悪い
+	PRINTV '(,10,')
+	S = 1
+ELSEIF RELATION:R > 0 && RELATION:R < 100
+	PRINT  - 
+	A -= 3
+	PRINT 相性いまいち
+	PRINTV '(,3,')
+	S = 1
+ELSEIF RELATION:R >= 100 && RELATION:R < 130
+	SIF S
+		PRINT  + 
+	A += 3
+	PRINT 相性ややよい
+	PRINTV '(,3,')
+	S = 1
+ELSEIF RELATION:R >= 100 && RELATION:R < 170
+	SIF S
+		PRINT  + 
+	A += 6
+	PRINT 相性よい
+	PRINTV '(,6,')
+	S = 1
+ELSEIF RELATION:R >= 100 && RELATION:R >= 170
+	SIF S
+		PRINT  + 
+	A += 10
+	PRINT 相性最高
+	PRINTV '(,10,')
+	S = 1
+ENDIF

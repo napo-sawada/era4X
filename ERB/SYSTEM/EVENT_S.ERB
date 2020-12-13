@@ -1,0 +1,335 @@
+﻿;EVENT_S.ERB、EVENT_SUB、追加処理及びサブイベント
+;-------------------------------------------------
+;日付が変わった時のイベント
+;-------------------------------------------------
+@EVENT_NEXTDAY
+$INPUT_LOOP
+;不思議の根持ちで精液経験が300以上で生える
+IF TARGET >= 0 
+	IF TALENT:TARGET:不思議な根 == 1 && EXP:TARGET:精液経験 >= 300 && TALENT:ふたなり == 0 && TALENT:オトコ == 0
+		DRAWLINE
+		PRINTFORML ……どうやら[不思議な根]の効果が現れそうだ
+		PRINTFORMW %CALLNAME:TARGET%を[ふたなり]にしますか？
+		PRINTL [0] - する
+		PRINTL [1] - しない
+		INPUT
+		IF RESULT == 0
+			PRINTFORML %NAME:TARGET%の[不思議な根]は[ふたなり]となった
+			TALENT:ふたなり = 1
+		ELSEIF RESULT == 1
+			PRINTFORML %NAME:TARGET%は[不思議な根]を失った
+		ELSE
+			GOTO INPUT_LOOP
+		ENDIF
+		DRAWLINE
+		WAIT
+		TALENT:TARGET:不思議な根 = 0
+	ENDIF
+ENDIF
+
+$INPUT_LOOP_2
+;具現持ちでレズ経験2500以上で生える
+IF TARGET >= 0 
+	IF TALENT:TARGET:具現 == 1 && EXP:TARGET:レズ経験 >= 2500 && TALENT:ふたなり == 0 && TALENT:オトコ == 0
+		DRAWLINE
+		PRINTFORML ……どうやら[具現]の効果が現れそうだ
+		PRINTFORML %CALLNAME:TARGET%を[ふたなり]にしますか？
+		PRINTL [0] - する
+		PRINTL [1] - しない
+		INPUT
+		IF RESULT == 0
+			PRINTFORML %NAME:TARGET%は[具現]によって[ふたなり]となった
+			TALENT:ふたなり = 1
+		ELSEIF RESULT == 1
+			PRINTFORML %NAME:TARGET%は[具現]を失った
+		ELSE
+			GOTO INPUT_LOOP_2
+		ENDIF
+		DRAWLINE
+		WAIT
+		TALENT:TARGET:具現 = 0
+	ENDIF
+ENDIF
+
+;放尿経験３０以上でおもらし癖がつく
+IF TARGET >= 0 
+	IF TALENT:おもらし癖 == 0
+		IF (TALENT:TARGET:幼稚 && EXP:TARGET:放尿経験 >= 10) || (TALENT:TARGET:幼稚 == 0 && EXP:TARGET:放尿経験 >= 30)
+			PRINTFORMW （む･･･なんだこれ？）
+			PRINTFORM %CALLNAME:TARGET%は
+			SIF TALENT:TARGET:幼稚 && EXP:TARGET:放尿経験 >= 10
+			PRINTFORM おねしょを
+			SIF TALENT:TARGET:幼稚 == 0 && EXP:TARGET:放尿経験 >= 30 
+			PRINTFORM 粗相を
+			PRINTFORMW してしまったようだ……
+			PRINTFORMW %CALLNAME:TARGET%は[おもらし癖]がついた
+			TALENT:TARGET:おもらし癖 = 1
+		ENDIF
+	ENDIF
+ENDIF
+
+IF TARGET >= 0 
+	;反発刻印３があり、かつ幼稚である時に
+	IF TALENT:TARGET:幼稚 && MARK:3 == 3
+		;欲望が5かつ従順が5かつマゾっ気が5かつ異常経験が７以上になる
+		SIF ABL:TARGET:1 >= 5 && ABL:TARGET:0 >= 5 && ABL:TARGET:9 >= 5 && EXP:TARGET:異常経験 >= 7
+			CALL EVENT_YOUJI
+	;反発刻印３があり、かつ幼稚がない時
+	ELSEIF TALENT:TARGET:幼稚 == 0 && MARK:3 == 3
+		;欲望が5かつ従順が5かつマゾっ気が5かつ異常経験が９以上に加え露出５とおもらし癖がある
+		SIF ABL:TARGET:1 >= 5 && ABL:TARGET:0 >= 5 && ABL:TARGET:9 >= 5 && ABL:TARGET:8 >= 5 && EXP:TARGET:異常経験 >= 9 && TALENT:おもらし癖 == 1
+			CALL EVENT_YOUJI
+	ENDIF
+ENDIF
+
+;奴隷と道具の維持費の処理
+;STARTモード限定でEASYでは20日、NORMALでは15日、HARDでは10日免除
+A = 900
+B = 25-FLAG:4*5
+REPEAT 25
+	SIF ITEM:COUNT
+		A += 150
+REND
+A += CHARANUM*600
+A -= 300
+;労役中の奴隷は除く
+REPEAT CHARANUM
+	SIF CFLAG:COUNT:12 > 0
+		A -= 600
+REND
+IF FLAG:5 == 0 && A && DAY > B
+	PRINTFORML 奴隷と道具の維持費、生活費に${A}かかった……
+	MONEY -= A
+ENDIF
+
+@EVENT_YOUJI
+;幼児退行
+PRINTFORMW %CALLNAME:TARGET%の様子がおかしい……
+PRINTFORMW %CALLNAME:TARGET%は過酷な調教に耐え切れず、【幼児退行】してしまったようだ……
+SIF TALENT:幼稚
+	TALENT:幼稚 = 0
+TALENT:幼児／幼児退行 = 1
+MARK:3 = 0
+
+
+;-------------------------------------------------
+;朝になった時のイベント
+;-------------------------------------------------
+@EVENT_NEWDAY
+;屋台の借金返済イベント
+SIF FLAG:23 == 1 && MONEY >= 100000
+	CALL RETURN_LOAN
+
+;奴隷レンタルの期日が来た場合の奴隷返却処理
+REPEAT CHARANUM
+	IF CFLAG:COUNT:12 == 1 && CFLAG:COUNT:13 == DAY
+		A = COUNT
+		CALL RETURN_SLAVE
+	ENDIF
+REND
+
+;娼館バイトが終わった場合の終了処理
+REPEAT CHARANUM
+	IF CFLAG:COUNT:12 == 2
+		A = COUNT
+		CALL END_PROSTITUTION
+	ENDIF
+REND
+
+;全体の妊娠判定の処理
+CALL IN_VAGINA
+
+;全体の妊娠発覚時のイベント
+CALL GET_CHILD
+
+;排卵誘発剤と子宮内避妊具の効果終了処理
+REPEAT CHARANUM
+	IF CFLAG:COUNT:108
+		PRINTFORMW %CALLNAME:COUNT%の子宮内避妊具の効果が切れたようだ
+		CFLAG:COUNT:108 = 0
+	ELSEIF CFLAG:COUNT:109
+		PRINTFORMW %CALLNAME:COUNT%の排卵誘発剤の効果が切れたようだ
+		CFLAG:COUNT:109 = 0
+	ENDIF
+REND
+
+;出産･育児室関連
+REPEAT CHARANUM
+	IF TALENT:COUNT:妊娠
+		;出産3日前からは臨月突入で調教不可に
+		IF (CFLAG:COUNT:110 - 3) == DAY
+			DRAWLINE
+			C = COUNT
+			CALL REACH_FULL_TERM
+		;出産前日には育児室への訪問を問うイベント発生
+		ELSEIF (CFLAG:COUNT:110 - 1) == DAY && TFLAG:701 != DAY
+			DRAWLINE
+			PRINTFORML %CALLNAME:COUNT%は出産が近づいているようだ……
+			C = COUNT
+			CALL CHILD_CARE_ROOM_SELECT
+		;出産予定日なら出産
+		ELSEIF CFLAG:COUNT:110 == DAY
+			DRAWLINE
+			C = COUNT
+			CALL CHILD_BIRTH
+		ENDIF
+	ELSEIF TALENT:COUNT:育児中
+		;出産後翌日には育児室への訪問を問うイベント発生
+		IF (CFLAG:COUNT:110 + 3) == DAY && TFLAG:701 != DAY
+			DRAWLINE
+			PRINTFORML %CALLNAME:COUNT%の出産から一日経ちました
+			C = COUNT
+			CALL CHILD_CARE_ROOM_SELECT
+		;出産後3日には育児室への訪問を問うイベント発生
+		ELSEIF (CFLAG:COUNT:110 + 3) == DAY && TFLAG:701 != DAY
+			DRAWLINE
+			PRINTFORML %CALLNAME:COUNT%の出産から三日経ちました
+			C = COUNT
+			CALL CHILD_CARE_ROOM_SELECT
+		;出産5日で親離れで調教可能に
+		ELSEIF (CFLAG:COUNT:110 + 5) == DAY
+			DRAWLINE
+			C = COUNT
+			CALL DEPEARENT
+		ENDIF
+	ENDIF
+REND
+
+;-------------------------------------------------
+;PCを選択式にしてみる
+;-------------------------------------------------
+@START_CHARA_SELECT
+TFLAG:100 = 0
+
+REPEAT 100
+	TFLAG:COUNT = ITEMSALES:COUNT
+	ITEMSALES:COUNT = 0
+REND
+
+CALL CHARA_LIST
+REPEAT 30
+	A = COUNT + TFLAG:100 * 100 + 200
+	B = TFLAG:A
+	ITEMSALES:B = 1
+REND
+
+
+;[0]ローターが表示されるバグを防止
+ITEMSALES:0 = 0
+CALL START_CHARA_SHOW
+
+$INPUT_LOOP
+INPUT
+IF RESULT == 1
+	IF TFLAG:100 > 0
+		CALL CHARA_LIST
+		REPEAT 100
+			A = COUNT + TFLAG:100 * 100 + 200 - 100
+			B = TFLAG:A
+			ITEMSALES:B = 1
+		REND
+		TFLAG:100 -= 1
+	ENDIF
+	;バグ対策。キャラ上限を超えるとITEMSALES:0が登録されるので
+	ITEMSALES:0 = 0
+
+	CALL START_CHARA_SHOW
+	GOTO INPUT_LOOP
+ELSEIF RESULT == 9
+	;最大ページ数と比較、ページ数変動の際は
+	IF TFLAG:100 < 0
+		CALL CHARA_LIST
+		REPEAT 100
+			A = COUNT + TFLAG:100 * 100 + 200 + 100
+			B = TFLAG:A
+			ITEMSALES:B = 1
+		REND
+		TFLAG:100 += 1
+	ENDIF
+	;バグ対策。キャラ上限を超えるとITEMSALES:0が登録されるので
+	ITEMSALES:0 = 0
+
+	CALL START_CHARA_SHOW
+	GOTO INPUT_LOOP
+ELSEIF RESULT == 0
+	CALL CHARA_BUY_AFTER
+ELSE
+	C = RESULT + 1 - 100
+	D = RESULT + 1000 - 100
+	E = RESULT + 5000 - 100
+	;キャラがいない＝フラグ値が0なら再入力
+	SIF FLAG:D == 0
+		GOTO INPUT_LOOP
+	ADDCHARA C
+	DELCHARA 0
+	MASTER = 0
+	FLAG:D = 0
+	FLAG:E = 1
+
+	PRINTFORMW プレイヤーを「%NAME:MASTER%」に設定します
+	;特殊キャラ時の設定を呼び出すやつっぽいんだけど、関数がないわ
+	;SIF NO:MASTER == 90
+	;	CALL CHARA_RANDOM_STATE_M
+		
+	
+	;最低技巧Lv2　オトコでなければ、レズっ気Lv3にまで引き上げておく
+	IF ABL:MASTER:2 < 2
+		ABL:MASTER:2 = 2
+		PRINTFORML ※EXモード特別仕様※　%NAME:MASTER%の%ABLNAME:2%のレベルが{ABL:MASTER:2}になりました
+	ENDIF
+	IF ABL:MASTER:11 < 3 && TALENT:MASTER:オトコ == 0
+		ABL:MASTER:11 = 3
+		PRINTFORML ※EXモード特別仕様※　%NAME:MASTER%の%ABLNAME:11%のレベルが{ABL:MASTER:11}になりました
+	ENDIF
+	
+	$INPUT_LOOP2
+	IF TALENT:MASTER:オトコ == 0
+		PRINTFORML 調教者を[ふたなり]にすることができます
+		PRINTFORMW %NAME:MASTER%を[ふたなり]にしますか？
+		PRINTL [ 0] - ふたなり化する
+		PRINTL [ 1] - ふたなり化しない
+		
+		INPUT
+		IF RESULT == 0
+			PRINTFORMW ＜%NAME:MASTER%は[ふたなり]になった＞
+			TALENT:MASTER:不思議な根 = 0
+			TALENT:MASTER:具現 = 0
+			TALENT:MASTER:ふたなり = 1
+			CFLAG:MASTER:10 += 2
+		ELSEIF RESULT == 1
+		;何も表示しない
+		ELSE
+			GOTO INPUT_LOOP2
+		ENDIF
+		
+	ENDIF
+		
+	CALL CHARA_BUY_AFTER
+ENDIF
+
+@START_CHARA_SHOW
+DRAWLINE
+PRINTL ★★プレイヤーを変更できます★★
+PRINTL ★★キャラを選択してください★★
+
+PRINT_SHOPITEM
+
+DRAWLINE
+PRINT 　page
+PRINTV TFLAG:100
+;PRINT 　[1]前のページ
+PRINT 　 　　　　　　
+PRINTC [0]変更しない
+;PRINTC [9]後のページ
+PRINT 　 　　　　　
+PRINTL 
+
+
+
+;-------------------------------------------------
+;東方関連のイベント
+;-------------------------------------------------
+@EVENTTRAIN
+
+@EVENT_NEXTDAY_TOHO
+

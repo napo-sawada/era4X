@@ -1,0 +1,65 @@
+﻿;--------------------------
+; 海賊の後始末
+; 海賊が襲撃して物資を奪った後の輸送船を引き取る任務
+;--------------------------
+
+;--------------------------
+; クエスト受注可能か
+;--------------------------
+@QUEST_ACCEPTABLE_1
+SIF QUEST_PROGRESS:1 < 2
+	RETURN 1
+RETURN
+
+;--------------------------
+; クエストの名前を返却
+;--------------------------
+@QUEST_NAME_1
+RESULTS = 海賊の後始末
+RETURN
+
+;--------------------------
+; クエスト本体
+;--------------------------
+@QUEST_BODY_1
+#DIM POS_X
+#DIM POS_Y
+SELECTCASE QUEST_PROGRESS:1
+	CASE 0
+		PRINTFORML 「へへ、おいお前。輸送船欲しくないか？」
+		PRINTFORML %CALLNAME:MASTER%が宇宙港を歩いていると、柄の悪そうな男に話しかけられた。
+		PRINTFORML 「誰も手を付けていない輸送船がある宙域に浮かんでいるんだ。その宙域の座標を教えてやる
+		PRINTFORML もちろんただじゃないぜ。そうだな、$10,000でどうだ？」
+		QUEST_PROGRESS:1 = 1
+		IF MONEY < 10000
+			PRINTFORMW 「なんだ、金がないのか。それじゃあこの話はなしだな」
+			RETURN
+		ENDIF
+	CASE 1
+		PRINTFORML 「お、やっぱり買う気になったか？」
+		IF MONEY < 10000
+			PRINTFORMW 「なんだ、金がないのか。それじゃあこの話はなしだな」
+			RETURN
+		ENDIF		
+ENDSELECT
+$INPUT_LOOP
+PRINTBUTTON "[0]買う", 0
+PRINTL
+PRINTBUTTON "[1]買わない", 1
+PRINTL
+INPUT
+IF RESULT == 0
+	PRINTL 「へへ、まいどあり
+	PRINTL それじゃあ座標データを送るぜ……よし、送ったぞ
+	PRINTL マップにアノマリー（！マーク）が追加されているはずだ。もしなかったらすでに誰かにとられた後だ。それじゃあな」
+	MONEY -= 10000
+	CALL ID2POS(ANOMALY_POSITIONID:0)
+	CLEARMAP:(RESULT:1):(RESULT:2) = 1
+	QUEST_PROGRESS:1 = 2
+ELSEIF RESULT == 1
+	PRINTL 「そうかい。まあ気が向いたらまた声をかけてくれ
+	PRINTL しばらくはここら辺をうろついてるからさ」
+ELSE
+	GOTO INPUT_LOOP
+ENDIF
+

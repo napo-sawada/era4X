@@ -1,0 +1,205 @@
+﻿;-------------------------------------------------
+;アナルバイブ
+;道具使用コマンド、レベル2
+;-------------------------------------------------
+@COM45
+;-------------------------------------------------
+;特殊派生処理
+;-------------------------------------------------
+IF TEQUIP:25
+	PRINTL アナル触手
+	STR:0 = アナル触手
+	SELECTCOM = 162
+ELSE
+	PRINTL アナルバイブ
+	STR:0 = アナルバイブ
+ENDIF
+CALL KOJO_MESSAGE_COM
+
+;着脱の処理
+IF TEQUIP:14 == 0
+	TEQUIP:14 = 1
+	;アナル触手は触手の汚れを追加
+	IF TEQUIP:25
+		STAIN:4 |= 32
+	ENDIF
+ELSE
+	TEQUIP:14 = 0
+ENDIF
+;-------------------------------------------------
+;ソース追加処理
+;-------------------------------------------------
+;消費体力、気力
+LOSEBASE:0 += 60
+LOSEBASE:1 += 150
+
+SOURCE:2 = 250
+SOURCE:13 = 50
+SOURCE:14 = 50
+SOURCE:17 = 50
+
+;-------------------------------------------------
+;特殊ソース処理
+;-------------------------------------------------
+;抑圧、抵抗持ちには、抑鬱ソース追加
+SIF TALENT:抑圧 || TALENT:抵抗
+	SOURCE:16 += 70
+
+;Aへの苦痛は先に処理しておく
+;EXP:Ａ経験をみる
+IF EXP:Ａ経験 < EXPLV:1
+	TIMES SOURCE:7 , 3.00
+	TIMES SOURCE:18 , 3.00
+ELSEIF EXP:Ａ経験 < EXPLV:2
+	TIMES SOURCE:7 , 1.20
+	TIMES SOURCE:18 , 2.00
+ELSEIF EXP:Ａ経験 < EXPLV:3
+	TIMES SOURCE:7 , 0.80
+	TIMES SOURCE:18 , 1.50
+ELSEIF EXP:Ａ経験 < EXPLV:4
+	TIMES SOURCE:7 , 0.60
+	TIMES SOURCE:18 , 1.20
+ELSEIF EXP:Ａ経験 < EXPLV:5
+	TIMES SOURCE:7 , 0.40
+ELSEIF EXP:Ａ経験 >= EXPLV:5
+	TIMES SOURCE:7 , 0.20
+ENDIF
+
+;PALAM:潤滑をみる
+IF PALAM:4 < PALAMLV:1
+	TIMES SOURCE:7 , 1.20
+	TIMES SOURCE:18 , 2.00
+ELSEIF PALAM:4 < PALAMLV:2
+	TIMES SOURCE:7 , 1.00
+	TIMES SOURCE:18 , 1.50
+ELSEIF PALAM:4 < PALAMLV:3
+	TIMES SOURCE:7 , 0.60
+ELSEIF PALAM:4 < PALAMLV:4
+	TIMES SOURCE:7 , 0.30
+ELSEIF PALAM:4 >= PALAMLV:4
+	TIMES SOURCE:7 , 0.20
+ENDIF
+
+;-------------------------------------------------
+;汚れの処理
+;-------------------------------------------------
+;アナル触手なら、触手体液がアナルに付く
+SIF TEQUIP:25
+	STAIN:4 |= 32
+
+;-------------------------------------------------
+;経験の処理
+;-------------------------------------------------
+;A経験
+EXP:Ａ経験 += 2
+PRINTL Ａ経験＋２
+
+;レズ経験
+A = 1
+B = NO:PLAYER + 899
+IF TALENT:オトコ == 0 && TALENT:PLAYER:オトコ == 0
+	PRINTFORML %EXPNAME:40%+{A}
+	EXP:レズ経験 += A
+	CFLAG:B += A
+ELSEIF TALENT:オトコ && TALENT:PLAYER:オトコ
+	PRINTFORML %EXPNAME:41%+{A}
+	EXP:ゲイ経験 += A
+	CFLAG:B += A
+ENDIF
+
+;触手召喚時、触手経験のリセットをする
+SIF TEQUIP:25 == 1
+	T = 0
+
+;依存度ベクトル
+TFLAG:33 = 3
+
+
+RETURN 1
+
+
+;-------------------------------------------------
+;装着継続の処理
+;-------------------------------------------------
+@EQUIP_COM45
+;アナルバイブ挿入中
+IF TEQUIP:25
+	PRINTL ＜アナル触手挿入中＞
+ELSE
+	PRINTL ＜アナルバイブ挿入中＞
+ENDIF
+
+LOSEBASE:0 += 30
+LOSEBASE:1 += 80
+
+SOURCE:2 += 125
+SOURCE:7 += 100
+SOURCE:13 += 25
+SOURCE:17 += 25
+SOURCE:18 += 40
+
+;-------------------------------------------------
+;特殊ソース処理
+;-------------------------------------------------
+;抑圧、抵抗持ちには、抑鬱ソース追加
+SIF TALENT:抑圧 || TALENT:抵抗
+	SOURCE:16 += 35
+
+;Aへの苦痛は先に処理しておく
+;EXP:Ａ経験をみる
+A = 100
+B = 40
+IF EXP:Ａ経験 < EXPLV:1
+	TIMES A , 3.00
+	TIMES B , 3.00
+ELSEIF EXP:Ａ経験 < EXPLV:2
+	TIMES A , 1.20
+	TIMES B , 2.00
+ELSEIF EXP:Ａ経験 < EXPLV:3
+	TIMES A , 0.80
+	TIMES B , 1.50
+ELSEIF EXP:Ａ経験 < EXPLV:4
+	TIMES A , 0.60
+	TIMES B , 1.20
+ELSEIF EXP:Ａ経験 < EXPLV:5
+	TIMES A , 0.40
+ELSEIF EXP:Ａ経験 >= EXPLV:5
+	TIMES A , 0.20
+ENDIF
+
+;PALAM:潤滑をみる
+IF PALAM:4 < PALAMLV:1
+	TIMES A , 1.20
+	TIMES B , 2.00
+ELSEIF PALAM:4 < PALAMLV:2
+	TIMES A , 1.00
+	TIMES B , 1.50
+ELSEIF PALAM:4 < PALAMLV:3
+	TIMES A , 0.60
+ELSEIF PALAM:4 < PALAMLV:4
+	TIMES A , 0.30
+ELSEIF PALAM:4 >= PALAMLV:4
+	TIMES A , 0.20
+ENDIF
+SOURCE:7 += A
+SOURCE:18 += B
+
+;-------------------------------------------------
+;経験の処理
+;-------------------------------------------------
+;自慰実行時は経験＋１
+IF SELECTCOM == 11
+	EXP:Ａ経験 += 2
+	PRINTL Ａ経験＋２
+ELSE
+	EXP:Ａ経験 += 1
+	PRINTL Ａ経験＋１
+ENDIF
+
+;触手経験加算
+SIF TEQUIP:25 == 1
+	T += 1
+
+
+RETURN 1
+

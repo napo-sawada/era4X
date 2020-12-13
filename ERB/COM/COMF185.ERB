@@ -1,0 +1,338 @@
+﻿;-------------------------------------------------
+;助手を犯す
+;特殊コマンド
+;-------------------------------------------------
+@COM185
+PRINTL 助手を犯す
+;-------------------------------------------------
+;実行判定処理
+;-------------------------------------------------
+;共通処理
+CALL COM_ORDER_COMMON
+SIF RESULT == 0
+	RETURN 0
+	
+
+
+;-------------------------------------------------
+;実行決定
+;-------------------------------------------------
+STR:0 = 助手を犯す
+CALL KOJO_MESSAGE_COM
+
+;-------------------------------------------------
+;射精ゲージチェック
+;-------------------------------------------------
+B = 1500
+
+;ABL:調教者の技巧をみる
+IF ABL:PLAYER:2 == 0
+	TIMES B , 1.00
+ELSEIF ABL:PLAYER:2 == 1
+	TIMES B , 1.20
+ELSEIF ABL:PLAYER:2 == 2
+	TIMES B , 1.40
+ELSEIF ABL:PLAYER:2 == 3
+	TIMES B , 1.60
+ELSEIF ABL:PLAYER:2 == 4
+	TIMES B , 1.80
+ELSE
+	TIMES B , 2.00
+ENDIF
+
+;ABL:助手の従順をみる
+IF ABL:ASSI:0 == 0
+	TIMES B , 0.80
+ELSEIF ABL:ASSI:0 == 1
+	TIMES B , 0.90
+ELSEIF ABL:ASSI:0 == 2
+	TIMES B , 1.00
+ELSEIF ABL:ASSI:0 == 3
+	TIMES B , 1.10
+ELSEIF ABL:ASSI:0 == 4
+	TIMES B , 1.20
+ELSE
+	TIMES B , 1.30
+ENDIF
+
+;ABL:助手の欲望をみる
+IF ABL:ASSI:1 == 0
+	TIMES B , 1.00
+ELSEIF ABL:ASSI:1 == 1
+	TIMES B , 1.10
+ELSEIF ABL:ASSI:1 == 2
+	TIMES B , 1.20
+ELSEIF ABL:ASSI:1 == 3
+	TIMES B , 1.30
+ELSEIF ABL:ASSI:1 == 4
+	TIMES B , 1.40
+ELSE
+	TIMES B , 1.50
+ENDIF
+
+;助手のEXP:Ｖ経験をみる
+IF EXP:ASSI:Ｖ経験 < EXPLV:1
+	TIMES B , 0.20
+ELSEIF EXP:ASSI:Ｖ経験 < EXPLV:2
+	TIMES B , 0.50
+ELSEIF EXP:ASSI:Ｖ経験 < EXPLV:3
+	TIMES B , 0.80
+ELSEIF EXP:ASSI:Ｖ経験 < EXPLV:4
+	TIMES B , 1.00
+ELSEIF EXP:ASSI:Ｖ経験 < EXPLV:5
+	TIMES B , 1.20
+ELSE
+	TIMES B , 1.40
+ENDIF
+
+;プレイヤーのABL:Ｃ感覚をみる
+IF ABL:PLAYER:3 == 0
+	TIMES B , 1.00
+ELSEIF ABL:PLAYER:3 == 1
+	TIMES B , 1.50
+ELSEIF ABL:PLAYER:3 == 2
+	TIMES B , 2.00
+ELSEIF ABL:PLAYER:3 == 3
+	TIMES B , 2.50
+ELSEIF ABL:PLAYER:3 == 4
+	TIMES B , 3.50
+ELSE
+	TIMES B , 5.00
+ENDIF
+
+;再装填処理中は射精ゲージは20分の1に
+SIF CFLAG:PLAYER:24 > 0
+	B /= 20
+
+
+SIF TALENT:PLAYER:半人半妖 || TALENT:PLAYER:ふたなり || TALENT:PLAYER:オトコ
+	BASE:PLAYER:2 += B
+
+;-------------------------------------------------
+;ソース追加処理
+;-------------------------------------------------
+;消費体力、気力
+LOSEBASE:0 += 0
+LOSEBASE:1 += 250
+
+SOURCE:4 = 200
+SOURCE:10 = 100
+SOURCE:14 = 1500
+SOURCE:17 = 700
+SOURCE:18 = 700
+
+;-------------------------------------------------
+;特殊ソース処理
+;-------------------------------------------------
+;抑圧、抵抗持ちには、抑鬱ソース追加
+SIF TALENT:抑圧 || TALENT:抵抗
+	SOURCE:16 += 700
+
+;助手が処女喪失をした場合、屈服と逸脱を増加
+IF TALENT:ASSI:処女 == 1
+	TIMES SOURCE:13 , 20.00
+	TIMES SOURCE:14 , 3.00
+ENDIF
+
+;助手と奴隷の相性によって、全体のソースが変化
+T = NO:TARGET
+A = NO:ASSI
+SOURCE:4 *= RELATION:A
+SOURCE:10 *= RELATION:A
+SOURCE:14 *= RELATION:A
+SOURCE:16 *= RELATION:A
+SOURCE:17 *= RELATION:A
+SOURCE:18 *= RELATION:A
+SOURCE:4 /= 100
+SOURCE:10 /= 100
+SOURCE:14 /= 100
+SOURCE:16 /= 100
+SOURCE:17 /= 100
+SOURCE:18 /= 100
+
+;-------------------------------------------------
+;射精チェック
+;-------------------------------------------------
+CALL SAMEN_CHECK
+
+;射精時の処理
+IF E >= 1
+	;射精先タイプの設定
+	TFLAG:703 = 6
+	;射精先選択の可・不可
+	TFLAG:704 = 0
+	;汎用的な処理はこの関数で行う
+	;（射精ゲージの再計算や射精経験の上昇と共通部分の表示）
+	CALL SAMEN_SHOOT
+ENDIF
+
+;-------------------------------------------------
+;汚れの処理
+;-------------------------------------------------
+;射精に関係なく行われる処理はここから
+IF TALENT:PLAYER:半人半妖 || TALENT:PLAYER:ふたなり || TALENT:PLAYER:オトコ
+	;主人のＰ⇔助手のＶの汚れが移動
+	STAIN:MASTER:2 |= STAIN:ASSI:3
+	STAIN:ASSI:3 |= STAIN:MASTER:2
+ENDIF
+
+;-------------------------------------------------
+;経験の処理
+;-------------------------------------------------
+;助手が処女の場合、助手と奴隷に異常経験付加
+T = NO:TARGET
+A = NO:ASSI
+IF TALENT:ASSI:処女 == 1
+	TALENT:ASSI:処女 = 0
+	PRINTL ＜助手が処女＞
+	IF RELATION:A > 100
+		EXP:異常経験 += 2
+		PRINTFORML %EXPNAME:50%＋２
+	ELSE
+		EXP:異常経験 += 1
+		PRINTFORML %EXPNAME:50%＋１
+	ENDIF
+	EXP:ASSI:異常経験 += 1
+ENDIF
+
+;助手のＶ経験
+EXP:ASSI:Ｖ経験 += 1
+
+;助手のレズ経験
+IF TALENT:MASTER:オトコ == 0 && TALENT:ASSI:オトコ == 0
+	PRINTS EXPNAME:40
+	PRINT +10
+	PRINTFORML (%CALLNAME:ASSI%) 
+	EXP:ASSI:レズ経験 += 10
+	A = NO:PLAYER + 899
+	CFLAG:ASSI:A += 10
+ENDIF
+
+;依存度ベクトル
+TFLAG:33 = 5
+
+T = NO:TARGET
+A = NO:ASSI
+;依存度補正値(助手との相性100↑かつ淫乱で1、娼婦で2）
+IF TALENT:淫乱 && RELATION:A > 100
+	TFLAG:30 += 1
+ELSEIF TALENT:娼婦 && RELATION:A > 100
+	TFLAG:30 += 2
+ENDIF
+
+RETURN 1
+
+;-------------------------------------------------
+;固有の実行判定
+;-------------------------------------------------
+@COM_ORDER_185
+A = 0
+S = 0
+
+;すべての命令に共通の要素を考慮
+;(従順が高いと命令に従いやすいなど)
+CALL COM_ORDER
+
+;ABL:欲望
+IF ABL:1
+	SIF S
+		PRINT  + 
+	A += ABL:1 * 2
+	PRINTS ABLNAME:1
+	PRINTV 'LV,ABL:1,'(,ABL:1 * 2,')
+	S = 1
+ENDIF
+
+IF MARK:1
+	SIF S
+		PRINT  + 
+	A += MARK:1 * 2
+	PRINTS MARKNAME:1
+	PRINTV 'LV,MARK:1,'(,MARK:1 * 2,')
+	S = 1
+ENDIF
+
+;PALAM:欲情
+IF PALAM:6 < PALAMLV:1
+	L = 0
+ELSEIF PALAM:6 < PALAMLV:2
+	L = 1
+ELSEIF PALAM:6 < PALAMLV:3
+	L = 2
+ELSEIF PALAM:6 < PALAMLV:4
+	L = 3
+ELSEIF PALAM:6 < PALAMLV:5
+	L = 4
+ELSE
+	L = 5
+ENDIF
+IF L
+	SIF S
+		PRINT  + 
+	A += L * 2
+	PRINTS PALAMNAME:6
+	PRINTV 'LV,L,'(,L * 2,')
+	S = 1
+ENDIF
+
+;助手のABL:露出癖
+IF ABL:ASSI:8
+	SIF S
+		PRINT  + 
+	A += ABL:ASSI:8 * 2
+	PRINT 助手の露出癖
+	PRINTV 'LV,ABL:ASSI:8,'(,ABL:ASSI:8 * 2,')
+	S = 1
+ENDIF
+
+;助手が恋慕
+IF TALENT:ASSI:恋慕 && ASSIPLAY == 0
+	SIF S
+		PRINT  + 
+	A += 10
+	PRINT 助手が恋慕
+	PRINTV '(,10,')
+	S = 1
+ENDIF
+
+;助手が親愛
+IF TALENT:ASSI:親愛 && ASSIPLAY == 0
+	SIF S
+		PRINT  + 
+	A += 25
+	PRINT 助手が親愛
+	PRINTV '(,25,')
+	S = 1
+ENDIF
+
+;助手が処女
+IF TALENT:ASSI:処女 == 1
+	PRINT  - 
+	A -= 50
+	PRINT 助手が処女
+	PRINTV '(,50,')
+	S = 1
+ENDIF
+
+;合計を表示(40以上で実行)
+PRINT  = 
+PRINTV A
+
+V = 40
+SIF A < V
+	PRINT  < 
+SIF A == V
+	PRINT  = 
+SIF A > V
+	PRINT  > 
+PRINT 実行値
+PRINTV V
+
+WAIT
+
+;実行できない
+SIF A < V
+	RETURN 0
+
+RETURN 1
+

@@ -1,0 +1,1146 @@
+﻿;乱交ライブ
+;奴隷をステージで歌わせて観客に襲わせます
+;客の数だけ収益が上がるため、欲望などが重要視されます
+@PROMISCUOUS_SEX_LIVE
+;使用する一時変数の初期化
+A = 0
+B = 0
+S = 0
+V = 0
+C = 0
+D = 0
+
+;乱交ライブで歌う奴隷を選択
+PRINTL 乱交ライブを行う奴隷を選択してください
+REPEAT CHARANUM
+	SIF COUNT == MASTER
+		CONTINUE
+	SIF CFLAG:COUNT:1 < 2
+		CONTINUE
+	SIF CFLAG:COUNT:12 > 0
+		CONTINUE
+	SIF (TALENT:COUNT:淫乱 || TALENT:COUNT:娼婦) && BASE:COUNT:0 > 800
+		PRINTFORML [{COUNT}] - %CALLNAME:COUNT%
+REND
+PRINTL [100] - 戻る
+$INPUT_LOOP_2
+INPUT
+IF RESULT == 100
+	RETURN 0
+ELSEIF RESULT < 0 || RESULT >= CHARANUM
+	GOTO INPUT_LOOP_2
+ELSEIF RESULT == MASTER
+	GOTO INPUT_LOOP_2
+ELSEIF CFLAG:RESULT:1 < 2
+	GOTO INPUT_LOOP_2
+ELSEIF CFLAG:RESULT:12 > 0
+	GOTO INPUT_LOOP_2
+ELSEIF (TALENT:RESULT:淫乱 == 0 && TALENT:RESULT:娼婦 == 0) || BASE:RESULT:0 <= 800
+	GOTO INPUT_LOOP_2
+ELSE
+	A = RESULT
+ENDIF
+
+$INPUT_LOOP_3
+IF CFLAG:A:108
+	PRINTL <避妊結界有効>
+	J = 1
+ELSE
+	PRINTL 避妊の有無と方法を選択してください
+	PRINTL [0]   - 避妊しない
+	SIF MONEY > 2000
+		PRINTFORML [1]   - 子宮内避妊具($-6000）
+	PRINTL [100] -   戻る
+	INPUT
+	IF RESULT == 0
+		J = 0
+	ELSEIF RESULT == 1 && MONEY > 6000
+		J = 1
+	ELSEIF RESULT == 100
+		RETURN 0
+	ELSE
+		GOTO INPUT_LOOP_3
+	ENDIF
+ENDIF
+
+;ライブ撮影オプション
+$INPUT_LOOP_4
+I = -1
+IF (ITEM:18 > 0 && ITEM:43 > 0) || NOITEM != 0
+	PRINTL 乱交ライブを撮影する者を選択してください
+	PRINTFORML [0] - %CALLNAME:MASTER%
+	REPEAT CHARANUM
+		SIF COUNT == MASTER
+			CONTINUE
+		SIF CFLAG:COUNT:12 > 0
+			CONTINUE
+		SIF CFLAG:COUNT:1 > 2
+			PRINTFORML [{COUNT}] - %CALLNAME:COUNT%
+	REND
+	PRINTL [100] - 撮影しない
+	INPUT
+	IF RESULT == 100
+		PRINTL 
+	ELSEIF RESULT < 0 || RESULT >= CHARANUM
+		GOTO INPUT_LOOP_4
+	ELSEIF CFLAG:RESULT:1 < 2 && RESULT != MASTER
+		GOTO INPUT_LOOP_4
+	ELSEIF CFLAG:RESULT:12 > 0
+		GOTO INPUT_LOOP_4
+	ELSEIF RESULT == MASTER
+		V += 150+ABL:MASTER:13*10
+		I = MASTER
+		PRINTFORML 撮影者は%CALLNAME:MASTER%です
+		PRINTFORML ライブ撮影 +{V}％
+		PRINTL 
+	ELSE
+		V += 150+ABL:RESULT:13*10
+		I = RESULT
+		PRINTFORML 撮影者は%CALLNAME:RESULT%です
+		PRINTFORML ライブ撮影 +{V}％
+		PRINTL 
+	ENDIF
+ENDIF
+
+;行為内容の算出。避妊処理はしないものの、バランスを取るために娼館から流用
+;ABL:従順をみる
+IF ABL:A:0 == 0
+	P = 0
+ELSEIF ABL:A:0 == 1
+	P = 1
+ELSEIF ABL:A:0 == 2
+	P = 2
+ELSEIF ABL:A:0 == 3
+	P = 3
+ELSEIF ABL:A:0 == 4
+	P = 4
+ELSEIF ABL:A:0 == 5
+	P = 5
+ELSEIF ABL:A:0 == 6
+	P = 6
+ELSEIF ABL:A:0 == 7
+	P = 7
+ELSEIF ABL:A:0 == 8
+	P = 8
+ELSEIF ABL:A:0 == 9
+	P = 9
+ELSE
+	P = 12
+ENDIF
+SIF P > 0
+	PRINTFORML %ABLNAME:0%{ABL:A:0}LV 行為数+{P}
+C += P
+
+;ABL:欲望をみる
+IF ABL:A:1 == 0
+	P = 1
+ELSEIF ABL:A:0 == 1
+	P = 2
+ELSEIF ABL:A:0 == 2
+	P = 3
+ELSEIF ABL:A:0 == 3
+	P = 5
+ELSEIF ABL:A:0 == 4
+	P = 7
+ELSEIF ABL:A:0 == 5
+	P = 9
+ELSEIF ABL:A:0 == 6
+	P = 11
+ELSEIF ABL:A:0 == 7
+	P = 13
+ELSEIF ABL:A:0 == 8
+	P = 15
+ELSEIF ABL:A:0 == 9
+	P = 18
+ELSE
+	P = 20
+ENDIF
+SIF P > 0
+	PRINTFORML %ABLNAME:1%{ABL:A:1}LV 行為数+{P}
+C += P
+
+
+;ABL:Ｖ感覚をみる
+IF ABL:A:4 == 0
+	P = 0
+ELSEIF ABL:A:4 == 1
+	P = 1
+ELSEIF ABL:A:4 == 2
+	P = 2
+ELSEIF ABL:A:4 == 3
+	P = 2
+ELSEIF ABL:A:4 == 4
+	P = 3
+ELSEIF ABL:A:4 == 5
+	P = 3
+ELSEIF ABL:A:4 == 6
+	P = 4
+ELSEIF ABL:A:4 == 7
+	P = 4
+ELSEIF ABL:A:4 == 8
+	P = 5
+ELSEIF ABL:A:4 == 9
+	P = 5
+ELSE
+	P = 6
+ENDIF
+SIF P > 0
+	PRINTFORML %ABLNAME:4%{ABL:A:4}LV 行為数+{P}
+C += P
+
+
+;ABL:Ａ感覚をみる
+IF ABL:A:5 == 0
+	P = 0
+ELSEIF ABL:A:5 == 1
+	P = 1
+ELSEIF ABL:A:5 == 2
+	P = 2
+ELSEIF ABL:A:5 == 3
+	P = 2
+ELSEIF ABL:A:5 == 4
+	P = 3
+ELSEIF ABL:A:5 == 5
+	P = 3
+ELSEIF ABL:A:5 == 6
+	P = 4
+ELSEIF ABL:A:5 == 7
+	P = 4
+ELSEIF ABL:A:5 == 8
+	P = 5
+ELSEIF ABL:A:5 == 9
+	P = 5
+ELSE
+	P = 6
+ENDIF
+SIF P > 0
+	PRINTFORML %ABLNAME:5%{ABL:A:5}LV 行為数+{P}
+C += P
+
+
+;ABL:奉仕精神をみる
+IF ABL:A:7 == 0
+	P = 0
+ELSEIF ABL:A:7 == 1
+	P = 1
+ELSEIF ABL:A:7 == 2
+	P = 2
+ELSEIF ABL:A:7 == 3
+	P = 3
+ELSEIF ABL:A:7 == 4
+	P = 4
+ELSEIF ABL:A:7 == 5
+	P = 5
+ELSEIF ABL:A:7 == 6
+	P = 6
+ELSEIF ABL:A:7 == 7
+	P = 7
+ELSEIF ABL:A:7 == 8
+	P = 8
+ELSEIF ABL:A:7 == 9
+	P = 9
+ELSE
+	P = 12
+ENDIF
+SIF P > 0
+	PRINTFORML %ABLNAME:7%{ABL:A:7}LV 行為数+{P}
+C += P
+
+
+;ABL:レズっ気をみる
+IF ABL:A:11 == 0
+	P = 0
+ELSEIF ABL:A:11 == 1
+	P = 1
+ELSEIF ABL:A:11 == 2
+	P = 2
+ELSEIF ABL:A:11 == 3
+	P = 2
+ELSEIF ABL:A:11 == 4
+	P = 3
+ELSEIF ABL:A:11 == 5
+	P = 3
+ELSEIF ABL:A:11 == 6
+	P = 4
+ELSEIF ABL:A:11 == 7
+	P = 4
+ELSEIF ABL:A:11 == 8
+	P = 5
+ELSEIF ABL:A:11 == 9
+	P = 5
+ELSE
+	P = 6
+ENDIF
+SIF P > 0
+	PRINTFORML %ABLNAME:11%{ABL:A:11}LV 行為数+{P}
+C += P
+
+
+;ABL:精液中毒をみる
+IF ABL:A:16 == 0
+	P = 0
+ELSEIF ABL:A:16 == 1
+	P = 1
+ELSEIF ABL:A:16 == 2
+	P = 2
+ELSEIF ABL:A:16 == 3
+	P = 3
+ELSEIF ABL:A:16 == 4
+	P = 4
+ELSEIF ABL:A:16 == 5
+	P = 5
+ELSEIF ABL:A:16 == 6
+	P = 6
+ELSEIF ABL:A:16 == 7
+	P = 7
+ELSEIF ABL:A:16 == 8
+	P = 8
+ELSEIF ABL:A:16 == 9
+	P = 9
+ELSE
+	P = 12
+ENDIF
+SIF P > 0
+	PRINTFORML %ABLNAME:16%{ABL:A:16}LV 行為数+{P}
+C += P
+
+;ABL:レズ中毒をみる
+IF ABL:A:17 == 0
+	P = 0
+ELSEIF ABL:A:17 == 1
+	P = 1
+ELSEIF ABL:A:17 == 2
+	P = 2
+ELSEIF ABL:A:17 == 3
+	P = 3
+ELSEIF ABL:A:17 == 4
+	P = 4
+ELSEIF ABL:A:17 == 5
+	P = 5
+ELSEIF ABL:A:17 == 6
+	P = 6
+ELSEIF ABL:A:17 == 7
+	P = 7
+ELSEIF ABL:A:17 == 8
+	P = 8
+ELSEIF ABL:A:17 == 9
+	P = 9
+ELSE
+	P = 12
+ENDIF
+SIF P > 0
+	PRINTFORML %ABLNAME:17%{ABL:A:17}LV 行為数+{P}
+C += P
+
+
+;ABL:セックス中毒をみる
+IF ABL:A:18 == 0
+	P = 0
+ELSEIF ABL:A:18 == 1
+	P = 1
+ELSEIF ABL:A:18 == 2
+	P = 2
+ELSEIF ABL:A:18 == 3
+	P = 3
+ELSEIF ABL:A:18 == 4
+	P = 4
+ELSEIF ABL:A:18 == 5
+	P = 5
+ELSEIF ABL:A:18 == 6
+	P = 6
+ELSEIF ABL:A:18 == 7
+	P = 7
+ELSEIF ABL:A:18 == 8
+	P = 8
+ELSEIF ABL:A:18 == 9
+	P = 9
+ELSE
+	P = 12
+ENDIF
+SIF P > 0
+	PRINTFORML %ABLNAME:18%{ABL:A:18}LV 行為数+{P}
+C += P
+
+
+;ABL:ホモっ気をみる
+IF ABL:A:20 == 0
+	P = 0
+ELSEIF ABL:A:20 == 1
+	P = 1
+ELSEIF ABL:A:20 == 2
+	P = 2
+ELSEIF ABL:A:20 == 3
+	P = 2
+ELSEIF ABL:A:20 == 4
+	P = 3
+ELSEIF ABL:A:20 == 5
+	P = 3
+ELSEIF ABL:A:20 == 6
+	P = 4
+ELSEIF ABL:A:20 == 7
+	P = 4
+ELSEIF ABL:A:20 == 8
+	P = 5
+ELSEIF ABL:A:20 == 9
+	P = 5
+ELSE
+	P = 6
+ENDIF
+SIF P > 0
+	PRINTFORML %ABLNAME:20%{ABL:A:20}LV 行為数+{P}
+C += P
+
+;ABL:ゲイ中毒をみる
+IF ABL:A:21 == 0
+	P = 0
+ELSEIF ABL:A:21 == 1
+	P = 1
+ELSEIF ABL:A:21 == 2
+	P = 2
+ELSEIF ABL:A:21 == 3
+	P = 3
+ELSEIF ABL:A:21 == 4
+	P = 4
+ELSEIF ABL:A:21 == 5
+	P = 5
+ELSEIF ABL:A:21 == 6
+	P = 6
+ELSEIF ABL:A:21 == 7
+	P = 7
+ELSEIF ABL:A:21 == 8
+	P = 8
+ELSEIF ABL:A:21 == 9
+	P = 9
+ELSE
+	P = 12
+ENDIF
+SIF P > 0
+	PRINTFORML %ABLNAME:21%{ABL:A:21}LV 行為数+{P}
+C += P
+
+
+SIF C > 0
+	PRINTFORML 総行為数：{C}
+;報酬の計算
+S = C * 500
+
+;素質による売却額補正値計算
+;TALENT:処女をみる
+IF TALENT:A:処女
+	F = 100
+	V += 100
+	PRINTFORML %TALENTNAME:0% ＋{F}％
+ENDIF
+;TALENT:再生処女をみる
+IF TALENT:A:再生処女
+	F = 20
+	V += 20
+	PRINTFORML %TALENTNAME:1% ＋{F}％
+ENDIF
+;素質による増減
+;陥落素質
+;恋慕
+IF TALENT:A:恋慕
+	F = 50
+	V -= 50
+	PRINTFORML %TALENTNAME:3% －{F}％
+ENDIF
+;淫乱
+IF TALENT:A:淫乱
+	F = 50
+	V += 50
+	PRINTFORML %TALENTNAME:4% ＋{F}％
+ENDIF
+;服従
+IF TALENT:A:服従
+	F = 30
+	V += 30
+	PRINTFORML %TALENTNAME:5% ＋{F}％
+ENDIF
+;親愛
+IF TALENT:A:親愛
+	F = 80
+	V -= 80
+	PRINTFORML %TALENTNAME:6% －{F}％
+ENDIF
+;娼婦
+IF TALENT:A:娼婦
+	F = 100
+	V += 100
+	PRINTFORML %TALENTNAME:7% ＋{F}％
+ENDIF
+;隷属
+IF TALENT:A:隷属
+	F = 60
+	V += 60
+	PRINTFORML %TALENTNAME:8% ＋{F}％
+ENDIF
+
+
+
+;その他素質
+;臆病
+IF TALENT:A:臆病
+	F = 20
+	V -= 20
+	PRINTFORML %TALENTNAME:10% －{F}％
+ENDIF
+;反抗的
+IF TALENT:A:反抗的
+	F = 20
+	V += 20
+	PRINTFORML %TALENTNAME:11% ＋{F}％
+ENDIF
+;気丈
+IF TALENT:A:気丈
+	F = 40
+	V += 40
+	PRINTFORML %TALENTNAME:12% ＋{F}％
+ENDIF
+;素直
+IF TALENT:A:素直
+	F = 20
+	V -= 20
+	PRINTFORML %TALENTNAME:13% －{F}％
+ENDIF
+;大人しい
+IF TALENT:A:大人しい
+	F = 20
+	V -= 20
+	PRINTFORML %TALENTNAME:14% －{F}％
+ENDIF
+;プライド高い
+IF TALENT:A:プライド高い
+	F = 20
+	V += 20
+	PRINTFORML %TALENTNAME:15% ＋{F}％
+ENDIF
+;生意気
+IF TALENT:A:生意気
+	F = 20
+	V += 20
+	PRINTFORML %TALENTNAME:16% ＋{F}％
+ENDIF
+;プライド低い
+IF TALENT:A:プライド低い
+	F = 20
+	V -= 20
+	PRINTFORML %TALENTNAME:17% －{F}％
+ENDIF
+;ツンデレ
+IF TALENT:A:ツンデレ
+	F = 20
+	V += 20
+	PRINTFORML %TALENTNAME:18% ＋{F}％
+ENDIF
+;自制心
+IF TALENT:A:自制心
+	F = 20
+	V += 20
+	PRINTFORML %TALENTNAME:20% ＋{F}％
+ENDIF
+;無関心
+IF TALENT:A:無関心
+	F = 20
+	V -= 20
+	PRINTFORML %TALENTNAME:21% －{F}％
+ENDIF
+;感情乏しい
+IF TALENT:A:感情乏しい
+	F = 20
+	V -= 20
+	PRINTFORML %TALENTNAME:22% －{F}％
+ENDIF
+;好奇心
+IF TALENT:A:好奇心
+	F = 10
+	V += 10
+	PRINTFORML %TALENTNAME:23% ＋{F}％
+ENDIF
+;保守的
+IF TALENT:A:保守的
+	F = 10
+	V += 10
+	PRINTFORML %TALENTNAME:24% ＋{F}％
+ENDIF
+;一線越えない
+IF TALENT:A:一線越えない
+	F = 30
+	V += 30
+	PRINTFORML %TALENTNAME:27% ＋{F}％
+ENDIF
+;目立ちたがり
+IF TALENT:A:目立ちたがり
+	F = 10
+	V += 10
+	PRINTFORML %TALENTNAME:28% ＋{F}％
+ENDIF
+;貞操観念
+IF TALENT:A:貞操観念
+	F = 20
+	V += 20
+	PRINTFORML %TALENTNAME:30% ＋{F}％
+ENDIF
+;貞操無頓着
+IF TALENT:A:貞操無頓着
+	F = 20
+	V -= 20
+	PRINTFORML %TALENTNAME:31% －{F}％
+ENDIF
+;解放
+IF TALENT:A:解放
+	F = 10
+	V += 10
+	PRINTFORML %TALENTNAME:33% ＋{F}％
+ENDIF
+;恥じらい
+IF TALENT:A:恥じらい
+	F = 10
+	V += 10
+	PRINTFORML %TALENTNAME:35% ＋{F}％
+ENDIF
+;恥薄い
+IF TALENT:A:恥薄い
+	F = 10
+	V -= 10
+	PRINTFORML %TALENTNAME:36% －{F}％
+ENDIF
+;痛みに弱い
+IF TALENT:A:痛みに弱い
+	F = 20
+	V -= 20
+	PRINTFORML %TALENTNAME:40% －{F}％
+ENDIF
+;痛みに強い
+IF TALENT:A:痛みに強い
+	F = 20
+	V += 20
+	PRINTFORML %TALENTNAME:41% ＋{F}％
+ENDIF
+;濡れやすい
+IF TALENT:A:濡れやすい
+	F = 10
+	V += 10
+	PRINTFORML %TALENTNAME:42% ＋{F}％
+ENDIF
+;濡れにくい
+IF TALENT:A:濡れにくい
+	F = 10
+	V -= 10
+	PRINTFORML %TALENTNAME:43% －{F}％
+ENDIF
+;習得早い
+IF TALENT:A:習得早い
+	F = 10
+	V += 10
+	PRINTFORML %TALENTNAME:50% ＋{F}％
+ENDIF
+;習得遅い
+IF TALENT:A:習得遅い
+	F = 10
+	V -= 10
+	PRINTFORML %TALENTNAME:51% －{F}％
+ENDIF
+;舌使い
+IF TALENT:A:舌使い
+	F = 30
+	V += 30
+	PRINTFORML %TALENTNAME:52% ＋{F}％
+ENDIF
+;薬毒耐性
+IF TALENT:A:薬毒耐性
+	F = 20
+	V -= 20
+	PRINTFORML %TALENTNAME:56% －{F}％
+ENDIF
+;おもらし癖
+IF TALENT:A:おもらし癖
+	F = 10
+	V += 10
+	PRINTFORML %TALENTNAME:57% ＋{F}％
+ENDIF
+;自慰しやすい
+IF TALENT:A:自慰しやすい
+	F = 10
+	V += 10
+	PRINTFORML %TALENTNAME:60% ＋{F}％
+ENDIF
+;汚臭鈍感
+IF TALENT:A:汚臭鈍感
+	F = 20
+	V -= 20
+	PRINTFORML %TALENTNAME:61% －{F}％
+ENDIF
+;汚臭敏感
+IF TALENT:A:汚臭敏感
+	F = 20
+	V += 20
+	PRINTFORML %TALENTNAME:62% ＋{F}％
+ENDIF
+;献身的
+IF TALENT:A:献身的
+	F = 30
+	V += 30
+	PRINTFORML %TALENTNAME:63% ＋{F}％
+ENDIF
+;快感に素直
+IF TALENT:A:快感に素直
+	F = 30
+	V -= 30
+	PRINTFORML %TALENTNAME:70% －{F}％
+ENDIF
+;快感の否定
+IF TALENT:A:快感の否定
+	F = 30
+	V += 30
+	PRINTFORML %TALENTNAME:71% ＋{F}％
+ENDIF
+;即落ち
+IF TALENT:A:即落ち
+	F = 50
+	V -= 50
+	PRINTFORML %TALENTNAME:73% －{F}％
+ENDIF
+;自慰狂い
+IF TALENT:A:自慰狂い
+	F = 20
+	V += 20
+	PRINTFORML %TALENTNAME:74% ＋{F}％
+ENDIF
+;セックス狂
+IF TALENT:A:セックス狂
+	F = 30
+	V += 30
+	PRINTFORML %TALENTNAME:75% ＋{F}％
+ENDIF
+;尻穴狂い
+IF TALENT:A:尻穴狂い
+	F = 20
+	V += 20
+	PRINTFORML %TALENTNAME:76% ＋{F}％
+ENDIF
+;淫乳
+IF TALENT:A:淫乳
+	F = 30
+	V += 30
+	PRINTFORML %TALENTNAME:77% ＋{F}％
+ENDIF
+;倒錯的
+IF TALENT:A:倒錯的
+	F = 10
+	V += 10
+	PRINTFORML %TALENTNAME:80% ＋{F}％
+ENDIF
+;男嫌い
+IF TALENT:A:男嫌い
+	F = 10
+	V -= 10
+	PRINTFORML %TALENTNAME:82% －{F}％
+ENDIF
+;サド
+IF TALENT:A:サド
+	F = 30
+	V += 30
+	PRINTFORML %TALENTNAME:83% ＋{F}％
+ENDIF
+;マゾ
+IF TALENT:A:マゾ
+	F = 40
+	V += 40
+	PRINTFORML %TALENTNAME:84% ＋{F}％
+ENDIF
+;妄信
+IF TALENT:A:妄信
+	F = 30
+	V += 30
+	PRINTFORML %TALENTNAME:86% ＋{F}％
+ENDIF
+;女嫌い
+IF TALENT:A:女嫌い
+	F = 10
+	V -= 10
+	PRINTFORML %TALENTNAME:88% －{F}％
+ENDIF
+;小悪魔
+IF TALENT:A:小悪魔
+	F = 20
+	V += 20
+	PRINTFORML %TALENTNAME:87% ＋{F}％
+ENDIF
+;妖狐
+IF TALENT:A:妖狐
+	F = 20
+	V += 20
+	PRINTFORML %TALENTNAME:91% ＋{F}％
+ENDIF
+;魅力
+IF TALENT:A:魅力
+	F = 20
+	V += 20
+	PRINTFORML %TALENTNAME:92% ＋{F}％
+ENDIF
+;謎の魅力
+IF TALENT:A:謎の魅力
+	F = 100
+	V += 100
+	PRINTFORML %TALENTNAME:94% ＋{F}％
+ENDIF
+;Ｃ鈍感（感覚が4以上なら無効）
+IF TALENT:A:Ｃ鈍感 && ABL:A:3 < 4
+	F = 30
+	V -= 30
+	PRINTFORML %TALENTNAME:101% －{F}％
+ENDIF
+;Ｃ敏感（感覚が3未満なら無効）
+IF TALENT:A:Ｃ敏感 && ABL:A:3 >= 3
+	F = 30
+	V += 30
+	PRINTFORML %TALENTNAME:102% ＋{F}％
+ENDIF
+;Ｖ鈍感（感覚が4以上なら無効）
+IF TALENT:A:Ｖ鈍感 && ABL:A:4 < 4
+	F = 30
+	V -= 30
+	PRINTFORML %TALENTNAME:103% －{F}％
+ENDIF
+;Ｖ敏感（感覚が3未満なら無効）
+IF TALENT:A:Ｖ敏感 && ABL:A:4 >= 3
+	F = 30
+	V += 30
+	PRINTFORML %TALENTNAME:104% ＋{F}％
+ENDIF
+;Ａ鈍感（感覚が4以上なら無効）
+IF TALENT:A:Ａ鈍感 && ABL:A:5 < 4
+	F = 30
+	V -= 30
+	PRINTFORML %TALENTNAME:105% －{F}％
+ENDIF
+;Ａ敏感（感覚が3未満なら無効）
+IF TALENT:A:Ａ敏感 && ABL:A:5 >= 3
+	F = 30
+	V += 30
+	PRINTFORML %TALENTNAME:106% ＋{F}％
+ENDIF
+;Ｂ鈍感（感覚が4以上なら無効）
+IF TALENT:A:Ｂ鈍感 && ABL:A:6 < 4
+	F = 30
+	V -= 30
+	PRINTFORML %TALENTNAME:107% －{F}％
+ENDIF
+;Ｂ敏感（感覚が3未満なら無効）
+IF TALENT:A:Ｂ敏感 && ABL:A:6 >= 3
+	F = 30
+	V += 30
+	PRINTFORML %TALENTNAME:108% ＋{F}％
+ENDIF
+;貧乳
+IF TALENT:A:貧乳
+	F = 20
+	V -= 20
+	PRINTFORML %TALENTNAME:109% －{F}％
+ENDIF
+;絶壁
+IF TALENT:A:絶壁
+	F = 10
+	V += 10
+	PRINTFORML %TALENTNAME:110% ＋{F}％
+ENDIF
+;巨乳
+IF TALENT:A:巨乳
+	F = 20
+	V += 20
+	PRINTFORML %TALENTNAME:111% ＋{F}％
+ENDIF
+;爆乳
+IF TALENT:A:爆乳
+	F = 10
+	V += 10
+	PRINTFORML %TALENTNAME:112% ＋{F}％
+ENDIF
+;回復早い
+IF TALENT:A:回復早い
+	F = 20
+	V += 20
+	PRINTFORML %TALENTNAME:130% ＋{F}％
+ENDIF
+;回復遅い
+IF TALENT:A:回復遅い
+	F = 20
+	V -= 20
+	PRINTFORML %TALENTNAME:131% －{F}％
+ENDIF
+;吸血鬼
+IF TALENT:A:吸血鬼
+	F = 30
+	V += 30
+	PRINTFORML %TALENTNAME:132% ＋{F}％
+ENDIF
+;動物耳
+IF TALENT:A:動物耳
+	F = 20
+	V += 20
+	PRINTFORML %TALENTNAME:143% ＋{F}％
+ENDIF
+;人気
+IF TALENT:A:人気
+	F = 50
+	V += 50
+	PRINTFORML %TALENTNAME:145% ＋{F}％
+ENDIF
+;蓬莱人
+IF TALENT:A:蓬莱人
+	F = 70
+	V += 70
+	PRINTFORML %TALENTNAME:147% ＋{F}％
+ENDIF
+;母乳体質
+IF TALENT:A:母乳体質
+	F = 20
+	V += 20
+	PRINTFORML %TALENTNAME:149% ＋{F}％
+ENDIF
+
+;崩壊,狂気,妊娠は報酬をかなり低くする（従順によって、80％まで回復）
+IF TALENT:A:崩壊 || TALENT:A:狂気 || TALENT:A:妊娠
+PRINTL 
+	IF TALENT:A:崩壊
+		S *= ABL:A:0
+		TIMES S , 0.08
+		Z = ABL:A:0
+		Z *= 8
+		PRINTFORML %TALENTNAME:9% ×{Z}％
+	ELSEIF TALENT:A:狂気
+		S *= ABL:A:0
+		TIMES S , 0.08
+		Z = ABL:A:0
+		Z *= 8
+		PRINTFORML %TALENTNAME:141% ×{Z}％
+	ELSEIF TALENT:A:妊娠
+		S *= ABL:A:0
+		TIMES S , 0.08
+		Z = ABL:A:0
+		Z *= 8
+		PRINTFORML %TALENTNAME:153% ×{Z}％
+	ENDIF
+PRINTL 
+ENDIF
+
+;補正値が0以下の場合は1にする
+SIF V <= 0
+	V = 1
+
+PRINTFORML 加算倍率合計 {V}％
+
+;補正値の適用
+S *= V
+S /= 100
+
+;VOICEROID補正
+IF TALENT:A:160
+	PRINTFORML %TALENTNAME:160% ×200％
+	TIMES S , 2.00
+ELSEIF TALENT:A:161
+	PRINTFORML %TALENTNAME:161% ×200％
+	TIMES S , 2.00
+ELSEIF TALENT:A:162
+	PRINTFORML %TALENTNAME:162% ×200％
+	TIMES S , 2.00
+ENDIF
+;難易度処理
+;EASY
+IF FLAG:4 == 1
+	PRINTFORML 難易度:EASY ×120％
+	TIMES S , 1.20
+;NORMAL
+ELSEIF FLAG:4 == 2
+	TIMES S , 1.00
+;HARD
+ELSEIF FLAG:4 == 3
+	PRINTFORML 難易度:HARD ×80％
+	TIMES S , 0.80
+ENDIF
+
+;乱交ライブを実行するか？
+IF S > 0
+	PRINTFORMW 利潤は${S}程度が見込めます
+ELSE
+	PRINTFORMW 利潤が見込めないため、乱交ライブを中止します
+	RETURN 0
+ENDIF
+PRINTFORML %CALLNAME:A%の乱交ライブを実行しますか？
+PRINTL [0] -   実行する
+PRINTL [100] - やめる
+$INPUT_LOOP_5
+INPUT
+IF RESULT == 100
+	RETURN 0
+ELSEIF RESULT != 0
+	GOTO INPUT_LOOP_5
+ENDIF
+
+;ビデオテープの処理
+SIF I >= 0
+	ITEM:43 -= 1
+
+IF J > 0 && CFLAG:A:108 == 0
+	PRINTL 避妊具の費用として、$2000を使いました
+	MONEY -= 2000
+	CFLAG:A:108 = 1
+ENDIF
+
+
+PRINTFORML %CALLNAME:A%の乱交ライブを行いました
+;口上用に先に定義
+B = C/2
+
+;イベント口上呼び出し
+U = 0
+IF ASSI >= 0
+	SIF ASSI == A
+		U = 1
+ENDIF
+T = TARGET
+TARGET = A
+TFLAG:13 = 21
+CALL KOJO_MESSAGE_EVENT
+TARGET = T
+SIF U
+	ASSI = A
+
+;奴隷の経験、能力処理
+IF ABL:A:14 == 0
+	R = 8
+	Q = 5
+ELSEIF ABL:A:14 == 1
+	R = 50
+	Q = 5
+ELSEIF ABL:A:14 == 2
+	R = 300
+	Q = 5
+ELSEIF ABL:A:14 == 3
+	R = 900
+	Q = 5
+ELSEIF ABL:A:14 == 4
+	R = 2400
+	Q = 10
+ELSEIF ABL:A:14 == 5
+	R = 3000
+	Q = 20
+ELSEIF ABL:A:14 == 6
+	R = 3500
+	Q = 30
+ELSEIF ABL:A:14 == 7
+	R = 4000
+	Q = 40
+ELSEIF ABL:A:14 == 8
+	R = 4500
+	Q = 50
+ELSEIF ABL:A:14 == 9
+	R = 5000
+	Q = 60
+ELSEIF ABL:A:14 >= 10
+	R = 6000
+	Q = 80
+ENDIF
+EXP:A:歌唱経験 += Q
+JUEL:A:8 += R
+
+BASE:A:0 -= 30*C
+
+;ストレス値の付加
+CFLAG:A:10 += 3
+
+;経験、珠の加算処理
+;VとAのプレイ差
+;オトコはAのみ
+IF TALENT:A:オトコ
+	D = ABL:A:5
+	E = 0
+	F = B
+ELSEIF ABL:A:4 > ABL:A:5
+	D = ABL:A:4-ABL:A:5
+	E = B+D/2
+	F = B-D/2
+ELSEIF B > 1
+	D = ABL:A:5-ABL:A:4
+	E = B-D/2
+	F = B+D/2
+ENDIF
+;奴隷が処女の場合
+IF EXP:A:Ｖ経験 == 0 && TALENT:A:処女
+	E += 5
+	G = 20
+ENDIF
+SIF E < 0
+	E = 0
+SIF F < 0
+	F = 0
+EXP:A:Ｖ経験 += E
+EXP:A:Ａ経験 += F
+EXP:A:絶頂経験 += (E+F)/3
+;ふたなりかオトコ
+SIF TALENT:A:ふたなり || TALENT:A:オトコ
+	EXP:A:射精経験 += (E+F)/3
+EXP:A:性交経験 += (E+F)
+;膣射経験
+IF CFLAG:A:108 == 0
+	EXP:A:膣射経験 += E
+	CFLAG:A:105 += E
+ENDIF
+EXP:A:精液経験 += B*5
+JUEL:A:1 += E*50
+JUEL:A:2 += F*50
+JUEL:A:6 += (E+F)*30
+JUEL:A:8 += (E+F)*20
+JUEL:A:100 += (E+F+G)*100/ABL:A:0
+
+IF I >= 0
+	PRINTFORML %CALLNAME:I%の撮影経験＋１
+	EXP:I:撮影経験 += 1
+ENDIF
+
+PRINTFORML 【%CALLNAME:A%の経験と珠】
+
+;経験表示は一括で行う
+SIF E > 0
+	PRINTFORML %EXPNAME:0%＋{E}
+SIF F > 0
+	PRINTFORML %EXPNAME:1%＋{F}
+SIF E > 0 || F > 0
+	PRINTFORML %EXPNAME:2%＋{(E+F)/3}
+SIF (TALENT:A:ふたなり || TALENT:A:オトコ) && (E > 0 || F > 0)
+	PRINTFORML %EXPNAME:3%＋{(E+F)/3}
+SIF E > 0 || F > 0
+	PRINTFORML %EXPNAME:4%＋{(E+F)}
+SIF E > 0
+	PRINTFORML %EXPNAME:5%＋{E}
+PRINTFORML %EXPNAME:20%＋{B*5}
+IF TALENT:A:処女 && B > 1
+	PRINTFORML 処女喪失
+	PRINTFORML %EXPNAME:50%＋3
+	EXP:A:異常経験 += 3
+	TALENT:A:処女 = 0
+ELSEIF TALENT:A:再生処女 && B > 1
+	PRINTFORML 再生処女喪失
+	TALENT:A:再生処女 = 0
+ENDIF
+PRINTFORML %EXPNAME:64%＋{Q}
+;珠表示も同様
+SIF E > 0
+	PRINTFORML %PALAMNAME:1%の珠＋{E*50}
+SIF F > 0
+	PRINTFORML %PALAMNAME:2%の珠＋{F*50}
+PRINTFORML %PALAMNAME:5%の珠＋{B*5}
+PRINTFORML %PALAMNAME:6%の珠＋{B*30}
+PRINTFORML %PALAMNAME:8%の珠＋{B*20+R}
+SIF ABL:A:9 >= ABL:A:10
+	PRINTFORML %PALAMNAME:10%の珠＋{B*5}
+PRINTFORML %PALAMNAME:100%の珠＋{(E+F+G)*100/ABL:A:0}
+
+;最後に金額の加算
+PRINTFORMW %CALLNAME:A%の乱交ライブで${S}を得ました
+MONEY += S
+DRAWLINE
+;休憩フラグを立てる
+FLAG:0 = 1
+BEGIN TURNEND

@@ -1,0 +1,180 @@
+﻿;-------------------------------------------------
+;野外プレイ
+;特殊なコマンド
+;-------------------------------------------------
+@COM184
+PRINTL 野外プレイ
+STR:0 = 野外プレイ
+CALL KOJO_MESSAGE_COM
+
+;着脱の処理　終了時はソース、経験の加算は行わない
+IF TEQUIP:29 == 1
+	TEQUIP:29 = 0
+	RETURN 1
+ELSE
+	TEQUIP:29 = 1
+ENDIF
+
+
+;-------------------------------------------------
+;ソース追加処理
+;-------------------------------------------------
+;消費体力、気力
+LOSEBASE:0 += 0
+LOSEBASE:1 += 150
+
+SOURCE:8 = 800
+SOURCE:13 = 1300
+SOURCE:17 = 300
+SOURCE:18 = 600
+
+
+;-------------------------------------------------
+;特殊ソース処理
+;-------------------------------------------------
+;抑圧、抵抗持ちには、抑鬱ソース追加
+SIF TALENT:抑圧 || TALENT:抵抗
+	SOURCE:16 += 600
+
+;苦痛を伴わないマゾっ気及びマゾの処理は先にしておく
+;マゾっ気を見る
+IF ABL:9 == 0
+	TIMES SOURCE:13 , 0.80
+	SOURCE:10 += 0
+	SOURCE:11 += 0
+ELSEIF ABL:9 == 1
+	TIMES SOURCE:13 , 1.00
+	SOURCE:10 += 20
+	SOURCE:11 += 30
+ELSEIF ABL:9 == 2
+	TIMES SOURCE:13 , 1.20
+	SOURCE:10 += 40
+	SOURCE:11 += 70
+ELSEIF ABL:9 == 3
+	TIMES SOURCE:13 , 1.40
+	SOURCE:10 += 70
+	SOURCE:11 += 120
+ELSEIF ABL:9 == 4
+	TIMES SOURCE:13 , 1.50
+	SOURCE:10 += 110
+	SOURCE:11 += 180
+ELSEIF ABL:9 == 5
+	TIMES SOURCE:13 , 1.70
+	SOURCE:10 += 150
+	SOURCE:11 += 250
+ELSEIF ABL:9 == 6
+	TIMES SOURCE:13 , 1.90
+	SOURCE:10 += 200
+	SOURCE:11 += 300
+ELSEIF ABL:9 == 7
+	TIMES SOURCE:13 , 2.10
+	SOURCE:10 += 250
+	SOURCE:11 += 350
+ELSEIF ABL:9 == 8
+	TIMES SOURCE:13 , 2.30
+	SOURCE:10 += 300
+	SOURCE:11 += 400
+ELSEIF ABL:9 == 9
+	TIMES SOURCE:13 , 2.50
+	SOURCE:10 += 350
+	SOURCE:11 += 450
+ELSEIF ABL:9 >= 10
+	TIMES SOURCE:13 , 3.00
+	SOURCE:10 += 500
+	SOURCE:11 += 500
+ENDIF
+
+;依存度ベクトル
+TFLAG:33 = 3
+
+
+RETURN 1
+
+
+;-------------------------------------------------
+;装着継続の処理
+;-------------------------------------------------
+@EQUIP_COM184
+;野外プレイ
+
+PRINTL ＜野外プレイ中＞
+
+LOSEBASE:0 += 50
+LOSEBASE:1 += 100
+
+SOURCE:8 += 1000
+SOURCE:17 += 1000
+SOURCE:18 += 1000
+
+
+;-------------------------------------------------
+;特殊ソース処理
+;-------------------------------------------------
+;抑圧、抵抗持ちには、抑鬱ソース追加
+SIF TALENT:抑圧 || TALENT:抵抗
+	SOURCE:16 += 700
+
+;苦痛を伴わないマゾっ気及びマゾの処理は先にしておく
+;マゾっ気を見る
+A = 2000
+IF ABL:9 == 0
+	TIMES A , 0.80
+	SOURCE:10 += 0
+	SOURCE:11 += 0
+ELSEIF ABL:9 == 1
+	TIMES A , 1.00
+	SOURCE:10 += 20
+	SOURCE:11 += 30
+ELSEIF ABL:9 == 2
+	TIMES A , 1.20
+	SOURCE:10 += 40
+	SOURCE:11 += 70
+ELSEIF ABL:9 == 3
+	TIMES A , 1.40
+	SOURCE:10 += 70
+	SOURCE:11 += 120
+ELSEIF ABL:9 == 4
+	TIMES A , 1.50
+	SOURCE:10 += 110
+	SOURCE:11 += 180
+ELSEIF ABL:9 == 5
+	TIMES A , 1.70
+	SOURCE:10 += 150
+	SOURCE:11 += 250
+ELSEIF ABL:9 == 6
+	TIMES A , 1.90
+	SOURCE:10 += 200
+	SOURCE:11 += 300
+ELSEIF ABL:9 == 7
+	TIMES A , 2.10
+	SOURCE:10 += 250
+	SOURCE:11 += 350
+ELSEIF ABL:9 == 8
+	TIMES A , 2.30
+	SOURCE:10 += 300
+	SOURCE:11 += 400
+ELSEIF ABL:9 == 9
+	TIMES A , 2.50
+	SOURCE:10 += 350
+	SOURCE:11 += 450
+ELSEIF ABL:9 >= 10
+	TIMES A , 3.00
+	SOURCE:10 += 500
+	SOURCE:11 += 500
+ENDIF
+SOURCE:13 += A
+
+;依存度ベクトルを強制的に変更
+SIF TFLAG:33 == 1 || TFLAG:33 == 2
+	TFLAG:33 = 3
+
+;依存度補正値(服従で1、隷属で2　強制変更なのでリセット）
+IF TALENT:服従 && ASSIPLAY == 0
+	TFLAG:30 = 1
+ELSEIF TALENT:隷属 && ASSIPLAY == 0
+	TFLAG:30 = 2
+ENDIF
+
+
+RETURN 1
+

@@ -1,0 +1,434 @@
+﻿;--------------------------
+; SLG INIT
+;--------------------------
+@SLG_INIT
+CALL INIT_MAP()
+VARSET BOARDING_SHIP_ID, -1
+VARSET RIDING_WITH, -1
+
+PRINTL 各勢力の初期化中
+;命名
+COUNTRY_NAME:0 = ERROR
+FOR LOCAL, 0, MAX_COUNTRY
+	TRYCALLFORM INIT_COUNTRY_{LOCAL}
+NEXT
+CALL INIT_ANOMALY
+CALL INIT_MINING_POINT
+CALL INIT_ITEM_PRICE
+
+RETURN
+
+;--------------------------
+; プレイヤー勢力初期化
+;--------------------------
+@INIT_COUNTRY_1
+#DIM PORT_POSITION_ID
+
+PORT_POSITION_ID = 星系座標ID:(RAND:星系数) + 1
+CALL ID2POS(PORT_POSITION_ID)
+X = RESULT:1
+Y = RESULT:2
+PLAYER_POSITION = PORT_POSITION_ID
+
+; 明瞭地域拡大
+CALL CLEAR_MAP(LIMIT(X + LOCAL:0, 0, MAP_WIDTH), LIMIT(Y + LOCAL:1, 0, MAP_HEIGHT), 3)
+
+COUNTRY_NAME:1 = プレイヤー文明
+
+; 艦船の配置
+VARSET BOARDING_SHIP_ID, -1
+
+; プレイヤーの初期艦
+CALL INIT_PRESET_SHIP(PLAYER_COUNTRY, PORT_POSITION_ID, 偵察艇, "偵察艇01", 偵察艇)
+SHIP_EQUIP:センサー:RESULT = 3
+SHIP_EQUIP:オプション:RESULT = 1
+BOARDING_SHIP_ID = RESULT
+
+;--------------------------
+; 社会主義国家初期化
+;--------------------------
+@INIT_COUNTRY_2
+#DIM COUNTER
+COUNTER = 1
+COUNTRY_NAME:2 = 社会主義人類国家
+MONEY:2 = 1000000000000
+
+; 関係図
+REL_LIKE:2:4 = -1000; 戦争状態
+REL_LIKE:2:7 = 500; お得意様
+REL_LIKE:2:8 = 500; お得意様
+REL_LIKE:2:9 = 750; お得意様
+
+
+; 星に国の割り振り
+STAR_OWNER:0 = 2
+STAR_OWNER:1 = 2
+STAR_OWNER:2 = 2
+
+; 宇宙港の設定
+FOR LOCAL, 0, STAR_PORT_SLOT_NUM
+	SELECTCASE LOCAL
+		CASE 0 TO 9
+			STAR_PORT_SLOT:0:LOCAL = コンテナ
+			STAR_PORT_SLOT:1:LOCAL = コンテナ
+			STAR_PORT_SLOT:2:LOCAL = コンテナ
+		CASE 10 TO 14
+			STAR_PORT_SLOT:0:LOCAL = 開発ドック
+			STAR_PORT_SLOT:1:LOCAL = 開発ドック
+			STAR_PORT_SLOT:2:LOCAL = 開発ドック
+		CASE 15 TO 19
+			STAR_PORT_SLOT:0:LOCAL = 工場
+			STAR_PORT_SLOT:1:LOCAL = 工場
+			STAR_PORT_SLOT:2:LOCAL = 工場
+	ENDSELECT
+NEXT
+
+; 資源の配置
+FOR LOCAL, 0, 3
+	CALL INIT_STAR_RESOURCE(星系座標ID:LOCAL, 2)
+NEXT
+
+; 艦船の配置
+; 社会主義国家は小型船が主力
+
+COUNTER = 0
+FOR LOCAL, 0, 3
+	FOR LOCAL:1, 0, 20
+		LOCALS = F{COUNTER}フリゲート
+		CALL INIT_PRESET_SHIP(2, 星系座標ID:LOCAL, フリゲート, LOCALS, フリゲート)
+		COUNTER ++
+	NEXT
+NEXT
+COUNTER = 0
+FOR LOCAL, 0, 3
+	FOR LOCAL:1, 0, 10
+		LOCALS = C{COUNTER}コルベット
+		CALL INIT_PRESET_SHIP(2, 星系座標ID:LOCAL, コルベット, LOCALS, コルベット)
+		COUNTER ++
+	NEXT
+NEXT
+COUNTER = 0
+FOR LOCAL, 0, 3
+	FOR LOCAL:1, 0, 10
+		LOCALS = DD{COUNTER}駆逐艦
+		CALL INIT_PRESET_SHIP(2, 星系座標ID:LOCAL, 駆逐艦, LOCALS, 駆逐艦)
+		COUNTER ++
+	NEXT
+NEXT
+
+;--------------------------
+; 企業連合初期化
+;--------------------------
+@INIT_COUNTRY_3
+COUNTRY_NAME:3 = 企業連合
+MONEY:3 = 3000000000000
+
+; 星の割り当て
+STAR_OWNER:3 = 3
+STAR_OWNER:4 = 3
+
+; 宇宙港の設定
+FOR LOCAL, 0, STAR_PORT_SLOT_NUM
+	SELECTCASE LOCAL
+		CASE 0 TO 9
+			STAR_PORT_SLOT:3:LOCAL = コンテナ
+			STAR_PORT_SLOT:4:LOCAL = コンテナ
+		CASE 10 TO 14
+			STAR_PORT_SLOT:3:LOCAL = 開発ドック
+			STAR_PORT_SLOT:4:LOCAL = 開発ドック
+		CASE 15 TO 19
+			STAR_PORT_SLOT:3:LOCAL = 工場
+			STAR_PORT_SLOT:4:LOCAL = 工場
+	ENDSELECT
+NEXT
+
+; 資源の配置
+FOR LOCAL, 3, 5
+	CALL INIT_STAR_RESOURCE(星系座標ID:LOCAL, 3)
+NEXT
+
+
+; 関係図
+REL_LIKE:3:2 = -500; 味方の敵
+REL_LIKE:3:4 = 1000; 味方兼お得意様
+REL_LIKE:3:7 = -1000; 見つけ次第殲滅
+REL_LIKE:3:8 = -500; 商売敵
+REL_LIKE:3:9 = -200; 味方の敵だが利用したい
+
+; 艦船の配置
+; 各艦船をバランスよく持っている
+
+FOR LOCAL, 3, 5
+	FOR LOCAL:1, 0, 10
+		LOCALS = フレン
+		CALL INIT_PRESET_SHIP(3, 星系座標ID:LOCAL, フリゲート, LOCALS, フリゲート)
+	NEXT
+NEXT
+FOR LOCAL, 3, 5
+	FOR LOCAL:1, 0, 8
+		LOCALS = コニー
+		CALL INIT_PRESET_SHIP(3, 星系座標ID:LOCAL, コルベット, LOCALS, コルベット)
+	NEXT
+NEXT
+FOR LOCAL, 3, 5
+	FOR LOCAL:1, 0, 6
+		LOCALS = ドロシー
+		CALL INIT_PRESET_SHIP(3, 星系座標ID:LOCAL, 駆逐艦, LOCALS, 駆逐艦)
+	NEXT
+NEXT
+FOR LOCAL, 3, 5
+	FOR LOCAL:1, 0, 4
+		LOCALS = キャサリン
+		CALL INIT_PRESET_SHIP(3, 星系座標ID:LOCAL, 巡洋艦, LOCALS, 巡洋艦)
+	NEXT
+NEXT
+FOR LOCAL, 3, 5
+	FOR LOCAL:1, 0, 3
+		LOCALS = バーバラ
+		CALL INIT_PRESET_SHIP(3, 星系座標ID:LOCAL, 戦艦, LOCALS, 戦艦)
+	NEXT
+NEXT
+FOR LOCAL, 3, 5
+	FOR LOCAL:1, 0, 3
+		LOCALS = アリス
+		CALL INIT_PRESET_SHIP(3, 星系座標ID:LOCAL, 空母, LOCALS, 空母)
+	NEXT
+NEXT
+
+
+;--------------------------
+; 企業連合初期化
+;--------------------------
+@INIT_COUNTRY_4
+COUNTRY_NAME:4 = 民主主義国家
+MONEY:4 = 2000000000000
+
+; 星の割り当て
+STAR_OWNER:5 = 4
+STAR_OWNER:6 = 4
+STAR_OWNER:7 = 4
+
+; 宇宙港の設定
+FOR LOCAL, 0, STAR_PORT_SLOT_NUM
+	SELECTCASE LOCAL
+		CASE 0 TO 9
+			STAR_PORT_SLOT:5:LOCAL = コンテナ
+			STAR_PORT_SLOT:6:LOCAL = コンテナ
+			STAR_PORT_SLOT:7:LOCAL = コンテナ
+		CASE 10 TO 14
+			STAR_PORT_SLOT:5:LOCAL = 開発ドック
+			STAR_PORT_SLOT:6:LOCAL = 開発ドック
+			STAR_PORT_SLOT:7:LOCAL = 開発ドック
+		CASE 15 TO 19
+			STAR_PORT_SLOT:5:LOCAL = 工場
+			STAR_PORT_SLOT:6:LOCAL = 工場
+			STAR_PORT_SLOT:7:LOCAL = 工場
+	ENDSELECT
+NEXT
+
+; 資源の配置
+FOR LOCAL, 5, 8
+	CALL INIT_STAR_RESOURCE(星系座標ID:LOCAL, 4)
+NEXT
+
+; 関係性
+REL_LIKE:4:2 = -1000; 戦争状態
+REL_LIKE:4:3 = 800; 胡散臭い味方
+REL_LIKE:4:7 = -500; 敵の味方
+REL_LIKE:4:8 = -500; 敵の味方
+REL_LIKE:4:9 = -500; 敵の味方
+
+; 初期艦
+; 空母打撃軍がメイン
+FOR LOCAL, 5, 8
+	FOR LOCAL:1, 0, 10
+		LOCALS = フォックス
+		CALL INIT_PRESET_SHIP(4, 星系座標ID:LOCAL, フリゲート, LOCALS, フリゲート)
+	NEXT
+NEXT
+FOR LOCAL, 5, 8
+	FOR LOCAL:1, 0, 10
+		LOCALS = ケルベロス
+		CALL INIT_PRESET_SHIP(4, 星系座標ID:LOCAL, 駆逐艦, LOCALS, 駆逐艦)
+	NEXT
+NEXT
+FOR LOCAL, 5, 8
+	FOR LOCAL:1, 0, 6
+		LOCALS = ベヒーモス
+		CALL INIT_PRESET_SHIP(4, 星系座標ID:LOCAL, 巡洋艦, LOCALS, 巡洋艦)
+	NEXT
+NEXT
+FOR LOCAL, 5, 8
+	FOR LOCAL:1, 0, 3
+		LOCALS = ドラゴン
+		CALL INIT_PRESET_SHIP(4, 星系座標ID:LOCAL, 空母, LOCALS, 空母)
+	NEXT
+NEXT
+
+;--------------------------
+; アレス宗教国家
+;--------------------------
+@INIT_COUNTRY_5
+COUNTRY_NAME:5 = アレス宗教国家
+MONEY:5 = 500000000000
+
+; 星割り当て
+STAR_OWNER:8 = 5
+
+; 宇宙港の設定
+FOR LOCAL, 0, STAR_PORT_SLOT_NUM
+	SELECTCASE LOCAL
+		CASE 0 TO 9
+			STAR_PORT_SLOT:8:LOCAL = コンテナ
+		CASE 10 TO 14
+			STAR_PORT_SLOT:8:LOCAL = 開発ドック
+		CASE 15 TO 19
+			STAR_PORT_SLOT:8:LOCAL = 工場
+	ENDSELECT
+NEXT
+
+; 資源の配置
+CALL INIT_STAR_RESOURCE(星系座標ID:8, 5)
+
+; 関係性
+REL_LIKE:5:6 = -800; 戦争一歩手前
+
+; 初期艦
+; 戦艦以下ピラミッド階層
+FOR LOCAL, 0, 20
+	LOCALS = ナイト
+	CALL INIT_PRESET_SHIP(5, 星系座標ID:8, フリゲート, LOCALS, フリゲート)
+NEXT
+FOR LOCAL, 0, 10
+	LOCALS = ビショップ
+	CALL INIT_PRESET_SHIP(5, 星系座標ID:8, 駆逐艦, LOCALS, 駆逐艦)
+NEXT
+FOR LOCAL, 0, 5
+	LOCALS = クイーン
+	CALL INIT_PRESET_SHIP(5, 星系座標ID:8, 巡洋艦, LOCALS, 巡洋艦)
+NEXT
+FOR LOCAL, 0, 1
+	LOCALS = キング
+	CALL INIT_PRESET_SHIP(5, 星系座標ID:8, 戦艦, LOCALS, 戦艦)
+NEXT
+
+;--------------------------
+; 機械文明
+;--------------------------
+@INIT_COUNTRY_6
+COUNTRY_NAME:6 = 機械文明
+MONEY:6 = 3000000000000
+
+; 星割り当て
+STAR_OWNER:9 = 6
+
+; 宇宙港の設定
+FOR LOCAL, 0, STAR_PORT_SLOT_NUM
+	SELECTCASE LOCAL
+		CASE 0 TO 9
+			STAR_PORT_SLOT:9:LOCAL = コンテナ
+		CASE 10 TO 14
+			STAR_PORT_SLOT:9:LOCAL = 開発ドック
+		CASE 15 TO 19
+			STAR_PORT_SLOT:9:LOCAL = 工場
+	ENDSELECT
+NEXT
+
+; 資源の配置
+CALL INIT_STAR_RESOURCE(星系座標ID:9, 6)
+
+; 初期艦
+; 駆逐と戦艦および空母構成
+FOR LOCAL, 0, 30
+	LOCALS = ウォーリア
+	CALL INIT_PRESET_SHIP(6, 星系座標ID:9, 駆逐艦, LOCALS, 駆逐艦)
+NEXT
+FOR LOCAL, 0, 5
+	LOCALS = スナイパー
+	CALL INIT_PRESET_SHIP(6, 星系座標ID:9, 戦艦, LOCALS, 戦艦)
+NEXT
+FOR LOCAL, 0, 3
+	LOCALS = マザー
+	CALL INIT_PRESET_SHIP(6, 星系座標ID:9, 空母, LOCALS, 空母)
+NEXT
+
+;--------------------------
+; 緑の海賊団
+;--------------------------
+@INIT_COUNTRY_7
+COUNTRY_NAME:7 = 緑の海賊団
+
+;--------------------------
+; 青の商業連合
+;--------------------------
+@INIT_COUNTRY_8
+COUNTRY_NAME:8 = 青の商業連合
+
+;--------------------------
+; 赤の傭兵集団
+;--------------------------
+@INIT_COUNTRY_9
+COUNTRY_NAME:9 = 赤の傭兵集団
+
+;--------------------------
+; 一般海賊
+;--------------------------
+@INIT_COUNTRY_10
+#DIM CONST X座標分割数 = MAP_WIDTH / 5
+#DIM CONST Y座標分割数 = MAP_HEIGHT / 5
+#DIM 星系座標X, 星系数
+#DIM 星系座標Y, 星系数
+#DIM ITER
+
+ITER = 0
+COUNTRY_NAME:10 = 海賊
+
+;関係性
+FOR LOCAL, 1, MAX_COUNTRY
+	SIF LOCAL == 10
+		CONTINUE
+	REL_LIKE:10:LOCAL = -1000
+	REL_LIKE:LOCAL:10 = -1000
+NEXT
+
+PRINTL 星系製作中……
+WHILE ITER < 10
+	FOR Y, 0, Y座標分割数 - 1
+		 FOR X, 0, X座標分割数 - 1
+		 	IF ITER < 星系数 && RAND(星系数 - ITER) == 0 && MAP:(X * 5 + 3):(Y * 5 + 3) != 0
+			 	CALL POS2ID(X * 5 + 1, Y * 5 + 1)
+			 	LOCALS = 海賊船＃{ITER}
+				CALL INIT_PRESET_SHIP(10, RESULT, フリゲート, LOCALS, フリゲート)
+				ITER ++
+			ENDIF
+		 NEXT
+	NEXT
+WEND
+PRINTL 完了!
+
+; 各星の初期化
+@INIT_STAR_RESOURCE(POSID, COUNTRY_ID)
+#DIM POSID
+#DIM COUNTRY_ID
+
+RESULT = ADD_RESOURCE(POSID, COUNTRY_ID, 赤原石, 5000)
+RESULT = ADD_RESOURCE(POSID, COUNTRY_ID, 青原石, 5000)
+RESULT = ADD_RESOURCE(POSID, COUNTRY_ID, 貴金属鉱石, 5000)
+RESULT = ADD_RESOURCE(POSID, COUNTRY_ID, エウスガス, 5000)
+RESULT = ADD_RESOURCE(POSID, COUNTRY_ID, ビクニーガス, 5000)
+RESULT = ADD_RESOURCE(POSID, COUNTRY_ID, ゼスタガス, 5000)
+RESULT = ADD_RESOURCE(POSID, COUNTRY_ID, チェルニーオイル, 5000)
+RESULT = ADD_RESOURCE(POSID, COUNTRY_ID, グリッドオイル, 5000)
+RESULT = ADD_RESOURCE(POSID, COUNTRY_ID, ジェルオイル, 5000)
+RESULT = ADD_RESOURCE(POSID, COUNTRY_ID, 武装合金, 2500)
+RESULT = ADD_RESOURCE(POSID, COUNTRY_ID, 装甲合金, 2500)
+RESULT = ADD_RESOURCE(POSID, COUNTRY_ID, 重武装合金, 2500)
+RESULT = ADD_RESOURCE(POSID, COUNTRY_ID, 重装甲合金, 2500)
+RESULT = ADD_RESOURCE(POSID, COUNTRY_ID, シールド発生装置, 2500)
+RESULT = ADD_RESOURCE(POSID, COUNTRY_ID, 多重シールド発生装置, 2500)
+RESULT = ADD_RESOURCE(POSID, COUNTRY_ID, 武装制御機器, 2500)
+RESULT = ADD_RESOURCE(POSID, COUNTRY_ID, 合金加工剤, 2500)
+RESULT = ADD_RESOURCE(POSID, COUNTRY_ID, 耐熱合金, 2500)
+RESULT = ADD_RESOURCE(POSID, COUNTRY_ID, ジェットガス, 2500)
+RESULT = ADD_RESOURCE(POSID, COUNTRY_ID, 超電導回路, 2500)
+RESULT = ADD_RESOURCE(POSID, COUNTRY_ID, タイラーセンサー, 2500)

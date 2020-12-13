@@ -1,0 +1,33 @@
+﻿;-----------------------------------
+; センサー
+;-----------------------------------
+@GET_SENSOR(ID)
+#DIM ID
+
+SELECTCASE ID
+	CASE 1
+		SENSOR = 1
+		EQUIP_NAME = TIER1汎用センサー
+	CASE 2
+		SENSOR = 2
+		EQUIP_NAME = TIER2汎用センサー
+	CASE 3
+		SENSOR = 3
+		EQUIP_NAME = TIER3汎用センサー
+	CASEELSE
+		EQUIP_NAME = ---
+ENDSELECT
+
+;-----------------------------------
+; センサーの説明
+;-----------------------------------
+@GET_SENSOR_DESCRIPTION(ID)
+#DIM ID
+CALL GET_SENSOR(ID)
+SELECTCASE ID
+	CASE 1 TO 3
+		PRINTFORML %EQUIP_NAME%
+		PRINTFORML センサー範囲: {SENSOR}
+	CASEELSE
+		PRINTFORML = ---
+ENDSELECT

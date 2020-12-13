@@ -1,0 +1,476 @@
+﻿@CALLTRAINEND
+TFLAG:CALLTRAIN = 0
+
+@SHOW_USERCOM
+VARSET Q, -1
+VARSET Z, 0
+;CALLTRAIN時は表示しない
+SIF TFLAG:CALLTRAIN
+	RETURN 0
+	
+;LOCAL:1 表示番号
+LOCAL:1 = -1
+;コマンドを全てチェック
+FOR LOCAL, 0, 799
+	;名前の長さが0の場合、ないものとみなす
+	SIF STRLENS(TRAINNAME:LOCAL) == 0
+		CONTINUE
+		
+	;表示番号を追加
+	LOCAL:1 += 1
+	
+	;ここにコマンドフィルタ入れたかったら入れる（J+参照）
+	
+	;警告用
+	TFLAG:DOTRAIN = 0
+	TRYCALLFORM COM_ABLE{LOCAL}
+	IF RESULT == 1
+		PRINTFORML %TRAINNAME:LOCAL%は@COM_ABLEで、COM_ABLE強制終了フラグが設定されていません
+		PRINTFORML 他のCOM_ABLEを参考にして、以下の記述を追加してください
+		PRINTFORML SIF TFLAG:DOTRAIN == 0 && TFLAG:CALLTRAIN == 0
+		PRINTFORMW 		RETURN 0
+	ENDIF
+	;DOTRAINを使うので1に
+	TFLAG:DOTRAIN = 1
+	
+	;COM_ABLE共通判定のためSELECTCOMにLOCALを代入
+	SELECTCOM = LOCAL
+	TRYCALLFORM COM_ABLE{LOCAL}
+	SIF RESULT == 0
+		CONTINUE
+	
+	;Q配列に実行可能コマンドを記録していく
+	Q:(LOCAL:1) = LOCAL
+	
+	
+	IF 1
+		;予め実行判定を調べ実行不可能ならばグレー表示にする
+		LOCAL:3 = 0
+		SKIPDISP 1
+		CALL PRE_COMORDER, LOCAL
+		LOCAL:3 = RESULT
+		SKIPDISP 0
+		SIF LOCAL:3
+			SETCOLOR 105, 105, 105
+		;コマンド名呼び出し
+		CALL CUSTOM_COMMAND_NAME, LOCAL, LOCAL:1
+		SIF LOCAL:3
+			RESETCOLOR
+	ENDIF
+	;改行処理
+	CALL CHECK_NEWLINE
+NEXT
+
+
+;USERCOM表示の前に一度、改行する
+PRINTL 
+;------------------------------------------------------
+;800番以降(コマンドではないもの)の表示
+;------------------------------------------------------
+A = 0
+Z = 0
+PRINTC 履歴表示[800]
+CALL CHECK_NEWLINE
+PRINTC 汚れ表示[801]
+CALL CHECK_NEWLINE
+PRINTC 能力表示[802]
+CALL CHECK_NEWLINE
+B = 11
+D = 0
+REPEAT 50
+	C = B+COUNT
+	;媚薬、利尿剤、ビデオカメラ、新妻プレイ、羞恥プレイ、強精神薬使用時は除く
+	SIF C == 26
+		CONTINUE
+	SIF C == 27
+		CONTINUE
+	SIF C == 28
+		CONTINUE
+	SIF C == 30
+		CONTINUE
+	SIF C == 33
+		CONTINUE
+	SIF C == 34
+		CONTINUE
+	SIF TEQUIP:C
+		D = 1
+REND
+IF D == 0
+	PRINTC 着衣設定[803]
+	CALL CHECK_NEWLINE
+ENDIF
+IF (TALENT:PLAYER:半人半妖 || TALENT:PLAYER:ふたなり || TALENT:PLAYER:オトコ) || (TALENT:半人半妖 || TALENT:ふたなり || TALENT:オトコ)
+	IF ITEM:45 > 0
+		PRINTC コンドーム設定[804]
+		CALL CHECK_NEWLINE
+	ENDIF
+	PRINTC 自動射精先変更[805]
+	CALL CHECK_NEWLINE
+ENDIF
+IF ASSIPLAY
+	PRINTC 能力表示(助手)[806]
+	CALL CHECK_NEWLINE
+ELSE
+	PRINTC 能力表示(マスター)[806]
+	CALL CHECK_NEWLINE
+ENDIF
+IF ASSI >= 0
+	IF ASSIPLAY && TEQUIP:25 == 0
+		PRINTC マスターと交代[900]
+	ELSEIF TEQUIP:25 == 0
+		PRINTC 助手と交代[900]
+	ENDIF
+	CALL CHECK_NEWLINE
+ENDIF
+CALL CHECK_NEWLINE
+PRINTC 調教終了[999]
+IF PREVCOM >= 0
+	PRINTL 
+	PRINT ＜前回調教コマンド:
+	PRINTS STR:0
+	SIF TFLAG:50
+		PRINT (助手)
+	PRINTL ＞
+ENDIF
+
+@USERCOM
+;コマンド入力ミスフラグ初期化
+TFLAG:54 = 0
+
+A = 0
+REPEAT 100
+	SIF ITEM:(500 + COUNT)
+		A = 1
+REND
+
+IF RESULT == 800
+	CALL SHOW_EQUIP
+	RETURN 1
+ELSEIF RESULT == 801
+	CALL STAIN_INFO
+	RETURN 1
+ELSEIF RESULT == 802
+	T = TARGET
+	CALL SHOW_INFO(T)
+	RETURN 1
+ELSEIF RESULT == 803 && D == 0
+	CALL CLOTHES_CHANGE
+	RETURN 1
+ELSEIF RESULT == 804 && ((TALENT:PLAYER:半人半妖 || TALENT:PLAYER:ふたなり || TALENT:PLAYER:オトコ) || (TALENT:半人半妖 || TALENT:ふたなり || TALENT:オトコ))
+	CALL CONDOM_SETTING
+	RETURN 1
+ELSEIF RESULT == 805 && ((TALENT:PLAYER:半人半妖 || TALENT:PLAYER:ふたなり || TALENT:PLAYER:オトコ) || (TALENT:半人半妖 || TALENT:ふたなり || TALENT:オトコ))
+	CALL SAMENPLACE_SETTING
+	RETURN 1
+ELSEIF RESULT == 806
+	PRINTSL NAME:PLAYER
+	T = PLAYER
+	CALL SHOW_INFO(T)
+	WAIT
+	RETURN 1
+ELSEIF RESULT == 900 && ASSI > 0 && TEQUIP:25 == 0
+	IF ASSIPLAY
+		ASSIPLAY = 0
+		PLAYER = MASTER
+	ELSE
+		ASSIPLAY = 1
+		PLAYER = ASSI
+	ENDIF
+	RETURN 1
+ELSEIF RESULT == 999
+	BEGIN AFTERTRAIN
+	RETURN 1
+;コマンド及び独自ユーティリティ実行
+ELSEIF RESULT >= 0 && VARSIZE("Q") > RESULT && Q:RESULT >= 0
+	DOTRAIN Q:RESULT
+;無効な数字入力がなされた場合、フラグをたてる
+;誘うコマンドの、行動前処理が無効な入力によって何度も表示される不具合を回避します
+ELSE
+	TFLAG:54 = 1
+ENDIF
+RETURN 0
+
+@SHOW_EQUIP
+T = TARGET
+CALL SHOW_INFO_JUEL
+IF PREVCOM >= 0
+	PRINT 前回調教コマンド:
+	PRINTS STR:0
+	SIF TFLAG:50
+		PRINT (助手)
+	PRINTL 
+ENDIF
+SIF TEQUIP:26
+	PRINTL [媚薬効果発揮中]
+SIF TEQUIP:27
+	PRINTL [利尿剤効果発揮中]
+IF TEQUIP:34 == 1
+	PRINTL [強精神薬反動中]
+ELSEIF TEQUIP:34 > 1
+	PRINTL [強精神薬効果発揮中]
+ENDIF
+
+SIF TEQUIP:28
+	PRINTFORML [ビデオ撮影中({TFLAG:70 - 1}/10)]
+SIF TEQUIP:29
+	PRINTL [野外プレイ中]
+SIF TEQUIP:30
+	PRINTL [羞恥プレイ中]
+SIF TEQUIP:31
+	PRINTL [お風呂場プレイ中]
+SIF TEQUIP:33
+	PRINTL [新妻プレイ中]
+SIF TEQUIP:25
+	PRINTL [触手調教中]
+
+IF TEQUIP:13 && TEQUIP:25
+	PRINTL [触手挿入]
+ELSEIF TEQUIP:13
+	PRINTL [バイブ装備中]
+ENDIF
+
+IF TEQUIP:14 && TEQUIP:25
+	PRINTL [触手アナル挿入]
+ELSEIF TEQUIP:14
+	PRINTL [アナルバイブ装備中]
+ENDIF
+
+IF TEQUIP:11 && TEQUIP:25
+	PRINTL [触手クリ責め]
+ELSEIF TEQUIP:11
+	PRINTL [クリキャップ装着中]
+ENDIF
+
+IF TEQUIP:16 && TEQUIP:25
+	PRINTL [触手乳首責め]
+ELSEIF TEQUIP:16
+	PRINTL [ニプルキャップ装備中]
+ENDIF
+IF TEQUIP:17 && TEQUIP:25
+	PRINTL [触手搾乳]
+ELSEIF TEQUIP:17
+	PRINTL [搾乳器装備中]
+ENDIF
+SIF TEQUIP:24
+	PRINTL [乳房電極装備中]
+
+IF TEQUIP:12 && TEQUIP:25
+	PRINTL [触手ペニス責め]
+ELSEIF TEQUIP:12
+	PRINTL [オナホール装備中]
+ENDIF
+
+IF TEQUIP:32
+	PRINTL [シャワー使用中]
+ENDIF
+
+IF TEQUIP:19 && TEQUIP:25
+	PRINTL [触手緊縛]
+ELSEIF TEQUIP:19
+	PRINTL [縄で緊縛]
+ENDIF
+
+IF TEQUIP:21 && TEQUIP:25
+	PRINTL [触手浣腸]
+ELSEIF TEQUIP:21
+	PRINTL [浣腸＋アナルプラグ装備中]
+ENDIF
+
+SIF TEQUIP:36
+	PRINTL [触手口辱中]
+
+SIF TEQUIP:18
+	PRINTL [アイマスク装備中]
+SIF TEQUIP:20
+	PRINTL [ボールギャグ装備中]
+SIF TEQUIP:15
+	PRINTL [アナルビーズ装備中]
+SIF TEQUIP:22
+	PRINTL [拡張バルーン装備中]
+SIF TEQUIP:23
+	PRINTL [アナル電極装備中]
+
+SIF EX:0
+	PRINTFORM Ｃ絶頂:{EX:0}回　
+SIF EX:1
+	PRINTFORM Ｖ絶頂:{EX:1}回　
+SIF EX:2
+	PRINTFORM Ａ絶頂:{EX:2}回　
+SIF EX:3
+	PRINTFORM Ｂ絶頂:{EX:3}回　
+SIF EX:4
+	PRINTFORM 　噴乳:{EX:4}回　
+SIF EX:5
+	PRINTFORM 　射精:{EX:5}回　
+SIF EX:0 || EX:1 || EX:2 || EX:3 || EX:4 || EX:5
+	PRINTL 
+WAIT
+
+@CONDOM_SETTING
+A = 0
+B = 0
+C = 0
+T = 0
+PRINTW コンドームの設定を行う対象を選択してください
+PRINTL  
+REPEAT 3
+	IF (TALENT:MASTER:半人半妖 || TALENT:MASTER:ふたなり || TALENT:MASTER:オトコ) && A == 0
+		PRINTFORM [{COUNT}] %CALLNAME:MASTER%
+		IF TEQUIP:MASTER:35 && (FLAG:98 & 4)
+			PRINTL (装着済み、常備)
+		ELSEIF TEQUIP:MASTER:35
+			PRINTL (装着済み)
+		ELSE
+			PRINTL (未装着)
+		ENDIF
+			A = 1
+	ELSEIF ASSI >= 0
+		IF (TALENT:ASSI:半人半妖 || TALENT:ASSI:ふたなり || TALENT:ASSI:オトコ) && B == 0
+			PRINTFORM [{COUNT}] %CALLNAME:ASSI%
+			IF TEQUIP:ASSI:35 && (FLAG:98 & 2)
+				PRINTL (装着済み、常備)
+			ELSEIF TEQUIP:ASSI:35
+				PRINTL (装着済み)
+			ELSE
+				PRINTL (未装着)
+			ENDIF
+			B = 1
+		ENDIF
+	ELSEIF (TALENT:半人半妖 || TALENT:ふたなり || TALENT:オトコ) && C == 0
+		PRINTFORM [{COUNT}] %CALLNAME:TARGET%
+		IF TEQUIP:TARGET:35 && (FLAG:98 & 1)
+			PRINTL (装着済み、常備)
+		ELSEIF TEQUIP:TARGET:35
+			PRINTL (装着済み)
+		ELSE
+			PRINTL (未装着)
+		ENDIF
+			C = 1
+	ENDIF
+REND
+PRINTL [100]戻る
+$INPUT_LOOP
+INPUT
+IF RESULT == 0
+	IF A == 1
+		T = MASTER
+	ELSEIF B == 1
+		T = ASSI
+	ELSEIF C == 1
+		T = TARGET
+	ENDIF
+ELSEIF RESULT == 1
+	IF B == 1
+		T = ASSI
+	ELSEIF C == 1
+		T = TARGET
+	ENDIF
+ELSEIF RESULT == 2
+	T = TARGET
+ELSEIF RESULT == 100
+	RETURN 0
+ELSE
+	GOTO INPUT_LOOP
+ENDIF
+
+PRINTL コンドームの設定をしてください
+PRINTL  
+	PRINTFORM 設定対象：%CALLNAME:T%
+	IF TEQUIP:T:35
+		PRINT (装着済み
+		IF (T == MASTER && (FLAG:98 & 4)) || (T == ASSI && (FLAG:98 & 2)) || (T == TARGET && (FLAG:98 & 1))
+			PRINTL 、常備)
+		ELSE
+			PRINTL )
+		ENDIF
+	ELSE
+		PRINTL (未装着)
+	ENDIF
+PRINTL [0]  コンドームを常に装着する
+PRINTL [1]  コンドームを装着する
+PRINTL [2]  コンドームを外す
+PRINTL [100]戻る
+
+$INPUT_LOOP_2
+INPUT
+IF RESULT == 0
+	IF TEQUIP:T:35 == 0
+		ITEM:45 -= 1
+		TEQUIP:T:35 = 1
+	ENDIF
+	SIF T == MASTER
+		FLAG:98 |= 4
+	SIF T == ASSI
+		FLAG:98 |= 2
+	SIF T == TARGET
+		FLAG:98 |= 1
+	PRINTFORMW %CALLNAME:T%は、コンドームを常につけるようにした
+ELSEIF RESULT == 1
+	IF TEQUIP:T:35 == 0
+		PRINTFORMW %CALLNAME:T%は、コンドームをつけた
+		ITEM:45 -= 1
+		TEQUIP:T:35 = 1
+	ELSEIF (T == MASTER && (FLAG:98 & 4)) || (T == ASSI && (FLAG:98 & 2)) || (T == TARGET && (FLAG:98 & 1))
+		PRINTFORMW %CALLNAME:T%は、コンドームを常につけないようにした
+		SIF T == MASTER
+			FLAG:98 &= 3
+		SIF T == ASSI
+			FLAG:98 &= 5
+		SIF T == TARGET
+			FLAG:98 &= 6
+	ELSE
+		PRINTFORMW %CALLNAME:T%は、既にコンドームをつけている
+	ENDIF
+ELSEIF RESULT == 2
+	PRINTFORMW %CALLNAME:T%はコンドームを外した
+	SIF T == MASTER
+		FLAG:98 &= 3
+	SIF T == ASSI
+		FLAG:98 &= 5
+	SIF T == TARGET
+		FLAG:98 &= 6
+ELSEIF RESULT == 100
+	RETURN 0
+ELSE
+	GOTO INPUT_LOOP_2
+ENDIF
+
+
+@CHECK_NEWLINE
+Z += 1
+IF (Z % PRINTCPERLINE()) == 0
+	PRINTL 
+ENDIF
+
+;---------------------------------------------------------
+;実行判定を呼び出してコマンドごとにチェックする処理
+;TRYCCALLFORMを使うので式中関数にはできない
+;---------------------------------------------------------
+@PRE_COMORDER, ARG
+TRYCCALLFORM COM_ORDER_{ARG}
+	;実行できない場合
+	IF A < V
+		RETURN 1
+	;実行できる場合
+	ELSE
+		RETURN 0
+	ENDIF
+CATCH
+	;元々実行判定のないコマンドの場合
+	RETURN 0
+ENDCATCH
+
+;---------------------------------------------------------------------------------------------
+;コマンド名変更処理
+;元はPRINTFORMC %TRAINNAME:LOCAL%[{LOCAL:1,3}]でTrain.csvのコマンド名通りに表示されていた処理
+;ARG 元処理のLOCAL(選択されているコマンド番号)
+;ARG:1 元処理のLOCAL:1(表示番号)
+;---------------------------------------------------------------------------------------------
+@CUSTOM_COMMAND_NAME, ARG, ARG:1
+;LOCALSに元のコマンド名を設定
+LOCALS = %TRAINNAME:ARG%
+
+;コマンド名表示
+PRINTFORMC %LOCALS%[{ARG:1,3}]
+
+

@@ -1,0 +1,123 @@
+﻿;技巧の可否
+@ISABLUP2
+;恋慕、親愛、服従、隷属はMAXLV10
+IF ABL:2 >= 10
+	RETURN 0
+ELSEIF ABL:2 >= 5 && TALENT:恋慕 == 0 && TALENT:親愛 == 0 && TALENT:服従 == 0 && TALENT:隷属 == 0
+	RETURN 0
+ENDIF
+
+CALL DECIDE_ABLUP2
+
+IF Z == 0
+	RETURN 0
+ELSE
+	RETURN 1
+ENDIF
+
+
+;技巧
+@ABLUP2
+DRAWLINE
+;恋慕、親愛、服従、隷属はMAXLV10
+IF ABL:2 >= 10
+	PRINTW 既にMAXです
+	RETURN 0
+ELSEIF ABL:2 >= 5 && TALENT:恋慕 == 0 && TALENT:親愛 == 0 && TALENT:服従 == 0 && TALENT:隷属 == 0
+	PRINTW 既にMAXです
+	RETURN 0
+ENDIF
+
+CALL DECIDE_ABLUP2
+
+PRINT [0] - 
+PRINTS PALAMNAME:8
+PRINT の珠×
+PRINTV A
+PRINT ……
+IF I == 0
+	PRINT ＯＫ
+ELSE
+	SIF I & 1
+		PRINT 珠不足 
+	SIF I & 2
+		PRINT 経験不足 
+ENDIF
+PRINTL 
+
+PRINTL [100] - やめる
+
+
+INPUT
+IF (RESULT < 0 || RESULT > 0) && RESULT != 100
+	RESTART
+ELSEIF I != 0 && RESULT == 0
+	PRINTL 条件を満たしていません
+	RESTART
+ELSEIF RESULT == 100
+	RETURN 0
+ENDIF
+
+ABL:2 += 1
+
+IF RESULT == 0
+	JUEL:8 -= A
+ENDIF
+
+PRINTS ABLNAME:2
+PRINT のレベルが
+PRINTV ABL:2
+PRINTW になりました
+
+;技巧LVUP判定
+@DECIDE_ABLUP2
+;条件別にＯＫかダメかを記録する
+I = 0
+;能力アップ可能なら1にする
+Z = 0
+
+IF ABL:2 == 0
+	A = 1
+ELSEIF ABL:2 == 1
+	A = 20
+ELSEIF ABL:2 == 2
+	A = 200
+ELSEIF ABL:2 == 3
+	A = 3000
+ELSEIF ABL:2 == 4
+	A = 20000
+ELSEIF ABL:2 == 5
+	A = 25000
+ELSEIF ABL:2 == 6
+	A = 34000
+ELSEIF ABL:2 == 7
+	A = 45000
+ELSEIF ABL:2 == 8
+	A = 55000
+ELSEIF ABL:2 == 9
+	A = 70000
+ENDIF
+
+;自尊心
+IF TALENT:プライド高い
+	TIMES A , 1.50
+ENDIF
+;一線越えない
+IF TALENT:一線越えない && (TALENT:恋慕 == 0 && TALENT:淫乱 == 0 && TALENT:服従 == 0 && TALENT:親愛 == 0 && TALENT:娼婦 == 0 && TALENT:隷属 == 0)
+	TIMES A , 2.00
+ENDIF
+
+;0になった場合は1にする
+SIF A == 0
+	A = 1
+
+;習得の珠で上げる
+SIF JUEL:8 < A
+	I |= 1
+
+IF I == 0
+	Z = 1
+ENDIF
+RETURN 1
+
+
