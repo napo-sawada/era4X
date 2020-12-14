@@ -53,6 +53,17 @@ ITEM_PRICE:耐熱合金 = 600
 ITEM_PRICE:ジェットガス = 600
 ITEM_PRICE:超電導回路 = 600
 ITEM_PRICE:タイラーセンサー = 600
+ITEM_PRICE:宇宙たばこ = 1000
+ITEM_PRICE:オーネスワイン = 1000
+ITEM_PRICE:トルス酒 = 1000
+ITEM_PRICE:サンロットの香木 = 1000
+ITEM_PRICE:フォルス酒 = 1000
+ITEM_PRICE:ゴルンミスト発生器 = 1000
+ITEM_PRICE:ロック布 = 1000
+ITEM_PRICE:ナナーシャ鳥 = 1000
+ITEM_PRICE:エインズの実 = 1000
+ITEM_PRICE:ナイ・ゲーム機 = 1000
+
 
 ; 採掘可能か判定
 ; INT 0: 採掘不可能, 1:採掘可能
@@ -238,6 +249,26 @@ SELECTCASE ID
         RETURNF "超電導回路"
     CASE タイラーセンサー
         RETURNF "タイラーセンサー"
+    CASE 宇宙たばこ
+        RETURNF "宇宙たばこ"
+    CASE オーネスワイン
+        RETURNF "オーネスワイン"
+    CASE トルス酒
+        RETURNF "トルス酒"
+    CASE サンロットの香木
+        RETURNF "サンロットの香木"
+    CASE フォルス酒
+        RETURNF "フォルス酒"
+    CASE ゴルンミスト発生器
+        RETURNF "ゴルンミスト発生器"
+    CASE ロック布
+        RETURNF "ロック布"
+    CASE ナナーシャ鳥
+        RETURNF "ナナーシャ鳥"
+    CASE エインズの実
+        RETURNF "エインズの実"
+    CASE ナイ・ゲーム機
+        RETURNF "ナイ・ゲーム機"
     CASEELSE
         RETURNF NO_ITEM
 ENDSELECT
@@ -289,6 +320,26 @@ SELECTCASE ID
         RETURNF "精密機器用の回路"
     CASE タイラーセンサー
         RETURNF "汎用的に扱われているセンサーの中核素材"
+    CASE 宇宙たばこ
+        RETURNF "煙も有害性もない不思議なたばこ"
+    CASE オーネスワイン
+        RETURNF "特定の星でとれる木の実から作られた風味の深いワイン"
+    CASE トルス酒
+        RETURNF "特定の星でとれる木の実から作られた深い味わいの酒"
+    CASE サンロットの香木
+        RETURNF "気分を落ち着かせる香りを放つ香木"
+    CASE フォルス酒
+        RETURNF "のど越しがよく、手っ取り早く酔える酒"
+    CASE ゴルンミスト発生器
+        RETURNF "気分を高揚させるミストを散布する装置"
+    CASE ロック布
+        RETURNF "富裕層に人気の布。肌触りがとにかくいい"
+    CASE ナナーシャ鳥
+        RETURNF "旨味の強い鳥"
+    CASE エインズの実
+        RETURNF "女性人気の高い甘い木の実。上品な甘さ"
+    CASE ナイ・ゲーム機
+        RETURNF "ロボットもはまる面白さのゲーム機"
     CASEELSE
         RETURNF NO_ITEM
 ENDSELECT
@@ -317,6 +368,8 @@ FOR ITEM_ID, 0, ITEM_LENGTH
     ITEM_COUNT = 0
     LOCALS = %GET_RESOURCE_NAME(ITEM_ID)%
     SIF LOCALS == NO_ITEM
+        CONTINUE
+    SIF GET_RESOURCE_NUM(星系座標ID:PORT_ID, STAR_OWNER:PORT_ID, ITEM_ID) == 0 && GET_RESOURCE_NUM(星系座標ID:PORT_ID, PLAYER_COUNTRY, ITEM_ID) == 0
         CONTINUE
     FOR SHIP_ID, 0, MAX_SHIP
         SIF SHIP_COUNTRY:SHIP_ID != PLAYER_COUNTRY
@@ -369,18 +422,23 @@ INPUT
 SELECTCASE RESULT
     CASE -100 TO 100
         ; 売買数が所持数以下の場合
-        IF ITEM_COUNT + (RESULT + BUY_COUNT) >= 0
-            BUY_COUNT += RESULT
-            IF BUY_COUNT * ITEM_PRICE:ITEM_ID > MONEY
-                BUY_COUNT = MONEY / ITEM_PRICE:ITEM_ID
-            ENDIF
-            SIF BUY_COUNT > CAPACITY
-                BUY_COUNT = CAPACITY
-
-        ; 売買数が所持数より多い場合、販売数を所持数に変える
-        ELSEIF ITEM_COUNT + (RESULT + BUY_COUNT) < 0
-            BUY_COUNT = -ITEM_COUNT
-        ENDIF
+        BUY_COUNT += RESULT
+        ; 自分が売れる数より販売数が多かった場合
+        LOCAL =  GET_RESOURCE_NUM(星系座標ID:PORT_ID, PLAYER_COUNTRY, ITEM_ID)
+        SIF BUY_COUNT < -1 * LOCAL
+            BUY_COUNT = -1 * LOCAL
+        ; 売られる側のキャパより販売数が多かった場合
+        LOCAL = GET_CAPACITY(星系座標ID:PORT_ID, STAR_OWNER:PORT_ID)
+        SIF BUY_COUNT < -1 * LOCAL
+            BUY_COUNT = -1 * LOCAL
+        ; 自分が買えるキャパより多く買おうとした場合
+        LOCAL = GET_CAPACITY(星系座標ID:PORT_ID, PLAYER_COUNTRY)
+        SIF BUY_COUNT > LOCAL
+            BUY_COUNT = LOCAL
+        ; 店が売れる数よりも多く買おうとした場合
+        LOCAL = GET_RESOURCE_NUM(星系座標ID:PORT_ID, STAR_OWNER:PORT_ID, ITEM_ID)
+        SIF BUY_COUNT > LOCAL
+            BUY_COUNT = LOCAL
         GOTO INPUT_LOOP2
     CASE 1000
         SIF BUY_COUNT * ITEM_PRICE:ITEM_ID != 0

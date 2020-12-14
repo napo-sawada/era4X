@@ -86,6 +86,14 @@ NEXT
 ; 資源の配置
 FOR LOCAL, 0, 3
 	CALL INIT_STAR_RESOURCE(星系座標ID:LOCAL, 2)
+	SELECTCASE LOCAL
+		CASE 0
+			RESULT = ADD_RESOURCE(星系座標ID:LOCAL, 2, 宇宙たばこ, 1000)
+		CASE 1
+			RESULT = ADD_RESOURCE(星系座標ID:LOCAL, 2, オーネスワイン, 1000)
+		CASE 2
+			RESULT = ADD_RESOURCE(星系座標ID:LOCAL, 2, トルス酒, 1000)
+	ENDSELECT
 NEXT
 
 ; 艦船の配置
@@ -145,6 +153,12 @@ NEXT
 ; 資源の配置
 FOR LOCAL, 3, 5
 	CALL INIT_STAR_RESOURCE(星系座標ID:LOCAL, 3)
+	SELECTCASE LOCAL
+		CASE 3
+			RESULT = ADD_RESOURCE(星系座標ID:LOCAL, 3, サンロットの香木, 1000)
+		CASE 4
+			RESULT = ADD_RESOURCE(星系座標ID:LOCAL, 3, フォルス酒, 1000)
+	ENDSELECT
 NEXT
 
 
@@ -197,7 +211,7 @@ NEXT
 
 
 ;--------------------------
-; 企業連合初期化
+; 民主主義国家初期化
 ;--------------------------
 @INIT_COUNTRY_4
 COUNTRY_NAME:4 = 民主主義国家
@@ -229,6 +243,14 @@ NEXT
 ; 資源の配置
 FOR LOCAL, 5, 8
 	CALL INIT_STAR_RESOURCE(星系座標ID:LOCAL, 4)
+	SELECTCASE LOCAL
+		CASE 5
+			RESULT = ADD_RESOURCE(星系座標ID:LOCAL, 4, ゴルンミスト発生器, 1000)
+		CASE 6
+			RESULT = ADD_RESOURCE(星系座標ID:LOCAL, 4, ロック布, 1000)
+		CASE 7
+			RESULT = ADD_RESOURCE(星系座標ID:LOCAL, 4, ナナーシャ鳥, 1000)
+	ENDSELECT
 NEXT
 
 ; 関係性
@@ -289,6 +311,7 @@ NEXT
 
 ; 資源の配置
 CALL INIT_STAR_RESOURCE(星系座標ID:8, 5)
+LOCAL = ADD_RESOURCE(星系座標ID:8, 5, エインズの実, 1000)
 
 ; 関係性
 REL_LIKE:5:6 = -800; 戦争一歩手前
@@ -336,6 +359,7 @@ NEXT
 
 ; 資源の配置
 CALL INIT_STAR_RESOURCE(星系座標ID:9, 6)
+LOCAL = ADD_RESOURCE(星系座標ID:9, 6, ナイ・ゲーム機, 1000)
 
 ; 初期艦
 ; 駆逐と戦艦および空母構成

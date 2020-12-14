@@ -182,6 +182,18 @@
 #DIM CONST 超電導回路 = 20
 #DIM CONST タイラーセンサー = 21
 
+; 嗜好品
+#DIM CONST 宇宙たばこ = 30
+#DIM CONST オーネスワイン = 31
+#DIM CONST トルス酒 = 32
+#DIM CONST サンロットの香木 = 33
+#DIM CONST フォルス酒 = 34
+#DIM CONST ゴルンミスト発生器 = 35
+#DIM CONST ロック布 = 36
+#DIM CONST ナナーシャ鳥 = 37
+#DIM CONST エインズの実 = 38
+#DIM CONST ナイ・ゲーム機 = 39
+
 
 ;-------------------------
 ; 宇宙港関連
