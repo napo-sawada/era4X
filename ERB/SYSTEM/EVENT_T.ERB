@@ -1,6 +1,9 @@
 ﻿;EVENT_T.ERB、EVENT_TRAIN、調教時及び調教前後のイベント
 @EVENTTRAIN
 #PRI
+
+CALL SLG_TURN_END(0)
+
 ;主人公の射精を0に
 BASE:MASTER:2 = 0
 ;いちおう調教対象と助手も
