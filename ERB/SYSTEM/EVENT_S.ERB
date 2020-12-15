@@ -84,23 +84,8 @@ ENDIF
 
 ;奴隷と道具の維持費の処理
 ;STARTモード限定でEASYでは20日、NORMALでは15日、HARDでは10日免除
-A = 900
-B = 25-FLAG:4*5
-REPEAT 25
-	SIF ITEM:COUNT
-		A += 150
-REND
-A += CHARANUM*600
-A -= 300
-;労役中の奴隷は除く
-REPEAT CHARANUM
-	SIF CFLAG:COUNT:12 > 0
-		A -= 600
-REND
-IF FLAG:5 == 0 && A && DAY > B
-	PRINTFORML 奴隷と道具の維持費、生活費に${A}かかった……
-	MONEY -= A
-ENDIF
+;今後実装予定
+
 
 @EVENT_YOUJI
 ;幼児退行

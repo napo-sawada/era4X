@@ -541,7 +541,11 @@ FOR ITER, 0, MAX_SHIP
 NEXT
 ; DOCKにいる艦船の回復
 CALL DOCK_REPAIR
-DAY ++
+TIME ++
+IF TIME % 2 == 0
+	DAY ++
+	TIME = 0
+ENDIF
 RETURN
 
 ;-------------------------------------------------

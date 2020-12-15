@@ -15,16 +15,12 @@ FLAG:99 = 8
 
 ;モード選択
 PRINTL ◆モード選択
-PRINTL [0]START （50日期限 目標金額$1,000,000）
-PRINTL [9]EXTRA （期限なし エンドレス）
+PRINTL [0]START
 
 $INPUT_LOOP
 INPUT
 IF RESULT == 0
 	FLAG:5 = 0
-ELSEIF RESULT == 9
-	FLAG:5 = 9
-	CALL START_CHARA_SELECT
 ELSE
 	GOTO INPUT_LOOP
 ENDIF
@@ -80,11 +76,7 @@ ENDIF
 ; 初期化処理
 ;==============================
 DAY = 1
-MONEY = 2000000000
-SIF FLAG:4 == 1
-	MONEY = 30000000000
-SIF FLAG:5 == 9
-	MONEY = 10000000000
+MONEY = 10000
 
 ;==============================
 ; SLG初期化処理
@@ -217,11 +209,6 @@ IF TIME == 1
 	DAY = DAY+1
 	PRINTW 一日が終わった……
 	TIME = 0
-	;バッドエンドの判定
-	SIF DAY > 50 && FLAG:5 == 0
-		CALL BADENDING_1
-	SIF MONEY < 0 && FLAG:5 == 0
-		CALL BADENDING_2
 
 	;朝になった時のイベント呼び出し
 	CALL EVENT_NEWDAY
