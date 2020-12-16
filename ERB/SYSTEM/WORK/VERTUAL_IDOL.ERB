@@ -1,0 +1,94 @@
+﻿;------------------------
+; バーチャルアイドル
+;------------------------
+@VERTUAL_IDOL(ID)
+#DIM ID
+#DIM POINT
+#DIM VIEWER_NUM
+#DIM REGISTER
+#DIM RANDOM_VIEWER
+#DIM GET_MONEY
+
+REGISTER = CFLAG:ID:1003
+VIEWER_NUM = 0
+
+; ベースの人気
+; 技能
+POINT = ABL:ID:22 * 200
+POINT += ABL:ID:13 * 75
+; TALENT
+SIF TALENT:ID:92 == 1
+	POINT += 500
+SIF TALENT:ID:93 == 1
+	POINT += 500
+SIF TALENT:ID:94 == 1
+	POINT += 500
+SIF TALENT:ID:111 == 1
+	POINT += 200
+SIF TALENT:ID:112 == 1
+	POINT += 300
+SIF TALENT:ID:145 == 1
+	POINT += 1000
+
+; 今回の配信
+PRINTFORM %CALLNAME:ID%は
+SELECTCASE RAND:3
+	CASE 0
+		; 料理動画
+		PRINTL 料理放送を行ったようだ
+		POINT += ABL:ID:12 * 200
+		PRINTL 料理経験+1
+		PRINTL 話術経験+5
+		EXP:ID:61 += 1
+		EXP:ID:65 += 5
+	CASE 1
+		; 歌動画
+		PRINTL 生歌放送を行ったようだ
+		POINT += ABL:ID:14 * 200
+		PRINTL 歌唱経験+1
+		PRINTL 話術経験+5
+		EXP:ID:64 += 1
+		EXP:ID:65 += 5
+	CASE 2
+		; 雑談動画
+		PRINTL 雑談放送を行ったようだ
+		POINT += ABL:ID:22 * 200
+		PRINTL 話術経験+10
+		EXP:ID:65 += 10
+ENDSELECT
+; 共通経験値
+PRINTL 撮影経験+1
+PRINTL 被写経験+1
+EXP:ID:62 += 1
+EXP:ID:63 += 1
+
+; ランダム流入
+RANDOM_VIEWER = RAND:200 + 100
+VIEWER_NUM += RANDOM_VIEWER
+
+; 登録者からの流入
+VIEWER_NUM += REGISTER / 66
+
+; ベースの人気から算出して一定の割合で登録者になる
+IF POINT < 1000
+	REGISTER += RANDOM_VIEWER / 10
+ELSEIF POINT < 2000
+	REGISTER += RANDOM_VIEWER / 6
+ELSEIF POINT < 3000
+	REGISTER += RANDOM_VIEWER / 3
+ELSE
+	REGISTER += RANDOM_VIEWER / 2
+ENDIF
+
+; 放送再生による報酬
+GET_MONEY = VIEWER_NUM / 200 + 1
+
+; スパ〇
+GET_MONEY += VIEWER_NUM / 100 * 5
+
+PRINTFORML 今回の生放送で%TOSTR(GET_MONEY, "$###,###,###")%手に入れた
+PRINTFORML 登録者が{REGISTER - CFLAG:ID:1003}人増えた
+
+; 登録者数追加
+CFLAG:ID:1003 = REGISTER
+MONEY += GET_MONEY

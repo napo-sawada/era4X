@@ -1,0 +1,9 @@
+﻿;----------------------
+; 汎用関数
+;----------------------
+@IS_FALL(CHARA_ID)
+#FUNCTION
+#DIM CHARA_ID
+SIF TALENT:CHARA_ID:恋慕 == 1 || TALENT:CHARA_ID:親愛 == 1 || TALENT:CHARA_ID:淫乱 == 1 || TALENT:CHARA_ID:娼婦 == 1 || TALENT:CHARA_ID:服従 == 1 || TALENT:CHARA_ID:隷属 == 1
+	RETURNF 1
+RETURNF 0

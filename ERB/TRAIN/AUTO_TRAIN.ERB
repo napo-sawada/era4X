@@ -1,0 +1,29 @@
+﻿;----------------------
+; 自動調教
+;----------------------
+@AUTO_TRAIN
+IF CFLAG:TARGET:1000 == 0
+    CALL AUTO_TRAIN_0
+ELSEIF CFLAG:TARGET:1000 == 1
+    CALL AUTO_TRAIN_1
+ELSEIF CFLAG:TARGET:1000 == 2
+    CALL AUTO_TRAIN_2
+ENDIF
+
+;----------------------
+; 恋慕ルート自動調教
+;----------------------
+@AUTO_TRAIN_0
+PRINTFORMW %CALLNAME:TARGET%とのんびり過ごした
+
+;----------------------
+; 淫乱ルート自動調教
+;----------------------
+@AUTO_TRAIN_1
+PRINTFORMW %CALLNAME:TARGET%を調教した
+
+;----------------------
+; 隷属ルート自動調教
+;----------------------
+@AUTO_TRAIN_2
+PRINTFORMW %CALLNAME:TARGET%に主従関係を教え込んだ

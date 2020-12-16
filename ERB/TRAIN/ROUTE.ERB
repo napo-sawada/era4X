@@ -1,0 +1,75 @@
+﻿;----------------------
+; 調教ルート管理
+;----------------------
+@INIT_ROUTE(CHARA_ID)
+#DIM CHARA_ID
+
+$INPUT_LOOP
+PRINTL ◆この奴隷をどのように扱いますか？
+PRINTBUTTON "[0] 優しく接する", 0
+PRINTBUTTON "[1] 性奴隷に仕立て上げる", 1
+PRINTBUTTON "[2] 上下関係を分からせる", 2
+
+INPUT
+IF RESULT == 0
+    $INPUT_LOOP0
+    PRINTL 「優しく接する」でよろしいですか？
+    PRINTBUTTON "[0] はい", 0
+    PRINTBUTTON "[1] いいえ", 1
+    INPUT
+    IF RESULT == 0
+        CFLAG:CHARA_ID:1000 = 0
+        PRINTW 「優しく接する」ことにしました
+    ELSEIF RESULT == 1
+        GOTO INPUT_LOOP
+    ELSE
+        GOTO INPUT_LOOP0
+    ENDIF
+ELSEIF RESULT == 1
+    $INPUT_LOOP1
+    PRINTL 「性奴隷に仕立て上げる」でよろしいですか？
+    PRINTBUTTON "[0] はい", 0
+    PRINTBUTTON "[1] いいえ", 1
+    INPUT
+    IF RESULT == 0
+        CFLAG:CHARA_ID:1000 = 1
+        PRINTW 「性奴隷に仕立て上げる」ことにしました
+    ELSEIF RESULT == 1
+        GOTO INPUT_LOOP
+    ELSE
+        GOTO INPUT_LOOP1
+    ENDIF
+ELSEIF RESULT == 2
+    $INPUT_LOOP2
+    PRINTL 「上下関係を分からせる」でよろしいですか？
+    PRINTBUTTON "[0] はい", 0
+    PRINTBUTTON "[1] いいえ", 1
+    INPUT
+    IF RESULT == 0
+        CFLAG:CHARA_ID:1000 = 2
+        PRINTW 「上下関係を分からせる」ことにしました
+    ELSEIF RESULT == 1
+        GOTO INPUT_LOOP
+    ELSE
+        GOTO INPUT_LOOP2
+    ENDIF
+ELSE
+    GOTO INPUT_LOOP
+ENDIF
+
+; 恋慕ルート
+@ROOM_TYPE_0(CHARA_ID)
+#DIM CHARA_ID
+PRINTFORMW %CALLNAME:CHARA_ID%は居心地のいい部屋でのびのびと過ごしている
+CFLAG:CHARA_ID:2 += RAND:10
+
+; 淫乱ルート
+@ROOM_TYPE_1(CHARA_ID)
+#DIM CHARA_ID
+PRINTFORMW %CALLNAME:CHARA_ID%は質素な部屋でぼんやりしている
+
+; 隷属ルート
+@ROOM_TYPE_2(CHARA_ID)
+#DIM CHARA_ID
+PRINTFORMW %CALLNAME:CHARA_ID%は監獄のような部屋で心細そうにしている
+CFLAG:CHARA_ID:2 -= RAND:10
