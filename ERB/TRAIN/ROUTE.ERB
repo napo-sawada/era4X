@@ -60,7 +60,18 @@ ENDIF
 ; 恋慕ルート
 @ROOM_TYPE_0(CHARA_ID)
 #DIM CHARA_ID
-PRINTFORMW %CALLNAME:CHARA_ID%は居心地のいい部屋でのびのびと過ごしている
+IF IS_FALL(CHARA_ID) == 0
+    PRINTFORMW %CALLNAME:CHARA_ID%は居心地のいい部屋でのびのびと過ごしている
+ELSEIF TALENT:CHARA_ID:恋慕 == 1 || TALENT:CHARA_ID:親愛 == 1
+    SELECTCASE RAND:2
+        CASE 0
+            PRINTFORMW %CALLNAME:CHARA_ID%は読書に勤しんでいる
+        CASE 1
+            PRINTFORMW %CALLNAME:CHARA_ID%は%CALLNAME:MASTER%が来るのを待ちわびている
+        CASE 2
+            PRINTFORMW %CALLNAME:cHARA_ID%は居心地のいい部屋でのんびりしている
+    ENDSELECT
+ENDIF
 CFLAG:CHARA_ID:2 += RAND:10
 
 ; 淫乱ルート
