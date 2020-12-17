@@ -67,7 +67,7 @@ IF QUEST_PROGRESS:0 == 1 && INVESTING_DOCTOR >= 1000000
 	IF RESULT == 0
 		PRINTFORML 「わかった。そうしたらさっそくラボを開設するよ。ぜひ実験体、もとい患者を連れてきてくれ」
 		QUEST_PROGRESS:0 = 3
-		HUMAN_LAB = PLAYER_POSITION
+		HUMAN_LAB = CHARACTER_POSITION
 	ELSEIF RESULT == 1
 		PRINTFORML 「そうか。そうしたらラボを立てたい星にいる私に声をかけてくれ」
 		QUEST_PROGRESS:1 = 2
