@@ -14,11 +14,62 @@ RETURN 0
 ;チュートリアル
 @TUTORIAL
 DRAWLINE
+$INPUT_LOOP
+PRINTL ◆チュートリアル
 PRINTFORMW ようこそera4Xへ
-PRINTFORMW このゲームはαバージョンです。
-PRINTFORMW まずは最寄りの星に入港し、奴隷を購入してみてください。
-PRINTFORMW マップの緑の星をクリックすると、その星で行えるメニューを開けます。
-PRINTFORMW 赤い▲は敵性の船です。非武装船で接近すると襲ってきますので注意してください。
-PRINTFORMW 強い船があれば、敵船を撃破することもできます。
-DRAWLINE
+PRINTBUTTON "[0] 楽しみ方", 0
+PRINTL
+PRINTBUTTON "[1] マップの記号", 1
+PRINTL
+PRINTBUTTON "[9] 戻る", 9
+INPUT
+IF RESULT == 0
+    PRINTL まずはasdwで船を操作し、近くの星に入港してください
+    PRINTL 入港は[f]キーです
+    PRINTL その後、[100]で奴隷の管理画面に行きましょう
+    PRINTL もちろん宇宙港に泊まっているその国の艦船やあなたの艦船を眺めても構いません
+    PRINTL ただお金が少ない現状で安易に買い物をするのは止めた方がいいでしょう。詰んでしまう可能性があります
+    PRINTL 奴隷の管理画面に行ったら奴隷を買い、好きに調教し陥落させましょう
+    PRINTW 陥落させることで[112]から奴隷を労働させることが可能になります
+    PRINTL
+    PRINTL まず輸送船を入手することを最優先目標にするのをお勧めします
+    PRINTL 輸送船で各地の特産品を買い、特産品の出る星とは別の星の各港にいる商人に売ることで、高い利益を得ることができます
+    PRINTL その後は輸送船を買い足して貿易の規模を拡大させるのもよし、巡洋艦などの戦艦を買うのもよし、あなたの自由です
+    PRINT ただし
+    SETCOLOR 0XFF0000
+    PRINT ▲
+    RESETCOLOR
+    PRINTL には注意してください。
+    PRINTW 彼らは敵性艦で、近づくと攻撃してきます
+    PRINTW 武装艦なら彼らを撃退することも可能です
+    PRINTW 以上でこの項目の説明は終わりです
+    GOTO INPUT_LOOP
+ELSEIF RESULT == 1
+    SETCOLOR 0xAAFFAA
+    PRINT ▲
+    RESETCOLOR
+    PRINTL : 自分操る船です
+    SETCOLOR 0XFF0000
+    PRINT 赤
+    RESETCOLOR
+    PRINTL : 敵の色です。
+    SETCOLOR 0X00FF00
+    PRINT 緑
+    RESETCOLOR
+    PRINTL : 自勢力の色です
+    PRINTL 白: 中立勢力の色です
+    PRINTL ▲: 艦船
+    PRINTL 星: 星と、それに付随する宇宙港
+    PRINTL ■: 未確認領域
+    PRINTL ！: アノマリー
+    PRINTL ＃: 採掘ポイント(採掘には同宙域に作業船と輸送船が必要)
+    PRINTL 港: 宇宙港。未実装です
+    WAIT
+    GOTO INPUT_LOOP
+ELSEIF RESULT == 9
+    RETURN
+ELSE
+    GOTO INPUT_LOOP
+ENDIF
+
 
