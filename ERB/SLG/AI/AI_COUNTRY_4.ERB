@@ -1,0 +1,24 @@
+﻿;--------------------------
+; AI ACTION 民主主義国家
+;--------------------------
+@SLG_AI_ACTION_4
+#DIM CONST COUNTRY_ID = 4
+
+CALL COMMON_AI_ACTION(COUNTRY_ID)
+
+@GET_STANDING_ARMY_4(UNIT)
+#DIM REF UNIT
+
+UNIT:フリゲート = 10
+UNIT:駆逐艦 = 10
+UNIT:巡洋艦 = 6
+UNIT:空母 = 3
+
+@GET_INVASION_ARMY_4(UNIT)
+#DIM REF UNIT
+
+UNIT:フリゲート = 12
+UNIT:コルベット = 12
+UNIT:駆逐艦 = 12
+UNIT:巡洋艦 = 12
+UNIT:空母 = 6
