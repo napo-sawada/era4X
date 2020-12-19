@@ -24,7 +24,7 @@ IF WAR_PHASE:COUNTRY_ID == 準備 && WAR_TARGET_POS:COUNTRY_ID == 0
 ELSEIF WAR_PHASE:COUNTRY_ID  == 準備
     IF SHIPS:フリゲート != INVASION_ARMY:COUNTRY_ID:フリゲート
         FOR STAR_ID, 0, 3
-            CALL BUILD_SHIP(STAR_ID, COUNTRY_ID, フリゲート, "侵攻用フリゲート", NEW_SHIP_ID)
+            CALL BUILD_SHIP(星系座標ID:STAR_ID, COUNTRY_ID, COUNTRY_ID, フリゲート, "侵攻用フリゲート", NEW_SHIP_ID)
             IF RESULT == 1
                 SHIP_MISSION:NEW_SHIP_ID = 移動
                 MOVING_POS:NEW_SHIP_ID = MEETING_POINT:COUNTRY_ID
@@ -33,7 +33,7 @@ ELSEIF WAR_PHASE:COUNTRY_ID  == 準備
         NEXT
     ELSEIF SHIPS:コルベット != INVASION_ARMY:COUNTRY_ID:コルベット
         FOR STAR_ID, 0, 3
-            CALL BUILD_SHIP(STAR_ID, COUNTRY_ID, コルベット, "侵攻用コルベット", NEW_SHIP_ID)
+            CALL BUILD_SHIP(星系座標ID:STAR_ID, COUNTRY_ID, COUNTRY_ID, コルベット, "侵攻用コルベット", NEW_SHIP_ID)
             IF RESULT == 1
                 SHIP_MISSION:NEW_SHIP_ID = 移動
                 MOVING_POS:NEW_SHIP_ID = MEETING_POINT:COUNTRY_ID
@@ -42,7 +42,7 @@ ELSEIF WAR_PHASE:COUNTRY_ID  == 準備
         NEXT
     ELSEIF SHIPS:駆逐艦 != INVASION_ARMY:COUNTRY_ID:駆逐艦
         FOR STAR_ID, 0, 3
-            CALL BUILD_SHIP(STAR_ID, COUNTRY_ID, 駆逐艦, "侵攻用駆逐艦", NEW_SHIP_ID)
+            CALL BUILD_SHIP(星系座標ID:STAR_ID, COUNTRY_ID, COUNTRY_ID, 駆逐艦, "侵攻用駆逐艦", NEW_SHIP_ID)
             IF RESULT == 1
                 SHIP_MISSION:NEW_SHIP_ID = 移動
                 MOVING_POS:NEW_SHIP_ID = MEETING_POINT:COUNTRY_ID
@@ -51,7 +51,7 @@ ELSEIF WAR_PHASE:COUNTRY_ID  == 準備
         NEXT
     ELSEIF SHIPS:巡洋艦 != INVASION_ARMY:COUNTRY_ID:巡洋艦
         FOR STAR_ID, 0, 3
-            CALL BUILD_SHIP(STAR_ID, COUNTRY_ID, 巡洋艦, "侵攻用巡洋艦", NEW_SHIP_ID)
+            CALL BUILD_SHIP(星系座標ID:STAR_ID, COUNTRY_ID, COUNTRY_ID, 巡洋艦, "侵攻用巡洋艦", NEW_SHIP_ID)
             IF RESULT == 1
                 SHIP_MISSION:NEW_SHIP_ID = 移動
                 MOVING_POS:NEW_SHIP_ID = MEETING_POINT:COUNTRY_ID
@@ -60,7 +60,7 @@ ELSEIF WAR_PHASE:COUNTRY_ID  == 準備
         NEXT
     ELSEIF SHIPS:戦艦 != INVASION_ARMY:COUNTRY_ID:戦艦
         FOR STAR_ID, 0, 3
-            CALL BUILD_SHIP(STAR_ID, COUNTRY_ID, 戦艦, "侵攻用戦艦", NEW_SHIP_ID)
+            CALL BUILD_SHIP(星系座標ID:STAR_ID, COUNTRY_ID, COUNTRY_ID, 戦艦, "侵攻用戦艦", NEW_SHIP_ID)
             IF RESULT == 1
                 SHIP_MISSION:NEW_SHIP_ID = 移動
                 MOVING_POS:NEW_SHIP_ID = MEETING_POINT:COUNTRY_ID
