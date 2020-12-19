@@ -83,15 +83,6 @@ FOR SHIP_ID, 0, MAX_SHIP
 	CALL MOVE_SHIP(RESULT:1, RESULT:2, SHIP_ID)
 NEXT
 
-
-;--------------------------
-; AI ACTION 社会主義国家
-;--------------------------
-@SLG_AI_ACTION_2
-#DIM CONST COUNTRY_ID = 2
-CALL COMMON_AI_ACTION(COUNTRY_ID)
-
-
 ;--------------------------
 ; AI ACTION 企業連合
 ;--------------------------
@@ -177,6 +168,13 @@ FOR SHIP_ID, 0, MAX_SHIP
 			パトロール中:STAR_ID = 1
 		NEXT
 		CONTINUE
+	ENDIF
+	IF SHIP_MISSION:SHIP_ID == 移動
+		CALL ID2POS(MOVING_POS:SHIP_ID)
+		CALL MOVE_SHIP(RESULT:1, RESULT:2, SHIP_ID)
+		IF RESULT == 1
+			SHIP_MISSION:SHIP_ID = 待機
+		ENDIF
 	ENDIF
 	IF SHIP_TYPE:SHIP_ID == 駆逐艦 && SHIP_MISSION:SHIP_ID == 待機
 		FOR STAR_ID, 0, 星系数
