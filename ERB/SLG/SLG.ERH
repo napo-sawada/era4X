@@ -18,10 +18,12 @@
 #DIM CONST 星系数 = 10
 #DIM SAVEDATA 星系座標ID, 星系数
 #DIM SAVEDATA STAR_OWNER, 星系数
+#DIMS CONST STAR_NAME = "S01", "S02", "S03", "ビリアン", "チェルシー", "アース", "エデン", "フロンティア", "神の右手", "グレートマザー"
 
 #DIM CONST MAX_PORT = 20
 #DIM SAVEDATA PORT_POSITION_ID, MAX_PORT
 #DIM SAVEDATA PORT_OWNER, MAX_PORT
+
 
 ; MAPTIP
 #DIM CONST 無 = 0

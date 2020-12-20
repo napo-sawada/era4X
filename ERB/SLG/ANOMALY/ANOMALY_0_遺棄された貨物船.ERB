@@ -31,7 +31,7 @@ SELECTCASE ANOMALY_PROGRESS:0
 		PRINTFORML 何者かに攻撃されたのか、装甲がボロボロだ。
 		PRINTFORML 貨物部分に空いた人工的な人型サイズの穴を見るに、接舷されて乗り込み攻撃をされたようだ。
 		PRINTFORML だがエンジンとコントロール部分は比較的無傷で、乗り込めばまだ使えるようだ。
-		PRINTFORMW 搭乗ポッドで乗り込めれば自分のものにできそうだ。
+		PRINTFORMW 同乗者入りの移乗ポットで乗り込めれば自分のものにできそうだ。
 		PRINTL
 		ANOMALY_PROGRESS:0 = 1
 	CASE 1
@@ -57,6 +57,7 @@ NEXT
 PRINTFORML %CALLNAME:ITER%を移乗コンテナで遺棄船に射出した。
 PRINTFORML どうやらうまくいったようだ。
 PRINTFORMW %CALLNAME:MASTER%は新しい輸送船を手に入れた。
+PRINTFORMW ただしかなりボロボロなので、修理には数万$かかるだろう。
 
 ; プレイヤーの初期艦
 CALL INIT_PRESET_SHIP(PLAYER_COUNTRY, ANOMALY_POSITIONID:0, 輸送船, "ぼろぼの輸送船", 輸送船)
