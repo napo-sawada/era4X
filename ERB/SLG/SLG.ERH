@@ -148,6 +148,14 @@
 ;研究所
 #DIM SAVEDATA HUMAN_LAB
 
+; 表示関連（多分別ファイルに引っ越す）
+#DIM CONST LEFT_COLUMN_LENGTH = 24
+#DIM CONST RIGHT_COLUMN_LENGTH = 60
+#DIM CONST WHITE_LINE = -1
+#DIM CONST GRAY_LINE = -2
+#DIM CONST GREEN_LINE = -3
+#DIM CONST NONE_LINE = -10
+
 ;-------------------------
 ; SLG ITEMS
 ;-------------------------
