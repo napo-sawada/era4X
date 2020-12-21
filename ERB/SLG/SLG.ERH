@@ -96,8 +96,8 @@
 
 ; SHIP_TYPE
 #DIM CONST 偵察艇 = 0
-#DIM CONST フリゲート = 1
-#DIM CONST コルベット = 2
+#DIM CONST コルベット = 1
+#DIM CONST フリゲート = 2
 #DIM CONST 駆逐艦 = 3
 #DIM CONST 巡洋艦 = 4
 #DIM CONST 戦艦 = 5
