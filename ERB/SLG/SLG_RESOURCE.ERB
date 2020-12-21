@@ -63,6 +63,12 @@ ITEM_PRICE:ロック布 = 1000
 ITEM_PRICE:ナナーシャ鳥 = 1000
 ITEM_PRICE:エインズの実 = 1000
 ITEM_PRICE:ナイ・ゲーム機 = 1000
+ITEM_PRICE:パワードスーツ = 30000
+ITEM_PRICE:レース機 = 50000
+ITEM_PRICE:思考戦車 = 1000000
+ITEM_PRICE:異星生物育成キット = 1000
+ITEM_PRICE:セクサロイド = 3000
+
 
 
 ; 採掘可能か判定
@@ -269,6 +275,16 @@ SELECTCASE ID
         RETURNF "エインズの実"
     CASE ナイ・ゲーム機
         RETURNF "ナイ・ゲーム機"
+    CASE パワードスーツ
+        RETURNF "パワードスーツ"
+    CASE レース機
+        RETURNF "レース機"
+    CASE 思考戦車
+        RETURNF "思考戦車"
+    CASE 異星生物育成キット
+        RETURNF "異星生物育成キット"
+    CASE セクサロイド
+        RETURNF "セクサロイド"
     CASEELSE
         RETURNF NO_ITEM
 ENDSELECT
@@ -340,6 +356,16 @@ SELECTCASE ID
         RETURNF "女性人気の高い甘い木の実。上品な甘さ"
     CASE ナイ・ゲーム機
         RETURNF "ロボットもはまる面白さのゲーム機"
+    CASE パワードスーツ
+        RETURNF "陸戦や地上の鉱物採掘時に使われるパワードスーツ"
+    CASE レース機
+        RETURNF "宇宙レースで使われるレース機。コレクターが多い"
+    CASE 思考戦車
+        RETURNF "自立思考AI搭載の戦車。喋り相手にもなる"
+    CASE 異星生物育成キット
+        RETURNF "スライムや触手を育てるための育成キット"
+    CASE セクサロイド
+        RETURNF "世の男達垂涎の美貌を持つセクサロイド。AIの思考レベルや性格も調整できる"
     CASEELSE
         RETURNF NO_ITEM
 ENDSELECT

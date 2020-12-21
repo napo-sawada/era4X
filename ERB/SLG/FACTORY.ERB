@@ -176,7 +176,10 @@ ENDIF
 #DIM ITER
 #DIM BUY_COUNT
 
+VARSET USE_RESOURCE, 0
+
 BUY_COUNT = ITEM_NUM
+CALL PROCESSING(ITEM_ID, USE_RESOURCE)
 
 FOR ITER, 0, ITEM_LENGTH
     SIF USE_RESOURCE:ITER == 0
@@ -240,6 +243,30 @@ SELECTCASE ITEM_ID
         USE_RESOURCE:貴金属鉱石 = 5
         USE_RESOURCE:ゼスタガス = 5
         USE_RESOURCE:ジェルオイル = 5
+    CASE パワードスーツ
+        USE_RESOURCE:赤原石 = 20
+        USE_RESOURCE:青原石 = 30
+        USE_RESOURCE:ビクニーガス = 20
+    CASE レース機
+        USE_RESOURCE:青原石 = 20
+        USE_RESOURCE:貴金属鉱石 = 10
+        USE_RESOURCE:ビクニーガス = 10
+        USE_RESOURCE:ジェルオイル = 10
+    CASE 思考戦車
+        USE_RESOURCE:赤原石 = 30
+        USE_RESOURCE:青原石 = 40
+        USE_RESOURCE:貴金属鉱石 = 20
+        USE_RESOURCE:ビクニーガス = 10
+        USE_RESOURCE: チェルニーオイル = 10
+        USE_RESOURCE: グリッドオイル = 10
+    CASE 異星生物育成キット
+        USE_RESOURCE:エウスガス = 10
+        USE_RESOURCE:グリッドオイル = 10
+        USE_RESOURCE:ジェルオイル = 10
+    CASE セクサロイド
+        USE_RESOURCE:貴金属鉱石 = 10
+        USE_RESOURCE:チェルニーオイル = 10
+        USE_RESOURCE:ジェルオイル = 10
 ENDSELECT
 
 RETURN
