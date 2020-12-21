@@ -37,24 +37,24 @@ SELECTCASE RAND:3
 		; 料理動画
 		PRINTL 料理放送を行ったようだ
 		POINT += ABL:ID:12 * 200
-		PRINTL 料理経験+1
-		PRINTL 話術経験+5
-		EXP:ID:61 += 1
-		EXP:ID:65 += 5
+		PRINTL 料理経験+2
+		PRINTL 話術経験+3
+		EXP:ID:61 += 2
+		EXP:ID:65 += 3
 	CASE 1
 		; 歌動画
 		PRINTL 生歌放送を行ったようだ
 		POINT += ABL:ID:14 * 200
-		PRINTL 歌唱経験+1
-		PRINTL 話術経験+5
-		EXP:ID:64 += 1
-		EXP:ID:65 += 5
+		PRINTL 歌唱経験+2
+		PRINTL 話術経験+3
+		EXP:ID:64 += 2
+		EXP:ID:65 += 3
 	CASE 2
 		; 雑談動画
 		PRINTL 雑談放送を行ったようだ
 		POINT += ABL:ID:22 * 200
-		PRINTL 話術経験+10
-		EXP:ID:65 += 10
+		PRINTL 話術経験+5
+		EXP:ID:65 += 5
 ENDSELECT
 ; 共通経験値
 PRINTL 撮影経験+1
@@ -63,11 +63,11 @@ EXP:ID:62 += 1
 EXP:ID:63 += 1
 
 ; ランダム流入
-RANDOM_VIEWER = RAND:200 + 100
+RANDOM_VIEWER = RAND:500 + 300
 VIEWER_NUM += RANDOM_VIEWER
 
 ; 登録者からの流入
-VIEWER_NUM += REGISTER / 66
+VIEWER_NUM += REGISTER / 33
 
 ; ベースの人気から算出して一定の割合で登録者になる
 IF POINT < 1000
@@ -86,8 +86,9 @@ GET_MONEY = VIEWER_NUM / 200 + 1
 ; スパ〇
 GET_MONEY += VIEWER_NUM / 100 * 5
 
-PRINTFORML 今回の生放送で%TOSTR(GET_MONEY, "$###,###,###")%手に入れた
-PRINTFORML 登録者が{REGISTER - CFLAG:ID:1003}人増えた
+PRINTFORML 今回の生放送の視聴者は{VIEWER_NUM}だった
+PRINTFORML %TOSTR(GET_MONEY, "$###,###,###")%手に入れた
+PRINTFORML チャンネル登録者が{REGISTER - CFLAG:ID:1003}人増えた
 
 ; 登録者数追加
 CFLAG:ID:1003 = REGISTER
@@ -129,22 +130,22 @@ SELECTCASE RAND:3
 	CASE 0
 		; 料理動画
 		POINT += ABL:ID:12 * 200
-		PRINTL 料理経験+1
-		PRINTL 話術経験+5
-		EXP:ID:61 += 1
-		EXP:ID:65 += 5
+		PRINTL 料理経験+2
+		PRINTL 話術経験+3
+		EXP:ID:61 += 2
+		EXP:ID:65 += 3
 	CASE 1
 		; 歌動画
 		POINT += ABL:ID:14 * 200
-		PRINTL 歌唱経験+1
-		PRINTL 話術経験+5
-		EXP:ID:64 += 1
-		EXP:ID:65 += 5
+		PRINTL 歌唱経験+2
+		PRINTL 話術経験+3
+		EXP:ID:64 += 2
+		EXP:ID:65 += 3
 	CASE 2
 		; 雑談動画
 		POINT += ABL:ID:22 * 200
-		PRINTL 話術経験+10
-		EXP:ID:65 += 10
+		PRINTL 話術経験+5
+		EXP:ID:65 += 5
 ENDSELECT
 ; 共通経験値
 PRINTL 撮影経験+1
@@ -153,11 +154,11 @@ EXP:ID:62 += 1
 EXP:ID:63 += 1
 
 ; ランダム流入
-RANDOM_VIEWER = RAND:200 + 100
+RANDOM_VIEWER = RAND:500 + 300
 VIEWER_NUM += RANDOM_VIEWER
 
 ; 登録者からの流入
-VIEWER_NUM += REGISTER / 66
+VIEWER_NUM += REGISTER / 33
 
 ; ベースの人気から算出して一定の割合で登録者になる
 IF POINT < 1000
