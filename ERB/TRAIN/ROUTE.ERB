@@ -63,13 +63,71 @@ ENDIF
 IF IS_FALL(CHARA_ID) == 0
     PRINTFORMW %CALLNAME:CHARA_ID%は居心地のいい部屋でのびのびと過ごしている
 ELSEIF TALENT:CHARA_ID:恋慕 == 1 || TALENT:CHARA_ID:親愛 == 1
-    SELECTCASE RAND:2
+    SELECTCASE RAND:32
         CASE 0
             PRINTFORMW %CALLNAME:CHARA_ID%は読書に勤しんでいる
         CASE 1
             PRINTFORMW %CALLNAME:CHARA_ID%は%CALLNAME:MASTER%が来るのを待ちわびている
         CASE 2
-            PRINTFORMW %CALLNAME:cHARA_ID%は居心地のいい部屋でのんびりしている
+            PRINTFORMW %CALLNAME:CHARA_ID%は居心地のいい部屋でのんびりしている
+        CASE 3
+            PRINTFORMW %CALLNAME:CHARA_ID%はストレッチして軽く身体をほぐしている
+        CASE 4
+            PRINTFORMW %CALLNAME:CHARA_ID%はうとうとしながら%CALLNAME:MASTER%の夢を見て、緩んだ笑みを浮かべている
+        CASE 5
+            PRINTFORMW %CALLNAME:CHARA_ID%はお菓子を頬張って幸せに浸っている
+        CASE 6
+            PRINTFORMW %CALLNAME:CHARA_ID%は机に向かって何かを書き留めている
+        CASE 7
+            PRINTFORMW %CALLNAME:CHARA_ID%は音楽を聞きながらリズムを取っている
+        CASE 8
+            PRINTFORMW %CALLNAME:CHARA_ID%はクッションを抱きしめながら映画に見入っている
+        CASE 9
+            PRINTFORMW %CALLNAME:CHARA_ID%は通信機で誰かと楽しそうに会話している
+        CASE 10
+            PRINTFORMW %CALLNAME:CHARA_ID%は雑誌の占いに一喜一憂している
+        CASE 11
+            PRINTFORMW %CALLNAME:CHARA_ID%は暇にあかして自室の掃除をしている
+        CASE 12
+            PRINTFORMW %CALLNAME:CHARA_ID%は%CALLNAME:MASTER%との愛の記憶をふりかえり、恥ずかしさで足をバタバタとさせている
+        CASE 13
+            PRINTFORMW %CALLNAME:CHARA_ID%は念入りに爪のお手入れをしている
+        CASE 14
+            PRINTFORMW %CALLNAME:CHARA_ID%はどこまでも広がる宇宙について思いを馳せている
+        CASE 15
+            PRINTFORMW %CALLNAME:CHARA_ID%は愛らしい動物の画像を眺めて頬を緩ませている
+        CASE 16
+            PRINTFORMW %CALLNAME:CHARA_ID%は上下が揃わない行方不明の下着を前にして頭を悩ませている
+        CASE 17
+            PRINTFORMW %CALLNAME:CHARA_ID%は今日の夕食について考えている
+        CASE 18
+            PRINTFORMW %CALLNAME:CHARA_ID%は通販サイトをのぞきながら面白そうなものを探している
+        CASE 19
+            PRINTFORMW %CALLNAME:CHARA_ID%はクスクスと思い出し笑いをしている
+        CASE 20
+            PRINTFORMW %CALLNAME:CHARA_ID%はお茶を飲んでまったりとしている
+        CASE 21
+            PRINTFORMW %CALLNAME:CHARA_ID%は個人用端末でゲームを遊んでいる
+        CASE 22
+            PRINTFORMW %CALLNAME:CHARA_ID%は特にすることがなく、可愛らしくあくびをした
+        CASE 23
+            PRINTFORMW %CALLNAME:CHARA_ID%は%CALLNAME:MASTER%の好みの料理について勉強している
+        CASE 24
+            PRINTFORMW %CALLNAME:CHARA_ID%は自身の仕事の改善点を洗い出している
+        CASE 25
+            PRINTFORMW %CALLNAME:CHARA_ID%は%CALLNAME:MASTER%の姿を思い浮かべて、ほう……と熱い息を吐いた
+        CASE 26
+            PRINTFORMW %CALLNAME:CHARA_ID%は意味もなくベッドの上をゴロゴロと転がっている
+        CASE 27
+            PRINTFORMW %CALLNAME:CHARA_ID%はご機嫌に鼻歌を歌っている
+        CASE 28
+            PRINTFORMW %CALLNAME:CHARA_ID%は目を閉じて何かを考え込んでいる
+        CASE 29
+            PRINTFORMW %CALLNAME:CHARA_ID%は下着姿で鏡の前に立ち、体型のチェックをしている
+        CASE 30
+            PRINTFORMW %CALLNAME:CHARA_ID%は小さくクシャミをした後、なんとなく周囲を見渡した
+        CASE 31
+            PRINTFORMW %CALLNAME:CHARA_ID%は休日の予定を立てている
     ENDSELECT
 ENDIF
 CFLAG:CHARA_ID:2 += RAND:10
