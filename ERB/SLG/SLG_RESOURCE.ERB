@@ -19,7 +19,7 @@ FOR LOCAL, 0, 3
             X_POS = RAND:MAP_WIDTH
             Y_POS = RAND:MAP_HEIGHT
 
-            SIF MAP:X_POS:Y_POS != 無
+            SIF MAP:X_POS:Y_POS != 明瞭
                 CONTINUE
             
             MAP:X_POS:Y_POS = 資源
@@ -481,7 +481,7 @@ SELECTCASE RESULT
         GOTO INPUT_LOOP2
     CASE 999
         SIF BUY_COUNT * GET_RESOURCE_PRICE(POSID, ITEM_ID) != 0
-            PRINTFORMW 所持金: %TOSTR(MONEY, "$##,###,###,###")% -> %TOSTR(MONEY - (BUY_COUNT * ITEM_PRICE:ITEM_ID), "$##,###,###,###")%
+            PRINTFORMW 所持金: %TOSTR(MONEY, "$##,###,###,###")% -> %TOSTR(MONEY - (BUY_COUNT * GET_RESOURCE_PRICE(POSID, ITEM_ID)), "$##,###,###,###")%
         MONEY -= BUY_COUNT * GET_RESOURCE_PRICE(POSID, ITEM_ID)
         IF OWNER == PLAYER_COUNTRY
             MONEY += BUY_COUNT * GET_RESOURCE_PRICE(POSID, ITEM_ID)
