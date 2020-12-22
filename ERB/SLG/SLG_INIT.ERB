@@ -119,6 +119,14 @@ FOR LOCAL, 0, 3
 		LOCALS = DD1駆逐艦
 		CALL INIT_PRESET_SHIP(2, 星系座標ID:LOCAL, 駆逐艦, LOCALS, 駆逐艦)
 	NEXT
+	FOR LOCAL:1, 0, 10
+		LOCALS = TS1輸送船
+		CALL INIT_PRESET_SHIP(2, 星系座標ID:LOCAL,　輸送船, LOCALS, 輸送船)
+	NEXT
+	FOR LOCAL:1, 0, 10
+		LOCALS = WS1作業船
+		CALL INIT_PRESET_SHIP(2, 星系座標ID:LOCAL,　作業船, LOCALS, 作業船)
+	NEXT
 NEXT
 
 ;--------------------------
@@ -197,6 +205,14 @@ FOR LOCAL, 3, 5
 		LOCALS = アリス
 		CALL INIT_PRESET_SHIP(3, 星系座標ID:LOCAL, 空母, LOCALS, 空母)
 	NEXT
+	FOR LOCAL:1, 0, 10
+		LOCALS = ボブ
+		CALL INIT_PRESET_SHIP(3, 星系座標ID:LOCAL, 輸送船, LOCALS, 輸送船)
+	NEXT
+	FOR LOCAL:1, 0, 10
+		LOCALS = マーカス
+		CALL INIT_PRESET_SHIP(3, 星系座標ID:LOCAL, 作業船, LOCALS, 作業船)
+	NEXT
 NEXT
 
 
@@ -261,23 +277,25 @@ FOR LOCAL, 5, 8
 		LOCALS = フォックス
 		CALL INIT_PRESET_SHIP(4, 星系座標ID:LOCAL, フリゲート, LOCALS, フリゲート)
 	NEXT
-NEXT
-FOR LOCAL, 5, 8
 	FOR LOCAL:1, 0, 10
 		LOCALS = ケルベロス
 		CALL INIT_PRESET_SHIP(4, 星系座標ID:LOCAL, 駆逐艦, LOCALS, 駆逐艦)
 	NEXT
-NEXT
-FOR LOCAL, 5, 8
 	FOR LOCAL:1, 0, 6
 		LOCALS = ベヒーモス
 		CALL INIT_PRESET_SHIP(4, 星系座標ID:LOCAL, 巡洋艦, LOCALS, 巡洋艦)
 	NEXT
-NEXT
-FOR LOCAL, 5, 8
 	FOR LOCAL:1, 0, 3
 		LOCALS = ドラゴン
 		CALL INIT_PRESET_SHIP(4, 星系座標ID:LOCAL, 空母, LOCALS, 空母)
+	NEXT
+	FOR LOCAL:1, 0, 10
+		LOCALS = ポーター
+		CALL INIT_PRESET_SHIP(4, 星系座標ID:LOCAL, 輸送船, LOCALS, 輸送船)
+	NEXT
+	FOR LOCAL:1, 0, 10
+		LOCALS = ワーカー
+		CALL INIT_PRESET_SHIP(4, 星系座標ID:LOCAL, 作業船, LOCALS, 作業船)
 	NEXT
 NEXT
 
@@ -330,6 +348,16 @@ FOR LOCAL, 0, 1
 	LOCALS = キング
 	CALL INIT_PRESET_SHIP(5, 星系座標ID:8, 戦艦, LOCALS, 戦艦)
 NEXT
+FOR LOCAL, 0, 10
+	LOCALS = 使途の足
+	CALL INIT_PRESET_SHIP(5, 星系座標ID:8, 輸送船, LOCALS, 輸送船)
+NEXT
+FOR LOCAL, 0, 10
+	LOCALS = 使途の手
+	CALL INIT_PRESET_SHIP(5, 星系座標ID:8, 作業船, LOCALS, 作業船)
+NEXT
+
+
 
 ;--------------------------
 ; 機械文明
@@ -372,6 +400,14 @@ NEXT
 FOR LOCAL, 0, 3
 	LOCALS = マザー
 	CALL INIT_PRESET_SHIP(6, 星系座標ID:9, 空母, LOCALS, 空母)
+NEXT
+FOR LOCAL, 0, 10
+	LOCALS = ストーン
+	CALL INIT_PRESET_SHIP(6, 星系座標ID:9, 輸送船, LOCALS, 輸送船)
+NEXT
+FOR LOCAL, 0, 10
+	LOCALS = ドリル
+	CALL INIT_PRESET_SHIP(6, 星系座標ID:9, 作業船, LOCALS, 作業船)
 NEXT
 
 ;--------------------------
