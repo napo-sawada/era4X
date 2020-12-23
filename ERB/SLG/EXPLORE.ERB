@@ -9,6 +9,7 @@
 #DIM SECTOR_ID
 #DIM X_POS
 #DIM Y_POS
+#DIM CURRENT_SECTOR_ID
 #DIM CURRENT_X_POS
 #DIM CURRENT_Y_POS
 #DIM X_DIFF
@@ -36,23 +37,69 @@ IF X_POS < 0 || X_POS >= MAP_WIDTH || Y_POS < 0 || Y_POS >= MAP_HEIGHT
     THROW 上記の以上挙動が確認されました
 ENDIF
 FOR MOVE, 0, 移動量
-    CURRENT_X_POS = (SHIP_POSITION:SHIP_ID % 10000) / 100
-    CURRENT_Y_POS = (SHIP_POSITION:SHIP_ID % 10000) % 100
+    CALL ID2POS(SHIP_POSITION:SHIP_ID)
+    CURRENT_SECTOR_ID = RESULT:0
+    CURRENT_X_POS = RESULT:1
+    CURRENT_Y_POS = RESULT:2
+    ; セクターが違った場合、ワープゲートへ移動
+    IF SECTOR_ID != CURRENT_SECTOR_ID
+        ; セクターのY軸を合わせに行く
+        IF SECTOR_ID / 10 != CURRENT_SECTOR_ID / 10
+            ; ワープゲートのX軸を合わせに行く
+            IF CURRENT_X_POS < MAP_WIDTH / 2
+                CURRENT_X_POS ++
+            ELSEIF CURRENT_X_POS > MAP_WIDTH / 2
+                CURRENT_X_POS --
+            ;ワープゲートのY軸を合わせに行く
+            ELSEIF (SECTOR_ID / 10 - CURRENT_SECTOR_ID / 10) > 0
+                CURRENT_Y_POS ++
+            ELSEIF (SECTOR_ID / 10 - CURRENT_SECTOR_ID / 10) < 0
+                CURRENT_Y_POS --
+            ENDIF
+        ; セクターのX軸を合わせに行く
+        ELSE
+            ; ワープゲートのＹ軸を合わせに行く
+            IF CURRENT_Y_POS < MAP_HEIGHT / 2
+                CURRENT_Y_POS ++
+            ELSEIF CURRENT_Y_POS > MAP_HEIGHT / 2
+                CURRENT_Y_POS --
+            ELSEIF (SECTOR_ID % 10 - CURRENT_SECTOR_ID % 10) > 0
+                CURRENT_X_POS ++
+            ELSEIF (SECTOR_ID % 10 - CURRENT_SECTOR_ID % 10) < 0
+                CURRENT_X_POS --
+            ENDIF
+        ENDIF
+        CALL POS2ID(CURRENT_SECTOR_ID, CURRENT_X_POS, CURRENT_Y_POS)
+        PRINTFORML posid: {RESULT}
+        SHIP_POSITION:SHIP_ID = RESULT
+        IF SHIP_COUNTRY:SHIP_ID == PLAYER_COUNTRY
+            FOR CHARA_ID, 0, CHARANUM
+                SIF BOARDING_SHIP_ID:CHARA_ID != SHIP_ID
+                    CONTINUE
+                CALL ID2POS(SHIP_POSITION:SHIP_ID)
+                CALL CLEAR_MAP(SHIP_POSITION:SHIP_ID, SHIP_EQUIP:センサー:(BOARDING_SHIP_ID:CHARA_ID))
+                BREAK
+            NEXT
+        ENDIF
+        SIF SHIP_POSITION:SHIP_ID == POSID
+            RETURN 1
+        CONTINUE
+    ENDIF
     SIF CURRENT_X_POS == X_POS && CURRENT_Y_POS == Y_POS
         RETURN 1
     ; X座標を合わせに行く
     X_DIFF = X_POS - CURRENT_X_POS
-    IF X_DIFF > 0
-        CALL POS2ID(SECTOR_ID, CURRENT_X_POS + 1, CURRENT_Y_POS)
-    ELSEIF X_DIFF < 0
-        CALL POS2ID(SECTOR_ID, CURRENT_X_POS - 1, CURRENT_Y_POS)
-    ENDIF
     Y_DIFF = Y_POS - CURRENT_Y_POS
-    IF Y_DIFF > 0
-        CALL POS2ID(SECTOR_ID, CURRENT_X_POS, CURRENT_Y_POS + 1)
+    IF X_DIFF > 0 && MAP:CURRENT_SECTOR_ID:(CURRENT_X_POS + 1):CURRENT_Y_POS != ワープゲート
+        CURRENT_X_POS ++
+    ELSEIF X_DIFF < 0 && MAP:CURRENT_SECTOR_ID:(CURRENT_X_POS - 1):CURRENT_Y_POS != ワープゲート
+        CURRENT_X_POS --
+    ELSEIF Y_DIFF > 0
+        CURRENT_Y_POS ++
     ELSEIF Y_DIFF < 0
-        CALL POS2ID(SECTOR_ID, CURRENT_X_POS, CURRENT_Y_POS - 1)
+        CURRENT_Y_POS --
     ENDIF
+    CALL POS2ID(CURRENT_SECTOR_ID, CURRENT_X_POS, CURRENT_Y_POS)
     SHIP_POSITION:SHIP_ID = RESULT
     IF SHIP_COUNTRY:SHIP_ID == PLAYER_COUNTRY
         FOR CHARA_ID, 0, CHARANUM
@@ -63,7 +110,7 @@ FOR MOVE, 0, 移動量
             BREAK
         NEXT
     ENDIF
-    SIF CURRENT_X_POS == X_POS && CURRENT_Y_POS == Y_POS
+    SIF SHIP_POSITION:SHIP_ID == POSID
         RETURN 1
 NEXT
 RETURN 0

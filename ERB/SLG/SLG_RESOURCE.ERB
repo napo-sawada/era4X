@@ -14,8 +14,6 @@
 ; ランダムに資源を2箇所ずつ配置する
 FOR SECTOR_ID, 0, MAX_SECTOR
     FOR LOCAL, 0, 1
-        SIF RAND:ITEM_LENGTH == 0     
-            CONTINUE
         FOR LOCAL:2, 0, RESOURCE_LENGTH
             TASK_COMPLETE = 0
             WHILE TASK_COMPLETE == 0
