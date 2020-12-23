@@ -25,15 +25,19 @@ RETURN
 ;--------------------------
 @INIT_COUNTRY_1
 #DIM PORTPOSID
+#DIM SECTOR_ID
+#DIM X_POS
+#DIM Y_POS
 
 PORTPOSID = 星系座標ID:(RAND:星系数) + 1
 CALL ID2POS(PORTPOSID)
-X = RESULT:1
-Y = RESULT:2
+SECTOR_ID = RESULT:0
+X_POS = RESULT:1
+Y_POS = RESULT:2
 CHARACTER_POSITION = PORTPOSID
 
 ; 明瞭地域拡大
-CALL CLEAR_MAP(LIMIT(X + LOCAL:0, 0, MAP_WIDTH), LIMIT(Y + LOCAL:1, 0, MAP_HEIGHT), 3)
+CALL CLEAR_MAP(CHARACTER_POSITION, 3)
 
 COUNTRY_NAME:1 = プレイヤー文明
 
@@ -437,6 +441,9 @@ COUNTRY_NAME:9 = 赤の傭兵集団
 #DIM 星系座標X, 星系数
 #DIM 星系座標Y, 星系数
 #DIM ITER
+#DIM SECTOR_ID
+#DIM X_POS
+#DIM Y_POS
 
 ITER = 0
 COUNTRY_NAME:10 = 無所属
@@ -450,16 +457,18 @@ FOR LOCAL, 1, MAX_COUNTRY
 NEXT
 
 PRINTL 星系製作中……
-WHILE ITER < 10
-	FOR Y, 0, Y座標分割数 - 1
-		 FOR X, 0, X座標分割数 - 1
-		 	IF ITER < 星系数 && RAND(星系数 - ITER) == 0 && MAP:(X * 5 + 3):(Y * 5 + 3) != 0
-			 	CALL POS2ID(X * 5 + 1, Y * 5 + 1)
-			 	LOCALS = 海賊船＃{ITER}
-				CALL INIT_PRESET_SHIP(10, RESULT, フリゲート, LOCALS, フリゲート)
-				ITER ++
-			ENDIF
-		 NEXT
+WHILE ITER < 星系数
+	FOR SECTOR_ID, 0, MAX_SECTOR
+		FOR Y, 0, Y座標分割数 - 1
+			FOR X, 0, X座標分割数 - 1
+				IF ITER < 星系数 && RAND(星系数 - ITER) == 0 && MAP:SECTOR_ID:(X * 5 + 3):(Y * 5 + 3) != 0
+					CALL POS2ID(SECTOR_ID, X_POS * 5 + 1, Y_POS * 5 + 1)
+					LOCALS = 海賊船＃{ITER}
+					CALL INIT_PRESET_SHIP(10, RESULT, フリゲート, LOCALS, フリゲート)
+					ITER ++
+				ENDIF
+			NEXT
+		NEXT
 	NEXT
 WEND
 PRINTL 完了!

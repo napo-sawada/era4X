@@ -2,83 +2,119 @@
 ; MAP初期化
 ;-------------------------------------------------
 @INIT_MAP
-#DIM CONST X座標分割数 = MAP_WIDTH / 5
-#DIM CONST Y座標分割数 = MAP_HEIGHT / 5
-#DIM 星系座標X, 星系数
-#DIM 星系座標Y, 星系数
 #DIM ITER
+#DIM SECTOR_ID
 #DIM X_POS
 #DIM Y_POS
+
+X_POS = MAP_WIDTH / 2
+Y_POS = MAP_HEIGHT / 2
 
 VARSET MAP, 1
 ITER = 0
 PRINTL 星系製作中……
 WHILE ITER < 星系数
-	FOR Y_POS, 0, Y座標分割数 - 1
-		 FOR X_POS, 0, X座標分割数 - 1
-		 	; もっとスマートな計算方法はないものか...
-		 	IF ITER < 星系数 && RAND(星系数 - ITER) == 0 && MAP:(X_POS * 5 + 3):(Y_POS * 5 + 3) != 星
-			 	MAP:(X_POS * 5 + 3):(Y_POS * 5 + 3) = 星
-			 	CALL POS2ID(X_POS * 5 + 3, Y_POS * 5 + 3)
-			 	星系座標ID:ITER = RESULT
-				ITER ++
-			ENDIF
-		 NEXT
+	FOR SECTOR_ID, 0, MAX_SECTOR
+		; もっとスマートな計算方法はないものか...
+		IF ITER < 星系数 && RAND(星系数 - ITER) == 0 && MAP:SECTOR_ID:X_POS:Y_POS != 星
+			MAP:SECTOR_ID:X_POS:Y_POS = 星
+			CALL POS2ID(SECTOR_ID, X_POS, Y_POS)
+			星系座標ID:ITER = RESULT
+			ITER ++
+		ENDIF
 	NEXT
 WEND
 PRINTL 完了!
 
+; ワープゲート設置
+FOR Y_POS, 0, MAX_SECTOR_Y
+	FOR X_POS, 0, MAX_SECTOR_X
+		SECTOR_ID = (Y_POS * MAX_SECTOR_Y + X_POS)
+		SIF Y_POS != 0
+			MAP:SECTOR_ID:(MAP_WIDTH / 2):0 = ワープゲート
+		SIF Y_POS != (MAP_HEIGHT - 1)
+			MAP:SECTOR_ID:(MAP_WIDTH / 2):(MAP_HEIGHT - 1) = ワープゲート
+		SIF X_POS != 0
+			MAP:SECTOR_ID:0:(MAP_HEIGHT / 2) = ワープゲート
+		SIF X_POS != (MAP_WIDTH - 1)
+			MAP:SECTOR_ID:(MAP_WIDTH - 1):(MAP_HEIGHT / 2) = ワープゲート
+	NEXT
+NEXT
+
 ;-------------------------------------------------
 ; MAP描画
 ;-------------------------------------------------
-@DRAW_MAP(MODE)
-#DIM MODE
+@DRAW_MAP(SECTOR_ID)
+#DIM SECTOR_ID
 #DIM X_POS
 #DIM Y_POS
 #DIM ITER
 #DIM PORT_COUNT
+#DIM POSID
 
 FINDELEMENT PORT_OWNER, 0
 PORT_COUNT = RESULT
 
 DRAWLINE
+PRINTFORML セクター＃{SECTOR_ID}
+DRAWLINE
 FOR Y_POS, 0, MAP_HEIGHT
 	FOR X_POS, 0, MAP_WIDTH
-		IF CLEARMAP:X_POS:Y_POS == 0
+		CALL POS2ID(SECTOR_ID, X_POS, Y_POS)
+		POSID = RESULT
+		IF CLEARMAP:SECTOR_ID:X_POS:Y_POS == 0
 			CALL ID2TILE(0)
 		ELSE
-			SIF MAP:X_POS:Y_POS == 0
+			SIF MAP:SECTOR_ID:X_POS:Y_POS == 0
 				CALL UPDATE_MAP
 			; 星以外では船を表示する
-			IF MAP:X_POS:Y_POS != 星 && MAP:X_POS:Y_POS != 宇宙港
-				CALL GET_SHIP_TILE(X_POS, Y_POS)
+			IF MAP:SECTOR_ID:X_POS:Y_POS != 星 && MAP:SECTOR_ID:X_POS:Y_POS != 宇宙港
+				CALL GET_SHIP_TILE(POSID)
 				IF RESULT > 0
 					CALL ID2TILE(RESULT)
 				ELSE
-					CALL ID2TILE(MAP:X_POS:Y_POS)
+					CALL ID2TILE(MAP:SECTOR_ID:X_POS:Y_POS)
 				ENDIF
 			ELSE
-				IF MAP:X_POS:Y_POS == 宇宙港
+				IF MAP:SECTOR_ID:X_POS:Y_POS == 宇宙港
 					FOR ITER, 0, PORT_COUNT
 						SIF PORT_OWNER:ITER != PLAYER_COUNTRY
 							CONTINUE
-						CALL POS2ID(X_POS, Y_POS)
-						SIF PORT_POSITION_ID:ITER != RESULT
+						SIF PORT_POSITION_ID:ITER != POSID
 							CONTINUE
 						SETCOLOR 0X00FF00
 					NEXT
 				ENDIF
 
-				CALL ID2TILE(MAP:X_POS:Y_POS)
+				CALL ID2TILE(MAP:SECTOR_ID:X_POS:Y_POS)
 			ENDIF
 		ENDIF
-		CALL POS2ID(X_POS, Y_POS)
-		SIF RESULT == CHARACTER_POSITION
+		SIF POSID == CHARACTER_POSITION
 			SETCOLOR 0xAAFFAA
-		PRINTBUTTON @"%RESULTS:0%", X_POS * 100 + Y_POS
+		PRINTBUTTON @"%RESULTS:0%", SECTOR_ID * 10000 + X_POS * 100 + Y_POS
 		RESETCOLOR
 	NEXT
-	PRINTL 
+	IF Y_POS < 10
+		PRINTFORM %"", 10, LEFT%
+		FOR X_POS, 0, MAX_SECTOR_X
+			SIF X_POS + Y_POS * 10 == CHARACTER_POSITION / 10000
+				SETCOLOR 0XAAFFAA
+			IF X_POS + Y_POS * 10 == SECTOR_ID
+				PRINT ■
+			ELSE
+				PRINTBUTTON "□", (Y_POS * 10 + X_POS + 1000) * -1
+			ENDIF
+			RESETCOLOR
+		NEXT
+	ENDIF
+	IF Y_POS == 10
+		PRINTFORM %"", 10, LEFT%
+		PRINT セクターマップ
+	ELSEIF Y_POS == 11
+		PRINTFORM %"", 10, LEFT%
+		PRINT クリックで表示セクター切り替え
+	ENDIF
+	PRINTL
 NEXT
 DRAWLINE
 
@@ -86,15 +122,21 @@ DRAWLINE
 ;-------------------------------------------------
 ; 探索済みマップの結果返却
 ;-------------------------------------------------
-@GET_MAP(X_POS, Y_POS)
+@GET_MAP(POSID)
 #FUNCTION
+#DIM POSID
+#DIM SECTOR_ID
 #DIM X_POS
 #DIM Y_POS
 
-IF CLEARMAP:X_POS:Y_POS == 0
+SECTOR_ID = POSID / 10000
+X_POS = (POSID % 10000) / 100
+Y_POS = (POSID % 10000) % 100
+
+IF CLEARMAP:SECTOR_ID:X_POS:Y_POS == 0
 	RETURNF 0
 ELSE
-	RETURNF MAP:X_POS:Y_POS == 0 ? 1 # MAP:X_POS:Y_POS
+	RETURNF MAP:SECTOR_ID:X_POS:Y_POS == 0 ? 1 # MAP:SECTOR_ID:X_POS:Y_POS
 ENDIF
 ;-------------------------------------------------
 ; MAPのタイル返却
@@ -114,6 +156,8 @@ SELECTCASE TILE_ID
 		RESULTS:0 = ！
 	CASE 資源
 		RESULTS:0 = ＃
+	CASE ワープゲート
+		RESULTS:0 = ◎
 	CASE 中立軍
 		RESULTS:0 = ▲
 	CASE 自軍
@@ -126,54 +170,64 @@ ENDSELECT
 RETURN
 
 ;-------------------------------------------------
-; IDから座標を返却 RESULT:0 = 異常値チェック(0:OUT, 1:SAFE) RESULT:1 = X, RESULT:2 = Y
+; IDから座標を返却 
 ;-------------------------------------------------
 @ID2POS(ID)
 #DIM ID
+#DIM SECTOR_ID
 #DIM X_POS
 #DIM Y_POS
 
-X_POS = ID / 100
-Y_POS = ID % 100
+SECTOR_ID = ID / 10000
+X_POS = (ID % 10000) / 100
+Y_POS = (ID % 10000) % 100
+RESULT:0 = SECTOR_ID
 RESULT:1 = X_POS
-IF X_POS < 0 && X_POS >= MAP_WIDTH
-	RESULT = 0
-	RETURN
-ENDIF
 RESULT:2 = Y_POS
-IF Y_POS < 0 && Y_POS >= MAP_HEIGHT
-	RESULT = 0
-ELSE
-	RESULT = 1
-ENDIF
+RETURN RESULT
 
 ;-------------------------------------------------
 ; 座標からIDを取得
 ;-------------------------------------------------
-@POS2ID(X_POS, Y_POS)
+@POS2ID(SECTOR_ID, X_POS, Y_POS)
+#DIM SECTOR_ID
 #DIM X_POS
 #DIM Y_POS
-RETURN Y_POS + X_POS * 100
+RETURN Y_POS + X_POS * 100 + SECTOR_ID * 10000
 
 ;-------------------------------------------------
-; IDから座標を返却
+; ワープゲート通過
 ;-------------------------------------------------
-@ID_TO_POS(ID)
-#FUNCTION
-#DIM ID
-RESULT:1 = ID/100
-RESULT:2 = ID%100
-
-;-------------------------------------------------
-; 古いマップの更新
-;-------------------------------------------------
-@UPDATE_MAP
+@PATH_WARP_GATE
+#DIM SHIP_ID
+#DIM SECTOR_ID
 #DIM X_POS
 #DIM Y_POS
 
-FOR Y_POS, 0, MAP_HEIGHT
-	FOR X_POS, 0, MAP_WIDTH
-		SIF MAP:X_POS:Y_POS == 0
-			MAP:X_POS:Y_POS = 1
-	NEXT
+FOR SHIP_ID, 0, MAX_SHIP
+	SIF SHIP_COUNTRY:SHIP_ID == 0
+		CONTINUE
+	CALL ID2POS(SHIP_POSITION:SHIP_ID)
+	SECTOR_ID = RESULT:0
+	X_POS = RESULT:1
+	Y_POS = RESULT:2
+	SIF MAP:SECTOR_ID:X_POS:Y_POS != ワープゲート
+		CONTINUE
+	IF X_POS == 0 && Y_POS == MAP_HEIGHT / 2
+		SECTOR_ID -= 1
+		X_POS = MAP_WIDTH - 2
+	ELSEIF X_POS == MAP_WIDTH - 1 && Y_POS == MAP_HEIGHT / 2
+		SECTOR_ID += 1
+		X_POS = 1
+	ELSEIF X_POS == MAP_WIDTH / 2 && Y_POS == 0
+		SECTOR_ID -= 10
+		Y_POS = MAP_HEIGHT - 2
+	ELSEIF X_POS == MAP_WIDTH / 2 && Y_POS == MAP_HEIGHT - 1
+		SECTOR_ID += 10
+		Y_POS = 1
+	ENDIF
+	CALL POS2ID(SECTOR_ID, X_POS, Y_POS)
+	SHIP_POSITION:SHIP_ID = RESULT
+	SIF SHIP_COUNTRY == PLAYER_COUNTRY
+		CALL CLEAR_MAP(RESULT, SHIP_EQUIP:センサー:SHIP_ID)
 NEXT
