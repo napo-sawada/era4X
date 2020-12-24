@@ -457,14 +457,14 @@ FOR LOCAL, 1, MAX_COUNTRY
 NEXT
 
 PRINTL 星系製作中……
-WHILE ITER < 星系数
+WHILE ITER < 50
 	FOR SECTOR_ID, 0, MAX_SECTOR
 		FOR Y, 0, Y座標分割数 - 1
 			FOR X, 0, X座標分割数 - 1
-				IF ITER < 星系数 && RAND(星系数 - ITER) == 0 && MAP:SECTOR_ID:(X * 5 + 3):(Y * 5 + 3) != 0
+				IF ITER < 50 && RAND(50 - ITER) == 0 && MAP:SECTOR_ID:(X * 5 + 3):(Y * 5 + 3) != 0
 					CALL POS2ID(SECTOR_ID, X_POS * 5 + 1, Y_POS * 5 + 1)
 					LOCALS = 海賊船＃{ITER}
-					CALL INIT_PRESET_SHIP(10, RESULT, フリゲート, LOCALS, フリゲート)
+					CALL INIT_PRESET_SHIP(10, RESULT, コルベット, LOCALS, コルベット)
 					ITER ++
 				ENDIF
 			NEXT

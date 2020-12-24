@@ -50,16 +50,17 @@ PRINTBUTTON "[1]買わない", 1
 PRINTL
 INPUT
 IF RESULT == 0
-	PRINTL 「へへ、まいどあり
-	PRINTL それじゃあ座標データを送るぜ……よし、送ったぞ
-	PRINTW マップにアノマリー（！マーク）が追加されているはずだ。もしなかったらすでに誰かにとられた後だ。諦めな」
-	PRINTL 「余計なお世話かもしれないが、誰も載っていない艦船に移乗するには移乗ポットに人を入れる必要がある
-	PRINTW 要は移乗ポットと同乗者が必要ってことだ。それじゃあな」
-	MONEY -= 10000
 	CALL ID2POS(ANOMALY_POSITIONID:0)
 	SECTOR_ID = RESULT:0
 	X_POS = RESULT:1
 	Y_POS = RESULT:2
+	PRINTL 「へへ、まいどあり
+	PRINTL それじゃあ座標データを送るぜ……よし、送ったぞ
+	PRINTFORML セクター＃{SECTOR_ID}のX: {X_POS}, Y: {Y_POS}だ
+	PRINTW マップにアノマリー（！マーク）が追加されているはずだ。もしなかったらすでに誰かにとられた後だ。諦めな」
+	PRINTL 「余計なお世話かもしれないが、誰も載っていない艦船に移乗するには移乗ポットに人を入れる必要がある
+	PRINTW 要は移乗ポットと同乗者が必要ってことだ。それじゃあな」
+	MONEY -= 10000
 	CLEARMAP:SECTOR_ID:X_POS:Y_POS = 1
 	QUEST_PROGRESS:1 = 2
 ELSEIF RESULT == 1

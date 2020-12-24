@@ -251,7 +251,6 @@ SPEED = 0
 AVOID = 0
 ANTI_AIR = 0
 AIR_SHIP_HP = 0
-AIR_SHIP_POWER = 0
 EQUIP_LIMIT = -1
 
 ;----------------------------
@@ -415,12 +414,28 @@ CALL GET_MAIN_WEAPON(SHIP_EQUIP:主砲:SHIP_ID)
 RETURN DAMAGE
 
 ;----------------------------
+; 艦の艦載機体力取得
+;----------------------------
+@GET_MAX_AIR_SHIP_HP(SHIP_ID)
+#DIM SHIP_ID
+CALL GET_MAIN_WEAPON(SHIP_EQUIP:主砲:SHIP_ID)
+RETURN AIR_SHIP_HP
+
+;----------------------------
 ; 艦の副砲攻撃力取得
 ;----------------------------
 @GET_SUB_WEAPON_DAMAGE(SHIP_ID)
 #DIM SHIP_ID
 CALL GET_SUB_WEAPON(SHIP_EQUIP:副砲:SHIP_ID)
 RETURN DAMAGE
+
+;----------------------------
+; 艦の副砲対空取得
+;----------------------------
+@GET_SUB_ANTI_AIR(SHIP_ID)
+#DIM SHIP_ID
+CALL GET_SUB_WEAPON(SHIP_EQUIP:副砲:SHIP_ID)
+RETURN ANTI_AIR
 
 ;----------------------------
 ; 艦の回避率返却
@@ -435,6 +450,16 @@ CALL GET_ENGIN(SHIP_EQUIP:エンジン:SHIP_ID)
 AVOID_POWER += AVOID
 
 RETURN AVOID_POWER
+
+;----------------------------
+; 攻撃参加できる艦載機の数を返す
+;----------------------------
+@GET_JOIN_AIR_SHIP(SHIP_ID)
+#DIM SHIP_ID
+CALL GET_MAIN_WEAPON(SHIP_EQUIP:主砲:SHIP_ID)
+SIF WEAPON_TYPE != 戦闘機
+	RETURN 0
+RETURN AIR_SHIP_COUNT * AIR_SHIP_HP / LIMIT(AIR_SHIP_HP - AIR_SHIP_DAMAGE, 0, AIR_SHIP_HP)
 
 ;----------------------------
 ; 破壊された船を除去する
