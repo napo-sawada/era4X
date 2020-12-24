@@ -96,7 +96,7 @@ IF SHIP_TYPE:SHIP_ID == 偵察艇 || SHIP_TYPE:SHIP_ID == 輸送船 || SHIP_TYPE
 	RETURN
 ENDIF
 $INPUT_LOOP
-PRINTFORML      装備名                          ダメージ  射撃レート 対空 命中率  有効距離  サイズ  費用
+PRINTFORML      装備名                          ダメージ  射撃レート 命中率 対空 有効距離  サイズ  費用
 DRAWLINE
 FOR ITER, 0, VARSIZE("EQUIP_IDS")
 	CALL GET_SUB_WEAPON(EQUIP_IDS:ITER)
