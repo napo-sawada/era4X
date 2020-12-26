@@ -2,9 +2,7 @@
 ; オプション
 ;-----------------------------------
 @GET_OPTION_NAME_1
-#FUNCTIONS
-
-RETURNF 小型移乗コンテナ
+RESULTS = 小型移乗コンテナ
 
 @GET_OPTION_STATUS_1(STATUS)
 #DIM REF STATUS
@@ -17,7 +15,8 @@ STATUS:PRICE = 10000
 @GET_OPTION_DESCRIPTION_1(STATUS)
 #DIM STATUS, STATUS_LENGTH
 CALL GET_OPTION_STATUS_1(STATUS)
-PRINTFORML %GET_OPTION_NAME_1()%
+CALL GET_OPTION_NAME_1
+PRINTFORML %RESULTS%
 PRINTFORML 一人乗りの移乗コンテナ。完全放棄された艦船を乗っ取るのに使う。
 
 ;-----------------------------------

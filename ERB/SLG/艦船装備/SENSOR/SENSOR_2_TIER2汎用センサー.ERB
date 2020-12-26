@@ -1,0 +1,30 @@
+﻿;-----------------------------------
+; センサー
+;-----------------------------------
+@GET_SENSOR_NAME_2
+RESULTS = TIER2汎用センサー
+
+@GET_SENSOR_STATUS_2(STATUS)
+#DIM REF STATUS
+
+STATUS:SENSOR = 2
+STATUS:PRICE = 20000
+
+;-----------------------------------
+; センサーの説明
+;-----------------------------------
+@GET_SENSOR_DESCRIPTION_2(STATUS)
+#DIM STATUS, STATUS_LENGTH
+CALL GET_SENSOR_STATUS_2(STATUS)
+CALL GET_SENSOR_NAME_2
+PRINTFORML %RESULTS%
+PRINTFORML センサー範囲: {STATUS:SENSOR}
+
+;-----------------------------------
+; センサーの資材
+;-----------------------------------
+@GET_SENSOR_RESOURCE_2(USE_RESOURCE)
+#DIM REF USE_RESOURCE
+
+USE_RESOURCE:タイラーセンサー = 6
+
