@@ -1,0 +1,43 @@
+﻿;-----------------------------------
+; サブウェポン
+;-----------------------------------
+@GET_SUB_WEAPON_NAME_8
+#FUNCTIONS
+
+RETURNF TIER2コイルガン
+
+@GET_SUB_WEAPON_STATUS_8(STATUS)
+#DIM REF STATUS
+
+STATUS:DAMAGE = 100
+STATUS:FIRE_RATE = 1
+STATUS:ANTI_AIR = 100
+STATUS:HIT_RATE = 60
+STATUS:SIZE = 3
+STATUS:WEAPON_TYPE = 実体弾
+STATUS:PRICE = 80000
+
+;-----------------------------------
+; サブウェポンの説明
+;-----------------------------------
+@GET_SUB_WEAPON_DESCRIPTION_8
+#DIM STATUS, STATUS_LENGTH
+
+CALL GET_SUB_WEAPON_STATUS_8(STATUS)
+PRINTFORML %GET_SUB_WEAPON_NAME_8()%
+PRINTFORML ダメージ  : {STATUS:DAMAGE}
+PRINTFORML 射撃レート: {STATUS:FIRE_RATE}発/ターン
+PRINTFORML 対空攻撃力: {STATUS:ANTI_AIR}
+PRINTFORML 命中率    : {STATUS:HIT_RATE}
+PRINTFORML 有効距離  : {STATUS:FIRE_RANGE}
+PRINTFORML サイズ    : {STATUS:SIZE}
+
+;-----------------------------------
+; サブウェポンの資材
+;-----------------------------------
+@GET_SUB_WEAPON_RESOURCE_8(USE_RESOURCE)
+#DIM REF USE_RESOURCE
+
+USE_RESOURCE:武装合金 = 4
+USE_RESOURCE:武装制御機器 = 2
+USE_RESOURCE:超電導回路 = 2

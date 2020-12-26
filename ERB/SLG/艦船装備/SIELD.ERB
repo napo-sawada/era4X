@@ -1,113 +1,4 @@
 ﻿;-----------------------------------
-; シールド
-;-----------------------------------
-@GET_SIELD(ID)
-#DIM ID
-
-SELECTCASE ID
-	CASE 1
-		SIELD = 100
-		SIELD_RECOVER = 2
-		SIZE = 1
-		EQUIP_NAME = TIER1小型シールド
-		PRICE = 10000
-	CASE 2
-		SIELD = 200
-		SIELD_RECOVER = 4
-		SIZE = 2
-		EQUIP_NAME = TIER1中型シールド
-		PRICE = 20000
-	CASE 3
-		SIELD = 500
-		SIELD_RECOVER = 10
-		SIZE = 3
-		EQUIP_NAME = TIER1大型シールド
-		PRICE = 40000
-	CASE 4
-		SIELD = 100
-		SIELD_RECOVER = 10
-		SIZE = 1
-		EQUIP_NAME = TIER2小型シールド
-		PRICE = 20000
-	CASE 5
-		SIELD = 200
-		SIELD_RECOVER = 20
-		SIZE = 2
-		EQUIP_NAME = TIER2中型シールド
-		PRICE = 40000
-	CASE 6
-		SIELD = 500
-		SIELD_RECOVER = 40
-		SIZE = 3
-		EQUIP_NAME = TIER2大型シールド
-		PRICE = 80000
-	CASE 7
-		SIELD = 200
-		SIELD_RECOVER = 10
-		SIZE = 1
-		EQUIP_NAME = TIER3小型シールド
-		PRICE = 40000
-	CASE 8
-		SIELD = 400
-		SIELD_RECOVER = 20
-		SIZE = 2
-		EQUIP_NAME = TIER3中型シールド
-		PRICE = 80000
-	CASE 9
-		SIELD = 1000
-		SIELD_RECOVER = 40
-		SIZE = 3
-		EQUIP_NAME = TIER3大型シールド
-		PRICE = 160000
-	CASEELSE
-		EQUIP_NAME = ---
-ENDSELECT
-;-----------------------------------
-; シールドの説明
-;-----------------------------------
-@GET_SIELD_DESCRIPTION(ID)
-#DIM ID
-CALL GET_SIELD(ID)
-SELECTCASE ID
-	CASE 1 TO 9
-		PRINTFORML %EQUIP_NAME%
-		PRINTFORML シールド    : {SIELD}
-		PRINTFORML シールド回復: {SIELD_RECOVER}発/ターン
-		PRINTFORML サイズ      : {SIZE}
-	CASEELSE
-		PRINTFORML = ---
-ENDSELECT
-
-;-----------------------------------
-; シールドの資材
-;-----------------------------------
-@GET_SIELD_RESOURCE(USE_RESOURCE, ID)
-#DIM REF USE_RESOURCE
-#DIM ID
-
-SELECTCASE ID
-	CASE 1
-		USE_RESOURCE:シールド発生装置 = 2
-	CASE 2
-		USE_RESOURCE:シールド発生装置 = 4
-	CASE 3
-		USE_RESOURCE:シールド発生装置 = 8
-	CASE 4
-		USE_RESOURCE:シールド発生装置 = 4
-	CASE 5
-		USE_RESOURCE:シールド発生装置 = 8
-	CASE 6
-		USE_RESOURCE:シールド発生装置 = 16
-	CASE 7
-		USE_RESOURCE:シールド発生装置 = 8
-	CASE 8
-		USE_RESOURCE:シールド発生装置 = 16
-	CASE 9
-		USE_RESOURCE:シールド発生装置 = 32
-
-ENDSELECT
-
-;-----------------------------------
 ; シールドの換装
 ;-----------------------------------
 @CHANGE_SIELD(SHIP_ID, SALE_COUNTRY, EQUIP_ID)
@@ -122,7 +13,7 @@ ENDSELECT
 
 CAN_BUY = 1
 
-CALL GET_SIELD_RESOURCE(USE_RESOURCE, EQUIP_ID)
+TRYCALLFORM GET_SIELD_RESOURCE_{EQUIP_ID}(USE_RESOURCE)
 FOR ITER, 0, ITEM_LENGTH
 	SIF USE_RESOURCE:ITER == 0
 		CONTINUE

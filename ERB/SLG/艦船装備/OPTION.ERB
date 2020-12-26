@@ -1,46 +1,4 @@
 ﻿;-----------------------------------
-; オプション
-;-----------------------------------
-@GET_OPTION(ID)
-#DIM ID
-
-SELECTCASE ID
-	CASE 1
-		EQUIP_NAME = 小型移乗コンテナ
-		PRICE = 10000
-		RETURN 1
-	CASEELSE
-		EQUIP_NAME = ---
-ENDSELECT
-
-;-----------------------------------
-; オプションの説明
-;-----------------------------------
-@GET_OPTION_DESCRIPTION(ID)
-#DIM ID
-CALL GET_OPTION(ID)
-SELECTCASE ID
-	CASE 1
-		PRINTFORML %EQUIP_NAME%
-		PRINTFORML 一人乗りの移乗コンテナ。完全放棄された艦船を乗っ取るのに使う。
-	CASEELSE
-		PRINTFORML = ---
-ENDSELECT
-
-;-----------------------------------
-; オプションの資材
-;-----------------------------------
-@GET_OPTION_RESOURCE(USE_RESOURCE, ID)
-#DIM REF USE_RESOURCE
-#DIM ID
-
-SELECTCASE ID
-	CASE 1
-		USE_RESOURCE:装甲合金 = 1
-		USE_RESOURCE:シールド発生装置 = 1
-ENDSELECT
-
-;-----------------------------------
 ; オプションの換装
 ;-----------------------------------
 @CHANGE_OPTION(SHIP_ID, SALE_COUNTRY, EQUIP_ID)
@@ -55,7 +13,7 @@ ENDSELECT
 
 CAN_BUY = 1
 
-CALL GET_OPTION_RESOURCE(USE_RESOURCE, EQUIP_ID)
+TRYCALLFORM GET_OPTION_RESOURCE_{EQUIP_ID}(USE_RESOURCE)
 FOR ITER, 0, ITEM_LENGTH
 	SIF USE_RESOURCE:ITER == 0
 		CONTINUE

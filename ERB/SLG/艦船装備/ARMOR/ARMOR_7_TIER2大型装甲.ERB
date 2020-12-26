@@ -1,0 +1,33 @@
+﻿;-----------------------------------
+; アーマー
+;-----------------------------------
+@GET_ARMOR_NAME_7
+#FUNCTIONS
+
+RETURNF "TIER2大型装甲"
+
+@GET_ARMOR_STATUS_7(STATUS)
+#DIM REF STATUS
+
+STATUS:ARMOR = 2000
+STATUS:SIZE = 3
+STATUS:PRICE = 80000
+
+;-----------------------------------
+; アーマーの説明
+;-----------------------------------
+@GET_ARMOR_DESCRIPTION_7
+#DIM STATUS, STATUS_LENGTH
+
+CALL GET_ARMOR_STATUS_7(STATUS)
+PRINTFORML %GET_ARMOR_NAME_7()%
+PRINTFORML 装甲      : {STATUS:ARMOR}
+PRINTFORML サイズ    : {STATUS:SIZE}
+
+;-----------------------------------
+; 装甲の資材
+;-----------------------------------
+@GET_ARMOR_RESOURCE_7(USE_RESOURCE)
+#DIM REF USE_RESOURCE
+
+USE_RESOURCE:装甲合金 = 24

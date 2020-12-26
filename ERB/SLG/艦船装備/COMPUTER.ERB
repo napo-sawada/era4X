@@ -1,45 +1,4 @@
 ﻿;-----------------------------------
-; コンピューター
-;-----------------------------------
-@GET_COMPUTER(ID)
-#DIM ID
-
-SELECTCASE ID
-	CASE 1
-		AVOID = 5
-		EQUIP_NAME = TIER1汎用艦船管理AI
-		PRICE = 10000
-	CASEELSE
-		EQUIP_NAME = ---
-ENDSELECT
-
-;-----------------------------------
-; コンピューターの説明
-;-----------------------------------
-@GET_COMPUTER_DESCRIPTION(ID)
-#DIM ID
-CALL GET_COMPUTER(ID)
-SELECTCASE ID
-	CASE 1
-		PRINTFORML %EQUIP_NAME%
-		PRINTFORML 回避    : {AVOID}
-	CASEELSE
-		PRINTFORML = ---
-ENDSELECT
-
-;-----------------------------------
-; AIの資材
-;-----------------------------------
-@GET_COMPUTER_RESOURCE(USE_RESOURCE, ID)
-#DIM REF USE_RESOURCE
-#DIM ID
-
-SELECTCASE ID
-	CASE 1
-		USE_RESOURCE:超電導回路 = 2
-ENDSELECT
-
-;-----------------------------------
 ; AIの換装
 ;-----------------------------------
 @CHANGE_COMPUTER(SHIP_ID, SALE_COUNTRY, EQUIP_ID)
@@ -54,7 +13,7 @@ ENDSELECT
 
 CAN_BUY = 1
 
-CALL GET_COMPUTER_RESOURCE(USE_RESOURCE, EQUIP_ID)
+TRYCALLFORM GET_COMPUTER_RESOURCE_{EQUIP_ID}(USE_RESOURCE)
 FOR ITER, 0, ITEM_LENGTH
 	SIF USE_RESOURCE:ITER == 0
 		CONTINUE

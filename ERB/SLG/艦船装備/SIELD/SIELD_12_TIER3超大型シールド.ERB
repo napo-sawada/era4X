@@ -1,0 +1,36 @@
+﻿;-----------------------------------
+; シールド
+;-----------------------------------
+@GET_SIELD_NAME_12
+#FUNCTIONS
+
+RETURNF TIER3超大型シールド
+
+@GET_SIELD_STATUS_12(STATUS)
+#DIM REF STATUS
+
+STATUS:SIELD = 6400
+STATUS:SIELD_RECOVER = 64
+STATUS:SIZE = 1
+STATUS:PRICE = 320000
+
+;-----------------------------------
+; シールドの説明
+;-----------------------------------
+@GET_SIELD_DESCRIPTION_12
+#DIM STATUS, STATUS_LENGTH
+
+CALL GET_SIELD_STATUS_12(STATUS)
+PRINTFORML %GET_SIELD_NAME_12()%
+PRINTFORML シールド    : {STATUS:SIELD}
+PRINTFORML シールド回復: {STATUS:SIELD_RECOVER}発/ターン
+PRINTFORML サイズ      : {STATUS:SIZE}
+
+;-----------------------------------
+; シールドの資材
+;-----------------------------------
+@GET_SIELD_RESOURCE_12(USE_RESOURCE)
+#DIM REF USE_RESOURCE
+
+USE_RESOURCE:シールド発生装置 = 96
+

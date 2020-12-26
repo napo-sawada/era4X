@@ -1,0 +1,33 @@
+﻿;-----------------------------------
+; アーマー
+;-----------------------------------
+@GET_ARMOR_NAME_9
+#FUNCTIONS
+
+RETURNF "TIER3小型装甲"
+
+@GET_ARMOR_STATUS_9(STATUS)
+#DIM REF STATUS
+
+STATUS:ARMOR = 1000
+STATUS:SIZE = 1
+STATUS:PRICE = 40000
+
+;-----------------------------------
+; アーマーの説明
+;-----------------------------------
+@GET_ARMOR_DESCRIPTION_9
+#DIM STATUS, STATUS_LENGTH
+
+CALL GET_ARMOR_STATUS_9(STATUS)
+PRINTFORML %GET_ARMOR_NAME_9()%
+PRINTFORML 装甲      : {STATUS:ARMOR}
+PRINTFORML サイズ    : {STATUS:SIZE}
+
+;-----------------------------------
+; 装甲の資材
+;-----------------------------------
+@GET_ARMOR_RESOURCE_9(USE_RESOURCE)
+#DIM REF USE_RESOURCE
+
+USE_RESOURCE:装甲合金 = 12

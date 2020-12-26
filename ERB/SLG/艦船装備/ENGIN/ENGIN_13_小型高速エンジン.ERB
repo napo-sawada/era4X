@@ -1,0 +1,36 @@
+﻿;-----------------------------------
+; エンジン
+;-----------------------------------
+@GET_ENGIN_NAME_13
+#FUNCTIONS
+
+RETURNF 小型高速エンジン
+
+@GET_ENGIN_STATUS13(STATUS)
+#DIM REF STATUS
+
+STATUS:SPEED = 2
+STATUS:AVOID = 3
+STATUS:SIZE = 1
+STATUS:PRICE = 80000
+
+;-----------------------------------
+; エンジンの説明
+;-----------------------------------
+@GET_ENGIN_DESCRIPTION_13(STATUS)
+#DIM STATUS, STATUS_LENGTH
+
+CALL GET_ENGIN_STATUS_13(STATUS)
+PRINTFORML %GET_ENGIN_NAME_13()%
+PRINTFORML スピード  : {STATUS:SPEED}
+PRINTFORML 回避      : {STATUS:AVOID}
+PRINTFORML サイズ    : {STATUS:SIZE}
+
+;-----------------------------------
+; エンジンの資材
+;-----------------------------------
+@GET_ENGIN_RESOURCE_13(USE_RESOURCE)
+#DIM REF USE_RESOURCE
+
+USE_RESOURCE:耐熱合金 = 16
+USE_RESOURCE:ジェットガス = 16

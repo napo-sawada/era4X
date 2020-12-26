@@ -1,0 +1,31 @@
+﻿;-----------------------------------
+; コンピューター
+;-----------------------------------
+@GET_COMPUTER_NAME_3
+#FUNCTIONS
+
+RETURNF TIER3汎用艦船管理AI
+
+@GET_COMPUTER_STATUS_3
+#DIM REF STATUS
+
+STATUS:AVOID = 7
+STATUS:PRICE = 40000
+
+;-----------------------------------
+; コンピューターの説明
+;-----------------------------------
+@GET_COMPUTER_DESCRIPTION_3(STATUS)
+#DIM STATUS, STATUS_LENGTH
+
+CALL GET_COMPUTER_3(STATUS)
+PRINTFORML %GET_COMPUTER_NAME_3()%
+PRINTFORML 回避    : {STATUS:AVOID}
+
+;-----------------------------------
+; AIの資材
+;-----------------------------------
+@GET_COMPUTER_RESOURCE_3(USE_RESOURCE)
+#DIM REF USE_RESOURCE
+
+USE_RESOURCE:超電導回路 = 8
