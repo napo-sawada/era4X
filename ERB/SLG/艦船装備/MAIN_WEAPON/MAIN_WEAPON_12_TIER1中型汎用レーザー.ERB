@@ -1,0 +1,41 @@
+﻿;-----------------------------------
+; メインウェポン
+;-----------------------------------
+@GET_MAIN_WEAPON_NAME_12
+#FUNCTIONS
+RETURNF TIER1中型汎用レーザー
+
+@GET_MAIN_WEAPON_STATUS_12(STATUS)
+#DIM REF STATUS
+
+STATUS:DAMAGE = 200
+STATUS:FIRE_RATE = 2
+STATUS:HIT_RATE = 70
+STATUS:FIRE_RANGE = 2
+STATUS:SIZE = 2
+STATUS:WEAPON_TYPE = レーザー
+STATUS:PRICE = 20000
+
+;-----------------------------------
+; メインウェポンの説明
+;-----------------------------------
+@GET_MAIN_WEAPON_DESCRIPTION_12
+#DIM STATUS, STATUS_LENGTH
+
+CALL GET_MAIN_WEAPON_STATUS_12(STATUS)
+PRINTFORML %GET_MAIN_WEAPON_NAME_12()%
+PRINTFORML ダメージ  : {STATUS:DAMAGE}
+PRINTFORML 射撃レート: {STATUS:FIRE_RATE}発/ターン
+PRINTFORML 命中率    : {STATUS:HIT_RATE}
+PRINTFORML 有効距離  : {STATUS:FIRE_RANGE}
+PRINTFORML サイズ    : {STATUS:SIZE}
+
+;-----------------------------------
+; メインウェポンの資材
+;-----------------------------------
+@GET_MAIN_WEAPON_RESOURCE_12(USE_RESOURCE)
+#DIM REF USE_RESOURCE
+
+USE_RESOURCE:武装合金 = 2
+USE_RESOURCE:耐熱合金 = 2
+USE_RESOURCE:武装制御機器 = 2

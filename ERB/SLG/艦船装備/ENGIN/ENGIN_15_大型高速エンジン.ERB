@@ -1,0 +1,36 @@
+﻿;-----------------------------------
+; エンジン
+;-----------------------------------
+@GET_ENGIN_NAME_15
+#FUNCTIONS
+
+RETURNF 大型高速エンジン
+
+@GET_ENGIN_STATUS15(STATUS)
+#DIM REF STATUS
+
+STATUS:SPEED = 2
+STATUS:AVOID = 3
+STATUS:SIZE = 3
+STATUS:PRICE = 320000
+
+;-----------------------------------
+; エンジンの説明
+;-----------------------------------
+@GET_ENGIN_DESCRIPTION_15(STATUS)
+#DIM STATUS, STATUS_LENGTH
+
+CALL GET_ENGIN_STATUS_15(STATUS)
+PRINTFORML %GET_ENGIN_NAME_15()%
+PRINTFORML スピード  : {STATUS:SPEED}
+PRINTFORML 回避      : {STATUS:AVOID}
+PRINTFORML サイズ    : {STATUS:SIZE}
+
+;-----------------------------------
+; エンジンの資材
+;-----------------------------------
+@GET_ENGIN_RESOURCE_15(USE_RESOURCE)
+#DIM REF USE_RESOURCE
+
+USE_RESOURCE:耐熱合金 = 64
+USE_RESOURCE:ジェットガス = 64

@@ -1,0 +1,36 @@
+﻿;-----------------------------------
+; シールド
+;-----------------------------------
+@GET_SIELD_NAME_1
+#FUNCTIONS
+
+RETURNF TIER1小型シールド
+
+@GET_SIELD_STATUS_1(STATUS)
+#DIM REF STATUS
+
+STATUS:SIELD = 200
+STATUS:SIELD_RECOVER = 2
+STATUS:SIZE = 1
+STATUS:PRICE = 10000
+
+;-----------------------------------
+; シールドの説明
+;-----------------------------------
+@GET_SIELD_DESCRIPTION_1
+#DIM STATUS, STATUS_LENGTH
+
+CALL GET_SIELD_STATUS_1(STATUS)
+PRINTFORML %GET_SIELD_NAME_1()%
+PRINTFORML シールド    : {STATUS:SIELD}
+PRINTFORML シールド回復: {STATUS:SIELD_RECOVER}発/ターン
+PRINTFORML サイズ      : {STATUS:SIZE}
+
+;-----------------------------------
+; シールドの資材
+;-----------------------------------
+@GET_SIELD_RESOURCE_1(USE_RESOURCE)
+#DIM REF USE_RESOURCE
+
+USE_RESOURCE:シールド発生装置 = 3
+
