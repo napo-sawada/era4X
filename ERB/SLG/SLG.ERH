@@ -102,7 +102,7 @@
 #DIM CONST 大破 = 5
 
 ; SHIP_TYPE
-#DIM CONST 偵察艇 = 0
+#DIM CONST 調査船 = 0
 #DIM CONST コルベット = 1
 #DIM CONST フリゲート = 2
 #DIM CONST 駆逐艦 = 3
