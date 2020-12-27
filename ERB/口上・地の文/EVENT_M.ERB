@@ -16,6 +16,7 @@ IF TEQUIP:25
 ELSE
 	PRINTW 体を丹念に愛撫した……
 ENDIF
+TRYCALLFORM MESSAGE_M{CFLAG:1005}_COM0
 ;-------------------------------------------------
 ;1,クンニ
 ;-------------------------------------------------
@@ -3050,7 +3051,88 @@ ENDIF
 SIF TFLAG:29 > 0
 	WAIT
 
-
+;-------------------------------------------
+;調教前のテキスト
+;-------------------------------------------
+@BEFORE_TRAIN
+SELECTCASE CFLAG:1000
+	CASE 恋慕ルート
+		IF TALENT:TARGET:恋慕 == 1 || TALENT:TARGET:親愛 == 1
+			SELECTCASE RAND:2
+				CASE 0
+					PRINTFORMW 自分の部屋でのんびりしていた%CALLNAME:TARGET%は、%CALLNAME:PLAYER%の顔を見るとパァっと顔を輝かせた
+				CASE 1
+					PRINTFORMW 自分の部屋で%CALLNAME:MASTER%を待ちわびていた%CALLNAME:TARGET%は、%CALLNAME:MASTER%の顔を見ると嬉しそうに駆け寄ってきた
+			ENDSELECT
+		ELSE
+			PRINTFORMW 居心地のいい部屋でのんびりしていた%CALLNAME:TARGET%は、%CALLNAME:PLAYER%の顔を見ると顔を曇らせた
+		ENDIF
+	CASE 淫乱ルート
+		IF TALENT:TARGET:淫乱 == 1 || TALENT:TARGET:娼婦 == 1
+			SELECTCASE RAND:2
+				CASE 0
+					PRINTFORMW ベッドに寝転んでいた%CALLNAME:TARGET%は、%CALLNAME:MASTER%の顔を見ると妖艶に微笑みかけてきた
+				CASE 1
+					PRINTFORMW 手持ち無沙汰に淫具をいじっていた%CALLNAME:TARGET%は、%CALLNAME:MASTER%の顔を見ると挑発的に淫具を舐め上げてみせた
+			ENDSELECT
+		ELSE
+			PRINTFORMW 質素な部屋でぼーっとしていた%CALLNAME:TARGET%は、%CALLNAME:PLAYER%の顔を見ると顔をしかめた
+		ENDIF
+	CASE 隷属ルート
+		IF TALENT:TARGET:服従 == 1 || TALENT:TARGET:隷属 == 1
+			SELECTCASE RAND:2
+				CASE 0
+					PRINTFORML 拠点の掃除をしていた%CALLNAME:TARGET%の手首を掴んで、調教部屋へ連れて行った。
+					PRINTFORMW %CALLNAME:TARGET%は無表情でされるがままにしている
+				CASE 1
+					PRINTFORMW 部屋で待機していた%CALLNAME:TARGET%は、あなたの顔を見ると足元に膝まづいた
+			ENDSELECT
+		ELSE
+			PRINTFORMW 独房の中で心細そうにしていた%CALLNAME:TARGET%は、%CALLNAME:PLAYER%の顔を見ると睨み付けてきた
+		ENDIF
+ENDSELECT
+IF CFLAG:1005 > 0
+	IF IS_FALL(TARGET)
+		STRLENS NICKNAME:TARGET
+		IF RESULT == 0
+			$INPUT_LOOP
+			PRINTFORML %CALLNAME:TARGET%が%CALLNAME:MASTER%の呼び名方を訪ねてきた
+			INPUTS
+			STRLENS RESULTS
+			SIF RESULT == 0
+				GOTO INPUT_LOOP
+			PRINTFORML %RESULTS%でいいですか？
+			PRINTBUTTON "[0] はい", 0
+			PRINTL
+			PRINTBUTTON "[1] いいえ", 1
+			INPUT
+			IF RESULT == 0
+				NICKNAME:TARGET = RESULTS
+			ELSE
+				GOTO INPUT_LOOP
+			ENDIF
+		ENDIF
+	ENDIF
+	STRLENS SELFCALL:TARGET
+	IF RESULT == 0
+		$INPUT_LOOP2
+		PRINTFORML ところで%CALLNAME:TARGET%の一人称は？
+		INPUTS
+		STRLENS RESULTS
+		SIF RESULT == 0
+			GOTO INPUT_LOOP2
+		PRINTFORML %RESULTS%でいいですか？
+		PRINTBUTTON "[0] はい", 0
+		PRINTL
+		PRINTBUTTON "[1] いいえ", 1
+		INPUT
+		IF RESULT == 0
+			SELFCALL:TARGET = RESULTS
+		ELSE
+			GOTO INPUT_LOOP2
+		ENDIF
+	ENDIF
+ENDIF
 ;-------------------------------------------
 ;調教後のテキスト
 ;-------------------------------------------

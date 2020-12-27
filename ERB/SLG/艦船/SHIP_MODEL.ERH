@@ -1,0 +1,9 @@
+﻿#DIM CONST 汎用調査船 = 1
+#DIM CONST 汎用コルベット = 2
+#DIM CONST 汎用フリゲート = 3
+#DIM CONST 汎用駆逐艦 = 4
+#DIM CONST 汎用巡洋艦 = 5
+#DIM CONST 汎用戦艦 = 6
+#DIM CONST 汎用空母 = 7
+#DIM CONST 汎用輸送船 = 8
+#DIM CONST 汎用作業船 = 9

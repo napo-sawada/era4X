@@ -1,0 +1,71 @@
+﻿;--------------------------
+; !!クエスト名と 3を好きな番号に変える！!
+; 海賊の討伐
+; 近場に沸いた海賊を討伐する
+;--------------------------
+
+;--------------------------
+; クエスト受注可能か
+;--------------------------
+@QUEST_ACCEPTABLE_3
+RETURN 1
+
+;--------------------------
+; クエストの名前を返却
+;--------------------------
+@QUEST_NAME_3
+RESULTS = 海賊の討伐依頼
+RETURN
+
+;--------------------------
+; クエスト本体
+;--------------------------
+@QUEST_BODY_3
+#DIM SECTOR_ID
+#DIM IS_COMPLETE
+#DIM SHIP_ID
+
+IF QUEST_PROGRESS:3 == 0
+	PRINTFORML 「お前、戦闘船を持ってるか？」
+	PRINTFORML %CALLNAME:MASTER%は商人らしき男に話しかけられた
+	$INPUT_LOOP
+	PRINTBUTTON "[0] はい", 0
+	PRINTBUTTON "[1] いいえ", 1
+	INPUT
+	IF RESULT == 0
+		PRINTFORML 「よし、ちょうどいい。このセクターに最近海賊が沸いて、商売上がったりなんだ
+		PRINTFORML 頼む、このセクターの海賊を討伐してくれ
+		PRINTFORMW 討伐してくれたら、$30,000出す。頼んだぞ！」
+		PRINTFORMW 無理やり海賊の討伐依頼を受けさせられてしまった
+		QUEST_PROGRESS:3 = 1
+		CALL ID2POS(CHARACTER_POSITION)
+		SECTOR_ID = RESULT:0
+		CALL POS2ID(SECTOR_ID, 13, 13)
+		CALL INIT_PRESET_SHIP(10, RESULT, 汎用コルベット, "海賊船", 汎用コルベット)
+	ELSEIF RESULT == 1
+		PRINTFORMW 「そうか、ならいいんだ……」
+	ELSE
+		GOTO INPUT_LOOP
+	ENDIF
+ELSE
+	IS_COMPLETE = 1
+	FOR SHIP_ID, 0, MAX_SHIP
+		SIF SHIP_COUNTRY:SHIP_ID != 10
+			CONTINUE
+		CALL ID2POS(CHARACTER_POSITION)
+		SECTOR_ID = RESULT:0
+		CALL ID2POS(SHIP_POSITION:SHIP_ID)
+		SIF SECTOR_ID != RESULT:0
+			CONTINUE
+			IS_COMPLETE = 0
+	NEXT
+	IF IS_COMPLETE == 0
+		PRINTFORMW 「このセクションの海賊討伐を頼んだぞ！」
+	ELSE
+		PRINTFORML 「海賊を討伐してくれたんだな！助かったよ
+		PRINTFORML これが報酬だ。じゃ、俺は仕事に行ってくるよ」
+		PRINTFORMW 男は%CALLNAME:MASTER%に報酬の$50,000を押し付けると、足早に去って行った
+		QUEST_PROGRESS:3 = 0
+	ENDIF
+ENDIF
+

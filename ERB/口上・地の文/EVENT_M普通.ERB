@@ -1,0 +1,19 @@
+﻿;調教時テキスト
+;-------------------------------------------------
+;0,愛撫
+;-------------------------------------------------
+@MESSAGE_M1_COM0
+
+IF TALENT:TARGET:恋慕 == 1 || TALENT:TARGET:親愛 == 1
+	PRINTFORML 「%NICKNAME:TARGET%……」
+	PRINTFORMW %CALLNAME:TARGET%は甘い声で%CALLNAME:MASTER%の名前を呼びながら、愛撫を受けて入れている
+ELSEIF TALENT:TARGET:淫乱 == 1 || TALENT:TARGET:娼婦 == 1
+	PRINTFORML 「もっとぉ」
+	PRINTFORMW %CALLNAME:TARGET%は顔と秘割をとろかせながら、さらなる刺激を求めている
+ELSEIF TALENT:TARGET:服従 == 1 || TALENT:TARGET:隷属 == 1
+	PRINTFORML 「%SELFCALL:TARGET%の体の味はいかがでしょうか？」
+	PRINTFORMW 快感を堪えながら、%CALLNAME:MASTER%にされるがままだ
+ELSE
+	PRINTFORMW 「気持ち悪い……」
+ENDIF
+

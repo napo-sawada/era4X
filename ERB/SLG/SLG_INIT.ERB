@@ -45,9 +45,9 @@ COUNTRY_NAME:1 = プレイヤー文明
 VARSET BOARDING_SHIP_ID, -1
 
 ; プレイヤーの初期艦
-CALL INIT_PRESET_SHIP(PLAYER_COUNTRY, PORTPOSID, 調査船, "調査船01", 調査船)
-SHIP_EQUIP:センサー:RESULT = 3
-SHIP_EQUIP:オプション:RESULT = 1
+CALL INIT_PRESET_SHIP(PLAYER_COUNTRY, PORTPOSID, 汎用調査船, "調査船01", 汎用調査船)
+SHIP_EQUIP:センサー:0:RESULT = 3
+SHIP_EQUIP:オプション:0:RESULT = 1
 BOARDING_SHIP_ID = RESULT
 
 ;--------------------------
@@ -113,23 +113,23 @@ COUNTER = 0
 FOR LOCAL, 0, 3
 	FOR LOCAL:1, 0, 30
 		LOCALS = C1コルベット
-		CALL INIT_PRESET_SHIP(2, 星系座標ID:LOCAL, コルベット, LOCALS, コルベット)
+		CALL INIT_PRESET_SHIP(2, 星系座標ID:LOCAL, 汎用コルベット, LOCALS, 汎用コルベット)
 	NEXT
 	FOR LOCAL:1, 0, 20
 		LOCALS = F1フリゲート
-		CALL INIT_PRESET_SHIP(2, 星系座標ID:LOCAL, フリゲート, LOCALS, フリゲート)
+		CALL INIT_PRESET_SHIP(2, 星系座標ID:LOCAL, 汎用フリゲート, LOCALS, 汎用フリゲート)
 	NEXT
 	FOR LOCAL:1, 0, 10
 		LOCALS = DD1駆逐艦
-		CALL INIT_PRESET_SHIP(2, 星系座標ID:LOCAL, 駆逐艦, LOCALS, 駆逐艦)
+		CALL INIT_PRESET_SHIP(2, 星系座標ID:LOCAL, 汎用駆逐艦, LOCALS, 汎用駆逐艦)
 	NEXT
 	FOR LOCAL:1, 0, 10
 		LOCALS = TS1輸送船
-		CALL INIT_PRESET_SHIP(2, 星系座標ID:LOCAL,　輸送船, LOCALS, 輸送船)
+		CALL INIT_PRESET_SHIP(2, 星系座標ID:LOCAL,　汎用輸送船, LOCALS, 汎用輸送船)
 	NEXT
 	FOR LOCAL:1, 0, 10
 		LOCALS = WS1作業船
-		CALL INIT_PRESET_SHIP(2, 星系座標ID:LOCAL,　作業船, LOCALS, 作業船)
+		CALL INIT_PRESET_SHIP(2, 星系座標ID:LOCAL,　汎用作業船, LOCALS, 汎用作業船)
 	NEXT
 NEXT
 
@@ -187,35 +187,35 @@ REL_LIKE:3:9 = -200; 味方の敵だが利用したい
 FOR LOCAL, 3, 5
 	FOR LOCAL:1, 0, 10
 		LOCALS = コニー
-		CALL INIT_PRESET_SHIP(3, 星系座標ID:LOCAL, コルベット, LOCALS, コルベット)
+		CALL INIT_PRESET_SHIP(3, 星系座標ID:LOCAL, 汎用コルベット, LOCALS, 汎用コルベット)
 	NEXT
 	FOR LOCAL:1, 0, 8
 		LOCALS = フレン
-		CALL INIT_PRESET_SHIP(3, 星系座標ID:LOCAL, フリゲート, LOCALS, フリゲート)
+		CALL INIT_PRESET_SHIP(3, 星系座標ID:LOCAL, 汎用フリゲート, LOCALS, 汎用フリゲート)
 	NEXT
 	FOR LOCAL:1, 0, 6
 		LOCALS = ドロシー
-		CALL INIT_PRESET_SHIP(3, 星系座標ID:LOCAL, 駆逐艦, LOCALS, 駆逐艦)
+		CALL INIT_PRESET_SHIP(3, 星系座標ID:LOCAL, 汎用駆逐艦, LOCALS, 汎用駆逐艦)
 	NEXT
 	FOR LOCAL:1, 0, 4
 		LOCALS = キャサリン
-		CALL INIT_PRESET_SHIP(3, 星系座標ID:LOCAL, 巡洋艦, LOCALS, 巡洋艦)
+		CALL INIT_PRESET_SHIP(3, 星系座標ID:LOCAL, 汎用巡洋艦, LOCALS, 汎用巡洋艦)
 	NEXT
 	FOR LOCAL:1, 0, 3
 		LOCALS = バーバラ
-		CALL INIT_PRESET_SHIP(3, 星系座標ID:LOCAL, 戦艦, LOCALS, 戦艦)
+		CALL INIT_PRESET_SHIP(3, 星系座標ID:LOCAL, 汎用戦艦, LOCALS, 汎用戦艦)
 	NEXT
 	FOR LOCAL:1, 0, 3
 		LOCALS = アリス
-		CALL INIT_PRESET_SHIP(3, 星系座標ID:LOCAL, 空母, LOCALS, 空母)
+		CALL INIT_PRESET_SHIP(3, 星系座標ID:LOCAL, 汎用空母, LOCALS, 汎用空母)
 	NEXT
 	FOR LOCAL:1, 0, 10
 		LOCALS = ボブ
-		CALL INIT_PRESET_SHIP(3, 星系座標ID:LOCAL, 輸送船, LOCALS, 輸送船)
+		CALL INIT_PRESET_SHIP(3, 星系座標ID:LOCAL, 汎用輸送船, LOCALS, 汎用輸送船)
 	NEXT
 	FOR LOCAL:1, 0, 10
 		LOCALS = マーカス
-		CALL INIT_PRESET_SHIP(3, 星系座標ID:LOCAL, 作業船, LOCALS, 作業船)
+		CALL INIT_PRESET_SHIP(3, 星系座標ID:LOCAL, 汎用作業船, LOCALS, 汎用作業船)
 	NEXT
 NEXT
 
@@ -279,27 +279,27 @@ REL_LIKE:4:9 = -500; 敵の味方
 FOR LOCAL, 5, 8
 	FOR LOCAL:1, 0, 10
 		LOCALS = フォックス
-		CALL INIT_PRESET_SHIP(4, 星系座標ID:LOCAL, フリゲート, LOCALS, フリゲート)
+		CALL INIT_PRESET_SHIP(4, 星系座標ID:LOCAL, 汎用フリゲート, LOCALS, 汎用フリゲート)
 	NEXT
 	FOR LOCAL:1, 0, 10
 		LOCALS = ケルベロス
-		CALL INIT_PRESET_SHIP(4, 星系座標ID:LOCAL, 駆逐艦, LOCALS, 駆逐艦)
+		CALL INIT_PRESET_SHIP(4, 星系座標ID:LOCAL, 汎用駆逐艦, LOCALS, 汎用駆逐艦)
 	NEXT
 	FOR LOCAL:1, 0, 6
 		LOCALS = ベヒーモス
-		CALL INIT_PRESET_SHIP(4, 星系座標ID:LOCAL, 巡洋艦, LOCALS, 巡洋艦)
+		CALL INIT_PRESET_SHIP(4, 星系座標ID:LOCAL, 汎用巡洋艦, LOCALS, 汎用巡洋艦)
 	NEXT
 	FOR LOCAL:1, 0, 3
 		LOCALS = ドラゴン
-		CALL INIT_PRESET_SHIP(4, 星系座標ID:LOCAL, 空母, LOCALS, 空母)
+		CALL INIT_PRESET_SHIP(4, 星系座標ID:LOCAL, 汎用空母, LOCALS, 汎用空母)
 	NEXT
 	FOR LOCAL:1, 0, 10
 		LOCALS = ポーター
-		CALL INIT_PRESET_SHIP(4, 星系座標ID:LOCAL, 輸送船, LOCALS, 輸送船)
+		CALL INIT_PRESET_SHIP(4, 星系座標ID:LOCAL, 汎用輸送船, LOCALS, 汎用輸送船)
 	NEXT
 	FOR LOCAL:1, 0, 10
 		LOCALS = ワーカー
-		CALL INIT_PRESET_SHIP(4, 星系座標ID:LOCAL, 作業船, LOCALS, 作業船)
+		CALL INIT_PRESET_SHIP(4, 星系座標ID:LOCAL, 汎用作業船, LOCALS, 汎用作業船)
 	NEXT
 NEXT
 
@@ -338,27 +338,27 @@ REL_LIKE:5:6 = -800; 戦争一歩手前
 ; 戦艦以下ピラミッド階層
 FOR LOCAL, 0, 20
 	LOCALS = ナイト
-	CALL INIT_PRESET_SHIP(5, 星系座標ID:8, フリゲート, LOCALS, フリゲート)
+	CALL INIT_PRESET_SHIP(5, 星系座標ID:8, 汎用フリゲート, LOCALS, 汎用フリゲート)
 NEXT
 FOR LOCAL, 0, 10
 	LOCALS = ビショップ
-	CALL INIT_PRESET_SHIP(5, 星系座標ID:8, 駆逐艦, LOCALS, 駆逐艦)
+	CALL INIT_PRESET_SHIP(5, 星系座標ID:8, 汎用駆逐艦, LOCALS, 汎用駆逐艦)
 NEXT
 FOR LOCAL, 0, 5
 	LOCALS = クイーン
-	CALL INIT_PRESET_SHIP(5, 星系座標ID:8, 巡洋艦, LOCALS, 巡洋艦)
+	CALL INIT_PRESET_SHIP(5, 星系座標ID:8, 汎用巡洋艦, LOCALS, 汎用巡洋艦)
 NEXT
 FOR LOCAL, 0, 1
 	LOCALS = キング
-	CALL INIT_PRESET_SHIP(5, 星系座標ID:8, 戦艦, LOCALS, 戦艦)
+	CALL INIT_PRESET_SHIP(5, 星系座標ID:8, 汎用戦艦, LOCALS, 汎用戦艦)
 NEXT
 FOR LOCAL, 0, 10
 	LOCALS = 使途の足
-	CALL INIT_PRESET_SHIP(5, 星系座標ID:8, 輸送船, LOCALS, 輸送船)
+	CALL INIT_PRESET_SHIP(5, 星系座標ID:8, 汎用輸送船, LOCALS, 汎用輸送船)
 NEXT
 FOR LOCAL, 0, 10
 	LOCALS = 使途の手
-	CALL INIT_PRESET_SHIP(5, 星系座標ID:8, 作業船, LOCALS, 作業船)
+	CALL INIT_PRESET_SHIP(5, 星系座標ID:8, 汎用作業船, LOCALS, 汎用作業船)
 NEXT
 
 
@@ -395,23 +395,23 @@ LOCAL = ADD_RESOURCE(星系座標ID:9, 6, ナイ・ゲーム機, 1000)
 ; 駆逐と戦艦および空母構成
 FOR LOCAL, 0, 30
 	LOCALS = ウォーリア
-	CALL INIT_PRESET_SHIP(6, 星系座標ID:9, 駆逐艦, LOCALS, 駆逐艦)
+	CALL INIT_PRESET_SHIP(6, 星系座標ID:9, 汎用駆逐艦, LOCALS, 汎用駆逐艦)
 NEXT
 FOR LOCAL, 0, 5
 	LOCALS = スナイパー
-	CALL INIT_PRESET_SHIP(6, 星系座標ID:9, 戦艦, LOCALS, 戦艦)
+	CALL INIT_PRESET_SHIP(6, 星系座標ID:9, 汎用戦艦, LOCALS, 汎用戦艦)
 NEXT
 FOR LOCAL, 0, 3
 	LOCALS = マザー
-	CALL INIT_PRESET_SHIP(6, 星系座標ID:9, 空母, LOCALS, 空母)
+	CALL INIT_PRESET_SHIP(6, 星系座標ID:9, 汎用空母, LOCALS, 汎用空母)
 NEXT
 FOR LOCAL, 0, 10
 	LOCALS = ストーン
-	CALL INIT_PRESET_SHIP(6, 星系座標ID:9, 輸送船, LOCALS, 輸送船)
+	CALL INIT_PRESET_SHIP(6, 星系座標ID:9, 汎用輸送船, LOCALS, 汎用輸送船)
 NEXT
 FOR LOCAL, 0, 10
 	LOCALS = ドリル
-	CALL INIT_PRESET_SHIP(6, 星系座標ID:9, 作業船, LOCALS, 作業船)
+	CALL INIT_PRESET_SHIP(6, 星系座標ID:9, 汎用作業船, LOCALS, 汎用作業船)
 NEXT
 
 ;--------------------------
@@ -464,7 +464,7 @@ WHILE ITER < 50
 				IF ITER < 50 && RAND(50 - ITER) == 0 && MAP:SECTOR_ID:(X * 5 + 3):(Y * 5 + 3) != 0
 					CALL POS2ID(SECTOR_ID, X_POS * 5 + 1, Y_POS * 5 + 1)
 					LOCALS = 海賊船＃{ITER}
-					CALL INIT_PRESET_SHIP(10, RESULT, コルベット, LOCALS, コルベット)
+					CALL INIT_PRESET_SHIP(10, RESULT, 汎用コルベット, LOCALS, 汎用コルベット)
 					ITER ++
 				ENDIF
 			NEXT
