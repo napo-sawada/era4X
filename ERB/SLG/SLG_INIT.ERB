@@ -46,8 +46,8 @@ VARSET BOARDING_SHIP_ID, -1
 
 ; プレイヤーの初期艦
 CALL INIT_PRESET_SHIP(PLAYER_COUNTRY, PORTPOSID, 汎用調査船, "調査船01", 汎用調査船)
-SHIP_EQUIP:センサー:RESULT = 3
-SHIP_EQUIP:オプション:RESULT = 1
+SHIP_EQUIP:センサー:0:RESULT = 3
+SHIP_EQUIP:オプション:0:RESULT = 1
 BOARDING_SHIP_ID = RESULT
 
 ;--------------------------
