@@ -1,0 +1,92 @@
+﻿;--------------------------
+; !!クエスト名と 4を好きな番号に変える！!
+; 恐ろしい海賊軍団
+; 近場に沸いた海賊軍団を討伐する。討伐完了すると派閥との高感度が上がる
+;--------------------------
+
+;--------------------------
+; クエスト受注可能か
+;--------------------------
+@QUEST_ACCEPTABLE_4
+RETURN 1
+
+;--------------------------
+; クエストの名前を返却
+;--------------------------
+@QUEST_NAME_4
+RESULTS = 恐ろしい海賊軍団
+RETURN
+
+;--------------------------
+; クエスト本体
+;--------------------------
+@QUEST_BODY_4
+#DIM SECTOR_ID
+#DIM IS_COMPLETE
+#DIM SHIP_ID
+#DIM COUNTRY_ID
+#DIM POSID
+
+IF QUEST_PROGRESS:4 == 0
+	PRINTFORML 「お前、戦闘艦を持ってるか？」
+	PRINTFORML %CALLNAME:MASTER%は軍人らしき男に話しかけられた
+	$INPUT_LOOP
+	PRINTBUTTON "[0] はい", 0
+	PRINTBUTTON "[1] いいえ", 1
+	INPUT
+	IF RESULT == 0
+		PRINTFORML 「ちょうどいい。もしお前が自分の艦隊に自信があるなら、このセクターに沸いた海賊軍団を撃滅して欲しい
+		PRINTFORMW 討伐してくれたら、$100,000,000と、この国における名声を贈ろう
+		PRINTFORMW 本当に強い連中だから、戦う前に戦力を調査しておいたほうがいい。もし無理なら、諦めてくれて構わない。本当なら正規軍が出ばる相手だからな」
+		PRINTFORMW %CALLNAME:MASTER%は軍人らしき男に海賊討伐のミッションを依頼された
+		QUEST_PROGRESS:4 = 1
+		CALL ID2POS(CHARACTER_POSITION)
+		SECTOR_ID = RESULT:0
+		CALL POS2ID(SECTOR_ID, 10, 10)
+		POSID = RESULT
+		FOR SHIP_ID, 0, 30
+			CALL INIT_PRESET_SHIP(10, POSID, 汎用コルベット, "海賊コルベット", 汎用コルベット)
+		NEXT
+		FOR SHIP_ID, 0, 20
+			CALL INIT_PRESET_SHIP(10, POSID, 汎用フリゲート, "海賊フリゲート", 汎用フリゲート)
+		NEXT
+		FOR SHIP_ID, 0, 10
+			CALL INIT_PRESET_SHIP(10, POSID, 汎用駆逐艦, "海賊駆逐艦", 汎用駆逐艦)
+		NEXT
+		FOR SHIP_ID, 0, 5
+			CALL INIT_PRESET_SHIP(10, POSID, 汎用巡洋艦, "海賊巡洋艦", 汎用巡洋艦)
+		NEXT
+	ELSEIF RESULT == 1
+		PRINTFORMW 「そうか、なら聞かなかったことにしてくれ」
+	ELSE
+		GOTO INPUT_LOOP
+	ENDIF
+ELSEIF QUEST_PROGRESS:4 == 1
+	IS_COMPLETE = 1
+	FOR SHIP_ID, 0, MAX_SHIP
+		SIF SHIP_COUNTRY:SHIP_ID != 10
+			CONTINUE
+		CALL ID2POS(CHARACTER_POSITION)
+		SECTOR_ID = RESULT:0
+		CALL ID2POS(SHIP_POSITION:SHIP_ID)
+		SIF SECTOR_ID != RESULT:0
+			CONTINUE
+			IS_COMPLETE = 0
+	NEXT
+	IF IS_COMPLETE == 0
+		PRINTFORMW 「頼んだぞ。無理なら正規軍が動くまで待っててくれ」
+	ELSE
+		PRINTFORML 「海賊を討伐したんだな！素晴らしい指揮と軍隊だ。
+		PRINTFORML これが約束の報酬だ。君の名声はこの国に広く知れ渡るだろう」
+		PRINTFORMW 男は%CALLNAME:MASTER%に報酬の$100,000,000を手渡すと、恭しく敬礼して見せた
+		MONEY += 100000000
+		FOR COUNTRY_ID, 0, 星系数
+			IF CHARACTER_POSITION == 星系座標ID:COUNTRY_ID
+				REL_LIKE:(STAR_OWNER:COUNTRY_ID):PLAYER_COUNTRY += 100
+				BREAK;
+			ENDIF
+		NEXT
+		QUEST_PROGRESS:4 = 0
+	ENDIF
+ENDIF
+

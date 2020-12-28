@@ -26,7 +26,7 @@ RETURN
 #DIM SHIP_ID
 
 IF QUEST_PROGRESS:3 == 0
-	PRINTFORML 「お前、戦闘船を持ってるか？」
+	PRINTFORML 「お前、戦闘艦を持ってるか？」
 	PRINTFORML %CALLNAME:MASTER%は商人らしき男に話しかけられた
 	$INPUT_LOOP
 	PRINTBUTTON "[0] はい", 0
@@ -65,6 +65,7 @@ ELSE
 		PRINTFORML 「海賊を討伐してくれたんだな！助かったよ
 		PRINTFORML これが報酬だ。じゃ、俺は仕事に行ってくるよ」
 		PRINTFORMW 男は%CALLNAME:MASTER%に報酬の$50,000を押し付けると、足早に去って行った
+		MONEY += 50000
 		QUEST_PROGRESS:3 = 0
 	ENDIF
 ENDIF
