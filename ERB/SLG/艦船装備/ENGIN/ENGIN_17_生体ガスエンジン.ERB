@@ -1,0 +1,36 @@
+﻿;-----------------------------------
+; エンジン
+;-----------------------------------
+@GET_ENGIN_NAME_16
+RESULTS = 超大型高速エンジン
+
+@GET_ENGIN_STATUS_16(STATUS)
+#DIM REF STATUS
+
+STATUS:SPEED = 1
+STATUS:AVOID = 1
+STATUS:SIZE = 1
+STATUS:PRICE = 640000
+
+;-----------------------------------
+; エンジンの説明
+;-----------------------------------
+@GET_ENGIN_DESCRIPTION_16(STATUS)
+#DIM STATUS, STATUS_LENGTH
+
+CALL GET_ENGIN_STATUS_16(STATUS)
+CALL GET_ENGIN_NAME_16
+PRINTFORML %RESULTS%
+PRINTFORML スピード  : {STATUS:SPEED}
+PRINTFORML 回避      : {STATUS:AVOID}
+PRINTFORML サイズ    : {STATUS:SIZE}
+
+;-----------------------------------
+; エンジンの資材
+;-----------------------------------
+@GET_ENGIN_RESOURCE_16(USE_RESOURCE)
+#DIM REF USE_RESOURCE
+
+
+@IS_SALE_ENGIN_16
+RETURN 0

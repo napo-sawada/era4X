@@ -7,3 +7,4 @@
 #DIM CONST 汎用空母 = 7
 #DIM CONST 汎用輸送船 = 8
 #DIM CONST 汎用作業船 = 9
+#DIM CONST 宇宙巨大スライム = 10

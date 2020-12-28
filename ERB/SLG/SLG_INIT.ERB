@@ -459,12 +459,27 @@ NEXT
 PRINTL 星系製作中……
 WHILE ITER < 50
 	FOR SECTOR_ID, 0, MAX_SECTOR
-		FOR Y, 0, Y座標分割数 - 1
-			FOR X, 0, X座標分割数 - 1
-				IF ITER < 50 && RAND(50 - ITER) == 0 && MAP:SECTOR_ID:(X * 5 + 3):(Y * 5 + 3) != 0
-					CALL POS2ID(SECTOR_ID, X_POS * 5 + 1, Y_POS * 5 + 1)
+		FOR Y_POS, 0, Y座標分割数 - 1
+			FOR X_POS, 0, X座標分割数 - 1
+				IF ITER < 50 && RAND(50 - ITER) == 0 && MAP:SECTOR_ID:(X_POS * 5 + 3):(Y_POS * 5 + 3) != 0
+					CALL POS2ID(SECTOR_ID, 1, 1)
 					LOCALS = 海賊船＃{ITER}
 					CALL INIT_PRESET_SHIP(10, RESULT, 汎用コルベット, LOCALS, 汎用コルベット)
+					ITER ++
+				ENDIF
+			NEXT
+		NEXT
+	NEXT
+WEND
+ITER = 0
+WHILE ITER < 50
+	FOR SECTOR_ID, 0, MAX_SECTOR
+		FOR Y_POS, 0, Y座標分割数 - 1
+			FOR X_POS, 0, X座標分割数 - 1
+				IF ITER < 50 && RAND(50 - ITER) == 0 && MAP:SECTOR_ID:(X_POS * 5 + 3):(Y_POS * 5 + 3) != 0
+					CALL POS2ID(SECTOR_ID, 9, 9)
+					LOCALS = 宇宙巨大スライム
+					CALL INIT_PRESET_SHIP(10, RESULT, 宇宙巨大スライム, LOCALS, 宇宙巨大スライム)
 					ITER ++
 				ENDIF
 			NEXT
