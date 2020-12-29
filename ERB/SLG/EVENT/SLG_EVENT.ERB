@@ -1,0 +1,15 @@
+﻿;---------------------------
+; イベント
+;---------------------------
+@BEGIN_SLG_EVENT
+#DIM EVENT_ID
+
+FOR EVENT_ID, 1, 10
+	RESULT = 0
+	TRYCCALLFORM IS_HAPPEN_SLG_EVENT_{EVENT_ID}
+		SIF RESULT == 1
+			TRYCALLFORM SLG_EVENT_MAIN_{EVENT_ID}
+	CATCH
+		CONTINUE
+	ENDCATCH
+NEXT

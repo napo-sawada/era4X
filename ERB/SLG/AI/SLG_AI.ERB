@@ -162,6 +162,7 @@ CALL COMMON_AI_ACTION(COUNTRY_ID)
 ;--------------------------
 @SLG_AI_ACTION_10
 #DIM SHIP_ID
+#DIM CONST COUNTRY_ID = 10
 
 ;全艦上下左右1マス以内に襲える敵がいるか判定して、いた場合襲う
 FOR SHIP_ID, 0, MAX_SHIP
@@ -189,6 +190,7 @@ FOR SHIP_ID, 0, MAX_SHIP
 		ENDIF
 	ENDIF
 NEXT
+CALL COMMON_AI_ACTION(COUNTRY_ID)
 
 ;--------------------------
 ; AIの共通処理
