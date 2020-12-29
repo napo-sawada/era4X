@@ -113,16 +113,16 @@ NEXT
 COUNTER = 0
 FOR LOCAL, 0, 3
 	FOR LOCAL:1, 0, 30
-		LOCALS = C1コルベット
-		CALL INIT_PRESET_SHIP(2, 星系座標ID:LOCAL, 汎用コルベット, LOCALS, 汎用コルベット)
+		LOCALS = ヴォーロス級コルベット
+		CALL INIT_PRESET_SHIP(2, 星系座標ID:LOCAL, ヴォーロス級コルベット, LOCALS, ヴォーロス級コルベット)
 	NEXT
 	FOR LOCAL:1, 0, 20
-		LOCALS = F1フリゲート
-		CALL INIT_PRESET_SHIP(2, 星系座標ID:LOCAL, 汎用フリゲート, LOCALS, 汎用フリゲート)
+		LOCALS = ペルーン級フリゲート
+		CALL INIT_PRESET_SHIP(2, 星系座標ID:LOCAL, ペルーン級フリゲート, LOCALS, ペルーン級フリゲート)
 	NEXT
 	FOR LOCAL:1, 0, 10
-		LOCALS = DD1駆逐艦
-		CALL INIT_PRESET_SHIP(2, 星系座標ID:LOCAL, 汎用駆逐艦, LOCALS, 汎用駆逐艦)
+		LOCALS = マーチ級駆逐艦
+		CALL INIT_PRESET_SHIP(2, 星系座標ID:LOCAL, マーチ級駆逐艦, LOCALS, マーチ級駆逐艦)
 	NEXT
 	FOR LOCAL:1, 0, 10
 		LOCALS = TS1輸送船
@@ -395,16 +395,12 @@ LOCAL = ADD_RESOURCE(星系座標ID:9, 6, ナイ・ゲーム機, 1000)
 ; 初期艦
 ; 駆逐と戦艦および空母構成
 FOR LOCAL, 0, 30
-	LOCALS = ウォーリア
-	CALL INIT_PRESET_SHIP(6, 星系座標ID:9, 汎用駆逐艦, LOCALS, 汎用駆逐艦)
+	LOCALS = イージスシールド駆逐艦
+	CALL INIT_PRESET_SHIP(6, 星系座標ID:9, イージスシールド駆逐艦, LOCALS, イージスシールド駆逐艦)
 NEXT
-FOR LOCAL, 0, 5
-	LOCALS = スナイパー
-	CALL INIT_PRESET_SHIP(6, 星系座標ID:9, 汎用戦艦, LOCALS, 汎用戦艦)
-NEXT
-FOR LOCAL, 0, 3
-	LOCALS = マザー
-	CALL INIT_PRESET_SHIP(6, 星系座標ID:9, 汎用空母, LOCALS, 汎用空母)
+FOR LOCAL, 0, 10
+	LOCALS = カラドボルグ級戦艦
+	CALL INIT_PRESET_SHIP(6, 星系座標ID:9, カラドボルグ級戦艦, LOCALS, カラドボルグ級戦艦)
 NEXT
 FOR LOCAL, 0, 10
 	LOCALS = ストーン

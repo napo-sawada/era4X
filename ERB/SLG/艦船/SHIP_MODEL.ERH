@@ -8,3 +8,8 @@
 #DIM CONST 汎用輸送船 = 8
 #DIM CONST 汎用作業船 = 9
 #DIM CONST 宇宙巨大スライム = 10
+#DIM CONST イージスシールド駆逐艦 = 11
+#DIM CONST カラドボルグ級戦艦 = 12
+#DIM CONST ヴォーロス級コルベット = 13
+#DIM CONST ペルーン級フリゲート = 14
+#DIM CONST マーチ級駆逐艦 = 15
