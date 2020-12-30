@@ -654,7 +654,6 @@ FOR PORT_ID, 0, MAX_PORT
         NEXT
 
         IF CAPACITY > NUM
-            PRINTFORML ADD RESOURCE:{NUM}
             PORT_CONTAINER:PORT_ID:SLOT_ID:ADD_ITEM_ID += NUM
             RETURNF 1
         ELSE

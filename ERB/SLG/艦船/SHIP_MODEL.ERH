@@ -13,3 +13,8 @@
 #DIM CONST ヴォーロス級コルベット = 13
 #DIM CONST ペルーン級フリゲート = 14
 #DIM CONST マーチ級駆逐艦 = 15
+#DIM CONST メルカバー級空母 = 16
+#DIM CONT フォックスハウンド級フリゲート = 17
+#DIM CONST ケルベロス級駆逐艦 = 18
+#DIM CONST ベヒーモス級巡洋艦 = 19
+#DIM CONST アクロバット級コルベット = 20
