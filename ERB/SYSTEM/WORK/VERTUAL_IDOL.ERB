@@ -84,11 +84,14 @@ ENDIF
 GET_MONEY = VIEWER_NUM / 200 + 1
 
 ; スパ〇
-GET_MONEY += VIEWER_NUM / 100 * 5
+GET_MONEY += VIEWER_NUM / 100
 
+PRINTFORML ------------%CALLNAME:ID%の生放送------------ 
 PRINTFORML 今回の生放送の視聴者は{VIEWER_NUM}だった
 PRINTFORML %TOSTR(GET_MONEY, "$###,###,###")%手に入れた
 PRINTFORML チャンネル登録者が{REGISTER - CFLAG:ID:1003}人増えた
+PRINTFORML 現在のチャンネル登録者数 {REGISTER}
+PRINTFORML --------------------------------------------
 
 ; 登録者数追加
 CFLAG:ID:1003 = REGISTER
