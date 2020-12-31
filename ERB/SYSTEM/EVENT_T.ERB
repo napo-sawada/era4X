@@ -94,15 +94,6 @@ SIF ABL:0 < 4 && ((TALENT:反抗的 && TALENT:服従 == 0 && TALENT:隷属 == 0)
 SIF ABL:1 < 4 && (TALENT:自制心 || TALENT:抑圧 || TALENT:抵抗)
 	RETURN 0
 
-IF ABL:2 >= 3 || ABL:7 >= 3 || ABL:9 >= 3 || ABL:3+ABL:4+ABL:5+ABL:6 >= 8 || ABL:0 >= 5 || ABL:1 >= 5
-	IF CFLAG:1 <= 0
-		PRINTFORMW %NAME:TARGET%が売却可能になりました
-		CFLAG:1 = 1
-	ENDIF
-ELSE
-	RETURN 0
-ENDIF
-
 IF ABL:0+ABL:1+ABL:2+ABL:11 >= 12
 	IF CFLAG:1 <= 1
 		PRINTFORMW %NAME:TARGET%が助手可能になりました

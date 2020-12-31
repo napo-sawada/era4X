@@ -1,0 +1,226 @@
+﻿;-------------------------------
+; ランダムで名前を返却する関数
+; 万が一他のバリアントで使いたい時は、自由に使ってくれて大丈夫です
+;-------------------------------
+; TYPE: INT (0: 指定なし, 1: 和風, 2: 洋風)
+; RETURN STRING
+@GET_RANDOM_NAME(TYPE)
+#FUNCTIONS
+#DIM TYPE
+
+IF TYPE == 1
+	LOCALS = %GET_RANDOM_NAME_JP()%
+	RETURNF LOCALS
+ELSEIF TYPE == 2
+	LOCALS = %GET_RANDOM_NAME_EN()%
+	RETURNF LOCALS
+ELSE
+	SELECTCASE RAND:2
+		CASE 0
+			LOCALS = %GET_RANDOM_NAME_JP()%
+			RETURNF LOCALS
+		CASE 1
+			LOCALS = %GET_RANDOM_NAME_EN()%
+			RETURNF LOCALS
+	ENDSELECT
+ENDIF
+
+@GET_RANDOM_NAME_JP
+#FUNCTIONS
+#DIMS SAMPLE, 123
+
+SAMPLE: 0 = 茜
+SAMPLE: 1 = 明日香
+SAMPLE: 2 = 和紗
+SAMPLE: 3 = 清香
+SAMPLE: 4 = 沙和
+SAMPLE: 5 = 詩花
+SAMPLE: 6 = 響
+SAMPLE: 7 = 美優
+SAMPLE: 8 = 美玲
+SAMPLE: 9 = 美和
+SAMPLE: 10 = 結花
+SAMPLE: 11 = 結弦
+SAMPLE: 12 = 玲香
+SAMPLE: 13 = 葵
+SAMPLE: 14 = 杏
+SAMPLE: 15 = 樹
+SAMPLE: 16 = 楓
+SAMPLE: 17 = 奏
+SAMPLE: 18 = 梢
+SAMPLE: 19 = 咲
+SAMPLE: 20 = 桜
+SAMPLE: 21 = 栞
+SAMPLE: 22 = 雫
+SAMPLE: 23 = 鈴
+SAMPLE: 24 = 環
+SAMPLE: 25 = 紬
+SAMPLE: 26 = 花
+SAMPLE: 27 = 萌
+SAMPLE: 28 = 結
+SAMPLE: 29 = 凛
+SAMPLE: 30 = 伊織
+SAMPLE: 31 = 乙葉
+SAMPLE: 32 = 織絵
+SAMPLE: 33 = 茅野
+SAMPLE: 34 = 紗奈
+SAMPLE: 35 = 初音
+SAMPLE: 36 = 比奈
+SAMPLE: 37 = 美央
+SAMPLE: 38 = 瑞樹
+SAMPLE: 39 = 美友
+SAMPLE: 40 = 優希
+SAMPLE: 41 = 由乃
+SAMPLE: 42 = 莉世
+SAMPLE: 43 = 五十鈴
+SAMPLE: 44 = 小乃花
+SAMPLE: 45 = 香耶乃
+SAMPLE: 46 = 沙耶香
+SAMPLE: 47 = 小百合
+SAMPLE: 48 = 紫乃歩
+SAMPLE: 49 = 野々花
+SAMPLE: 50 = 双葉
+SAMPLE: 51 = 文香
+SAMPLE: 52 = 実里
+SAMPLE: 53 = 萌々花
+SAMPLE: 54 = 柚子菜
+SAMPLE: 55 = 由利恵
+SAMPLE: 56 = 薫子
+SAMPLE: 57 = 桜子
+SAMPLE: 58 = 幸子
+SAMPLE: 59 = 小夜子
+SAMPLE: 60 = 紗代子
+SAMPLE: 61 = 妙子
+SAMPLE: 62 = 遠子
+SAMPLE: 63 = 緋沙子
+SAMPLE: 64 = 風子
+SAMPLE: 65 = 真理子
+SAMPLE: 66 = 碧子
+SAMPLE: 67 = 桃子
+SAMPLE: 68 = 莉子
+SAMPLE: 69 = 和香子
+SAMPLE: 70 = 伊吹
+SAMPLE: 71 = 卯月
+SAMPLE: 72 = 杏果
+SAMPLE: 73 = 紗季
+SAMPLE: 74 = 桜
+SAMPLE: 75 = 皐月
+SAMPLE: 76 = 芹那
+SAMPLE: 77 = 千春
+SAMPLE: 78 = 美桜
+SAMPLE: 79 = 芽衣
+SAMPLE: 80 = 弥生
+SAMPLE: 81 = 若菜
+SAMPLE: 82 = 蒼乃
+SAMPLE: 83 = 彩美
+SAMPLE: 84 = 彩芽
+SAMPLE: 85 = 香澄
+SAMPLE: 86 = 夏帆
+SAMPLE: 87 = 瑚夏
+SAMPLE: 88 = 鈴華
+SAMPLE: 89 = 鈴音
+SAMPLE: 90 = 純香
+SAMPLE: 91 = 菜月
+SAMPLE: 92 = 葉月
+SAMPLE: 93 = 風花
+SAMPLE: 94 = 立夏
+SAMPLE: 95 = 秋穂
+SAMPLE: 96 = 夏帆
+SAMPLE: 97 = 花鈴
+SAMPLE: 98 = 桔梗
+SAMPLE: 99 = 胡桃
+SAMPLE: 100 =	紅羽
+SAMPLE: 101 = 沙耶香
+SAMPLE: 102 = 菜月
+SAMPLE: 103 = 文
+SAMPLE: 104 = 美樹
+SAMPLE: 105 = 実里
+SAMPLE: 106 = 紅葉
+SAMPLE: 107 = 結菜
+SAMPLE: 108 = 柚葉
+SAMPLE: 109 = 柚月
+SAMPLE: 110 = 莉乃
+SAMPLE: 111 = 小春
+SAMPLE: 112 = 伊鶴
+SAMPLE: 113 = 如月
+SAMPLE: 114 = 琴
+SAMPLE: 115 = 小雪
+SAMPLE: 116 = 咲耶
+SAMPLE: 117 = 愁
+SAMPLE: 118 = 千鶴
+SAMPLE: 119 = 鞠
+SAMPLE: 120 = 雪乃
+SAMPLE: 121 = 六花
+SAMPLE: 122 = 凛花
+
+RETURNF SAMPLE:(RAND:123)
+
+@GET_RANDOM_NAME_EN
+#FUNCTIONS
+#DIMS SAMPLE, 63
+
+SAMPLE:0 = エマ
+SAMPLE:1 = オリビア
+SAMPLE:2 = エヴァ
+SAMPLE:3 = イザベラ
+SAMPLE:4 = ソフィア
+SAMPLE:5 = シャーロット
+SAMPLE:6 = ミア
+SAMPLE:7 = アメリア
+SAMPLE:8 = ハーパー
+SAMPLE:9 = エブリン
+SAMPLE:10 = アビゲイル
+SAMPLE:11 = エミリー
+SAMPLE:12 = エリザベス
+SAMPLE:13 = ミラ
+SAMPLE:14 = エラ
+SAMPLE:15 = エイブリー
+SAMPLE:16 = ソフィア
+SAMPLE:17 = カミラ
+SAMPLE:18 = アリア
+SAMPLE:19 = スカーレット
+SAMPLE:20 = ヴィクトリア
+SAMPLE:21 = ルーナ
+SAMPLE:22 = グレース
+SAMPLE:23 = クロエ
+SAMPLE:24 = ペネロペ
+SAMPLE:25 = レイラ
+SAMPLE:26 = ライリー
+SAMPLE:27 = ゾーイ
+SAMPLE:28 = ノラ
+SAMPLE:29 = リリー
+SAMPLE:30 = エレノア
+SAMPLE:31 = ハンナ
+SAMPLE:32 = リリアン
+SAMPLE:33 = オーブリー
+SAMPLE:34 = エリー
+SAMPLE:35 = ステラ
+SAMPLE:36 = ナタリー
+SAMPLE:37 = リア
+SAMPLE:38 = レア
+SAMPLE:39 = ヘーゼル
+SAMPLE:40 = ヴァイオレット
+SAMPLE:41 = オーロラ
+SAMPLE:42 = ベラ
+SAMPLE:43 = クレア
+SAMPLE:44 = ポピー
+SAMPLE:45 = アリス
+SAMPLE:46 = デイジー
+SAMPLE:47 = フローレンス
+SAMPLE:48 = ジェシカ
+SAMPLE:49 = フレイヤ
+SAMPLE:50 = シエンナ
+SAMPLE:51 = アイヴィー
+SAMPLE:52 = ウィロウ
+SAMPLE:53 = マチルダ
+SAMPLE:54 = エルシー
+SAMPLE:55 = ルビー
+SAMPLE:56 = エミリア
+SAMPLE:57 = ミリー
+SAMPLE:58 = ローラ
+SAMPLE:59 = エリン
+SAMPLE:60 = メイジー
+SAMPLE:61 = アリア
+SAMPLE:62 = ルーシー
+
+RETURNF SAMPLE:(RAND:63)
