@@ -18,10 +18,10 @@
 #DIM SAVEDATA CHECKED_MAP, MAX_SECTOR, MAP_WIDTH, MAP_HEIGHT
 #DIM SAVEDATA RESOURCE_MAP, MAX_SECTOR, MAP_WIDTH, MAP_HEIGHT
 
-#DIM CONST 星系数 = 10
+#DIM CONST 星系数 = 13
 #DIM SAVEDATA 星系座標ID, 星系数
 #DIM SAVEDATA STAR_OWNER, 星系数
-#DIMS CONST STAR_NAME = "S01", "S02", "S03", "ビリアン", "チェルシー", "アース", "エデン", "フロンティア", "神の右手", "グレートマザー"
+#DIMS CONST STAR_NAME = "S01", "S02", "S03", "ビリアン", "チェルシー", "アース", "エデン", "フロンティア", "神の右手", "グレートマザー", "豊神の地", "王女の座", "女王の食卓"
 
 #DIM CONST MAX_PORT = 100
 #DIM SAVEDATA PORT_POSITION_ID, MAX_PORT
@@ -158,7 +158,7 @@
 #DIM CONST 敵機 = 2
 
 ;勢力
-#DIM CONST MAX_COUNTRY = 11
+#DIM CONST MAX_COUNTRY = 13
 #DIM SAVEDATA REL_LIKE, MAX_COUNTRY, MAX_COUNTRY
 #DIMS SAVEDATA COUNTRY_NAME, MAX_COUNTRY
 
@@ -195,7 +195,7 @@
 ;-------------------------
 ; SLG ITEMS
 ;-------------------------
-#DIM CONST ITEM_LENGTH = 50
+#DIM CONST ITEM_LENGTH = 60
 #DIM SAVEDATA SLG_ITEM, MAX_COUNTRY, 100
 
 ; 輸送船の積載物内訳
@@ -247,13 +247,18 @@
 #DIM CONST ナナーシャ鳥 = 37
 #DIM CONST エインズの実 = 38
 #DIM CONST ナイ・ゲーム機 = 39
+#DIM CONST 日本酒 = 40
+#DIM CONST MR観光セット = 41
+#DIM CONST ペルマティーセット = 42
 
 ; 特産品
-#DIM CONST パワードスーツ = 40
-#DIM CONST レース機 = 41
-#DIM CONST 思考戦車 = 42
-#DIM CONST 異星生物育成キット = 43
-#DIM CONST セクサロイド = 44
+#DIM CONST パワードスーツ = 50
+#DIM CONST レース機 = 51
+#DIM CONST 思考戦車 = 52
+#DIM CONST 異星生物育成キット = 53
+#DIM CONST セクサロイド = 54
+#DIM CONST プラモデル = 55
+#DIM CONST ビームセイバー = 56
 
 
 ;-------------------------

@@ -71,11 +71,16 @@ ITEM_PRICE:ロック布 = 1000
 ITEM_PRICE:ナナーシャ鳥 = 1000
 ITEM_PRICE:エインズの実 = 1000
 ITEM_PRICE:ナイ・ゲーム機 = 1000
+ITEM_PRICE:日本酒 = 1000
+ITEM_PRICE:MR観光セット = 1000
+ITEM_PRICE:ペルマティーセット = 1000
 ITEM_PRICE:パワードスーツ = 30000
 ITEM_PRICE:レース機 = 50000
 ITEM_PRICE:思考戦車 = 1000000
 ITEM_PRICE:異星生物育成キット = 1000
 ITEM_PRICE:セクサロイド = 3000
+ITEM_PRICE:プラモデル = 500
+ITEM_PRICE:ビームセイバー = 1000
 
 
 
@@ -300,6 +305,12 @@ SELECTCASE ID
         RETURNF "エインズの実"
     CASE ナイ・ゲーム機
         RETURNF "ナイ・ゲーム機"
+    CASE 日本酒
+        RETURNF "日本酒"
+    CASE MR観光セット
+        RETURNF "MR観光セット"
+    CASE ペルマティーセット
+        RETURNF "ペルマティーセット"
     CASE パワードスーツ
         RETURNF "パワードスーツ"
     CASE レース機
@@ -310,6 +321,10 @@ SELECTCASE ID
         RETURNF "異星生物育成キット"
     CASE セクサロイド
         RETURNF "セクサロイド"
+    CASE プラモデル
+        RETURNF "プラモデル"
+    CASE ビームセイバー
+        RETURNF "ビームセイバー"
     CASEELSE
         RETURNF NO_ITEM
 ENDSELECT
@@ -381,6 +396,12 @@ SELECTCASE ID
         RETURNF "女性人気の高い甘い木の実。上品な甘さ"
     CASE ナイ・ゲーム機
         RETURNF "ロボットもはまる面白さのゲーム機"
+    CASE 日本酒
+        RETURNF "かつて島国で作られた歴史のあるお酒"
+    CASE MR観光セット
+        RETURNF "美しい世界に連れて行ってくれるMR観光セット"
+    CASE ペルマティーセット
+        RETURNF "入植先で見つかったペルマの葉から作られたお茶のセット"
     CASE パワードスーツ
         RETURNF "陸戦や地上の鉱物採掘時に使われるパワードスーツ"
     CASE レース機
@@ -391,6 +412,10 @@ SELECTCASE ID
         RETURNF "スライムや触手を育てるための育成キット"
     CASE セクサロイド
         RETURNF "世の男達垂涎の美貌を持つセクサロイド。AIの思考レベルや性格も調整できる"
+    CASE プラモデル
+        RETURNF "全宇宙にコレクターがいる精密なプラモデル"
+    CASE ビームセイバー
+        RETURNF "白兵戦で圧倒的な威力を誇るビームセイバー。ただし使い捨て"
     CASEELSE
         RETURNF NO_ITEM
 ENDSELECT

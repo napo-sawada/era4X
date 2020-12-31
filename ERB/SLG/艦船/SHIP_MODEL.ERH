@@ -21,3 +21,14 @@
 #DIM CONST アルテミス級コルベット = 21
 #DIM CONST ディオネ級フリゲート = 22
 #DIM CONST ヴァンガード級輸送船 = 23
+#DIM CONST 秋月級コルベット = 24
+#DIM CONST 津軽級フリゲート = 25
+#DIM CONST 豊後級駆逐艦 = 26
+#DIM CONST 大江戸級巡洋艦 = 27
+#DIM CONST 大和級戦艦 = 28
+#DIM CONST 護衛空母 = 29
+#DIM CONST ネヴァン級フリゲート = 30
+#DIM CONST スカアハ級駆逐艦 = 31
+#DIM CONST ミアハ級巡洋艦 = 32
+#DIM CONST ブリギッド級戦艦 = 33
+#DIM CONST ルー級空母 = 34

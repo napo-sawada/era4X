@@ -453,7 +453,6 @@ FOR LOCAL, 1, MAX_COUNTRY
 	REL_LIKE:LOCAL:10 = -1000
 NEXT
 
-PRINTL 星系製作中……
 WHILE ITER < 50
 	FOR SECTOR_ID, 0, MAX_SECTOR
 		FOR Y_POS, 0, Y座標分割数 - 1
@@ -483,7 +482,122 @@ WHILE ITER < 50
 		NEXT
 	NEXT
 WEND
-PRINTL 完了!
+
+;--------------------------
+; 豊秋津皇国
+;--------------------------
+@INIT_COUNTRY_11
+COUNTRY_NAME:11 = 豊秋津皇国
+MONEY:11 = 3000000000000
+
+; 星割り当て
+STAR_OWNER:10 = 11
+
+; 宇宙港の設定
+FOR LOCAL, 0, STAR_PORT_SLOT_NUM
+	SELECTCASE LOCAL
+		CASE 0 TO 16
+			STAR_PORT_SLOT:10:LOCAL = コンテナ
+		CASE 17
+			STAR_PORT_SLOT:10:LOCAL = ドック
+		CASE 18
+			STAR_PORT_SLOT:10:LOCAL = 造船所
+		CASE 19
+			STAR_PORT_SLOT:10:LOCAL = 工場
+	ENDSELECT
+NEXT
+
+; 資源の配置
+CALL INIT_STAR_RESOURCE(星系座標ID:10, 11)
+CALL ADD_RESOURCE(星系座標ID:10, 11, 日本酒, 1000)
+
+; 初期艦
+FOR LOCAL, 0, 24
+	CALL INIT_PRESET_SHIP(11, 星系座標ID:10, 秋月級コルベット, "秋月級コルベット", 秋月級コルベット)
+NEXT
+FOR LOCAL, 0, 20
+	CALL INIT_PRESET_SHIP(11, 星系座標ID:10, 津軽級フリゲート, "津軽級フリゲート", 津軽級フリゲート)
+NEXT
+FOR LOCAL, 0, 16
+	CALL INIT_PRESET_SHIP(11, 星系座標ID:10, 豊後級駆逐艦, "豊後級駆逐艦", 豊後級駆逐艦)
+NEXT
+FOR LOCAL, 0, 8
+	CALL INIT_PRESET_SHIP(11, 星系座標ID:10, 大江戸級巡洋艦, "大江戸級巡洋艦", 大江戸級巡洋艦)
+NEXT
+FOR LOCAL, 0, 4
+	CALL INIT_PRESET_SHIP(11, 星系座標ID:10, 大和級戦艦, "大和級戦艦", 大和級戦艦)
+NEXT
+FOR LOCAL, 0, 2
+	CALL INIT_PRESET_SHIP(11, 星系座標ID:10, 護衛空母, "護衛空母", 護衛空母)
+NEXT
+FOR LOCAL, 0, 10
+	CALL INIT_PRESET_SHIP(11, 星系座標ID:10, 汎用輸送船, "汎用輸送船", 汎用輸送船)
+	CALL INIT_PRESET_SHIP(11, 星系座標ID:10, 汎用作業船, "汎用作業船", 汎用作業船)
+NEXT
+
+
+;--------------------------
+; ハールバルズ王国
+;--------------------------
+@INIT_COUNTRY_12
+COUNTRY_NAME:12 = ハールバルズ王国
+MONEY:12 = 5000000000000
+
+; 星割り当て
+STAR_OWNER:11 = 12
+STAR_OWNER:12 = 12
+
+; 宇宙港の設定
+FOR LOCAL, 0, STAR_PORT_SLOT_NUM
+	SELECTCASE LOCAL
+		CASE 0 TO 16
+			STAR_PORT_SLOT:11:LOCAL = コンテナ
+			STAR_PORT_SLOT:12:LOCAL = コンテナ
+		CASE 17
+			STAR_PORT_SLOT:11:LOCAL = ドック
+			STAR_PORT_SLOT:12:LOCAL = ドック
+		CASE 18
+			STAR_PORT_SLOT:11:LOCAL = 造船所
+			STAR_PORT_SLOT:12:LOCAL = 造船所
+		CASE 19
+			STAR_PORT_SLOT:11:LOCAL = 工場
+			STAR_PORT_SLOT:12:LOCAL = 工場
+	ENDSELECT
+NEXT
+
+; 資源の配置
+CALL INIT_STAR_RESOURCE(星系座標ID:11, 12)
+CALL INIT_STAR_RESOURCE(星系座標ID:12, 12)
+CALL ADD_RESOURCE(星系座標ID:11, 12, MR観光セット, 1000)
+CALL ADD_RESOURCE(星系座標ID:12, 12, ペルマティーセット, 1000)
+
+; 初期艦
+; 駆逐と戦艦および空母構成
+FOR LOCAL, 0, 16
+	CALL INIT_PRESET_SHIP(12, 星系座標ID:11, ネヴァン級フリゲート, "ネヴァン級フリゲート", ネヴァン級フリゲート)
+	CALL INIT_PRESET_SHIP(12, 星系座標ID:12, ネヴァン級フリゲート, "ネヴァン級フリゲート", ネヴァン級フリゲート)
+NEXT
+FOR LOCAL, 0, 8
+	CALL INIT_PRESET_SHIP(12, 星系座標ID:11, スカアハ級駆逐艦, "スカアハ級駆逐艦", スカアハ級駆逐艦)
+	CALL INIT_PRESET_SHIP(12, 星系座標ID:12, スカアハ級駆逐艦, "スカアハ級駆逐艦", スカアハ級駆逐艦)
+NEXT
+FOR LOCAL, 0, 4
+	CALL INIT_PRESET_SHIP(12, 星系座標ID:11, ミアハ級巡洋艦, "ミアハ級巡洋艦", ミアハ級巡洋艦)
+	CALL INIT_PRESET_SHIP(12, 星系座標ID:12, ミアハ級巡洋艦, "ミアハ級巡洋艦", ミアハ級巡洋艦)
+NEXT
+FOR LOCAL, 0, 2
+	CALL INIT_PRESET_SHIP(12, 星系座標ID:11, ブリギッド級戦艦, "ブリギッド級戦艦", ブリギッド級戦艦)
+	CALL INIT_PRESET_SHIP(12, 星系座標ID:12, ブリギッド級戦艦, "ブリギッド級戦艦", ブリギッド級戦艦)
+NEXT
+CALL INIT_PRESET_SHIP(12, 星系座標ID:11, ルー級空母, "ルー級空母", ルー級空母)
+CALL INIT_PRESET_SHIP(12, 星系座標ID:12, ルー級空母, "ルー級空母", ルー級空母)
+FOR LOCAL, 0, 10
+	CALL INIT_PRESET_SHIP(12, 星系座標ID:11, 汎用輸送船, "汎用輸送船", 汎用輸送船)
+	CALL INIT_PRESET_SHIP(12, 星系座標ID:12, 汎用輸送船, "汎用輸送船", 汎用輸送船)
+	CALL INIT_PRESET_SHIP(12, 星系座標ID:11, 汎用作業船, "汎用作業船", 汎用作業船)
+	CALL INIT_PRESET_SHIP(12, 星系座標ID:12, 汎用作業船, "汎用作業船", 汎用作業船)
+NEXT
+
 
 ; 各星の初期化
 @INIT_STAR_RESOURCE(POSID, COUNTRY_ID)
