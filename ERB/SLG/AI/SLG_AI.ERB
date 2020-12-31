@@ -24,6 +24,10 @@ FOR ITER, 1, MAX_COUNTRY
 			CALL SLG_AI_ACTION_6
 		CASE 10
 			CALL SLG_AI_ACTION_10
+		CASE 11
+			CALL SLG_AI_ACTION_11
+		CASE 12
+			CALL SLG_AI_ACTION_12
 	ENDSELECT
 NEXT
 
@@ -192,6 +196,20 @@ FOR SHIP_ID, 0, MAX_SHIP
 		ENDIF
 	ENDIF
 NEXT
+CALL COMMON_AI_ACTION(COUNTRY_ID)
+
+;--------------------------
+; AI ACTION 豊秋津皇国
+;--------------------------
+@SLG_AI_ACTION_11
+#DIM CONST COUNTRY_ID = 11
+CALL COMMON_AI_ACTION(COUNTRY_ID)
+
+;--------------------------
+; AI ACTION ハールバルズ王国
+;--------------------------
+@SLG_AI_ACTION_12
+#DIM CONST COUNTRY_ID = 12
 CALL COMMON_AI_ACTION(COUNTRY_ID)
 
 ;--------------------------
