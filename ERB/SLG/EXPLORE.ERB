@@ -64,6 +64,7 @@ FOR MOVE, 0, 移動量
                 CURRENT_Y_POS ++
             ELSEIF CURRENT_Y_POS > MAP_HEIGHT / 2
                 CURRENT_Y_POS --
+            ; ワープゲートのX軸を合わせに行く
             ELSEIF (SECTOR_ID % 10 - CURRENT_SECTOR_ID % 10) > 0
                 CURRENT_X_POS ++
             ELSEIF (SECTOR_ID % 10 - CURRENT_SECTOR_ID % 10) < 0
@@ -80,6 +81,20 @@ FOR MOVE, 0, 移動量
                 CALL CLEAR_MAP(SHIP_POSITION:SHIP_ID, SHIP_EQUIP:センサー:0:(BOARDING_SHIP_ID:CHARA_ID))
                 BREAK
             NEXT
+        ENDIF
+        ; ワープゲートに到着していたら待機
+        IF SECTOR_ID / 10 != CURRENT_SECTOR_ID / 10
+            IF (SECTOR_ID / 10 - CURRENT_SECTOR_ID / 10) > 0 && CURRENT_Y_POS == (MAP_HEIGHT - 1) && CURRENT_X_POS == MAP_WIDTH / 2
+                RETURN 0
+            ELSEIF (SECTOR_ID / 10 - CURRENT_SECTOR_ID / 10) < 0 && CURRENT_Y_POS == 0 && CURRENT_X_POS == MAP_WIDTH / 2
+                RETURN 0
+            ENDIF
+        ELSE
+            IF (SECTOR_ID % 10 - CURRENT_SECTOR_ID % 10) > 0 && CURRENT_X_POS == (MAP_WIDTH - 1) && CURRENT_Y_POS == MAP_HEIGHT / 2
+                RETURN 0
+            ELSEIF (SECTOR_ID % 10 - CURRENT_SECTOR_ID % 10) < 0 && CURRENT_X_POS == 0 && CURRENT_Y_POS == MAP_HEIGHT / 2
+                RETURN 0
+            ENDIF
         ENDIF
         SIF SHIP_POSITION:SHIP_ID == POSID
             RETURN 1
