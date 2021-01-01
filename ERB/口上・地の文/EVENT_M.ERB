@@ -16,7 +16,6 @@ IF TEQUIP:25
 ELSE
 	PRINTW 体を丹念に愛撫した……
 ENDIF
-TRYCALLFORM MESSAGE_M{CFLAG:1005}_COM0
 ;-------------------------------------------------
 ;1,クンニ
 ;-------------------------------------------------
@@ -2528,8 +2527,6 @@ PRINTFORMW %CALLNAME:TARGET%と%CALLNAME:ASSI%の性器でペニスを挟み、�
 PRINTFORMW %CALLNAME:TARGET%に%CALLNAME:MASTER%と%CALLNAME:ASSI%のペニスに同時に奉仕させた……
 
 
-
-
 ;-------------------------------------------
 ;調教者の射精時のテキスト
 ;-------------------------------------------
@@ -3054,7 +3051,7 @@ SIF TFLAG:29 > 0
 ;-------------------------------------------
 ;調教前のテキスト
 ;-------------------------------------------
-@BEFORE_TRAIN
+@BEFORE_TRAIN_MESSAGE
 SELECTCASE CFLAG:1000
 	CASE 恋慕ルート
 		IF TALENT:TARGET:恋慕 == 1 || TALENT:TARGET:親愛 == 1
@@ -3091,6 +3088,20 @@ SELECTCASE CFLAG:1000
 			PRINTFORMW 独房の中で心細そうにしていた%CALLNAME:TARGET%は、%CALLNAME:PLAYER%の顔を見ると睨み付けてきた
 		ENDIF
 ENDSELECT
+
+;-------------------------------------------
+;調教前のテキスト
+;-------------------------------------------
+@BEFORE_TRAIN
+IF CFLAG:1006 == 0
+	CALL BEFORE_TRAIN_MESSAGE
+ELSEIF CFLAG:1006 == 1
+	TRYCALLFORM BEFORE_TRAIN_M{CFLAG:1005}
+ELSE
+	CALL BEFORE_TRAIN_MESSAGE
+	TRYCALLFORM BEFORE_TRAIN_M{CFLAG:1005}
+ENDIF
+
 IF CFLAG:1005 > 0
 	IF IS_FALL(TARGET)
 		STRLENS NICKNAME:TARGET
@@ -3127,7 +3138,7 @@ IF CFLAG:1005 > 0
 		PRINTBUTTON "[1] いいえ", 1
 		INPUT
 		IF RESULT == 0
-			SELFCALL:TARGET = RESULTS
+			SELFCALL:TARGET = %RESULTS%
 		ELSE
 			GOTO INPUT_LOOP2
 		ENDIF
@@ -3187,6 +3198,7 @@ SIF TFLAG:3 || TFLAG:8 || SELECTCOM == 21
 ;-------------------------------------------
 @PALAM_MESSAGE_D
 ;欲情がLV2になったとき　などなど
+
 
 
 ;-------------------------------------------
@@ -3429,188 +3441,20 @@ ENDIF
 ;親離れ時のイベント口上
 @EVENT_MESSAGE_14
 
-
-;定食屋台時のイベント口上
-@EVENT_MESSAGE_15
-IF ABL:12 == 0
-	PRINTFORM %CALLNAME:TARGET%との定食屋台で出した
-	CALL LUNCH_NAME
-	IF F == 1
-		PRINTW は、まずまずの評価を得られた
-	ELSE
-		PRINTW は、あまり好評ではなかったようだ
-	ENDIF
-ELSEIF ABL:12 < 4
-	PRINTFORM %CALLNAME:TARGET%との定食屋台で出した
-	CALL LUNCH_NAME
-	IF F == 1
-		PRINTW は、かなり好評だったようだ
-	ELSE
-		PRINTW は、今ひとつ評価がされなかったようだ
-	ENDIF
-ELSE
-	IF F == 1
-		PRINTFORML %CALLNAME:TARGET%との定食屋台で出した料理は、多くの客から好評を得られた
-		PRINTFORM 中でも、%CALLNAME:TARGET%の
-		CALL LUNCH_NAME
-		PRINTW は、多くの客の舌を唸らせていた
-	ELSE
-		PRINTFORMW %CALLNAME:TARGET%との定食屋台で出した料理は、いつもより売れ行きがよくなかったようだ
-	ENDIF
-ENDIF
-
-
-;娼館でバイト時のイベント口上
-@EVENT_MESSAGE_16
-;避妊具の有無：B、総プレイ数：C、セックス系：D、奉仕系：G、SM系：H、レズ系：Iにプレイ数保管、報酬額：S
-;CFLAG:30～33には各プレイごとのプレイ数が多いものから順に格納されている。
-PRINTFORML %CALLNAME:TARGET%は娼館に来た客を、その体でもてなした
-PRINT 中でも
-;セックス系
-SIF CFLAG:30 == D
-	PRINTFORM 腰を突かれるたびに淫靡に体を揺らし、嬌声をあげる様は
-;奉仕系
-SIF CFLAG:30 == G
-	PRINTFORM うっとりした表情でされる緩急をつけた奉仕は
-;SM系
-IF CFLAG:30 == H
-	;マゾっ気が高い
-	SIF ABL:9 >= ABL:10
-		PRINTFORM 苦痛に喘ぎ、嗜虐心をそそるプレイは
-	;サドっ気が高い
-	SIF ABL:10 > ABL:9
-		PRINTFORM 被虐心をそそり、苦痛を快楽に変えるとのプレイは
-ENDIF
-;レズ、ゲイ系
-IF CFLAG:30 == I
-	IF TARGET:140 == 0
-		PRINT 女
-	ELSE
-		PRINT 男
-	ENDIF
-	PRINTFORM の敏感な部分を知り尽くした%CALLNAME:TARGET%とのプレイは
-ENDIF
-PRINTW 多くの客を満足させることだろう……
-
-;レンタル時のイベント口上
-@EVENT_MESSAGE_17
-;Bはレンタルの期間日数
-IF B == 1
-	PRINTFORMW 疲れを感じさせない微笑を浮かべている
-	PRINT どうやら、
-ELSEIF B == 3
-	PRINTFORMW 柔らかな笑みを浮かべている
-	PRINT どうやら、
-ELSEIF B == 5
-	PRINTFORMW 笑ってみせたが、顔には疲労が浮かんでいる
-	PRINT だが、
-ELSEIF B == 10
-	PRINTFORMW 疲弊しきった表情をしている
-	PRINT だが、
-ENDIF
-PRINTFORMW %CALLNAME:TARGET%は%CALLNAME:MASTER%の役に立てたことに喜びを感じているようだ……
-
-;売却時のイベント口上
-@EVENT_MESSAGE_18
-
-;ビデオ売却時のイベント口上
-@EVENT_MESSAGE_19
-
-;コンサート実行時のイベント口上
-@EVENT_MESSAGE_20
-;失敗時
-IF F == 0
-	PRINTFORML %CALLNAME:TARGET%のコンサートを開いた
-	PRINTL 緊張のせいか、何度もミスを繰り返している
-	PRINTL そのせいか、今回のライブの評判はあまりよくなかったようだ……
-;成功時
-ELSE
-	PRINTFORML %CALLNAME:TARGET%のコンサートを開いた
-	PRINTFORM %CALLNAME:TARGET%
-	;IF ABL:14 >= 4
-	;	PRINT が披露したとっておきの持ち歌
-	;	CALL SONG_NAME_TOHO
-	;	PRINT は
-	;ELSE
-		PRINT のライブは
-	;ENDIF
-	IF ABL:14 >= 5
-		PRINTL 大成功だ
-		PRINTFORML %CALLNAME:TARGET%の魅力的な歌声に、会場に集まった観客は熱狂的な歓声を上げている
-		PRINTFORMW 歌い終わると%CALLNAME:TARGET%は達成感溢れる笑みを観客、そして%CALLNAME:MASTER%へと送った……
-	ELSEIF ABL:14 >= 3
-		PRINTL どうやら成功したようだ
-		PRINTFORMW %CALLNAME:TARGET%は歌い終えた後も気分が高揚しているのか、さっきからずっと鼻歌を歌っていた……
-	ELSE
-		PRINTL 失敗せずに済んだようだ
-		PRINTFORMW %CALLNAME:TARGET%は緊張していたのか、舞台を降りるとほっとした表情を浮かべていた……
-	ENDIF
-ENDIF
-
-;乱交ライブ実行時のイベント口上
-@EVENT_MESSAGE_21
-PRINTFORML %CALLNAME:TARGET%は聴衆の前で歌を披露した
-PRINTFORML %CALLNAME:TARGET%は艶めかしい笑みを浮かべ、まるで誘うようなしぐさで踊っている……
-PRINTL ……
-IF B >= 3
-	PRINTFORML %CALLNAME:TARGET%の魅力と歌声に魅せられたのか
-	PRINTFORML 興奮した聴衆達が一斉に%CALLNAME:TARGET%のもとへなだれ込んだ……
-ELSE
-	PRINTFORML 何のスイッチが入ったのか突然聴衆達は%CALLNAME:TARGET%に向かってなだれ込んだ……
-ENDIF
-PRINTFORML %CALLNAME:TARGET%は群がった聴衆に何度と無く犯されてた……
-IF I >= 0
-	PRINTFORMW %CALLNAME:I%はその様子をしっかりと撮影し続けていた……
-ELSE
-	WAIT
-ENDIF
-
-;公衆便所プレイ実行時のイベント口上
-@EVENT_MESSAGE_22
-IF B == 1
-	PRINTFORML 森林バイオームに着くと%CALLNAME:TARGET%を適当な木の元で
-ELSEIF B == 2
-	PRINTFORML 村の郊外に着くと%CALLNAME:TARGET%を適当な切り株の上で
-ELSEIF B == 3
-	PRINTFORML 黄昏の森に着くと%CALLNAME:TARGET%を適当な木の元で
-ELSEIF B == 4
-	PRINTFORML ネザーに着くと%CALLNAME:TARGET%を適当な建物の中で
-ELSEIF B == 5
-	PRINTFORML 舞倉市郊外に着くと%CALLNAME:TARGET%適当な建物の前で
-ENDIF
-PRINTL 股を大きく広げるようにして座らせ、その手にプラカードを持たせ、そこで待機するよう命令した
-PRINTL ……
-PRINTFORM どうやら%CALLNAME:TARGET%の肉便器は
-IF B == 1
-	PRINT 森に来た人達
-ELSEIF B == 2
-	PRINT 村の人達
-ELSEIF B == 3
-	PRINT ミノタウロス達
-ELSEIF B == 4
-	PRINT ゾンビピッグマン達
-ELSEIF B == 5
-	PRINT 舞倉市の人達
-ENDIF
-PRINTW に好評だったようだ……
-
 ;ビデオ保有時のイベント口上
 @EVENT_MESSAGE_23
 
 
-
-
 ;SELECTCOMに応じたテキスト関数をCALLする
 @TRAIN_MESSAGE
-;SELECTCOMで条件分岐しててあまりにも草だったので修正
-TRYCALLFORM MESSAGE_COM{SELECTCOM}
-
-;前の実装 こんな悲劇を繰り返してはならない　
-;SIF SELECTCOM == 0
-;	CALL MESSAGE_COM0
-;SIF SELECTCOM == 1
-;	CALL MESSAGE_COM1
-;以下略
+IF CFLAG:1006 == 0
+	TRYCALLFORM MESSAGE_COM{SELECTCOM}
+ELSEIF CFLAG:1006 == 1
+	TRYCALLFORM MESSAGE_M{CFLAG:1005}_COM{SELECTCOM}
+ELSE
+	TRYCALLFORM MESSAGE_COM{SELECTCOM}
+	TRYCALLFORM MESSAGE_M{CFLAG:1005}_COM{SELECTCOM}
+ENDIF
 
 ;処女喪失の後でペニスを抜いているか
 IF TFLAG:31 == 2
@@ -3623,18 +3467,12 @@ ENDIF
 ;TFLAG:13に応じたテキスト関数をCALLする
 @EVENT_MESSAGE
 
-;これもTFLAG:13で条件分岐してて大草原不可避だったので修正
-TRYCALLFORM EVENT_MESSAGE_{TFLAG:13}
-
-;前の実装 こんな悲劇を繰り返してはならない(2)
-;朝フェラ
-;SIF TFLAG:13 == 1
-;	CALL EVENT_MESSAGE_1
-;朝パイズリ
-;SIF TFLAG:13 == 2
-;	CALL EVENT_MESSAGE_2
-;以下略
-
-
-
+IF CFLAG:1006 == 0
+	TRYCALLFORM EVENT_MESSAGE_{TFLAG:13}
+ELSEIF CFLAG:1006 == 1
+	TRYCALLFORM EVENT_MESSAGE_M{CFLAG:1005}_{TFLAG:13}
+ELSE
+	TRYCALLFORM EVENT_MESSAGE_{TFLAG:13}
+	TRYCALLFORM EVENT_MESSAGE_M{CFLAG:1005}_{TFLAG:13}
+ENDIF
 

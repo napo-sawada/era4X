@@ -1,5 +1,5 @@
 ﻿; 口上タイプ
-#DIM CONST 普通 = 1
+#DIM CONST 普通タイプ1 = 1
 
 ; 調教ルート
 #DIM CONST 恋慕ルート = 0
