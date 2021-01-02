@@ -7,7 +7,7 @@
 ; 存在チェック
 ;-------------------------------------------------
 @MESSAGE_EXIT_1
-RETURN 1
+RETURN 0
 
 ;-------------------------------------------------
 ; ユーザに口上の選択肢として表示するテキスト
@@ -20,17 +20,34 @@ RESULTS = [汎用口上1] 開発者向けサンプル口上
 ;-------------------------------------------------
 @MESSAGE_M1_COM0
 
-IF TALENT:TARGET:恋慕 == 1 || TALENT:TARGET:親愛 == 1
-	PRINTFORML 「%NICKNAME:TARGET%……」
-	PRINTFORMW %CALLNAME:TARGET%は甘い声で%CALLNAME:MASTER%の名前を呼びながら、愛撫を受けて入れている
-ELSEIF TALENT:TARGET:淫乱 == 1 || TALENT:TARGET:娼婦 == 1
-	PRINTFORML 「もっとぉ」
-	PRINTFORMW %CALLNAME:TARGET%は顔と秘割をとろかせながら、さらなる刺激を求めている
-ELSEIF TALENT:TARGET:服従 == 1 || TALENT:TARGET:隷属 == 1
-	PRINTFORML 「%SELFCALL:TARGET%の体の味はいかがでしょうか？」
-	PRINTFORMW 快感を堪えながら、%CALLNAME:MASTER%にされるがままだ
+;初めて
+IF CFLAG:300 == 0
+  PRINTFORMW 
+  CFLAG:300 = 1
+;二回目以降
 ELSE
-	PRINTFORMW 「気持ち悪い……」
+  ;陥落済み
+  IF (TALENT:恋慕 || TALENT:淫乱 || TALENT:服従 || TALENT:親愛 || TALENT:娼婦 || TALENT:隷属) && (CFLAG:300 < 4 || FLAG:7 == 2)
+    ;恋慕、親愛
+    IF TALENT:恋慕 || TALENT:親愛
+      PRINTFORMW 
+    ;淫乱、娼婦
+    ELSEIF TALENT:淫乱 || TALENT:娼婦
+      PRINTFORMW 
+    ;服従、隷属
+    ELSEIF TALENT:服従 || TALENT:隷属
+      PRINTFORMW 
+    ENDIF
+    CFLAG:300 = 4
+  ;屈服刻印Lv3
+  ELSEIF MARK:2 == 3 && (CFLAG:300 < 3 || FLAG:7 == 2)
+    PRINTFORMW 
+    CFLAG:300 = 3
+  ;それ以外
+  ELSEIF CFLAG:300 < 2 || FLAG:7 == 2
+    PRINTFORMW 
+    CFLAG:300 = 2
+  ENDIF
 ENDIF
 
 ;-------------------------------------------------
