@@ -62,12 +62,14 @@ PRINTL 被写経験+1
 EXP:ID:62 += 1
 EXP:ID:63 += 1
 
-; ランダム流入
-RANDOM_VIEWER = RAND:500 + 300
+; ランダム流入(記入レベルに依存)
+RANDOM_VIEWER = RAND:(500 + CFLAG:ID:1007 * 150) + CFLAG:ID:1008 * 150 + 300
+
 VIEWER_NUM += RANDOM_VIEWER
 
 ; 登録者からの流入
 VIEWER_NUM += REGISTER / 33
+
 
 ; ベースの人気から算出して一定の割合で登録者になる
 IF POINT < 1000
