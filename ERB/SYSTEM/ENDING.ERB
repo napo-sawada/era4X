@@ -21,6 +21,8 @@ PRINTBUTTON "[0] 楽しみ方", 0
 PRINTL
 PRINTBUTTON "[1] マップの記号", 1
 PRINTL
+PRINTBUTTON "[2] 宇宙港の建て方", 2
+PRINTL
 PRINTBUTTON "[9] 戻る", 9
 INPUT
 IF RESULT == 0
@@ -65,6 +67,14 @@ ELSEIF RESULT == 1
     PRINTL ＃: 採掘ポイント(採掘には同宙域に作業船と輸送船が必要)
     PRINTL 港: 宇宙港。未実装です
     WAIT
+    GOTO INPUT_LOOP
+ELSEIF RESULT == 2
+    PRINTL 建造船に乗り、装甲合金を積んだ輸送船を追従させると何もない宙域に建造できます
+    PRINTL 建造を開始すると必要な物資を要求されるので、要求された物資を運搬します
+    PRINTW 全ての物資を運搬し終えると、宇宙港が完成し中に入れるようになります
+    PRINTL 宇宙港では独自のメニューとして [8] 宇宙港スロット が用意されています
+    PRINTL 宇宙港スロットは20個用意されており、艦船の建造できる造船所や物資を収納できるコンテナなどを設置できます
+    PRINTW コンテナに必要物資を集めて造船所で好きな艦船や武装を選ぶと、無料で建造できます
     GOTO INPUT_LOOP
 ELSEIF RESULT == 9
     RETURN
