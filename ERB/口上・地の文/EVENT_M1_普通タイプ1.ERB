@@ -13,7 +13,7 @@ RETURN 0
 ; ユーザに口上の選択肢として表示するテキスト
 ;-------------------------------------------------
 @MESSAGE_DESCRIPTION_1
-RESULTS = [汎用口上1] 開発者向けサンプル口上
+RESULTS = 普通口調1 地の文と併用推奨 
 
 ;-------------------------------------------------
 ; 0,愛撫
@@ -22,7 +22,8 @@ RESULTS = [汎用口上1] 開発者向けサンプル口上
 
 ;初めて
 IF CFLAG:300 == 0
-  PRINTFORMW 
+	PRINTFORML 「%SELFCALL:TARGET%をどうするつもりなの
+  PRINTFORMW 変なことしたら噛みつくからね！」
   CFLAG:300 = 1
 ;二回目以降
 ELSE
@@ -4587,35 +4588,43 @@ ENDIF
 DRAWLINE
 ;初調教時
 IF CFLAG:201 == 0
-	PRINTFORMW 初回調教！
+	PRINTFORML 「%SELFCALL:TARGET%をどうするつもり？
+	PRINTFORMW 変なことしたら絶対許さないから」
 	CFLAG:201 = 1
 	RETURN 0
 ;屈服刻印Lv1
 ELSEIF CFLAG:201 < 2 && MARK:2 == 1
-	PRINTFORMW 
+	PRINTFORML 「もう変なことしないって約束してくれたら、素直に言うこと聞くよ
+	PRINTFORMW ……まあ、そんな都合のいい話ないよね……」
 	CFLAG:201 = 2
 	RETURN 0
 ;屈服刻印Lv2
 ELSEIF CFLAG:201 < 3 && MARK:2 == 2
-	PRINTFORMW 
+	PRINTFORMW 「なんで%SELFCALL:TARGET%、こんな目に遭ってるんだろう。帰りたい……」
 	CFLAG:201 = 3
 	RETURN 0
 ;屈服刻印Lv3
 ELSEIF CFLAG:201 < 4 && MARK:2 == 3 && (TALENT:恋慕 == 0 && TALENT:淫乱 == 0 && TALENT:服従 == 0 && TALENT:親愛 == 0 && TALENT:娼婦 == 0 && TALENT:隷属 == 0)
-	PRINTFORMW 
+	PRINTFORML 「もう言うこと聞くからこれ以上はやめてよ。でないと%SELFCALL:TARGET%……」
+	PRINTFORMW %CALLNAME:TARGET%はか細い声で何事かを呟いている
 	CFLAG:201 = 4
 	RETURN 0
 ;陥落
 ELSEIF CFLAG:201 < 5 && (TALENT:恋慕 || TALENT:淫乱 || TALENT:服従)
 	;恋慕
 	IF TALENT:恋慕
-		PRINTFORMW 
+		PRINTFORML 「%NICKNAME:TARGET%の優しさにやっと気がついたから、%SELFCALL:TARGET%、これからはいい子でいるね
+		PRINTFROMW だから見捨てないでね、%NICKNAME:TARGET%」
 	;淫乱
 	ELSEIF TALENT:淫乱
-		PRINTFORMW 
+		PRINTFORML 「ねえ%NICKNAME:TARGET%。今日も気持ちよくしてくれるんだよね？
+		PRINTFORML もうわがまま言わないから、もっと気持ちよくしてね」
+		PRINTFORMW %CALLNAME:TARGET%は%CALLNAME:MASTER%の腕を掴んで引っ張りながら、妖しく笑って見せた
 	;服従
 	ELSEIF TALENT:服従
-		PRINTFORMW 
+		PRINTFORML 「%NICKNAME:TARGET%、%SELFCALL:TARGET%覚悟しました
+		PRINTFORML これからは%NICKNAME:TARGET%に服従します」
+		PRINTFORMW %CALLNAME:TARGET%は%CALLNAME:MASTER%の足元に膝まづき、服従の言葉を述べた
 	ENDIF
 	CFLAG:201 = 5
 	RETURN 0
@@ -4631,59 +4640,64 @@ ENDIF
 @BEFORE_TRAIN_2ND_M1
 ;反発刻印Lv3
 IF MARK:3 == 3 && (CFLAG:202 < 4 || FLAG:7 == 2)
-	PRINTFORMW 
+	PRINTFORML 「……」
+	PRINTFORMW %CALLNAME:TARGET%は無言で%CALLNAME:MASTER%を睨み付けている
 	CFLAG:202 = 4
 ;屈服刻印Lv0
 ELSEIF MARK:2 == 0 && (CFLAG:202 < 1 || FLAG:7 == 2)
-	PRINTFORMW 二回目調教！
+	PRINTFORML 「触ったら怒るからね」
+	PRINTFORMW %CALLNAME:TARGET%はじと目で%CALLNAME:TARGET%を睨み付けている
 	CFLAG:202 = 1
 ;屈服刻印Lv1
 ELSEIF MARK:2 == 1 && (CFLAG:202 < 2 || FLAG:7 == 2)
-	PRINTFORMW 
+	PRINTFORML 「なんで%SELFCALL:TARGET%がこんな目に遭ってるんだろう」
+	PRINTFORMW %CALLNAME:TARGET%は%CALLNAME:MASTER%にベッドに押し倒されながら、ぼやいている
 	CFLAG:202 = 2
 ;屈服刻印Lv2
 ELSEIF MARK:2 == 2 && (CFLAG:202 < 3 || FLAG:7 == 2)
-	PRINTFORMW 
+	PRINTFORML 「人並みの幸せが欲しかったなぁ」
+	PRINTFORMW %CALLNAME:TARGET%はぼやきながら%CALLNAME:MASTER%に押し倒された
 	CFLAG:202 = 3
 ;屈服刻印Lv3＋陥落素質無し
 ELSEIF MARK:2 == 3 && (TALENT:恋慕 == 0 && TALENT:淫乱 == 0 && TALENT:服従 == 0 && TALENT:親愛 == 0 && TALENT:娼婦 == 0 && TALENT:隷属 == 0) && (CFLAG:202 < 4 || FLAG:7 == 2)
-	PRINTFORMW 
+	PRINTFORML 「もう好きにすれば」
+	PRINTFORMW %CALLNAME:TARGET%は何かを諦めているようだ
 	CFLAG:202 = 4
 ;陥落済み
 ELSEIF CFLAG:202 < 5 || FLAG:7 == 2
 	;恋慕、親愛
 	IF TALENT:恋慕 || TALENT:親愛
 		;ランダムで口上が変化する（使わない場合はすべて同じにすればよい）
-		K:1 = RAND:3
-		IF K:1 == 0
-			PRINTFORMW 
-		ELSEIF K:1 == 1
-			PRINTFORMW 
-		ELSE
-			PRINTFORMW 
-		ENDIF
+		SELECTCASE RAND:3
+			CASE 0
+				PRINTFORMW 「やっと来た。待ってたんだからね」
+			CASE 1
+				PRINTFORMW 「えへへ、今日はたくさんサービスしてあげる」
+			CASE 2
+				PRINTFORMW 「ふふ、今日は何をするつもりなのかなー？」
+		ENDSELECT
 	;淫乱、娼婦
 	ELSEIF TALENT:淫乱 || TALENT:娼婦
 		;ランダムで口上が変化する（使わない場合はすべて同じにすればよい）
-		K:1 = RAND:3
-		IF K:1 == 0
-			PRINTFORMW 
-		ELSEIF K:1 == 1
-			PRINTFORMW 
-		ELSE
-			PRINTFORMW 
-		ENDIF
+		SELECTCASE RAND:3
+			CASE 0
+				PRINTFORMW 「やっと来たー。今日もたくさんしてよ」
+			CASE 1
+				PRINTFORMW 「待ってたよ。さ、早くベッド行こ」
+			CASE 2
+				PRINTFORMW 「中々来ないからオナニーで済ましちゃうとこだったよ」
+		ENDSELECT
 	;服従、隷属
 	ELSEIF TALENT:服従 || TALENT:隷属
 		;ランダムで口上が変化する（使わない場合はすべて同じにすればよい）
-		K:1 = RAND:3
-		IF K:1 == 0
-			PRINTFORMW 
-		ELSEIF K:1 == 1
-			PRINTFORMW 
-		ELSE
-			PRINTFORMW 
-		ENDIF
+		SELECTCASE RAND:3
+			CASE 0
+				PRINTFORMW 「ようこそ%NICKNAME:TARGET%」
+			CASE 1
+				PRINTFORMW 「今日はどのようなご用件でしょうか」
+			CASE 2
+				PRINTFORMW 「どうぞ今日も%SELFCALL%を可愛がってくださいませ」
+		ENDSELECT
 	ENDIF
 	CFLAG:202 = 5
 ENDIF
@@ -4703,18 +4717,19 @@ IF TFLAG:3 > 0
 	CALL PALAM_MESSAGE_C
 	;恋慕か親愛かつ主人のセックスによる処女喪失
 	IF TFLAG:20
-		PRINTFORMW 
+		PRINTFORML 「えへへ、%NICKNAME:TARGET%に初めてを奪われちゃった」
+		PRINTFORMW %CALLNAME:TARGET%は心底嬉しそうにはにかんでいる
 	;それ以外の時に処女喪失
 	ELSE
 		;陥落済み
 		IF TALENT:恋慕 || TALENT:淫乱 || TALENT:服従 || TALENT:親愛 || TALENT:娼婦 || TALENT:隷属
-			PRINTFORMW 
+			PRINTFORMW 「痛いけど……大丈夫」
 		;屈服刻印Lv3
 		ELSEIF MARK:2 == 3
-			PRINTFORMW 
+			PRINTFORMW 「覚悟はしてたけど、やっぱり痛い」
 		;それ以外
 		ELSE
-			PRINTFORMW 
+			PRINTFORMW 「初めてがこんなところで……最悪……」
 		ENDIF
 	ENDIF
 ENDIF
