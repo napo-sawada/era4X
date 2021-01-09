@@ -3,6 +3,16 @@
 ;朝に起こるイベント
 ;-------------------------------------------------
 @EVENT_NEWDAY_SELF
+#DIM ID
+#DIM FALL_COUNT
+
+FALL_COUNT = 0
+
+FOR ID, 0, CHARANUM
+	SIF IS_FALL(ID) == 1
+		FALL_COUNT ++
+NEXT
+
 ;調教対象が居ない場合は終了
 SIF TARGET < 0
 	RETURN 0
@@ -16,14 +26,19 @@ SIF TALENT:MASTER:半人半妖 == 0 && TALENT:MASTER:ふたなり == 0 && TALENT
 	RETURN 0
 
 ;朝騎乗位判定
-IF TALENT:処女 == 0 && TALENT:再生処女 == 0 && ABL:4 >= 3 && ABL:7 >= 7 && TALENT:オトコ == 0
+IF TALENT:処女 == 0 && TALENT:再生処女 == 0 && ABL:4 >= 3 && ABL:7 >= 7 && TALENT:オトコ == 0 && RAND:4 == 1
 	CALL SELF_MORNING_3
 ;朝パイズリ判定
-ELSEIF ABL:7 >= 5 && TALENT:絶壁 == 0 && TALENT:オトコ == 0
+ELSEIF ABL:7 >= 5 && TALENT:絶壁 == 0 && TALENT:オトコ == 0 && RAND:3 == 1
 	CALL SELF_MORNING_2
-;朝フェラ判定
 ELSE
-	CALL SELF_MORNING_1
+	IF FALL_COUNT >= 3 && RAND:2 == 1
+		; 肉布団
+		CALL SELF_MORNING_4
+	ELSE
+		; 朝フェラ
+		CALL SELF_MORNING_1
+	ENDIF
 ENDIF
 
 ;朝フェラ
@@ -195,6 +210,12 @@ PRINTFORMW %PALAMNAME:8%の珠＋{A*40}
 DRAWLINE
 
 RETURN 0
+
+;肉布団
+@SELF_MORNING_4
+DRAWLINE
+TFLAG:13 = 15
+CALL KOJO_MESSAGE_EVENT
 
 
 ;-------------------------------------------------
