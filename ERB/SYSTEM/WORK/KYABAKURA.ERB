@@ -48,7 +48,7 @@ POINT = LIMIT(POINT, 0, 9999)
 PRINTFORM %CALLNAME:ID%はキャバクラで
 SELECTCASE RAND:3
 	CASE 0
-		PRINTFORML 安物のスーツに身を包んだサラリーマンの相手をした
+		PRINTFORML 安物のスーツに身を包んだサラリーマン等の相手をした
 		; 要求の低い客
 		IF POINT > 1000
 			CFLAG:ID:1002 += 50
@@ -59,7 +59,7 @@ SELECTCASE RAND:3
 		ENDIF
 	CASE 1
 		; 要求の普通の客
-		PRINTFORML 小綺麗な身なりの男を相手にした
+		PRINTFORML 小綺麗な身なりの男等を相手にした
 		IF POINT > 2000
 			CFLAG:ID:1002 += 100
 			PRINTFORML どうやらうまく接客できたようだ
@@ -69,7 +69,7 @@ SELECTCASE RAND:3
 		ENDIF
 	CASE 2
 		; 要求の高い客
-		PRINTFORML 高級ブランドに身を包んだ男の相手をした
+		PRINTFORML 高級ブランドに身を包んだ男等の相手をした
 		IF POINT > 3000
 			CFLAG:ID:1003 += 200
 			PRINTFORML どうやらうまく接客できたようだ
@@ -84,7 +84,6 @@ EXP:ID:65 += 5
 
 CFLAG:ID:1002 = LIMIT(CFLAG:ID:1002, 0, 100000)
 GET_MONEY = POINT + CFLAG:ID:1002 - RAND:(POINT / 10)
-GET_MONEY /= 10
 PRINTFORML %CALLNAME:ID%は%TOSTR(GET_MONEY, "$###,###")%稼いできた
 MONEY += GET_MONEY
 
