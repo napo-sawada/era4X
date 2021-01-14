@@ -1,0 +1,33 @@
+﻿;-----------------------------------
+; アーマー
+;-----------------------------------
+@GET_ARMOR_NAME_90
+RESULTS = 金色の鱗
+
+@GET_ARMOR_STATUS_90(STATUS)
+#DIM REF STATUS
+
+STATUS:ARMOR = 30000
+STATUS:SIZE = 4
+STATUS:PRICE = 99999999
+
+;-----------------------------------
+; アーマーの説明
+;-----------------------------------
+@GET_ARMOR_DESCRIPTION_90
+#DIM STATUS, STATUS_LENGTH
+
+CALL GET_ARMOR_STATUS_90(STATUS)
+CALL GET_ARMOR_NAME_90
+PRINTFORML %RESULTS%
+PRINTFORML 装甲      : {STATUS:ARMOR}
+PRINTFORML サイズ    : {STATUS:SIZE}
+
+;-----------------------------------
+; 装甲の資材
+;-----------------------------------
+@GET_ARMOR_RESOURCE_90(USE_RESOURCE)
+#DIM REF USE_RESOURCE
+
+@IS_SALE_ARMOR_90
+RETURN 0

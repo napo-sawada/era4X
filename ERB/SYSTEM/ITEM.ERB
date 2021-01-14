@@ -244,7 +244,7 @@ SIF F == 1 && ITEM:25 == 0
 
 ;第三の瞳
 ITEMSALES:63 = 0
-SIF F == 1 && TALENT:MASTER:テレパシー == 0
+SIF F == 1 && TALENT:MASTER:覚 == 0
 	ITEMSALES:63 = 1
 
 ;元気になる薬（条件は調合知識のみ）
@@ -410,9 +410,9 @@ ELSEIF BOUGHT >= 60 && BOUGHT <= 69
 	;素質アイテム【禁断の知識】
 	SIF BOUGHT == 62
 		TALENT:MASTER:禁断の知識 = 1
-	;素質アイテム【テレパシー】
+	;素質アイテム【覚】
 	SIF BOUGHT == 63
-		TALENT:MASTER:テレパシー = 1
+		TALENT:MASTER:覚 = 1
 ENDIF
 
 ;複数所持可能なアイテムの場合
