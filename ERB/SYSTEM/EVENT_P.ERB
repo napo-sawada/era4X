@@ -177,13 +177,28 @@ ELSEIF TALENT:T:巨乳 == 0 && TALENT:T:爆乳 == 0
 	PRINTW ぐらいに大きくなった
 	PRINTFORMW 　
 	TALENT:T:巨乳 = 1
+ELSEIF TALENT:T:巨乳
+	PRINTFORMW %CALLNAME:T%の胸が巨乳程度から
+	PRINT [
+	PRINTS TALENTNAME:112
+	PRINT ]
+	PRINTW ぐらいに大きくなった
+	PRINTFORMW 　
+	TALENT:T:巨乳 = 0
+	TALENT:T:爆乳 = 1
+ELSEIF TALENT:T:爆乳 == 1
+	;妊娠前から爆乳だったかを保存
+	CFLAG:T:112 = 1
 ENDIF
+
 
 ;母乳出るようになる
 IF TALENT:T:母乳体質 == 0
 	PRINTFORMW %CALLNAME:T%は母乳が出るようになった
 	PRINTFORMW 　
 	TALENT:T:母乳体質 = 1
+ELSE
+	CFLAG:113 = 1
 ENDIF
 
 
@@ -330,7 +345,7 @@ SIF ASSI == C
 @CHILD_BIRTH
 T = TARGET
 REPEAT CHARANUM
-	SIF NO:COUNT == CFLAG:C:111
+	SIF COUNT == CFLAG:C:111
 		F = COUNT
 REND
 EXP:C:出産経験 ++
@@ -406,7 +421,18 @@ IF TALENT:C:崩壊
 	MAXBASE:C:0 += 500
 	CALL CLEAR_FLAG
 	;妊娠時に大きくなった胸のサイズを一段小さくする
-	CALL REVERSE_B_SIZE
+	IF CFLAG:C:112 == 0
+		PRINTFORMW %CALLNAME:C%の胸は母乳を与える役割を終えたことで小さくなりました
+		CALL REVERSE_B_SIZE
+	ENDIF
+	PRINTFORMW 出産により%CALLNAME:C%の体型に変化がありました
+	CALL UPDATE_BODY_SIZE(C)
+	;母乳体質削除
+	SIF CFLAG:C:113 == 0
+		TALENT:C:母乳体質 = 0
+	CFLAG:C:112 = 0
+	CFLAG:C:113 = 0
+
 ;育児に入った場合
 ELSE
 	PRINTFORML %CALLNAME:C%は育児室で育児を始めた
@@ -496,9 +522,18 @@ PRINTFORMW %CALLNAME:C%は再び調教可能になりました
 MAXBASE:C:0 += 500
 TALENT:C:育児中 = 0
 IF TALENT:C:貧乳 == 0 && TALENT:C:絶壁 == 0
-	PRINTFORMW %CALLNAME:C%の胸は母乳を与える役割を終えたことで小さくなりました
 	;妊娠時に大きくなった胸のサイズを一段小さくする
-	CALL REVERSE_B_SIZE
+	IF CFLAG:C:112 == 0
+		PRINTFORMW %CALLNAME:C%の胸は母乳を与える役割を終えたことで小さくなりました
+		CALL REVERSE_B_SIZE
+	ENDIF
+	PRINTFORMW 子育てにより%CALLNAME:C%の体型に変化がありました
+	CALL UPDATE_BODY_SIZE(C)
+	;母乳体質削除
+	SIF CFLAG:C:113 == 0
+		TALENT:C:母乳体質 = 0
+	CFLAG:C:112 = 0
+	CFLAG:C:113 = 0
 ENDIF
 CALL CLEAR_FLAG
 
@@ -532,10 +567,12 @@ ELSEIF TALENT:C:貧乳 == 0 && TALENT:C:絶壁 == 0
 ENDIF
 
 ;育児室にいるかの判定
-@CHECK_CHILD_CARE
-SIF (TALENT:C:妊娠 && CFLAG:C:110 - 3 <= DAY) || TALENT:C:育児中
-	RETURN 1
+@CHECK_CHILD_CARE(ID)
+#FUNCTION
+#DIM ID
+SIF (TALENT:ID:妊娠 && CFLAG:ID:110 - 3 <= DAY) || TALENT:ID:育児中
+	RETURNF 1
 
-RETURN 0
+RETURNF 0
 
 
