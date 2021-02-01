@@ -1,0 +1,815 @@
+﻿
+;≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡
+; タグ指定が可能な文字列
+;
+;	関数名	:	FuncTagSetText_～～
+;
+; @@でタグ指定する。対応するタグは以下。
+;	@C:value@		: 色指定。                "value"はタグで囲んだ部分のテキスト色を 0xRRGGBB で指定する。この時 -1 を指定すると RESETCOLOR する。
+;
+;	@B:value@		: ボタン指定。            "value"はタグで囲んだ部分をクリックした際に入力される文字列を指定する。
+;
+;	@F:value@		: フォント指定。          "value"はタグで囲んだ部分のフォント名称を指定する
+;
+;	@I:value@		: 画像指定。              "value"は描画する画像のリソース名を指定する。
+;												","区切りで<img>タグの他の属性も指定できる。（例：value="画像リソース名,height='600',ypos='-600'"）
+;												タグで囲んだ部分は捨てられるが、FuncTagSetText_GetPrintLength()を使用する場合は、「(画像の幅÷フォントサイズ)個の全角スペース」を挿入すること
+;												（例 @I:画像のリソース名@　　　　　@/I@）リソースで指定した画像の幅が高さの5倍の場合
+;												
+;												また、複数行に跨る画像を描画する場合、yposの値は [-1 * 画像の高さ] にすることを推奨する。
+;												これは、画像指定よりも下の行で、なんらかの描画を行った場合、その内容で画像の描画が上書きされてしまうためである
+;
+;	@S:value@		: フォントスタイル指定。  "value"はタグで囲んだ部分のスタイル値を指定する（スタイル値はFONTSTYLEで指定する値）
+;												※Html版は、value値に関係なく太字として扱う
+; 
+; 
+; 使用例)
+;		CALLF FuncTagSetText_Print( "あいう@C:0xFF8888@@B:Red@赤ボタン@/B@@C:0x88FF88@@B:Green@緑ボタン@/B@@C:0x8888FF@@B:Blue@青ボタン@/B@@/C@", 0x01 )
+;	で以下の記述と同じ描画行える
+;		LOCAL = GETCOLOR()
+;		PRINTFORM あいう
+;		SETCOLOR 0xFF8888
+;		PRINTBUTTON "赤ボタン", "Red"
+;		SETCOLOR 0x88FF88
+;		PRINTBUTTON "緑ボタン", "Green"
+;		SETCOLOR 0x8888FF
+;		PRINTBUTTON "青ボタン", "Blue"
+;		SETCOLOR LOCAL
+;		PRINTL
+;≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡
+
+
+;================================================================
+; カラーバー用の文字列を生成する
+;--------------------------------
+;[引数]
+;	nBarVol			: バー現在値
+;	nBarVolMax		: バー最大値（0以下指定だとnBarVolと同値として扱う）
+;	nScaleNum		: 目盛数（半角文字の個数）
+;	colorLeft		: バーの左端の色
+;	colorRigth		: バーの右端(100%)の色
+;	colorEmpty		: バーのEmpty部分の色
+;	flgExtra		: 特殊表示フラグ（ビット演算。）
+;						0x01	: カラーバーの後ろに現在値と最大値を記述する	" ({nBarVol,5}/{nBarVolMax,5})"
+;	strScaleText	: メモリ文字（半角文字。未指定時は%UNICODE(0x2586)%）
+;--------------------------------
+;[戻り値など]
+;	カラーバー用の文字列（色指定タグと■で構成された文字列）
+;================================================================
+@FuncTagSetText_CreateColorBarText( nBarVol, nBarVolMax, nScaleNum, colorLeft, colorRigth, colorEmpty, flgExtra, strScaleText = "" )
+#FUNCTIONS
+	#DIM  nBarVol
+	#DIM  nBarVolMax
+	#DIM  nScaleNum
+	#DIM  colorLeft
+	#DIM  colorRigth
+	#DIM  colorEmpty
+	#DIM  flgExtra
+	#DIMS strScaleText
+
+	#DIM  colorLeft_RGB, 3
+	#DIM  colorRigth_RGB, 3
+	#DIM  colorCalc_RGB, 3
+	#DIM  colorBuf
+	#DIM  flgEmpty
+	#DIM  nLoop
+	#DIMS strBarText
+
+	IF STRLENS( strScaleText ) <= 0
+		strScaleText '= UNICODE(0x2586)
+		;strScaleText '= UNICODE(0x220E)
+		;strScaleText '= UNICODE(0x2588)
+		;strScaleText '= UNICODE(0x2585)
+	ENDIF
+
+	VARSET strBarText, ""
+
+	colorLeft_RGB:0 = colorLeft / 256 / 256
+	colorLeft_RGB:1 = colorLeft / 256 % 256
+	colorLeft_RGB:2 = colorLeft % 256
+	colorRigth_RGB:0 = colorRigth / 256 / 256
+	colorRigth_RGB:1 = colorRigth / 256 % 256
+	colorRigth_RGB:2 = colorRigth % 256
+
+	flgEmpty = 0
+	FOR nLoop, 0, nScaleNum
+		IF nBarVol > nLoop * nBarVolMax / nScaleNum
+			colorCalc_RGB:0 = (colorRigth_RGB:0 - colorLeft_RGB:0) * nLoop / MAX( nScaleNum - 1 )
+			colorCalc_RGB:1 = (colorRigth_RGB:1 - colorLeft_RGB:1) * nLoop / MAX( nScaleNum - 1 )
+			colorCalc_RGB:2 = (colorRigth_RGB:2 - colorLeft_RGB:2) * nLoop / MAX( nScaleNum - 1 )
+			colorBuf = FuncColor_ChangeColor( colorLeft, colorCalc_RGB:0, colorCalc_RGB:1, colorCalc_RGB:2 )
+			strBarText += @"@C:{colorBuf}@"
+		ELSE
+			IF flgEmpty == 0
+				strBarText += @"@C:{colorEmpty}@"
+				flgEmpty = 1
+			ENDIF
+		ENDIF
+		strBarText += strScaleText
+		IF flgEmpty == 0 || nLoop == nScaleNum - 1
+			strBarText += @"@/C@"
+		ENDIF
+	NEXT
+
+	IF (flgExtra & 0x01) > 0
+		strBarText += @" ({nBarVol,5}/{nBarVolMax,5})"
+	ENDIF
+
+	RETURNF strBarText
+
+
+;================================================================
+; 指定したタグ指定テキスト文字列に設定されているボタン情報を取得する
+;--------------------------------
+;[引数]
+;	strText		: タグ指定を含んだ表示テキスト
+;					※ @@で囲むことでタグ指定として扱う
+;--------------------------------
+;[戻り値など]
+;	ボタン数が返る
+;
+;	RESULT:0	: ボタン数が格納される
+;	RESULTS:0~	: ボタン値が格納される
+;================================================================
+@FuncTagSetText_GetButtonData( strText )
+#FUNCTION
+	#DIMS strText
+
+	#DIMS strSplitBuf, 500
+	#DIM  nSplitCount
+	#DIM  nLoop
+
+	#DIMS arrTagInfo, 20
+	#DIMS arrButtonValue, 500
+	#DIM  nButtonCount
+
+	VARSET strSplitBuf, ""
+	SPLIT strText, "@", strSplitBuf
+	nSplitCount = RESULT
+
+	VARSET arrTagInfo, ""
+	VARSET arrButtonValue, ""
+	nButtonCount = 0
+	FOR nLoop, 0, nSplitCount
+		IF nLoop % 2 == 0
+			; 表示する文字列は無視する
+		ELSE
+			CALLF FuncTagSetText_SetTagInfo( strSplitBuf:nLoop, arrTagInfo )
+			IF STRLENS(arrTagInfo:1) > 0
+				IF FINDELEMENT(arrButtonValue, arrTagInfo:1, 0, VARSIZE( "arrButtonValue" ), 1) == -1
+					arrButtonValue:nButtonCount '= arrTagInfo:1
+					nButtonCount += 1
+				ENDIF
+			ENDIF
+		ENDIF
+	NEXT
+
+	VARSET RESULTS, ""
+	VARSET RESULT, 0
+	ARRAYCOPY "arrButtonValue", "RESULTS"
+	RESULT = nButtonCount
+	RETURNF nButtonCount
+
+
+;================================================================
+; 指定したタグ指定テキスト文字列の表示文字数を取得する
+;--------------------------------
+;[引数]
+;	strText		: タグ指定を含んだ表示テキスト
+;					※ @@で囲むことでタグ指定として扱う
+;--------------------------------
+;[戻り値など]
+;	指定したタグ指定テキスト文字列の表示文字数（全角文字は2文字でカウントする）
+;================================================================
+@FuncTagSetText_GetPrintLength( strText )
+#FUNCTION
+	#DIMS strText
+
+	#DIMS strSplitBuf, 500
+	#DIM  nSplitCount
+	#DIM  nLoop
+	#DIM  nPrintTextLen
+
+	VARSET strSplitBuf, ""
+	nPrintTextLen = 0
+
+	SPLIT strText, "@", strSplitBuf
+	nSplitCount = RESULT
+
+	FOR nLoop, 0, nSplitCount
+		IF nLoop % 2 == 0
+			nPrintTextLen += FuncString_GetLength( strSplitBuf:nLoop )
+		ELSE
+			; タグの内容は無視する
+		ENDIF
+	NEXT
+
+	RETURNF nPrintTextLen
+
+
+;================================================================
+; 指定したタグ指定テキスト文字列の非タグ部分を取得する
+;--------------------------------
+;[引数]
+;	strText		: タグ指定を含んだ表示テキスト
+;					※ @@で囲むことでタグ指定として扱う
+;--------------------------------
+;[戻り値など]
+;	指定したタグ指定テキスト文字列の非タグ部分
+;================================================================
+@FuncTagSetText_GetPlainText( strText )
+#FUNCTIONS
+	#DIMS strText
+
+	#DIMS strSplitBuf, 500
+	#DIM  nSplitCount
+	#DIM  nLoop
+	#DIM  nPrintTextLen
+	#DIMS strPlainText
+
+	VARSET strSplitBuf, ""
+	nPrintTextLen = 0
+
+	SPLIT strText, "@", strSplitBuf
+	nSplitCount = RESULT
+
+	strPlainText '= ""
+	FOR nLoop, 0, nSplitCount
+		IF nLoop % 2 == 0
+			strPlainText += strSplitBuf:nLoop
+		ELSE
+			; タグの内容は無視する
+		ENDIF
+	NEXT
+
+	RETURNF strPlainText
+
+
+;================================================================
+; タグ指定テキストを指定の文字数となるように整形する
+; ※ 文字数が多い場合は、複数の文字列に分割して返す
+;--------------------------------
+;[引数]
+;	strText		: タグ指定を含んだ表示テキスト
+;					※ @@で囲むことでタグ指定として扱う
+;	nShapeSize	: 分割する長さを指定する（2以上の値を指定すること。全角は2文字扱い）
+;	nPadding	: 分割後の文字列の長さが指定文字数になるように半角スペースで埋めるかどうか（0=埋めない, 1=半角スペース埋め, ）
+;	nAlign		: 左詰め,右詰め,中央寄せ
+;					0 = 左詰め
+;					1 = 右詰め
+;					2 = 中央寄せ（不足文字数が奇数の場合、左側の埋め文字が1文字多くなる）
+;--------------------------------
+;[戻り値など]
+;	成形後のタグ指定テキスト。RESULTS:0の内容と同じ
+;
+;	RESULT		: 成形後の文字列の個数。分割しなければ 1 が返る
+;	RESULTS:0~	: 分割後のタグ指定テキスト。文字数が多い場合は、サイズ内に収まるように分割し、RESULTS:0,1と順番に格納していく
+;================================================================
+@FuncTagSetText_ShapeSize( strText, nShapeSize, nPadding, nAlign=0 )
+#FUNCTIONS
+	#DIMS strText
+	#DIM  nShapeSize
+	#DIM  nPadding
+	#DIM  nAlign
+
+	#DIMS strShapeText, 200
+	#DIM  nShapeTextCnt
+
+	#DIMS arrTagInfo, 20
+	#DIMS strSplitBuf, 500
+	#DIM  nSplitCount
+	#DIM  nLoop
+
+	#DIMS strTextBuf
+	#DIM  nCheckedTextLen
+
+	#DIMS strAlign
+
+	VARSET strShapeText, ""
+	nShapeTextCnt = 0
+	VARSET arrTagInfo, ""
+	VARSET strSplitBuf, ""
+
+	VARSET RESULT, 0
+	VARSET RESULTS, ""
+
+	; サイズが2未満の場合は、分割せず、指定されたサイズに整形した文字列を返す
+	SELECTCASE nShapeSize
+		CASE IS <= 0
+			RESULTS:0 '= ""
+			RESULT = 1
+			RETURNF RESULTS:0
+		CASE 1
+			LOCALS '= SUBSTRINGU(strText, 0, 1)
+			RESULTS:0 '= (STRLENS(LOCALS) == 1 ? LOCALS # " ")
+			RESULT = 1
+			RETURNF RESULTS:0
+	ENDSELECT
+
+	SELECTCASE nAlign
+		CASE 1
+			strAlign '= "R"
+		CASE 2
+			strAlign '= "C"
+		CASEELSE
+			strAlign '= "L"
+	ENDSELECT
+
+	SPLIT strText, "@", strSplitBuf
+	nSplitCount = RESULT
+
+	nCheckedTextLen = 0
+	FOR nLoop, 0, nSplitCount
+		IF nLoop % 2 == 0
+			strTextBuf '= strSplitBuf:nLoop
+			WHILE STRLENSU( strTextBuf ) > 0
+				nCheckedTextLen = FuncTagSetText_GetPrintLength( strShapeText:nShapeTextCnt )
+				LOCAL = FuncString_GetLength( strTextBuf )
+				IF nCheckedTextLen + LOCAL <= nShapeSize
+					strShapeText:nShapeTextCnt += strTextBuf
+					nCheckedTextLen += LOCAL
+					strTextBuf '= ""
+				ELSE
+					; 格納できる分だけ、格納領域へ格納する
+					WHILE 1
+						LOCALS '= SUBSTRINGU( strTextBuf, 0, 1 )
+						SIF nCheckedTextLen + FuncString_GetLength( LOCALS ) > nShapeSize
+							BREAK
+						strShapeText:nShapeTextCnt += LOCALS
+						nCheckedTextLen += FuncString_GetLength( LOCALS )
+						strTextBuf '= SUBSTRINGU( strTextBuf, 1, -1 )
+					WEND
+					; 格納し終わったので、タグを閉じる
+					strShapeText:nShapeTextCnt += FuncTagSetText_TagInfoText_End( arrTagInfo )
+					IF nPadding == 1
+						IF nShapeSize - nCheckedTextLen > 0
+							LOCAL = FuncString_GetLength( strShapeText:nShapeTextCnt ) + nShapeSize - nCheckedTextLen
+							strShapeText:nShapeTextCnt '= FuncString_Padding( strShapeText:nShapeTextCnt, LOCAL, " ", strAlign )
+						ENDIF
+					ENDIF
+					; 次の格納領域へ
+					nShapeTextCnt += 1
+					strShapeText:nShapeTextCnt '= FuncTagSetText_TagInfoText_Start( arrTagInfo )
+					nCheckedTextLen = 0
+				ENDIF
+			WEND
+		ELSE
+			strShapeText:nShapeTextCnt += "@" + strSplitBuf:nLoop + "@"
+			CALLF FuncTagSetText_SetTagInfo( strSplitBuf:nLoop, arrTagInfo )
+		ENDIF
+	NEXT
+
+	; 格納し終わったので、タグを閉じる
+	strShapeText:nShapeTextCnt += FuncTagSetText_TagInfoText_End( arrTagInfo )
+	IF nPadding == 1
+		IF nShapeSize - nCheckedTextLen > 0
+			LOCAL = FuncString_GetLength( strShapeText:nShapeTextCnt ) + nShapeSize - nCheckedTextLen
+			strShapeText:nShapeTextCnt '= FuncString_Padding( strShapeText:nShapeTextCnt, LOCAL, " ", strAlign )
+		ENDIF
+	ENDIF
+
+	VARSET RESULT, 0
+	VARSET RESULTS, ""
+	ARRAYCOPY "strShapeText", "RESULTS"
+	RESULT:0 = nShapeTextCnt + 1
+	RETURNF RESULTS:0
+
+
+;================================================================
+;【内部処理用】
+; タグ指定テキストのタグ情報を設定する
+;--------------------------------
+;[引数]
+;	strText		: タグ指定文字列
+;	arrTagInfo	: 現在のタグ情報
+;					arrTagInfo:0	= 色指定情報
+;					arrTagInfo:1	= ボタン指定情報
+;					arrTagInfo:2	= フォント指定
+;					arrTagInfo:3	= 画像指定
+;					arrTagInfo:4	= フォントスタイル指定
+;--------------------------------
+;[戻り値など]
+;================================================================
+@FuncTagSetText_SetTagInfo( strText, arrTagInfo )
+#FUNCTION
+	#DIMS strText
+	#DIMS REF arrTagInfo, 0
+
+	#DIMS strTagType
+	#DIMS strTagValue
+
+	IF SUBSTRINGU( strText, 0, 1 ) == "/"
+		; タグ解除
+		strTagType  '= SUBSTRINGU( strText, 1, -1 )
+		strTagValue '= ""
+	ELSE
+		; タグ設定
+		VARSET LOCALS, ""
+		SPLIT strText, ":", LOCALS
+		strTagType  '= LOCALS:0
+		strTagValue '= LOCALS:1
+	ENDIF
+
+	SELECTCASE strTagType
+		; 色指定
+		CASE "C"
+			arrTagInfo:0 '= strTagValue
+		; ボタン指定
+		CASE "B"
+			arrTagInfo:1 '= strTagValue
+		; フォント指定
+		CASE "F"
+			arrTagInfo:2 '= strTagValue
+		; 画像指定
+		CASE "I"
+			arrTagInfo:3 '= strTagValue
+		; フォントスタイル指定
+		CASE "S"
+			arrTagInfo:4 '= strTagValue
+	ENDSELECT
+
+	RETURNF 0
+
+
+;================================================================
+;【内部処理用】
+; タグ指定テキストのタグ指定文字列を生成する
+;--------------------------------
+;[引数]
+;	arrTagInfo	: 現在のタグ情報
+;					arrTagInfo:0	= 色指定情報
+;					arrTagInfo:1	= ボタン指定情報
+;					arrTagInfo:2	= フォント指定
+;					arrTagInfo:3	= 画像指定
+;					arrTagInfo:4	= フォントスタイル指定
+;--------------------------------
+;[戻り値など]
+;	RESULTS:0	: タグ指定文字列
+;================================================================
+@FuncTagSetText_TagInfoText_Start( arrTagInfo )
+#FUNCTIONS
+	#DIMS REF arrTagInfo, 0
+
+	#DIMS strTagText
+	#DIM  nLoop
+
+	VARSET strTagText, "" 
+
+	FOR nLoop, 0, 5
+		SIF STRLENS( arrTagInfo:nLoop ) <= 0
+			CONTINUE
+
+		SELECTCASE nLoop
+			CASE 0
+				strTagText '= strTagText + @"@C:%arrTagInfo:nLoop%@"
+			CASE 1
+				strTagText '= strTagText + @"@B:%arrTagInfo:nLoop%@"
+			CASE 2
+				strTagText '= strTagText + @"@F:%arrTagInfo:nLoop%@"
+			CASE 3
+				strTagText '= strTagText + @"@I:%arrTagInfo:nLoop%@"
+			CASE 4
+				strTagText '= strTagText + @"@S:%arrTagInfo:nLoop%@"
+			CASEELSE
+				; 以降、未使用
+		ENDSELECT
+	NEXT
+
+	RESULTS:0 '= strTagText
+	RETURNF strTagText
+
+
+;================================================================
+;【内部処理用】
+; タグ指定テキストのタグクローズ用のタグ指定文字列を生成する
+;--------------------------------
+;[引数]
+;	arrTagInfo	: 現在のタグ情報
+;					arrTagInfo:0	= 色指定情報
+;					arrTagInfo:1	= ボタン指定情報
+;					arrTagInfo:2	= フォント指定
+;					arrTagInfo:3	= 画像指定
+;					arrTagInfo:4	= フォントスタイル指定
+;--------------------------------
+;[戻り値など]
+;	RESULTS:0	: タグ指定文字列
+;================================================================
+@FuncTagSetText_TagInfoText_End( arrTagInfo )
+#FUNCTIONS
+	#DIMS REF arrTagInfo, 0
+
+	#DIMS strTagText
+	#DIM  nLoop
+
+	VARSET strTagText, "" 
+
+	FOR nLoop, 0, 5
+		SIF STRLENS( arrTagInfo:nLoop ) <= 0
+			CONTINUE
+
+		SELECTCASE nLoop
+			CASE 0
+				strTagText '= strTagText + "@/C@"
+			CASE 1
+				strTagText '= strTagText + "@/B@"
+			CASE 2
+				strTagText '= strTagText + "@/F@"
+			CASE 3
+				strTagText '= strTagText + "@/I@"
+			CASE 4
+				strTagText '= strTagText + "@/S@"
+			CASEELSE
+				; 以降、未使用
+		ENDSELECT
+	NEXT
+
+	RESULTS:0 '= strTagText
+	RETURNF strTagText
+
+
+;/************************************************************************************/
+; HTMLでの出力用処理
+;/************************************************************************************/
+
+
+;================================================================
+; 指定したタグ指定テキスト文字列のHTMLテキストに変換する
+;--------------------------------
+;[引数]
+;	strText		: タグ指定を含んだ表示テキスト
+;					※ @@で囲むことでタグ指定として扱う
+;--------------------------------
+;[戻り値など]
+;	HTMLテキスト
+;================================================================
+@FuncTagSetText_ConvHtmlText( strText )
+#FUNCTIONS
+	#DIMS strText
+
+	#DIMS strHtmlTag
+	#DIMS strHtmlText
+	#DIMS strTagType
+
+	#DIMS strSplitBuf, 1000
+	#DIM  nSplitCount
+
+	#DIM  nLoop
+
+	SPLIT strText, "@", strSplitBuf
+	nSplitCount = RESULT
+
+	strTagType '= ""
+	strHtmlText '= ""
+	FOR nLoop, 0, nSplitCount
+		IF nLoop % 2 == 0
+			; 文字列処理
+			;MEMO : 画像表示で囲まれた文字は表示文字長の算出用なので、実際の出力文字からは除外する
+			IF strTagType != "I"
+				strHtmlText += HTML_ESCAPE(strSplitBuf:nLoop)
+			ENDIF
+		ELSE
+			; タグ文字処理
+			strHtmlTag '= FuncTagSetText_ConvHtmlTag( strSplitBuf:nLoop )
+			strTagType '= RESULTS:0
+			strHtmlText += strHtmlTag
+		ENDIF
+	NEXT
+
+	;DEBUGPRINTFORML debug - TAGSET_TEXT_CONVERT_HTMLTEXT( %strText% ) → 『%strHtmlText%』
+	RETURNF strHtmlText
+
+
+;================================================================
+;【内部処理用】
+; タグ指定テキストのタグ情報をHTML形式のタグに変換する
+;--------------------------------
+;[引数]
+;	strTagInfoText	: タグ文字列（"@C:value@"など）
+;--------------------------------
+;[戻り値など]
+;	HTMLテキスト
+;
+;	RESULTS:0		: タグ判別用文字（"C","B","F","I" etc）
+;================================================================
+@FuncTagSetText_ConvHtmlTag( strTagInfoText )
+#FUNCTIONS
+	#DIMS strTagInfoText
+
+	#DIMS strTagType
+	#DIMS strTagValue
+	#DIM  nTagClose
+
+	#DIMS strHtmlTag
+
+	IF SUBSTRINGU( strTagInfoText, 0, 1 ) == "/"
+		; タグ解除
+		strTagType  '= SUBSTRINGU( strTagInfoText, 1, -1 )
+		strTagValue '= ""
+		nTagClose = 1
+	ELSE
+		; タグ設定
+		strTagType  '= SUBSTRINGU( strTagInfoText, 0, 1 )
+		strTagValue '= SUBSTRINGU( strTagInfoText, 2, -1 )
+		nTagClose = 0
+	ENDIF
+
+	strHtmlTag '= ""
+	SELECTCASE strTagType
+		CASE "C"
+			IF nTagClose == 0
+				strHtmlTag '= @"<font color='#" + TOSTR(TOINT(strTagValue), "X6") + "'>"
+			ELSE
+				strHtmlTag '= @"</font>"
+			ENDIF
+		CASE "B"
+			; <button value='～' title='～' pos='～'>テキスト</button>    title,posは省略する
+			IF STRLENS(strTagValue) > 0
+				IF nTagClose == 0
+					strHtmlTag '= @"<button value='%strTagValue%'>"
+				ELSE
+					strHtmlTag '= @"</button>"
+				ENDIF
+			ELSE
+				IF nTagClose == 0
+					strHtmlTag '= @"<button>"
+				ELSE
+					strHtmlTag '= @"</button>"
+				ENDIF
+			ENDIF
+		CASE "F"
+			IF nTagClose == 0
+				strHtmlTag '= @"<font face='%strTagValue%'>"
+			ELSE
+				strHtmlTag '= @"</font>"
+			ENDIF
+		CASE "S"
+			; フォントスタイル指定はHtml版ではvalue値に関係なく太字として扱う
+			IF nTagClose == 0
+				strHtmlTag '= @"<b>"
+			ELSE
+				strHtmlTag '= @"</b>"
+			ENDIF
+		CASE "I"
+			IF nTagClose == 0
+				VARSET LOCALS, ""
+				SPLIT strTagValue, ",", LOCALS
+				IF STRLENS(LOCALS) > 0
+					strHtmlTag '= @"<img src='%LOCALS:0%' %LOCALS:1% %LOCALS:2%>"
+				ELSE
+					strHtmlTag '= @""
+				ENDIF
+			ELSE
+				strHtmlTag '= @""
+			ENDIF
+	ENDSELECT
+
+	VARSET RESULTS, ""
+	SIF nTagClose == 0
+		RESULTS:0 '= strTagType
+	RETURNF strHtmlTag
+
+
+;/************************************************************************************/
+; PRINT系での出力用処理
+;/************************************************************************************/
+
+
+;================================================================
+; タグ指定テキストの描画
+;--------------------------------
+;[引数]
+;	strText		: タグ指定を含んだ表示テキスト
+;					※ @@で囲むことでタグ指定として扱う
+;	nExFlag		: 特殊フラグ（ビット指定）
+;					0x01 : 描画後に改行を行う
+;					0x02 : タグを無視する
+;					0x04 : ボタンを数値ボタンで処理する
+;--------------------------------
+;[戻り値など]
+;================================================================
+@FuncTagSetText_Print( strText, nExFlag )
+#FUNCTION
+	#DIMS strText
+	#DIM  nExFlag
+
+	#DIMS arrTagInfoDefault, 20
+	#DIMS arrTagInfo, 20
+	#DIMS strSplitBuf, 500
+	#DIM  nSplitCount
+	#DIM  nLoop
+	#DIM  nBtnIsNum
+
+	VARSET arrTagInfoDefault, ""
+	arrTagInfoDefault:0 '= "0x" + TOSTR( GETCOLOR(), "X6" )
+	arrTagInfoDefault:2 '= GETFONT()
+	arrTagInfoDefault:4 '= TOSTR( GETSTYLE() )
+	VARSET arrTagInfo, ""
+	VARSET strSplitBuf, ""
+	nBtnIsNum = ((nExFlag & 0x04) ? 1 # 0)
+
+	SPLIT strText, "@", strSplitBuf
+	nSplitCount = RESULT
+	FOR nLoop, 0, nSplitCount
+		IF nLoop % 2 == 0
+			CALLF FuncTagSetText_PrintTagSetText( strSplitBuf:nLoop, arrTagInfo, nBtnIsNum )
+		ELSE
+			; タグ無視フラグのチェック
+			SIF (nExFlag & 0x02) > 0
+				CONTINUE
+			CALLF FuncTagSetText_SetTagInfo( strSplitBuf:nLoop, arrTagInfo )
+			; テキスト色,フォントなどを本関数実行前の状態に戻す
+			CALLF FuncTagSetText_PrintTagSetText( "", arrTagInfoDefault, nBtnIsNum )		;MEMO : なにかタグが存在するごとに設定し直している。手抜き工事
+		ENDIF
+	NEXT
+
+	; テキスト色,フォントなどを本関数実行前の状態に戻す
+	CALLF FuncTagSetText_PrintTagSetText( "", arrTagInfoDefault, nBtnIsNum )
+
+	IF (nExFlag & 0x01) > 0
+		PRINTL
+	ENDIF
+
+	RETURNF 0
+
+
+;================================================================
+;【内部処理用】
+; テキストを指定されたタグ情報に準じた描画を行う
+;--------------------------------
+;[引数]
+;	strText		: 描画文字列
+;	arrTagInfo	: 現在のタグ情報
+;					arrTagInfo:0	= 色指定情報
+;					arrTagInfo:1	= ボタン指定情報
+;					arrTagInfo:2	= フォント指定
+;					arrTagInfo:3	= 画像指定
+;					arrTagInfo:4	= フォントスタイル指定
+;	nBtnIsNum	: ボタンを数値ボタンで処理する
+;--------------------------------
+;[戻り値など]
+;================================================================
+@FuncTagSetText_PrintTagSetText( strText, arrTagInfo, nBtnIsNum )
+#FUNCTION
+	#DIMS strText
+	#DIMS REF arrTagInfo, 0
+	#DIM  nBtnIsNum
+
+	#DIM  nBuf
+
+	; 色指定
+	IF STRLENS( arrTagInfo:0 ) > 0
+		IF ISNUMERIC( arrTagInfo:0 ) == 1
+			nBuf = TOINT( arrTagInfo:0 )
+			IF nBuf >= 0
+				SETCOLOR nBuf
+			ELSE
+				RESETCOLOR
+			ENDIF
+		ENDIF
+	ENDIF
+
+	; フォント指定
+	IF STRLENS( arrTagInfo:2 ) > 0
+		IF CHKFONT( arrTagInfo:2 ) == 1
+			SETFONT arrTagInfo:2
+		ELSE
+			DEBUGPRINTFORML %arrTagInfo:2%
+		ENDIF
+	ENDIF
+
+	; フォントスタイル指定
+	IF STRLENS( arrTagInfo:4 ) > 0
+		nBuf = TOINT( arrTagInfo:4 )
+		IF nBuf >= 0
+			FONTSTYLE nBuf
+		ELSE
+			FONTSTYLE 0
+		ENDIF
+	ENDIF
+
+	; 画像 or ボタン指定 or 通常表示
+	IF STRLENS( arrTagInfo:3 ) > 0
+		VARSET LOCALS, ""
+		SPLIT arrTagInfo:3, ",", LOCALS
+		PRINT_IMG @"%LOCALS:0%"
+	ELSEIF STRLENS( arrTagInfo:1 ) > 0
+		IF nBtnIsNum == 1 && ISNUMERIC( arrTagInfo:1 )
+			PRINTBUTTON strText, TOINT( arrTagInfo:1 )
+		ELSE
+			PRINTBUTTON strText, arrTagInfo:1
+		ENDIF
+	ELSE
+		PRINTPLAINFORM %strText%
+	ENDIF
+
+	RETURNF 0
+
+
+;/************************************************************************************/
+; 
+;/************************************************************************************/
+
+
+;================================================================
+
+

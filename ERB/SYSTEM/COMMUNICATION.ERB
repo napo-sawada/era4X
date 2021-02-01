@@ -1,0 +1,103 @@
+﻿;----------------------
+; コミュニケーション
+;----------------------
+@COMMUNICATION
+#DIM AT_STAR
+#DIM STAR_ID
+
+AT_STAR = 0
+FOR STAR_ID, 0, 星系数
+	SIF CHARACTER_POSITION != 星系座標ID:STAR_ID
+		CONTINUE
+	AT_STAR = 1
+NEXT
+
+$INPUT_LOOP
+
+PRINTL [0] - お茶に誘う
+SIF AT_STAR == 1
+	PRINTL [1] - デートに誘う
+SIF AT_STAR == 1 && CFLAG:TARGET:2 > 500
+	PRINTL [2] - 一緒にご飯を作る
+SIF CFLAG:TARGET:2 > 500
+	PRINTL [3] - カラオケに誘う
+PRINTL [9] - 戻る
+
+INPUT
+IF RESULT == 0
+	CALL COMMUNICATION_TEA
+ELSEIF RESULT == 1
+	CALL COMMUNICATION_DATE
+ELSEIF RESULT == 9
+	RETURN 0
+ELSE
+	GOTO INPUT_LOOP
+ENDIF
+RETURN 1
+
+;----------------------
+; お茶に誘う
+;----------------------
+@COMMUNICATION_TEA
+#DIM 恭順
+#DIM 恭順倍率
+#DIM 依存度
+
+PRINTFORML %CALLNAME:TARGET%をお茶に誘った
+
+SELECTCASE RAND:5
+	CASE 0
+		PRINTW 会話がとても捗った！
+		恭順倍率 = 125
+		依存度 = 75
+	CASE 1 TO 3
+		PRINTW そこそこ会話が盛り上がった
+		恭順倍率 = 100
+		依存度 = 50
+	CASE 4
+		PRINTW あまり会話が盛り上がらなかった
+		恭順倍率 = 75
+		依存度 = 25
+ENDSELECT
+
+SELECTCASE ABL:TARGET:0
+	CASE 0
+		恭順 = 10
+	CASE 1
+		恭順 = 50
+	CASE 2
+		恭順 = 100
+	CASE 3
+		恭順 = 200
+	CASE 4
+		恭順 = 500
+	CASE 5
+		恭順 = 1000
+	CASE 6
+		恭順 = 3000
+	CASE 7
+		恭順 = 5000
+	CASE 8
+		恭順 = 10000
+	CASE 9
+		恭順 = 20000
+	CASE 10
+		恭順 = 50000
+ENDSELECT
+
+恭順 = 恭順 * 恭順倍率 / 100
+CFLAG:TARGET:2 += 依存度
+
+
+JUEL:5 += 恭順
+PRINTFORML 依存度 + {依存度}
+PRINTFORMW 恭順の珠＋{恭順}
+
+RETURN 1
+
+;----------------------
+; デート
+;----------------------
+@COMMUNICATION_DATE
+PRINTFORML %CALLNAME:TARGET%をデートに誘った
+

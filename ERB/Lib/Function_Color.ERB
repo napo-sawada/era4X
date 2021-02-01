@@ -1,0 +1,127 @@
+﻿
+;≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡
+; 色
+;
+;	関数名	:	FuncColor_～～
+;≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡
+
+
+;================================================================
+; カラー値の算出（RGB指定）
+;--------------------------------
+;[引数]
+;	nRGB:0		: 変動値（Ｒ値)
+;	nRGB:1		: 変動値（Ｇ値)
+;	nRGB:2		: 変動値（Ｂ値)
+;--------------------------------
+;[戻り値など]
+;	算出したカラー値
+;================================================================
+@FuncColor_FromRGB( nRGB:0, nRGB:1, nRGB:2 )
+#FUNCTION
+#LOCALSIZE 4
+	#DIM nRGB, 3
+	#DIM nResultColor
+
+	LOCAL:0 = LIMIT( nRGB:0, 0x00, 0xFF )
+	LOCAL:1 = LIMIT( nRGB:1, 0x00, 0xFF )
+	LOCAL:2 = LIMIT( nRGB:2, 0x00, 0xFF )
+
+	nResultColor = (LIMIT( nRGB:0, 0x00, 0xFF ) * 0x010000) + (LIMIT( nRGB:1, 0x00, 0xFF ) * 0x000100) + (LIMIT( nRGB:2, 0x00, 0xFF ) * 0x000001)
+
+	RETURNF nResultColor
+
+
+;================================================================
+; カラー値の算出（HSB指定）
+;--------------------------------
+;[引数]
+;	nHSB:0		: 色相（0～359）
+;	nHSB:1		: 彩度（0～255)
+;	nHSB:2		: 明度（0～255)
+;--------------------------------
+;[戻り値など]
+;	算出したカラー値
+;================================================================
+@FuncColor_FromHSB( arrHSB:0, arrHSB:1, arrHSB:2 )
+#FUNCTION
+	#DIM arrHSB, 3
+
+	#DIM arrRGB, 3
+	#DIM nMax
+	#DIM nMin
+	#DIM nResultColor
+
+	nMax = arrHSB:2
+	nMin = nMax - (arrHSB:1 * nMax / 255)
+
+	SELECTCASE arrHSB:0
+		CASE 0 TO 59
+			arrRGB:0 = nMax
+			arrRGB:1 = nMin + ((nMax - nMin) * (arrHSB:0) / 60)
+			arrRGB:2 = nMin
+		CASE 60 TO 119
+			arrRGB:0 = nMin + ((nMax - nMin) * (120 - arrHSB:0) / 60)
+			arrRGB:1 = nMax
+			arrRGB:2 = nMin
+		CASE 120 TO 179
+			arrRGB:0 = nMin
+			arrRGB:1 = nMax
+			arrRGB:2 = nMin + ((nMax - nMin) * (arrHSB:0 - 120) / 60)
+		CASE 180 TO 239
+			arrRGB:0 = nMin
+			arrRGB:1 = nMin + ((nMax - nMin) * (240 - arrHSB:0) / 60)
+			arrRGB:2 = nMax
+		CASE 240 TO 299
+			arrRGB:0 = nMin + ((nMax - nMin) * (arrHSB:0 - 240) / 60)
+			arrRGB:1 = nMin
+			arrRGB:2 = nMax
+		CASE 300 TO 360
+			arrRGB:0 = nMax
+			arrRGB:1 = nMin
+			arrRGB:2 = nMin + ((nMax - nMin) * (360 - arrHSB:0) / 60)
+	ENDSELECT
+
+	nResultColor = (arrRGB:0 * 256 * 256) + (arrRGB:1 * 256) + (arrRGB:2)
+	RETURNF nResultColor
+
+
+;================================================================
+; カラー値の算出（基準値から変動）
+;--------------------------------
+;[引数]
+;	nBaseColor	: 基準となるカラー値
+;	nRGB:0		: 変動値（Ｒ値)
+;	nRGB:1		: 変動値（Ｇ値)
+;	nRGB:2		: 変動値（Ｂ値)
+;--------------------------------
+;[戻り値など]
+;	算出したカラー値
+;================================================================
+@FuncColor_ChangeColor( nBaseColor, nRGB:0, nRGB:1, nRGB:2 )
+#FUNCTION
+#LOCALSIZE 4
+	#DIM nBaseColor
+	#DIM nRGB, 3
+	#DIM nResultColor
+
+	LOCAL:0 = LIMIT( nRGB:0 + ((nBaseColor / 0x010000) % 0x0100), 0x00, 0xFF )
+	LOCAL:1 = LIMIT( nRGB:1 + ((nBaseColor / 0x000100) % 0x0100), 0x00, 0xFF )
+	LOCAL:2 = LIMIT( nRGB:2 + (nBaseColor % 0x0100),              0x00, 0xFF )
+
+	nResultColor = (LOCAL:0 * 0x010000) + (LOCAL:1 * 0x000100) + (LOCAL:2 * 0x000001)
+
+	RETURNF nResultColor
+
+
+;================================================================
+
+
+
+
+
+
+
+
+
+

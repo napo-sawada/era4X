@@ -1,0 +1,57 @@
+﻿
+; 描画モード（描画に使用する処理を決定するためのフラグ）
+;	0	: HTML版	メリット  ：等幅フォント以外のフォントを使用してもウィンドウの表示位置がずれない
+;								画像表示が行える
+;					デメリット：HTMLの書式的におかしい場合、異常終了する（<button>の入れ子やタグの閉じ忘れなど）
+;								枠無しの場合、ウィンドウ表示位置の左側に半角スペースが１つ入る
+;
+;	1	: PRINT		メリット  ：HTML版のデメリットが発生しない
+;					デメリット：MSゴシック以外のフォントを使用すると表示が崩れる
+;								画像表示を行うと表示が崩れる（画像より右側への文字出力が想定通りに出力できない）
+;								ウィンドウが重なる場合、下のウィンドウの描画位置が右に1文字分ずれることがあります
+;
+;	※ 基本的にはHTMLでの使用を推奨
+#DEFINE DEF_WINDOW_DRAWER_MODE 0
+
+; ウィンドウ数の上限
+#DEFINE DEF_WINDOW_DRAWER_MAX_WND_LENGTH 100
+
+#DIM  m_arrWndExsit,        100, 1		; ウィンドウ生成済みフラグ
+#DIMS m_arrWndTitle,        100, 1		; タイトル文字列
+#DIM  m_arrWndPropN,        100, 20		; プロパティ保持領域（数値用）
+#DIMS m_arrWndPropS,        100, 10		; プロパティ保持領域（文字列用）
+#DIMS m_arrWndText,         100, 50		; 登録されたテキスト
+#DIMS m_arrWndTextPrint,    100, 50		; 実際に表示する整形済みのテキスト。表示する度に整形すると処理が重たくなるため、保持しておく
+#DIM  m_arrWndSetTextPrint, 100, 1		; 実際に表示する整形済みのテキストの作成済みフラグ
+
+
+
+#DIMS CONST m_strWndBgBtnValue				=  "_"	; ウィンドウ背景用ボタン値
+
+
+
+; ウィンドウプロパティのIndex値（数値用）
+#DIM CONST PropIdx_WndPosX				=  0	; ウィンドウ座標Ｘ値
+#DIM CONST PropIdx_WndPosY				=  1	; ウィンドウ座標Ｙ値
+#DIM CONST PropIdx_WndWidth				=  2	; ウィンドウ幅
+#DIM CONST PropIdx_WndHeight			=  3	; ウィンドウ高さ
+#DIM CONST PropIdx_WndClientWidth		=  4	; ウィンドウ幅(クライアント領域)
+#DIM CONST PropIdx_WndClientHeight		=  5	; ウィンドウ高さ(クライアント領域)
+#DIM CONST PropIdx_WndBorder			=  6	; 枠設定
+												;	0=枠無し, 1=枠あり(太枠), 2=枠あり(細枠), 
+#DIM CONST PropIdx_WndBorderColorSet	=  7	; ウィンドウ枠の色を変更するフラグ
+												;	0=変更なし, 1=変更あり（PropIdx_WndBorderColorで枠の色を設定する）
+#DIM CONST PropIdx_WndBorderColor		=  8	; ウィンドウ枠の色
+#DIM CONST PropIdx_WndDisabled			=  9	; 無効化フラグ
+												;	0=ウィンドウ有効, 1=ウィンドウ無効（無効化時は全てのタグを無視する。またウィンドウ全体の色が無効化時用の色になる）
+#DIM CONST PropIdx_WndHidden			= 10	; 非表示フラグ
+												;	0=ウィンドウ表示, 1=ウィンドウ非表示
+#DIM CONST PropIdx_WndLogButton			= 11	; ログボタン有効
+												;	0=ログボタンなし, 1=ログボタン有効（ウィンドウ右下にログボタンを表示。枠あり時のみ）
+#DIM CONST PropIdx_WndBehindWindow		= 12	; 他ウィンドウの背後にあることを示すフラグ
+												;	0=OFF, 1=ON
+
+; ウィンドウプロパティのIndex値（文字列用）
+
+
+

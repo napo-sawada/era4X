@@ -1,0 +1,1787 @@
+﻿
+;≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡
+; 複数のウィンドウを管理し、まとめて描画するための関数群
+;
+;	関数名	:	WndMgr_～～(), FuncWndMgr_～～()
+;
+;	※ 要 TagSetText.ERB
+; 
+;--------------------------------
+; 注意事項)
+;	・@WndMgr_Display()の nDisplayWidth はヴァリアントの設定に応じて変更すること
+; 
+;	・ウィンドウは100個まで作成可能（WindowDrawer.ERHのDEF_WINDOW_DRAWER_MAX_WND_LENGTHで設定）
+; 
+;	・一画面に収まる程度のサイズでの使用を想定している
+; 
+;	・枠ありにする場合は、その分ウィンドウの大きさを増やすこと（縦:+2,横:+4）
+; 
+;	・また、太字などのフォント修飾を使用すると文字の横幅が少し増えるため、ウィンドウサイズには少し余裕を持たせると良い
+; 
+;	・枠無しの場合でも、描画の左位置を設定するために半角スペースを設定している。そのため枠無しウィンドウの左側に半角スペースが一文字設定される。
+; 
+;	・ウィンドウの背景は全て半角スペースのボタンとなっている。これはウィンドウが重なった際に、ウィンドウに隠れている下のウィンドウのボタンが押下できてしまう現象を防ぐため
+;	　そのため、INPUTSなどの処理では、ウィンドウ枠内をクリックすると、半角スペースが入力されたとしてINPUTSを抜けてしまう。
+;	　INPUTS使用時は半角スペースの入力を無効とし再入力させるなどして対応すること。
+; 
+;	・ウィンドウが重なる状態では、上にウィンドウが重なるウィンドウでは画像の描画が無効化される。
+;	　これは下のウィンドウで描画される画像が、上のウィンドウを突きぬけてしまう現象を回避するための処置。
+;	　複数行に跨る画像描画を禁止し、resourcesのcsv登録を一行単位で行うようにすれば現象は発生しなくなるが、画像登録の手間と現象によるデメリットを考慮し、仕様とした。
+; 
+;--------------------------------
+; 使い方)
+;	以下のような流れで複数のウィンドウを生成しまとめて描画する。
+;	ウィンドウの領域が重なっていた場合、基本的には新しく生成したウィンドウが上になる。
+;	ウィンドウ内に表示する文字列はタグ指定することで、色変更やボタン化を行える。タグ指定については TagSetText.ERB を参照。
+;	----------------
+;		ウィンドウ生成 → 行数を指定して文字列を設定 → 行数を指定して文字列を設定 → 行数を指定して文字列を設定
+;		 → ウィンドウ生成 → 行数を指定して文字列を設定
+;		 → 全てのウィンドウを描画
+;		 → 生成したウィンドウを破棄
+;	----------------
+; 
+;--------------------------------
+; サンプル)
+;	以下のコードは2つのウィンドウを描画するコードです
+;		CALL WndMgr_CreateWindow( 0, 0, 0, 32, 10, 1 )			; ウィンドウを生成（ID=0, 左上Ｘ値=0, 左上Ｙ値=0, 幅=32, 高さ=10, 枠あり）
+;		CALL WndMgr_TextSet( 0, 0, "ウィンドウ０" )				; 「ID=0」のウィンドウの 0 行目の文字列を "ウィンドウ１" に設定
+;		CALL WndMgr_TextSet( 0, 1, "あいうえお" )				; 「ID=0」のウィンドウの 1 行目の文字列を "あいうえお" に設定
+;		CALL WndMgr_CreateWindow( 1, 36, 2, 32, 10, 1 )			; ウィンドウを生成（ID=1, 左上Ｘ値=36, 左上Ｙ値=2, 幅=32, 高さ=10, 枠あり）
+;		CALL WndMgr_TextSet( 1, 0, "ウィンドウ１" )				; 「ID=1」のウィンドウの 0 行目の文字列を "ウィンドウ２" に設定
+;		CALL WndMgr_TextSet( 1, 1, "かきくけこ" )				; 「ID=1」のウィンドウの 1 行目の文字列を "かきくけこ" に設定
+;		CALL WndMgr_DisplayAll()								; ウィンドウ０とウィンドウ１を描画する
+;		CALL WndMgr_DestroyWindow( 0 )							; ウィンドウを破棄する
+;		CALL WndMgr_DestroyWindow( 1 )							; ウィンドウを破棄する
+;≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡
+
+
+;================================================================
+; 未生成のウィンドウIDを取得する
+;--------------------------------
+;--------------------------------
+;[戻り値など]
+;	RESULT:0	: 未生成（CREATEされていない）ウィンドウIDの内、最も若いIDを返す。
+;				  未生成のウィンドウIDがない場合は -1 を返す
+;================================================================
+@WndMgr_VacantId()
+	#DIM nWndId
+
+	FOR nWndId, 0, DEF_WINDOW_DRAWER_MAX_WND_LENGTH
+		CALL WndMgr_WindowMgrMain( "EXIST", nWndId, 0, "" )
+		SIF RESULT == 0
+			RETURN nWndId
+	NEXT
+
+	DEBUGPRINTFORML ★★★ Windowの領域に空きがありません
+	RETURN -1
+
+
+;================================================================
+; 生成済みのウィンドウIDのリストを取得する
+;--------------------------------
+;--------------------------------
+;[戻り値など]
+;	RESULT:0	: 生成済みのウィンドウIDの個数
+;	RESULT:1~	: 生成済みのウィンドウIDのリスト
+;================================================================
+@WndMgr_CheckExistWindow()
+	#DIM nWndId
+	#DIM arrWndIdList, DEF_WINDOW_DRAWER_MAX_WND_LENGTH
+	#DIM nIdx
+
+	nIdx = 0
+	VARSET arrWndIdList, -1
+	FOR nWndId, 0, DEF_WINDOW_DRAWER_MAX_WND_LENGTH
+		CALL WndMgr_WindowMgrMain( "EXIST", nWndId, 0, "" )
+		IF RESULT == 1
+			arrWndIdList:nIdx = nWndId
+			nIdx += 1
+		ENDIF
+	NEXT
+
+	VARSET RESULT, -1
+	ARRAYCOPY "arrWndIdList", "RESULT"
+	ARRAYSHIFT RESULT, 1, 0
+	RESULT:0 = nIdx
+
+	RETURN RESULT
+
+
+;================================================================
+; 表示中の有効なウィンドウに存在するボタン情報の取得/設定
+;--------------------------------
+;	strMode				: 処理モード（"GET"or"SET"）
+;	arrButtonValue		: (REF) 表示中の有効なウィンドウに存在するボタンのボタン値
+;	nButtonCount		: (REF) arrButtonValueの有効値数
+;--------------------------------
+;[戻り値など]
+;	strMode="GET"指定した場合、「arrButtonValue,nButtonCount」に有効なボタンの情報が格納される
+;================================================================
+@WndMgr_ButtonInfo( strMode, arrButtonValue, nButtonCount )
+	#DIMS strMode
+	#DIMS REF arrButtonValue, 0
+	#DIM REF  nButtonCount
+
+	#DIMS arrButtonValueMem, 2000
+	#DIM  nButtonCountMem
+	#DIM  nLoop
+
+	SELECTCASE strMode
+		CASE "GET"
+			VARSET arrButtonValue, ""
+			ARRAYCOPY "arrButtonValueMem", "arrButtonValue"
+			nButtonCount = nButtonCountMem
+
+		CASE "SET"
+			VARSET arrButtonValueMem, ""
+			nButtonCountMem = 0
+			; 重複した値があるかもしれないので、チェックしながら記録
+			FOR nLoop, 0, MIN( VARSIZE( "arrButtonValueMem" ), nButtonCount )
+				LOCALS '= arrButtonValue:nLoop
+				IF STRLENS(LOCALS) > 0
+					IF FINDELEMENT(arrButtonValueMem, LOCALS, 0, VARSIZE( "arrButtonValueMem" ), 1) == -1
+						arrButtonValueMem:nButtonCountMem '= LOCALS
+						nButtonCountMem += 1
+					ENDIF
+				ENDIF
+			NEXT
+;			DEBUGPRINTFORML 　debug - WndMgr_ButtonInfo() 有効ボタンデータ({nButtonCountMem}個)：
+;			DEBUGPRINTFORM 　　
+;			FOR nLoop, 0, nButtonCountMem
+;				DEBUGPRINTFORM [%arrButtonValueMem:nLoop%], 
+;			NEXT
+;			DEBUGPRINTFORML
+	ENDSELECT
+
+	RETURN 0
+
+
+;================================================================
+; 指定したウィンドウと描画領域が（一部でも）重なっているウィンドウのリストを取得する
+;--------------------------------
+;[引数]
+;	nWndId		: ウィンドウＩＤ（0~=対象ウィンドウ）
+;	ARG:0		: 非表示のウィンドウは対象外にする
+;--------------------------------
+;[戻り値など]
+;	RESULT:0	: ウィンドウIDの個数
+;	RESULT:1~	: ウィンドウIDのリスト
+;================================================================
+@WndMgr_CheckOverlapWnd( nWndId, ARG:0 )
+	#DIM  nWndId
+
+	#DIM  nWndA_Left
+	#DIM  nWndA_Top
+	#DIM  nWndA_Rigth
+	#DIM  nWndA_Bottom
+
+	#DIM  nWndB_Left
+	#DIM  nWndB_Top
+	#DIM  nWndB_Rigth
+	#DIM  nWndB_Bottom
+
+	#DIM  arrWndIdList, DEF_WINDOW_DRAWER_MAX_WND_LENGTH
+	#DIM  nWndCount
+	#DIM  arrExistWndIdList, DEF_WINDOW_DRAWER_MAX_WND_LENGTH
+	#DIM  nExistWndCnt
+
+	#DIM  nLoop
+	#DIM  nCheck
+
+	CALL WndMgr_GetRectangle( nWndId )
+	nWndA_Left   = RESULT:0
+	nWndA_Top    = RESULT:1
+	nWndA_Rigth  = RESULT:0 + RESULT:2 - 1
+	nWndA_Bottom = RESULT:1 + RESULT:3 - 1
+
+	VARSET arrExistWndIdList, -1
+	CALL WndMgr_CheckExistWindow()
+	nExistWndCnt = RESULT:0
+	ARRAYCOPY "RESULT", "arrExistWndIdList"
+	ARRAYSHIFT arrExistWndIdList, -1, -1
+
+	nWndCount = 0
+	VARSET arrWndIdList, -1
+	FOR nLoop, 0, nExistWndCnt
+		nCheck = arrExistWndIdList:nLoop
+		SIF nCheck < 0
+			CONTINUE
+		IF ARG:0 == 1
+			; 非表示ウィンドウは対象外
+			CALL WndMgr_GetPropertyNum( nCheck, PropIdx_WndHidden )
+			SIF RESULT == 1
+				CONTINUE
+		ENDIF
+		; ウィンドウの表示位置とサイズを取得
+		CALL WndMgr_GetRectangle( nCheck )
+		nWndB_Left   = RESULT:0
+		nWndB_Top    = RESULT:1
+		nWndB_Rigth  = RESULT:0 + RESULT:2 - 1
+		nWndB_Bottom = RESULT:1 + RESULT:3 - 1
+		; ウィンドウＡの左端がウィンドウＢの右端よりも右なら重なっていない
+		; ウィンドウＡの右端がウィンドウＢの左端よりも左なら重なっていない
+		; ウィンドウＡの上端がウィンドウＢの下端よりも下なら重なっていない
+		; ウィンドウＡの下端がウィンドウＢの上端よりも上なら重なっていない
+		SIF nWndA_Left   > nWndB_Rigth
+			CONTINUE
+		SIF nWndA_Rigth  < nWndB_Left
+			CONTINUE
+		SIF nWndA_Top    > nWndB_Bottom
+			CONTINUE
+		SIF nWndA_Bottom < nWndB_Top
+			CONTINUE
+		arrWndIdList:nWndCount = nCheck
+		nWndCount += 1
+	NEXT
+
+	VARSET RESULT, -1
+	ARRAYCOPY "arrWndIdList", "RESULT"
+	ARRAYSHIFT RESULT, 1, 0
+	RESULT:0 = nWndCount
+
+	RETURN RESULT
+
+
+;================================================================
+; ウィンドウが他ウィンドウの背後にあるかのプロパティ値をまとめて設定する
+;--------------------------------
+;[引数]
+;	nWindowCnt				: ウィンドウ数
+;	arrDisplayPriority		: 描画対象ウィンドウ（ウィンドウIDを配列で指定する。ここで指定した順番でウィンドウの描画が行われる）
+;								※ 若い位置のウィンドウほど下になる
+;--------------------------------
+;[戻り値など]
+;================================================================
+@WndMgr_SetBehindProp( nWindowCnt, arrDisplayPriority )
+	#DIM  nWindowCnt
+	#DIM REF arrDisplayPriority, 0
+
+	#DIM  nWindowCnt_Mem					; 再チェック防止用の前回の対象ウィンドウ情報を保持する
+	#DIM  arrDisplayPriority_Mem, 1000		; 同上
+
+	#DIM  arrWndIdOverlap, 200
+	#DIM  nOverlapWndCount
+	#DIM  nTargetWndId
+
+	#DIM  nLoop
+	#DIM  nCheck
+
+	; 対象ウィンドウ情報を前回と今回で比較（同じならチェックする必要はない）
+	IF nWindowCnt_Mem == nWindowCnt
+		nCheck = 0
+		FOR nLoop, 0, nWindowCnt
+			IF arrDisplayPriority_Mem:nLoop != arrDisplayPriority:nLoop
+				BREAK
+			ENDIF
+			nCheck += 1
+		NEXT
+		; 対象ウィンドウ情報を前回と今回で同じなら、何もせずに抜ける
+		IF nCheck == nWindowCnt
+			RETURN
+		ENDIF
+	ENDIF
+
+	; 全てのウィンドウの他ウィンドウの背後にあるかのプロパティ値をリセットする
+	FOR nLoop, 0, nWindowCnt
+		CALL WndMgr_SetPropertyNum( arrDisplayPriority:nLoop, PropIdx_WndBehindWindow, 0 )
+	NEXT
+
+	; 他ウィンドウの背後にあるかのチェック
+	FOR nLoop, 0, nWindowCnt
+		nTargetWndId = arrDisplayPriority:nLoop
+		; 重なっているウィンドウを取得
+		VARSET arrWndIdOverlap, -1
+		CALL WndMgr_CheckOverlapWnd( nTargetWndId, 1 )
+		nOverlapWndCount = RESULT:0
+		ARRAYCOPY "RESULT", "arrWndIdOverlap"
+		ARRAYSHIFT arrWndIdOverlap, -1, -1
+		; 重なっているウィンドウが、チェック対象ウィンドウよりも上に表示されるウィンドウかをチェックする
+		FOR nCheck, 0, nOverlapWndCount
+			LOCAL = FINDELEMENT( arrDisplayPriority, arrWndIdOverlap:nCheck )
+			IF LOCAL > nLoop
+				CALL WndMgr_SetPropertyNum( arrDisplayPriority:nLoop, PropIdx_WndBehindWindow, 1 )		; 上に重なっているウィンドウが存在するので、チェック対象ウィンドウは「他ウィンドウの背後にある」
+				BREAK
+			ENDIF
+		NEXT
+	NEXT
+
+	; 今回のチェック対象情報を記憶する
+	nWindowCnt_Mem = nWindowCnt
+	VARSET arrDisplayPriority_Mem, -1
+	ARRAYCOPY "arrDisplayPriority", "arrDisplayPriority_Mem"
+
+	RETURN
+
+
+;================================================================
+; 生成したウィンドウを描画する
+;--------------------------------
+;	nBtnIsNum				: ボタンを数値ボタンで表示するフラグ（0=文字列ボタン, 1=数値ボタン）
+;================================================================
+@WndMgr_DisplayAll( nBtnIsNum = 0 )
+	#DIM  nBtnIsNum
+
+	#DIM  nWindowCnt
+	#DIM  arrDisplayPriority, DEF_WINDOW_DRAWER_MAX_WND_LENGTH = -1
+	#DIM  nLoop
+	#DIM  nCheck
+
+	VARSET arrDisplayPriority, -1
+	CALL WndMgr_CheckExistWindow()
+	nWindowCnt = RESULT:0
+	ARRAYCOPY "RESULT", "arrDisplayPriority"
+	ARRAYSHIFT arrDisplayPriority, -1, -1
+
+	CALL WndMgr_Display( nWindowCnt, arrDisplayPriority, nBtnIsNum )
+
+
+;================================================================
+; 生成したウィンドウの内、指定したものだけを描画する
+;--------------------------------
+;	nWindowCnt				: ウィンドウ数
+;	arrDisplayPriority		: 描画対象ウィンドウ（ウィンドウIDを配列で指定する。ここで指定した順番でウィンドウの描画が行われる）
+;								※ 若い位置のウィンドウほど下になる
+;	nBtnIsNum				: ボタンを数値ボタンで表示するフラグ（0=文字列ボタン, 1=数値ボタン）
+;--------------------------------
+;[戻り値など]
+;================================================================
+@WndMgr_Display( nWindowCnt, arrDisplayPriority, nBtnIsNum = 0 )
+#LOCALSSIZE 10
+	#DIM  nWindowCnt
+	#DIM REF arrDisplayPriority, 0
+	#DIM  nBtnIsNum
+
+	SELECTCASE DEF_WINDOW_DRAWER_MODE
+		CASE 0
+			CALL WndMgr_Display_ModeHtml( nWindowCnt, arrDisplayPriority, nBtnIsNum )		; HTML命令使用版
+		CASE 1
+			CALL WndMgr_Display_ModePrint( nWindowCnt, arrDisplayPriority, nBtnIsNum )		; PRINT系命令使用版
+	ENDSELECT
+
+	RETURN
+
+
+;================================================================
+; 生成したウィンドウの内、指定したものだけを描画する
+;	(HTML版)
+;--------------------------------
+;	nWindowCnt				: ウィンドウ数
+;	arrDisplayPriority		: 描画対象ウィンドウ（ウィンドウIDを配列で指定する。ここで指定した順番でウィンドウの描画が行われる）
+;								※ 若い位置のウィンドウほど下になる
+;	nBtnIsNum				: ボタンを数値ボタンで表示するフラグ（0=文字列ボタン, 1=数値ボタン）
+;--------------------------------
+;[戻り値など]
+;================================================================
+@WndMgr_Display_ModeHtml( nWindowCnt, arrDisplayPriority, nBtnIsNum = 0 )
+#LOCALSSIZE 10
+	#DIM  nWindowCnt
+	#DIM REF arrDisplayPriority, 0
+	#DIM  nBtnIsNum
+
+	#DIMS arrDisplayText, 200
+	#DIM  nLoop
+	#DIM  nWndId
+	#DIM  nWndLine
+	#DIM  nCheckLine
+	#DIM  nMaxLine
+
+	#DIM  nPosX
+	#DIM  nPosY
+	#DIM  nSizeW
+	#DIM  nSizeH
+	#DIM  nDisable
+
+	#DIMS strPrintText
+	#DIMS arrButtonValue, 1000
+	#DIM  nButtonCount
+
+	; ウィンドウが背後にあるかどうかのプロパティ値を更新する
+	CALL WndMgr_SetBehindProp( nWindowCnt, arrDisplayPriority )
+
+	VARSET arrButtonValue, ""
+	nButtonCount = 0
+
+	nMaxLine = 0
+	VARSET arrDisplayText, ""
+
+	; 全てのウィンドウの描画内容を１行ずつタグ指定文字列にする
+	FOR nLoop, 0, nWindowCnt
+		nWndId = arrDisplayPriority:nLoop
+		SIF nWndId < 0
+			CONTINUE
+		CALL WndMgr_Exist( nWndId )
+		SIF RESULT == 0
+			CONTINUE
+		CALL WndMgr_GetPropertyNum( nWndId, PropIdx_WndHidden )
+		SIF RESULT == 1
+			CONTINUE
+
+		CALL WndMgr_GetRectangle( nWndId )
+		nPosX   = RESULT:0
+		nPosY   = RESULT:1
+		nSizeW  = RESULT:2
+		nSizeH  = RESULT:3
+		SIF nSizeW <= 0 || nSizeH <= 0
+			CONTINUE
+
+		CALL WndMgr_GetPropertyNum( nWndId, PropIdx_WndDisabled )
+		nDisable = RESULT
+
+		; 表示用テキストの生成
+		CALL WndMgr_WindowMgrMain( "PRINT_TEXT_CREATE", nWndId, 0, "" )
+
+		;DEBUGPRINTFORML check WndMgr_Display() PrintWndID={nWndId}
+		FOR nWndLine, 0, nSizeH
+			nCheckLine = nPosY + nWndLine
+			SIF nCheckLine < 0
+				CONTINUE
+			CALL WndMgr_WindowMgrMain( "PRINT_TEXT_GET", nWndId, nWndLine, "" )
+			strPrintText '= RESULTS:0
+			arrDisplayText:nCheckLine += strPrintText
+			nMaxLine = MAX( nMaxLine, nCheckLine )
+
+			; ボタン情報の取得
+			IF nDisable == 0
+				CALL WndMgr_WindowMgrMain( "TEXT_GET", nWndId, nWndLine, "" )
+				LOCAL = FuncTagSetText_GetButtonData( RESULTS )
+				FOR LOCAL:1, 0, LOCAL:0
+					arrButtonValue:nButtonCount '= RESULTS:(LOCAL:1)
+					nButtonCount += 1
+				NEXT
+			ENDIF
+		NEXT
+	NEXT
+
+	; 全てのウィンドウの描画内容をまとめたタグ指定文字列を描画する
+	FOR nCheckLine, 0, nMaxLine + 1
+		IF STRLENS( arrDisplayText:nCheckLine ) > 0
+			HTML_PRINT @"<nobr>%arrDisplayText:nCheckLine%</nobr>"
+		ELSE
+			HTML_PRINT @"<nobr> </nobr>"
+		ENDIF
+		;DEBUGPRINTFORML debug - WndMgr_Display_ModeHtml() 「%arrDisplayText:nCheckLine%」
+	NEXT
+
+	; 表示中の有効なボタン情報の登録
+	CALL WndMgr_ButtonInfo( "SET", arrButtonValue, nButtonCount )
+
+	RETURN
+
+
+;================================================================
+; 生成したウィンドウの内、指定したものだけを描画する
+;--------------------------------
+;	nWindowCnt				: ウィンドウ数
+;	arrDisplayPriority		: 描画対象ウィンドウ（ウィンドウIDを配列で指定する。ここで指定した順番でウィンドウの描画が行われる）
+;								※ 若い位置のウィンドウほど下になる
+;	nBtnIsNum				: ボタンを数値ボタンで表示するフラグ（0=文字列ボタン, 1=数値ボタン）
+;--------------------------------
+;[戻り値など]
+;================================================================
+@WndMgr_Display_ModePrint( nWindowCnt, arrDisplayPriority, nBtnIsNum = 0 )
+#LOCALSSIZE 10
+	#DIM  nWindowCnt
+	#DIM REF arrDisplayPriority, 0
+	#DIM  nBtnIsNum
+
+	#DIM  nDisplayWidth
+
+	#DIMS arrDisplayText, 200
+	#DIM  nLoop
+	#DIM  nWndId
+	#DIM  nWndLine
+	#DIM  nCheckLine
+	#DIM  nMaxLine
+
+	#DIM  nPosX
+	#DIM  nPosY
+	#DIM  nSizeW
+	#DIM  nSizeH
+	#DIM  nDisable
+
+	#DIMS strPrintText
+	#DIMS arrButtonValue, 1000
+	#DIM  nButtonCount
+
+	; ウィンドウが背後にあるかどうかのプロパティ値を更新する
+	CALL WndMgr_SetBehindProp( nWindowCnt, arrDisplayPriority )
+
+	VARSET arrButtonValue, ""
+	nButtonCount = 0
+
+	nDisplayWidth = 2 * CLIENTWIDTH() / GETCONFIG("フォントサイズ")		; 1行に出力できる文字数（MSゴシックの半角）
+
+	nMaxLine = 0
+	VARSET arrDisplayText, ""
+
+	; 全てのウィンドウの描画内容を１行ずつタグ指定文字列にする
+	FOR nLoop, 0, nWindowCnt
+		nWndId = arrDisplayPriority:nLoop
+		SIF nWndId < 0
+			CONTINUE
+		CALL WndMgr_Exist( nWndId )
+		SIF RESULT == 0
+			CONTINUE
+		CALL WndMgr_GetPropertyNum( nWndId, PropIdx_WndHidden )
+		SIF RESULT == 1
+			CONTINUE
+
+		CALL WndMgr_GetRectangle( nWndId )
+		nPosX   = RESULT:0
+		nPosY   = RESULT:1
+		nSizeW  = RESULT:2
+		nSizeH  = RESULT:3
+		SIF nSizeW <= 0 || nSizeH <= 0
+			CONTINUE
+
+		CALL WndMgr_GetPropertyNum( nWndId, PropIdx_WndDisabled )
+		nDisable = RESULT
+
+		; 表示用テキストの生成
+		CALL WndMgr_WindowMgrMain( "PRINT_TEXT_CREATE", nWndId, 0, "" )
+
+		;DEBUGPRINTFORML check WndMgr_Display() PrintWndID={nWndId}
+		FOR nWndLine, 0, nSizeH
+			VARSET LOCALS, ""
+			nCheckLine = nPosY + nWndLine
+			SIF nCheckLine < 0
+				CONTINUE
+			IF nPosX >= 0
+				CALLF FuncTagSetText_ShapeSize( arrDisplayText:nCheckLine, nPosX, 1 )
+				LOCALS:0 '= RESULTS:0
+				CALLF FuncTagSetText_ShapeSize( arrDisplayText:nCheckLine, nPosX + nSizeW, 0 )
+				LOCALS:1 '= RESULTS:1
+				CALL WndMgr_WindowMgrMain( "PRINT_TEXT_GET", nWndId, nWndLine, "" )
+				CALLF FuncTagSetText_ShapeSize( RESULTS, nSizeW, 1 )
+				LOCALS:2 '= RESULTS:0
+			ELSE
+				LOCALS:0 '= ""
+				CALLF FuncTagSetText_ShapeSize( arrDisplayText:nCheckLine, MAX( 0, nPosX + nSizeW ), 0 )
+				LOCALS:1 '= RESULTS:1
+				IF nSizeW > nPosX
+					CALL WndMgr_WindowMgrMain( "PRINT_TEXT_GET", nWndId, nWndLine, "" )
+					CALLF FuncTagSetText_ShapeSize( RESULTS, ABS( nPosX ), 0 )
+					LOCALS:2 '= RESULTS:1
+				ELSE
+					LOCALS:2 '= ""
+				ENDIF
+			ENDIF
+			arrDisplayText:nCheckLine '= LOCALS:0 + LOCALS:2 + LOCALS:1
+			nMaxLine = MAX( nMaxLine, nCheckLine )
+			strPrintText '= LOCALS:2
+
+			; ボタン情報の取得
+			IF nDisable == 0
+				LOCAL = FuncTagSetText_GetButtonData( strPrintText )
+				FOR LOCAL:1, 0, LOCAL:0
+					arrButtonValue:nButtonCount '= RESULTS:(LOCAL:1)
+					nButtonCount += 1
+				NEXT
+			ENDIF
+		NEXT
+	NEXT
+
+	; 全てのウィンドウの描画内容をまとめたタグ指定文字列を描画する
+	FOR nCheckLine, 0, nMaxLine + 1
+		LOCALS '= FuncTagSetText_ShapeSize( arrDisplayText:nCheckLine, nDisplayWidth, 1 )
+		CALLF FuncTagSetText_Print( LOCALS, (nBtnIsNum == 0 ? 0x01 # 0x05) )
+	NEXT
+
+	; 表示中の有効なボタン情報の登録
+	CALL WndMgr_ButtonInfo( "SET", arrButtonValue, nButtonCount )
+
+	RETURN
+
+
+;================================================================
+; ウィンドウが存在するかどうか
+;--------------------------------
+;[引数]
+;	nWndId		: ウィンドウＩＤ（0~=対象ウィンドウ）
+;--------------------------------
+;[戻り値など]
+;		RESULT:0	: 0=存在しない, 1=存在する
+;================================================================
+@WndMgr_Exist( nWndId )
+	#DIM  nWndId
+
+	SIF nWndId < 0 || nWndId >= DEF_WINDOW_DRAWER_MAX_WND_LENGTH
+		RETURN 0
+	; 指定したウィンドウ番号のウィンドウが生成済みかどうかをチェックする
+	CALL WndMgr_WindowMgrMain( "EXIST", nWndId, 0, "" )
+	RETURN RESULT
+
+
+;================================================================
+; ウィンドウを生成する
+;--------------------------------
+;[引数]
+;	nWndId		: ウィンドウＩＤ（0~=対象ウィンドウ）
+;	nLocX		: ウィンドウ座標（左上Ｘ値）
+;	nLocY		: ウィンドウ座標（左上Ｙ値）
+;	nWidth		: ウィンドウサイズ（幅）※枠を使用する場合、偶数で指定すること
+;	nHeigth		: ウィンドウサイズ（高さ）
+;	nExFlag		: その他の設定
+;					0x01 : 枠あり（太枠。枠の分だけ記述できる領域が小さくなるので注意すること）
+;					0x02 : 枠あり（細枠。枠の分だけ記述できる領域が小さくなるので注意すること）
+;							※ 0x03の場合は細枠になる
+;--------------------------------
+;================================================================
+@WndMgr_CreateWindow( nWndId, nLocX, nLocY, nWidth, nHeigth, nExFlag )
+	#DIM  nWndId
+	#DIM  nLocX
+	#DIM  nLocY
+	#DIM  nWidth
+	#DIM  nHeigth
+	#DIM  nExFlag
+
+	#DIM  nBorder
+
+	; 指定したウィンドウ番号のウィンドウが生成済みの場合はエラーにする
+	CALL WndMgr_Exist( nWndId )
+	IF RESULT == 1
+		THROW WndMgr_CreateWindow() : ウィンドウ（nWndId={nWndId}）は生成済みです
+	ENDIF
+
+	; ウィンドウを生成する
+	IF (nExFlag & 0x02)
+		nBorder = 2
+	ELSEIF (nExFlag & 0x01)
+		nBorder = 1
+	ELSE
+		nBorder = 0
+	ENDIF
+	CALL WndMgr_WindowMgrMain( "CREATE", nWndId, 0, @"{nLocX},{nLocY},{nWidth},{nHeigth},{nBorder}" )
+
+	RETURN
+
+
+;================================================================
+; ウィンドウを破棄する
+;--------------------------------
+;[引数]
+;	nWndId		: ウィンドウＩＤ（0~=対象ウィンドウ, -1=生成済みの全ウィンドウ対象）
+;--------------------------------
+;================================================================
+@WndMgr_DestroyWindow( nWndId )
+	#DIM  nWndId
+
+	#DIM  arrWndIdList, DEF_WINDOW_DRAWER_MAX_WND_LENGTH
+	#DIM  nExistWndCnt
+	#DIM  nLoop
+
+	IF nWndId == -1
+		CALL WndMgr_CheckExistWindow()
+		nExistWndCnt = RESULT:0
+		ARRAYSHIFT RESULT, -1, -1
+		ARRAYCOPY "RESULT", "arrWndIdList"
+	ELSE
+		nExistWndCnt = 1
+		arrWndIdList:0 = nWndId
+	ENDIF
+
+	FOR nLoop, 0, nExistWndCnt
+		;--------------------------------
+		;※ 初期化としても使うかもしれないのでこのエラーチェックはコメントアウト
+		;	; 指定したウィンドウ番号のウィンドウが未生成の場合はエラーにする
+		;	CALL WndMgr_Exist( arrWndIdList:nLoop )
+		;	IF RESULT == 0
+		;		THROW CREATE_WINDOW() : ウィンドウ（nWndId={arrWndIdList:nLoop}）は未生成です
+		;	ENDIF
+		;--------------------------------
+
+		; ウィンドウを破棄する
+		CALL WndMgr_WindowMgrMain( "DESTROY", arrWndIdList:nLoop, 0, "" )
+	NEXT
+
+	RETURN
+
+
+;================================================================
+; ウィンドウの属性とテキストを初期化する
+;	※ ウィンドウの位置,サイズ,枠設定は変化しない
+;--------------------------------
+;[引数]
+;	nWndId		: ウィンドウＩＤ（0~=対象ウィンドウ, -1=生成済みの全ウィンドウ対象）
+;--------------------------------
+;================================================================
+@WndMgr_ResetWindow( nWndId )
+	#DIM  nWndId
+
+	#DIM  arrWndIdList, DEF_WINDOW_DRAWER_MAX_WND_LENGTH
+	#DIM  nExistWndCnt
+	#DIM  nLoop
+
+	IF nWndId == -1
+		CALL WndMgr_CheckExistWindow()
+		nExistWndCnt = RESULT:0
+		ARRAYSHIFT RESULT, -1, -1
+		ARRAYCOPY "RESULT", "arrWndIdList"
+	ELSE
+		nExistWndCnt = 1
+		arrWndIdList:0 = nWndId
+	ENDIF
+
+	FOR nLoop, 0, nExistWndCnt
+		;--------------------------------
+		;※ 初期化としても使うかもしれないのでこのエラーチェックはコメントアウト
+		;	; 指定したウィンドウ番号のウィンドウが未生成の場合はエラーにする
+		;	CALL WndMgr_Exist( arrWndIdList:nLoop )
+		;	IF RESULT == 0
+		;		THROW CREATE_WINDOW() : ウィンドウ（nWndId={arrWndIdList:nLoop}）は未生成です
+		;	ENDIF
+		;--------------------------------
+
+		; ウィンドウの属性とテキストを初期化
+		CALL WndMgr_WindowMgrMain( "RESET", arrWndIdList:nLoop, 0, "" )
+	NEXT
+
+	RETURN
+
+
+;================================================================
+; ウィンドウのタイトルを設定する
+;	※ タイトルは枠線表示設定時に、右上の枠線上に表示される（┌タイトル────┐）
+;--------------------------------
+;[引数]
+;	nWndId		: ウィンドウＩＤ（0~=対象ウィンドウ）
+;	strText		: 設定する文字列（タグ指定文字列(TagSetText.ERBを参照)で指定可能）
+;--------------------------------
+;[戻り値など]
+;================================================================
+@WndMgr_WindowTitle( nWndId, strText )
+	#DIM  nWndId
+	#DIMS strText
+
+	; 指定したウィンドウ番号のウィンドウが未生成の場合はエラーにする
+	CALL WndMgr_Exist( nWndId )
+	IF RESULT == 0
+		THROW WndMgr_TextSet() : ウィンドウ（nWndId={nWndId}）は未生成です
+	ENDIF
+
+	; ウィンドウのタイトルを設定する
+	CALL WndMgr_WindowMgrMain( "TITLE", nWndId, 0, strText )
+
+	RETURN
+
+
+;================================================================
+; ウィンドウに表示する文字列を設定する
+;--------------------------------
+;[引数]
+;	nWndId		: ウィンドウＩＤ（0~=対象ウィンドウ）
+;	nLine		: 文字列を設定する行位置
+;	strText		: 設定する文字列（タグ指定文字列(TagSetText.ERBを参照)で指定可能）
+;--------------------------------
+;================================================================
+@WndMgr_TextSet( nWndId, nLine, strText )
+	#DIM  nWndId
+	#DIM  nLine
+	#DIMS strText
+
+	; 指定したウィンドウ番号のウィンドウが未生成の場合はエラーにする
+	CALL WndMgr_Exist( nWndId )
+	IF RESULT == 0
+		THROW WndMgr_TextSet() : ウィンドウ（nWndId={nWndId}）は未生成です
+	ENDIF
+
+	; ウィンドウに表示する文字列を設定する
+	CALL WndMgr_WindowMgrMain( "TEXT_SET", nWndId, nLine, strText )
+
+	RETURN
+
+
+;================================================================
+; ウィンドウに表示する文字列を追加する
+;--------------------------------
+;[引数]
+;	nWndId		: ウィンドウＩＤ（0~=対象ウィンドウ）
+;	nLine		: 文字列を設定する行位置
+;	strText		: 設定する文字列（タグ指定文字列(TagSetText.ERBを参照)で指定可能）
+;--------------------------------
+;================================================================
+@WndMgr_TextAdd( nWndId, nLine, strText )
+	#DIM  nWndId
+	#DIM  nLine
+	#DIMS strText
+
+	; 指定したウィンドウ番号のウィンドウが未生成の場合はエラーにする
+	CALL WndMgr_Exist( nWndId )
+	IF RESULT == 0
+		THROW WndMgr_TextSet() : ウィンドウ（nWndId={nWndId}）は未生成です
+	ENDIF
+
+	; ウィンドウに表示する文字列を設定する
+	CALL WndMgr_WindowMgrMain( "TEXT_ADD", nWndId, nLine, strText )
+
+	RETURN
+
+
+;================================================================
+; ウィンドウに設定されている文字列を全てクリアする
+;--------------------------------
+;[引数]
+;	nWndId		: ウィンドウＩＤ（0~=対象ウィンドウ, -1=生成済みの全ウィンドウ対象）
+;--------------------------------
+;================================================================
+@WndMgr_TextClear( nWndId )
+	#DIM  nWndId
+
+	#DIM  arrWndIdList, DEF_WINDOW_DRAWER_MAX_WND_LENGTH
+	#DIM  nExistWndCnt
+	#DIM  nLoop
+
+	IF nWndId == -1
+		CALL WndMgr_CheckExistWindow()
+		nExistWndCnt = RESULT:0
+		ARRAYSHIFT RESULT, -1, -1
+		ARRAYCOPY "RESULT", "arrWndIdList"
+	ELSE
+		nExistWndCnt = 1
+		arrWndIdList:0 = nWndId
+	ENDIF
+
+	FOR nLoop, 0, nExistWndCnt
+		;--------------------------------
+		;※ 初期化としても使うかもしれないのでこのエラーチェックはコメントアウト
+		;	; 指定したウィンドウ番号のウィンドウが未生成の場合はエラーにする
+		;	CALL WndMgr_Exist( arrWndIdList:nLoop )
+		;	IF RESULT == 0
+		;		THROW CREATE_WINDOW() : ウィンドウ（nWndId={arrWndIdList:nLoop}）は未生成です
+		;	ENDIF
+		;--------------------------------
+
+		; ウィンドウに設定されている文字列を全てクリア
+		CALL WndMgr_WindowMgrMain( "TEXT_CLEAR", arrWndIdList:nLoop, 0, "" )
+	NEXT
+
+	RETURN
+
+
+;================================================================
+; ウィンドウの表示位置,サイズなどを変更する
+;--------------------------------
+;[引数]
+;	nWndId		: ウィンドウＩＤ（0~=対象ウィンドウ）
+;	nLocX		: ウィンドウ座標（左上Ｘ値）
+;	nLocY		: ウィンドウ座標（左上Ｙ値）
+;	nWidth		: ウィンドウサイズ（幅） ※枠を使用する場合、偶数で指定すること
+;	nHeigth		: ウィンドウサイズ（高さ）
+;	nExFlag		: その他の設定
+;					0x01 : 枠あり（太枠。枠の分だけ記述できる領域が小さくなるので注意すること）
+;					0x02 : 枠あり（細枠。枠の分だけ記述できる領域が小さくなるので注意すること）
+;							※ 0x03の場合は細枠になる
+;--------------------------------
+;================================================================
+@WndMgr_Rectangle( nWndId, nLocX, nLocY, nWidth, nHeigth, nExFlag )
+	#DIM  nWndId
+	#DIM  nLocX
+	#DIM  nLocY
+	#DIM  nWidth
+	#DIM  nHeigth
+	#DIM  nExFlag
+
+	#DIM  nBorder
+
+	; 指定したウィンドウ番号のウィンドウが未生成の場合はエラーにする
+	CALL WndMgr_Exist( nWndId )
+	IF RESULT == 0
+		THROW WndMgr_Rectangle() : ウィンドウ（nWndId={nWndId}）は未生成です
+	ENDIF
+
+	; ウィンドウの表示位置などを再設定する
+	IF (nExFlag & 0x02)
+		nBorder = 2
+	ELSEIF (nExFlag & 0x01)
+		nBorder = 1
+	ELSE
+		nBorder = 0
+	ENDIF
+	CALL WndMgr_WindowMgrMain( "RECTANGLE", nWndId, 0, @"{nLocX},{nLocY},{nWidth},{nHeigth},{nBorder}" )
+
+	RETURN
+
+
+;================================================================
+; ウィンドウの表示位置を変更する
+;--------------------------------
+;[引数]
+;	nWndId		: ウィンドウＩＤ（0~=対象ウィンドウ）
+;	nLocX		: ウィンドウ座標（左上Ｘ値）
+;	nLocY		: ウィンドウ座標（左上Ｙ値）
+;--------------------------------
+;================================================================
+@WndMgr_Move( nWndId, nLocX, nLocY )
+	#DIM  nWndId
+	#DIM  nLocX
+	#DIM  nLocY
+
+	; 指定したウィンドウ番号のウィンドウが未生成の場合はエラーにする
+	CALL WndMgr_Exist( nWndId )
+	IF RESULT == 0
+		THROW WndMgr_Move() : ウィンドウ（nWndId={nWndId}）は未生成です
+	ENDIF
+
+	; 表示位置変更
+	CALL WndMgr_WindowMgrMain( "MOVE", nWndId, 0, @"{nLocX},{nLocY}" )
+
+	RETURN
+
+
+;================================================================
+; ウィンドウの属性を変更する
+;--------------------------------
+;[引数]
+;	nWndId		: ウィンドウＩＤ（0~=対象ウィンドウ, -1=生成済みの全ウィンドウ対象）
+;	ARGS:0		: 設定する属性名称
+;	ARG:0		: 設定値
+;					ARGS="Border"			: ARG … 0=枠無し, 1=太枠, 2=細枠, 
+;					ARGS="Disabled"			: ARG … 0=ウィンドウ有効化, 1=ウィンドウ無効化（灰色表示、タグ無効化）
+;					ARGS="BorderColor"		: ARG … ウィンドウの枠の色を指定する（-1で指定なし）
+;					ARGS="Hide"				: ARG … 非表示フラグ（0=表示する, 1=非表示, ）
+;					ARGS="LogButton"		: ARG … ログボタン有効化（0=無効化, 1=有効化, ）
+;--------------------------------
+;================================================================
+@WndMgr_Attribute( nWndId, ARGS, ARG )
+	#DIM  nWndId
+	#DIM  nExFlag
+
+	#DIM  nPropIndex, 5
+	#DIM  nPropValue, 5
+
+	#DIM  arrWndIdList, DEF_WINDOW_DRAWER_MAX_WND_LENGTH
+	#DIM  nExistWndCnt
+	#DIM  nLoop
+
+	VARSET nPropIndex, -1
+	VARSET nPropValue, -1
+	SELECTCASE ARGS
+		CASE "Border"
+			nPropIndex:0 = PropIdx_WndBorder
+			nPropValue:0 = ARG
+		CASE "Disabled"
+			nPropIndex:0 = PropIdx_WndDisabled
+			nPropValue:0 = ARG
+		CASE "BorderColor"
+			nPropIndex:0 = PropIdx_WndBorderColor
+			nPropValue:0 = ARG
+			nPropIndex:1 = PropIdx_WndBorderColorSet
+			nPropValue:1 = (ARG == -1 ? 0 # 1)
+		CASE "Hide"
+			nPropIndex:0 = PropIdx_WndHidden
+			nPropValue:0 = ARG
+		CASE "LogButton"
+			nPropIndex:0 = PropIdx_WndLogButton
+			nPropValue:0 = ARG
+		CASEELSE
+			THROW WndMgr_Attribute() : 属性名称が不正です(%ARGS%)
+	ENDSELECT
+
+	IF nWndId == -1
+		CALL WndMgr_CheckExistWindow()
+		nExistWndCnt = RESULT:0
+		ARRAYSHIFT RESULT, -1, -1
+		ARRAYCOPY "RESULT", "arrWndIdList"
+	ELSE
+		nExistWndCnt = 1
+		arrWndIdList:0 = nWndId
+	ENDIF
+
+	FOR nLoop, 0, nExistWndCnt
+		; 指定したウィンドウ番号のウィンドウが未生成の場合はエラーにする
+		CALL WndMgr_Exist( arrWndIdList:nLoop )
+		IF RESULT == 0
+			THROW WndMgr_Attribute() : ウィンドウ（nWndId={arrWndIdList:nLoop}）は未生成です
+		ENDIF
+
+		; 設定反映
+		FOR LOCAL, 0, 5
+			SIF nPropIndex:(LOCAL) == -1
+				CONTINUE
+			CALL WndMgr_WindowMgrMain( "PROPERTY_NUM_SET", arrWndIdList:nLoop, nPropIndex:(LOCAL), TOSTR( nPropValue:(LOCAL) ) )
+		NEXT
+	NEXT
+
+	RETURN
+
+
+;================================================================
+; ウィンドウの表示位置、サイズを取得する
+;--------------------------------
+;[引数]
+;	nWndId		: ウィンドウＩＤ（0~=対象ウィンドウ）
+;	nPropIdx	: 取得したいプロパティIndex値（WindowDrawer.ERH参照）
+;--------------------------------
+;[戻り値など]
+;		RESULT:0	: ウィンドウ座標Ｘ値
+;		RESULT:1	: ウィンドウ座標Ｙ値
+;		RESULT:2	: ウィンドウ幅
+;		RESULT:3	: ウィンドウ高さ
+;		RESULT:4	: ウィンドウ幅  (クライアント領域)
+;		RESULT:5	: ウィンドウ高さ(クライアント領域)
+;		RESULT:6	: 枠設定（0=枠無し, 1=枠あり, 2=枠あり(細枠), ）
+;================================================================
+@WndMgr_GetRectangle( nWndId )
+	#DIM  nWndId
+	#DIM  nPropIdx
+
+	; 指定したウィンドウ番号のウィンドウが未生成の場合はエラーにする
+	CALL WndMgr_Exist( nWndId )
+	IF RESULT == 0
+		THROW WndMgr_Move() : ウィンドウ（nWndId={nWndId}）は未生成です
+	ENDIF
+
+	; 設定取得
+	RESULT:0 = m_arrWndPropN:nWndId:PropIdx_WndPosX
+	RESULT:1 = m_arrWndPropN:nWndId:PropIdx_WndPosY
+	RESULT:2 = m_arrWndPropN:nWndId:PropIdx_WndWidth
+	RESULT:3 = m_arrWndPropN:nWndId:PropIdx_WndHeight
+	RESULT:4 = m_arrWndPropN:nWndId:PropIdx_WndClientWidth
+	RESULT:5 = m_arrWndPropN:nWndId:PropIdx_WndClientHeight
+	RESULT:6 = m_arrWndPropN:nWndId:PropIdx_WndBorder
+
+	RETURN RESULT
+
+
+;================================================================
+; ウィンドウに設定されているボタン情報を取得する
+;--------------------------------
+;[引数]
+;	nWndId		: ウィンドウＩＤ（0~=対象ウィンドウ）
+;--------------------------------
+;[戻り値など]
+;		RESULT:0	: ボタン数
+;		RESULTS:0~	: ボタンのボタン値
+;================================================================
+@WndMgr_GetButtonData( nWndId )
+	#DIM  nWndId
+
+	#DIMS arrButtonValue, 1000
+	#DIM  nButtonCount
+	#DIM  nSizeH
+	#DIM  nLoop
+	#DIM  nWndLine
+
+	; 指定したウィンドウ番号のウィンドウが未生成の場合はエラーにする
+	CALL WndMgr_Exist( nWndId )
+	IF RESULT == 0
+		THROW WndMgr_Move() : ウィンドウ（nWndId={nWndId}）は未生成です
+	ENDIF
+
+	; 設定取得
+	CALL WndMgr_GetPropertyNum( nWndId, PropIdx_WndHeight )
+	nSizeH  = RESULT
+
+	VARSET arrButtonValue, ""
+	nButtonCount = 0
+
+	FOR nWndLine, 0, nSizeH
+		CALL WndMgr_WindowMgrMain( "TEXT_GET", nWndId, nWndLine, "" )
+		LOCAL = FuncTagSetText_GetButtonData( RESULTS )
+		FOR nLoop, 0, LOCAL:0
+			arrButtonValue:nButtonCount '= RESULTS:nLoop
+			nButtonCount += 1
+		NEXT
+	NEXT
+
+	VARSET RESULTS, ""
+	ARRAYCOPY "arrButtonValue", "RESULTS"
+	RETURN nButtonCount
+
+
+;================================================================
+; ウィンドウのプロパティ設定を取得する
+;--------------------------------
+;[引数]
+;	nWndId		: ウィンドウＩＤ（0~=対象ウィンドウ）
+;	nPropIdx	: 対象のプロパティIndex値（WindowDrawer.ERH参照）
+;--------------------------------
+;[戻り値など]
+;	RESULT:0	: 指定したプロパティ値
+;================================================================
+@WndMgr_GetPropertyNum( nWndId, nPropIdx )
+	#DIM  nWndId
+	#DIM  nPropIdx
+
+	; 指定したウィンドウ番号のウィンドウが未生成の場合はエラーにする
+	CALL WndMgr_Exist( nWndId )
+	IF RESULT == 0
+		THROW WndMgr_Move() : ウィンドウ（nWndId={nWndId}）は未生成です
+	ENDIF
+
+	; 設定取得
+	CALL WndMgr_WindowMgrMain( "PROPERTY_NUM_GET", nWndId, nPropIdx )
+
+	RETURN RESULT
+
+
+;================================================================
+; ウィンドウのプロパティ設定を取得する
+;--------------------------------
+;[引数]
+;	nWndId		: ウィンドウＩＤ（0~=対象ウィンドウ）
+;	nPropIdx	: 対象のプロパティIndex値（WindowDrawer.ERH参照）
+;--------------------------------
+;[戻り値など]
+;	RESULT:0	: 指定したプロパティ値
+;================================================================
+@WndMgr_GetPropertyStr( nWndId, nPropIdx )
+	#DIM  nWndId
+	#DIM  nPropIdx
+
+	; 指定したウィンドウ番号のウィンドウが未生成の場合はエラーにする
+	CALL WndMgr_Exist( nWndId )
+	IF RESULT == 0
+		THROW WndMgr_Move() : ウィンドウ（nWndId={nWndId}）は未生成です
+	ENDIF
+
+	; 設定取得
+	CALL WndMgr_WindowMgrMain( "PROPERTY_STR_GET", nWndId, nPropIdx )
+
+	RESULTS '= RESULTS
+	RETURN
+
+
+;================================================================
+; ウィンドウのプロパティ設定を変更する
+;--------------------------------
+;[引数]
+;	nWndId		: ウィンドウＩＤ（0~=対象ウィンドウ）
+;	nPropIdx	: 対象のプロパティIndex値（WindowDrawer.ERH参照）
+;	ARG:0		: 設定値
+;--------------------------------
+;[戻り値など]
+;	RESULT:0	: 指定したプロパティ値
+;================================================================
+@WndMgr_SetPropertyNum( nWndId, nPropIdx, ARG )
+	#DIM  nWndId
+	#DIM  nPropIdx
+
+	; 指定したウィンドウ番号のウィンドウが未生成の場合はエラーにする
+	CALL WndMgr_Exist( nWndId )
+	IF RESULT == 0
+		THROW WndMgr_Move() : ウィンドウ（nWndId={nWndId}）は未生成です
+	ENDIF
+
+	; 設定取得
+	CALL WndMgr_WindowMgrMain( "PROPERTY_NUM_SET", nWndId, nPropIdx, TOSTR( ARG ) )
+
+	RETURN
+
+
+;================================================================
+; ウィンドウのプロパティ設定を変更する
+;--------------------------------
+;[引数]
+;	nWndId		: ウィンドウＩＤ（0~=対象ウィンドウ）
+;	nPropIdx	: 対象のプロパティIndex値（WindowDrawer.ERH参照）
+;	ARGS:0		: 設定値
+;--------------------------------
+;[戻り値など]
+;	RESULT:0	: 指定したプロパティ値
+;================================================================
+@WndMgr_SetPropertyStr( nWndId, nPropIdx, ARGS )
+	#DIM  nWndId
+	#DIM  nPropIdx
+
+	; 指定したウィンドウ番号のウィンドウが未生成の場合はエラーにする
+	CALL WndMgr_Exist( nWndId )
+	IF RESULT == 0
+		THROW WndMgr_Move() : ウィンドウ（nWndId={nWndId}）は未生成です
+	ENDIF
+
+	; 設定取得
+	CALL WndMgr_WindowMgrMain( "PROPERTY_STR_SET", nWndId, nPropIdx, ARGS )
+
+	RETURN
+
+
+;================================================================
+;【内部処理用】
+; ウィンドウの管理
+;--------------------------------
+;[引数]
+;	strMode		: 処理内容
+;					"EXIST"				: ウィンドウが生成されているか確認する
+;					"CREATE"			: ウィンドウの生成
+;					"DESTROY"			: ウィンドウの破棄
+;					"MOVE"				: ウィンドウの位置を変更する
+;					"RECTANGLE"			: ウィンドウの表示位置などを再設定する
+;					"RESET"				: ウィンドウの属性と、テキストの初期化
+;					"PROPERTY_NUM_GET"	: ウィンドウのプロパティ情報を取得する
+;					"PROPERTY_NUM_SET"	: ウィンドウのプロパティ情報を設定する
+;					"PROPERTY_STR_GET"	: ウィンドウのプロパティ情報を取得する
+;					"PROPERTY_STR_SET"	: ウィンドウのプロパティ情報を設定する
+;					"TEXT_CLEAR"		: ウィンドウに登録された文字列をすべてクリアする
+;					"TEXT_SET"			: ウィンドウの指定した行位置に文字列を設定する
+;					"TEXT_ADD"			: ウィンドウの指定した行位置に文字列を追加する
+;					"TEXT_GET"			: ウィンドウの指定した行位置に設定されている文字列を取得する（表示用ではない文字列）
+;					"PRINT_TEXT_CREATE"	: 表示用の文字列を生成する（"PRINT_TEXT_GET"で取得できるのは、ここで生成した文字列）
+;					"PRINT_TEXT_GET"	: ウィンドウの指定した行位置の表示用の文字列を取得する
+;					"TITLE"				: ウィンドウのタイトルを設定する          （枠あり時のみ有効）
+;	nWndId		: ウィンドウＩＤ（0~=対象ウィンドウ）
+;	ARG:0		: 処理内容によって変化
+;	ARGS:0		: 処理内容によって変化
+;--------------------------------
+; 処理内容ごとの ARG:0,ARGS:0 の内容
+;	strMode = "EXIST", "DESTROY"
+;		ARG:0	: 未使用
+;		ARGS:0	: 未使用
+;
+;	strMode = "CREATE", "RECTANGLE"
+;		ARG:0	: 未使用
+;		ARGS:0	: ウィンドウ情報をCSV形式で記述した文字列
+;					（"ウィンドウ座標Ｘ値", "ウィンドウ座標Ｙ値", "ウィンドウ幅", "ウィンドウ高さ", "枠設定(0=枠無し, 1=枠あり, 2=枠あり(細枠), )" ）
+;
+;	strMode = "PROPERTY_NUM_GET", "PROPERTY_NUM_SET", "PROPERTY_STR_GET", "PROPERTY_STR_SET"
+;		ARG:0	: 取得したいプロパティIndex値（WindowDrawer.ERH参照）
+;		ARGS:0	: 設定値
+;
+;	strMode = "TEXT_SET", "TEXT_ADD"
+;		ARG:0	: 文字列を設定する行位置
+;		ARGS:0	: 設定する文字列
+;
+;	strMode = "TEXT_CLEAR"
+;		ARG:0	: 未使用
+;		ARGS:0	: 未使用
+;
+;	strMode = "PRINT_TEXT_GET"
+;		ARG:0	: 取得する行位置
+;		ARGS:0	: 未使用
+;
+;	strMode = "PRINT_TEXT_CREATE", "RESET"
+;		ARG:0	: 未使用
+;		ARGS:0	: 未使用
+;--------------------------------
+;[戻り値など]
+;	strMode = "EXIST"の場合
+;		RESULT:0	: 0=ウィンドウが生成されていない, 1=ウィンドウが生成されている
+;
+;	strMode = "PRINT_TEXT_GET"の場合
+;		RESULTS:0	: 指定した行位置に設定されている文字列
+;
+;	strMode = "PROPERTY_NUM_GET"の場合
+;		RESULT:0	: 指定したプロパティ値
+;================================================================
+@WndMgr_WindowMgrMain( strMode, nWndId, ARG, ARGS )
+#LOCALSIZE 1000
+#LOCALSSIZE 20
+	#DIMS DYNAMIC strMode
+	#DIM DYNAMIC  nWndId
+
+	#DIM DYNAMIC  nLoop
+	#DIM nWndTextLen = -1
+	#DIM nWndInfoLen = -1
+
+	IF nWndTextLen == -1
+		VARSIZE m_arrWndText
+		nWndTextLen = RESULT:1
+	ENDIF
+	IF nWndInfoLen == -1
+		VARSIZE m_arrWndPropN
+		nWndInfoLen = RESULT:1
+	ENDIF
+
+	SELECTCASE strMode
+		CASE "CREATE"
+			m_arrWndExsit:nWndId:0 = 1
+			m_arrWndTitle:nWndId:0 '= ""
+			; プロパティ値のリセット
+			FOR nLoop, 0, nWndInfoLen
+				m_arrWndPropN:nWndId:nLoop = 0
+			NEXT
+			; 登録テキストのリセット
+			FOR nLoop, 0, nWndTextLen
+				m_arrWndText:nWndId:nLoop '= ""
+				m_arrWndTextPrint:nWndId:nLoop '= ""
+			NEXT
+			; 表示テキスト生成済みフラグ解除
+			m_arrWndSetTextPrint:nWndId:0 = 0
+			; 表示位置などの設定
+			CALL WndMgr_WindowMgrMain( "RECTANGLE", nWndId, ARG, ARGS )
+
+		CASE "DESTROY"
+			m_arrWndExsit:nWndId:0 = 0
+			m_arrWndTitle:nWndId:0 '= ""
+			; プロパティ値のリセット
+			FOR nLoop, 0, nWndInfoLen
+				m_arrWndPropN:nWndId:nLoop = 0
+			NEXT
+			; 登録テキストのリセット
+			FOR nLoop, 0, nWndTextLen
+				m_arrWndText:nWndId:nLoop '= ""
+				m_arrWndTextPrint:nWndId:nLoop '= ""
+			NEXT
+			; 表示テキスト生成済みフラグ解除
+			m_arrWndSetTextPrint:nWndId:0 = 0
+
+		CASE "RECTANGLE"
+			; 表示位置などの設定
+			VARSET LOCALS, ""
+			SPLIT ARGS, ",", LOCALS
+			FOR nLoop, 0, 5
+				IF ISNUMERIC( LOCALS:nLoop ) == 0
+					THROW WndMgr_WindowMgrMain() : 設定内容が不正です（strMode=%strMode%, ARGS=%ARGS%）
+				ENDIF
+			NEXT
+			m_arrWndPropN:nWndId:PropIdx_WndPosX   = TOINT( LOCALS:0 )
+			m_arrWndPropN:nWndId:PropIdx_WndPosY   = TOINT( LOCALS:1 )
+			m_arrWndPropN:nWndId:PropIdx_WndWidth  = TOINT( LOCALS:2 )
+			m_arrWndPropN:nWndId:PropIdx_WndHeight = TOINT( LOCALS:3 )
+			m_arrWndPropN:nWndId:PropIdx_WndBorder = TOINT( LOCALS:4 )
+			m_arrWndPropN:nWndId:PropIdx_WndClientWidth  = m_arrWndPropN:nWndId:PropIdx_WndWidth  - (m_arrWndPropN:nWndId:PropIdx_WndBorder == 0 ? 0 # 4)
+			m_arrWndPropN:nWndId:PropIdx_WndClientHeight = m_arrWndPropN:nWndId:PropIdx_WndHeight - (m_arrWndPropN:nWndId:PropIdx_WndBorder == 0 ? 0 # 2)
+			; 表示テキスト生成済みフラグ解除
+			m_arrWndSetTextPrint:nWndId:0 = 0
+
+		CASE "MOVE"
+			VARSET LOCALS, ""
+			SPLIT ARGS, ",", LOCALS
+			FOR nLoop, 0, 2
+				IF ISNUMERIC( LOCALS:nLoop ) == 0
+					THROW WndMgr_WindowMgrMain() : 設定内容が不正です（strMode=%strMode%, ARGS=%ARGS%）
+				ENDIF
+			NEXT
+			m_arrWndPropN:nWndId:PropIdx_WndPosX   = TOINT( LOCALS:0 )
+			m_arrWndPropN:nWndId:PropIdx_WndPosY   = TOINT( LOCALS:1 )
+
+		CASE "RESET"
+			; プロパティ値のリセット（表示位置と枠の設定を除く）
+			FOR nLoop, 0, nWndInfoLen
+				SELECTCASE nLoop
+					CASE PropIdx_WndPosX, PropIdx_WndPosY, PropIdx_WndWidth, PropIdx_WndHeight, PropIdx_WndClientWidth, PropIdx_WndClientHeight, PropIdx_WndBorder
+					CASEELSE
+						m_arrWndPropN:nWndId:nLoop = 0
+				ENDSELECT
+			NEXT
+			; 登録テキストのリセット
+			FOR nLoop, 0, nWndTextLen
+				m_arrWndText:nWndId:nLoop '= ""
+				m_arrWndTextPrint:nWndId:nLoop '= ""
+			NEXT
+			; 表示テキスト生成済みフラグ解除
+			m_arrWndSetTextPrint:nWndId:0 = 0
+			m_arrWndTitle:nWndId:0 '= ""
+
+		CASE "PROPERTY_NUM_GET"
+			RESULT:0 = m_arrWndPropN:nWndId:(ARG)
+			RETURN RESULT:0
+
+		CASE "PROPERTY_NUM_SET"
+			m_arrWndPropN:nWndId:(ARG) = TOINT( ARGS )
+			IF ARG == PropIdx_WndBorder
+				m_arrWndPropN:nWndId:PropIdx_WndClientWidth  = m_arrWndPropN:nWndId:PropIdx_WndWidth  - (m_arrWndPropN:nWndId:PropIdx_WndBorder == 0 ? 0 # 4)
+				m_arrWndPropN:nWndId:PropIdx_WndClientHeight = m_arrWndPropN:nWndId:PropIdx_WndHeight - (m_arrWndPropN:nWndId:PropIdx_WndBorder == 0 ? 0 # 2)
+			ENDIF
+			; 表示テキスト生成済みフラグ解除
+			m_arrWndSetTextPrint:nWndId:0 = 0
+
+		CASE "PROPERTY_STR_GET"
+			RESULTS:0 '= m_arrWndPropS:nWndId:(ARG)
+			RETURN
+
+		CASE "PROPERTY_STR_SET"
+			m_arrWndPropS:nWndId:(ARG) '= ARGS
+
+		CASE "TEXT_CLEAR"
+			; 登録テキストのリセット
+			FOR nLoop, 0, nWndTextLen
+				m_arrWndText:nWndId:nLoop '= ""
+				m_arrWndTextPrint:nWndId:nLoop '= ""
+			NEXT
+			; 表示テキスト生成済みフラグ解除
+			m_arrWndSetTextPrint:nWndId:0 = 0
+
+		CASE "TEXT_SET"
+			m_arrWndText:nWndId:(ARG) '= ARGS
+			; 表示テキスト生成済みフラグ解除
+			m_arrWndSetTextPrint:nWndId:0 = 0
+
+		CASE "TEXT_ADD"
+			m_arrWndText:nWndId:(ARG) '= m_arrWndText:nWndId:(ARG) + ARGS
+			; 表示テキスト生成済みフラグ解除
+			m_arrWndSetTextPrint:nWndId:0 = 0
+
+		CASE "TEXT_GET"
+			RESULTS:0 '= m_arrWndText:nWndId:(ARG)
+			RETURN
+
+		CASE "PRINT_TEXT_CREATE"
+			IF m_arrWndSetTextPrint:nWndId:0 == 0
+				CALL WndMgr_CreatePrintText( nWndId )		; 表示用テキストの生成
+				m_arrWndSetTextPrint:nWndId:0 = 1
+			ENDIF
+			RETURN
+
+		CASE "PRINT_TEXT_GET"
+			; 表示用テキストが未生成の場合、生成する（※"PRINT_TEXT_CREATE"時の処理）
+			IF m_arrWndSetTextPrint:nWndId:0 == 0
+				CALL WndMgr_CreatePrintText( nWndId )		; 表示用テキストの生成
+				m_arrWndSetTextPrint:nWndId:0 = 1
+			ENDIF
+			RESULTS:0 '= m_arrWndTextPrint:nWndId:(ARG)
+			RETURN
+
+		CASE "TITLE"
+			m_arrWndTitle:nWndId:0 '= ARGS
+			; 表示テキスト生成済みフラグ解除
+			m_arrWndSetTextPrint:nWndId:0 = 0
+
+		CASE "EXIST"
+			RESULT:0 = m_arrWndExsit:nWndId:0
+			RETURN RESULT:0
+
+		CASEELSE
+			DEBUGPRINTFORML ★★★ WndMgr_WindowMgrMain() : 処理内容の指定が不正です（strMode=%strMode%）
+
+	ENDSELECT
+
+	RETURN
+
+
+;================================================================
+;【内部処理用】
+; 実際に表示する整形済みのテキストを作成する
+;--------------------------------
+;[引数]
+;	nWndId						: ウィンドウＩＤ（0～9を指定する）
+;--------------------------------
+;================================================================
+@WndMgr_CreatePrintText( nWndId )
+	#DIM  nWndId
+
+	SELECTCASE DEF_WINDOW_DRAWER_MODE
+		CASE 0
+			CALL WndMgr_CreatePrintText_Html( nWndId )
+		CASE 1
+			CALL WndMgr_CreatePrintText_Print( nWndId )
+	ENDSELECT
+
+	RETURN
+
+
+;================================================================
+;【内部処理用】
+; 実際に表示する整形済みのテキストを作成する
+;--------------------------------
+;[引数]
+;	nWndId						: ウィンドウＩＤ（0～9を指定する）
+;--------------------------------
+;================================================================
+@WndMgr_CreatePrintText_Html( nWndId )
+	#DIM  nWndId
+
+	#DIMS arrWndTextBuf, 100
+
+	#DIMS arrBorderText, 8		; 左上, 上, 右上, 左下, 下, 右下, 左, 右, 
+	#DIMS arrBorderColor, 2
+	#DIMS strInvlidColorText = "@C:0x333333@"
+
+	#DIMS arrPaddingSpace				; 後のウィンドウを目隠しするためのスペース埋め
+	#DIMS arrWndText_LineStartText, 3	; 0:先頭行, 1:最終行, 2:中間行
+
+	#DIM  nPosX
+	#DIM  nSizeW
+	#DIM  nSizeH
+	#DIM  nLineWidth
+
+	#DIM  nLoop
+	#DIMS strBuf
+
+	nPosX      = m_arrWndPropN:nWndId:PropIdx_WndPosX
+	nSizeW     = m_arrWndPropN:nWndId:PropIdx_WndWidth
+	nSizeH     = m_arrWndPropN:nWndId:PropIdx_WndHeight
+	nLineWidth = m_arrWndPropN:nWndId:PropIdx_WndClientWidth
+
+	SIF nSizeW <= 0 || nSizeH <= 0
+		RETURN
+	SIF (m_arrWndPropN:nWndId:PropIdx_WndBorder > 0) && (nSizeW < 4 || nSizeH < 2)
+		RETURN
+
+	; 枠の色
+	VARSET arrBorderColor, ""
+	IF (m_arrWndPropN:nWndId:PropIdx_WndBorder > 0)
+		; 無効ウィンドウ / ウィンドウ枠の色 / それ以外
+		IF (m_arrWndPropN:nWndId:PropIdx_WndDisabled == 1)
+			arrBorderColor:0 '= strInvlidColorText
+			arrBorderColor:1 '= "@/C@"
+		ELSEIF (m_arrWndPropN:nWndId:PropIdx_WndBorderColorSet == 1)
+			arrBorderColor:0 '= "@C:0x" + TOSTR( m_arrWndPropN:nWndId:PropIdx_WndBorderColor, "X6" ) + "@"
+			arrBorderColor:1 '= "@/C@"
+		ELSE
+			VARSET arrBorderColor, ""
+		ENDIF
+	ENDIF
+	; 枠線のテキスト
+	VARSET arrBorderText, ""
+	CALL WndMgr_GetWndBorderText( m_arrWndPropN:nWndId:PropIdx_WndBorder, arrBorderText )
+
+	; 行開始のテキスト
+	SELECTCASE m_arrWndPropN:nWndId:PropIdx_WndBorder
+		; 枠無し
+		CASE 0
+			arrWndText_LineStartText:0 '= @"<font face='ＭＳ ゴシック'><nonbutton pos='{(nPosX-1) * 50}'> </nonbutton></font>"
+			arrWndText_LineStartText:1 '= @"<font face='ＭＳ ゴシック'><nonbutton pos='{(nPosX-1) * 50}'> </nonbutton></font>"
+			arrWndText_LineStartText:2 '= @"<font face='ＭＳ ゴシック'><nonbutton pos='{(nPosX-1) * 50}'> </nonbutton></font>"
+		; 枠あり
+		CASE 1, 2
+			LOCALS:0 '= FuncTagSetText_ConvHtmlText( arrBorderColor:0 + arrBorderText:0 + arrBorderColor:1 )
+			LOCALS:1 '= FuncTagSetText_ConvHtmlText( arrBorderColor:0 + arrBorderText:3 + arrBorderColor:1 )
+			LOCALS:2 '= FuncTagSetText_ConvHtmlText( arrBorderColor:0 + arrBorderText:6 + arrBorderColor:1 )
+			arrWndText_LineStartText:0 '= @"<font face='ＭＳ ゴシック'><nonbutton pos='{nPosX * 50}'>%LOCALS:0%</nonbutton></font>"
+			arrWndText_LineStartText:1 '= @"<font face='ＭＳ ゴシック'><nonbutton pos='{nPosX * 50}'>%LOCALS:1%</nonbutton></font>"
+			arrWndText_LineStartText:2 '= @"<font face='ＭＳ ゴシック'><nonbutton pos='{nPosX * 50}'>%LOCALS:2%</nonbutton></font>"
+	ENDSELECT
+
+	;--------------------------------
+	; テキスト部
+	;--------------------------------
+	; 登録テキストを整形
+	VARSET arrWndTextBuf, ""
+	FOR nLoop, 0, nSizeH
+		arrWndTextBuf:nLoop '= m_arrWndText:nWndId:nLoop
+	NEXT
+	; HTMLテキストに変換
+	FOR nLoop, 0, nSizeH
+		IF m_arrWndPropN:nWndId:PropIdx_WndDisabled == 1
+			strBuf '= strInvlidColorText + FuncTagSetText_GetPlainText( arrWndTextBuf:nLoop ) + "@/C@"
+		ELSE
+			strBuf '= arrWndTextBuf:nLoop
+			; ウィンドウが他のウィンドウの背後にある場合
+			IF m_arrWndPropN:nWndId:PropIdx_WndBehindWindow == 1
+				; 画像描画を無効にする
+				WHILE 1
+					LOCAL:0 = STRFINDU( strBuf, "@I:", 0 )
+					SIF LOCAL:0 < 0
+						BREAK
+					LOCAL:1 = STRFINDU( strBuf, "@", LOCAL:0 + 1 )
+					strBuf '= SUBSTRINGU( strBuf, LOCAL:0, LOCAL:1 - LOCAL:0 + 1 )
+					LOCAL:0 = STRFINDU( strBuf, "@/I@", 0 )
+					strBuf '= SUBSTRINGU( strBuf, LOCAL:0, 4 )
+				WEND
+			ENDIF
+		ENDIF
+		arrWndTextBuf:nLoop '= FuncTagSetText_ConvHtmlText( strBuf )
+	NEXT
+	; 枠線ありの場合の特殊な処理
+	SELECTCASE m_arrWndPropN:nWndId:PropIdx_WndBorder
+		; 枠無し
+		CASE 0
+		; 太枠, 細枠
+		CASE 1, 2
+			; テキスト位置を1行下にずらす
+			ARRAYSHIFT arrWndTextBuf, 1, ""
+
+			; 先頭行
+			LOCALS:0 '= FuncTagSetText_ConvHtmlText( arrBorderColor:0 + arrBorderText:0 + arrBorderText:1 * (nLineWidth / 2) + arrBorderText:2 + arrBorderColor:1 )
+			arrWndTextBuf:0 += @"<font face='ＭＳ ゴシック'><nonbutton pos='{nPosX * 50}'>%LOCALS:0%</nonbutton></font>"
+			;	先頭行の追加記述：タイトル
+			IF STRLENS( m_arrWndTitle:nWndId:0 ) > 0
+				LOCAL   = (nPosX + 2) * 50
+				LOCALS '= FuncTagSetText_ConvHtmlText( arrBorderColor:0 + FuncTagSetText_GetPlainText( m_arrWndTitle:nWndId:0 ) + arrBorderColor:1 )
+				arrWndTextBuf:0 += @"<nonbutton pos='{LOCAL}'> %LOCALS% </nonbutton>"
+			ENDIF
+
+			; 最終行
+			LOCALS:0 '= FuncTagSetText_ConvHtmlText( arrBorderColor:0 + arrBorderText:3 + arrBorderText:4 * (nLineWidth / 2) + arrBorderText:5 + arrBorderColor:1 )
+			arrWndTextBuf:(nSizeH - 1) += @"<font face='ＭＳ ゴシック'><nonbutton pos='{nPosX * 50}'>%LOCALS:0%</nonbutton></font>"
+			;	最終行の追加記述：ログ表示ボタン
+			IF m_arrWndPropN:nWndId:PropIdx_WndLogButton == 1
+				LOCAL = (nPosX + MAX(0, nLineWidth - 16)) * 50
+				arrWndTextBuf:(nSizeH - 1) += @"<button value='l' pos='{LOCAL}'> [l] ログ表示 </button>"
+			ENDIF
+
+			; 中間行
+			FOR nLoop, 1, nSizeH - 1
+				LOCAL = (nPosX + nSizeW - 2) * 50
+				LOCALS:0 '= FuncTagSetText_ConvHtmlText( arrBorderColor:0 + arrBorderText:7 + arrBorderColor:1 )
+				arrWndTextBuf:nLoop += @"<font face='ＭＳ ゴシック'><nonbutton pos='{LOCAL}'>%LOCALS:0%</nonbutton></font>"
+			NEXT
+
+	ENDSELECT
+
+	;--------------------------------
+	; 表示テキストに登録
+	;--------------------------------
+	; ウィンドウ背景を塗りつぶす
+	FOR nLoop, 0, nSizeH
+		m_arrWndTextPrint:nWndId:nLoop '= @"<font face='ＭＳ ゴシック'><button pos='{nPosX * 50}' value='%m_strWndBgBtnValue%'>" + (" " * nSizeW) + @"</button></font>"
+	;	m_arrWndTextPrint:nWndId:nLoop '= @"<font face='ＭＳ ゴシック'><nonbutton pos='{nPosX * 50}'>" + (" " * nSizeW) + @"</nonbutton></font>"
+		;MEMO ウィンドウ背景の塗り潰しだが、上と下どちらの処理もデメリットがある
+		;     ・上の処理 ： ウィンドウ領域をクリックすると、文字入力が発生してしまう（INPUTSをぬけてしまう）。
+		;     ・下の処理 ： ウィンドウが重なっている場合、上のウィンドウで隠れている、下のウィンドウのボタンを押下できてしまう。
+		;     上の処理を採用する。理由は、入力内容が分かり、入力破棄と再入力で回避が可能で、予期せぬ入力が発生する下の処理よりも危険が少ないため。
+	NEXT
+	; 変換したHTMLテキストを格納
+	FOR nLoop, 0, nSizeH
+		SELECTCASE nLoop
+			CASE 0
+				m_arrWndTextPrint:nWndId:nLoop += arrWndText_LineStartText:0 + arrWndTextBuf:nLoop
+			CASE nSizeH - 1
+				m_arrWndTextPrint:nWndId:nLoop += arrWndText_LineStartText:1 + arrWndTextBuf:nLoop
+			CASEELSE
+				m_arrWndTextPrint:nWndId:nLoop += arrWndText_LineStartText:2 + arrWndTextBuf:nLoop
+		ENDSELECT
+	NEXT
+
+	RETURN
+
+
+;================================================================
+;【内部処理用】
+; 実際に表示する整形済みのテキストを作成する
+;--------------------------------
+;[引数]
+;	nWndId						: ウィンドウＩＤ（0～9を指定する）
+;--------------------------------
+;================================================================
+@WndMgr_CreatePrintText_Print( nWndId )
+	#DIM  nWndId
+
+	#DIMS arrWndTextBuf, 100
+
+	#DIMS arrBorderText, 8		; 左上, 上, 右上, 左下, 下, 右下, 左, 右, 
+	#DIMS arrBorderColor, 2
+	#DIMS strInvlidColorText = "@C:0x333333@"
+
+	#DIM  nPosX
+	#DIM  nSizeW
+	#DIM  nSizeH
+	#DIM  nLineWidth
+
+	#DIM  nLoop
+	#DIMS strBuf
+
+	nPosX      = m_arrWndPropN:nWndId:PropIdx_WndPosX
+	nSizeW     = m_arrWndPropN:nWndId:PropIdx_WndWidth
+	nSizeH     = m_arrWndPropN:nWndId:PropIdx_WndHeight
+	nLineWidth = (m_arrWndPropN:nWndId:PropIdx_WndBorder == 0 ? m_arrWndPropN:nWndId:PropIdx_WndWidth # m_arrWndPropN:nWndId:PropIdx_WndClientWidth)
+
+	SIF nSizeW <= 0 || nSizeH <= 0
+		RETURN
+
+	;--------------------------------
+	; 枠線部
+	;--------------------------------
+	; 枠の色
+	VARSET arrBorderColor, ""
+	IF (m_arrWndPropN:nWndId:PropIdx_WndBorder > 0)
+		; 無効ウィンドウ / ウィンドウ枠の色 / それ以外
+		IF (m_arrWndPropN:nWndId:PropIdx_WndDisabled == 1)
+			arrBorderColor:0 '= strInvlidColorText
+			arrBorderColor:1 '= "@/C@"
+		ELSEIF (m_arrWndPropN:nWndId:PropIdx_WndBorderColorSet == 1)
+			arrBorderColor:0 '= "@C:0x" + TOSTR( m_arrWndPropN:nWndId:PropIdx_WndBorderColor, "X6" ) + "@"
+			arrBorderColor:1 '= "@/C@"
+		ELSE
+			VARSET arrBorderColor, ""
+		ENDIF
+	ENDIF
+	; 枠線のテキスト
+	VARSET arrBorderText, ""
+	CALL WndMgr_GetWndBorderText( m_arrWndPropN:nWndId:PropIdx_WndBorder, arrBorderText )
+	IF (m_arrWndPropN:nWndId:PropIdx_WndBorder > 0)
+		arrBorderText:0 '= arrBorderColor:0 + arrBorderText:0 + arrBorderColor:1
+		arrBorderText:2 '= arrBorderColor:0 + arrBorderText:2 + arrBorderColor:1
+		arrBorderText:3 '= arrBorderColor:0 + arrBorderText:3 + arrBorderColor:1
+		arrBorderText:5 '= arrBorderColor:0 + arrBorderText:5 + arrBorderColor:1
+		arrBorderText:6 '= arrBorderColor:0 + arrBorderText:6 + arrBorderColor:1
+		arrBorderText:7 '= arrBorderColor:0 + arrBorderText:7 + arrBorderColor:1
+	ENDIF
+
+	;--------------------------------
+	; ウィンドウにセットされたテキストを整形
+	VARSET arrWndTextBuf, ""
+	FOR nLoop, 0, nSizeH
+		arrWndTextBuf:nLoop '= m_arrWndText:nWndId:nLoop
+	NEXT
+	SELECTCASE m_arrWndPropN:nWndId:PropIdx_WndBorder
+		; 枠無し
+		CASE 0
+		; 太枠, 細枠
+		CASE 1, 2
+			VARSET LOCALS, ""
+			ARRAYSHIFT arrWndTextBuf, 1, ""
+			LOCALS:0 '= FuncTagSetText_GetPlainText( m_arrWndTitle:nWndId:0 )
+			LOCALS:1 '= arrBorderText:1 * (nLineWidth / 2)
+			LOCALS:2 '= arrBorderText:4 * (nLineWidth / 2)
+			IF m_arrWndPropN:nWndId:PropIdx_WndLogButton == 1
+				LOCALS:3 '= " @B:l@\[l\] ログ表示@/B@ "
+				LOCAL = FuncTagSetText_GetPrintLength( LOCALS:3 )
+				LOCALS:2 '= FuncString_Mold( LOCALS:2, nLineWidth - LOCAL, " ", "L" )
+			ENDIF
+			arrWndTextBuf:0            '= arrBorderColor:0 + FuncString_Mold( LOCALS:0 + LOCALS:1, nLineWidth, " ", "L" ) + arrBorderColor:1
+			arrWndTextBuf:(nSizeH - 1) '= arrBorderColor:0 + LOCALS:2 + LOCALS:3 + arrBorderColor:1
+	ENDSELECT
+
+	FOR nLoop, 0, nSizeH
+		IF m_arrWndPropN:nWndId:PropIdx_WndDisabled == 1
+			strBuf '= strInvlidColorText + FuncTagSetText_GetPlainText( arrWndTextBuf:nLoop ) + "@/C@"
+		ELSE
+			strBuf '= arrWndTextBuf:nLoop
+		ENDIF
+		arrWndTextBuf:nLoop '= FuncTagSetText_ShapeSize( strBuf, nLineWidth, 1 )
+	NEXT
+
+	;--------------------------------
+	; テキスト部
+	SELECTCASE m_arrWndPropN:nWndId:PropIdx_WndBorder
+		; 枠無し
+		CASE 0
+			FOR nLoop, 0, nSizeH
+				m_arrWndTextPrint:nWndId:nLoop '= arrBorderText:6 + arrWndTextBuf:nLoop + arrBorderText:7
+			NEXT
+
+		; 枠あり, 細枠
+		CASE 1, 2
+			FOR nLoop, 0, nSizeH
+				SELECTCASE nLoop
+					CASE 0
+						m_arrWndTextPrint:nWndId:nLoop '= arrBorderText:0 + arrWndTextBuf:nLoop + arrBorderText:2
+					CASE nSizeH - 1
+						m_arrWndTextPrint:nWndId:nLoop '= arrBorderText:3 + arrWndTextBuf:nLoop + arrBorderText:5
+					CASEELSE
+						m_arrWndTextPrint:nWndId:nLoop '= arrBorderText:6 + arrWndTextBuf:nLoop + arrBorderText:7
+				ENDSELECT
+			NEXT
+	ENDSELECT
+
+	RETURN
+
+
+;================================================================
+;【内部処理用】
+; ウィンドウの枠線用テキストを取得する
+;--------------------------------
+;[引数]
+;	nBorderType				: 枠線のタイプ
+;	arrBorderText:Ｘ		: (REF) 枠線用テキスト格納領域（Ｘ:左上, 上, 右上, 左下, 下, 右下, 左, 右, ）
+;--------------------------------
+;================================================================
+@WndMgr_GetWndBorderText( nBorderType, arrBorderText )
+	#DIM  nBorderType
+	#DIMS REF arrBorderText, 0
+
+	SELECTCASE nBorderType
+		; 枠無し
+		CASE 0
+			VARSET arrBorderText, ""
+		; 太枠
+		CASE 1
+			arrBorderText '= "┏", "━", "┓", "┗", "━", "┛", "┃", "┃"
+		; 細枠
+		CASE 2
+			arrBorderText '= "┌", "─", "┐", "└", "─", "┘", "│", "│"
+	ENDSELECT
+
+	RETURN
+
+
+;================================================================
+
+
+
+
+
+
+

@@ -1,0 +1,333 @@
+﻿
+;≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡
+; 文字列操作関連の関数
+;
+;	関数名	:	FuncString_～～
+;≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡
+
+
+;================================================================
+; 渡された文字列の長さを取得する。
+; ※ STRLENS()はUnicodeの文字の全角半角が判断できないため、追加する
+; ※ MSゴシック前提
+;--------------------------------
+;[引数]
+;	strSrcText		: 
+;--------------------------------
+;[戻り値など]
+;	渡された文字列の長さ
+;================================================================
+@FuncString_GetLength( strSrcText )
+#FUNCTION
+	#DIMS strSrcText
+
+	#DIM  nTextLen
+
+	nTextLen = STRLENS( strSrcText )
+	; 一部のユニコード文字が表示上は全角だが、半角と判断されているので、文字数を増やす
+	nTextLen += STRCOUNT(strSrcText, UNICODE(0x2610))
+	nTextLen += STRCOUNT(strSrcText, UNICODE(0x2611))
+	nTextLen += STRCOUNT(strSrcText, UNICODE(0x2612))
+	nTextLen += STRCOUNT(strSrcText, UNICODE(0x2764))
+
+	RETURNF nTextLen
+
+
+;================================================================
+; 渡された文字列をユニコードのバイト値文字列に変換する
+;--------------------------------
+;[引数]
+;	strSrcText		: 
+;--------------------------------
+;[戻り値など]
+;	変換した文字列
+;	例）"あいうえお" → "3042304430463048304A"
+;================================================================
+@FuncString_ConvertToUnicodeText( strSrcText )
+#FUNCTIONS
+	#DIMS strSrcText
+
+	#DIMS strUnicodeText
+	#DIM  nTextLength
+	#DIM  nLoop
+
+	strUnicodeText '= ""
+	ENCODETOUNI %strSrcText%
+	nTextLength = RESULT:0
+	FOR nLoop, 0, nTextLength
+		strUnicodeText += TOSTR(RESULT:(nLoop + 1), "X4")
+	NEXT
+
+	RETURNF strUnicodeText
+
+
+;================================================================
+; 渡されたユニコードのバイト値文字列を通常の文字列に変換する
+;	※FuncString_ConvertToUnicodeText()の再変換用
+;--------------------------------
+;[引数]
+;	strUnicodeText		: 
+;--------------------------------
+;[戻り値など]
+;	変換した文字列
+;	例）"3042304430463048304A" → "あいうえお"
+;================================================================
+@FuncString_ConvertFromUnicodeText( strUnicodeText )
+#FUNCTIONS
+	#DIMS strUnicodeText
+
+	#DIMS strDestText
+	#DIMS strBuf
+	#DIM  nLoop
+
+	strDestText '= ""
+	nLoop = 0
+	WHILE 1
+		strBuf '= "0x" + SUBSTRING( strUnicodeText, nLoop * 4, 4 )
+		IF ISNUMERIC( strBuf ) == 0
+			DEBUGPRINTFORML FuncString_ConvertFromUnicodeText() - 不正な値を検出しました（不正値=「%strBuf%」(nLoop={nLoop}), 変換元=「%strUnicodeText%」）
+			BREAK
+		ENDIF
+		strDestText += UNICODE( TOINT( strBuf ) )
+		nLoop += 1
+		SIF ((nLoop + 1) * 4) > STRLENS(strUnicodeText)
+			BREAK
+	WEND
+
+	RETURNF strDestText
+
+
+;================================================================
+; 文字列を指定の文字数になるように整形する
+;	短ければ、指定の文字数になるように埋め文字を追加する
+;	長ければ、後ろの文字を削除する
+;--------------------------------
+;[引数]
+;	strText		: 文字列
+;	nLength		: 文字列長（指定した文字列長に足りない場合、strPaddingで埋める）
+;	strPadding	: パディング用文字（半角1文字であること）
+;	strAlign	: "L"or"R"or"C"
+;					"L" = 左詰め
+;					"R" = 右詰め
+;					"C" = 中央寄せ（不足文字数が奇数の場合、左から埋めていく）
+;--------------------------------
+;[戻り値など]
+;	変換した文字列
+;================================================================
+@FuncString_Mold( strText, nLength, strPadding=" ", strAlign="L" )
+#FUNCTIONS
+#LOCALSIZE 4
+#LOCALSSIZE 4
+	#DIMS strText
+	#DIM  nLength
+	#DIMS strPadding
+	#DIMS strAlign
+
+	#DIM  nCheck
+
+	SELECTCASE nLength - FuncString_GetLength( strText )
+		CASE IS > 0
+			LOCALS:0 '= FuncString_Padding( strText, nLength, strPadding, strAlign )
+
+		CASE IS < 0
+			VARSET LOCALS, ""
+			nCheck = 0
+			SELECTCASE strAlign
+				CASE "L", "C"
+					WHILE nCheck < STRLENSU(strText)
+						LOCALS:1 '= SUBSTRINGU( strText, nCheck, 1 )
+						SIF FuncString_GetLength(LOCALS:0) + FuncString_GetLength(LOCALS:1) > nLength
+							BREAK
+						LOCALS:0 += LOCALS:1
+						nCheck += 1
+					WEND
+					WHILE FuncString_GetLength(LOCALS) < nLength
+						LOCALS:0 += " "
+					WEND
+
+				CASE "R"
+					WHILE nCheck < STRLENSU(strText)
+						LOCAL = STRLENSU(strText)
+						LOCALS:1 '= SUBSTRINGU( strText, LOCAL - 1 - nCheck, 1 )
+						SIF FuncString_GetLength(LOCALS:0) + FuncString_GetLength(LOCALS:1) > nLength
+							BREAK
+						LOCALS:0 '= LOCALS:1 + LOCALS:0
+						nCheck += 1
+					WEND
+					WHILE FuncString_GetLength(LOCALS:0) < nLength
+						LOCALS:0 '= " " + LOCALS:0
+					WEND
+			ENDSELECT
+
+		CASE 0
+			LOCALS:0 '= strText
+	ENDSELECT
+
+	RETURNF LOCALS:0
+
+
+;================================================================
+; 文字列を指定の文字数になるように埋め文字を追加して返す
+; 文字列が文字長よりも長い場合はそのまま返す
+;--------------------------------
+;[引数]
+;	strText		: 文字列
+;	nLength		: 文字列長（指定した文字列長に足りない場合、strPaddingで埋める）
+;	strPadding	: パディング用文字（半角1文字であること）
+;	strAlign	: "L"or"R"or"C"
+;					"L" = 左詰め
+;					"R" = 右詰め
+;					"C" = 中央寄せ（不足文字数が奇数の場合、左側の埋め文字が1文字多くなる）
+;--------------------------------
+;[戻り値など]
+;	変換した文字列
+;================================================================
+@FuncString_Padding( strText, nLength, strPadding, strAlign )
+#FUNCTIONS
+#LOCALSIZE 4
+#LOCALSSIZE 4
+	#DIMS strText
+	#DIM  nLength
+	#DIMS strPadding
+	#DIMS strAlign
+
+	#DIM  nPaddingLength
+
+	nPaddingLength = nLength - FuncString_GetLength( strText )
+	IF nPaddingLength > 0
+		SELECTCASE TOUPPER( strAlign )
+			CASE "L", "LEFT"
+				LOCALS '= strText + (strPadding * nPaddingLength)
+			CASE "R", "RIGHT"
+				LOCALS '= (strPadding * nPaddingLength) + strText
+			CASE "C", "CENTER"
+				LOCAL:1 = (nPaddingLength / 2) + (nPaddingLength % 2)
+				LOCAL:2 = nPaddingLength / 2
+				LOCALS '= (strPadding * LOCAL:1) + strText + (strPadding * LOCAL:2)
+			CASEELSE
+				LOCALS '= @"%strText, nLength%"
+		ENDSELECT
+	ELSE
+		LOCALS '= strText
+	ENDIF
+
+	RETURNF LOCALS
+
+
+;================================================================
+; 文字の前後に存在する半角スペースを削除する
+;--------------------------------
+;[引数]
+;	strText		: 文字列
+;--------------------------------
+;[戻り値など]
+;	変換した文字列
+;================================================================
+@FuncString_Trim( strText )
+#FUNCTIONS
+	#DIMS strText
+
+	#DIM  nIdx
+
+	; 先頭チェック
+	WHILE 1
+		nIdx = STRFINDU( strText, " ", 0 )
+		IF nIdx == 0
+			strText '= SUBSTRINGU( strText, 1, -1 )
+			CONTINUE
+		ENDIF
+		BREAK
+	WEND
+
+	; 末尾チェック
+	WHILE 1
+		nIdx = STRFINDU( strText, " ", STRLENSU(strText) - 1 )
+		IF nIdx != -1
+			strText '= SUBSTRINGU( strText, 0, nIdx )
+			CONTINUE
+		ENDIF
+		BREAK
+	WEND
+
+	RETURNF strText
+
+
+;================================================================
+; 文字の前後に存在する半角スペース、全角スペースを削除する
+;--------------------------------
+;[引数]
+;	strText		: 文字列
+;--------------------------------
+;[戻り値など]
+;	変換した文字列
+;================================================================
+@FuncString_TrimEx( strText )
+#FUNCTIONS
+	#DIMS strText
+
+	#DIM  nIdx
+
+	; 先頭チェック
+	WHILE 1
+		nIdx = STRFINDU( strText, " ", 0 )
+		IF nIdx == 0
+			strText '= SUBSTRINGU( strText, 1, -1 )
+			CONTINUE
+		ENDIF
+		nIdx = STRFINDU( strText, "　", 0 )
+		IF nIdx == 0
+			strText '= SUBSTRINGU( strText, 1, -1 )
+			CONTINUE
+		ENDIF
+		BREAK
+	WEND
+
+	; 末尾チェック
+	WHILE 1
+		nIdx = STRFINDU( strText, " ", STRLENSU(strText) - 1 )
+		IF nIdx != -1
+			strText '= SUBSTRINGU( strText, 0, nIdx )
+			CONTINUE
+		ENDIF
+		nIdx = STRFINDU( strText, "　", STRLENSU(strText) - 1 )
+		IF nIdx != -1
+			strText '= SUBSTRINGU( strText, 0, nIdx )
+			CONTINUE
+		ENDIF
+		BREAK
+	WEND
+
+	RETURNF strText
+
+
+;================================================================
+; 文字列を数値に変換する。変換できない場合はデフォルト値を返す
+;--------------------------------
+;[引数]
+;	strText		: 文字列
+;	nDefault	: デフォルト値
+;--------------------------------
+;[戻り値など]
+;	変換した数値
+;================================================================
+@FuncString_ToInt( strText, nDefault = 0 )
+#FUNCTION
+	#DIMS strText
+	#DIM  nDefault
+
+	IF ISNUMERIC( strText ) > 0
+		RETURNF TOINT( strText )
+	ENDIF
+	RETURNF nDefault
+
+
+;================================================================
+
+
+
+
+
+
+
+
+
