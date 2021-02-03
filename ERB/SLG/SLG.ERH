@@ -292,8 +292,40 @@
 #DIM CONST 酒場 = 5
 #DIM CONST 風俗 = 6
 
+#DIM SAVEDATA ソートキー = 0
+#DIM SAVEDATA 降順ソート = 0
+#DIM CONST ソート_NO = 0
+#DIM CONST ソート_所属 = 1
+#DIM CONST ソート_艦種 = 2
+#DIM CONST ソート_任務 = 3
+#DIM CONST ソート_HP = 4
+#DIM CONST ソート_MAXHP = 5
+#DIM CONST ソート_HP割合 = 6
+#DIM CONST ソート_シールド = 7
+#DIM CONST ソート_MAXシールド = 8
+#DIM CONST ソート_シールド割合 = 9
+#DIM CONST ソート_実弾 = 10
+#DIM CONST ソート_レーザー = 11
+#DIM CONST ソート_ミサイル = 12
+#DIM CONST ソート_戦闘機 = 13
+#DIM CONST ソート_魚雷 = 14
+#DIM CONST ソート_対空 = 15
+#DIM CONST ソート_回避 = 15
 
-
+#DIM CONST データ_艦名 = 0
+#DIM CONST データ_艦種 = 1
+#DIM CONST データ_所属 = 2
+#DIM CONST データ_任務 = 3
+#DIM CONST データ_HP = 4
+#DIM CONST データ_シールド = 5
+#DIM CONST データ_実弾 = 6
+#DIM CONST データ_レーザー = 7
+#DIM CONST データ_ミサイル = 8
+#DIM CONST データ_戦闘機 = 9
+#DIM CONST データ_魚雷 = 10
+#DIM CONST データ_対空 = 11
+#DIM CONST データ_回避 = 12
+#DIM CONST 船舶一覧データ数 = 13 ;↑を追加したら更新する
 ;-------------------------
 ; DEBUG関連
 ;-------------------------
