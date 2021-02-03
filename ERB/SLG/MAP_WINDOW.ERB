@@ -1,141 +1,139 @@
+﻿;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;@DRAW_WINDOW(SECTOR_ID,wFLAG)
+;;; 	引数１	SECTOR_ID	: 表示するセクターXX
+;;;							: 中心マップおよび右セクターマップの表示
+;;;		引数２	SELECTED	: 特にクリックされた地点　[SECTER][POS_X][POSY] 6桁
+;;;							: 有効な座標６ケタ、もしくは SECTRE2ケタ+9999：セクターマップ切り替え用
+;;;		引数３	SHIP_ID		; 主体となる船 左上情報ウィンドウ5用 -1で非表示
+;;; 	引数４	wFLAG		: 描画画面切り替えフラグ。　wFLAG == 1 は宙域画面　コントローラーWINDOW0を出す
+;;;							: 1=コントローラー表示  0:非表示 (移動先、交易指定などで使用)
+;;; 画面用に宙域マップを描画する　SECTOR_IDで指定されたものを表示する
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;@DRAW_WINDOW(SECTOR_ID,POSID)
-;;; �E�B���h�E�̏����ݒ肪�����ōs����
-;;; ������͉�ʂƕ������ق����悳��������
-;;; �u�ėp�֐��E���C�u���������X���v98 �΂ӂ������J�̃��C�u�������g�p���Ă��܂�
-;;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-@DRAW_WINDOW(SECTOR_ID, POSID)
-#DIM SECTOR_ID	;�\���Z�N�^�[
-#DIM POSID	= -1	;�w�肳�ꂽ���W
-#DIM  nWndId, 5
-#DIM  nLocX, 5
-#DIM  nLocY, 5
-#DIM  nWidth, 5
-#DIM  nHeigth, 5
-#DIM  nExFlag, 5
-#DIMS strInputResult
+@DRAW_WINDOW(SECTOR_ID, SELECTED = -1, SHIP_ID = -1, Wnd0_FLAG = 0)
+#DIM SECTOR_ID
+#DIM SELECTED
+#DIM SHIP_ID
+#DIM Wnd0_FLAG		;window0 コントローラー表示するフラグ
+#DIM Wnd4_LINES = 0	;window4 MainInfo表示内容行数
+#DIM dynamic OPWnd , 10	;ウィンドウ群展開に使用
+#DIM WndCOUNT			;ウィンドウ群展開に使用
 
-;;�E�B���h�E�������Ȃ珉���ݒ肷��
-;--------------------------------
-CALL WndMgr_VacantId()
-IF RESULT == 0
-; �E�B���h�E�O�̐����ƁA�\��������̐ݒ�
-	nWndId:0  = 0		;;�E�C���h�E�ԍ� 0=�R���g���[�����@1=���C���}�b�v�����@2=�Z�N�^�[�}�b�v�@3=�߂����[��
-	nLocX:0   = 2		;;�E�B���h�E�̋N�_�w
-	nLocY:0   = 5		;;�E�B���h�E�̋N�_�x
-	nWidth:0  = 26		;;�E�B���h�E�̕�
-	nHeigth:0 = 10		;;�E�C���h�E�̍���
-	nExFlag:0 = 0x02	;;�g�̗L���@0x00 �Ȃ� 0x01 �� 0x02 ��
-	CALL WndMgr_CreateWindow( nWndId:0, nLocX:0, nLocY:0, nWidth:0, nHeigth:0, nExFlag:0 )		; �uID=nWndId:0�v�̃E�B���h�E�𐶐�����
+;;移動用宙域画面でも、あなたが船に乗ってない場合、コントローラ表示させない
+SIF Wnd0_FLAG == 1 && BOARDING_SHIP_ID < 0 
+	Wnd0_FLAG = 0
 
-;	CALL WndMgr_GetPropertyNum( nWndId:0, PropIdx_WndClientWidth )
-;	nWndClientWidth = RESULT
+;;お約束 WINDOW未生成の場合作成する
+CALL SETUP_WINDOW
 
-; �E�B���h�E1�̐����ƁA�\��������̐ݒ�
-	nWndId:1  = 1
-	nLocX:1   = 34
-	nLocY:1   = 0
-	nWidth:1  = 34
-	nHeigth:1 = 17
-	nExFlag:1 = 0x01
-	CALL WndMgr_CreateWindow( nWndId:1, nLocX:1, nLocY:1, nWidth:1, nHeigth:1, nExFlag:1 )
-	
-; �E�B���h�E2�̐����ƁA�\��������̐ݒ�
-	nWndId:2  = 2
-	nLocX:2   = nLocX:1+ nWidth:1 + 0
-	nLocY:2   = 0
-	nWidth:2  = 24
-	nHeigth:2 = 12
-	nExFlag:2 = 0x02
-	CALL WndMgr_CreateWindow( nWndId:2, nLocX:2, nLocY:2, nWidth:2, nHeigth:2, nExFlag:2 )	
-	
-;�E�B���h�E3�̍쐬
-	nWndId:3  = 3
-	nLocX:3   = nLocX:2
-	nLocY:3   = nLocY:2 + nHeigth:2
-	nWidth:3  = 44
-	nHeigth:3 = 8
-	nExFlag:3 = 0x02
-	CALL WndMgr_CreateWindow( nWndId:3, nLocX:3, nLocY:3, nWidth:3, nHeigth:3, nExFlag:3 )
-
-ENDIF ;;�E�B���h�E�����ݒ肱���܂�
-;--------------------------------
-
-;���C�����[�v��������
-;$LEAP_PRINT
-
-CLEARLINE LINECOUNT
-DRAWLINE
-
-;;;�ewindow�̍��@�ĕ`�悵�Ȃ��Ă����g�R�܂ł��Ă��܂��Ă邯�ǂ��Ƃ܂킵
-;;�R���g���[���\�� window0
-IF BOARDING_SHIP_ID >= 0
+;;;各windowの内容を作成　再作成しなくていいトコまでしてしまってるけどあとまわし
+;;内容作成　window0 宙域画面・左側コントローラー部分
+SIF Wnd0_FLAG == 1 
 	CALL CREATE_WINDOW_CONTROLL
-ENDIF
 
-;;;���C���}�b�v�\�� window1
+;;;内容作成　window1 宙域画面・中央マップ部分
 CALL CREATE_WINDOW_MAINMAP(SECTOR_ID)
 
-;;�E�Z�N�^�[�}�b�v�\�� window2
+;;;内容作成　window2 宙域画面・右側セクター全体マップ部分
 CALL CREATE_WINDOW_SUBMAP(SECTOR_ID)
 
-;;���b�Z�[�W�g window3
-CALL CREATE_WINDOW_MESSAGE(POSID)
+;;;内容作成　window3 宙域画面・右下情報枠 / 座標オブジェクト表示
+CALL CREATE_WINDOW_SUBINFO(SELECTED)
 
-IF BOARDING_SHIP_ID <0 
-	LOCAL = 1, 2, 3
-	CALL WndMgr_Display( 3, LOCAL, 0 )
-ELSE
-	CALL WndMgr_DisplayAll( 0 )
+;;;内容作成　window4.宙域画面・下部メッセージ / 艦隊情報
+;IF Wnd0_FLAG == 1
+	CALL CREATE_WINDOW_MAININFO(SELECTED)
+	Wnd4_LINES = RESULT
+;ENDIF
+
+;内容作成　window5 船情報概略
+SIF SHIP_ID >= 0
+	CALL CREATE_WINDOW_SHIPINFO_MAIN(SHIP_ID)
+
+;;画面への表示を実行
+;IF Wnd0_FLAG == 1	;宙域移動画面　コントローラーあり
+;	IF Wnd4_LINES >= 1	;window4に記述ありなら表示する
+;		OPWnd = 0, 1, 2, 3, 4, 5
+;		WndCOUNT = 6
+;	ELSE			;window4に記述なしなら表示せず破棄する
+;		OPWnd = 0, 1, 2, 3, 5
+;		CALL WndMgr_DestroyWindow( 4 )	
+;		WndCOUNT = 5
+;;	ENDIF
+;ELSE			;;座標表示用 移動や交易、船を降りたあなた。
+;	IF Wnd4_LINES >= 1	;window4に記述ありなら表示する
+;		OPWnd = 1, 2, 3, 4 ,5
+;		WndCOUNT = 4
+;	ELSE
+;		OPWnd = 1, 2, 3
+;		CALL WndMgr_DestroyWindow( 4 )	
+;		WndCOUNT = 3
+;	ENDIF
+;ENDIF
+
+
+DRAWLINE
+;;窓1：中央マップ部分 / 窓２:右側セクター全体マップ部分 / 窓３:右下情報枠 は常にある
+	OPWnd = 1, 2, 3
+	WndCOUNT = 3
+	
+IF Wnd0_FLAG == 1	;窓０コントローラーあり
+	OPWnd:WndCOUNT = 0
+	WndCOUNT ++
+ENDIF
+IF Wnd4_LINES >= 1	;窓４下部メッセージ / 艦隊情報 に記入あり
+	OPWnd:WndCOUNT = 4
+	WndCOUNT ++
+ELSE				;;あとで表示調整するため、非表示なら破棄しとく
+	CALL WndMgr_DestroyWindow( 4 )	
+ENDIF
+IF SHIP_ID >= 0		;窓５ 船情報概略 
+	OPWnd:WndCOUNT = 5
+	WndCOUNT ++
 ENDIF
 
-;;;window�S�\������
+;;;指定windowの表示を実行
+CALL WndMgr_Display( WndCOUNT, OPWnd, 0 )
+;window4が存在しない場合ズレ補正に空行
+CALL WndMgr_Exist( 4 )
+IF RESULT:0 == 0
+	PRINTL
+	PRINTL
+	PRINTL
+ENDIF
 
-
-;$INPUT
-
-;INPUTS
-;strInputResult '= RESULTS
-;;;������łȂ��������͂̏ꍇ�A���W���N���b�N�����f�[�^�Ȃ̂Ő����ɂ��ǂ�
-;ISNUMERIC strInputResult
-;IF RESULT:0
-;	TOINT strInputResult
-;	IF RESULT >= 0 && RESULT <= 999999
-;		SECTOR_ID = RESULT / 10000
-;		POSID = RESULT
-;		
-;		GOTO LEAP_PRINT
-;	ENDIF
-;;; "_"���͂�window�N���b�N�������Q�Ȃ̂łق��Ƃ�
-;ELSEIF strInputResult == "_"
-;	CLEARLINE 1
-;	GOTO INPUT
-;ENDIF
+;;;window4 展開用に数値保持
+RETURN Wnd4_LINES
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;@CREATE_WINDOW_CONTROLL
-;;; window0 �R���g���[���[�̍쐬
-;;; �Ƃ肠�����`�����������蔲��
-;;�A���ړ����삵�����Ȃ�ONEINPUTS�ňꕶ�����́B�ł��ړ����x�؂�ւ��݂����Ȃ̕K�v
-;;	�ꕶ�����͂ɂȂ�ƃZ�N�^�[�N���b�N�������Ȃ��Ȃ�̂ŗǂ�����
+;;; window0 コントローラーの作成
+;;; とりあえず形つくっただけ手抜き
+;;連続移動操作したいならONEINPUTSで一文字入力。でも移動速度切り替えみたいなの必要
+;;	一文字入力になるとセクタークリックが利かなくなるので良し悪し
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 @CREATE_WINDOW_CONTROLL
 #DIM windowID = 0
+#DIM 色 = 0xFFFF00
 
 	CALL WndMgr_WindowTitle( windowID , @"%SHIP_NAME:BOARDING_SHIP_ID%" )
 	
 	CALL ID2POS(SHIP_POSITION:BOARDING_SHIP_ID)
 	
-	CALL WndMgr_TextSet( windowID , 0, @"@B:{SHIP_POSITION:BOARDING_SHIP_ID}@ ���ݒn:#{RESULT:0,2,RIGHT} X:{RESULT:1,2,RIGHT} Y:{RESULT:2,2,RIGHT} @/B@" )
-	CALL WndMgr_TextSet( windowID , 3, @"�@�@�@�@@B:w@[��w]@/B@" )
-	CALL WndMgr_TextSet( windowID , 4, @"�@@B:a@[��a]@/B@�@�@�@�@@B:d@[d��]@/B@" )
-	CALL WndMgr_TextSet( windowID , 5, @"�@�@�@�@@B:s@[��s]@/B@" )
+	CALL WndMgr_TextSet( windowID , 0, @"@B:{SHIP_POSITION:BOARDING_SHIP_ID}@ 現在地:#{RESULT:0,2,RIGHT} X:{RESULT:1,2,RIGHT} Y:{RESULT:2,2,RIGHT} @/B@" )
+	CALL WndMgr_TextSet( windowID , 3, @"　　　　@B:w@[↑w]@/B@" )
+	CALL WndMgr_TextSet( windowID , 4, @"　@B:a@[←a]@/B@　　　　@B:d@[d→]@/B@" )
+	CALL WndMgr_TextSet( windowID , 5, @"　　　　@B:s@[↓s]@/B@" )
+
+IF SHIP_MISSION:BOARDING_SHIP_ID != 待機
+	CALL WndMgr_TextSet( windowID , 3, @"　 　@C:{色}@自動航行中@/C@" )	
+	CALL WndMgr_TextSet( windowID , 4, @"" )
+	CALL WndMgr_TEXTSET( windowID , 5, @" @B:v@[ 進行 ]@/B@　　@B:c@[ 解除 ]@/B@" )	
+ENDIF
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;@CREATE_WINDOW_MAINMAP(SECTOR_ID)
-;;; window1 ���C���}�b�v����}���쐬
-;;;�@SECTOR_ID ���C���}�b�v�ŕ\�����̃Z�N�^�[ 2�P�^
+;;;　引数１：セクター 2ケタ
+;;; window1 に引数１で指定されたメインマップ宙域図を作成
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 @CREATE_WINDOW_MAINMAP(SECTOR_ID)
 #DIM windowID = 1
@@ -145,11 +143,11 @@ ENDIF
 #DIM ITER
 #DIM PORT_COUNT
 #DIM POSID
-#DIMS �^�C��
-#DIM �F
+#DIMS タイル
+#DIM 色
 #DIM KEY
 
-	CALL WndMgr_WindowTitle( windowID, @" �Z�N�^�[��{SECTOR_ID} " ) ;�g�^�C�g��
+	CALL WndMgr_WindowTitle( windowID, @" セクター＃{SECTOR_ID} " ) ;枠タイトル
 
 FOR Y_POS, 0, MAP_HEIGHT
 	FOR X_POS, 0, MAP_WIDTH
@@ -160,8 +158,8 @@ FOR Y_POS, 0, MAP_HEIGHT
 		ELSE
 			SIF MAP:SECTOR_ID:X_POS:Y_POS == 0
 				CALL UPDATE_MAP
-			; ���ȊO�ł͑D��\������
-			IF MAP:SECTOR_ID:X_POS:Y_POS != �� && MAP:SECTOR_ID:X_POS:Y_POS != �F���`
+			; 星以外では船を表示する
+			IF MAP:SECTOR_ID:X_POS:Y_POS != 星 && MAP:SECTOR_ID:X_POS:Y_POS != 宇宙港
 				CALL GET_SHIP_TILE(POSID)
 				IF RESULT > 0
 					CALL ID2TILE(RESULT)
@@ -169,7 +167,7 @@ FOR Y_POS, 0, MAP_HEIGHT
 					CALL ID2TILE(MAP:SECTOR_ID:X_POS:Y_POS)
 				ENDIF
 			ELSE
-				IF MAP:SECTOR_ID:X_POS:Y_POS == �F���`
+				IF MAP:SECTOR_ID:X_POS:Y_POS == 宇宙港
 					FOR ITER, 0, PORT_COUNT
 						SIF PORT_OWNER:ITER != PLAYER_COUNTRY
 							CONTINUE
@@ -182,158 +180,272 @@ FOR Y_POS, 0, MAP_HEIGHT
 				CALL ID2TILE(MAP:SECTOR_ID:X_POS:Y_POS)
 			ENDIF
 		ENDIF
-	;;�\���p�ϊ�
-		�^�C�� = %RESULTS:0%
-		
-		SIF POSID == CHARACTER_POSITION
-			�F = 0xAAFFAA
+	;;表示用変換
+		タイル = %RESULTS:0%
+	;クリックした際のボタン番号
+		 KEY = SECTOR_ID * 10000 + X_POS * 100 + Y_POS	;クリックした際のボタン番号
 
-		GETCOLOR	;;�\���ڐA�ɂ�����̍�@SETCOLOR�Ŏw�肳�ꂽ�ݒ�����W����
-		�F = RESULT:0
+	;;色の設定
+		GETCOLOR	;;SETCOLORで指定された設定を収集
+		色 = RESULT:0
 		RESETCOLOR
-		 KEY = SECTOR_ID * 10000 + X_POS * 100 + Y_POS
+	;;あなたのいる場所
+		SIF CHARACTER_POSITION == KEY
+			色 = 0xAAFFAA
 
-		;;�������ƃ^�C����z�u
+		;;初期化とタイル一つ配置
 		SIF X_POS == 0
 			CALL WndMgr_TextSet( windowID , Y_POS , @"" )
-		CALL WndMgr_TextAdd( windowID, Y_POS , @"@C:{�F}@@B:{KEY}@%�^�C��%@/B@@/C@" )
+		CALL WndMgr_TextAdd( windowID, Y_POS , @"@C:{色}@@B:{KEY}@%タイル%@/B@@/C@" )
 	NEXT
 NEXT
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;@CREATE_WINDOW_SUBMAP(SECTOR_ID)
-;;; window2 �Z�N�^�[�}�b�v���쐬����
-;;;�@SECTOR_ID ���C���}�b�v�ŕ\�����̃Z�N�^�[ 2�P�^
-;;�@X_SEC, Y_SEC �Z�N�^�[�z�u�p
+;;;　引数１：セクター 2ケタ
+;;; window2 に引数で指定されたセクターマップを作成する
+;;; 切り替えキーに X99,Y99の値を使用する{319999}ならSECTOR 31 に画面切り替え
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 @CREATE_WINDOW_SUBMAP(SECTOR_ID)
 #DIM windowID = 2
 #DIM X_SEC
 #DIM Y_SEC
 #DIM SECTOR_ID
-#DIMS �^�C��
-#DIM �F
+#DIMS タイル
+#DIM 色
 #DIM KEY
 
-	CALL WndMgr_WindowTitle( windowID, @" �Z�N�^�[�}�b�v " ) ;�g�^�C�g��
+	CALL WndMgr_WindowTitle( windowID, @" セクターマップ " ) ;枠タイトル
 
 FOR Y_SEC, 0, MAX_SECTOR_Y
 	FOR X_SEC, 0, MAX_SECTOR_X
-		�^�C�� '= "��"
+		タイル '= "□"
 		
-		;�\�����G���A
+		;表示中エリア
 		IF Y_SEC * 10 + X_SEC == SECTOR_ID
 			SETCOLOR 0xFFFF99
-			�^�C�� '= "��"
+			タイル '= "■"
 			
-		;�\���łȂ��ꏊ�ł��Ȃ��̂���G���A
+		;表示でない場所であなたのいるエリア
 		ELSEIF Y_SEC * 10 + X_SEC == CHARACTER_POSITION / 10000
 			SETCOLOR 0xAAFFAA
-			�^�C�� '= "��"
+			タイル '= "▲"
 			
-	;	;�v���C���[�����f���̂���G���A
+	;	;プレイヤー所属惑星のあるエリア 宇宙港？
 	;	ELSEIF ??
 	;		SETCOLOR 0x33CCCC
-	;		�^�C�� '= "��"
+	;		タイル '= "●"
 	
-		;����(X07Y07��������)�G���A
+		;未踏(X07Y07が未発見)エリア
 		ELSEIF (CLEARMAP: (Y_SEC * 10 + X_SEC) : 7: 7 ) == 0
 			SETCOLOR 0x666666
-			�^�C�� '= "��"
+			タイル '= "■"
 		ENDIF
 
 		GETCOLOR
-		�F = RESULT:0
+		色 = RESULT:0
 		RESETCOLOR
-		KEY = (Y_SEC * 10 + X_SEC ) * 10000 +9999 ;;�Z�N�^�[+X99 Y99 �����[
-;		KEY =  (Y_SEC * 10 + X_SEC + 1000) * -1
+		KEY = (Y_SEC * 10 + X_SEC ) * 10000 +9999 ;;セクター+X99 Y99 を収納
 		
-		;;�������ƃ^�C����z�u
+		;;初期化とタイル一つ配置
 		SIF X_SEC == 0
 			CALL WndMgr_TextSet( windowID , Y_SEC , @"" )
-		CALL WndMgr_TextAdd( windowID, Y_SEC , @"@C:{�F}@@B:{KEY}@%�^�C��%@/B@@/C@" )
+		CALL WndMgr_TextAdd( windowID, Y_SEC , @"@C:{色}@@B:{KEY}@%タイル%@/B@@/C@" )
 
 	NEXT
 NEXT
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;@CREATE_WINDOW_MESSAGE(POSID)
-;;; POSID = SECTOR+X+Y �^��6�����W
-;;; window3 ���b�Z�[�W�g���쐬
-;;; �͑����������ꍇ�\��������Ȃ�
-;;; �͖������Ɨe�͂Ȃ����؂��
-;;; ���ʒu�\������Ǝ����̑D�΂������肱�ނ̂łȂ�
-;;; �f����Ԃɒ����ȊO�ł���l������
+;;;@CREATE_WINDOW_SUBINFO(SELECTED)
+;;; 引数１	: SELECTED = SECTOR+X+Y 型の6桁座標
+;;;			: -1 プレイヤー場所を追尾　-2　無効
+;;; window3 メッセージ枠を作成する
+;;; SELECTEDで指定された座標の艦隊以外情報を表示する
+;;;
+;;; 外部参照で表示文字列だけもってこれたら楽
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-@CREATE_WINDOW_MESSAGE(POSID)
+@CREATE_WINDOW_SUBINFO(SELECTED = -1)
 #DIM windowID = 3
-#DIM POSID	;�I�����ꂽ���W
+#DIM SELECTED	;選択された座標
 #DIM SECTOR_ID
 #DIM X_POS
 #DIM Y_POS
 
-CALL WndMgr_ResetWindow(3)	;�E�B���h�E������
+;ウィンドウ初期化　メッセージ残るため
+CALL WndMgr_ResetWindow(windowID)
 
-SIF POSID == -1
+;;指定なければプレイヤーがいる場所を表示
+SIF SELECTED == -1 
+	SELECTED = CHARACTER_POSITION:MASTER
+;;セクター切り替え信号は表示しない
+SIF SELECTED < 0 || SELECTED % 10000 == 9999
 	RETURN
-
-CALL ID2POS(POSID)
+;;イレギラーははじく
+CALL ID2POS(SELECTED)
 SECTOR_ID = RESULT:0
 X_POS = RESULT:1
 Y_POS = RESULT:2
-SIF X_POS > 17 || Y_POS > 17
+SIF X_POS > MAP_WIDTH  || Y_POS > MAP_HEIGHT
 	RETURN
 
 CALL WndMgr_WindowTitle( windowID , @" #{SECTOR_ID,2,RIGHT} X:{X_POS,2,RIGHT} Y:{Y_POS,2,RIGHT} " )
 
+;;未探索領域は非表示で終わり
 IF CLEARMAP:SECTOR_ID:X_POS:Y_POS == 0
-	CALL WndMgr_TextSet( windowID,  0, @" ���T���n��" )
+	CALL WndMgr_TextSet( windowID,  0, @" 未探索地域" )
 	RETURN
 ENDIF
 
 SELECTCASE MAP:SECTOR_ID:X_POS:Y_POS
-	CASE ����
-		CALL WndMgr_TextSet( windowID,  0, @" �󔒒���" )
-	CASE ��
-		CALL MAPID2PORTID(POSID)
-		CALL WndMgr_TextSet( windowID,  0, @" ������(����: %COUNTRY_NAME:(STAR_OWNER:RESULT)%)" )
-	CASE ����
-		CALL WndMgr_TextSet( windowID,  0, @" ���̌@�\�G���A" )
-		CALL WndMgr_TextSet( windowID,  1, @"  %GET_RESOURCE_NAME(RESOURCE_MAP:SECTOR_ID:X_POS:Y_POS)%" )
-		CALL WndMgr_TextSet( windowID,  2, @"  %GET_RESOURCE_DESCRIPTION(RESOURCE_MAP:SECTOR_ID:X_POS:Y_POS)%" )
+	CASE 明瞭
+		CALL WndMgr_TextSet( windowID,  0, @" 空白宙域" )
+	CASE 星
+		;;勢力追加敵対起こればケース分け必要
+		CALL MAPID2PORTID(SELECTED)
+		CALL WndMgr_TextSet( windowID,  0, @" 中立星(所属: %COUNTRY_NAME:(STAR_OWNER:RESULT)%)" )
+	CASE 資源
+		CALL WndMgr_TextSet( windowID,  0, @" ◆採掘可能エリア" )
+		CALL WndMgr_TextSet( windowID,  1, @" %GET_RESOURCE_NAME(RESOURCE_MAP:SECTOR_ID:X_POS:Y_POS)%" )
+		CALL WndMgr_TextSet( windowID,  2, @"%GET_RESOURCE_DESCRIPTION(RESOURCE_MAP:SECTOR_ID:X_POS:Y_POS)%" )
 	CASE ANOMALY
-		CALL WndMgr_TextSet( windowID,  0, @" ���A�m�}���[" )
+		CALL WndMgr_TextSet( windowID,  0, @" ◆アノマリー" )
 
-	CASE ���[�v�Q�[�g
-		CALL WndMgr_TextSet( windowID,  0, @" �����[�v�Q�[�g" )
+	CASE ワープゲート
+		CALL WndMgr_TextSet( windowID,  0, @" ◆ワープゲート" )
 		SIF X_POS == 0 && Y_POS == MAP_HEIGHT / 2
-			CALL WndMgr_TextSet( windowID,  1, @"�Z�N�^�[{SECTOR_ID - 1}�֒ʂ���Q�[�g" )
+			CALL WndMgr_TextSet( windowID,  1, @"セクター{SECTOR_ID - 1}へ通じるゲート" )
 		SIF X_POS == MAP_WIDTH - 1 && Y_POS == MAP_HEIGHT / 2
-			CALL WndMgr_TextSet( windowID,  1, @"�Z�N�^�[{SECTOR_ID + 1}�֒ʂ���Q�[�g" )
+			CALL WndMgr_TextSet( windowID,  1, @"セクター{SECTOR_ID + 1}へ通じるゲート" )
 		SIF X_POS == MAP_WIDTH / 2 && Y_POS == 0
-			CALL WndMgr_TextSet( windowID,  1, @"�Z�N�^�[{SECTOR_ID - 10}�֒ʂ���Q�[�g" )
+			CALL WndMgr_TextSet( windowID,  1, @"セクター{SECTOR_ID - 10}へ通じるゲート" )
 		SIF X_POS == MAP_WIDTH / 2 && Y_POS == MAP_HEIGHT - 1
-			CALL WndMgr_TextSet( windowID,  1, @"�Z�N�^�[{SECTOR_ID + 10}�֒ʂ���Q�[�g" )
-	CASE ��
-		CALL MAPID2PORTID(POSID)
-		CALL WndMgr_TextSet( windowID,  0, @" ������(����: %COUNTRY_NAME:(STAR_OWNER:RESULT)%)" )
+			CALL WndMgr_TextSet( windowID,  1, @"セクター{SECTOR_ID + 10}へ通じるゲート" )
 ENDSELECT
 	
-IF MAP:SECTOR_ID:X_POS:Y_POS != ��
-	CALL GET_SHIP_LIST_FROM_POS(POSID)
-	IF SHIP_LIST_LENGTH > 0
-		CALL WndMgr_TextSet( windowID,  0, @" ������͑�" )
-		FOR LOCAL, 0, SHIP_LIST_LENGTH
-			IF LOCAL >= 4 	;�\���g�ȏ�͏����Ă��܂�
-				CALL WndMgr_TextSet( windowID, 1+ LOCAL, @" ��{SHIP_LIST_LENGTH - LOCAL}��")
-				RETURN
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;@CREATE_WINDOW_MESSAGE(SELECTED)
+;;; 引数１	: SELECTED = SECTOR+X+Y 型の6桁座標
+;;;			: -1 プレイヤー場所を追尾　-2　無効
+;;; window4 メッセージ枠を作成
+;;; SELECTEDで指定された座標の地形状況以外を表示する　主に艦隊表示？
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+@CREATE_WINDOW_MAININFO(SELECTED = -1)
+#DIM windowID = 4
+#DIM SELECTED			;選択された座標
+#DIM SECTOR_ID			;選択された座標→セクター
+#DIM X_POS				;選択された座標→x座標
+#DIM Y_POS				;選択された座標→y座標
+#DIM STAR_ID			; 星の確定用
+#DIM COUNTER			;;星数えるのに必要でした
+#DIM Wnd4_LINES			;;ウィンドウ４内メッセージ行数
+#DIM Wnd4_LINE_MAX		;;ウィンドウ４内表示可能行数
+#DIM Wnd4_LISTFLAG		;;1 = ウィンドウ４内リスト展開済み
+#DIM 色
+#DIMS タイル
+
+;ウィンドウ初期化　メッセージ残るため
+CALL WndMgr_ResetWindow(windowID)
+;;指定なければプレイヤーがいる場所を表示
+SIF SELECTED == -1 
+	SELECTED = CHARACTER_POSITION:MASTER
+;;セクター切り替え信号は表示しない
+SIF SELECTED < 0 || SELECTED % 10000 == 9999
+	RETURN 0
+
+;;イレギラーははじく
+CALL ID2POS(SELECTED)
+SECTOR_ID = RESULT:0
+X_POS = RESULT:1
+Y_POS = RESULT:2
+SIF X_POS > MAP_WIDTH  || Y_POS > MAP_HEIGHT
+	RETURN 0
+
+;;表示可能行数のカウント
+	CALL WndMgr_GetRectangle( windowID )
+	Wnd4_LINE_MAX = RESULT:5
+
+;;;小細工。 ウィンドウ内が展開済みかどうか
+	Wnd4_LISTFLAG = 0
+	SIF Wnd4_LINE_MAX > 4
+			Wnd4_LISTFLAG = 1
+	
+;;枠内記述行数
+;;記述空っぽなら邪魔なので消す。そのための行数カウントWnd4_LINES
+Wnd4_LINES = 0
+
+;;;;　その座標に居る船を表示
+CALL GET_SHIP_LIST_FROM_POS(SELECTED)
+IF SHIP_LIST_LENGTH > 0
+;;タイトルバー描画
+	IF GET_MAP(SELECTED) == 星
+		COUNTER = 0
+		FOR STAR_ID, 0, 星系数
+			SIF 星系座標ID:STAR_ID == SELECTED
+				BREAK
+			COUNTER ++
+		NEXT
+		CALL WndMgr_WindowTitle( windowID , @" 惑星 %STAR_NAME:(COUNTER)% 駐留艦隊 {SHIP_LIST_LENGTH, 3,RIGHT}隻  #{SECTOR_ID,2,RIGHT} X:{X_POS,2,RIGHT} Y:{Y_POS,2,RIGHT}"  )
+;	ELSEIF GET_MAP(SELECTED) == 宇宙港
+;		CALL WndMgr_WindowTitle( windowID , @" 宇宙港 駐留艦隊 #{SECTOR_ID,2,RIGHT} X:{X_POS,2,RIGHT} Y:{Y_POS,2,RIGHT}"  )
+	ELSE ;;星でない
+		CALL WndMgr_WindowTitle( windowID , @" ◆宙域艦隊 {SHIP_LIST_LENGTH, 3,RIGHT}隻  #{SECTOR_ID,2,RIGHT} X:{X_POS,2,RIGHT} Y:{Y_POS,2,RIGHT} " )
+	ENDIF
+
+	FOR LOCAL, 0, SHIP_LIST_LENGTH
+		IF (Wnd4_LINES + 1 == Wnd4_LINE_MAX) && (SHIP_LIST_LENGTH > Wnd4_LINE_MAX );表示枠以上は消えてしまう [戻す]用に1枠空ける
+			CALL WndMgr_TextSet( windowID, Wnd4_LINES, @" 他{SHIP_LIST_LENGTH - LOCAL, 3,RIGHT}隻")
+			CALL WndMgr_TextAdd( windowID, Wnd4_LINES , @"　　@B:L@[一覧表示 / 戻す]@/B@" )
+
+											;実際表示する部分
+		ELSEIF Wnd4_LINES + 1 <= Wnd4_LINE_MAX
+			SELECTCASE SHIP_CATEGORY:LOCAL
+				CASE 0, 7, 8 ;;調査船 || 輸送船 || 作業船
+					タイル '= "　▲"
+				CASE 1, 2, 3, 4, 5, 6 ;;フリゲート || コルベット || 駆逐艦 || 巡洋艦 || 戦艦 || 空母 
+					タイル '= "　▲"
+				CASEELSE
+					タイル '= "　　"
+			ENDSELECT
+		
+			IF SHIP_COUNTRY:(SHIP_LIST:LOCAL) == 0						;;無所属？
+				色 = 0xFFFFFF
+			ELSEIF SHIP_COUNTRY:(SHIP_LIST:LOCAL) == PLAYER_COUNTRY		;;自軍
+				色 = 0x00FF00
+		;	ELSEIF ;;謎生物
+		;		色 = 0x9999FF
+			ELSE														;;友好度による色分け
+				SELECTCASE REL_LIKE:(SHIP_COUNTRY:(SHIP_LIST:LOCAL)):PLAYER_COUNTRY
+					CASE IS <= -1000	;敵対
+						色 = 0xFF0000
+					CASE IS >= 1000	;友好
+						色 = 0x00FF00
+					CASEELSE		;その他
+						色 = 0xFFFFFF
+				ENDSELECT
 			ENDIF
 			
-			CALL WndMgr_TextSet( windowID, 1+ LOCAL, @" %COUNTRY_NAME:(SHIP_COUNTRY:(SHIP_LIST:LOCAL))%���� %SHIP_NAME:(SHIP_LIST:LOCAL)%" )
-			IF SHIP_MISSION:(SHIP_LIST:LOCAL) == �p�g���[��
-				CALL WndMgr_TextAdd( windowID, 1+LOCAL , @"(�p�g���[���C����)" )
-			ELSEIF SHIP_MISSION:(SHIP_LIST:LOCAL) == �̌@
-				CALL WndMgr_TextAdd( windowID, 1+LOCAL , @"(�̌@��)" )
+			CALL WndMgr_TextSet( windowID, Wnd4_LINES, @"@C:{色}@%タイル%@/C@")
+		
+			CALL WndMgr_TextAdd( windowID, Wnd4_LINES , @" %GET_TYPE_NAME(SHIP_CATEGORY:(SHIP_LIST:LOCAL)),12,LEFT% %COUNTRY_NAME:(SHIP_COUNTRY:(SHIP_LIST:LOCAL))%所属 %SHIP_NAME:(SHIP_LIST:LOCAL)%" )
+			IF SHIP_MISSION:(SHIP_LIST:LOCAL) == パトロール
+				CALL WndMgr_TextAdd( windowID, Wnd4_LINES , @"(パトロール任務中)" )
+			ELSEIF SHIP_MISSION:(SHIP_LIST:LOCAL) == 採掘
+				CALL WndMgr_TextAdd( windowID, Wnd4_LINES , @"(採掘中)" )
 			ENDIF
-		NEXT
+		ELSE
+			;表示しきれない部分は無処理
+		ENDIF
+		;きっちり数える
+		Wnd4_LINES ++
+	NEXT
+	;;;枠展開済みなら[戻す]をつける
+	IF Wnd4_LISTFLAG == 1
+		CALL WndMgr_TextSet( windowID, Wnd4_LINES, @" 他{SHIP_LIST_LENGTH - LOCAL, 3,RIGHT}隻")
+		CALL WndMgr_TextAdd( windowID, Wnd4_LINES , @"　　@B:L@[一覧表示 / 戻す]@/B@" )
 	ENDIF
 ENDIF
+
+;;あなただけが空白飛んでたら窓ごと消す
+	SIF Wnd4_LINES == 1 && SELECTED == CHARACTER_POSITION:MASTER && GET_MAP(SELECTED) == 1
+		Wnd4_LINES = 0
+
+RETURN Wnd4_LINES

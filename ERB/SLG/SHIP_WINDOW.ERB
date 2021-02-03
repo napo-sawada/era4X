@@ -1,0 +1,153 @@
+﻿;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;@DRAW_WINDOW(SECTOR_ID,wFLAG)
+;;; 	引数１	SECTOR_ID	: 表示するセクターXX
+;;;		引数２	SELECTED		: 特にクリックされた地点　[SECTER][POS_X][POSY] 6桁
+;;; 	引数３	wFLAG		: wFLAG == 1 は宙域画面
+;;;							: 1=コントローラー表示  0:非表示 (移動先、交易指定などで使用)
+;;; 画面用に宙域マップを描画する　SECTOR_IDで指定されたものを表示する
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+@SHOW_SHIP_WINDOW_INFO(SHIP_ID)
+#DIM SHIP_ID
+#DIM dynamic OPWnd , 4
+
+
+;;お約束 WINDOW未生成の場合作成する
+CALL SETUP_WINDOW
+
+;;内容作成　window5 船情報概略
+CALL CREATE_WINDOW_SHIPINFO_MAIN(SHIP_ID)
+
+;;内容作成　window6 船情報細目
+;CALL CREATE_WINDOW_SHIPINFO_SUB(SHIP_ID)
+
+
+;;画面への表示を実行
+DRAWLINE
+
+OPWnd = 5
+;OPWnd = 6, 5
+
+;;;指定windowの表示を実行
+CALL WndMgr_Display( 1, OPWnd, 0 )
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;@CREATE_WINDOW_SHIPINFO_MAIN(SHIP_ID)
+;;;　引数１：表示する船ID
+;;; window5 船情報概略
+;;; あちこち出すイメージでなるべく小型化。宙域画面で出せるほどになれば・・・
+;;; 表示項目は練る必要があります
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+@CREATE_WINDOW_SHIPINFO_MAIN(SHIP_ID)
+#DIM windowID = 5
+#DIM SHIP_ID
+#DIM SLOT_ID
+#DIM STATUS, STATUS_LENGTH
+#DIM DYNAMIC SHIP_STATUS, SHIP_STATUS_LENGTH
+#DIM HP
+#DIM MAX_HP
+#DIM SP
+#DIM MAX_SP
+#DIM CARGO
+#DIM MAX_CARGO
+#DIM 色,2
+#DIMS MESSAGE,2
+
+;ウィンドウ初期化　メッセージ残るため
+CALL WndMgr_ResetWindow(windowID)
+
+TRYCALLFORM GET_SHIP_STATUS_{SHIP_MODEL:SHIP_ID}(SHIP_STATUS)
+
+;;耐久
+CALL GET_SHIP_HP(SHIP_ID)
+HP = RESULT
+CALL GET_SHIP_TOTAL_HP(SHIP_ID)
+MAX_HP = RESULT
+IF HP >= MAX_HP
+	色:0 = 0x00FF00		;緑
+ELSEIF HP > 0
+	色:0 = 0xADFF2F		;黄緑 greenyello
+ELSE
+	色:0 = 0xFF0000		;赤
+ENDIF
+
+;;シールド
+MAX_SP = 0
+FOR SLOT_ID, 0, SHIP_STATUS:SHIP_SIELD_SLOT
+	TRYCALLFORM GET_SIELD_STATUS_{SHIP_EQUIP:シールド:SLOT_ID:SHIP_ID}(STATUS)
+	MAX_SP += STATUS:SIELD
+NEXT
+CALL GET_SHIP_SIELD(SHIP_ID)
+SP = RESULT
+IF SP >= MAX_SP
+	色:1 = 0x00FFFF		;CYAN
+ELSEIF SP > 0
+	色:1 = 0x87CEFA		;LIGHTSKYBLUE
+ELSE
+	色:1 = 0xFFFF00		;YELLOW
+ENDIF
+
+;;カーゴ　要るかな・・？
+MAX_CARGO = SHIP_STATUS:SHIP_CAPACITY
+CARGO = 0
+FOR LOCAL, 0, ITEM_LENGTH
+	CARGO += CARGO_CONTENTS:SHIP_ID:LOCAL
+NEXT
+
+
+;;;とりあえずダミータイトル
+;;;STATUS 正常・ドッグ内・ﾊﾟﾄﾛｰﾙ中・採掘中・建造中・DESTROYed・・・？
+LOCALS = %SHIP_NAME:SHIP_ID%
+CALL WndMgr_WindowTitle( windowID , @"%LOCALS%" )
+CALL WndMgr_TextSet( windowID, 0, @" 　%GET_TYPE_NAME(SHIP_CATEGORY:SHIP_ID)%")
+;;SHIP ACTION(STATUS) を入れるか
+
+
+CALL WndMgr_TextSet( windowID, 1, @" 耐久 @C:{色:0}@{HP, 5, RIGHT} /{MAX_HP, 5, RIGHT}@/C@ ")
+;;;カラーバー表示したいが、PRINTしちゃうとダメなのでどうしよう
+BARSTR HP, MAX_HP , 5
+MESSAGE:0 '= RESULTS:0
+CALL WndMgr_TextAdd( windowID, 1, @"@C:{色:0}@%MESSAGE:0%@/C@")
+
+CALL WndMgr_TextSet( windowID, 2, @"SHILD @C:{色:1}@{SP, 5, RIGHT} /{MAX_SP, 5, RIGHT}@/C@ ")
+BARSTR SP, MAX_SP , 5
+MESSAGE:0 '= RESULTS:0
+CALL WndMgr_TextAdd( windowID, 2, @"@C:{色:1}@%MESSAGE:0%@/C@")
+
+SIF MAX_CARGO != 0
+	CALL WndMgr_TextSet( windowID, 3, @" 積載 {CARGO, 5, RIGHT} /{MAX_CARGO, 5, RIGHT} ")
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;@CREATE_WINDOW_SHIPINFO_SUB(SHIP_ID)
+;;;　引数１：表示する船ID
+;;; window6 船情報概略
+;;; がっつり一覧表示
+;;; 表示項目は練る必要があります　;;;未完成。呼び出しありません
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+@CREATE_WINDOW_SHIPINFO_SUB(SHIP_ID)
+#DIM windowID = 6
+#DIM SHIP_ID
+#DIM SLOT_ID
+#DIM STATUS, STATUS_LENGTH
+#DIM SHIP_STATUS, SHIP_STATUS_LENGTH
+#DIM Wnd6_LINE
+
+
+
+Wnd6_LINE = 0
+;;　解説とれない
+
+Wnd6_LINE ++
+;回避
+CALL WndMgr_TextSet( windowID, Wnd6_LINE, @" 　　　　　回避 : {SHIP_STATUS:SHIP_AVOID, 4, RIGHT}")
+;;;エンジン計算も必要
+
+;主砲
+
+
+
+Wnd6_LINE ++
+;CREW　;;移乗コンテナの計算も必要
+CALL WndMgr_TextSet( windowID, Wnd6_LINE, @" 　塔乗可能人数 : {SHIP_STATUS:SHIP_CREW, 4, RIGHT} ")
+
+;;;あかんこれ　作りかけです
+

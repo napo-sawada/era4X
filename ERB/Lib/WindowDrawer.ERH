@@ -20,8 +20,8 @@
 #DIMS m_arrWndTitle,        100, 1		; タイトル文字列
 #DIM  m_arrWndPropN,        100, 20		; プロパティ保持領域（数値用）
 #DIMS m_arrWndPropS,        100, 10		; プロパティ保持領域（文字列用）
-#DIMS m_arrWndText,         100, 50		; 登録されたテキスト
-#DIMS m_arrWndTextPrint,    100, 50		; 実際に表示する整形済みのテキスト。表示する度に整形すると処理が重たくなるため、保持しておく
+#DIMS m_arrWndText,         100, 102	; 登録されたテキスト
+#DIMS m_arrWndTextPrint,    100, 102	; 実際に表示する整形済みのテキスト。表示する度に整形すると処理が重たくなるため、保持しておく
 #DIM  m_arrWndSetTextPrint, 100, 1		; 実際に表示する整形済みのテキストの作成済みフラグ
 
 

@@ -1,0 +1,112 @@
+﻿;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;@SETUP_WINDOW
+;;; ウィンドウの初期設定がここで行われる
+;;; 起動後未生成の場合、生成する
+;;; 「汎用関数・ライブラリ総合スレ」98 ばふぉ氏公開のライブラリを使用しています
+;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+@SETUP_WINDOW
+#DIM  nWndId, 7		;;ウィンドウID格納用
+#DIM  nLocX,  7		;;起点X
+#DIM  nLocY,  7		;;起点Y
+#DIM  nWidth, 7		;;幅X
+#DIM  nHeigth,7		;;高さY
+#DIM  nExFlag,7		;;枠の有無　0x00 なし 0x01 太 0x02 細	
+
+;;ウィンドウ未生成なら初期設定する
+; 航宙画面	WndId 0.コントローラー / 1.メインマップ / 2.セクターマップ / 3.右下情報枠 / 4.下部メッセージ
+; 艦情報	WndID 5.船情報小 / 6.船装備
+;--------------------------------
+; ウィンドウ0の生成　サイズ・位置はここで決める
+; nWndId == 0 航宙画面・左側コントローラー部分
+	nWndId:0  = 0		;;ウインドウ番号 0.コントローラー
+	nLocX:0   = 2		;;ウィンドウの起点Ｘ
+	nLocY:0   = 5		;;ウィンドウの起点Ｙ
+	nWidth:0  = 26		;;ウィンドウの幅
+	nHeigth:0 = 10		;;ウインドウの高さ
+	nExFlag:0 = 0x02	;;枠の有無　0x00 なし 0x01 太 0x02 細
+CALL WndMgr_Exist( 0 )
+SIF ! RESULT:0
+	CALL WndMgr_CreateWindow( nWndId:0, nLocX:0, nLocY:0, nWidth:0, nHeigth:0, nExFlag:0 )	; 「ID=nWndId:0」のウィンドウを生成する
+
+
+; ウィンドウ1の生成
+; nWndId == 1 航宙画面・中央マップ部分
+	nWndId:1  = 1		;;ウインドウ番号 1.メインマップ
+	nLocX:1   = 32		;;ウィンドウの起点Ｘ
+	nLocY:1   = 0		;;ウィンドウの起点Ｙ
+	nWidth:1  = 2*(MAP_WIDTH +2) ;;+2はフチ[nExFlag: ]の分
+	nHeigth:1 =   MAP_HEIGHT +2  ;;+2はフチ[nExFlag: ]の分
+	nExFlag:1 = 0x01
+CALL WndMgr_Exist( 1 )
+SIF ! RESULT:0
+	CALL WndMgr_CreateWindow( nWndId:1, nLocX:1, nLocY:1, nWidth:1, nHeigth:1, nExFlag:1 )
+
+
+; ウィンドウ2の生成
+; nWndId == 2 航宙画面・右側セクター全体マップ部分
+
+	nWndId:2  = 2		;;ウインドウ番号 2.セクターマップ
+	nLocX:2   = nLocX:1+ nWidth:1 + 0
+	nLocY:2   = 0
+	nWidth:2  = 2*(MAX_SECTOR_X +2) ;;+2はフチ[nExFlag: ]の分
+	nHeigth:2 =    MAX_SECTOR_Y +2  ;;+2はフチ[nExFlag: ]の分
+	nExFlag:2 = 0x02
+CALL WndMgr_Exist( 2 )
+SIF ! RESULT:0
+	CALL WndMgr_CreateWindow( nWndId:2, nLocX:2, nLocY:2, nWidth:2, nHeigth:2, nExFlag:2 )	
+
+
+; ウィンドウ3の生成
+; nWndId == 3 航宙画面・右下情報枠 / 座標オブジェクト表示
+	nWndId:3  = 3		;;ウインドウ番号 3.右下情報枠
+	nLocX:3   = nLocX:2
+	nLocY:3   = nLocY:2 + nHeigth:2
+	nWidth:3  = 46
+	nHeigth:3 = 7
+	nExFlag:3 = 0x02
+CALL WndMgr_Exist( 3 )
+SIF ! RESULT:0
+	CALL WndMgr_CreateWindow( nWndId:3, nLocX:3, nLocY:3, nWidth:3, nHeigth:3, nExFlag:3 )
+
+
+; ウィンドウ4の生成
+; nWndId == 4.航宙画面・下部メッセージ / 艦隊情報
+	nWndId:4  = 4		;;ウインドウ番号 4.下部メッセージ
+	nLocX:4   = 20
+	nLocY:4   = (nLocY:3 + nHeigth:3 )- 3
+	nWidth:4  = 80
+	nHeigth:4 = 6
+	nExFlag:4 = 0x02
+CALL WndMgr_Exist( 4 )
+SIF ! RESULT:0
+	CALL WndMgr_CreateWindow( nWndId:4, nLocX:4, nLocY:4, nWidth:4, nHeigth:4, nExFlag:4 )
+
+
+; ウィンドウ5の生成
+; 船ステータス表示概略	;;なんか妥協した作り
+	nWndId:5  = 5
+	nLocX:5   = 0
+	nLocY:5   = 0
+	nWidth:5  = 30
+	nHeigth:5 = 6
+	nExFlag:5 = 0x02
+CALL WndMgr_Exist( 5 )
+SIF ! RESULT:0	
+	CALL WndMgr_CreateWindow( nWndId:5, nLocX:5, nLocY:5, nWidth:5, nHeigth:5, nExFlag:5 )
+
+
+; ウィンドウ6の生成
+; 船ステータス表示詳細 ;;;未完成
+	nWndId:6  = 6
+	nLocX:6   = nLocX:5
+	nLocY:6   = nLocY:5 + nHeigth:5 -1
+	nWidth:6  = 80
+	nHeigth:6 = 20
+	nExFlag:6 = nExFlag:5
+CALL WndMgr_Exist( 6 )
+SIF ! RESULT:0
+	CALL WndMgr_CreateWindow( nWndId:6, nLocX:6, nLocY:6, nWidth:6, nHeigth:6, nExFlag:6 )
+
+ ;;ウィンドウ初期設定ここまで
+;--------------------------------
