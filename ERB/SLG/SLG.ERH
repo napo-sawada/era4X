@@ -173,6 +173,19 @@
 #DIM CONST 自国 = 1
 #DIM CONST 敵国 = 2
 
+#DIM CONST 国家ID_プレイヤー = 1
+#DIM CONST 国家ID_社会主義 = 2
+#DIM CONST 国家ID_企業連合 = 3
+#DIM CONST 国家ID_民主主義 = 4
+#DIM CONST 国家ID_アレス宗教 = 5
+#DIM CONST 国家ID_機械文明 = 6
+#DIM CONST 国家ID_緑の海賊団 = 7
+#DIM CONST 国家ID_青の商業連合 = 8
+#DIM CONST 国家ID_赤の傭兵集団 = 9
+#DIM CONST 国家ID_一般海賊 = 10
+#DIM CONST 国家ID_豊秋津皇国 = 11
+#DIM CONST 国家ID_ハールバルズ = 12
+
 ; 勢力-侵攻
 #DIM SAVEDATA MEETING_POINT, MAX_COUNTRY
 #DIM SAVEDATA WAR_PHASE, MAX_COUNTRY

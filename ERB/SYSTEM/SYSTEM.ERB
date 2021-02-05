@@ -39,6 +39,9 @@ ELSE
 	GOTO INPUT_LOOP_2
 ENDIF
 
+;プレイヤー勢力の艦名リストを選択
+CALL SELECT_PLAYERS_SHIP_NAME_LIST()
+
 ;オープニング表示
 $INPUT_LOOP_3
 IF FLAG:5 == 0
