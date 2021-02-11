@@ -117,8 +117,8 @@ PRINT 　
 ;PRINTBUTTON "[v] 時間を進める", "v"
 ;PRINT 　
 
-;PRINTBUTTON "[z] いんふぉ", "z"
-;PRINT 　
+PRINTBUTTON "[z] インフォ", "z"
+PRINT 　
 
 FOR ITER, 0, 星系数
 	IF 星系座標ID:ITER == CHARACTER_POSITION
@@ -150,8 +150,12 @@ IF RESULT != 0
 	PRINTBUTTON "[e] アノマリーを調査", "e"
 	PRINT　
 ENDIF
-;DRAWLINE
-
+; クエスト対象座標
+;CALL IS_QUEST(CHARACTER_POSITON)
+;IF RESULT == 1
+;	PRINTBUTTON "[Q] ***  " , "Q"
+;	PRINT　
+;ENDIF
 ; 宇宙港建造
 CALL IS_BUILDING(CHARACTER_POSITION)
 IF RESULT == 1
@@ -223,6 +227,10 @@ SELECTCASE strInputResult
 			TRYCALLFORM ANOMALY_BODY_%ANOMALY_MAP:SECTOR_ID:X_POS:Y_POS%
 		ENDIF
 		GOTO INPUT_LOOP
+	; クエスト対象座標
+;;	CASE "Q"
+;;			
+;;	
 	; 宇宙港建造
 	CASE "t"
 		CALL IS_BUILDING(CHARACTER_POSITION)
@@ -259,6 +267,9 @@ SELECTCASE strInputResult
 	CASE "c"
 		SIF BOARDING_SHIP_ID != -1 && SHIP_MISSION:BOARDING_SHIP_ID != 待機
 			SHIP_MISSION:BOARDING_SHIP_ID = 待機
+		GOTO INPUT_LOOP
+	CASE "z"
+		CALL SHOW_INFO_ASSET()
 		GOTO INPUT_LOOP
 	;window4メッセージ枠の拡張表示
 	;基本4行＋枠２のタテ６マスのwindowとしている
