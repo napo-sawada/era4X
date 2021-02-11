@@ -32,12 +32,8 @@ ENDIF
 CALL DECIDE_ABLUP0
 
 
-;ＬＶ４から５に上げるときは異常経験必要（素質：[臆病][素直][恋慕][親愛]なら無視できる）
-IF ABL:0 == 4 && TALENT:臆病 == 0 && TALENT:素直 == 0 && TALENT:恋慕 == 0 && TALENT:親愛 == 0
-	PRINTS EXPNAME:50
-	PRINTL あり、かつ
 ;ＬＶ７から８に上げるときは異常経験3以上必要（素質：[臆病][素直][恋慕][親愛]なら無視できる）
-ELSEIF ABL:0 == 7 && TALENT:臆病 == 0 && TALENT:素直 == 0 && TALENT:恋慕 == 0 && TALENT:親愛 == 0
+IF ABL:0 == 7 && TALENT:臆病 == 0 && TALENT:素直 == 0 && TALENT:恋慕 == 0 && TALENT:親愛 == 0
 	PRINTS EXPNAME:50
 	PRINTL 3以上、かつ
 ENDIF
@@ -232,17 +228,8 @@ IF TALENT:一線越えない && (TALENT:恋慕 == 0 && TALENT:淫乱 == 0 && TAL
 	TIMES D , 2.00
 ENDIF
 
-;ＬＶ４から５に上げるときは異常経験必要（素質：[臆病][素直][恋慕][親愛]なら無視できる）
-IF ABL:0 == 4 && TALENT:臆病 == 0 && TALENT:素直 == 0 && TALENT:恋慕 == 0 && TALENT:親愛 == 0
-	IF EXP:異常経験 == 0
-		;異常経験がない
-		I |= 2
-		J |= 2
-		K |= 2
-		L |= 2
-	ENDIF
 ;ＬＶ７から８に上げるときは異常経験3以上必要（素質：[臆病][素直][恋慕][親愛]なら無視できる）
-ELSEIF ABL:0 == 7 && TALENT:臆病 == 0 && TALENT:素直 == 0 && TALENT:恋慕 == 0 && TALENT:親愛 == 0
+IF ABL:0 == 7 && TALENT:臆病 == 0 && TALENT:素直 == 0 && TALENT:恋慕 == 0 && TALENT:親愛 == 0
 	IF EXP:異常経験 < 3
 		;異常経験が3未満
 		I |= 2
