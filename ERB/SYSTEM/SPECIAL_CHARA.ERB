@@ -1,33 +1,33 @@
-﻿;----------------------
-; スペシャルキャラ
+;----------------------
+; �X�y�V�����L����
 ;----------------------
 @SPECIAL_CHARA
 $INPUT_LOOP
-PRINTL 「お客様にご紹介できる特別な奴隷でございます」
+PRINTL �u���q�l�ɂ��Љ�ł�����ʂȓz��ł������܂��v
 IF CAN_BUY_SPECIAL_CHARA_1() == 1
-	PRINTBUTTON "[1] カタリナ($10,000)", 1
+	PRINTBUTTON "[1] �J�^���i($10,000)", 1
 	PRINTL
 ENDIF
-PRINTBUTTON "[99] 戻る", 99
+PRINTBUTTON "[99] �߂�", 99
 INPUT
 IF RESULT == 1 && CAN_BUY_SPECIAL_CHARA_1() == 1
 	IF MONEY < 10000
-		PRINTW 「手持ちのお金がたりないようですよ」
+		PRINTW �u�莝���̂���������Ȃ��悤�ł���v
 	ELSE
 		MONEY -= 10000
 		PRINTL
-		PRINTFORML 裏の顔……性奴隷調教師としてのアレス宗教国家での窓口の商人から、連絡があった。
-		PRINTFORML なにやら、特別な商品が手に入った、という事らしいのだが。
-		PRINTFORML 「これはこれは、お忙しい中お越しいただき誠に有難う御座います、英雄殿」
-		PRINTFORML 「……そう、ですね。お伝えした通り、最近、取って置きの商品が入荷いたしましてな」
-		PRINTFORML 「貴方様にだけご紹介できる、本当に特別な品でございます、ええ」
-		PRINTFORML 「此方へ付いて来て頂けますかな？」
-		PRINTFORMW そう言って、店の奥……自分も今まで入った事の無い場所へ案内される。
-		PRINTFORMW ………
-		PRINTFORMW ……
-		PRINTFORMW …
-		PRINTFORML 「こちらです。貴方様の御眼鏡に適うモノであると確信しております、ええ」
-		PRINTFORMW 店の最奥、貴賓室染みた豪華な水槽の中に居たのは……
+		PRINTFORML ���̊�c�c���z�꒲���t�Ƃ��ẴA���X�@�����Ƃł̑����̏��l����A�A�����������B
+		PRINTFORML �Ȃɂ��A���ʂȏ��i����ɓ������A�Ƃ������炵���̂����B
+		PRINTFORML �u����͂���́A���Z���������z�������������ɗL�������܂��A�p�Y�a�v
+		PRINTFORML �u�c�c�����A�ł��ˁB���`�������ʂ�A�ŋ߁A����Ēu���̏��i�����ׂ������܂��Ăȁv
+		PRINTFORML �u�M���l�ɂ������Љ�ł���A�{���ɓ��ʂȕi�ł������܂��A�����v
+		PRINTFORML �u�����֕t���ė��Ē����܂����ȁH�v
+		PRINTFORMW ���������āA�X�̉��c�c���������܂œ��������̖����ꏊ�ֈē������B
+		PRINTFORMW �c�c�c
+		PRINTFORMW �c�c
+		PRINTFORMW �c
+		PRINTFORML �u������ł��B�M���l�̌�ዾ�ɓK�����m�ł���Ɗm�M���Ă���܂��A�����v
+		PRINTFORMW �X�̍ŉ��A�M�o�����݂����؂Ȑ����̒��ɋ����̂́c�c
 		PRINTL
 		PRINTL
 		PRINTL
@@ -37,10 +37,10 @@ IF RESULT == 1 && CAN_BUY_SPECIAL_CHARA_1() == 1
 		PRINTL
 		PRINTL
 		SETCOLOR 0XB1AB25
-		PRINT 「私は……
+		PRINT �u���́c�c
 		WAIT
 		CLEARLINE 1
-		PRINTL 「私は……何時まで……」
+		PRINTL �u���́c�c�����܂Łc�c�v
 		RESETCOLOR
 		PRINTL
 		PRINTL
@@ -51,32 +51,34 @@ IF RESULT == 1 && CAN_BUY_SPECIAL_CHARA_1() == 1
 		PRINTL
 		PRINTL
 		PRINTW
-		PRINTFORMW %CALLNAME:MASTER%は思わず目を疑った。
-		PRINTFORMW そこに居たのが『聖歌の聖女』とも称されるカタリナ・セラフィーニその人だったからだ。
-		PRINTFORML 「……なぜ聖女様がこんな所に居られるのか、説明致します」
-		PRINTFORML 「まず、英雄殿の艦隊戦による海賊征伐、御見事でございました」
-		PRINTFORML 「あの後、騎士団が速やかに残存勢力の掃討と拠点制圧を行ったのですが、」
-		PRINTFORML 「その際に、ええ、本当に恥ずかしい事に、件の海賊とある大司教が内通していた記録が見つかりまして」
-		PRINTFORMW 「道理で此方側の行動が先読みされる訳ですよ、ええ」
+		PRINTFORMW %CALLNAME:MASTER%�͎v�킸�ڂ��^�����B
+		PRINTFORMW �V��̂悤�ȓ����ʂ������B���̎��̂悤�����������B���ʂɂ���ԋe�ɂ��Ⴆ����A�z�����܂ꂻ���Ȑ[�����̓��B
+		PRINTFORMW �����ĉ����A���̗c���Ȃ�����R���ȁA�F���ł��w�܂�Ə̂������e�B
+		PRINTFORMW �����ɋ����̂��w���̂̐����x�Ə̂�����J�^���i�E�Z���t�B�[�j���̐l���������炾�B
+		PRINTFORML �u�c�c�Ȃ������l������ȏ��ɋ�����̂��A�����v���܂��v
+		PRINTFORML �u�܂��A�p�Y�a�̊͑���ɂ��C�������A�䌩���ł������܂����v
+		PRINTFORML �u���̌�A�R�m�c�����₩�Ɏc�����͂̑|���Ƌ��_�������s�����̂ł����A�v
+		PRINTFORML �u���̍ۂɁA�����A�{���ɒp�����������ɁA���̊C���Ƃ����i�������ʂ��Ă����L�^��������܂��āv
+		PRINTFORMW �u�����ō������̍s������ǂ݂�����ł���A�����v
 		PRINTL
-		PRINTFORML 「そういった訳でその大司教は処刑され、その部下にも罰が言い渡されたのですが……」
-		PRINTFORML 「件の大司教の御息女こそが彼女、カタリナ様なのです」
-		PRINTFORML 「彼女はその大司教が据えたお飾りでは在りましたが、しかし民衆への人気は本物」
-		PRINTFORML 「表向きに処罰してしまうと、最悪暴動が起こりかねないのですよ」
-		PRINTFORML 「かといって親族が処刑までされてしまった者を聖女の地位に置いておくこともできません」
-		PRINTFORMW 「そして、ここだけの話ですが……」
+		PRINTFORML �u������������ł��̑�i���͏��Y����A���̕����ɂ����������n���ꂽ�̂ł����c�c�v
+		PRINTFORML �u���̑�i���̌䑧���������ޏ��A�J�^���i�l�Ȃ̂ł��v
+		PRINTFORML �u�ޏ��͂��̑�i����������������ł͍݂�܂������A���������O�ւ̐l�C�͖{���v
+		PRINTFORML �u�\�����ɏ������Ă��܂��ƁA�ň��\�����N���肩�˂Ȃ��̂ł���v
+		PRINTFORML �u���Ƃ����Đe�������Y�܂ł���Ă��܂����҂𐹏��̒n�ʂɒu���Ă������Ƃ��ł��܂���v
+		PRINTFORMW �u�����āA���������̘b�ł����c�c�v
 		PRINTL
-		PRINTFORML 「この国の上層部は恐れているのですよ。かの大司教、強大な政治的怪物の血を引いた彼女のことを」
-		PRINTFORML 「その美貌と話術で篭絡される事を恐れ、この国への復讐の為の道具として使われる事を恐れたのです」
-		PRINTFORML 「……例え、当人がそんな才が無くとも、そんなことを思っていなくても」
-		PRINTFORML 「あの怪物はその影ですらこうも恐れられる存在なのです。彼の陰謀に加担させられた者ほどそう思うことでしょう」
-		PRINTFORMW 「故にこそ、貴方様なのです。英雄殿」
+		PRINTFORML �u���̍��̏�w���͋���Ă���̂ł���B���̑�i���A����Ȑ����I�����̌����������ޏ��̂��Ƃ��v
+		PRINTFORML �u���̔��e�Ƙb�p�ŘU������鎖������A���̍��ւ̕��Q�ׂ̈̓���Ƃ��Ďg���鎖�����ꂽ�̂ł��v
+		PRINTFORML �u�c�c�Ⴆ�A���l�ɂ���ȍ˂������Ƃ��A����Ȃ��Ƃ��v���Ă��Ȃ��Ă��v
+		PRINTFORML �u���̉����͂��̉e�ł���A������������鑶�݂Ȃ̂ł��B�ނ̉A�d�ɉ��S������ꂽ�҂قǂ����v�����Ƃł��傤�v
+		PRINTFORMW �u�̂ɂ����A�M���l�Ȃ̂ł��B�p�Y�a�v
 		PRINTL
-		PRINTFORML 「名誉と功績ゆえに角が立たず、正面戦力は国家に劣り、そしてなにより、この国で最も女の扱いに長けている」
-		PRINTFORML 「つまりこれは、この国からの裏の報酬であり、厄介払いなんですよ」
-		PRINTFORMW 「……それでは、これより引き渡しを行わせて頂きます」
-		PRINTFORMW 「どうぞ、今後とも御贔屓の程、よろしくお願いいたします」
-		PRINTW カタリナを手に入れた
+		PRINTFORML �u���_�ƌ��т䂦�Ɋp���������A���ʐ�͍͂��Ƃɗ��A�����ĂȂɂ��A���̍��ōł����̈����ɒ����Ă���v
+		PRINTFORML �u�܂肱��́A���̍�����̗��̕�V�ł���A�����Ȃ�ł���v
+		PRINTFORMW �u�c�c����ł́A����������n�����s�킹�Ē����܂��v
+		PRINTFORMW �u�ǂ����A����Ƃ����ۛ��̒��A��낵�����肢�������܂��v
+		PRINTW �J�^���i����ɓ��ꂽ
 		ADDCHARA 1
 		CHARACTER_POSITION:(CHARANUM - 1) = CHARACTER_POSITION:0
 		CFLAG:(CHARANUM - 1):1009 = 0XC9CACA
@@ -98,8 +100,8 @@ ENDIF
 @CAN_BUY_SPECIAL_CHARA_1
 #FUNCTION
 
-FOR LOCAL, 0, 星系数
-	SIF 星系座標ID:LOCAL != CHARACTER_POSITION
+FOR LOCAL, 0, ���n��
+	SIF ���n���WID:LOCAL != CHARACTER_POSITION
 	CONTINUE
 	SIF STAR_OWNER:LOCAL != 5
 	CONTINUE

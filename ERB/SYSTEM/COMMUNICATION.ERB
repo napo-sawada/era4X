@@ -17,10 +17,6 @@ $INPUT_LOOP
 PRINTL [0] - お茶に誘う
 SIF AT_STAR == 1
 	PRINTL [1] - デートに誘う
-SIF AT_STAR == 1 && CFLAG:TARGET:2 > 500
-	PRINTL [2] - 一緒にご飯を作る
-SIF CFLAG:TARGET:2 > 500
-	PRINTL [3] - カラオケに誘う
 PRINTL [9] - 戻る
 
 INPUT
@@ -103,4 +99,47 @@ RETURN 1
 @COMMUNICATION_DATE
 PRINTFORML %CALLNAME:TARGET%をデートに誘った
 IF CFLAG:TARGET:2 < 300
+	PRINTW 断られてしまった……
+	RETURN 0
+ELSEIF CFLAG:TARGET:2 < 600
+	PRINTL 断られてしまったが、代わりにお茶をすることになった
+	PRINTW そこそこ盛り上がった
+ELSEIF CFLAG:TARGET:2 < 1200
+	PRINTL OKをもらえた
+	PRINTW 盛り上がった！
 ENDIF
+
+SELECTCASE ABL:TARGET:0
+	CASE 0
+		恭順 = 10
+	CASE 1
+		恭順 = 50
+	CASE 2
+		恭順 = 150
+	CASE 3
+		恭順 = 300
+	CASE 4
+		恭順 = 1000
+	CASE 5
+		恭順 = 2000
+	CASE 6
+		恭順 = 4500
+	CASE 7
+		恭順 = 7500
+	CASE 8
+		恭順 = 15000
+	CASE 9
+		恭順 = 30000
+	CASE 10
+		恭順 = 75000
+ENDSELECT
+
+恭順 = 恭順 * 恭順倍率 / 100
+CFLAG:TARGET:2 += 依存度
+
+
+JUEL:5 += 恭順
+PRINTFORML 依存度 + {依存度}
+PRINTFORMW 恭順の珠＋{恭順}
+
+RETURN 1
