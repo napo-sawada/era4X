@@ -1,0 +1,251 @@
+﻿;--------------------------
+; クエスト番号５
+; クエスト名：ソラのゴミ拾い
+; 序盤用。かつクエストシステム解説用
+;--------------------------
+;;使用変数 要セーブ
+; QUEST_PROGRESS:5 ==   0: 未受注 / 1:受注済み 
+; QUEST_05_FLAG ,4   :0 完了後再受注可能DAYを入れておく
+;                    :1 クエストを受けた座標（星）
+;                    :2 回収した数
+;                    :3 回収する総数
+; 別の星いってもなぜか同じおっちゃんがいます。転勤です。
+;--------------------------
+
+;--------------------------
+; クエスト受注可能か
+;--------------------------
+@QUEST_ACCEPTABLE_5 ()
+
+;;クエスト未受注かつ再受注時期未達の場合表示を消す
+	SIF QUEST_PROGRESS:5 == 0 && DAY < QUEST_05_FLAG:0
+		RETURN 0
+	
+	RETURN 1
+	
+;--------------------------
+; クエストの名前を返却
+;--------------------------
+@QUEST_NAME_5 ()
+RESULTS = ソラのゴミ拾い
+RETURN
+
+;--------------------------
+; マップでの表示
+; @QUEST_SET_TILE_  : マップ上対象地点にマークを出す。
+; @QUEST_MAP_INFO_  : 右下小窓にメッセージを出す
+; 引数１： ARG:0 SSXXYY　座標データ　マップ上でクリックされた座標。表示条件分岐に。
+;--------------------------
+;;;マップ画面上での表示。 隠したかったら関数コメントアウトか"□" 
+;;;色を替えたかったらSETCOLORしておけば後の処理で色反映します
+@QUEST_SET_TILE_5 (ARG:0 )
+	;;2byte分なら全角でも半角でも崩れない
+	RESULTS '= "**"
+	SETCOLOR 0xFFFF00
+RETURN 1
+
+;;;右下小窓に出す。隠したければ関数コメントアウトか"空白宙域"
+@QUEST_MAP_INFO_5 (ARG:0 )
+		RESULTS:0 '= ""
+		RESULTS:1 '= "デブリ溜まりができている"
+		RESULTS:2 '= ""
+		RESULTS:3 '= ""
+		RESULTS:4 '= ""
+RETURN 1
+
+;-----------------------
+; マップ上からQUEST_BODYを実行する処理
+; @QUEST_SHOW_COMMAND_x : ここで指定した文字列のコマンドを現地で表示する
+; 　　　　　　　　　　 ：(調査する||捜索する||採集する||待ち伏せする||挑戦する)といったフレーバー
+; @QUEST_PLACE_CHECK_x ： 設定マスを踏んだら呼び出される。不要ならば消すか無処理で返す
+;--------------------------
+@QUEST_SHOW_COMMAND_5 ()
+	RESULTS '= "回収作業"
+RETURN 1
+
+@QUEST_REACH_PLACE_5 ()
+#DIM QUEST_ID = 5
+
+	;;雰囲気づくりにダミーの宙域画面をだしている（操作窓のないやつ）
+	;;ココはターンエンドで呼び出されるので文字だけや戦闘に入るならなくていい
+	CALL DRAW_WINDOW( CHARACTER_POSITION:MASTER/10000 , -1 , BOARDING_SHIP_ID:MASTER , 0)
+	
+	
+	SETCOLOR 0xFFFF00
+IF QUEST_05_FLAG:3 == QUEST_05_FLAG:2 ;;完了済み　//回収終わった時に星座標にクエスト呼び出しを設置している
+	PRINTL
+	PRINTL 　　回収物を所定のエリアに引き渡した
+	PRINTL 　　依頼窓口へ向かおう
+	;;表示したら用済みなのでQUESTMAPの設定をクリアしとく
+	CALL QUEST_RELEASE_POINT(QUEST_ID, CHARACTER_POSITION:MASTER)
+	PRINTL
+ELSE
+	PRINTL
+	PRINTL 回収ポイントに到着した
+	;;たんなるフレーバーテキスト
+	IF RAND:100 <=97
+		PRINTDATA
+			DATA 漂うスクラップの狭間に人形が見えた
+			DATA 何か光ったが・・・次の瞬間にはわからなくなった
+			DATA デブリに衝突されればタダでは済まない
+			DATA 何者かが隠れていても容易にはわからない　不意に恐怖にとらわれる・・・
+			DATA 岩塊、鉄塊、ワイヤー、欠片。 様々なものが漂っている、
+		ENDDATA
+	ELSE
+		PRINTL 　不意に、漂う装甲板の文字が目にとまった "るくし・・" 船名だろうか？
+		PRINTL 　なぜかひどく物悲しい気分になった
+	ENDIF
+	PRINTL
+	PRINTL ・・・さっさとやってしまおう
+	PRINTL
+	SIF QUEST_05_FLAG:2 == 0	;;まだ未回収
+		PRINTL 　　[Q] 回収作業　コマンドで回収できる
+ENDIF
+RESETCOLOR
+PRINTW
+
+RETURN
+
+
+;--------------------------
+; クエスト本体
+;--------------------------
+@QUEST_BODY_5()
+#DIM QUEST_ID = 5
+#DIM POSID
+#DIM SECTOR_ID
+#DIM X_POS
+#DIM Y_POS
+
+	CALL ID2POS (CHARACTER_POSITION:MASTER)
+		SECTOR_ID = RESULT:0
+		X_POS = RESULT:1
+		Y_POS = RESULT:2
+		
+;;;宙域図から呼び出されたらこちら　クエスト進行中
+IF QUESTMAP:(RESULT:0):(RESULT:1):(RESULT:2) == QUEST_ID
+		QUEST_05_FLAG:2 ++
+		PRINTFORML 　スペースデブリを回収した [ {QUEST_05_FLAG:2} / {QUEST_05_FLAG:3} ]
+		CALL QUEST_RELEASE_POINT(QUEST_ID, CHARACTER_POSITION:MASTER)
+	IF QUEST_05_FLAG:3 == QUEST_05_FLAG:2 
+		PRINTL 　これで依頼は完了だ　報酬を受け取りに戻ろう
+		PRINTL 　・・・ゴミを引っ張りながら。	
+		CALL QUEST_SET_POINT (QUEST_ID, QUEST_05_FLAG:1 )	;;帰還時用に受注星にイベント呼び出し設置
+															;;この座標にすでにクエスト設置されていると不発になる
+	ENDIF
+	PRINTW
+	RETURN 
+
+;;;こっちは星にいることになる
+ELSEIF QUEST_PROGRESS:QUEST_ID == 0
+	QUEST_05_FLAG:2 = 0
+	QUEST_05_FLAG:3 = 4
+	IF  QUEST_05_FLAG:0 == 0	;;未受注初回 ;;導入部
+		SETCOLOR 0xF0E68C
+		PRINTW 　　「みなさまのご協力おまちしておりまーす」
+		PRINTL
+		RESETCOLOR
+		PRINTL 　　街中の喧騒にまぎれる宣伝に、仕事を見つけた
+		PRINTL 
+		PRINTL 　　"船があればだれでもできる簡単な回収作業"　"やりがいのある皆に感謝される仕事"
+		PRINTL 
+		PRINTL 　　少額ながら報酬もあるそうだがさてはて・・？
+		PRINTL
+		PRINTFORML 　[1] いってみる 　　　[0] やめておく
+		INPUT
+		IF RESULT == 0	;やめたら帰る
+			RETURN
+		ELSE
+			PRINTL 　　話をしてくれた受付嬢によれば "宇宙ゴミ" ・・いわゆるスペースデブリの回収依頼だ
+			PRINTL 　　ようは貸与された回収装置でゴミ拾いをしてこいということらしい
+			PRINTL 　　作業中のケガ・船など物損への補償はありません。とにこやかに言われた
+			PRINTL
+			PRINTFORML 　　報酬は一か所につき $500。 それが {QUEST_05_FLAG:3} 箇所。
+			PRINTL
+			PRINTL 　　海賊など敵性体がいれば無理せず止めていいそうだ
+			PRINTL 　　戦闘報酬もありません、とやはりにこやかに言われた・・・
+			PRINTL 
+			PRINTFORML 　[1] 受ける 　　　　　[0] これは危険な仕事ではないのか？
+			INPUT
+			IF RESULT == 0		;やめたら帰る
+				PRINTFORML 報酬が危険に見合わない仕事はやめるべきだ。 %CALLNAME:MASTER% は退散した
+			ELSE
+				QUEST_PROGRESS:QUEST_ID = 1
+				QUEST_05_FLAG:1 = CHARACTER_POSITION:MASTER
+				PRINTL 　これも経験だ。
+				PRINTL 　座標を受け取った。　表示される地点に向かおう
+				PRINTL
+			ENDIF
+			PRINTW
+		ENDIF
+	ELSE	;;2回目以降 QUEST_05_FLAG:0 >0
+		PRINTL 　　初手からイカついおっさんのところに通された！？
+		PRINTL 　　「受付嬢？ あれは初回サービスってやつだ。
+		PRINTFORML 　　  省いた方が話が早くて助かるだろう。今回は {QUEST_05_FLAG:3} か所だ頼んだぞ。」
+		PRINTL
+		PRINTL 　　・・・まだ報酬の話もしていないのだが・・・
+		PRINTL
+		PRINTW
+		QUEST_PROGRESS:QUEST_ID = 1
+		QUEST_05_FLAG:1 = CHARACTER_POSITION:MASTER
+	ENDIF
+	
+;;; QUEST_PROGRESS:QUEST_ID 0→1でクエスト初期設定をここでする 目標地点の設定
+	IF QUEST_PROGRESS:QUEST_ID == 1 
+		LOCAL = QUEST_05_FLAG:3
+		WHILE LOCAL
+			;; 関数つかって適当に。 指定セクター内　6:ちょっと外より を抽選
+			CALL QUEST_SET_RANDPOINT(QUEST_ID, SECTOR_ID, 6 )
+			IF RESULT >= 0
+				X_POS = (RESULT / 100) %100
+				Y_POS = RESULT %100
+				CLEARMAP:SECTOR_ID:X_POS:Y_POS = 1		;;明瞭化おまけ
+				LOCAL --
+			ENDIF
+		WEND
+	ENDIF
+
+;;受注後回収未完了
+ELSEIF QUEST_05_FLAG:2 < QUEST_05_FLAG:3
+	SIF QUEST_05_FLAG:0 == 0	;;初回受注の意味
+		PRINTL なぜかイカついおっさんと対面している
+		
+	PRINTFORML 「あと {QUEST_05_FLAG:3 - QUEST_05_FLAG:2} か所残ってるが、やめとくこともできるぜ」
+	PRINTL 
+	PRINTFORML [1] まだ続ける 　　　　[0] ここでやめておく
+	INPUT
+	IF RESULT == 1
+		PRINTL 「そうか。引き続きよろしくたのむ」
+	ELSE
+		PRINTL 「そうか。無理して死なれても面倒くさいしな。
+		PRINTL 　またしばらくしたら依頼をだすから懲りずに参加してくれ」
+		IF QUEST_05_FLAG:2 >= 1
+			LOCAL = 500 * ( QUEST_05_FLAG:2 )
+			PRINTFORML 依頼を中断し ${LOCAL} を受け取った
+			MONEY += LOCAL
+		ELSE
+			PRINTL 依頼をキャンセルした
+		ENDIF
+		QUEST_PROGRESS:QUEST_ID = 0
+		QUEST_05_FLAG:0 = DAY + 10
+		CALL QUEST_RELEASE_POINT(QUEST_ID, -1 )	;;MAPイベントの掃除
+	ENDIF
+	PRINTW
+
+;;回収完了報告
+ELSEIF QUEST_05_FLAG:3 == QUEST_05_FLAG:2	;;全回収完了
+	PRINTL イカついおっさんと対面している
+	PRINTL 　「お疲れさん。これでこの辺もちったぁキレイになったってもんだ
+	PRINTL 　　ほっとくと溜まっちまうんで定期的に依頼をだしてるんだが皆嫌っててな・・
+	PRINTL 　　少ないながらも報酬だ。またたのむぜ！」
+		LOCAL = 500 * ( QUEST_05_FLAG:2 )
+		MONEY += LOCAL
+	PRINTFORML 　　　依頼を完了し ${LOCAL} を受け取った
+	;;友好度とかあげるならココ
+	QUEST_PROGRESS:QUEST_ID = 0
+	QUEST_05_FLAG:2 = 0
+	QUEST_05_FLAG:0 = DAY + 30
+	CALL QUEST_RELEASE_POINT(QUEST_ID, -1 )		;;MAPイベントの掃除
+	PRINTW
+
+ENDIF

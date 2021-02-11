@@ -1,0 +1,136 @@
+﻿;;;クエスト関係の補助関数群
+;--------------------------
+; 対象座標にクエストイベントが設定されているかを返す
+; @IS_QUEST(POSID )
+; 	引数１： 対象座標 SSXXYY
+; 	RETURNF ： 座標にクエストが設定されていれば { クエスト番号} そうで無ければ{ -1}を返す
+;--------------------------
+@IS_QUEST(POSID )
+#FUNCTION
+#DIM POSID
+#DIM SECTOR_ID
+#DIM X_POS
+#DIM Y_POS
+
+SECTOR_ID = POSID / 10000
+X_POS = (POSID / 100 ) %100
+Y_POS =  POSID % 100
+
+SIF QUESTMAP:SECTOR_ID:X_POS:Y_POS != 0
+	RETURNF QUESTMAP:SECTOR_ID:X_POS:Y_POS
+
+RETURNF -1
+
+;--------------------------
+; 指定座標にクエストイベントを設定する
+; マップ上にクエスト表示を出す場合は空白空域を指定すること
+; @QUEST_SET_POINT(QUEST_ID, POSID)
+; 	引数１： クエスト番号
+; 	引数２： 指定座標 SSXXYY
+; RETURN  ： 成功 1 / 失敗 -1
+;--------------------------
+@QUEST_SET_POINT(QUEST_ID, POSID)
+#DIM QUEST_ID
+#DIM POSID
+#DIM SECTOR_ID
+#DIM X_POS
+#DIM Y_POS
+
+; すでにクエストが設定されていれば失敗 -1
+SIF IS_QUEST(POSID ) != -1 
+	RETURN -1
+
+CALL ID2POS(POSID)
+	SECTOR_ID = RESULT:0
+	X_POS = RESULT:1
+	Y_POS = RESULT:2
+
+QUESTMAP:SECTOR_ID:X_POS:Y_POS = QUEST_ID		;;QUESTMAP にクエストIDをセットする
+SIF MAP:SECTOR_ID:X_POS:Y_POS == 1				;;空白宙域ならマーク表示フラグをMAPにSET
+	MAP:SECTOR_ID:X_POS:Y_POS = 11
+
+RETURN 1
+
+
+;--------------------------
+; 指定セクター内からランダムに空白宙域を一点選んでクエストポイントを設定する
+; @QUEST_SET_RANDPOINT(QUEST_ID, SECTOR_ID)
+; 	引数１： クエスト番号
+; 	引数２： 指定セクター SS 2ケタ
+; 	引数３： 中央に寄せるか外側にするか ( 中心寄り 1 ～ 9 外縁寄り ) 無指定でランダム抽選
+;  RETURN ： SSXXYY POSID // 失敗 -1
+;--------------------------
+@QUEST_SET_RANDPOINT(QUEST_ID, SECTOR_ID, ARG:2 = 0 )
+#DIM QUEST_ID
+#DIM POSID
+#DIM SECTOR_ID
+#DIM X_POS
+#DIM Y_POS
+
+FOR LOCAL , 1 , 100
+	CALL RAND_CHOICE_XY( MAP_WIDTH, (ARG:2), 4)
+		X_POS = RESULT:0
+		Y_POS = RESULT:1
+	
+	IF MAP:SECTOR_ID:X_POS:Y_POS == 1 && QUESTMAP:SECTOR_ID:X_POS:Y_POS == 0
+		POSID = SECTOR_ID * 10000 + X_POS * 100 + Y_POS
+		CALL QUEST_SET_POINT(QUEST_ID, POSID)
+		SIF RESULT == -1
+			CONTINUE
+			
+		DEBUGPRINTFORML {LOCAL}回数で {POSID}を選定 @QUEST_SET_RANDPOINT
+		RETURN POSID
+	ENDIF
+NEXT
+
+DEBUGPRINTL {LOCAL}回数で 選定失敗  @QUEST_SET_RANDPOINT
+RETURN -1
+
+;--------------------------
+; マップに設定したクエストのイベントフラグを解除する
+; クエスト中断、終了時のお片付け用
+; @QUEST_RELEASE_POINT(QUEST_ID, POSID = -1 )
+; 	引数１： クエスト番号
+; 	引数２： 省略やマイナスで全消去。
+;		  ： POSID指定で指定マスのみ解除する  // 0は #00 (00,00)指定になることに注意すること
+;--------------------------
+@QUEST_RELEASE_POINT(QUEST_ID, POSID = -1 )
+#DIM QUEST_ID
+#DIM POSID
+#DIM SECTOR_ID
+#DIM X_POS
+#DIM Y_POS
+
+COUNT = 0
+IF POSID >= 0
+	CALL ID2POS(POSID )
+		SECTOR_ID = RESULT:0
+		X_POS = RESULT:1
+		Y_POS = RESULT:2
+	IF QUESTMAP:SECTOR_ID:X_POS:Y_POS == QUEST_ID
+		QUESTMAP:SECTOR_ID:X_POS:Y_POS = 0
+	;; MAP上が空白セクターであれば戻す。
+		SIF MAP:SECTOR_ID:X_POS:Y_POS == 11
+			MAP:SECTOR_ID:X_POS:Y_POS = 1
+
+		COUNT ++
+	ENDIF
+ELSE
+	FOR SECTOR_ID, 0, MAX_SECTOR
+		FOR Y_POS, 0, MAP_HEIGHT
+			FOR X_POS, 0, MAP_WIDTH
+				IF QUESTMAP:SECTOR_ID:X_POS:Y_POS == QUEST_ID
+					QUESTMAP:SECTOR_ID:X_POS:Y_POS = 0
+				;; MAP上が空白セクターであれば戻す。
+					SIF MAP:SECTOR_ID:X_POS:Y_POS == 11
+						MAP:SECTOR_ID:X_POS:Y_POS = 1
+						
+					COUNT ++
+				ENDIF
+			NEXT
+		NEXT
+	NEXT
+ENDIF
+
+DEBUGPRINTFORML QUEST_ID:{QUEST_ID} のイベント配置 {COUNT}個を開放 @QUEST_RELEASE_POINT
+RETURN

@@ -18,6 +18,43 @@ RETURN 1
 RESULTS = クエスト名
 RETURN
 
+
+;--------------------------
+; マップでの表示を設定する
+; @QUEST_SET_TILE_  : マップ上対象地点にマークを出す。
+; @QUEST_MAP_INFO_  : 右下小窓にメッセージを出す
+; 引数１： ARG:0 SSXXYY　座標データ　マップ上でクリックされた座標。表示条件分岐に。
+;--------------------------
+;;;マップ画面上での表示。 隠したかったら関数コメントアウトか RETURN 0
+;;;色を替えたかったらSETCOLORしておけば後の処理で色反映します
+@QUEST_SET_TILE_XX (ARG:0 )
+	RESULTS '= "？"
+	SETCOLOR 0xFFFF00
+RETURN 1
+
+;;;右下小窓に出す。隠したければ関数コメントアウトか RETURN 0
+@QUEST_MAP_INFO_XX (ARG:0 )
+		RESULTS:0 '= ""
+		RESULTS:1 '= "クエスト対象エリア"
+		RESULTS:2 '= ""
+		RESULTS:3 '= ""
+		RESULTS:4 '= ""
+RETURN 1
+
+;-----------------------
+; マップ上からQUEST_BODYを実行する処理
+; @QUEST_SHOW_COMMAND_x : ここで指定した文字列のコマンドを現地で表示する
+; 　　　　　　　　　　 ：(調査する||捜索する||採集する||待ち伏せする||挑戦する)といったフレーバー
+; @QUEST_PLACE_CHECK_x ： 設定マスを踏んだら呼び出される。不要ならば消すか無処理で返す
+;--------------------------
+@QUEST_SHOW_COMMAND_XX ()
+	RESULTS '= "クエストを行う"
+RETURN 1
+
+@QUEST_REACH_PLACE_XX ()
+; CALL QUEST_BODY_XX
+RETURN
+
 ;--------------------------
 ; クエスト本体
 ;--------------------------

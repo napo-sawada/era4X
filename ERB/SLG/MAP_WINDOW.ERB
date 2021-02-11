@@ -153,31 +153,43 @@ FOR Y_POS, 0, MAP_HEIGHT
 	FOR X_POS, 0, MAP_WIDTH
 		CALL POS2ID(SECTOR_ID, X_POS, Y_POS)
 		POSID = RESULT
+		;;未探索領域は黒塗りマスで終わり
 		IF CLEARMAP:SECTOR_ID:X_POS:Y_POS == 0
 			CALL ID2TILE(0)
+		;;発見済みである
 		ELSE
-			SIF MAP:SECTOR_ID:X_POS:Y_POS == 0
-				CALL UPDATE_MAP
-			; 星以外では船を表示する
-			IF MAP:SECTOR_ID:X_POS:Y_POS != 星 && MAP:SECTOR_ID:X_POS:Y_POS != 宇宙港
+			;;星の場合
+			IF MAP:SECTOR_ID:X_POS:Y_POS == 星
+				CALL ID2TILE(MAP:SECTOR_ID:X_POS:Y_POS)
+				FOR ITER, 0, 星系数
+					IF 星系座標ID:ITER == POSID
+						SIF STAR_OWNER:ITER == PLAYER_COUNTRY
+							SETCOLOR 0X00FF00
+						BREAK
+					ENDIF
+				NEXT
+			;;宇宙港の場合
+			ELSEIF MAP:SECTOR_ID:X_POS:Y_POS == 宇宙港
+				CALL ID2TILE(MAP:SECTOR_ID:X_POS:Y_POS)
+				FOR ITER, 0, PORT_COUNT
+					IF PORT_POSITION_ID:ITER == POSID
+						SIF PORT_OWNER:ITER == PLAYER_COUNTRY
+							SETCOLOR 0X00FF00
+						BREAK
+					ENDIF
+				NEXT
+			;;星・宇宙港でなければ艦隊優先
+			ELSE
 				CALL GET_SHIP_TILE(POSID)
-				IF RESULT > 0
+				IF RESULT >0	;艦隊の獲得 色も指定されている
 					CALL ID2TILE(RESULT)
-				ELSE
+				ELSEIF MAP:SECTOR_ID:X_POS:Y_POS == 11 ;;クエストの場合個別設定
+					TRYCALLFORM QUEST_SET_TILE_{QUESTMAP:SECTOR_ID:X_POS:Y_POS}(POSID)
+					SIF RESULT != 1
+						CALL ID2TILE(0) ;RETUEN 1が返ってこなければ□にしておく
+				ELSE	;空白(明瞭)・ANOMALY・資源・ワープゲート
 					CALL ID2TILE(MAP:SECTOR_ID:X_POS:Y_POS)
 				ENDIF
-			ELSE
-				IF MAP:SECTOR_ID:X_POS:Y_POS == 宇宙港
-					FOR ITER, 0, PORT_COUNT
-						SIF PORT_OWNER:ITER != PLAYER_COUNTRY
-							CONTINUE
-						SIF PORT_POSITION_ID:ITER != POSID
-							CONTINUE
-						SETCOLOR 0X00FF00
-					NEXT
-				ENDIF
-
-				CALL ID2TILE(MAP:SECTOR_ID:X_POS:Y_POS)
 			ENDIF
 		ENDIF
 	;;表示用変換
@@ -230,11 +242,10 @@ FOR Y_SEC, 0, MAX_SECTOR_Y
 		ELSEIF Y_SEC * 10 + X_SEC == CHARACTER_POSITION / 10000
 			SETCOLOR 0xAAFFAA
 			タイル '= "▲"
-			
-	;	;プレイヤー所属惑星のあるエリア 宇宙港？
-	;	ELSEIF ??
-	;		SETCOLOR 0x33CCCC
-	;		タイル '= "●"
+
+;		ELSEIF MAP:(Y_SEC*10 + X_SEC): 7: 7 == 星
+;			SETCOLOR 0x33CCCC
+;			タイル '= "●"
 	
 		;未踏(X07Y07が未発見)エリア
 		ELSEIF (CLEARMAP: (Y_SEC * 10 + X_SEC) : 7: 7 ) == 0
@@ -279,6 +290,7 @@ SIF SELECTED == -1
 ;;セクター切り替え信号は表示しない
 SIF SELECTED < 0 || SELECTED % 10000 == 9999
 	RETURN
+	
 ;;イレギラーははじく
 CALL ID2POS(SELECTED)
 SECTOR_ID = RESULT:0
@@ -308,7 +320,18 @@ SELECTCASE MAP:SECTOR_ID:X_POS:Y_POS
 		CALL WndMgr_TextSet( windowID,  2, @"%GET_RESOURCE_DESCRIPTION(RESOURCE_MAP:SECTOR_ID:X_POS:Y_POS)%" )
 	CASE ANOMALY
 		CALL WndMgr_TextSet( windowID,  0, @" ◆アノマリー" )
-
+	CASE 11
+		VARSET RESULTS
+		TRYCALLFORM QUEST_MAP_INFO_{QUESTMAP:SECTOR_ID:X_POS:Y_POS} (SELECTED)
+		IF RESULT == 1
+			CALL WndMgr_TextSet( windowID,  0, @" %RESULTS:0%" )
+			CALL WndMgr_TextSet( windowID,  1, @" %RESULTS:1%" )
+			CALL WndMgr_TextSet( windowID,  2, @" %RESULTS:2%" )
+			CALL WndMgr_TextSet( windowID,  3, @" %RESULTS:3%" )
+			CALL WndMgr_TextSet( windowID,  4, @" %RESULTS:4%" )
+		ELSE
+			CALL WndMgr_TextSet( windowID,  0, @" 空白宙域" )
+		ENDIF
 	CASE ワープゲート
 		CALL WndMgr_TextSet( windowID,  0, @" ◆ワープゲート" )
 		SIF X_POS == 0 && Y_POS == MAP_HEIGHT / 2
@@ -345,8 +368,10 @@ ENDSELECT
 ;ウィンドウ初期化　メッセージ残るため
 CALL WndMgr_ResetWindow(windowID)
 ;;指定なければプレイヤーがいる場所を表示
-SIF SELECTED == -1 
+IF SELECTED == -1 
 	SELECTED = CHARACTER_POSITION:MASTER
+
+ENDIF
 ;;セクター切り替え信号は表示しない
 SIF SELECTED < 0 || SELECTED % 10000 == 9999
 	RETURN 0
@@ -358,6 +383,10 @@ X_POS = RESULT:1
 Y_POS = RESULT:2
 SIF X_POS > MAP_WIDTH  || Y_POS > MAP_HEIGHT
 	RETURN 0
+
+;;未探索領域は非表示で終わり
+SIF CLEARMAP:SECTOR_ID:X_POS:Y_POS == 0
+	RETURN
 
 ;;表示可能行数のカウント
 	CALL WndMgr_GetRectangle( windowID )
@@ -397,11 +426,15 @@ IF SHIP_LIST_LENGTH > 0
 
 											;実際表示する部分
 		ELSEIF Wnd4_LINES + 1 <= Wnd4_LINE_MAX
-			SELECTCASE SHIP_CATEGORY:LOCAL
+			SELECTCASE SHIP_CATEGORY:(SHIP_LIST:LOCAL)
 				CASE 0, 7, 8 ;;調査船 || 輸送船 || 作業船
+					タイル '= "　△"
+				CASE 1, 2, 3 ;, 4, 5, 6 ;;フリゲート || コルベット || 駆逐艦 || 巡洋艦 || 戦艦 || 空母 
 					タイル '= "　▲"
-				CASE 1, 2, 3, 4, 5, 6 ;;フリゲート || コルベット || 駆逐艦 || 巡洋艦 || 戦艦 || 空母 
-					タイル '= "　▲"
+				CASE 4, 5
+					タイル '= "　Ж"
+				CASE 6
+					タイル '= "　Θ"
 				CASEELSE
 					タイル '= "　　"
 			ENDSELECT
