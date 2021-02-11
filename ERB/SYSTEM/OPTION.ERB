@@ -4,6 +4,9 @@ PRINTL 設定項目を選択してください
 PRINTL [0] - テキスト設定
 PRINTL [1] - 射精箇所設定
 PRINTL [2] - 着衣関連設定
+SETCOLOR 0x666666
+PRINTL [999]-マップ乱数テストモード　※未セーブで進行中のゲーム内容は失われます
+RESETCOLOR
 PRINTL [100]-戻る
 $INPUT_LOOP
 INPUT
@@ -15,6 +18,8 @@ ELSEIF RESULT == 2
 	CALL CLOTHES_SETTING
 ELSEIF RESULT == 100
 	RETURN 0
+ELSEIF RESULT == 999 ;;;ランダムに座標を確認する関数の挙動確認用です　用済み後削除してください
+	CALL TEST_RAND_MAIN
 ELSE
 	GOTO INPUT_LOOP
 ENDIF

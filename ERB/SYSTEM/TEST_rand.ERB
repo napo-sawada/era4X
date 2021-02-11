@@ -1,0 +1,357 @@
+﻿@TEST_RAND_MAIN
+#DIM SECTOR_ID 
+#DIM SELECTED = -1
+#DIM dynamic OPWnd , 10	;ウィンドウ群展開に使用
+#DIM WndCOUNT			;ウィンドウ群展開に使用
+#DIMS strInputResult
+#DIM HIKI1 = 5
+#DIM HIKI2 = 1
+#DIM nCOUNT = 100
+SECTOR_ID = CHARACTER_POSITION:MASTER / 10000
+DRAWLINE
+PRINTFORML 　乱数配置によるテスト用マップモードです。
+PRINTFORML 　進行中の内容は失われます
+PRINTFORML 　それでも進む場合はキーボードから 0 を入力してください。
+DRAWLINE
+PRINTL
+PRINTFORML  　　[1] [ やめる ] 　　　　[2] [ 戻 る ]
+PRINTL
+INPUT
+	SIF RESULT != 0
+		RETURN
+
+CLEARLINE LINECOUNT
+DRAWLINE
+;;お約束 WINDOW未生成の場合作成する
+CALL SETUP_WINDOW
+
+
+$TEST_LOOP_MAIN
+
+;;;内容作成　window1 宙域画面・中央マップ部分
+CALL CREATE_WINDOW_MAINMAP(SECTOR_ID)
+;;;内容作成　window2 宙域画面・右側セクター全体マップ部分
+CALL CREATE_WINDOW_SUBMAP(SECTOR_ID)
+;;;内容作成　window3 宙域画面・右下情報枠 / 座標オブジェクト表示
+CALL CREATE_WINDOW_SUBINFO(SELECTED)
+
+	OPWnd = 1, 2, 3
+	WndCOUNT = 3
+CALL WndMgr_Display( WndCOUNT, OPWnd, 0 )
+
+
+DRAWLINE
+PRINTL 　　ランダムに座標を選択する関数がどういう挙動をするか確認するためのモードです
+PRINTL 　　
+PRINTL 
+PRINT　　　
+SETCOLOR 0xFFFF00
+PRINTBUTTON "[a] はじめに" , "a"
+RESETCOLOR
+PRINT　　　
+PRINTBUTTON "[z] 雲操作　全解除" , "z"
+PRINT 　　　　　　　　　　　　　　　　　　　　　　　　　
+PRINTBUTTON "[q] おまけ" , "q"
+PRINTL
+PRINT 　　　以下のパラメータで　
+PRINTBUTTON "[ 宙域図に手動テスト実行 ]" , "T"
+PRINT  / 
+PRINTBUTTON "[セクターに対して実行]" , "S"
+PRINTL
+PRINT　　　　　　
+PRINTFORM  引数２：   {HIKI1} 　　１～９
+PRINTBUTTON "　[ 中心に寄せる ]　" , "u" 
+PRINTBUTTON "　[ 外縁に寄せる ]　" , "j"
+PRINTL　:５は中間。その他や省略は５と同じ挙動
+
+PRINT　　　　　　
+PRINTFORM  引数３：   {HIKI2} 　　０～９
+PRINTBUTTON "　　[偏らせない] " , "i"
+PRINTBUTTON "　　　[偏らせる]" , "k"
+PRINTL 　　　：0 なし / 1 なんとなく ～ 9 ほんき 。
+
+PRINTFORM   実行数 : {nCOUNT,4} 回　　
+PRINTBUTTON "[ １回 ]" , "o"
+PRINTBUTTON "　[ 10回 ]" , "m"
+PRINTBUTTON "　[ 100回]", "l"
+PRINTBUTTON "　[1000回]", "p"
+PRINTL
+
+PRINTL
+
+$TEST_LOOP_INPUTS
+DRAWLINE
+INPUTS
+
+
+strInputResult '= RESULTS
+;;; "_"入力はwindow背景クリックした際の動作なのでほっとく
+IF strInputResult == "_"
+	CLEARLINE 1
+	GOTO TEST_LOOP_INPUTS
+ENDIF
+ISNUMERIC strInputResult
+IF RESULT:0
+	TOINT strInputResult
+	IF RESULT >= 0 && RESULT <= 999999
+		SECTOR_ID = RESULT / 10000
+		IF RESULT % 10000 == 9999	;;セクター切り替え操作
+			SELECTED = RESULT		;; SECTOR_ID + 9999 のまま描画にもどる
+			GOTO TEST_LOOP_MAIN
+		ELSE						;;同セクター内で何かをクリック
+			SELECTED = RESULT		;; SELECTEDに入力値を入れ描画にもどる	
+			;CALL ID2POS(SELECTED)
+			;X_POS = LIMIT(RESULT:1, 0, MAP_WIDTH - 1)
+			;Y_POS = LIMIT(RESULT:2, 0, MAP_HEIGHT - 1)
+			GOTO TEST_LOOP_MAIN
+		ENDIF
+	ENDIF
+ENDIF
+
+SELECTCASE strInputResult
+	CASE "z"
+		VARSET CLEARMAP:0:0:0 , 1
+	
+	CASE "a"
+		CALL TEST_SET_CLOUD_INTRO
+	CASE "T"
+		CALL TEST_SET_CLOUD_MANUAL(SECTOR_ID , HIKI1, HIKI2, nCOUNT )
+	CASE "S"
+		CALL TEST_SET_CLOUD_FOR_SECTOR(SECTOR_ID , HIKI1, HIKI2, nCOUNT )
+	CASE "q"
+		CALL TEST_SET_AROUND_POINT
+	CASE "u"
+		HIKI1 --
+	CASE "j"
+		HIKI1 ++
+	CASE "i"
+		HIKI2 --
+	CASE "k"
+		HIKI2 ++
+	CASE "o"
+		nCOUNT = 1
+	CASE "m"
+		nCOUNT = 10
+	CASE "l"
+		nCOUNT = 100
+	CASE "p"
+		nCOUNT = 1000
+ENDSELECT
+
+	HIKI1 = LIMIT(HIKI1 , 0 , 9)
+	HIKI2 = LIMIT(HIKI2 , 0 , 9)
+
+
+GOTO TEST_LOOP_MAIN
+
+
+
+
+
+@TEST_SET_CLOUD_INTRO
+#DIM SECTOR_ID
+#DIM X_POS
+#DIM Y_POS
+#DIM OPWnd ,10
+#DIM WndCOUNT
+
+SECTOR_ID = CHARACTER_POSITION:MASTER / 10000
+CLEARLINE LINECOUNT
+PRINTL 　●ランダム配置関数のデモです
+PRINTL 　　直感的に挙動が分かりにくいので把握のために用意しました
+PRINTL 
+PRINTL 　　挙動確認のため、全エリアを発見済みにします。雲がかかった未発見が選ばれたポイントです。
+PRINTL
+
+PRINTW 　　ここでは試しにあなたのいるセクタに、「中央と外縁の真ん中」を狙った乱数雲100個（重複あり）をだします
+DRAWLINE
+PRINTL
+;;;マップ上の抽選
+VARSET CLEARMAP:0:0:0 , 1
+	FOR LOCAL , 0 , 100
+		CALL RAND_CHOICE_XY( MAP_WIDTH , 5 , 9 )	;;引数１（サイズ）をマップサイズにする
+		X_POS = RESULT:0
+		Y_POS = RESULT:1
+		CLEARMAP:SECTOR_ID:Y_POS:X_POS = 0
+	NEXT
+	
+CALL CREATE_WINDOW_MAINMAP(SECTOR_ID)
+CALL CREATE_WINDOW_SUBMAP(SECTOR_ID)
+CALL CREATE_WINDOW_SUBINFO( )
+	OPWnd = 1, 2, 3
+	WndCOUNT = 3
+CALL WndMgr_Display( WndCOUNT, OPWnd, 0 )
+
+
+PRINTL
+PRINTL 　　　これは　引数２：５ 中心部でも外縁部でもない間
+PRINTL 　　　　　　　引数３：９ ほんきで集中
+PRINTL 　　　実行数 100回 ランダム抽選した結果です
+PRINTL
+PRINTL 　　　通常の宙域図なら　"中央からの距離が 7-8 あたり" が選ばれたとおもいます
+PRINTL
+DRAWLINE
+PRINTW
+PRINTL
+VARSET CLEARMAP:0:0:0 , 1
+	FOR LOCAL , 0 , 100
+		CALL RAND_CHOICE_XY( MAP_WIDTH , 5 , 2 )
+		X_POS = RESULT:0
+		Y_POS = RESULT:1
+		CLEARMAP:SECTOR_ID:Y_POS:X_POS = 0
+	NEXT
+	
+CALL CREATE_WINDOW_MAINMAP(SECTOR_ID)
+CALL CREATE_WINDOW_SUBMAP(SECTOR_ID)
+CALL CREATE_WINDOW_SUBINFO( )
+	OPWnd = 1, 2, 3
+	WndCOUNT = 3
+CALL WndMgr_Display( WndCOUNT, OPWnd, 0 )
+
+PRINTL
+PRINTL 　　　今回は　引数２：同じく５ 
+PRINTL 　　　　　　　引数３：９→２　 すこしだけ偏らせる
+PRINTL 　　　実行数 100回 ランダム抽選した結果です
+PRINTL
+PRINTL 　　　かなりバラけました。
+PRINTL 　　　しかし、引数３の指定のため極端な数である "中心部も外縁部も選ばれる可能性は低く" なります
+PRINTL 　　　
+DRAWLINE
+PRINTW
+PRINTL
+PRINTL 　　引数２を小さくすれば中央に寄り、　大きくすれば外縁に寄せることができます
+PRINTL 　　引数３を小さくすれば2度目のようにぼやっと広がり、 大きくすれば最初のように帯状に集中できます
+PRINTL 　　引数１は抽選の対象サイズです。ここでは省きます
+PRINTL
+DRAWLINE
+PRINTW
+PRINTL
+PRINTL
+PRINT 　　　
+;;;;　セクター側の抽選　引数１に注意
+VARSET CLEARMAP:0:0:0 , 1
+PRINTL
+PRINTFORM 　　セクターを選択 
+	FOR LOCAL , 0 , 13
+		CALL RAND_CHOICE_XY( MAX_SECTOR_X , 4 , 3 )		;;引数１（サイズ）をセクターサイズにする
+		X_POS = RESULT:0
+		Y_POS = RESULT:1
+		LOCAL:1= Y_POS*10 + X_POS
+		CLEARMAP:(LOCAL:1):7:7 = 0
+		PRINTFORM #{Y_POS}{X_POS} , 
+	NEXT
+	PRINTL
+	PRINTL
+	
+CALL CREATE_WINDOW_MAINMAP(SECTOR_ID)
+CALL CREATE_WINDOW_SUBMAP(SECTOR_ID)
+CALL CREATE_WINDOW_SUBINFO( )
+	OPWnd = 1, 2, 3
+	WndCOUNT = 3
+CALL WndMgr_Display( WndCOUNT, OPWnd, 0 )
+
+PRINTL
+PRINTL
+PRINTL 　　　セクターマップ側も対応可能です。　引数１をいじってます
+PRINTL 　　　　　　　引数２：４ やや中心寄り
+PRINTL 　　　　　　　引数３；３ すこし偏らせる
+PRINTL 　　　　実行数  13回　・・・・カブってるのもあるかもしれませんね
+PRINTL 　　　　　まあ適当に散らせてないでしょうか？
+DRAWLINE
+PRINTW
+PRINTL 　
+PRINTL 　このようにクセが強いですが乱数座標が作れます
+PRINTL 　引数２，３で挙動が大きくかわるので本メニューでご確認ください
+PRINTL
+PRINTL 　マップサイズは最低３，上限16になっています。
+PRINTL 　　エラーメッセージをだすのでご注意。
+PRINTL
+PRINTL 　尚、以下の設定の場合は完全にランダムの応答になります
+PRINTL　　　　引数２：省略、もしくは 5，もしくは 1－9以外の数字
+PRINTL　　　　引数３：省略、もしくは 0
+PRINTL
+PRINTL
+PRINTL
+DRAWLINE
+PRINTW
+RETURN 
+
+
+;;;　宙域マップに対して実施
+@TEST_SET_CLOUD_MANUAL(SECTOR_ID , ARG:1, ARG:2, ARG:3 )
+#DIM POSID 
+#DIM SECTOR_ID
+#DIM X_POS
+#DIM Y_POS
+
+	FOR LOCAL , 0 , ARG:3
+		CALL RAND_CHOICE_XY( MAP_WIDTH , ARG:1 , ARG:2 )
+		X_POS = RESULT:0
+		Y_POS = RESULT:1
+		CLEARMAP:SECTOR_ID:Y_POS:X_POS = 0
+		LOCAL++
+	NEXT
+DRAWLINE
+PRINTL
+PRINTFORML 　　　#{SECTOR_ID} に対して RAND_CHOICE_XY ( {MAP_WIDTH} , {ARG:1}, {ARG:2} )　を{ARG:3}回おこないました
+PRINTL
+
+
+;; セクターに対して実施
+@TEST_SET_CLOUD_FOR_SECTOR(SECTOR_ID , ARG:1, ARG:2, ARG:3)
+#DIM POSID 
+#DIM SECTOR_ID
+#DIM X_POS
+#DIM Y_POS
+
+	FOR LOCAL , 0 , ARG:3
+		CALL RAND_CHOICE_XY( MAX_SECTOR_X , ARG:1 , ARG:2 )
+		X_POS = RESULT:0
+		Y_POS = RESULT:1
+		LOCAL:1 = Y_POS*10 + X_POS
+		CLEARMAP:(LOCAL:1):7:7 = 0
+		LOCAL++
+	NEXT
+
+DRAWLINE
+PRINTL	
+PRINTFORML 　　　全セクターに対して RAND_CHOICE_XY ( {MAX_SECTOR_X} , {ARG:1}, {ARG:2} )　を{ARG:3}回おこないました
+PRINTL 　　　選ばれたセクターの (07, 07)　を未確認にしました。　右セクターマップの影で判別してください
+PRINTL
+
+;;あなた中心周辺セクターから一点選択して返す
+;;漂流物とか遺棄クルーズ船とか誘拐犯とかスパイ船との合流とかの妄想
+@TEST_SET_AROUND_POINT
+#DIM SECTOR_ID
+#DIM SEC_X
+#DIM SEC_Y
+#DIM X_POS
+#DIM Y_POS
+
+PRINTFORML 　　クエストにでも使えないかなぁとおもうので
+PRINTFORML 　　指定エリアの隣接セクターから一点選ぶ・・・とりあえず”あなた”中心で。
+PRINTL
+
+	SECTOR_ID = CHARACTER_POSITION:MASTER / 10000
+$RAND_LOOP1
+	SEC_X = LIMIT(SECTOR_ID % 10 ,1 , MAX_SECTOR_X -1 )
+	SEC_Y = LIMIT(SECTOR_ID / 10 ,1 , MAX_SECTOR_Y -1 )
+	
+	CALL RAND_CHOICE_XY( 3 , 0 , 0 ) ;3x3対象。ランダム
+	
+	SEC_X = SEC_X + (RESULT:0 - 1)
+	SEC_Y = SEC_Y + (RESULT:1 - 1)
+	SIF SECTOR_ID == SEC_Y * 10 + SEC_X  	;あなたのいる場所なので再抽選
+		GOTO RAND_LOOP1
+		
+	SECTOR_ID = SEC_Y * 10 + SEC_X 	;;近傍セクター決定
+	
+	CALL RAND_CHOICE_XY(MAP_WIDTH, 7 , 4 ) ;;マップサイズ対象,外縁を若干狙う
+		X_POS = RESULT:0
+		Y_POS = RESULT:1
+	
+	PRINTFORML "あなた”近傍座標として #{SECTOR_ID,2,RIGHT} , Y:{Y_POS,2,RIGHT} , X:{X_POS,2,RIGHT}を適当に選びました
+	
+;	RETURN SECTOR_ID , Y_POS , X_POS
+	CLEARMAP:SECTOR_ID:Y_POS:X_POS = 0
+
