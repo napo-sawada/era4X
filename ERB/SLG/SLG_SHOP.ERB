@@ -12,7 +12,8 @@
 #DIM PREV_CHARACTER_SECTOR_ID
 #DIM STATUS, STATUS_LENGTH
 #DIMS strInputResult
-#DIM Wnd4_LINES					;;window4展開用　桁数
+#DIM Wnd4_LINES					;;window4展開用　行数
+#DIM Wnd4FLAG = 30				;;window4展開用　最大行数制限
 #DIM PREV_CHARACTER_POSID
 
 CALL ID2POS(CHARACTER_POSITION)
@@ -35,6 +36,8 @@ ENDIF
 CALL DRAW_WINDOW(SECTOR_ID, SELECTED, BOARDING_SHIP_ID , 1)
 ;;;window4 展開用に数値保持
 Wnd4_LINES = RESULT
+SIF FLAG:500 >= 5
+	Wnd4FLAG = FLAG:500 +2
 
 ; 変数初期化
 CURRENT_STAR_PORTID = -1
@@ -53,16 +56,16 @@ IF BOARDING_SHIP_ID != -1 && SHIP_MISSION:BOARDING_SHIP_ID == 待機
 		PRINTBUTTON "   [s]↓", "s"
 		PRINTL 
 	ELSEIF STATUS:SPEED == 2
-		PRINTBUTTON "     [ww]↑", "ww"
+		PRINTBUTTON "     [W]↑", "W"
 		PRINTBUTTON "[w]↑↑", "w"
 		PRINTL 
-		PRINTBUTTON "[aa]←", "aa"
+		PRINTBUTTON "[A]←", "A"
 		PRINTBUTTON "[a]←←", "a"
 		PRINT     
 		PRINTBUTTON "→→[d]", "d"
-		PRINTBUTTON "→[dd]", "dd"
+		PRINTBUTTON "→[D]", "D"
 		PRINTL 
-		PRINTBUTTON "     [ss]↓", "ss"
+		PRINTBUTTON "     [S]↓", "S"
 		PRINTBUTTON "[s]↓↓", "s"
 		PRINTL 
 	ENDIF
@@ -179,7 +182,7 @@ DRAWLINE
 ;入力
 
 $INPUT_LOOP2
-INPUTS
+ONEINPUTS
 
 
 strInputResult '= RESULTS
@@ -280,22 +283,27 @@ SELECTCASE strInputResult
 	CASE "z"
 		CALL SHOW_INFO_ASSET()
 		GOTO INPUT_LOOP
+	;移動量の切り替え　FLAG:502
+	CASE "x"
+		FLAG:502 ++
+		SIF FLAG:502 >= 2
+			FLAG:502 = 0
 	;window4メッセージ枠の拡張表示
 	;基本4行＋枠２のタテ６マスのwindowとしている
 	;[一覧表示 / 戻す]　の操作で必要行数まで拡張するための処理。それでも最大100行。これ以上は
 	;;WindowDrawer.ERH の変更が必要。ここだけ増やすとおちる。
+	;; 表示最大行数をflag:500で変更可能にした　Wnd4FLAG = flag:500 +2(枠) 行
 	CASE "L"
 		CALL WndMgr_Exist( 4 )
 		IF RESULT:0
-			Wnd4_LINES += 2 + 1 							;;必要行数＋２（枠）＋１ [一覧表示 / 戻す]
-			Wnd4_LINES = LIMIT ( Wnd4_LINES , 6, 102) 	;;window表示上限50→102にした　重すぎたら検討
 			CALL WndMgr_GetRectangle( 4 )
 			IF RESULT:3 == 6
-				CALL WndMgr_Rectangle( 4, RESULT:0 ,RESULT:1 , RESULT:2 , Wnd4_LINES , RESULT:6 )
+				CALL WndMgr_Rectangle( 4, RESULT:0, RESULT:1, RESULT:2, Wnd4FLAG, RESULT:6 )
 			ELSE
-				CALL WndMgr_Rectangle( 4, RESULT:0 ,RESULT:1 , RESULT:2 , 6 , RESULT:6 )
+				CALL WndMgr_DestroyWindow( 4 )
 			ENDIF
 		ENDIF
+		
 		GOTO INPUT_LOOP
 	CASEELSE
 ENDSELECT
@@ -356,39 +364,31 @@ ENDSELECT
 ;ENDIF
 
 ; 船による移動
-IF BOARDING_SHIP_ID != -1 && (RESULTS == "w" || RESULTS == "d" || RESULTS == "a" || RESULTS == "s" || RESULTS == "ww" || RESULTS == "dd" || RESULTS == "aa" || RESULTS == "ss") && SHIP_MISSION:BOARDING_SHIP_ID == 待機
+; エンジン性能STATUS:SPEED と低速移動フラグFLAG:502により wasdの移動量が決まる。 WASDは常に１．
+IF BOARDING_SHIP_ID != -1 && (RESULTS == "w" || RESULTS == "d" || RESULTS == "a" || RESULTS == "s" || RESULTS == "W" || RESULTS == "D" || RESULTS == "A" || RESULTS == "S") && SHIP_MISSION:BOARDING_SHIP_ID == 待機
 	TRYCALLFORM GET_ENGIN_STATUS_{SHIP_EQUIP:エンジン:0:BOARDING_SHIP_ID}(STATUS)
-	IF STATUS:SPEED == 2
-		SELECTCASE RESULTS
-			CASE "w"
-				CALL SHIP_MOVE_FOR(8, BOARDING_SHIP_ID)
-			CASE "d"
-				CALL SHIP_MOVE_FOR(6, BOARDING_SHIP_ID)
-			CASE "a"
-				CALL SHIP_MOVE_FOR(4, BOARDING_SHIP_ID)
-			CASE "s"
-				CALL SHIP_MOVE_FOR(2, BOARDING_SHIP_ID)
-			CASE "ww"
-				CALL SHIP_MOVE_FOR(8, BOARDING_SHIP_ID, 1)
-			CASE "dd"
-				CALL SHIP_MOVE_FOR(6, BOARDING_SHIP_ID, 1)
-			CASE "aa"
-				CALL SHIP_MOVE_FOR(4, BOARDING_SHIP_ID, 1)
-			CASE "ss"
-				CALL SHIP_MOVE_FOR(2, BOARDING_SHIP_ID, 1)
-		ENDSELECT
-	ELSE
-		SELECTCASE RESULTS
-			CASE "w"
-				CALL SHIP_MOVE_FOR(8, BOARDING_SHIP_ID)
-			CASE "d"
-				CALL SHIP_MOVE_FOR(6, BOARDING_SHIP_ID)
-			CASE "a"
-				CALL SHIP_MOVE_FOR(4, BOARDING_SHIP_ID)
-			CASE "s"
-				CALL SHIP_MOVE_FOR(2, BOARDING_SHIP_ID)
-		ENDSELECT
-	ENDIF
+	SIF STATUS:SPEED < 2
+		FLAG:502 = 0	;低速移動フラグ 0= 無制限 / 1= 低速モード移動量１
+
+	SELECTCASE RESULTS
+		CASE "w"
+			CALL SHIP_MOVE_FOR(8, BOARDING_SHIP_ID, FLAG:502)
+		CASE "d"
+			CALL SHIP_MOVE_FOR(6, BOARDING_SHIP_ID, FLAG:502)
+		CASE "a"
+			CALL SHIP_MOVE_FOR(4, BOARDING_SHIP_ID, FLAG:502)
+		CASE "s"
+			CALL SHIP_MOVE_FOR(2, BOARDING_SHIP_ID, FLAG:502)
+		CASE "W"
+			CALL SHIP_MOVE_FOR(8, BOARDING_SHIP_ID, 1)
+		CASE "D"
+			CALL SHIP_MOVE_FOR(6, BOARDING_SHIP_ID, 1)
+		CASE "A"
+			CALL SHIP_MOVE_FOR(4, BOARDING_SHIP_ID, 1)
+		CASE "S"
+			CALL SHIP_MOVE_FOR(2, BOARDING_SHIP_ID, 1)
+	ENDSELECT
+	
 	CALL ID2POS(SHIP_POSITION:BOARDING_SHIP_ID)
 	X_POS = RESULT:1
 	Y_POS = RESULT:2

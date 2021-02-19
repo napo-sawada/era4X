@@ -1,0 +1,19 @@
+﻿;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;@SORT_SHIP_LIST()
+; グローバル配列 SHIP_LISTをソートする。 所属国－艦種別－船番号の決め打ち
+; @GET_SHIP_LIST 系の後に使用すること
+; 国追加・船種別追加は SLG.ERH の変数みてるので対応できるハズ
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+@SORT_SHIP_LIST()
+#DIM DYNAMIC SORT_1, MAX_SHIP
+#DIM SHIP_ID
+
+FOR LOCAL, 0, SHIP_LIST_LENGTH
+	SHIP_ID = SHIP_LIST:LOCAL
+	SORT_1:LOCAL = SHIP_ID + MAX_SHIP*( SHIP_CATEGORY:SHIP_ID+ (SHIP_CATEGORY_COUNT)*SHIP_COUNTRY:SHIP_ID )
+NEXT
+
+ARRAYMSORT SORT_1, SHIP_LIST
+RETURN
+
