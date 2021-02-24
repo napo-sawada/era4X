@@ -1,15 +1,14 @@
 ﻿;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;@DRAW_WINDOW(SECTOR_ID,wFLAG)
-;;; 	引数１	SECTOR_ID	: 表示するセクターXX
-;;;		引数２	SELECTED		: 特にクリックされた地点　[SECTER][POS_X][POSY] 6桁
-;;; 	引数３	wFLAG		: wFLAG == 1 は宙域画面
-;;;							: 1=コントローラー表示  0:非表示 (移動先、交易指定などで使用)
-;;; 画面用に宙域マップを描画する　SECTOR_IDで指定されたものを表示する
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;@SHOW_SHIP_WINDOW_INFO(SHIP_ID)
+;;; 	引数１	SHIP_ID		表示する船
+;;;	船情報を表示するウィンドウを展開する
+;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 @SHOW_SHIP_WINDOW_INFO(SHIP_ID)
 #DIM SHIP_ID
 #DIM dynamic OPWnd , 4
-
+#DIM WndCOUNT			;ウィンドウ群展開に使用
+#DIM Wnd7_LINES
 
 ;;お約束 WINDOW未生成の場合作成する
 CALL SETUP_WINDOW
@@ -20,16 +19,30 @@ CALL CREATE_WINDOW_SHIPINFO_MAIN(SHIP_ID)
 ;;内容作成　window6 船情報細目
 ;CALL CREATE_WINDOW_SHIPINFO_SUB(SHIP_ID)
 
-
+;;内容作成　window7 船情報積荷
+CALL CREATE_WINDOW_SHIPINFO_CARGO(SHIP_ID)
+	Wnd7_LINES = RESULT
+	
 ;;画面への表示を実行
 DRAWLINE
 
 OPWnd = 5
+WndCOUNT = 1
+
 ;OPWnd = 6, 5
+IF Wnd7_LINES > 0
+	OPWnd:WndCOUNT = 7
+	WndCOUNT ++
+	IF Wnd7_LINES >= 5
+		CALL WndMgr_GetRectangle( 7 )	;;枠情報の収集
+		CALL WndMgr_Rectangle( 7, RESULT:0, RESULT:1, RESULT:2, Wnd7_LINES + 2, RESULT:6 )	;枠の高さ再設定
+	ENDIF
+ENDIF
 
 ;;;指定windowの表示を実行
-CALL WndMgr_Display( 1, OPWnd, 0 )
+CALL WndMgr_Display( WndCOUNT, OPWnd, 0 )
 
+	CALL WndMgr_DestroyWindow( 7 )
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;@CREATE_WINDOW_SHIPINFO_MAIN(SHIP_ID)
 ;;;　引数１：表示する船ID
@@ -113,6 +126,44 @@ CALL WndMgr_TextAdd( windowID, 2, @"@C:{色:1}@%MESSAGE:0%@/C@")
 
 SIF MAX_CARGO != 0
 	CALL WndMgr_TextSet( windowID, 3, @" 積載 {CARGO, 5, RIGHT} /{MAX_CARGO, 5, RIGHT} ")
+	
+	
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;@CREATE_WINDOW_SHIPINFO_CARGO(TargetShip)
+;;;　引数１：表示する船ID
+;;; window7 船情報搭載貨物
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+@CREATE_WINDOW_SHIPINFO_CARGO(TargetShip)
+#DIM windowID = 7
+#DIM TargetShip
+#DIM Compartment
+#DIM Wnd7_LINES
+#DIM ITEM_ID
+#DIM ITEM_NUM
+
+CALL WndMgr_ResetWindow(windowID)
+CALL WndMgr_WindowTitle( windowID, @" IN CARGO " ) ;枠タイトル
+
+Wnd7_LINES = 0
+FOR Compartment, 0, ITEM_LENGTH
+	CALL GET_CARGO_ITEM_INFO(TargetShip, Compartment)
+	SIF RESULT:0 == -1 || RESULT:1 <= 0
+		BREAK
+	
+	IF Wnd7_LINES >= 20
+		CALL WndMgr_TEXTSET( windowID, (Wnd7_LINES -1 ), @" 省略されました" )
+		BREAK
+	ENDIF
+	
+	ITEM_ID = RESULT:0
+	ITEM_NUM = RESULT:1
+	CALL GET_ITEM_NAME(RESULT:0)
+	CALL WndMgr_TextSet( windowID, Wnd7_LINES, @" [{ITEM_ID,2,RIGHT}] %RESULTS,20,LEFT% x {ITEM_NUM,4,LEFT}" 　)
+	Wnd7_LINES ++
+NEXT
+
+RETURN Wnd7_LINES
+
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;@CREATE_WINDOW_SHIPINFO_SUB(SHIP_ID)

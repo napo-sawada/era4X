@@ -6,12 +6,12 @@
 ;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 @SETUP_WINDOW
-#DIM  nWndId, 7		;;ウィンドウID格納用
-#DIM  nLocX,  7		;;起点X
-#DIM  nLocY,  7		;;起点Y
-#DIM  nWidth, 7		;;幅X
-#DIM  nHeigth,7		;;高さY
-#DIM  nExFlag,7		;;枠の有無　0x00 なし 0x01 太 0x02 細	
+#DIM  nWndId, 10	;;ウィンドウID格納用
+#DIM  nLocX,  10	;;起点X
+#DIM  nLocY,  10	;;起点Y
+#DIM  nWidth, 10	;;幅X
+#DIM  nHeigth,10	;;高さY
+#DIM  nExFlag,10	;;枠の有無　0x00 なし 0x01 太 0x02 細	
 
 ;;ウィンドウ未生成なら初期設定する
 ; 航宙画面	WndId 0.コントローラー / 1.メインマップ / 2.セクターマップ / 3.右下情報枠 / 4.下部メッセージ
@@ -107,6 +107,18 @@ SIF ! RESULT:0
 CALL WndMgr_Exist( 6 )
 SIF ! RESULT:0
 	CALL WndMgr_CreateWindow( nWndId:6, nLocX:6, nLocY:6, nWidth:6, nHeigth:6, nExFlag:6 )
+	
+; ウィンドウ7の生成
+; 船ステータス表示　カーゴ
+	nWndId:7  = 7
+	nLocX:7   = nLocX:5 + nWidth:5
+	nLocY:7   = nLocY:5
+	nWidth:7  = 40
+	nHeigth:7 = 6
+	nExFlag:7 = nExFlag:5
+CALL WndMgr_Exist( 7 )
+SIF ! RESULT:0
+	CALL WndMgr_CreateWindow( nWndId:7, nLocX:7, nLocY:7, nWidth:7, nHeigth:7, nExFlag:7 )
 
  ;;ウィンドウ初期設定ここまで
 ;--------------------------------
