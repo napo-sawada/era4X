@@ -311,8 +311,10 @@ SELECTCASE MAP:SECTOR_ID:X_POS:Y_POS
 		CALL WndMgr_TextSet( windowID,  0, @" 中立星(所属: %COUNTRY_NAME:(STAR_OWNER:RESULT)%)" )
 	CASE 資源
 		CALL WndMgr_TextSet( windowID,  0, @" ◆採掘可能エリア" )
-		CALL WndMgr_TextSet( windowID,  1, @" %GET_RESOURCE_NAME(RESOURCE_MAP:SECTOR_ID:X_POS:Y_POS)%" )
-		CALL WndMgr_TextSet( windowID,  2, @"%GET_RESOURCE_DESCRIPTION(RESOURCE_MAP:SECTOR_ID:X_POS:Y_POS)%" )
+		CALL GET_ITEM_NAME( RESOURCE_MAP:SECTOR_ID:X_POS:Y_POS )
+		CALL WndMgr_TextSet( windowID,  1, @" %RESULTS%" )
+		CALL GET_ITEM_DESCRIPTION(RESOURCE_MAP:SECTOR_ID:X_POS:Y_POS)
+		CALL WndMgr_TextSet( windowID,  2, @"%RESULTS%" )
 	CASE ANOMALY
 		CALL WndMgr_TextSet( windowID,  0, @" ◆アノマリー" )
 	CASE 11

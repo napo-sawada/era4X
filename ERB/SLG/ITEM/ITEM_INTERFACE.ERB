@@ -1,0 +1,147 @@
+﻿;-----------------------------------
+;アイテム名を取得
+;-----------------------------------
+@GET_ITEM_NAME(ITEM_ID)
+#DIM ITEM_ID
+TRYCCALLFORM GET_ITEM_NAME_{ITEM_ID}
+    RETURN 0
+CATCH
+    RESULTS = ""
+ENDCATCH
+RETURN -1
+;-----------------------------------
+;アイテムの分類を取得
+;-----------------------------------
+@GET_ITEM_CATEGORY(ITEM_ID)
+#DIM ITEM_ID
+TRYCCALLFORM GET_ITEM_CATEGORY_{ITEM_ID}
+    RETURN 0
+CATCH
+    RESULTS:0 = ""
+    RESULTS:1 = ""
+ENDCATCH
+RETURN -1
+
+;-----------------------------------
+;アイテムの説明を取得
+;-----------------------------------
+@GET_ITEM_DESCRIPTION(ITEM_ID)
+#DIM ITEM_ID
+TRYCCALLFORM GET_ITEM_DESCRIPTION_{ITEM_ID}
+    RETURN 0
+CATCH
+    RESULTS:0 = ""
+    RESULTS:1 = ""
+ENDCATCH
+RETURN -1
+;-----------------------------------
+;アイテムに関する情報をSTATUS配列に取得
+;-----------------------------------
+@GET_ITEM_INFO_ALL(ITEM_ID, STATUS)
+#DIM ITEM_ID
+#DIM REF STATUS
+VARSET STATUS, 0
+TRYCCALLFORM GET_ITEM_INFO_{ITEM_ID}(STATUS)
+    RETURN 0
+CATCH
+ENDCATCH
+RETURN -1
+
+;-----------------------------------
+;アイテムに関する情報のうち、STATUS_IDで指定したものを返す
+;-----------------------------------
+@GET_ITEM_INFO(ITEM_ID, STATUS_ID)
+#DIM ITEM_ID
+#DIM STATUS_ID
+#DIM STATUS, STATUS_LENGTH
+VARSET STATUS
+CALL GET_ITEM_INFO_ALL(ITEM_ID, STATUS)
+SIF RESULT == -1
+    RETURN -1
+RETURN STATUS:STATUS_ID
+
+;-----------------------------------
+;アイテムの素材を取得
+;-----------------------------------
+@GET_RESOUCES_OF_ITEM(ITEM_ID, USE_RESOURCE)
+#DIM ITEM_ID
+#DIM REF USE_RESOURCE
+VARSET USE_RESOURCE, 0
+TRYCCALLFORM GET_ITEM_RESOURCE_{ITEM_ID}(USE_RESOURCE)
+    RETURN 0
+CATCH
+ENDCATCH
+RETURN -1
+
+;-----------------------------------
+;アイテムが店に並ぶか
+;（後々、品揃えは国か宇宙港にもたせたいですね…
+;-----------------------------------
+@IS_MARKET_AVAILABLE_ITEM(ITEM_ID)
+#DIM ITEM_ID
+TRYCCALLFORM IS_MARKET_AVAILABLE_ITEM_{ITEM_ID}
+    RETURN RESULT
+CATCH
+ENDCATCH
+RETURN -1
+
+;-----------------------------------
+;アイテムが敵からドロップするか
+;-----------------------------------
+@IS_DROPPABLE_ITEM(ITEM_ID)
+#DIM ITEM_ID
+TRYCCALLFORM IS_DROPPABLE_ITEM_{ITEM_ID}
+    RETURN RESULT
+CATCH
+ENDCATCH
+RETURN -1
+
+;-----------------------------------
+;アイテムがCOUNTRY_ID国で非合法かどうか
+;国に持たせてもアイテムに持たせても追加時に変更がデカいので、ここで一括管理したほうが良いはず（たぶん）
+;戻り値　0:合法　1:非合法
+;-----------------------------------
+@IS_ILEGAL_ITEM(COUNTRY_ID, ITEM_ID)
+#DIM ITEM_ID
+#DIM COUNTRY_ID
+
+RETURN 0
+
+;-----------------------------------
+;指定した分類のアイテムを探し、ITEM_LIST配列に格納する。
+;小分類(LOWER_CLASS)は省略可能
+;返り値として、該当するアイテムの数を返す
+;-----------------------------------
+@GET_ITEM_LIST_BY_CATEGORY(ITEM_LIST, UPPER_CLASS, LOWER_CLASS = "")
+#DIM REF ITEM_LIST, 0
+#DIMS UPPER_CLASS
+#DIMS LOWER_CLASS
+#DIM ITEM_NUM
+
+VARSET ITEM_LIST, -1
+ITEM_NUM = 0
+
+IF LOWER_CLASS == "" 
+    FOR LOCAL, 0, ITEM_LENGTH
+        CALL GET_ITEM_CATEGORY(LOCAL)
+        SIF RESULT == -1
+            CONTINUE
+        DEBUGPRINTFORML %RESULTS:0% %UPPER_CLASS% 
+        IF RESULTS:0 == UPPER_CLASS
+            ITEM_LIST:ITEM_NUM = LOCAL
+            ITEM_NUM += 1
+        ENDIF
+    NEXT
+ELSE
+    FOR LOCAL, 0, ITEM_LENGTH
+        CALL GET_ITEM_CATEGORY(LOCAL)
+        SIF RESULT == -1
+            CONTINUE
+        IF RESULTS:0 == UPPER_CLASS && RESULTS:1 == LOWER_CLASS
+            ITEM_LIST:ITEM_NUM = LOCAL
+            ITEM_NUM += 1
+        ENDIF
+    NEXT
+ENDIF
+
+RETURN ITEM_NUM
