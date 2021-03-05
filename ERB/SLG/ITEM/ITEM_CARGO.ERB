@@ -141,8 +141,9 @@ SIF ItemNum < 1
     RETURN ItemNum
 
 CALL GET_LOADABLE_ITEM_NUM(TargetShip, ItemID)
+
 SIF RESULT:0 < 1
-    RETURN ItemNum
+    RETURN 0
 
 LoadableNum = MIN(ItemNum, RESULT:0)
 Compartment = RESULT:1
