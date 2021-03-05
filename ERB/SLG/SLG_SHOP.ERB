@@ -678,7 +678,7 @@ ENDIF
 
 #DIM PREVIOUS_LINECOUNT
 
-#DIM COLUMN_ORDER = データ_艦名, データ_艦種, データ_所属, データ_任務, データ_HP, データ_シールド, データ_実弾, データ_レーザー, データ_ミサイル, データ_戦闘機, データ_魚雷, データ_対空, データ_回避
+#DIM COLUMN_ORDER = データ_艦名, データ_艦種, データ_所属, データ_任務, データ_HP, データ_シールド, データ_実体弾, データ_レーザー, データ_ミサイル, データ_戦闘機, データ_魚雷, データ_対空, データ_回避
 #DIM DATA_WIDTH, 船舶一覧データ数 
 #DIM INDEX
 ;列幅
@@ -688,7 +688,7 @@ DATA_WIDTH:データ_所属 = 16
 DATA_WIDTH:データ_任務 = 4
 DATA_WIDTH:データ_HP = 11
 DATA_WIDTH:データ_シールド = 11
-DATA_WIDTH:データ_実弾 = 4
+DATA_WIDTH:データ_実体弾 = 4
 DATA_WIDTH:データ_レーザー = 4
 DATA_WIDTH:データ_ミサイル = 4
 DATA_WIDTH:データ_戦闘機 = 4
@@ -890,8 +890,8 @@ FOR LOCAL, INDEX, VARSIZE("COLUMN_ORDER")
 			PRINTBUTTON "   耐久    ", 10000 + ソート_MAXHP
 		CASE データ_シールド
 			PRINTBUTTON "  シールド ", 10000 + ソート_MAXシールド
-		CASE データ_実弾
-			PRINTBUTTON "実弾", 10000 + ソート_実弾
+		CASE データ_実体弾
+			PRINTBUTTON "実体弾", 10000 + ソート_実体弾
 		CASE データ_レーザー
 			PRINTBUTTON "ﾚｰｻﾞｰ", 10000 + ソート_レーザー
 		CASE データ_ミサイル
@@ -962,7 +962,7 @@ FOR LOCAL, INDEX, VARSIZE("COLUMN_ORDER")
 			COLUMN_DATA += "/"
 			CALL GET_SHIP_TOTAL_SIELD(SHIP_ID)
 			COLUMN_DATA += @"{RESULT, 5, RIGHT}"					
-		CASE データ_実弾
+		CASE データ_実体弾
 			COLUMN_DATA += @"{FIREPOWER_LIST:実体弾, 4, RIGHT}"
 		CASE データ_レーザー
 			COLUMN_DATA += @"{FIREPOWER_LIST:レーザー, 4, RIGHT}"
@@ -1029,7 +1029,7 @@ FOR LOCAL, 0, MAX_SHIP
 		CASE ソート_シールド割合
 			CALL GET_SHIP_SHIELD_PERCENT(CURRENT_SHIP_LIST:LOCAL)
 			SORT_VALUE:LOCAL = RESULT
-		CASE ソート_実弾
+		CASE ソート_実体弾
 			CALL GET_TOTAL_FIREPOWER(CURRENT_SHIP_LIST:LOCAL, FIREPOWER_LIST)
 			SORT_VALUE:LOCAL = FIREPOWER_LIST:実体弾
 		CASE ソート_レーザー

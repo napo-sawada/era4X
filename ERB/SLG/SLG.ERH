@@ -270,7 +270,7 @@
 #DIM CONST ソート_シールド = 7
 #DIM CONST ソート_MAXシールド = 8
 #DIM CONST ソート_シールド割合 = 9
-#DIM CONST ソート_実弾 = 10
+#DIM CONST ソート_実体弾 = 10
 #DIM CONST ソート_レーザー = 11
 #DIM CONST ソート_ミサイル = 12
 #DIM CONST ソート_戦闘機 = 13
@@ -284,7 +284,7 @@
 #DIM CONST データ_任務 = 3
 #DIM CONST データ_HP = 4
 #DIM CONST データ_シールド = 5
-#DIM CONST データ_実弾 = 6
+#DIM CONST データ_実体弾 = 6
 #DIM CONST データ_レーザー = 7
 #DIM CONST データ_ミサイル = 8
 #DIM CONST データ_戦闘機 = 9
