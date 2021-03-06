@@ -10,61 +10,53 @@
 #DIM NEW_SHIP_ID
 #DIM ITER
 #DIM IS_COMPLETE
+#DIM COUNTER
 
 VARSET SHIPS, 0
 VARSET CURRENT_WAITING_SHIPS, 0
 IS_COMPLETE = 0
+COUNTER = 0
 
-RETURN
 CALL GET_INVASION_ARMY_2(SHIPS)
 ; 戦争目標が定まっていない場合
-IF WAR_PHASE:COUNTRY_ID == 準備 && WAR_TARGET_POS:COUNTRY_ID == 1;<-わざと
+IF WAR_PHASE:COUNTRY_ID == 準備 && WAR_TARGET_POS:COUNTRY_ID == 0
     WAR_TARGET_POS:COUNTRY_ID = 星系座標ID:7
     MEETING_POINT:COUNTRY_ID = 星系座標ID:0 - 100
 ELSEIF WAR_PHASE:COUNTRY_ID  == 準備
-    IF SHIPS:フリゲート != INVASION_ARMY:COUNTRY_ID:フリゲート
+    IF SHIPS:ヴォーロス級コルベット != INVASION_ARMY:COUNTRY_ID:ヴォーロス級コルベット
         FOR STAR_ID, 0, 3
-            CALL BUILD_SHIP(星系座標ID:STAR_ID, COUNTRY_ID, COUNTRY_ID, フリゲート, "侵攻用フリゲート", NEW_SHIP_ID)
+            CALL BUILD_SHIP(星系座標ID:STAR_ID, COUNTRY_ID, COUNTRY_ID, ヴォーロス級コルベット, "侵攻用コルベット", NEW_SHIP_ID)
             IF RESULT == 1
                 SHIP_MISSION:NEW_SHIP_ID = 移動
                 MOVING_POS:NEW_SHIP_ID = MEETING_POINT:COUNTRY_ID
-                INVASION_ARMY:COUNTRY_ID:フリゲート ++
+                INVASION_ARMY:COUNTRY_ID:ヴォーロス級コルベット ++
             ENDIF
         NEXT
-    ELSEIF SHIPS:コルベット != INVASION_ARMY:COUNTRY_ID:コルベット
+    ELSEIF SHIPS:ペルーン級フリゲート != INVASION_ARMY:COUNTRY_ID:ペルーン級フリゲート
         FOR STAR_ID, 0, 3
-            CALL BUILD_SHIP(星系座標ID:STAR_ID, COUNTRY_ID, COUNTRY_ID, コルベット, "侵攻用コルベット", NEW_SHIP_ID)
+            CALL BUILD_SHIP(星系座標ID:STAR_ID, COUNTRY_ID, COUNTRY_ID, ペルーン級フリゲート, "侵攻用フリゲート", NEW_SHIP_ID)
             IF RESULT == 1
                 SHIP_MISSION:NEW_SHIP_ID = 移動
                 MOVING_POS:NEW_SHIP_ID = MEETING_POINT:COUNTRY_ID
-                INVASION_ARMY:COUNTRY_ID:コルベット ++
+                INVASION_ARMY:COUNTRY_ID:ペルーン級フリゲート ++
             ENDIF
         NEXT
-    ELSEIF SHIPS:駆逐艦 != INVASION_ARMY:COUNTRY_ID:駆逐艦
+    ELSEIF SHIPS:マーチ級駆逐艦 != INVASION_ARMY:COUNTRY_ID:マーチ級駆逐艦
         FOR STAR_ID, 0, 3
-            CALL BUILD_SHIP(星系座標ID:STAR_ID, COUNTRY_ID, COUNTRY_ID, 駆逐艦, "侵攻用駆逐艦", NEW_SHIP_ID)
+            CALL BUILD_SHIP(星系座標ID:STAR_ID, COUNTRY_ID, COUNTRY_ID, マーチ級駆逐艦, "侵攻用駆逐艦", NEW_SHIP_ID)
             IF RESULT == 1
                 SHIP_MISSION:NEW_SHIP_ID = 移動
                 MOVING_POS:NEW_SHIP_ID = MEETING_POINT:COUNTRY_ID
-                INVASION_ARMY:COUNTRY_ID:駆逐艦 ++
+                INVASION_ARMY:COUNTRY_ID:マーチ級駆逐艦 ++
             ENDIF
         NEXT
-    ELSEIF SHIPS:巡洋艦 != INVASION_ARMY:COUNTRY_ID:巡洋艦
+    ELSEIF SHIPS:汎用巡洋艦 != INVASION_ARMY:COUNTRY_ID:汎用巡洋艦
         FOR STAR_ID, 0, 3
-            CALL BUILD_SHIP(星系座標ID:STAR_ID, COUNTRY_ID, COUNTRY_ID, 巡洋艦, "侵攻用巡洋艦", NEW_SHIP_ID)
+            CALL BUILD_SHIP(星系座標ID:STAR_ID, COUNTRY_ID, COUNTRY_ID, 汎用巡洋艦, "侵攻用巡洋艦", NEW_SHIP_ID)
             IF RESULT == 1
                 SHIP_MISSION:NEW_SHIP_ID = 移動
                 MOVING_POS:NEW_SHIP_ID = MEETING_POINT:COUNTRY_ID
-                INVASION_ARMY:COUNTRY_ID:巡洋艦 ++
-            ENDIF
-        NEXT
-    ELSEIF SHIPS:戦艦 != INVASION_ARMY:COUNTRY_ID:戦艦
-        FOR STAR_ID, 0, 3
-            CALL BUILD_SHIP(星系座標ID:STAR_ID, COUNTRY_ID, COUNTRY_ID, 戦艦, "侵攻用戦艦", NEW_SHIP_ID)
-            IF RESULT == 1
-                SHIP_MISSION:NEW_SHIP_ID = 移動
-                MOVING_POS:NEW_SHIP_ID = MEETING_POINT:COUNTRY_ID
-                INVASION_ARMY:COUNTRY_ID:戦艦 ++
+                INVASION_ARMY:COUNTRY_ID:汎用巡洋艦 ++
             ENDIF
         NEXT
     ELSE
@@ -76,7 +68,7 @@ ELSEIF WAR_PHASE:COUNTRY_ID == 集合
             CONTINUE
         SIF SHIP_COUNTRY:SHIP_ID != COUNTRY_ID
             CONTINUE
-        CURRENT_WAITING_SHIPS:(SHIP_CATEGORY:SHIP_ID) ++
+        CURRENT_WAITING_SHIPS:(SHIP_MODEL:SHIP_ID) ++
     NEXT
     FOR ITER, 0, SHIP_CATEGORY_COUNT
         SIF SHIPS:ITER != CURRENT_WAITING_SHIPS:ITER
@@ -97,23 +89,37 @@ ELSEIF WAR_PHASE:COUNTRY_ID == 進撃
         IF SHIP_POSITION:SHIP_ID == MEETING_POINT:COUNTRY_ID && SHIP_MISSION == 待機
             SHIP_MISSION:SHIP_ID = 移動
             MOVING_POS:SHIP_ID = WAR_TARGET_POS:COUNTRY_ID
+            COUNTER ++
         ELSEIF SHIP_POSITION:SHIP_ID == WAR_TARGET_POS:COUNTRY_ID
             SHIP_MISSION:SHIP_ID = 移動
             MOVING_POS:SHIP_ID = 星系座標ID:0
             WAR_PHASE:COUNTRY_ID = 退却
+        ELSEIF SHIP_MISSION:SHIP_ID == 移動 && MOVING_POS:SHIP_ID == WAR_TARGET_POS:COUNTRY_ID
+            COUNTER ++
         ENDIF
     NEXT
+    IF WAR_PHASE:COUNTRY_ID == 進撃 && COUNTER < 36
+        SETCOLOR 0XFF0000
+        PRINTL [ニュース] 損耗が激しいため、社会主義国の侵攻部隊は退却しました
+        RESETCOLOR
+        FOR SHIP_ID, 0, MAX_SHIP
+            IF SHIP_COUNTRY:SHIP_ID != COUNTRY_ID
+                CONTINUE
+            ELSEIF SHIP_MISSION:SHIP_ID == 移動 && MOVING_POS:SHIP_ID == WAR_TARGET_POS:COUNTRY_ID
+                SHIP_MISSION:SHIP_ID = 移動
+                MOVING_POS:SHIP_ID = 星系座標ID:0
+            ENDIF
+        NEXT
+        WAR_PHASE:COUNTRY_ID = 退却
+    ENDIF
 ELSEIF WAR_PHASE:COUNTRY_ID == 退却
-    SETCOLOR 0XFF0000
-    PRINTL [ニュース] 社会主義国の侵攻により民主主義国家の防衛部隊が壊滅しました
-    RESETCOLOR
-    WAIT
-    WAIT
     WAR_PHASE:COUNTRY_ID = 準備
     FOR SHIP_ID, 0, MAX_SHIP
         SIF SHIP_COUNTRY:SHIP_ID != COUNTRY_ID
             CONTINUE
         SIF SHIP_MISSION:SHIP_ID == パトロール
+            CONTINUE
+        SIF SHIP_POSITION:SHIP_ID == 星系座標ID:0 || SHIP_POSITION:SHIP_ID == 星系座標ID:1 || SHIP_POSITION:SHIP_ID == 星系座標ID:2
             CONTINUE
         SHIP_MISSION:SHIP_ID = 移動
         MOVING_POS:SHIP_ID = 星系座標ID:0
@@ -132,5 +138,4 @@ UNIT:マーチ級駆逐艦 = 10
 UNIT:ヴォーロス級コルベット = 33
 UNIT:ペルーン級フリゲート = 21
 UNIT:マーチ級駆逐艦 = 12
-UNIT:巡洋艦 = 6
-
+UNIT:汎用巡洋艦 = 6
