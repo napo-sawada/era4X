@@ -1,0 +1,82 @@
+﻿;--------------------------
+; 高貴なるお方
+; ヴァレンティナ・ファン・クラウゼ加入イベント
+;--------------------------
+
+
+;--------------------------
+; クエスト受注可能か
+;--------------------------
+@QUEST_ACCEPTABLE_2
+#DIM STAR_ID
+
+FOR STAR_ID, 0, 星系数
+	SIF CHARACTER_POSITION != 星系座標ID:STAR_ID
+		CONTINUE
+	SIF STAR_OWNER:STAR_ID != 4
+		CONTINUE
+	RETURN 0
+NEXT
+
+RETURN 0
+
+;--------------------------
+; クエストの名前を返却
+;--------------------------
+@QUEST_NAME_2
+RESULTS = 高貴なるお方
+RETURN
+
+;--------------------------
+; クエスト本体
+;--------------------------
+@QUEST_BODY_2
+SELECTCASE QUEST_PROGRESS:2
+	CASE 0
+		CALL QUEST_BODY_2_0
+	CASE 1
+		CALL QUEST_BODY_2_1
+	CASE 2
+		CALL QUEST_BODY_2_2
+	CASE 3
+		CALL QUEST_BODY_2_3
+	CASE 4
+		CALL QUEST_BODY_2_4
+ENDSELECT
+
+
+; 進捗0
+@QUEST_BODY_2_0
+PRINTFORML %CALLNAME:MASTER%が宇宙港を歩いていると、不意に近くに居た兵士に声をかけられた
+IF REL_LIKE:4:0 < 100
+	PRINTL 「おいお前、あまりここら辺をウロウロするな。もうすぐやんごとなきお方がいらっしゃるのだ」
+	PRINTFORMW %CALLNAME:MASTER%は兵士に追い返されてしまった
+ELSE
+	PRINTL 「お前、見覚えがあるな。最近国のために尽くしているようじゃないか。
+	PRINTL そうだ。最近この辺りに海賊が出ていてな。よければ討伐してくれないか」
+	CALL ASK_YN
+	IF RESULT == 0
+		PRINTW 「そうか、それは残念だ」
+		RETURN
+	ENDIF
+	PRINTW 「よし、頼んだぞ」
+	QUEST_PROGRESS:2 = 1
+	; 海賊の生成
+	CALL ID2POS(CHARACTER_POSITION)
+	CALL POS2ID(RESULT, 0, 14)
+	CALL INIT_PRESET_SHIP(10, RESULT, 汎用コルベット, "海賊コルベット", 汎用コルベット)
+ENDIF
+
+; 進捗1
+@QUEST_BODY_2_1
+
+
+; 進捗1
+@QUEST_BODY_2_2
+
+; 進捗1
+@QUEST_BODY_2_3
+
+; 進捗1
+@QUEST_BODY_2_4
+
