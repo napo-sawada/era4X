@@ -1,0 +1,44 @@
+﻿;--------------------------
+; !!クエスト名と 8を好きな番号に変える！!
+; 資産家の後始末
+; コルベット3隻が手に入る
+;--------------------------
+
+
+;--------------------------
+; クエスト受注可能か
+;--------------------------
+@QUEST_ACCEPTABLE_8
+SIF QUEST_PROGRESS:8 == 0
+	RETURN 1
+RETURN 0
+
+;--------------------------
+; クエストの名前を返却
+;--------------------------
+@QUEST_NAME_8
+RESULTS = 資産家の後始末
+RETURN
+
+
+;--------------------------
+; クエスト本体
+;--------------------------
+@QUEST_BODY_8
+PRINTL 宇宙港に古ぼけた汎用コルベットが3隻並んでいる
+PRINTFORML %CALLNAME:MASTER%がそのコルベットを眺めていると、一人の老婆が声をかけてきた
+PRINTL 「宇宙船に興味がおありですか？」
+PRINTFORML 品の良さそうな老婆だ。彼女は%CALLNAME:MASTER%が頷いてみせると、突飛な提案をしてきた
+PRINTW 「よろしければお譲りいたしょうか」
+PRINTW ...
+PRINTW ......
+PRINTL それから数十分間、彼女と彼女の最近無くなったという夫の半生を聞かされ続けた
+PRINTL まとめると、彼女の最近無くなった夫が宇宙船マニアで、このコルベットも夫の遺産だという
+PRINTL 「この船だけ引き取り手がいなくて、本当に困っていたの。助けると思って引き取ってくれないかしら？」
+PRINTFORMW 船は多いにこしたことない。%CALLNAME:MASTER%は喜んでうなずいて見せた
+PRINTW 「よかった。この船で、亡き夫の分まで宇宙の旅を楽しんでちょうだい」
+PRINTW コルベットを3隻手に入れた
+CALL INIT_PRESET_SHIP(PLAYER_COUNTRY, CHARACTER_POSITION, 汎用コルベット, "デネブ", 汎用コルベット)
+CALL INIT_PRESET_SHIP(PLAYER_COUNTRY, CHARACTER_POSITION, 汎用コルベット, "アルタイル", 汎用コルベット)
+CALL INIT_PRESET_SHIP(PLAYER_COUNTRY, CHARACTER_POSITION, 汎用コルベット, "ベガ", 汎用コルベット)
+QUEST_PROGRESS:8 = 1
