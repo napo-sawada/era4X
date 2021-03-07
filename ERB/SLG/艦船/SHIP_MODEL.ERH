@@ -32,5 +32,6 @@
 #DIM CONST ミアハ級巡洋艦 = 32
 #DIM CONST ブリギッド級戦艦 = 33
 #DIM CONST ルー級空母 = 34
+#DIM CONST 宇宙ししゃも = 35
 #DIM CONST 黄金三叉龍王 = 90
 #DIM CONST 宇宙ひらめ = 91

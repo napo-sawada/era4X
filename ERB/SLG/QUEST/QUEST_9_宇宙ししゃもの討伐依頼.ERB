@@ -1,0 +1,81 @@
+﻿;--------------------------
+; !!クエスト名と 9を好きな番号に変える！!
+; 宇宙ししゃもの討伐依頼
+; 近場に沸いた宇宙ししゃもを討伐する
+;--------------------------
+
+;--------------------------
+; クエスト受注可能か
+;--------------------------
+@QUEST_ACCEPTABLE_9
+SIF QUEST_COMPLETE_DATE == 0 || DAY - QUEST_COMPLETE_DATE > 10
+	RETURN 1
+RETURN 0
+
+;--------------------------
+; クエストの名前を返却
+;--------------------------
+@QUEST_NAME_9
+RESULTS = 宇宙ししゃもの討伐依頼
+RETURN
+
+;--------------------------
+; クエスト本体
+;--------------------------
+@QUEST_BODY_9
+#DIM SECTOR_ID
+#DIM IS_COMPLETE
+#DIM SHIP_ID
+
+IF QUEST_PROGRESS:9 == 0
+	PRINTFORML 「お前、戦闘艦を持ってるか？」
+	PRINTFORML %CALLNAME:MASTER%は商人らしき男に話しかけられた
+	$INPUT_LOOP
+	PRINTBUTTON "[0] はい", 0
+	PRINTBUTTON "[1] いいえ", 1
+	INPUT
+	IF RESULT == 0
+		PRINTFORML 「よし、ちょうどいい。このセクターに最近宇宙ししゃもが沸いて、商船が襲われているんだ
+		PRINTFORML 頼む、このセクターの宇宙ししゃもを討伐してくれ
+		PRINTFORMW 討伐してくれたら、$30,000出す。頼んだぞ！」
+		PRINTFORMW 無理やり宇宙ししゃもの討伐依頼を受けさせられてしまった
+		QUEST_PROGRESS:9 = 1
+		CALL ID2POS(CHARACTER_POSITION)
+		SECTOR_ID = RESULT:0
+		CALL POS2ID(SECTOR_ID, 9, 8)
+		LOCAL = RESULT
+		CALL INIT_PRESET_SHIP(10, LOCAL, 宇宙ししゃも, "宇宙ししゃもA", 宇宙ししゃも)
+		CALL INIT_PRESET_SHIP(10, LOCAL, 宇宙ししゃも, "宇宙ししゃもB", 宇宙ししゃも)
+		CALL INIT_PRESET_SHIP(10, LOCAL, 宇宙ししゃも, "宇宙ししゃもC", 宇宙ししゃも)
+		CALL INIT_PRESET_SHIP(10, LOCAL, 宇宙ししゃも, "宇宙ししゃもD", 宇宙ししゃも)
+	ELSEIF RESULT == 1
+		PRINTFORMW 「そうか、ならいいんだ……」
+	ELSE
+		GOTO INPUT_LOOP
+	ENDIF
+ELSE
+	IS_COMPLETE = 1
+	FOR SHIP_ID, 0, MAX_SHIP
+		SIF SHIP_COUNTRY:SHIP_ID != 10
+			CONTINUE
+		CALL ID2POS(CHARACTER_POSITION)
+		SECTOR_ID = RESULT:0
+		CALL ID2POS(SHIP_POSITION:SHIP_ID)
+		SIF SECTOR_ID != RESULT:0
+			CONTINUE
+		SIF SHIP_MODEL:SHIP_ID != 宇宙ししゃも
+			CONTINUE
+		IS_COMPLETE = 0
+	NEXT
+	IF IS_COMPLETE == 0
+		PRINTFORMW 「このセクションの宇宙ししゃも討伐を頼んだぞ！」
+	ELSE
+		PRINTFORML 「宇宙ししゃもを討伐してくれたんだな！助かったよ
+		PRINTFORML これが報酬だ。俺はみんなに報告してくるよ」
+		PRINTFORMW 男は%CALLNAME:MASTER%に報酬の$30,000を押し付けると、足早に去って行った
+		MONEY += 30000
+		QUEST_PROGRESS:9 = 0
+		QUEST_COMPLETE_DATE = DAY
+	ENDIF
+ENDIF
+
