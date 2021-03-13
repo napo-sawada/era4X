@@ -247,7 +247,7 @@ RETURN 1
 @PORT_MENU(PORTID)
 #DIM PORTID
 #DIM SLOT_ID
-#DIM UNLOCK_FACILITY, 7
+#DIM UNLOCK_FACILITY, 8
 #DIMS LEFT_COLUMNS, 50
 #DIM LEFT_COLUMNS_BUTTON_VALUE, 50
 #DIM CURRENT_MODE
@@ -447,6 +447,9 @@ FOR SLOT_ID, 0, STAR_PORT_SLOT_NUM
         CASE 造船所
             SLOT_NAME = %"造船所", 20, LEFT%
             PRINTBUTTON @"[{SLOT_ID, 2, RIGHT}] %SLOT_NAME%", SLOT_ID
+        CASE AVスタジオ
+            SLOT_NAME = %"AVスタジオ", 20, LEFT%
+            PRINTBUTTON @"[{SLOT_ID, 2, RIGHT}] %SLOT_NAME%", SLOT_ID
     ENDSELECT
     SIF SLOT_ID % 4 == 3
         PRINTL
@@ -496,6 +499,9 @@ SELECTCASE PORT_SLOT:PORT_ID:SLOT_ID
     CASE 造船所
         PRINTL 造船所
         PRINTL 効果: 艦船を建造できるようになる(効果は重複しない)
+    CASE AVスタジオ
+        PRINT AVスタジオ
+        PRINTL 効果: AV撮影の効果が劇的に上がる(効果は重複しない)
 ENDSELECT
 PRINTL
 PRINTL 選択できるアイテム(価格): 効果
@@ -506,6 +512,8 @@ PRINTL
 PRINTBUTTON "[3] 工場    ($1,000,000) : 素材の加工を行えるようになる(効果は重複しない)", 3
 PRINTL
 PRINTBUTTON "[4] 造船所  ($2,000,000) : 艦船を建造できるようになる(効果は重複しない)", 4
+PRINTL
+PRINTBUTTON "[7] AVスタジオ ($300,000) : AV撮影の効果が劇的に上がる(効果は重複しない)", 7
 PRINTL
 PRINTBUTTON "[9] 戻る", 9
 INPUT
@@ -535,6 +543,13 @@ ELSEIF RESULT == 4
     CALL SLOT_CHANGE_DIALOG("造船所", 2000000)
     IF RESULT == 1
         PORT_SLOT:PORT_ID:SLOT_ID = 造船所
+    ELSE
+        GOTO INPUT_LOOP
+    ENDIF
+ELSEIF RESULT == 7
+    CALL SLOT_CHANGE_DIALOG("AVスタジオ", 300000)
+    IF RESULT == 1
+        PORT_SLOT:PORT_ID:SLOT_ID = AVスタジオ
     ELSE
         GOTO INPUT_LOOP
     ENDIF

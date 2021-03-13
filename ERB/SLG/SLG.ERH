@@ -257,6 +257,7 @@
 #DIM CONST 造船所 = 4
 #DIM CONST 酒場 = 5
 #DIM CONST 風俗 = 6
+#DIM CONST AVスタジオ = 7
 
 #DIM SAVEDATA ソートキー = 0
 #DIM SAVEDATA 降順ソート = 0
