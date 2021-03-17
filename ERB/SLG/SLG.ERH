@@ -258,6 +258,7 @@
 #DIM CONST 酒場 = 5
 #DIM CONST 風俗 = 6
 #DIM CONST AVスタジオ = 7
+#DIM CONST ステージ = 8
 
 #DIM SAVEDATA ソートキー = 0
 #DIM SAVEDATA 降順ソート = 0

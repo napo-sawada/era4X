@@ -137,7 +137,7 @@ RETURN IS_WORK
 @NEED_PORT_RESOURCE(RESOURCE)
 #DIM REF RESOURCE
 
-RESOURCE:装甲合金 = 500
+RESOURCE:装甲合金 = 100
 RESOURCE:重装甲合金 = 300
 RESOURCE:シールド発生装置 = 600
 RESOURCE:合金加工剤 = 500
@@ -450,6 +450,9 @@ FOR SLOT_ID, 0, STAR_PORT_SLOT_NUM
         CASE AVスタジオ
             SLOT_NAME = %"AVスタジオ", 20, LEFT%
             PRINTBUTTON @"[{SLOT_ID, 2, RIGHT}] %SLOT_NAME%", SLOT_ID
+        CASE ステージ
+            SLOT_NAME = %"ステージ", 20, LEFT%
+            PRINTBUTTON @"[{SLOT_ID, 2, RIGHT}] %SLOT_NAME%", SLOT_ID
     ENDSELECT
     SIF SLOT_ID % 4 == 3
         PRINTL
@@ -502,6 +505,9 @@ SELECTCASE PORT_SLOT:PORT_ID:SLOT_ID
     CASE AVスタジオ
         PRINT AVスタジオ
         PRINTL 効果: AV撮影の効果が劇的に上がる(効果は重複しない)
+    CASE ステージ
+        PRINT ステージ
+        PRINTL 効果: 各種公演を行えるようになる(効果は重複しない)
 ENDSELECT
 PRINTL
 PRINTL 選択できるアイテム(価格): 効果
@@ -514,6 +520,8 @@ PRINTL
 PRINTBUTTON "[4] 造船所  ($2,000,000) : 艦船を建造できるようになる(効果は重複しない)", 4
 PRINTL
 PRINTBUTTON "[7] AVスタジオ ($300,000) : AV撮影の効果が劇的に上がる(効果は重複しない)", 7
+PRINTL
+PRINTBUTTON "[8] ステージ ($300,000) : 各種公演を行えるようになる(効果は重複しない)", 8
 PRINTL
 PRINTBUTTON "[9] 戻る", 9
 INPUT
@@ -550,6 +558,13 @@ ELSEIF RESULT == 7
     CALL SLOT_CHANGE_DIALOG("AVスタジオ", 300000)
     IF RESULT == 1
         PORT_SLOT:PORT_ID:SLOT_ID = AVスタジオ
+    ELSE
+        GOTO INPUT_LOOP
+    ENDIF
+ELSEIF RESULT == 8
+    CALL SLOT_CHANGE_DIALOG("ステージ", 300000)
+    IF RESULT == 1
+        PORT_SLOT:PORT_ID:SLOT_ID = ステージ
     ELSE
         GOTO INPUT_LOOP
     ENDIF
