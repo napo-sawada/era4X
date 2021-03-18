@@ -71,7 +71,7 @@ SELECTCASE RAND:3
 		; 要求の高い客
 		PRINTFORML 高級ブランドに身を包んだ男等の相手をした
 		IF POINT > 3000
-			CFLAG:ID:1003 += 200
+			CFLAG:ID:1002 += 200
 			PRINTFORML どうやらうまく接客できたようだ
 		ELSE
 			CFLAG:ID:1002 -= 50
@@ -149,7 +149,7 @@ SELECTCASE RAND:3
 	CASE 2
 		; 要求の高い客
 		IF POINT > 3000
-			CFLAG:ID:1003 += 200
+			CFLAG:ID:1002 += 200
 		ELSE
 			CFLAG:ID:1002 -= 50
 		ENDIF
