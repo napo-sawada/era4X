@@ -1,0 +1,548 @@
+﻿@SET_BODYSIZE(対象, セット位置 = 0)
+#DIM 対象
+#DIM セット位置
+
+SIF GETBIT(セット位置, サイズ_身長) || セット位置 == 0
+	CALL SET_BODYSIZE_HEIGHT(対象)
+
+SIF GETBIT(セット位置, サイズ_バスト) || セット位置 == 0
+	CALL SET_BODYSIZE_BUST(対象)
+
+SIF GETBIT(セット位置, サイズ_ウェスト) || セット位置 == 0
+	CALL SET_BODYSIZE_WEIST(対象)
+
+SIF GETBIT(セット位置, サイズ_ヒップ) || セット位置 == 0
+	CALL SET_BODYSIZE_HIP(対象)
+
+SIF GETBIT(セット位置, サイズ_体重) || セット位置 == 0
+	CALL SET_BODYSIZE_WEIGHT(対象)
+
+SIF GETBIT(セット位置, サイズ_ペニス) || セット位置 == 0
+	CALL SET_BODYSIZE_PENIS(対象)
+
+CALL CUT_WOMB_SPERM_AMOUNT(対象)
+
+;-------------------------
+;身長の設定
+;-------------------------
+@SET_BODYSIZE_HEIGHT(対象)
+#DIM 対象
+#DIM 身長基礎値
+
+MAXBASE:対象:身長 = CALC_BODYSIZE_HEIGHT(対象)
+BASE:対象:身長 = MAXBASE:対象:身長
+
+
+@CALC_BODYSIZE_HEIGHT(対象)
+#FUNCTION
+#DIM 対象
+#DIM 基礎値
+
+IF CFLAG:対象:行動不能状態 == 行動不能_子供
+	基礎値 = MIN(750 + CFLAG:対象:子の成長度 * 30, 1300) + RAND:30
+ELSEIF TALENT:対象:幼児
+	基礎値 = MIN(900 + (CFLAG:対象:子の成長度 - 6) * 40, 1300) + RAND:40
+ELSE
+	SELECTCASE TALENT:対象:体格
+		CASE 体格_子供
+			基礎値 = IS_MALE(対象) ? 1200 # 1100
+			基礎値 += RAND:200
+		CASE 体格_小柄
+			基礎値 = IS_MALE(対象) ? 1400 # 1300
+			基礎値 += RAND:200
+		CASE 体格_普通
+			基礎値 = IS_MALE(対象) ? 1600 # 1500
+			基礎値 += RAND:200
+		CASE 体格_長身
+			基礎値 = IS_MALE(対象) ? 1800 + RAND:150 # 1700 + RAND:100
+		CASE 体格_大柄
+			基礎値 = IS_MALE(対象) ? 1950 + RAND:200 # 1800 + RAND:200
+		CASE 体格_巨大
+			基礎値 = 3000 + RAND:1000
+	ENDSELECT
+ENDIF
+
+RETURNF 基礎値
+
+
+
+;-------------------------
+;ウェストの設定
+;-------------------------
+@SET_BODYSIZE_WEIST(対象)
+#DIM 対象
+
+BASE:対象:ウェスト = CALC_BODYSIZE_WEIST(対象)
+MAXBASE:対象:ウェスト = BASE:対象:ウェスト
+
+@CALC_BODYSIZE_WEIST(対象)
+#FUNCTION
+#DIM 対象
+#DIM 基礎値
+基礎値 = (BASE:対象:身長 * (IS_MALE(対象) ? 42 # 37 + TALENT:対象:体型)) / 100
+
+SELECTCASE TALENT:対象:体格
+	CASE 体格_子供
+		TIMES 基礎値, 1.07
+	CASE 体格_小柄
+		TIMES 基礎値, 1.03
+	CASE 体格_普通
+	CASE 体格_長身
+	CASE 体格_大柄
+		TIMES 基礎値, 1.03
+	CASE 体格_巨大
+		TIMES 基礎値, 1.10
+ENDSELECT
+
+SELECTCASE TALENT:対象:体型
+	CASE 体型_痩せすぎ
+		TIMES 基礎値, 0.90
+	CASE 体型_細身
+		TIMES 基礎値, 0.94
+	CASE 体型_スレンダー
+		TIMES 基礎値, 0.97
+	CASE 体型_豊満
+		TIMES 基礎値, 1.10
+	CASE 体型_肥満
+		TIMES 基礎値, 1.20
+ENDSELECT
+
+基礎値 = 基礎値 * RAND(97, 104) / 100
+
+RETURNF 基礎値
+
+;-------------------------
+;バストサイズの設定
+;-------------------------
+@SET_BODYSIZE_BUST(対象)
+#DIM 対象
+
+BASE:対象:バスト = CALC_BODYSIZE_BUST(対象)
+MAXBASE:対象:バスト = BASE:対象:バスト
+
+@CALC_BODYSIZE_BUST(対象)
+#FUNCTION
+#DIM 対象
+#DIM 基礎値
+
+基礎値 = BASE:対象:身長 * (IS_MALE(対象) ? 52 # 53) / 100
+
+SELECTCASE GET_BUSTSIZE(対象)
+	CASE -2
+		TIMES 基礎値, 0.85
+	CASE -1
+		TIMES 基礎値, 0.9
+	CASE 0
+	CASE 1
+		TIMES 基礎値, 1.05
+	CASE 2
+		TIMES 基礎値, 1.10
+ENDSELECT
+
+SELECTCASE TALENT:対象:体格
+	CASE 体格_子供
+		TIMES 基礎値, 0.90
+	CASE 体格_小柄
+		TIMES 基礎値, 0.95
+	CASE 体格_普通
+	CASE 体格_長身
+	CASE 体格_大柄
+		TIMES 基礎値, 1.03
+	CASE 体格_巨大
+		TIMES 基礎値, 1.10
+ENDSELECT
+
+SELECTCASE TALENT:対象:体型
+	CASE 体型_痩せすぎ
+		TIMES 基礎値, 0.90
+	CASE 体型_細身
+		TIMES 基礎値, 0.92
+	CASE 体型_スレンダー
+		TIMES 基礎値, 0.93
+	CASE 体型_豊満
+		TIMES 基礎値, 1.07
+	CASE 体型_肥満
+		TIMES 基礎値, 1.07
+ENDSELECT
+
+基礎値 = 基礎値 * RAND(97, 104) / 100
+
+基礎値 = MAX(基礎値, CALC_BODYSIZE_UNDERBUST(対象) + 10)
+
+RETURNF 基礎値
+
+;-------------------------
+;アンダーバストの算出
+;-------------------------
+@CALC_BODYSIZE_UNDERBUST(対象)
+#FUNCTION
+#DIM 対象
+#DIM 基礎値
+基礎値 = BASE:対象:身長 * (IS_MALE(対象) ? 50 # 43) / 100
+
+SELECTCASE TALENT:対象:体格
+	CASE 体格_子供
+		TIMES 基礎値, 0.90
+	CASE 体格_小柄
+		TIMES 基礎値, 0.95
+	CASE 体格_普通
+	CASE 体格_長身
+		TIMES 基礎値, 1.03
+	CASE 体格_大柄
+		TIMES 基礎値, 1.07
+	CASE 体格_巨大
+		TIMES 基礎値, 1.15
+ENDSELECT
+
+SELECTCASE TALENT:対象:体型
+	CASE 体型_痩せすぎ
+		TIMES 基礎値, 0.90
+	CASE 体型_細身
+		TIMES 基礎値, 0.93
+	CASE 体型_スレンダー
+		TIMES 基礎値, 0.95
+	CASE 体型_豊満
+		TIMES 基礎値, 1.05
+	CASE 体型_肥満
+		TIMES 基礎値, 1.10
+ENDSELECT
+
+RETURNF 基礎値
+
+;-------------------------
+;ヒップサイズの設定
+;-------------------------
+@SET_BODYSIZE_HIP(対象)
+#DIM 対象
+
+BASE:対象:ヒップ = CALC_BODYSIZE_HIP(対象)
+MAXBASE:対象:ヒップ = BASE:対象:ヒップ
+
+@CALC_BODYSIZE_HIP(対象)
+#FUNCTION
+#DIM 対象
+#DIM 基礎値
+
+基礎値 = BASE:対象:身長 * (IS_MALE(対象) ? 51 # 53 + TALENT:対象:体型) / 100
+
+SELECTCASE TALENT:対象:体格
+	CASE 体格_子供, 体格_小柄
+		TIMES 基礎値, 1.05
+	CASE 体格_巨大
+		TIMES 基礎値, 1.1
+ENDSELECT
+
+SELECTCASE GET_HIPSIZE(対象)
+	CASE -2
+		TIMES 基礎値, 0.85
+	CASE -1
+		TIMES 基礎値, 0.94
+	CASE 0
+	CASE 1
+		TIMES 基礎値, 1.06
+	CASE 2
+		TIMES 基礎値, 1.15
+ENDSELECT
+
+SELECTCASE TALENT:対象:体型
+	CASE 体型_痩せすぎ
+		TIMES 基礎値, 0.93
+	CASE 体型_細身, 体型_スレンダー
+		TIMES 基礎値, 0.97
+	CASE 体型_グラマー
+		TIMES 基礎値, 1.03
+	CASE 体型_豊満
+		TIMES 基礎値, 1.07
+	CASE 体型_肥満
+		TIMES 基礎値, 1.13
+ENDSELECT
+
+SIF TALENT:対象:美尻
+	TIMES 基礎値, 1.05
+
+基礎値 = 基礎値 * RAND(95, 106) / 100
+
+RETURNF 基礎値
+
+;-------------------------
+;体重の設定
+;-------------------------
+@SET_BODYSIZE_WEIGHT(対象)
+#DIM 対象
+
+BASE:対象:体重 = CALC_BODYSIZE_WEIGHT(対象)
+MAXBASE:対象:体重 = BASE:対象:体重
+
+
+
+@CALC_BODYSIZE_WEIGHT(対象)
+#FUNCTION
+#DIM 対象
+#DIM 基礎値
+#DIM 乳重量
+
+IF IS_MALE(対象) && CFLAG:対象:行動不能状態 != 行動不能_子供
+	基礎値 = BASE:対象:身長 * BASE:対象:身長 * 20 / 100000
+ELSE
+	基礎値 = BASE:対象:身長 * BASE:対象:身長 * 19 / 100000
+	基礎値 += POWER(BASE:対象:バスト / 100, 3) / 50
+	基礎値 += POWER(BASE:対象:ヒップ / 100, 3) / 50
+ENDIF
+
+SELECTCASE TALENT:対象:体格
+	CASE 体格_子供
+		TIMES 基礎値, 0.85
+	CASE 体格_小柄
+		TIMES 基礎値, 0.95
+	CASE 体格_長身
+		TIMES 基礎値, 1.05
+	CASE 体格_大柄
+		TIMES 基礎値, 1.1
+	CASE 体格_巨大
+		TIMES 基礎値, 1.5
+ENDSELECT
+
+SELECTCASE TALENT:対象:体型
+	CASE 体型_痩せすぎ
+		TIMES 基礎値, 0.85
+	CASE 体型_細身
+		TIMES 基礎値, 0.90
+	CASE 体型_スレンダー
+		TIMES 基礎値, 0.95
+	CASE 体型_豊満
+		TIMES 基礎値, 1.15
+	CASE 体型_肥満
+		TIMES 基礎値, 1.20
+ENDSELECT
+
+基礎値 = 基礎値 * RAND(95, 105) / 100
+
+RETURNF 基礎値
+;-------------------------
+;チンポ
+;-------------------------
+@SET_BODYSIZE_PENIS(対象)
+#DIM 対象
+#DIM サイズ基礎値
+SELECTCASE GET_PENISSIZE(対象)
+	CASE -2
+		サイズ基礎値 = RAND:3 + 2
+	CASE -1
+		サイズ基礎値 = RAND:4 + 4
+	CASE 0
+		サイズ基礎値 = RAND:4 + 8
+	CASE 1
+		サイズ基礎値 = RAND:4 + 13
+	CASE 2
+		サイズ基礎値 = RAND:7 + 17
+ENDSELECT
+
+サイズ基礎値 = BASE:対象:身長 / 12 * サイズ基礎値 / 10
+
+BASE:対象:ペニス = サイズ基礎値
+MAXBASE:対象:ペニス = BASE:対象:ペニス
+
+;-------------------------
+;胃
+;-------------------------
+@CALC_STOMACH_SIZE(対象)
+#FUNCTION
+#DIM 対象
+#DIM サイズ
+
+サイズ = LIMIT(BASE:対象:身長 / 5, 100, 1000)
+
+SIF GETBIT(TALENT:対象:淫乱系, 素質_淫乱_蕩唇)
+	TIMES サイズ, 1.5
+
+サイズ += SQRT(STOMACH_TOTAL_CREAMPIED_AMOUNT:対象:0 * 3)
+
+サイズ = LIMIT(サイズ, 0, BASE:対象:身長 * 3 / 10)
+
+RETURNF サイズ
+
+
+;-------------------------
+;子宮
+;-------------------------
+@CALC_WOMB_SIZE(対象)
+#FUNCTION
+#DIM 対象
+#DIM サイズ
+
+サイズ = LIMIT(BASE:対象:身長 / 15, 10, 200)
+
+SIF GETBIT(TALENT:対象:淫乱系, 素質_淫乱_淫壷)
+	TIMES サイズ, 1.5
+
+SIF GETBIT(TALENT:対象:淫乱系, 素質_淫乱_孕みたがり)
+	TIMES サイズ, 1.5
+
+SIF GETBIT(TALENT:対象:淫乱系, 素質_淫乱_良質母胎)
+	TIMES サイズ, 1.5
+
+SIF TALENT:対象:妊娠
+	TIMES サイズ, 0.3
+
+サイズ += SQRT(WOMB_TOTAL_CREAMPIED_AMOUNT:対象:0 * 3)
+サイズ += EXP:対象:出産経験 * 3
+
+サイズ = LIMIT(サイズ, 0, BASE:対象:身長 * 3 / 10)
+
+
+RETURNF サイズ
+
+;-------------------------
+;腸
+;-------------------------
+@CALC_ANUS_SIZE(対象)
+#FUNCTION
+#DIM 対象
+#DIM サイズ
+
+サイズ = LIMIT(BASE:対象:身長 / 13, 10, 300)
+
+SIF GETBIT(TALENT:対象:淫乱系, 素質_淫乱_尻穴狂い)
+	TIMES サイズ, 1.5
+
+サイズ += SQRT(ANUS_TOTAL_CREAMPIED_AMOUNT:対象:0 * 3)
+
+サイズ = LIMIT(サイズ, 0, BASE:対象:身長 * 3 / 10)
+
+RETURNF サイズ
+
+;-------------------------
+;子供の重量の取得（妊娠時の体重に加算）
+;-------------------------
+@GET_BABY_WEIGHT(対象)
+#FUNCTION
+#DIM 対象
+SIF GETBIT(TALENT:対象:淫乱系, 素質_淫乱_良質母胎)
+	RETURNF TALENT:対象:妊娠 ? BASE:対象:体重 / ( BASE:対象:体重 <= 200 ? 24 # 40 ) * (CFLAG:対象:妊娠期間 * 2) # 0
+RETURNF TALENT:対象:妊娠 ? BASE:対象:体重 / ( BASE:対象:体重 <= 200 ? 24 # 40 ) * CFLAG:対象:妊娠期間 # 0
+
+;-------------------------
+;子供のサイズの取得（妊娠時のウェストに加算）
+;-------------------------
+@GET_BABY_SIZE(対象)
+#FUNCTION
+#DIM 対象
+SIF GETBIT(TALENT:対象:淫乱系, 素質_淫乱_良質母胎)
+	RETURNF TALENT:対象:妊娠 ? BASE:対象:ウェスト / 20 * (CFLAG:対象:妊娠期間 * 2) # 0
+RETURNF TALENT:対象:妊娠 ? BASE:対象:ウェスト / 20 * CFLAG:対象:妊娠期間 # 0
+
+;-------------------------
+;妊娠していることによるバストの膨らみ
+;ワコール曰く「2カップ程度」とのことなので5センチ程度？
+;-------------------------
+@GET_BABY_BUST(対象)
+#FUNCTION
+#DIM 対象
+SIF GETBIT(TALENT:対象:淫乱系, 素質_淫乱_良質母胎)
+	RETURNF TALENT:対象:妊娠 ? BASE:対象:バスト / 100 * (CFLAG:対象:妊娠期間 * 2) # 0
+RETURNF TALENT:対象:妊娠 ? BASE:対象:バスト / 100 * CFLAG:対象:妊娠期間 # 0
+
+;-------------------------
+;スリーサイズその他の表示
+;-------------------------
+@SHOW_BODYSIZE(対象)
+#DIM 対象
+#DIM 子供重量
+#DIM 子供サイズ
+#DIM 子供バスト
+
+子供重量 = GET_BABY_WEIGHT(対象)
+子供サイズ = GET_BABY_SIZE(対象)
+子供バスト = GET_BABY_BUST(対象)
+
+IF HAS_TAG(対象, タグ_小人) || GROUPMATCH(対象, NAME_TO_CHARA("上海人形"), NAME_TO_CHARA("蓬莱人形"), NAME_TO_CHARA("大江戸人形"), NAME_TO_CHARA("針妙丸"))
+	PRINTFORM 身長:%DECIMAL_STRING(BASE:対象:身長 / 5, 1), 5, RIGHT%cm/ 
+	PRINTFORM 体重:{BASE:対象:体重 * 5 + 子供重量, 5, RIGHT}g
+;	SIF TALENT:対象:妊娠
+;		PRINTFORM (妊娠前{BASE:対象:体重 * 5, 5, RIGHT}g)
+	PRINTFORM /
+	PRINTFORM  B:%DECIMAL_STRING((BASE:対象:バスト + 子供バスト) / 5, 1), 6, RIGHT%cm 
+	SIF TALENT:対象:妊娠
+		PRINTFORM (妊娠前%DECIMAL_STRING(BASE:対象:バスト / 5, 1), 6, RIGHT%cm)
+
+	CALL PRINT_CUPSIZE(対象)
+	PRINTFORM / W:%DECIMAL_STRING((BASE:対象:ウェスト + 子供サイズ) / 5, 1), 6, RIGHT%cm
+	SIF TALENT:対象:妊娠
+		PRINTFORM (妊娠前%DECIMAL_STRING(BASE:対象:ウェスト / 5, 1), 6, RIGHT%cm)
+	PRINTFORM / H:%DECIMAL_STRING(BASE:対象:ヒップ / 5, 1), 6, RIGHT%cm 
+	CALL PRINT_HIPSIZE(対象)
+	SIF HAS_PENIS(対象)
+		PRINTFORM / P:%DECIMAL_STRING(BASE:対象:ペニス / 5, 1), 6, RIGHT%cm
+ELSE
+	PRINTFORM 身長:%DECIMAL_STRING(BASE:対象:身長, 1), 6, RIGHT%cm/ 
+	PRINTFORM 体重:%DECIMAL_STRING(BASE:対象:体重 + 子供重量, 1), 5, RIGHT%kg
+;	SIF TALENT:対象:妊娠
+;		PRINTFORM (妊娠前%DECIMAL_STRING(BASE:対象:体重, 1), 5, RIGHT%kg)
+	PRINTFORM /
+	PRINTFORM  B:%DECIMAL_STRING(BASE:対象:バスト + 子供バスト, 1), 6, RIGHT%cm 
+	CALL PRINT_CUPSIZE(対象)
+;	SIF TALENT:対象:妊娠
+;		PRINTFORM (妊娠前%DECIMAL_STRING(BASE:対象:バスト, 1), 6, RIGHT%cm)
+	PRINTFORM / W:%DECIMAL_STRING(BASE:対象:ウェスト + 子供サイズ, 1), 6, RIGHT%cm
+;	SIF TALENT:対象:妊娠
+;		PRINTFORM (妊娠前%DECIMAL_STRING(BASE:対象:ウェスト, 1), 6, RIGHT%cm)
+	PRINTFORM / H:%DECIMAL_STRING(BASE:対象:ヒップ, 1), 6, RIGHT%cm 
+	CALL PRINT_HIPSIZE(対象)
+	SIF HAS_PENIS(対象)
+		PRINTFORM / P:%DECIMAL_STRING(BASE:対象:ペニス, 1), 5, RIGHT%cm 
+ENDIF
+
+PRINTL
+
+@TOSTR_CUPSIZE(対象)
+#FUNCTIONS
+#DIM 対象
+#DIMS CONST SIZES = "-","AAA","AA","A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P","Q","R","S","T","U","V","W","X","Y","Z","Z+", 
+#DIMS サイズ
+LOCAL = (BASE:対象:バスト + GET_BABY_BUST(対象) - CALC_BODYSIZE_UNDERBUST(対象)) / 25
+
+;文字列変数が若干不自由なので無理やり作成
+LOCAL = MAX(LOCAL , 1)
+LOCALS:0 = %LOCALS:(LOCAL)%
+IF IS_MALE(対象)
+	サイズ '= "--"
+ELSE
+	サイズ = %SIZES:LOCAL%
+ENDIF
+
+RETURNF サイズ
+
+;バストのカップサイズ生成及び表示処理
+@PRINT_CUPSIZE(対象)
+#DIM 対象
+PRINTFORM (%TOSTR_CUPSIZE(対象)%)
+
+@PRINT_HIPSIZE(対象)
+#DIM 対象
+SELECTCASE BASE:対象:ヒップ / 10
+	CASE IS <= 71
+		LOCALS = XS
+	CASE 72 TO 76
+		LOCALS = 3S
+	CASE 77 TO 81
+		LOCALS = SS
+	CASE 82 TO 86
+		LOCALS = S 
+	CASE 87 TO 91
+		LOCALS = M 
+	CASE 92 TO 96
+		LOCALS = L 
+	CASE 97 TO 101
+		LOCALS = LL
+	CASE 102 TO 106
+		LOCALS = 3L
+	CASE 107 TO 111
+		LOCALS = 4L
+	CASE 112 TO 116
+		LOCALS = 5L
+	CASEELSE
+		LOCALS = XL
+ENDSELECT
+SIF IS_MALE(対象)
+	LOCALS = --
+PRINTFORM (%LOCALS:0%) 

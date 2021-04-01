@@ -1,0 +1,153 @@
+﻿@EVENT_DAILY()
+#DIM EVENT_NUM
+#DIMS NAME_ENG
+#DIMS NAME_JAP
+#DIM EVENT_COUNT
+#DIM EVENT_ARRAY, VARSIZE("SHAFFLE_ARRAY")
+
+DAILY_CANCEL = 0
+EVENT_COUNT = DAILY_EVENT_COUNT
+
+SIF !IS_DAILY_EVENT_HAPPEN(MASTER)
+	RETURN 0
+
+CALL DAILY_DERIVATION()
+
+SIF DAILY_CANCEL
+	RETURN 0
+
+EVENT_NUM = DAILY_EVENT_NUM
+
+CALL FISHER_YATES_SHAFFLE(EVENT_NUM)
+
+ARRAYCOPY "SHAFFLE_ARRAY", "EVENT_ARRAY"
+
+FOR LOCAL, 0, EVENT_NUM
+	SIF EVENT_COUNT == 0
+		BREAK
+	NAME_ENG = %DAILY_EVENT_NAME_ENG:デイリー_通常:(EVENT_ARRAY:LOCAL)%
+	NAME_JAP = %DAILY_EVENT_NAME:デイリー_通常:(EVENT_ARRAY:LOCAL)%
+
+	SIF DAILY_GET_DISABLE_CONFIG(NAME_ENG)
+		CONTINUE
+
+	TRYCCALLFORM EVENT_DAILY_%NAME_ENG%_RATE()
+
+		SIF RESULT * DAILY_EVENT_ODDS <= RAND:1000
+			CONTINUE
+
+		;放浪中の拠点フェイズデイリーは特殊な関数が必要
+		IF !CFLAG:MASTER:所属
+			RESULT = 0
+			TRYCALLFORM EVENT_DAILY_%NAME_ENG%_ALLOW_WHEN_WANDERING()
+			SIF RESULT == 0
+				CONTINUE
+		ENDIF
+
+		RESULT = 1
+		TRYCALLFORM EVENT_DAILY_%NAME_ENG%_DECISION()
+		SIF RESULT == 0
+			CONTINUE
+
+		VARSET DAILY_TARGET, -1
+		VARSET DAILY_TARGET_NUM
+		RESULT = 1
+		TRYCALLFORM EVENT_DAILY_%NAME_ENG%_SETTARGET()
+		SIF RESULT == 0
+			CONTINUE
+
+		RESULTS = 
+		TRYCALLFORM EVENT_DAILY_%NAME_ENG%_NAME()
+		IF RESULTS == ""
+			CALL DAILY_START(NAME_JAP)
+		ELSE
+			CALL DAILY_START(RESULTS)
+		ENDIF
+		CALLFORM EVENT_DAILY_%NAME_ENG%()
+
+		IF RESULT == 1
+			EVENT_COUNT --
+		ENDIF
+		SIF DAILY_CANCEL
+			RETURN
+	CATCH
+		;DEBUGPRINTFORML EVENT_DAILY_%NAME_ENG%_RATEみつからず
+	ENDCATCH
+NEXT
+
+;-------------------------------------------------------------------------------
+;指定キャラについて、「放浪したり死んだりしていない」「捕虜でない」「どこかの勢力に所属している」を満たしているなら真
+;-------------------------------------------------------------------------------
+@IS_DAILY_EVENT_HAPPEN(ARG:0)
+#FUNCTION
+IF CFLAG:(ARG:0):特殊状態 == 0 && CFLAG:(ARG:0):捕虜先 == 0
+	RETURNF 1
+ENDIF
+RETURNF 0
+
+;-------------------------------------------------------------------------------
+;デイリーイベントにおいて、ランダムに対象キャラを選出する
+;捕虜でなく、死んだりしていないのは前提
+;ARG:0 0自勢力キャラ　1全勢力から選択
+;RESULT 選出された対象キャラ
+;-------------------------------------------------------------------------------
+@DAILY_EVENT_RAND_CHARASELECT(ARG:0 = 0)
+IF ARG:0
+	CALL SELECT_CHARA_RANDOM("DAILY_EVENT_RAND_CHARASELECT_ALL")
+ELSE
+	CALL SELECT_CHARA_RANDOM("DAILY_EVENT_RAND_CHARASELECT_OUR_COUNTRY")
+ENDIF
+RETURN RESULT
+
+@SELECT_CHARA_RANDOM_LOGIC_DAILY_EVENT_RAND_CHARASELECT_OUR_COUNTRY(対象)
+#DIM 対象
+RETURN CFLAG:対象:所属 == CFLAG:MASTER:所属 && !CFLAG:(対象):捕虜先 && !CFLAG:(対象):特殊状態
+
+@SELECT_CHARA_RANDOM_LOGIC_DAILY_EVENT_RAND_CHARASELECT_ALL(対象)
+#DIM 対象
+RETURN !CFLAG:(対象):捕虜先 && !CFLAG:(対象):特殊状態
+
+
+;-------------------------------------------------------------------------------
+;デイリーイベントにおいて、ランダムに対象都市を選出する
+;ARG:0 0自勢力都市　1全勢力から選択
+;RESULT 選出された対象都市
+;-------------------------------------------------------------------------------
+@DAILY_EVENT_RAND_CITYSELECT(ARG:0 = 0)
+#DIM 対象, MAX_CITY
+#DIM カウンタ, 1
+VARSET 対象
+VARSET カウンタ
+
+;シャッフル用の配列を作成する
+FOR LOCAL, 1, MAX_CITY
+	IF CITY_TYPE:LOCAL == 1
+		BREAK
+	ENDIF
+	IF ARG:0 || (!ARG:0 && CITY_OWNER:LOCAL == CFLAG:MASTER:1)
+		対象:カウンタ = LOCAL
+		カウンタ ++
+	ENDIF
+NEXT
+
+RETURN カウンタ ? 対象:(RAND:カウンタ) # -1
+
+;-------------------------------------------------------------------------------
+;デイリーイベントにおいて、ランダムに対象国家を選出する
+;RESULT 選出された対象国家
+;-------------------------------------------------------------------------------
+@DAILY_EVENT_RAND_COUNTRYSELECT
+#DIM 対象, MAX_COUNTRY
+#DIM カウンタ
+VARSET 対象
+VARSET カウンタ
+
+;シャッフル用の配列を作成する
+FOR LOCAL, 0, MAX_COUNTRY
+	IF IS_COUNTRY(LOCAL)
+		対象:カウンタ = LOCAL
+		カウンタ ++
+	ENDIF
+NEXT
+
+RETURN カウンタ ? 対象:(RAND:カウンタ) # -1

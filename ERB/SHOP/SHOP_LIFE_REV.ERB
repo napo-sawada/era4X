@@ -1,0 +1,43 @@
+﻿@SELECT_CHARA_RANDOM_LOGIC_REV_TRAINER(対象)
+#DIM 対象
+;メイン調教者はこの前段階で含まれてるのでパス
+SIF GET_ID(対象) == FLAG:逆調教メイン調教者
+	RETURN 0
+SIF CFLAG:(対象):所属 != CFLAG:MASTER:捕虜先 || CFLAG:(対象):捕虜先 || CFLAG:(対象):特殊状態
+	RETURN 0
+SIF !CFLAG:(対象):面識 && RAND:3
+	RETURN 0
+SIF ABL:(対象):性知識 < 2
+	RETURN 0
+SIF CONFIG:17 && !CFLAG:(対象):面識
+	RETURN 0
+RETURN 1
+
+@SELECT_CHARA_RANDOM_BIAS_REV_TRAINER(対象)
+#DIM 対象
+RETURN MAX(CFLAG:対象:好感度, CFLAG:対象:依存度, CFLAG:対象:従属度, CFLAG:対象:支配度)
+
+
+;-------------------------------------------------
+;逆調教の参加者決定
+;-------------------------------------------------
+@SELECT_REV_TRAINER()
+#DIM LCOUNT
+#DIM メイン
+VARSET メイン, -1
+
+CALL SELECT_CHARA_RANDOM_MULTI(5, "REV_TRAINER", "REV_TRAINER")
+
+SIF SELECTED_CHARA_NUM == 0
+	RETURN -1, 0
+
+FOR LOCAL, 0, SELECTED_CHARA_NUM
+	LOCAL:1 = SELECTED_CHARA:LOCAL
+	CFLAG:(LOCAL:1):調教参加フラグ = 1
+	CFLAG:(LOCAL:1):強制友好化 = 1
+	SIF LOCAL == 0
+		メイン = LOCAL:1
+NEXT
+
+RETURN メイン, SELECTED_CHARA_NUM
+

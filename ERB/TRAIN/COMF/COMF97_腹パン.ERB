@@ -1,0 +1,249 @@
+﻿;スパンキング
+
+;-------------------------------------------------
+;コマンド名称
+;-------------------------------------------------
+@COM_NAME97
+LOCALS:0 = 腹パン
+
+RESULTS:0 = %LOCALS:0%する
+RESULTS:1 = %LOCALS:0%させられる
+RESULTS:2 = %LOCALS:0%させる
+RESULTS:3 = %LOCALS:0%される
+RESULTS:4 = %LOCALS:0%させる
+RESULTS:5 = %LOCALS:0%見せつけ
+
+;-------------------------------------------------
+;選択可否判定
+;-------------------------------------------------
+@COM_ABLE97
+;共通部分
+CALL COM_ABLE_COMMON(97)
+SIF RESULT == 0
+	RETURN 0
+;プレイヤーは最大で1人まで
+SIF MPLY_NUM <= 0 || MPLY_NUM > 1
+	RETURN 0
+;ターゲットは最大で2人まで
+SIF MTAR_NUM <= 0 || MTAR_NUM > 2
+	RETURN 0
+FOR LOCAL, 0, MTAR_NUM
+	SIF !CAN_REACH_BODY(MPLY:0, MTAR:(LOCAL:0))
+		RETURN 0
+NEXT
+RETURN 1
+
+;-------------------------------------------------
+;メイン処理
+;-------------------------------------------------
+@COM97
+;実行判定
+CALL COM_ORDER_COMMON
+SIF RESULT == 0
+	RETURN 0
+
+;●プレイヤーについて処理
+DOWNBASE:(MPLY:0):体力 += 100
+
+SOURCE:(MPLY:0):嗜虐 = 150
+SOURCE:(MPLY:0):逸脱 = 50
+SOURCE:(MPLY:0):接触 = 30
+EXP:(MPLY:0):嗜虐経験値 += RAND:3 + 1
+
+;主導権に応じた優越・屈従のソース追加
+CALL ADD_SOURCE_INITIATIVE_U(MPLY:0, 150, 50)
+
+;●全ターゲットについて処理
+FOR LOCAL:0, 0, MTAR_NUM
+	LOCAL:1 = MTAR:(LOCAL:0)
+
+	DOWNBASE:(LOCAL:1):体力 += 100
+
+	SOURCE:(LOCAL:1):苦痛 = 150 + MIN(ABL:(MPLY:0):武闘, 90) * 3
+	SOURCE:(LOCAL:1):露出 = 50
+	SOURCE:(LOCAL:1):逸脱 = 80
+	SOURCE:(LOCAL:1):接触 = 30
+	EXP:(LOCAL:1):被虐経験値 += RAND:3 + 1
+
+	;ターゲットが気絶している場合
+	IF TCVAR:(LOCAL:1):52
+		SOURCE:(LOCAL:1):気絶回復 = 300
+	ENDIF
+
+	;主導権に応じた優越・屈従のソース追加
+	CALL ADD_SOURCE_INITIATIVE_U(LOCAL:1, 0, 150)
+
+	IF GETBIT(TALENT:(MPLY:0):淫乱系, 素質_淫乱_サド)
+		TIMES SOURCE:(LOCAL:1):苦痛, 1.50
+	ENDIF
+NEXT
+
+;主導度変化基準値
+TFLAG:49 = 2
+
+;倒錯度変化基準値
+TFLAG:50 = 2
+
+;レズ・ＢＬ経験基準値
+TFLAG:51 = 2
+
+RETURN 1
+
+;-------------------------------------------------
+;固有の実行判定
+;-------------------------------------------------
+@COM_ORDER_PLAYER97(ARG:0)
+;実行値の設定
+TCVAR:(ARG:0):25 = 90
+
+;共通部分
+CALL COM_ORDER(ARG:0)
+
+CALL COM_ORDER_ELEMENT(ARG:0, @"欲望Lv{ABL:(ARG:0):欲望}", ABL:(ARG:0):欲望 * 1)
+CALL COM_ORDER_ELEMENT(ARG:0, @"サドLv{ABL:(ARG:0):サド}", ABL:(ARG:0):サド * 3)
+
+LOCAL:0 = GET_PALAMLV(PALAM:(ARG:0):欲情)
+CALL COM_ORDER_ELEMENT(ARG:0, @"欲情Lv{LOCAL:0}", MIN(LOCAL:0 * 1, 10))
+
+IF TALENT:(ARG:0):大人しい
+	CALL COM_ORDER_ELEMENT(ARG:0, "大人しい", -3)
+ENDIF
+IF TALENT:(ARG:0):恥じらい
+	CALL COM_ORDER_ELEMENT(ARG:0, "恥じらい", -2)
+ENDIF
+IF TALENT:(ARG:0):献身的
+	CALL COM_ORDER_ELEMENT(ARG:0, "献身的", 3)
+ENDIF
+IF TALENT:(ARG:0):Ｓ気質
+	CALL COM_ORDER_ELEMENT(ARG:0, "Ｓ気質", 6)
+ENDIF
+
+IF GETBIT(TALENT:(ARG:0):淫乱系, 素質_淫乱_サド)
+	CALL COM_ORDER_ELEMENT(ARG:0, "サド", 40)
+ELSE
+	IF ABL:(ARG:0):主導度Ｕ >= 500
+		CALL COM_ORDER_ELEMENT(ARG:0, "主導度", 15)
+	ELSEIF ABL:(ARG:0):主導度Ｕ >= 300
+		CALL COM_ORDER_ELEMENT(ARG:0, "主導度", 10)
+	ELSEIF ABL:(ARG:0):主導度Ｕ >= 100
+		CALL COM_ORDER_ELEMENT(ARG:0, "主導度", 5)
+	ELSEIF ABL:(ARG:0):主導度Ｕ > -100
+		CALL COM_ORDER_ELEMENT(ARG:0, "主導度", 0)
+	ELSE
+		CALL COM_ORDER_ELEMENT(ARG:0, "主導度", -5)
+	ENDIF
+
+	IF ABL:(ARG:0):倒錯度 >= 800
+		CALL COM_ORDER_ELEMENT(ARG:0, "倒錯度", 20)
+	ELSEIF ABL:(ARG:0):倒錯度 >= 500
+		CALL COM_ORDER_ELEMENT(ARG:0, "倒錯度", 15)
+	ELSEIF ABL:(ARG:0):倒錯度 >= 300
+		CALL COM_ORDER_ELEMENT(ARG:0, "倒錯度", 10)
+	ELSEIF ABL:(ARG:0):倒錯度 >= 100
+		CALL COM_ORDER_ELEMENT(ARG:0, "倒錯度", 5)
+	ELSE
+		CALL COM_ORDER_ELEMENT(ARG:0, "倒錯度", 0)
+	ENDIF
+ENDIF
+
+RETURN 1
+
+;-------------------------------------------------
+;地の文(前文)
+;-------------------------------------------------
+@COM_TEXT_BEFORE97
+;ターゲットが２人
+IF MTAR_NUM == 2
+	LOCALS:0 = %ANAME(MTAR:0)%と%ANAME(MTAR:1)%
+
+;ターゲットが１人
+ELSE
+	LOCALS:0 = %ANAME(MTAR:0)%
+ENDIF
+IF TALENT:(MTAR:0):妊娠
+	LOCALS:1 = %ANAME(MTAR:0)%が妊娠しているにもかかわらず、
+ELSEIF TALENT:(MTAR:0):触手妊娠 || TALENT:(MTAR:0):Ａ触手妊娠 || TALENT:(LOCAL:0):Ｕ触手妊娠
+	LOCALS:1 = %ANAME(MTAR:0)%が触手の子を宿しているにもかかわらず、
+ELSEIF BASE:(MTAR:0):体力 <= 0
+	LOCALS:1 = 体力の限界を迎えた%ANAME(MTAR:0)%を叱咤するように、
+ELSEIF BASE:(MTAR:0):気力 <= 0
+	LOCALS:1 = 気力の限界を迎えた%ANAME(MTAR:0)%を叱咤するように、
+ELSEIF MTAR_NUM == 2 && TALENT:(MTAR:1):妊娠
+	LOCALS:1 = %ANAME(MTAR:1)%が妊娠しているにもかかわらず、
+ELSEIF MTAR_NUM == 2 && (TALENT:(MTAR:1):触手妊娠 || TALENT:(MTAR:1):Ａ触手妊娠)
+	LOCALS:1 = %ANAME(MTAR:1)%が触手の子を宿しているにもかかわらず、
+ELSEIF MTAR_NUM == 2 && BASE:(MTAR:1):体力 <= 0
+	LOCALS:1 = 体力の限界を迎えた%ANAME(MTAR:1)%を叱咤するように、
+ELSEIF MTAR_NUM == 2 && BASE:(MTAR:1):気力 <= 0
+	LOCALS:1 = 気力の限界を迎えた%ANAME(MTAR:1)%を叱咤するように、
+ELSE
+	LOCALS:1 = 
+ENDIF
+
+
+SELECTCASE GET_COM_INITIATIVE()
+	;プレイヤーに主導権
+	CASE 0
+		PRINTFORMW %ANAME(MPLY:0)%は%LOCALS:1%%LOCALS:0%の腹に、力一杯拳を叩きつけ%TARGET_STR("た", "てきた")%…
+	;ターゲットに主導権
+	CASE 1
+		PRINTFORML %LOCALS:1%%LOCALS:0%は%ANAME(MPLY:0)%に、腹を殴るよう命令した
+		PRINTFORMW %ANAME(MPLY:0)%は言われるまま、%LOCALS:0%の腹に拳を叩きつけた…
+	;第三者に主導権
+	CASEELSE
+		PRINTFORML %LOCALS:1%%ANAME(TFLAG:45)%は%ANAME(MPLY:0)%に対して、%LOCALS:0%の腹を殴るよう命令した
+		PRINTFORMW %ANAME(MPLY:0)%は言われるまま、%LOCALS:0%の腹に拳を叩きつけた…
+ENDSELECT
+
+;--------------------------------------------------------
+;地の文(パラメータ・刻印変動後)
+;--------------------------------------------------------
+@COM_TEXT_LAST97
+FOR LOCAL:0, 0, MTAR_NUM
+	LOCAL:1 = MTAR:(LOCAL:0)
+	IF (LOCAL:1 != MASTER || CONFIG:441) && !IS_ANIMAL(LOCAL:1)
+		LOCAL:2 = CUP:(LOCAL:1):怖主
+		LOCAL:3 = CUP:(LOCAL:1):怒主
+		IF TALENT:(LOCAL:1):妊娠
+			PRINTFORML 子を守ろうと、%ANAME(LOCAL:1)%はとっさに腹をかばった…
+		ELSEIF TALENT:(LOCAL:1):触手妊娠 || TALENT:(LOCAL:1):Ａ触手妊娠 || TALENT:(LOCAL:0):Ｕ触手妊娠
+			PRINTFORML %ANAME(LOCAL:1)%の腹から、肉の潰れるような嫌な音が響いた…
+		ELSEIF BASE:(LOCAL:1):体力 <= 0 || BASE:(LOCAL:1):気力 <= 0
+			PRINTFORML 気絶している%ANAME(LOCAL:1)%は、痛みに呻いた…
+		ELSEIF ABL:(LOCAL:1):マゾ >= 5
+			PRINTFORML %ANAME(LOCAL:1)%は痛みを感じているにもかかわらず嬉しそうに甘い声を上げている
+		ELSEIF ABL:(LOCAL:1):マゾ >= 3
+			PRINTFORML %ANAME(LOCAL:1)%は苦悶のうめきをあげるが、その声には甘い色が混じっている
+		ELSEIF LOCAL:2 >= 3000
+			PRINTFORML %ANAME(LOCAL:1)%はあまりの痛みと恐怖に嗚咽を漏らしながら転げ回っている
+		ELSEIF LOCAL:2 >= 1500
+			PRINTFORML %ANAME(LOCAL:1)%は痛みに耐えきれず、口から呻きを漏らし、崩れ落ちた
+		ELSEIF LOCAL:2 >= 500
+			PRINTFORML %ANAME(LOCAL:1)%は痛みのあまりうずくまっている
+		ELSE
+			IF LOCAL:3 >= 200 && !IS_INITIATIVE(LOCAL:1)
+				PRINTFORML %ANAME(LOCAL:1)%は痛みに耐えながら、%ANAME(MPLY:0)%を睨みつけた
+			ELSE
+				PRINTFORML %ANAME(LOCAL:1)%は歯を食いしばって痛みに耐えている
+			ENDIF
+		ENDIF
+	ENDIF
+NEXT
+
+;-------------------------------------------------
+
+;コマンド区分
+;-------------------------------------------------
+
+@COM_AVAILABLE_WHEN97
+RETURN コマンド_ウフフ
+
+;--------------------
+;性嗜好用関数
+;--------------------
+@COM_PREFERENCE_PLAYER_97()
+RETURN POWER(2, 性的嗜好_虐げたい)
+
+@COM_PREFERENCE_TARGET_97()
+RETURN POWER(2, 性的嗜好_虐げられたい)
+

@@ -1,0 +1,532 @@
+﻿;-------------------------------------------------
+;「スキル習得」の名称
+;-------------------------------------------------
+@SHOP_LIFE_NAME41
+RESULTS:0 '= "スキル習得"
+
+;-------------------------------------------------
+;「スキル習得」の選択可否
+;-------------------------------------------------
+@SHOP_LIFE_CHECK41
+SIF FLAG:クリアフラグ
+	RETURN 0
+SIF CFLAG:MASTER:捕虜先
+	RETURN 0
+RETURN 1
+
+;-------------------------------------------------
+;「スキル習得」の選択可能キャラ存在判定
+;-------------------------------------------------
+@SHOP_LIFE_CHECKCHARA41(ARG:0)
+;捕虜でない、同一勢力、通常状態または育児中
+RETURN CFLAG:MASTER:所属 && CFLAG:MASTER:所属 == CFLAG:(ARG:0):所属 && !CFLAG:(ARG:0):捕虜先
+
+;-------------------------------------------------
+;「スキル習得」の左カラムメニューの入力処理
+;-------------------------------------------------
+@SHOP_LIFE_EVENTBUY41
+FLAG:拠点フェイズページ = 1
+FLAG:夜這い = 0
+RETURN 0
+
+;-------------------------------------------------
+;「スキル習得」の右カラム表示処理
+;-------------------------------------------------
+@SHOP_LIFE_EVENTBUY_SHOW41
+CALL COLUMN_RIGHT_TITLE("習得者選択", "0", "1", "", @"%NUM_FORMAT(SKILL_LEARN_PRICE:1)%~")
+CALL COLUMN_RIGHT_PRINTL
+CALL COLUMN_RIGHT_LINE
+CALL COLUMN_RIGHT_PRINTL
+;標準的なキャラリストとページ移動
+CALL COLUMN_RIGHT_CHARALIST
+RETURN 0
+
+;-------------------------------------------------
+;「スキル習得」のリスト１入力処理
+;-------------------------------------------------
+@SHOP_LIFE_USERSHOP41(対象, 編集モード= 0)
+#DIM 対象
+#DIM FIRST_LINE
+#DIM ジャンル
+#DIM 編集モード
+#DIM ソート順
+#DIMS ソート順文字列 = "NO", "NO降順", "レベル", "レベル降順"
+
+;あなたを選択するとここで弾かれる？
+IF !編集モード
+	TRYCALLFORM SHOP_LIFE_CHECKCHARA{FLAG:拠点フェイズ選択コマンド}(対象)
+	SIF !RESULT
+		RETURN 0
+ENDIF
+
+
+REDRAW 0
+FIRST_LINE = LINECOUNT
+
+CALL SHOP_LIFE_SKILL_CREATE_LIST(対象, 編集モード, ソート順)
+
+FOR LOCAL, 0, VARSIZE("SHOP_SKILL_PAGE")
+	SHOP_SKILL_PAGE:LOCAL = 1
+NEXT
+
+$SHOW_LOOP
+
+CALL SINGLE_DRAWLINE
+
+IF !編集モード
+	CALL ICPRINT(@"金を消費し、<%ANAME(対象)%>にスキルを習得・忘却させます%TOSTR_SPACE(10)%所持金:%NUM_FORMAT(MONEY)%", "", カラー_注意)
+ELSE
+	CALL ICPRINT(@"<%ANAME(対象)%>にスキルを習得・忘却させます", "", カラー_注意)
+ENDIF
+
+PRINTL
+CALL SINGLE_DRAWLINE
+CALL SHOP_LIFE_SKILL_PRINT_TABS(ジャンル)
+
+IF ジャンル == SKILL_GENRE_NUM
+	CALL SHOP_LIFE_SKILL_PRINT_FORGET_LIST(対象, 編集モード)
+ELSE
+	CALL SHOP_LIFE_SKILL_PRINT_LEARN_LIST(ジャンル,対象, 編集モード)
+ENDIF
+CALL SINGLE_DRAWLINE
+PRINTBUTTON @"[ソート:%ソート順文字列:ソート順%]", 99997
+PRINTBUTTON "[習得済スキル並べ替え]", 99998
+PRINTL
+PRINTBUTTON "[戻る]", 99999
+
+INPUT 99999
+
+
+SELECTCASE RESULT
+	CASE 0 TO 3000
+		IF ジャンル != SKILL_GENRE_NUM
+			CALL SHOP_LEARN_SKILL(対象, ジャンル, RESULT, 編集モード)
+		ELSE
+			CALL SHOP_FORGET_SKILL(対象, RESULT, 編集モード)
+		ENDIF
+		LOCAL = RESULT
+		CALL SHOP_LIFE_SKILL_CREATE_LIST(対象, 編集モード, ソート順)
+		IF LOCAL == 1 && !編集モード
+			CLEARLINE LINECOUNT - FIRST_LINE
+			GOTO SHOW_LOOP			
+		ENDIF
+	CASE 4000 TO (4000 + SKILL_GENRE_NUM)
+		ジャンル = RESULT - 4000
+	;タブ切り替え処理
+	CASE 5000
+		SHOP_SKILL_PAGE:ジャンル --
+	CASE 5001
+		SHOP_SKILL_PAGE:ジャンル ++
+	CASE 5002
+		SHOP_SKILL_PAGE:ジャンル -= 5
+	CASE 5003
+		SHOP_SKILL_PAGE:ジャンル += 5
+	CASE 99997
+		ソート順 = ROUND_INCREMENT(ソート順, 0, VARSIZE("ソート順文字列") - 1)
+		CALL SHOP_LIFE_SKILL_CREATE_LIST(対象,編集モード,ソート順)
+		CLEARLINE LINECOUNT - FIRST_LINE
+		GOTO SHOW_LOOP
+	CASE 99998
+		CALL SHOP_LIFE_SWAP_SKILL(対象)
+		CLEARLINE LINECOUNT - FIRST_LINE
+		GOTO SHOW_LOOP
+	;戻る
+	CASE 99999
+		RETURN 0
+ENDSELECT
+
+CLEARLINE LINECOUNT - FIRST_LINE
+GOTO SHOW_LOOP
+
+;----------------------------
+;スキル習得をこころみる
+;----------------------------
+@SHOP_LEARN_SKILL(対象, ジャンル, 番号, 編集モード = 0)
+#DIM 対象
+#DIM 教師
+#DIM 番号
+#DIM ジャンル
+#DIM スキル
+#DIM スキル位置
+#DIM レベル
+#DIMS スキル名
+#DIM 編集モード
+
+レベル = SHOP_SKILL_LEVEL_LIST:ジャンル:番号
+
+;資金不足ならだめ
+IF SKILL_LEARN_PRICE:レベル > MONEY && !編集モード
+	PRINTFORMW (資金不足です)
+	RETURN
+ENDIF
+
+CALL SKILL_LEARN(対象, ジャンル, SHOP_SKILL_NO_LIST:ジャンル:番号, SHOP_SKILL_ID_LIST:ジャンル:番号)
+
+;いっぱいならだめ
+IF RESULT == 0
+	PRINTFORML (このジャンルのスキルは既に覚えきっています)
+	PRINTFORMW (新たなものを覚えるには、何かを忘れる必要があります)
+	RETURN 
+ENDIF
+
+CALLFORM SKILL_{SHOP_SKILL_NO_LIST:ジャンル:番号}_%SKILL_GENRE_ENG:ジャンル%_{SHOP_SKILL_ID_LIST:ジャンル:番号}_NAME
+スキル名 = %RESULTS%
+
+SIF 編集モード
+	RETURN 1
+
+教師 = NO_TO_CHARA(SHOP_SKILL_NO_LIST:ジャンル:番号)
+
+IF 教師 == -1 || 教師 == 対象 || 教師 == NAME_TO_CHARA("あなた")
+	CALL COLOR_PRINTW(@"%ANAME(対象)%は『%スキル名%』を習得した！", カラー_注意)
+ELSE
+	CALL COLOR_PRINTW(@"%ANAME(対象)%は%ANAME(教師)%から『%スキル名%』を習得した！", カラー_注意)
+ENDIF
+
+MONEY -= SKILL_LEARN_PRICE:レベル
+
+RETURN 1
+
+;----------------------------
+;スキル忘却をこころみる
+;----------------------------
+@SHOP_FORGET_SKILL(対象, 番号, 編集モード)
+#DIM 対象
+#DIM 番号
+#DIM ジャンル
+#DIM スキル
+#DIM スキル位置
+#DIM レベル
+#DIM 編集モード
+#DIMS スキル名
+
+ジャンル = 番号 / MAX_SKILL_SLOT
+スキル = 番号 % MAX_SKILL_SLOT
+
+;資金不足ならだめ
+IF SKILL_FORGET_PRICE > MONEY && !編集モード
+	PRINTFORMW (資金不足です)
+	RETURN
+ENDIF
+
+;該当スキルの習得判定
+IF SKILL_NO_SLOT:対象:ジャンル:スキル < 0 || SKILL_ID_SLOT:対象:ジャンル:スキル < 0
+	PRINTFORML (そのスキルは覚えていません)
+	RETURN
+ENDIF
+
+CALLFORM SKILL_{SKILL_NO_SLOT:対象:ジャンル:スキル}_%SKILL_GENRE_ENG:ジャンル%_{SKILL_ID_SLOT:対象:ジャンル:スキル}_NAME
+スキル名 = %RESULTS%
+
+
+
+SKILL_NO_SLOT:対象:ジャンル:スキル = -1
+SKILL_ID_SLOT:対象:ジャンル:スキル = -1
+
+SIF 編集モード
+	RETURN 1
+
+CALL COLOR_PRINTW(@"%ANAME(対象)%は『%スキル名%』を忘れた！", カラー_注意)
+
+MONEY -= SKILL_FORGET_PRICE
+
+CFLAG:対象:行動済み = 1
+
+RETURN 1
+
+;----------------------------
+;スキルタブ描画
+;----------------------------
+@SHOP_LIFE_SKILL_PRINT_TABS(ジャンル)
+#DIM ジャンル
+FOR LOCAL, 0, SKILL_GENRE_NUM
+	IF ジャンル == LOCAL
+		SETCOLOR カラー_選択中
+	ENDIF
+	PRINTBUTTON @"[%SKILL_GENRE:LOCAL%]", 4000 + LOCAL
+	PRINT  
+	RESETCOLOR
+NEXT
+IF ジャンル == LOCAL
+	SETCOLOR カラー_選択中
+ENDIF
+PRINTBUTTON @"[忘れる]", 4000 + LOCAL
+RESETCOLOR
+PRINTL
+
+;----------------------------
+;習得可能スキル描画
+;----------------------------
+@SHOP_LIFE_SKILL_PRINT_LEARN_LIST(ジャンル, 対象, 編集モード)
+#DIM 対象
+#DIM ジャンル
+#DIM スキル
+#DIM 最大ページ
+#DIM CONST 項目数 = 10
+#DIM 空きスロット
+#DIM 編集モード
+#DIM レベル
+#DIM 描画行
+
+最大ページ = MAX(SHOP_SKILL_NUM:ジャンル - 1, 0) / 項目数 + 1
+
+IF SHOP_SKILL_PAGE:ジャンル <= 0
+	SHOP_SKILL_PAGE:ジャンル = 最大ページ
+ELSEIF SHOP_SKILL_PAGE:ジャンル > 最大ページ
+	SHOP_SKILL_PAGE:ジャンル = 1
+ENDIF
+
+空きスロット = GET_EMPTY_SKILL_SLOT(対象, ジャンル)
+
+CALL SINGLE_DRAWLINE
+PRINTFORM -スキルの習得-
+IF 空きスロット == -1
+	CALL COLOR_PRINTL("  このジャンルのスキルスロットがいっぱいです", カラー_注意)
+ELSE
+	PRINTL
+ENDIF
+CALL SINGLE_DRAWLINE
+
+描画行 = 0
+FOR スキル, (SHOP_SKILL_PAGE:ジャンル - 1) * 項目数, MIN(SHOP_SKILL_PAGE:ジャンル * 項目数, SHOP_SKILL_NUM:ジャンル)
+
+	CALLFORM SKILL_{SHOP_SKILL_NO_LIST:ジャンル:スキル}_%SKILL_GENRE_ENG:ジャンル%_{SHOP_SKILL_ID_LIST:ジャンル:スキル}_LEVEL
+	レベル = RESULT
+
+	CALL COLOR_LINE
+	;習得ボタンは一番左
+	IF (SKILL_LEARN_PRICE:レベル > MONEY && !編集モード) || 空きスロット == -1
+		SETCOLOR カラー_選択不可
+		PRINTPLAIN [習得]
+		RESETCOLOR
+	ELSE
+		PRINTBUTTON "[習得]", スキル
+	ENDIF
+	;項目描画
+	SIF !編集モード
+		PRINTFORM  価格:%NUM_FORMAT(SKILL_LEARN_PRICE:レベル), 7, RIGHT% 
+	CALL SKILL_EXPLANATION(ジャンル, SHOP_SKILL_NO_LIST:ジャンル:スキル, SHOP_SKILL_ID_LIST:ジャンル:スキル, 19)
+	描画行 ++
+NEXT
+
+IF 項目数 - 描画行 > 0
+	FOR LOCAL, 描画行, 項目数
+		PRINTL
+		PRINTL
+		SIF LOCAL != 項目数 - 1
+			PRINTL
+	NEXT
+ENDIF
+
+CALL SINGLE_DRAWLINE
+PRINTFORML {SHOP_SKILL_PAGE:ジャンル} / {最大ページ}
+CALL SINGLE_DRAWLINE
+PRINTBUTTON "[5頁前]", 5002
+PRINTFORM %TOSTR_SPACE(3)%
+PRINTBUTTON "[前のページ]", 5000
+PRINTFORM %TOSTR_SPACE(3)%
+PRINTBUTTON "[次のページ]", 5001
+PRINTFORM %TOSTR_SPACE(3)%
+PRINTBUTTON "[5頁後]", 5003
+PRINTL
+
+
+;----------------------------
+;忘却スキル描画
+;----------------------------
+@SHOP_LIFE_SKILL_PRINT_FORGET_LIST(対象, 編集モード)
+#DIM 対象
+#DIM ジャンル
+#DIM ジャンル数
+#DIM スキル数
+#DIM スキル
+#DIM 最大ページ
+#DIM CONST 項目数 = 10
+#DIMS アクセサ
+#DIMS キャラ名
+#DIMS スキル名
+#DIM レベル
+#DIM 編集モード
+#DIMS 説明
+#DIM 描画行
+#DIM オフセット
+
+ジャンル数 = SKILL_GENRE_NUM
+
+;ページ数出す用
+スキル数 = 0
+FOR ジャンル, 0, ジャンル数
+	FOR スキル, 0, MAX_SKILL_SLOT
+		SIF SKILL_NO_SLOT:対象:ジャンル:スキル >= 0 && SKILL_ID_SLOT:対象:ジャンル:スキル >= 0
+			スキル数 ++
+	NEXT
+NEXT
+
+最大ページ = MAX(スキル数 - 1, 0) / 項目数 + 1
+
+IF SHOP_SKILL_PAGE:ジャンル数 <= 0
+	SHOP_SKILL_PAGE:ジャンル数 = 最大ページ
+ELSEIF SHOP_SKILL_PAGE:ジャンル数 > 最大ページ
+	SHOP_SKILL_PAGE:ジャンル数 = 1
+ENDIF
+
+CALL SINGLE_DRAWLINE
+PRINTFORML -スキルの忘却-
+CALL SINGLE_DRAWLINE
+
+
+オフセット = 0
+描画行 = 0
+FOR ジャンル, 0, SKILL_GENRE_NUM
+	FOR スキル, 0, MAX_SKILL_SLOT
+		IF オフセット < (SHOP_SKILL_PAGE:ジャンル数 - 1) * 項目数
+			オフセット ++
+			CONTINUE
+		ELSEIF オフセット >= MIN(SHOP_SKILL_PAGE:ジャンル数 * 項目数, スキル数)
+			BREAK
+		ENDIF
+		;存在判定
+		TRYCCALLFORM SKILL_{SKILL_NO_SLOT:対象:ジャンル:スキル}_%SKILL_GENRE_ENG:ジャンル%_{SKILL_ID_SLOT:対象:ジャンル:スキル}_EXIST
+		CATCH
+			CONTINUE
+		ENDCATCH
+
+		CALL COLOR_LINE
+
+		;習得ボタンは一番左
+		IF SKILL_FORGET_PRICE > MONEY && !編集モード
+			SETCOLOR カラー_選択不可
+			PRINTPLAIN [忘却]
+			RESETCOLOR
+		ELSE
+			PRINTBUTTON "[忘却]", ジャンル * MAX_SKILL_SLOT + スキル
+		ENDIF
+		;項目描画
+		SIF !編集モード
+			PRINTFORM  価格:%NUM_FORMAT(SKILL_FORGET_PRICE), 7, RIGHT% 
+		CALL SKILL_EXPLANATION(ジャンル, SKILL_NO_SLOT:対象:ジャンル:スキル, SKILL_ID_SLOT:対象:ジャンル:スキル, 19)
+		描画行 ++
+		オフセット ++
+	NEXT
+NEXT
+
+IF 項目数 - 描画行 > 0
+	FOR LOCAL, 描画行, 項目数
+		PRINTL
+		PRINTL
+		SIF LOCAL != 項目数 - 1
+			PRINTL
+	NEXT
+ENDIF
+
+CALL SINGLE_DRAWLINE
+PRINTFORML {SHOP_SKILL_PAGE:ジャンル数} / {最大ページ}
+CALL SINGLE_DRAWLINE
+PRINTBUTTON "[前のページ]", 5000
+PRINTBUTTON "[次のページ]", 5001
+PRINTL
+
+
+;----------------------------
+;あるキャラが習得できるスキルリスト生成
+;----------------------------
+@SHOP_LIFE_SKILL_CREATE_LIST(対象, 編集モード, ソート順)
+#DIM キャラ
+#DIM ジャンル
+#DIM スキルID
+#DIM 対象
+#DIM 対象スキル
+#DIM 編集モード
+#DIM ソート順
+
+VARSET SHOP_SKILL_NO_LIST
+VARSET SHOP_SKILL_ID_LIST
+VARSET SHOP_SKILL_LEVEL_LIST
+VARSET SHOP_SKILL_NUM
+
+FOR キャラ, 0, CHARANUM
+	;0番は汎用なのでスキップ　本人もスキップ
+	IF !(NO:キャラ == 0 || キャラ == 対象)
+		SIF (CFLAG:キャラ:所属 != CFLAG:MASTER:所属 || CFLAG:キャラ:特殊状態 == 特殊状態_放浪) && !編集モード
+			CONTINUE
+		SIF CFLAG:キャラ:捕虜先 && !編集モード
+			CONTINUE
+		SIF !IS_TOHO_CHARA(キャラ)
+			CONTINUE
+	ENDIF
+	FOR ジャンル, 0, SKILL_GENRE_NUM
+		FOR スキルID, 0, MAX_SKILLS
+			TRYCCALLFORM SKILL_{NO:キャラ}_%SKILL_GENRE_ENG:ジャンル%_{スキルID}_EXIST
+				;教えられない
+				TRYCCALLFORM SKILL_{NO:キャラ}_%SKILL_GENRE_ENG:ジャンル%_{スキルID}_CANT_TELL
+					SIF (NO:キャラ != NO:対象 && !編集モード) || NO:キャラ == 0
+						GOTO CANCEL
+				CATCH
+				ENDCATCH
+				;所持してたらダメ
+				SIF CHECK_SKILL_DUPLICATE(対象, ジャンル, NO:キャラ, スキルID)
+					GOTO CANCEL
+				;ショップ経由でダメなスキルを弾く
+				TRYCCALLFORM SKILL_{NO:キャラ}_%SKILL_GENRE_ENG:ジャンル%_{スキルID}_CANT_LEARN_FROM_SHOP
+					SIF !編集モード
+						GOTO CANCEL
+				CATCH
+					SHOP_SKILL_NO_LIST:ジャンル:(SHOP_SKILL_NUM:ジャンル) = NO:キャラ
+					SHOP_SKILL_ID_LIST:ジャンル:(SHOP_SKILL_NUM:ジャンル) = スキルID
+					CALLFORM SKILL_{NO:キャラ}_%SKILL_GENRE_ENG:ジャンル%_{スキルID}_LEVEL
+					SHOP_SKILL_LEVEL_LIST:ジャンル:(SHOP_SKILL_NUM:ジャンル) = RESULT
+					SHOP_SKILL_NUM:ジャンル ++
+				ENDCATCH
+			CATCH
+				$CANCEL
+			ENDCATCH
+		NEXT
+	NEXT
+NEXT
+
+CALL SHOP_LIFE_SKILL_SORT(ソート順)
+
+;----------------------------
+;スキルリストのソート
+;----------------------------
+@SHOP_LIFE_SKILL_SORT(ソート順)
+#DIM ソート順
+#DIM 降順
+#DIM CONST ソート順_NO = 0
+#DIM CONST ソート順_NO降順 = 1
+#DIM CONST ソート順_レベル = 2
+#DIM CONST ソート順_レベル降順 = 3
+#DIM SORT_VALUES, VARSIZE("SHOP_SKILL_NO_LIST", 0), VARSIZE("SHOP_SKILL_NO_LIST", 1)
+#DIM ジャンル
+#DIM スキルID
+#DIM 走査
+
+VARSET SORT_VALUES
+
+IF GROUPMATCH(ソート順, ソート順_NO降順, ソート順_レベル降順)
+	降順 = 1
+ELSE
+	降順 = 0
+ENDIF
+
+FOR ジャンル, 0, SKILL_GENRE_NUM
+	FOR スキルID, 0, SHOP_SKILL_NUM:ジャンル
+		IF GROUPMATCH(ソート順, ソート順_NO, ソート順_NO降順)
+			SORT_VALUES:ジャンル:スキルID = SHOP_SKILL_NO_LIST:ジャンル:スキルID
+		ELSE
+			SORT_VALUES:ジャンル:スキルID = SHOP_SKILL_LEVEL_LIST:ジャンル:スキルID
+		ENDIF
+	NEXT
+NEXT
+
+FOR ジャンル, 0, SKILL_GENRE_NUM
+	FOR スキルID, 1, SHOP_SKILL_NUM:ジャンル
+		IF (!降順 && SORT_VALUES:ジャンル:スキルID < SORT_VALUES:ジャンル:(スキルID - 1)) || (降順 && SORT_VALUES:ジャンル:スキルID > SORT_VALUES:ジャンル:(スキルID - 1))
+			SWAP SORT_VALUES:ジャンル:スキルID, SORT_VALUES:ジャンル:(スキルID - 1)
+			SWAP SHOP_SKILL_NO_LIST:ジャンル:スキルID, SHOP_SKILL_NO_LIST:ジャンル:(スキルID - 1)
+			SWAP SHOP_SKILL_ID_LIST:ジャンル:スキルID, SHOP_SKILL_ID_LIST:ジャンル:(スキルID - 1)
+			SWAP SHOP_SKILL_LEVEL_LIST:ジャンル:スキルID, SHOP_SKILL_LEVEL_LIST:ジャンル:(スキルID - 1)
+			スキルID = MAX(スキルID - 2, 0)
+		ENDIF
+	NEXT
+NEXT

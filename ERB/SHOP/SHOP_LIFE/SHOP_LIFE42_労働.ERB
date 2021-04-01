@@ -1,0 +1,273 @@
+﻿;-------------------------------------------------
+;「労働」の名称
+;-------------------------------------------------
+@SHOP_LIFE_NAME42
+RESULTS:0 '= "労働"
+
+;-------------------------------------------------
+;「労働」の選択可否
+;-------------------------------------------------
+@SHOP_LIFE_CHECK42
+SIF CFLAG:MASTER:捕虜先
+	RETURN 0
+RETURN 1
+
+;-------------------------------------------------
+;「労働」の選択可能キャラ存在判定
+;-------------------------------------------------
+@SHOP_LIFE_CHECKCHARA42(ARG:0)
+;捕虜でない、同一勢力、通常状態または育児中、クールタイムでない
+RETURN CHECK91(ARG:0, 2, CFLAG:(ARG:0):所属 == CFLAG:MASTER:所属 && (ARG:0 == MASTER || CFLAG:(ARG:0):所属) && !CFLAG:(ARG:0):捕虜先 && !IS_ANIMAL(ARG:0) && GROUPMATCH(CFLAG:(ARG:0):行動不能状態, 0, 2) && COOLTIME:(ARG:0):0 == 0)
+
+;-------------------------------------------------
+;「労働」の左カラムメニューの入力処理
+;-------------------------------------------------
+@SHOP_LIFE_EVENTBUY42
+FLAG:拠点フェイズページ = 1
+FLAG:夜這い = 0
+RETURN 0
+
+;-------------------------------------------------
+;「労働」の右カラムボタン入力値をキャラ番号に変換する処理のオフ判定
+;-------------------------------------------------
+@SHOP_LIFE_USERSHOP_COLUMN_RIGHT_CONVERT_CHARANUM_OFF_CHECK42
+
+;-------------------------------------------------
+;「労働」の右カラムキャラリスト１のボタン
+;-------------------------------------------------
+@SHOP_LIFE_LIST1_BUTTON42(ARG:0, ARG:1)
+#DIM HEAD_SIX = GETNUM(ABL, "武闘"),  GETNUM(ABL, "防衛"), GETNUM(ABL, "知略"),  GETNUM(ABL, "政治"),GETNUM(ABL, "歌唱"), GETNUM(ABL, "料理"),
+#DIM HEAD_LEWD = GETNUM(ABL, "欲望"), GETNUM(ABL, "性技"), GETNUM(ABL, "奉仕"), GETNUM(ABL, "性交")
+#DIM 選択人数
+VARSET 選択人数
+
+FOR LOCAL, 0, CHARANUM
+	SIF CFLAG:LOCAL:労働内容
+		選択人数 ++
+NEXT
+
+CALL COLUMN_RIGHT_LINE
+CALL COLUMN_RIGHT_PRINTL
+
+PRINTFORM %SNAME(ARG:0), MAX_CHARANAME_LENGTH / 2, LEFT%
+CALL SHOP_LIFE_BUTTON42(ARG:0, CFLAG:(ARG:0):労働内容 == 0,             1,                 0,                                             "待機")
+CALL SHOP_LIFE_BUTTON42(ARG:0, CFLAG:(ARG:0):労働内容 == 労働_建設,     1 + 労働_建設,     CFLAG:(ARG:0):労働内容 == 0 && 選択人数 >= MAX_WORKER_NUM, "建設")
+CALL SHOP_LIFE_BUTTON42(ARG:0, CFLAG:(ARG:0):労働内容 == 労働_巡回,     1 + 労働_巡回,     CFLAG:(ARG:0):労働内容 == 0 && 選択人数 >= MAX_WORKER_NUM, "巡回")
+CALL SHOP_LIFE_BUTTON42(ARG:0, CFLAG:(ARG:0):労働内容 == 労働_広報,     1 + 労働_広報,     CFLAG:(ARG:0):労働内容 == 0 && 選択人数 >= MAX_WORKER_NUM, "広報")
+CALL SHOP_LIFE_BUTTON42(ARG:0, CFLAG:(ARG:0):労働内容 == 労働_街宣,     1 + 労働_街宣,     CFLAG:(ARG:0):労働内容 == 0 && 選択人数 >= MAX_WORKER_NUM, "街宣")
+CALL SHOP_LIFE_BUTTON42(ARG:0, CFLAG:(ARG:0):労働内容 == 労働_炊き出し, 1 + 労働_炊き出し, CFLAG:(ARG:0):労働内容 == 0 && 選択人数 >= MAX_WORKER_NUM, "炊き出し")
+CALL SHOP_LIFE_BUTTON42(ARG:0, CFLAG:(ARG:0):労働内容 == 労働_ライブ  , 1 + 労働_ライブ  , CFLAG:(ARG:0):労働内容 == 0 && 選択人数 >= MAX_WORKER_NUM, "ライブ")
+CALL SHOP_LIFE_BUTTON42(ARG:0, CFLAG:(ARG:0):労働内容 == 労働_娼館,     1 + 労働_娼館,     (CFLAG:(ARG:0):労働内容 == 0 && 選択人数 >= MAX_WORKER_NUM) || ABL:(ARG:0):性技 < ランク閾値:ランク_その他:ランク_D || !IS_FEMALE(ARG:0), "娼館")
+CALL SHOP_LIFE_BUTTON42(ARG:0, CFLAG:(ARG:0):労働内容 == 労働_ＡＶ,     1 + 労働_ＡＶ,     (CFLAG:(ARG:0):労働内容 == 0 && 選択人数 >= MAX_WORKER_NUM) || ABL:(ARG:0):性技 < ランク閾値:ランク_その他:ランク_D || !IS_FEMALE(ARG:0), "ＡＶ撮影")
+CALL SHOP_LIFE_BUTTON42(ARG:0, CFLAG:(ARG:0):労働内容 == 労働_搾乳,     1 + 労働_搾乳,     (CFLAG:(ARG:0):労働内容 == 0 && 選択人数 >= MAX_WORKER_NUM )|| !IS_FEMALE(ARG:0), "搾乳")
+
+CALL COLUMN_RIGHT_PRINTL
+
+CALL PRINT_SEX(ARG:0, 1)
+PRINTPLAIN   
+
+FOR LOCAL, 0, VARSIZE("HEAD_SIX")
+	CALL COLOR_PRINT(@"%ABLNAME:(HEAD_SIX:LOCAL)%:", カラー_注釈)
+	CALL PRINT_ALPHABET_RANK(ランク_ＳＬＧ, ABL:(ARG:0):(HEAD_SIX:LOCAL))
+	PRINTFORM %TOSTR_R(ABL:(ARG:0):(HEAD_SIX:LOCAL), 3)%  
+NEXT
+CALL COLUMN_RIGHT_PRINTL
+PRINTPLAIN     
+FOR LOCAL, 0, VARSIZE("HEAD_LEWD")
+	CALL COLOR_PRINT(@"%ABLNAME:(HEAD_LEWD:LOCAL)%:", カラー_注釈)
+	CALL PRINT_ALPHABET_RANK(ランク_その他, ABL:(ARG:0):(HEAD_LEWD:LOCAL))
+	PRINTFORM %TOSTR_R(ABL:(ARG:0):(HEAD_LEWD:LOCAL), 3)%  
+NEXT
+PRINTFORM 娼婦:  \@GETBIT(TALENT:(ARG:0):淫乱系, 素質_淫乱_娼婦) ? ○ # × \@  
+PRINTFORM 女優:  \@GETBIT(TALENT:(ARG:0):淫乱系, 素質_淫乱_ＡＶ女優) ? ○ # × \@  
+PRINTFORM 雌牛:  \@GETBIT(TALENT:(ARG:0):淫乱系, 素質_淫乱_雌牛) ? ○ # × \@
+
+RETURN 0
+
+;-------------------------------------------------
+;「労働」の右カラム表示処理
+;-------------------------------------------------
+@SHOP_LIFE_EVENTBUY_SHOW42
+#DIM 選択人数
+VARSET 選択人数
+
+FOR LOCAL, 0, CHARANUM
+	CALL SHOP_LIFE_CHECKCHARA42(LOCAL)
+
+	;労働本体で解除処理はあるが、念のため
+	SIF !RESULT && CFLAG:LOCAL:労働内容
+		CFLAG:LOCAL:労働内容 = 0
+
+	SIF CFLAG:LOCAL:労働内容
+		選択人数 ++
+NEXT
+
+CALL COLUMN_RIGHT_TITLE("労働者選択", TOSTR(選択人数), TOSTR(MAX_WORKER_NUM), "0", "0", "拠点ﾌｪｲｽﾞ終了時に労働します")
+CALL COLUMN_RIGHT_PRINTL
+;標準的なキャラリストとページ移動 １列1ボタン,1ボタン3行
+;ボタンにラインを含むため開始前にラインをひかない
+CALL COLUMN_RIGHT_CHARALIST(1, 4)
+RETURN 0
+
+;-------------------------------------------------
+;「労働」のリスト１入力処理
+;-------------------------------------------------
+@SHOP_LIFE_USERSHOP42(ARG:0)
+#DIM 項目番号
+#DIM キャラ番号
+#DIM 選択人数
+VARSET 選択人数
+
+FOR LOCAL, 0, CHARANUM
+	SIF CFLAG:LOCAL:労働内容
+		選択人数 ++
+NEXT
+
+項目番号 = ARG:0 / 1000 - 1
+キャラ番号 = ARG:0 - (1000 * (項目番号 + 1))
+
+;手入力で番号外を選択したときの退避処理
+;SHOP_LIFE_USERSHOP_COLUMN_RIGHT_CONVERT_CHARANUM_OFF_CHECKを指定しているときは
+;キャラ番号外を自動的に弾かないので注意がいる
+
+SIF !INRANGE(項目番号, 0, 労働_搾乳)
+	RETURN 0
+
+SIF キャラ番号 < 0 || キャラ番号 > CHARANUM
+	RETURN 0
+
+SIF ABL:キャラ番号:性技 < ランク閾値:ランク_その他:ランク_D && GROUPMATCH(項目番号, 労働_娼館, 労働_ＡＶ)
+	RETURN 0
+
+SIF !IS_FEMALE(キャラ番号) && 項目番号 == 労働_搾乳
+	RETURN 0
+
+SIF 選択人数 >= MAX_WORKER_NUM && CFLAG:キャラ番号:労働内容 == 0 && INRANGE(項目番号, 労働_建設, 労働_搾乳)
+	RETURN 0
+
+RESULT = 0
+TRYCALLFORM SHOP_LIFE_CHECKCHARA{FLAG:拠点フェイズ選択コマンド}(キャラ番号)
+SIF RESULT
+	CFLAG:キャラ番号:労働内容 = 項目番号
+
+RETURN 0
+
+;-------------------------------------------------
+;扱い指定専用ボタン表示
+;0:捕虜のキャラ番号 1:扱いの種別番号 2:ボタン表示文字列
+;-------------------------------------------------
+@SHOP_LIFE_BUTTON42(キャラ番号, 選択中色フラグ, 種別指定番号, 選択不可フラグ, ボタン表示文字列)
+#DIM キャラ番号
+#DIM 選択中色フラグ
+#DIM 選択不可フラグ
+#DIM 種別指定番号
+#DIMS ボタン表示文字列
+
+PRINTPLAIN  
+
+IF 選択不可フラグ
+	SETCOLOR カラー_選択不可
+	PRINTPLAINFORM \[%ボタン表示文字列%\]
+	RESETCOLOR
+ELSEIF 選択中色フラグ
+	SETCOLOR カラー_選択中
+	PRINTPLAINFORM \[%ボタン表示文字列%\]
+	RESETCOLOR
+ELSE
+	PRINTBUTTON @"\[%ボタン表示文字列%\]", キャラ番号 + (種別指定番号 * 1000)
+ENDIF
+
+;-------------------------------------------------
+;DESC  : 拠点フェイズ終了時の労働処理
+;ARG   ::
+;-------------------------------------------------
+@EVENT_WORK
+#DIM 報酬
+#DIM 選択人数
+; 	報酬 = 1500
+; 	SELECTCASE 能力
+; 		CASE GETNUM(ABL, "武闘"), GETNUM(ABL, "防衛"), GETNUM(ABL, "知略"), GETNUM(ABL, "政治")
+; 			報酬 += RAND:(MAX(ABL:対象:能力 * 10, 1))
+; 		CASE GETNUM(ABL, "料理"), GETNUM(ABL, "歌唱")
+; 			報酬 += RAND:(MAX(ABL:対象:能力 * 20, 1))
+; 	ENDSELECT
+; 	SELECTCASE 経験値
+; 		CASE GETNUM(EXP, "武闘経験値"), GETNUM(EXP, "知略経験値"), GETNUM(EXP, "政治経験値"), GETNUM(EXP, "防衛経験値")
+; 			CALL PRINT_ADD_EXP(対象, EXPNAME:(経験値), RAND(1, 5))
+; 		CASE GETNUM(EXP, "料理経験値"), GETNUM(EXP, "歌唱経験値")
+; 			CALL PRINT_ADD_EXP(対象, EXPNAME:(経験値), RAND(1, 3))
+; 	ENDSELECT
+; 	CALL TRAIN_AUTO_ABLUP(対象)
+
+CALL SINGLE_DRAWLINE
+
+FOR LOCAL, 0, CHARANUM
+	SIF CFLAG:LOCAL:労働内容 == 0
+		CONTINUE
+	CALL SHOP_LIFE_CHECKCHARA42(LOCAL)
+	IF RESULT == 0
+		CFLAG:LOCAL:労働内容 = 0
+		CALL COLOR_PRINTW(@"%ANAME(LOCAL)%が労働できない状態のため、労働設定を解除しました", カラー_注意)
+		CONTINUE
+	ELSEIF !IS_FEMALE(LOCAL) && GROUPMATCH(CFLAG:LOCAL:労働内容, 労働_娼館, 労働_ＡＶ, 労働_搾乳)
+		CFLAG:LOCAL:労働内容 = 0
+		CALL COLOR_PRINTW(@"%ANAME(LOCAL)%が労働できない状態のため、労働設定を解除しました", カラー_注意)
+		CONTINUE
+	ENDIF
+	報酬 = 1000
+	SELECTCASE CFLAG:LOCAL:労働内容
+		CASE 労働_建設
+			報酬 += RAND(MAX(ABL:LOCAL:武闘 * 3, 0), MAX(ABL:LOCAL:武闘 * 5, 1))
+			PRINTFORML %ANAME(LOCAL)%は領内の建設業を手伝った……
+			CALL PRINT_ADD_EXP(LOCAL, "武闘経験値", RAND(6, 12))
+		CASE 労働_巡回
+			報酬 += RAND(MAX(ABL:LOCAL:防衛 * 3, 0), MAX(ABL:LOCAL:防衛 * 5, 1))
+			PRINTFORML %ANAME(LOCAL)%は領内の巡回を行った……
+			CALL PRINT_ADD_EXP(LOCAL, "防衛経験値", RAND(6, 12))
+		CASE 労働_広報
+			報酬 += RAND(MAX(ABL:LOCAL:知略 * 3, 0), MAX(ABL:LOCAL:知略 * 5, 1))
+			PRINTFORML %ANAME(LOCAL)%は広報活動を行った……
+			CALL PRINT_ADD_EXP(LOCAL, "知略経験値", RAND(6, 12))
+		CASE 労働_街宣
+			報酬 += RAND(MAX(ABL:LOCAL:政治 * 3, 0), MAX(ABL:LOCAL:政治 * 5, 1))
+			PRINTFORML %ANAME(LOCAL)%はプロパガンダ活動を行った……
+			CALL PRINT_ADD_EXP(LOCAL, "政治経験値", RAND(6, 12))
+		CASE 労働_炊き出し
+			報酬 += RAND(MAX(ABL:LOCAL:料理 * 3, 0), MAX(ABL:LOCAL:料理 * 5, 1))
+			PRINTFORML %ANAME(LOCAL)%は炊き出しを行った……
+			CALL PRINT_ADD_EXP(LOCAL, "料理経験値", RAND(6, 12))
+		CASE 労働_ライブ
+			報酬 += RAND(MAX(ABL:LOCAL:歌唱 * 3, 0), MAX(ABL:LOCAL:歌唱 * 5, 1))
+			PRINTFORML %ANAME(LOCAL)%は領内の民向けにライブを行った……
+			CALL PRINT_ADD_EXP(LOCAL, "歌唱経験値", RAND(6, 12))
+		CASE 労働_娼館
+			報酬 += RAND(MAX(ABL:LOCAL:欲望 + ABL:LOCAL:性技 + ABL:LOCAL:奉仕 + ABL:LOCAL:性交, 0), MAX((ABL:LOCAL:欲望 + ABL:LOCAL:性技 + ABL:LOCAL:奉仕 + ABL:LOCAL:性交) * 3, 1)) * 8
+			報酬 += GETBIT(TALENT:LOCAL:淫乱系, 素質_淫乱_娼婦) * RAND(500, 1500)
+			SIF IS_FEMALE(LOCAL) && TALENT:LOCAL:処女
+				報酬 += 10000
+			PRINTFORML %ANAME(LOCAL)%は娼館で働いた……
+			CALL WORK_WHORE_TEXT(LOCAL)
+		CASE 労働_ＡＶ
+			報酬 += RAND(MAX(ABL:LOCAL:欲望 + ABL:LOCAL:性技 + ABL:LOCAL:奉仕 + ABL:LOCAL:性交, 0), MAX((ABL:LOCAL:欲望 + ABL:LOCAL:性技 + ABL:LOCAL:奉仕 + ABL:LOCAL:性交) * 3, 1)) * 8
+			報酬 += GETBIT(TALENT:LOCAL:淫乱系, 素質_淫乱_ＡＶ女優) * RAND(500, 1500)
+			SIF IS_FEMALE(LOCAL) && TALENT:LOCAL:処女
+				報酬 += 10000
+			CALL WORK_AV_TEXT(LOCAL)
+		CASE 労働_搾乳
+			報酬 += RAND(MAX(ABL:LOCAL:Ｂ感 + ABL:LOCAL:噴乳, 0), MAX((ABL:LOCAL:Ｂ感 + ABL:LOCAL:噴乳) * 3, 1)) * 8
+			報酬 += TALENT:LOCAL:母乳体質 * 500
+			報酬 += MAX(GET_BUSTSIZE(LOCAL) * 300, 0)
+			報酬 += GETBIT(TALENT:LOCAL:淫乱系, 素質_淫乱_雌牛) * RAND(500, 1500)
+			SIF !TALENT:LOCAL:母乳体質
+				報酬 = 0
+			CALL WORK_MILK_TEXT(LOCAL)
+	ENDSELECT
+	CALL TRAIN_AUTO_ABLUP(LOCAL)
+	IF 報酬 >= 0
+		CALL COLOR_PRINTL("金",, TOSTR(報酬), カラー_注意, "を得た")
+		MONEY += 報酬
+	ENDIF
+	PRINTW
+NEXT
+
+CALL SINGLE_DRAWLINE

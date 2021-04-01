@@ -1,0 +1,67 @@
+﻿;-------------------------------------------------
+;特殊勢力による調教
+;-------------------------------------------------
+@SP_TRAIN(勢力)
+#DIM 勢力
+#DIM 対象
+#DIM 表示フラグ
+#DIM 勢力定数
+#DIMS 勢力名
+
+勢力定数 = SP_COUNTRY_TO_CONST(勢力)
+
+SIF !勢力定数
+	RETURN 0
+
+勢力名 = %SP_COUNTRY_NAME_ENG:勢力定数%
+
+SIF 勢力名 == ""
+	RETURN 0
+
+表示フラグ = 0
+
+TRYCCALLFORM %勢力名%_DOES_TRAIN
+CATCH
+	RETURN
+ENDCATCH
+
+FOR 対象, 0, CHARANUM
+	SIF !IS_TRAIN_BY_SP_COUNTRY(対象, 勢力)
+		CONTINUE
+	IF !表示フラグ
+		CALL SINGLE_DRAWLINE("-", カラー_選択不可)
+		RESETCOLOR
+		PRINTFORMW %SP_COUNTRY_NAME:勢力定数%に囚われた各国の仕官が調教されているようです……
+		PRINTFORML
+		表示フラグ = 1
+	ENDIF
+	TRYCALLFORM %勢力名%_TRAIN_MSG(対象, GETBIT(TALENT:対象:特殊勢力陥落系, 勢力定数) || SP_TRAIN_COUNT:対象:勢力定数 >= (TRAIN_FALLEN_TERM:2 - (CFLAG:対象:所属 == 勢力)))
+	SP_TRAIN_COUNT:対象:勢力定数 ++
+
+	IF IS_BETRAY_TO_SP_COUNTRY(対象, 勢力)
+		PRINTFORML
+		SETCOLOR カラー_警告
+		TRYCALLFORM %勢力名%_FALLEN_MSG(対象)
+		RESETCOLOR
+		SIF CFLAG:対象:所属 != 勢力
+			CALL CHANGE_COUNTRY(対象, 勢力, 1)
+		SETBIT TALENT:対象:特殊勢力陥落系, 勢力定数
+		SIF SP_TRAIN_IS_DECREASE_CFLAG(対象, 勢力)
+			CALL LOSE_RELATION_TALENT(対象)
+		TRYCALLFORM %勢力名%_FALLEN_LEAVE_MARK(対象)
+		SIF 対象 == MASTER
+			CALL PLAYER_FALLEN_TO_SP_COUNTRY(勢力)
+		CALL CLOTH_RESET(対象)
+		CALL SET_CLOTH_BY_NAME(対象, 衣装部位_首, "奴隷の首輪")
+
+		IF 対象 != MASTER && CFLAG:対象:所属 == CFLAG:MASTER:所属
+			CFLAG:対象:好感度 = MAX(CFLAG:対象:好感度, 500)
+			CFLAG:対象:従属度 = MAX(CFLAG:対象:従属度, 1000)
+			CFLAG:対象:依存度 = MAX(CFLAG:対象:依存度, 500)
+			CFLAG:対象:支配度 = MAX(CFLAG:対象:支配度, 0)
+			TALENT:対象:合意 = 1
+		ENDIF
+	ENDIF
+	PRINTL
+	WAIT
+NEXT

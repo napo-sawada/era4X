@@ -1,0 +1,603 @@
+﻿;---------------------------------
+;指定した名前のパッシブスキルを探す
+;---------------------------------
+@PASSIVE_SKILL_NAME_TO_ID(スキル名)
+#FUNCTION
+#DIM 発動者
+#DIMS スキル名
+SELECTCASE スキル名
+	CASE "超成長力"
+		RETURNF 0
+	CASE "努力家"
+		RETURNF 1
+	CASE "治療"
+		RETURNF 2
+	CASE "明察"
+		RETURNF 3
+	CASE "工作員"
+		RETURNF 4
+ENDSELECT
+
+RETURNF -1
+
+;---------------------------------
+;指定した名前のパッシブスキルがあるかを探す
+;---------------------------------
+@FIND_PASSIVE_SKILL(発動者, スキル名)
+#FUNCTION
+#DIM 発動者
+#DIMS スキル名
+#DIM スキルID
+#DIM パッシブ
+
+スキルID = PASSIVE_SKILL_NAME_TO_ID(スキル名)
+
+SIF スキルID == -1
+	THROW 該当する名前のスキルなし
+
+パッシブ = FINDELEMENT(SKILL_GENRE_ENG, "PASSIVE")
+
+FOR LOCAL, 0, MAX_SKILL_SLOT
+	SIF SKILL_NO_SLOT:発動者:パッシブ:LOCAL == 0 && SKILL_ID_SLOT:発動者:パッシブ:LOCAL == スキルID
+		RETURNF 1
+NEXT
+RETURNF 0
+
+@FIND_GENERAL_SKILL(発動者, スキル名)
+#DIM 発動者
+#DIMS スキル名
+#DIM ジャンル
+#DIM スキルID
+FOR LOCAL, 0, VARSIZE("SKILL_GENRE")
+	FOR LOCAL:1, 0, MAX_SKILLS
+		TRYCCALLFORM SKILL_0_%SKILL_GENRE_ENG:LOCAL%_{LOCAL:1}_NAME()
+			IF RESULTS == スキル名
+				ジャンル = LOCAL
+				スキルID = LOCAL:1
+				GOTO FOUND
+			ENDIF
+		CATCH
+			CONTINUE
+		ENDCATCH
+	NEXT
+NEXT
+
+RETURN 0
+
+$FOUND
+
+FOR LOCAL, 0, MAX_SKILL_SLOT
+	IF SKILL_NO_SLOT:発動者:ジャンル:LOCAL == 0 && SKILL_ID_SLOT:発動者:ジャンル:LOCAL == スキルID
+		RETURN 1
+	ENDIF
+NEXT
+
+RETURN 0
+
+;---------------------------------
+;SP, BASE, CAPTURE, ESCAPEスキル発動用
+;---------------------------------
+@SKILL_COMBAT_INVOKE(発動者, 発動番号, ジャンル, 発動側, 発動勢力, 発動部隊, 対象勢力, 対象部隊)
+#DIM 発動者
+#DIM 発動番号
+#DIM ジャンル
+#DIM 発動側
+#DIM 発動勢力
+#DIM 発動部隊
+#DIM 対象勢力
+#DIM 対象部隊
+
+SIF BATTLE_SKILL_SEALED:発動側:発動番号 || BATTLE_SUMMONED_CHARA:発動側:発動番号
+	RETURN 0
+
+FOR LOCAL, 0, MAX_SKILL_SLOT
+	SIF SKILL_NO_SLOT:発動者:ジャンル:LOCAL < 0
+		CONTINUE
+	SIF SKILL_ID_SLOT:発動者:ジャンル:LOCAL < 0
+		CONTINUE
+	CALL SKILL_COMBAT_TRY_INVOKE(発動者, 発動番号, ジャンル, SKILL_NO_SLOT:発動者:ジャンル:LOCAL, SKILL_ID_SLOT:発動者:ジャンル:LOCAL, 発動側, 発動勢力, 発動部隊, 対象勢力, 対象部隊)
+NEXT
+
+;---------------------------------
+;SP, BASE, CAPTURE, ESCAPEスキル発動用 CAPTUREでは発動側が捕縛側、ESCAPEでは発動側が逃走側
+;---------------------------------
+@SKILL_COMBAT_TRY_INVOKE(発動者, 発動番号, ジャンル, スキルNO, スキルID, 発動側, 発動勢力, 発動部隊, 対象勢力, 対象部隊)
+#DIM 発動者
+#DIM 発動番号
+#DIM ジャンル
+#DIM スキルNO
+#DIM スキルID
+#DIM 発動側
+#DIM 発動勢力
+#DIM 発動部隊
+#DIM 対象勢力
+#DIM 対象部隊
+
+SIF BATTLE_SKILL_SEALED:発動側:発動番号
+	RETURN -1
+
+;存在判定
+TRYCCALLFORM SKILL_{スキルNO}_%SKILL_GENRE_ENG:ジャンル%_{スキルID}_EXIST
+CATCH
+	RETURN -1
+ENDCATCH
+;対象選択
+TRYCCALLFORM SKILL_{スキルNO}_%SKILL_GENRE_ENG:ジャンル%_{スキルID}_SETTARGET(発動者, 発動番号, 発動側, 発動勢力, 発動部隊, 対象勢力, 対象部隊)
+	IF !RESULT
+		RESETCOLOR
+		RETURN 0
+	ENDIF
+CATCH
+ENDCATCH
+;発動率判定
+CALLFORM SKILL_{スキルNO}_%SKILL_GENRE_ENG:ジャンル%_{スキルID}_RATE(発動者, 発動番号, 発動側, 発動勢力, 発動部隊, 対象勢力, 対象部隊)
+
+;技術研究の成果
+SIF TECHNOLOGY_STATUS:(CFLAG:発動者:所属):TECHNOLOGY_BATTLE_SKILL >= 1
+	RESULT += 50
+SIF TECHNOLOGY_STATUS:(CFLAG:発動者:所属):TECHNOLOGY_BATTLE_SKILL >= 7
+	RESULT += 100
+
+IF RAND:1000 >= RESULT * BATTLE_SKILL_RATE:発動側:発動番号 / 100
+	RESETCOLOR
+	RETURN 0
+ENDIF
+;発動判定
+CALLFORM SKILL_{スキルNO}_%SKILL_GENRE_ENG:ジャンル%_{スキルID}_CAN_INVOKE(発動者, 発動番号, 発動側, 発動勢力, 発動部隊, 対象勢力, 対象部隊)
+IF !RESULT
+	RESETCOLOR
+	RETURN 0
+ENDIF
+;TRYCCALLFORM SKILL_{発動者}_%ジャンル%_{スキル}_INVOKE_TEXT(発動者)
+;	CATCH
+CALLFORM SKILL_PRINT_INVOKE(発動者, ジャンル, スキルNO, スキルID)
+;ENDCATCH
+CALLFORM SKILL_{スキルNO}_%SKILL_GENRE_ENG:ジャンル%_{スキルID}_INVOKE(発動者, 発動番号, 発動側, 発動勢力, 発動部隊, 対象勢力, 対象部隊)
+RETURN RESULT
+
+;---------------------------------
+;国家方針・研究スキル
+;---------------------------------
+@TECHNOLOGY_PERSONAL_SKILL_COMBAT_INVOKE(発動側, 発動勢力, 発動部隊, 対象勢力, 対象部隊)
+#DIM 発動者
+#DIM 発動番号
+#DIM ジャンル
+#DIM 発動側
+#DIM 発動勢力
+#DIM 発動部隊
+#DIM 対象勢力
+#DIM 対象部隊
+#DIM 都市
+
+SIF BATTLE_COMMANDER_NUM:発動側 == 0
+	RETURN 0
+
+SIF BATTLE_SKILL_SEALED:発動側:発動番号 || BATTLE_SUMMONED_CHARA:発動側:発動番号
+	RETURN 0
+
+発動者 = BATTLE_COMMANDER:(発動側):0
+発動番号 = 0
+;国人衆参戦
+SIF TECHNOLOGY_STATUS:(CFLAG:発動者:所属):TECHNOLOGY_BATTLE_SKILL >= 2
+	CALL SKILL_COMBAT_TRY_INVOKE(発動者, 発動番号, スキル_ジャンル_PERSONAL, 0, 40, 発動側, 発動勢力, 発動部隊, 対象勢力, 対象部隊)
+
+
+@TECHNOLOGY_TROOP_SKILL_COMBAT_INVOKE(発動側, 発動勢力, 発動部隊, 対象勢力, 対象部隊)
+#DIM 発動者
+#DIM 発動番号
+#DIM ジャンル
+#DIM 発動側
+#DIM 発動勢力
+#DIM 発動部隊
+#DIM 対象勢力
+#DIM 対象部隊
+#DIM 都市
+
+SIF BATTLE_COMMANDER_NUM:発動側 == 0
+	RETURN 0
+
+SIF BATTLE_SKILL_SEALED:発動側:発動番号 || BATTLE_SUMMONED_CHARA:発動側:発動番号
+	RETURN 0
+	
+発動者 = BATTLE_COMMANDER:(発動側):0
+発動番号 = 0
+;弾幕強化
+SIF TECHNOLOGY_STATUS:(CFLAG:発動者:所属):TECHNOLOGY_BATTLE_SKILL >= 3
+	CALL SKILL_COMBAT_TRY_INVOKE(発動者, 発動番号, スキル_ジャンル_TROOP, 0, 34, 発動側, 発動勢力, 発動部隊, 対象勢力, 対象部隊)
+SIF TECHNOLOGY_STATUS:(CFLAG:発動者:所属):TECHNOLOGY_BATTLE_SKILL >= 4
+	CALL SKILL_COMBAT_TRY_INVOKE(発動者, 発動番号, スキル_ジャンル_TROOP, 0, 35, 発動側, 発動勢力, 発動部隊, 対象勢力, 対象部隊)
+SIF TECHNOLOGY_STATUS:(CFLAG:発動者:所属):TECHNOLOGY_BATTLE_SKILL >= 5
+	CALL SKILL_COMBAT_TRY_INVOKE(発動者, 発動番号, スキル_ジャンル_TROOP, 0, 36, 発動側, 発動勢力, 発動部隊, 対象勢力, 対象部隊)
+SIF TECHNOLOGY_STATUS:(CFLAG:発動者:所属):TECHNOLOGY_BATTLE_SKILL >= 6
+	CALL SKILL_COMBAT_TRY_INVOKE(発動者, 発動番号, スキル_ジャンル_TROOP, 0, 37, 発動側, 発動勢力, 発動部隊, 対象勢力, 対象部隊)
+
+;---------------------------------
+;スキル発動時のデフォルト地の文
+;---------------------------------
+@SKILL_PRINT_INVOKE(発動者, ジャンル, スキルNO, スキルID)
+#DIM 発動者
+#DIM スキルNO
+#DIM スキルID
+#DIM ジャンル
+CALLFORM SKILL_{スキルNO}_%SKILL_GENRE_ENG:ジャンル%_{スキルID}_NAME
+PRINTFORML %ANAME(発動者)%のスキル「%RESULTS%」発動！
+
+;---------------------------------
+;暗殺の効果用
+;---------------------------------
+@COMBAT_ASSASINATE(対象側, 対象番号)
+#DIM 対象側
+#DIM 対象番号
+BATTLE_武闘:対象側:対象番号 = 0
+BATTLE_防衛:対象側:対象番号 = 0
+BATTLE_知略:対象側:対象番号 = 0
+BATTLE_政治:対象側:対象番号 = 0
+BATTLE_妖術:対象側:対象番号 = 0
+BATTLE_料理:対象側:対象番号 = 0
+BATTLE_歌唱:対象側:対象番号 = 0
+BATTLE_武闘パワー:対象側:対象番号 = 0
+BATTLE_防衛パワー:対象側:対象番号 = 0
+BATTLE_知略パワー:対象側:対象番号 = 0
+BATTLE_妖術パワー:対象側:対象番号 = 0
+BATTLE_歌唱パワー:対象側:対象番号 = 0
+BATTLE_料理パワー:対象側:対象番号 = 0
+BATTLE_SKILL_RATE:対象側:対象番号 = 0
+BATTLE_SKILL_SEALED:対象側:対象番号 = 1
+
+;---------------------------------
+;召喚系スキル
+;---------------------------------
+@BATTLE_SUMMON(発動側, 対象, 部隊フラグ)
+#DIM 発動側
+#DIM 対象
+#DIM 部隊フラグ
+
+FOR LOCAL:0, 0, VARSIZE("BATTLE_COMMANDER", 1)
+	SIF BATTLE_COMMANDER:発動側:LOCAL >= 0
+		CONTINUE
+	SIF 部隊フラグ == 0 && BATTLE_COMMANDER_NUM:発動側 >= MAX_CITY_COMMANDER
+		BREAK
+	BATTLE_COMMANDER:発動側:LOCAL = 対象
+	BATTLE_武闘:発動側:LOCAL = ABL:対象:武闘
+	BATTLE_防衛:発動側:LOCAL = ABL:対象:防衛
+	BATTLE_知略:発動側:LOCAL = ABL:対象:知略
+	BATTLE_政治:発動側:LOCAL = ABL:対象:政治
+	BATTLE_歌唱:発動側:LOCAL = ABL:対象:歌唱
+	BATTLE_料理:発動側:LOCAL = ABL:対象:料理
+	BATTLE_妖術:発動側:LOCAL = ABL:対象:妖術
+	BATTLE_武闘パワー:発動側:LOCAL = ABL_POWER(BATTLE_武闘:発動側:LOCAL, BATTLE_COMMANDER:発動側:LOCAL)
+	BATTLE_防衛パワー:発動側:LOCAL = ABL_POWER(BATTLE_防衛:発動側:LOCAL, BATTLE_COMMANDER:発動側:LOCAL)
+	BATTLE_知略パワー:発動側:LOCAL = ABL_POWER(BATTLE_知略:発動側:LOCAL, BATTLE_COMMANDER:発動側:LOCAL)
+	BATTLE_妖術パワー:発動側:LOCAL = ABL_POWER(BATTLE_妖術:発動側:LOCAL, BATTLE_COMMANDER:発動側:LOCAL)
+	BATTLE_歌唱パワー:発動側:LOCAL = ABL_POWER(BATTLE_歌唱:発動側:LOCAL, BATTLE_COMMANDER:発動側:LOCAL)
+	BATTLE_料理パワー:発動側:LOCAL = ABL_POWER(BATTLE_料理:発動側:LOCAL, BATTLE_COMMANDER:発動側:LOCAL)
+	BATTLE_妖術パワー:発動側:LOCAL = ABL_POWER(BATTLE_妖術:発動側:LOCAL, BATTLE_COMMANDER:発動側:LOCAL)
+	BATTLE_SKILL_RATE:発動側:LOCAL = 0
+	BATTLE_SUMMONED_CHARA:発動側:LOCAL = 1
+	BATTLE_COMMANDER_NUM:発動側 ++
+	RETURN 1
+NEXT
+RETURN 0
+
+;---------------------------------
+;モブ召喚系スキル
+;---------------------------------
+@BATTLE_ADD_MOB(発動側, 部隊フラグ, 名前, 武闘値, 防衛値, 知略値,  政治値, 妖術値, 料理値, 歌唱値)
+#DIM 発動側
+#DIM 部隊フラグ
+#DIM 対象
+#DIMS 名前
+#DIM 武闘値
+#DIM 防衛値
+#DIM 知略値
+#DIM 政治値
+#DIM 妖術値
+#DIM 料理値
+#DIM 歌唱値
+
+CALL ADD_VOID_CHARA()
+対象 = RESULT
+NAME:対象 = %名前%
+CALLNAME:対象 = %名前%
+TALENT:対象:戦闘モブ = 1
+ABL:対象:武闘 = 武闘値
+ABL:対象:防衛 = 防衛値
+ABL:対象:知略 = 知略値
+ABL:対象:政治 = 政治値
+ABL:対象:妖術 = 妖術値
+ABL:対象:料理 = 料理値
+ABL:対象:歌唱 = 歌唱値
+FOR LOCAL, 0, VARSIZE("BATTLE_COMMANDER", 1)
+	SIF BATTLE_COMMANDER:発動側:LOCAL >= 0
+		CONTINUE
+	SIF 部隊フラグ == 0 && BATTLE_COMMANDER_NUM:発動側 >= MAX_CITY_COMMANDER
+		BREAK
+	BATTLE_COMMANDER:発動側:LOCAL = 対象
+	BATTLE_武闘:発動側:LOCAL = ABL:対象:武闘
+	BATTLE_防衛:発動側:LOCAL = ABL:対象:防衛
+	BATTLE_知略:発動側:LOCAL = ABL:対象:知略
+	BATTLE_政治:発動側:LOCAL = ABL:対象:政治
+	BATTLE_歌唱:発動側:LOCAL = ABL:対象:歌唱
+	BATTLE_料理:発動側:LOCAL = ABL:対象:料理
+	BATTLE_妖術:発動側:LOCAL = ABL:対象:妖術
+	BATTLE_武闘パワー:発動側:LOCAL = ABL_POWER(BATTLE_武闘:発動側:LOCAL, BATTLE_COMMANDER:発動側:LOCAL)
+	BATTLE_防衛パワー:発動側:LOCAL = ABL_POWER(BATTLE_防衛:発動側:LOCAL, BATTLE_COMMANDER:発動側:LOCAL)
+	BATTLE_知略パワー:発動側:LOCAL = ABL_POWER(BATTLE_知略:発動側:LOCAL, BATTLE_COMMANDER:発動側:LOCAL)
+	BATTLE_妖術パワー:発動側:LOCAL = ABL_POWER(BATTLE_妖術:発動側:LOCAL, BATTLE_COMMANDER:発動側:LOCAL)
+	BATTLE_歌唱パワー:発動側:LOCAL = ABL_POWER(BATTLE_歌唱:発動側:LOCAL, BATTLE_COMMANDER:発動側:LOCAL)
+	BATTLE_料理パワー:発動側:LOCAL = ABL_POWER(BATTLE_料理:発動側:LOCAL, BATTLE_COMMANDER:発動側:LOCAL)
+	BATTLE_妖術パワー:発動側:LOCAL = ABL_POWER(BATTLE_妖術:発動側:LOCAL, BATTLE_COMMANDER:発動側:LOCAL)
+	BATTLE_SKILL_RATE:発動側:LOCAL = 0
+	BATTLE_SUMMONED_CHARA:発動側:LOCAL = 1
+	BATTLE_COMMANDER_NUM:発動側 ++
+	RETURN 対象
+NEXT
+RETURN -1
+
+
+;---------------------------------
+;スキル発動時のデフォルト地の文
+;---------------------------------
+@SKILL_INIT(対象)
+#DIM 対象
+#DIM ジャンル
+#DIM 対象NO
+#DIM スキルID
+
+
+FOR ジャンル, 0, SKILL_GENRE_NUM
+	FOR スキルID, 0, MAX_SKILL_SLOT
+		SKILL_NO_SLOT:対象:ジャンル:スキルID = -1
+		SKILL_ID_SLOT:対象:ジャンル:スキルID = -1
+	NEXT
+NEXT
+
+対象NO = NO:対象
+TRYCALLFORM SKILL_INIT_{対象NO}_GENERAL(対象)
+
+;ジャンルごとで習得させていく
+FOR ジャンル, 0, SKILL_GENRE_NUM
+	FOR スキルID, 0, MAX_SKILL_SLOT
+		;0番は汎用にするので、「あなた」には何も学ばせない
+		SIF 対象NO == 0
+			GOTO CANCEL
+		TRYCCALLFORM SKILL_{対象NO}_%SKILL_GENRE_ENG:ジャンル%_{スキルID}_EXIST
+			;初期状態で習得不可のスキルは弾く
+			TRYCCALLFORM SKILL_{対象NO}_%SKILL_GENRE_ENG:ジャンル%_{スキルID}_NO_LEARN_INIT
+				GOTO CANCEL
+			CATCH
+				CALL SKILL_LEARN(対象, ジャンル, 対象NO, スキルID)
+			ENDCATCH
+		CATCH
+			$CANCEL
+		ENDCATCH
+	NEXT
+NEXT
+
+;---------------------------------
+;スキルの説明
+;---------------------------------
+@SKILL_EXPLANATION(ジャンル, スキルNO, スキルID, スペース)
+#DIM ジャンル
+#DIM スキルNO
+#DIM スキルID
+#DIMS アクセサ
+#DIMS キャラ名
+#DIMS スキル名
+#DIMS レベル
+#DIMS 説明
+#DIMS 伝達不可
+#DIMS 発動率
+#DIM スペース
+;描画内容を用意
+アクセサ = SKILL_{スキルNO}_%SKILL_GENRE_ENG:ジャンル%_{スキルID}_
+CALLFORM %アクセサ%NAME
+スキル名 = %(STRLENS(RESULTS:0) > 20 ? TOHALF(RESULTS:0) # RESULTS:0)%
+IF スキルNO == 0
+	キャラ名 = 汎用
+ELSEIF スキルNO > 10000
+	キャラ名 = 特殊
+ELSE
+	キャラ名 = %SNAME(NO_TO_CHARA(スキルNO))%
+ENDIF
+CALLFORM %アクセサ%LEVEL
+レベル '= TOSTR(RESULT)
+
+CALLFORM %アクセサ%EXPLANATION
+説明 = %RESULTS%
+
+IF ジャンル == スキル_ジャンル_PASSIVE
+	発動率 '= "  --"
+ELSE
+	TRYCCALLFORM %アクセサ%RATE_VARABLE
+		発動率 '= "可変"
+	CATCH
+		CALLFORM %アクセサ%RATE
+		発動率 = %DECIMAL_STRING(RESULT, 1)%
+	ENDCATCH
+ENDIF
+
+TRYCCALLFORM %アクセサ%CANT_TELL
+	伝達不可 '= "伝達不可"
+CATCH
+	伝達不可 '= ""
+ENDCATCH
+
+PRINTFORML %スキル名, 35, LEFT%LV%レベル, 3, LEFT% 発動率%発動率, 6, LEFT%%SKILL_GENRE:ジャンル, 6, LEFT%%伝達不可, 10, LEFT%%キャラ名, MAX_CHARANAME_LENGTH/2, LEFT%
+PRINTFORML %TOSTR_SPACE(スペース)%%説明%
+
+
+;---------------------------------
+;空きスロットにスキルのセット
+;習得できれば1が戻る　空きがなければ0
+;---------------------------------
+@SKILL_LEARN_BY_NAME(対象, ジャンル, スキルNO, スキル名)
+#DIM 対象
+#DIM ジャンル
+#DIM スキルNO
+#DIMS スキル名
+#DIM スキルID
+#DIM 空きスロット
+
+;いっぱいならだめ
+空きスロット = GET_EMPTY_SKILL_SLOT(対象, ジャンル)
+SIF 空きスロット == -1
+	RETURN 0
+
+FOR スキルID, 0, MAX_SKILLS
+	TRYCCALLFORM SKILL_{スキルNO}_%SKILL_GENRE_ENG:ジャンル%_{スキルID}_NAME
+		IF RESULTS == スキル名
+			CALL SKILL_LEARN(対象, ジャンル, スキルNO, スキルID)
+			RETURN RESULT
+		ENDIF
+	CATCH
+	ENDCATCH
+NEXT
+
+RETURN 0
+
+
+;---------------------------------
+;空きスロットにスキルのセット
+;習得できれば1が戻る　空きがなければ0
+;---------------------------------
+@SKILL_LEARN(対象, ジャンル, スキルNO, スキルID)
+#DIM 対象
+#DIM ジャンル
+#DIM スキルNO
+#DIM スキルID
+#DIM 空きスロット
+
+;いっぱいならだめ
+空きスロット = GET_EMPTY_SKILL_SLOT(対象, ジャンル)
+SIF 空きスロット == -1
+	RETURN 0
+
+;重複してたらダメでしょ
+SIF CHECK_SKILL_DUPLICATE(対象, ジャンル, スキルNO, スキルID)
+	RETURN 0
+
+SKILL_NO_SLOT:対象:ジャンル:空きスロット = スキルNO
+SKILL_ID_SLOT:対象:ジャンル:空きスロット = スキルID
+
+RETURN 1
+
+;---------------------------------
+;指定スキルを忘れる
+;忘れたら1が戻る　そもそも空なら0
+;---------------------------------
+@SKILL_FORGET(対象, ジャンル, スロット)
+#DIM 対象
+#DIM ジャンル
+#DIM スロット
+
+SIF GROUPMATCH(-1, SKILL_NO_SLOT:対象:ジャンル:スロット, SKILL_ID_SLOT:対象:ジャンル:スロット)
+	RETURN 0
+
+SKILL_NO_SLOT:対象:ジャンル:スロット = -1
+SKILL_ID_SLOT:対象:ジャンル:スロット = -1
+
+RETURN 1
+
+;---------------------------------
+;指定した名前のスキルを忘れる
+;忘れたら1が戻る
+;---------------------------------
+@SKILL_FORGET_BY_NAME(対象, ジャンル, スキル名)
+#DIM 対象
+#DIM ジャンル
+#DIMS スキル名
+#DIM スロット
+
+FOR スロット, 0, MAX_SKILL_SLOT
+	SIF GROUPMATCH(-1, SKILL_NO_SLOT:対象:ジャンル:スロット, SKILL_ID_SLOT:対象:ジャンル:スロット)
+		CONTINUE
+	TRYCCALLFORM SKILL_{SKILL_NO_SLOT:対象:ジャンル:スロット}_%SKILL_GENRE_ENG:ジャンル%_{SKILL_ID_SLOT:対象:ジャンル:スロット}_NAME
+		IF RESULTS == スキル名
+			CALL SKILL_FORGET(対象, ジャンル, スロット)
+			RETURN RESULT
+		ENDIF
+	CATCH
+	ENDCATCH
+NEXT
+
+RETURN 0
+
+
+;---------------------------------
+;空きスロットの取得　空きがなければ-1
+;---------------------------------
+@GET_EMPTY_SKILL_SLOT(対象, ジャンル)
+#FUNCTION
+#DIM 対象
+#DIM ジャンル
+#DIM 空きスロット
+;空きスロットを探す
+FOR 空きスロット, 0, MAX_SKILL_SLOT
+	IF SKILL_NO_SLOT:対象:ジャンル:空きスロット < 0 && SKILL_ID_SLOT:対象:ジャンル:空きスロット < 0
+		空きスロット --
+		BREAK
+	ENDIF
+NEXT
+
+;いっぱいならだめ
+SIF 空きスロット == MAX_SKILL_SLOT
+	RETURNF -1
+
+RETURNF 空きスロット
+
+;---------------------------------------
+;汎用スキル初期化処理用、名前からスキル拾ってきて覚えさせるやつ
+;普通にやるぶんにはSKILL_LEARN_BY_NAMEつかえ
+;---------------------------------------
+@LEARN_SKILL_GENERAL_BY_NAME(対象, 汎用スキル名)
+#DIM 対象
+#DIMS 汎用スキル名
+#DIM ジャンル
+#DIM スキルID
+#DIM 空きスロット
+FOR ジャンル, 0, SKILL_GENRE_NUM
+	FOR スキルID, 0, MAX_SKILLS
+		TRYCCALLFORM SKILL_0_%SKILL_GENRE_ENG:ジャンル%_{スキルID}_NAME
+			SIF RESULTS == 汎用スキル名
+				GOTO FOUND
+		CATCH
+		ENDCATCH
+	NEXT
+NEXT
+
+SIF ジャンル == SKILL_GENRE_NUM
+	THROW %ANAME(対象)%に指定された%汎用スキル名%は存在しない
+
+$FOUND
+
+SIF CHECK_SKILL_DUPLICATE(対象, ジャンル, 0, スキルID)
+	RETURN 0
+
+空きスロット = GET_EMPTY_SKILL_SLOT(対象, ジャンル)
+
+SIF 空きスロット == -1
+	RETURN 0
+
+CALL SKILL_LEARN(対象, ジャンル, 0, スキルID)
+
+RETURN 1
+
+
+;---------------------------------------
+;指定したスキルをもう覚えているかを調べる
+;---------------------------------------
+@CHECK_SKILL_DUPLICATE(対象, ジャンル, スキルNO, スキルID)
+#FUNCTION
+#DIM 対象
+#DIM ジャンル
+#DIM スキルID
+#DIM スキルNO
+#DIM スキル
+
+FOR スキル, 0, MAX_SKILL_SLOT
+	SIF SKILL_NO_SLOT:対象:ジャンル:スキル == スキルNO && SKILL_ID_SLOT:対象:ジャンル:スキル == スキルID
+		RETURNF 1
+NEXT
+
+RETURNF 0

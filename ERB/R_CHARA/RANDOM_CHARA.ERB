@@ -1,0 +1,1708 @@
+﻿;ランダムキャラの処理
+
+;-------------------------
+;汎用武将の作成
+;ARG:0=ケモ率、ARG:1=能力傾向、ARG:2=性別
+;生成したキャラの番号を返すが、人数の限界により生成に失敗した場合-1を返す
+;-------------------------
+@CREATE_RANDOM_CHARA(ARG:0 = 1, ARG:1 = -1, ARG:2 = -1, ARG:3 = 0)
+IF !CAN_ADD_RANDOM_CHARA()
+	RETURN -1
+ENDIF
+
+;ターゲットを退避
+LOCAL:0 = TARGET
+
+;キャラを追加
+ADDVOIDCHARA
+
+;作成したキャラをターゲットにする
+TARGET = CHARANUM - 1
+
+;NOの設定
+NO = FLAG:汎用武将カウント + MIN_NO_RANDOM_CHARA
+FLAG:汎用武将カウント ++
+
+;素質と能力の決定
+CALL RANDOM_CHARA_SETTING(ARG:0, ARG:1, ARG:2)
+
+;名前の決定(※素質決定後に行う)
+CALL RANDOM_CHARA_NAMING(ARG:3)
+
+;初期設定(※素質決定後に行う)
+CALL INIT_NEWCHARA(TARGET)
+
+;スキルの習得
+CALL RANDOM_CHARA_SKILL_SETTING()
+
+;衣装の設定
+CALL RANDOM_CHARA_CLOTH_SETTING()
+
+;タグの設定
+CALL RANDOM_CHARA_TAG_SETTING()
+
+;ターゲットの再設定
+TARGET = LOCAL:0
+
+RETURN CHARANUM - 1
+
+;-------------------------
+;汎用武将の素質と能力を決定する
+;ARG:0=ケモ率、ARG:1=能力傾向、ARG:2=性別
+;-------------------------
+@RANDOM_CHARA_SETTING(ARG:0, ARG:1, ARG:2)
+IF ARG:2 > 5
+	THROW @"RANDOM_CHARA_SETTING 関数に設定された性別が不正です(ARG:2 = {ARG:2})"
+ENDIF
+
+;性別を指定の通りに設定、指定がない場合は設定された男性率に応じて性別をランダムに決定
+LOCAL:0 = ARG:2
+IF LOCAL:0 <= -1
+	IF RAND:100 < CONFIG:3
+		IF RAND:30 == 0
+			LOCAL:0 = 4
+		ELSEIF RAND:30 == 0
+			LOCAL:0 = 3
+		ELSE
+			LOCAL:0 = 0
+		ENDIF
+	ELSE
+		IF RAND:20 == 0
+			LOCAL:0 = 2
+		ELSE
+			LOCAL:0 = 1
+		ENDIF
+	ENDIF
+ENDIF
+
+SELECTCASE LOCAL:0
+	CASE 0
+		;男性
+		TALENT:性別 = 0
+		;童貞かどうかをランダムに設定
+		TALENT:童貞 = (RAND:5 <= 2)
+		TALENT:処女 = 1
+		TALENT:アナル処女 = 1
+		;キス経験をランダムに設定
+		IF TALENT:童貞
+			TALENT:キス未経験 = (RAND:4 != 0)
+		ELSE
+			TALENT:キス未経験 = (RAND:3 == 0)
+		ENDIF
+	CASE 1
+		;女性
+		TALENT:性別 = 1
+		;処女・キス経験をランダムに設定
+		TALENT:童貞 = 1
+		TALENT:処女 = (RAND:4 != 0)
+		TALENT:アナル処女 = (RAND:10 != 0)
+		IF TALENT:処女
+			TALENT:キス未経験 = (RAND:4 != 0)
+		ELSE
+			TALENT:キス未経験 = (RAND:3 == 0)
+		ENDIF
+	CASE 2
+		;女ふた
+		TALENT:性別 = 2
+		;童貞・処女かどうかをランダムに設定
+		TALENT:童貞 = (RAND:5 <= 2)
+		TALENT:処女 = (RAND:4 != 0)
+		TALENT:アナル処女 = (RAND:10 != 0)
+		IF TALENT:処女
+			TALENT:キス未経験 = (RAND:4 != 0)
+		ELSE
+			TALENT:キス未経験 = (RAND:3 == 0)
+		ENDIF
+	CASE 3
+		;男ふた
+		TALENT:性別 = 3
+		;童貞・処女かどうかをランダムに設定
+		TALENT:童貞 = (RAND:5 <= 2)
+		TALENT:処女 = (RAND:4 != 0)
+		TALENT:アナル処女 = (RAND:10 != 0)
+		IF TALENT:処女
+			TALENT:キス未経験 = (RAND:4 != 0)
+		ELSE
+			TALENT:キス未経験 = (RAND:3 == 0)
+		ENDIF
+	CASE 4
+		;男の娘
+		TALENT:性別 = 4
+		;童貞かどうかをランダムに設定(男性より童貞率高め)
+		TALENT:童貞 = (RAND:8 <= 6)
+		TALENT:処女 = 1
+		TALENT:アナル処女 = (RAND:10 != 0)
+		;キス経験をランダムに設定
+		IF TALENT:童貞
+			TALENT:キス未経験 = (RAND:4 != 0)
+		ELSE
+			TALENT:キス未経験 = (RAND:3 == 0)
+		ENDIF
+	CASE 5
+		;男の娘ふた
+		TALENT:性別 = 5
+		;童貞・処女かどうかをランダムに設定
+		TALENT:童貞 = (RAND:8 <= 6)
+		TALENT:処女 = (RAND:4 != 0)
+		TALENT:アナル処女 = (RAND:10 != 0)
+		IF TALENT:処女
+			TALENT:キス未経験 = (RAND:4 != 0)
+		ELSE
+			TALENT:キス未経験 = (RAND:3 == 0)
+		ENDIF
+ENDSELECT
+
+;■BASE値の決定
+LOCAL:2 = RAND:6 + RAND:5 - 4
+MAXBASE:体力 = 1600 + LOCAL:2 * 100
+
+LOCAL:2 = RAND:8 + RAND:7 - 6
+IF LOCAL:2 < 0
+	MAXBASE:気力 = 1300 - ABS(LOCAL:2) / 2 * 100
+ELSE
+	MAXBASE:気力 = 1300 + LOCAL:2 * 100
+ENDIF
+
+BASE:体力 = MAXBASE:体力
+BASE:気力 = MAXBASE:気力
+
+;■戦闘系能力と成長型の設定
+;多能
+IF ARG:1 == 0
+	TALENT:成長型 = RANDOM_ARRAY(1, 2, 3, 4) - 1
+;武官
+ELSEIF ARG:1 == 1
+	TALENT:成長型 = RANDOM_ARRAY(1, 3, 4)
+;軍師
+ELSEIF ARG:1 == 2
+	TALENT:成長型 = RANDOM_ARRAY(1, 2, 5)
+;政務官
+ELSEIF ARG:1 == 3
+	TALENT:成長型 = RANDOM_ARRAY(2, 3, 6)
+;アイドル
+ELSEIF ARG:1 == 4
+	TALENT:成長型 = RANDOM_ARRAY(1, 8) - 1
+;料理人
+ELSEIF ARG:1 == 5
+	TALENT:成長型 = RANDOM_ARRAY(1, 9) - 1
+;指定なし
+ELSE
+	IF RAND:100 == 0
+		TALENT:成長型 = 9
+	ELSE
+		TALENT:成長型 = RANDOM_ARRAY(1, 2, 3, 4, 5, 6, 7, 9) - 1
+	ENDIF
+ENDIF
+
+SELECTCASE TALENT:成長型
+	CASE 0
+		ABL:武闘 = RAND:46 + 25
+		ABL:防衛 = RAND:46 + 25
+		ABL:知略 = RAND:46 + 25
+		ABL:政治 = RAND:46 + 25
+	CASE 1
+		ABL:武闘 = RAND:21 + RAND:10 + 35
+		ABL:防衛 = RAND:21 + RAND:10 + 35
+		ABL:知略 = RAND:21 + RAND:10 + 35
+		ABL:政治 = RAND:61 + 5
+	CASE 2
+		ABL:武闘 = RAND:51 + 15
+		ABL:防衛 = RAND:51 + 15
+		ABL:知略 = RAND:21 + RAND:11 + 40
+		ABL:政治 = RAND:21 + RAND:11 + 40
+	CASE 3
+		ABL:武闘 = RAND:21 + RAND:11 + 40
+		ABL:防衛 = RAND:21 + RAND:11 + 40
+		ABL:知略 = RAND:51 + 15
+		ABL:政治 = RAND:21 + RAND:11 + 40
+	CASE 4
+		ABL:武闘 = RAND:16 + RAND:6 + 55
+		ABL:防衛 = RAND:16 + RAND:6 + 55
+		ABL:知略 = RAND:51 + 15
+		ABL:政治 = RAND:51 + 15
+	CASE 5
+		ABL:武闘 = RAND:51 + 15
+		ABL:防衛 = RAND:51 + 15
+		ABL:知略 = RAND:16 + RAND:6 + 55
+		ABL:政治 = RAND:51 + 15
+	CASE 6
+		ABL:武闘 = RAND:51 + 15
+		ABL:防衛 = RAND:51 + 15
+		ABL:知略 = RAND:51 + 15
+		ABL:政治 = RAND:16 + RAND:6 + 55
+	CASE 7
+		ABL:武闘 = RAND:41 + 20
+		ABL:防衛 = RAND:41 + 20
+		ABL:知略 = RAND:41 + 20
+		ABL:政治 = RAND:41 + 20
+	CASE 8
+		ABL:武闘 = RAND:41 + 20
+		ABL:防衛 = RAND:41 + 20
+		ABL:知略 = RAND:41 + 20
+		ABL:政治 = RAND:41 + 20
+ENDSELECT
+
+IF TALENT:成長型 == 7 || ARG:1 == 4
+	ABL:歌唱 = RAND:41 + 25
+	IF RAND:4 == 0
+		ABL:歌唱 += RAND:11
+	ENDIF
+	IF RAND:8 == 0
+		ABL:歌唱 -= RAND:11
+	ENDIF
+ELSE
+	ABL:歌唱 = RAND:21
+	IF RAND:4 == 0
+		ABL:歌唱 += RAND:26
+		IF RAND:4 == 0
+			ABL:歌唱 += RAND:31
+		ENDIF
+	ENDIF
+ENDIF
+IF TALENT:成長型 == 8 || ARG:1 == 5
+	ABL:料理 = RAND:41 + 25
+	IF RAND:4 == 0
+		ABL:料理 += RAND:11
+	ENDIF
+	IF RAND:8 == 0
+		ABL:料理 -= RAND:11
+	ENDIF
+ELSE
+	ABL:料理 = RAND:21
+	IF RAND:4 == 0
+		ABL:料理 += RAND:26
+		IF RAND:4 == 0
+			ABL:料理 += RAND:31
+		ENDIF
+	ENDIF
+ENDIF
+
+;指定多能(全てにボーナス)
+IF ARG:1 == 0
+	ABL:武闘 += RAND:4
+	ABL:防衛 += RAND:4
+	ABL:知略 += RAND:4
+	ABL:政治 += RAND:4
+	ABL:歌唱 += RAND:4
+	ABL:料理 += RAND:4
+;指定武官(武闘を最大に＆ボーナス)
+ELSEIF ARG:1 == 1
+	SIF ABL:武闘 < ABL:政治
+		SWAP ABL:武闘, ABL:政治
+	SIF ABL:武闘 < ABL:知略
+		SWAP ABL:武闘, ABL:知略
+	ABL:武闘 += RAND:6
+;指定軍師(知略を最大に＆ボーナス)
+ELSEIF ARG:1 == 2
+	SIF ABL:知略 < ABL:武闘
+		SWAP ABL:知略, ABL:武闘
+	SIF ABL:知略 < ABL:政治
+		SWAP ABL:知略, ABL:政治
+	ABL:知略 += RAND:6
+;指定政務官(政治を最大に＆ボーナス)
+ELSEIF ARG:1 == 3
+	SIF ABL:政治 < ABL:武闘
+		SWAP ABL:政治, ABL:武闘
+	SIF ABL:政治 < ABL:知略
+		SWAP ABL:政治, ABL:知略
+	ABL:政治 += RAND:6
+;指定アイドル(歌唱にボーナス)
+ELSEIF ARG:1 == 4
+	ABL:歌唱 += RAND:6
+;指定料理人
+ELSEIF ARG:1 == 5
+	ABL:料理 += RAND:6
+ENDIF
+
+;能力値に応じて精神力を設定
+CALL SET_MIND_POWER(TARGET)
+
+;■素質の決定
+;臆病、気丈
+CALL RCHARA_TALENT_OPPOSE, 10, 12, 12, 12
+;反抗的、素直
+CALL RCHARA_TALENT_OPPOSE, 11, 13, 20, 20
+;大人しい
+CALL RCHARA_TALENT_SINGLE, 14, 7
+;プライド高い、プライド低い
+CALL RCHARA_TALENT_OPPOSE, 15, 17, 12, 3
+;生意気(素直を持つなら確率低下)
+IF TALENT:素直
+	CALL RCHARA_TALENT_SINGLE, 16, 3
+ELSE
+	CALL RCHARA_TALENT_SINGLE, 16, 12
+ENDIF
+;ツンデレ(反抗的を持つキャラは高確率・素直と同居しない)
+IF TALENT:反抗的
+	CALL RCHARA_TALENT_SINGLE, 18, 23
+ELSEIF !TALENT:素直
+	CALL RCHARA_TALENT_SINGLE, 18, 5
+ENDIF
+;快感に素直、快感の否定
+CALL RCHARA_TALENT_OPPOSE, 70, 71, 9, 5
+;自制心(快感に素直と同居しない)
+IF !TALENT:快感に素直
+	CALL RCHARA_TALENT_SINGLE, 20, 7
+ENDIF
+;好奇心、保守的
+CALL RCHARA_TALENT_OPPOSE, 23, 24, 13, 6
+;楽観的、悲観的
+CALL RCHARA_TALENT_OPPOSE, 25, 26, 11, 7
+;一線越えない
+CALL RCHARA_TALENT_SINGLE, 27, 6
+;目立ちたがり
+CALL RCHARA_TALENT_SINGLE, 28, 9
+;貞操観念、貞操無頓着
+CALL RCHARA_TALENT_OPPOSE, 30, 31, 10, 6
+;抑圧(一部素質と同居しない)
+IF !TALENT:生意気 && !TALENT:好奇心 && !TALENT:楽観的 && !TALENT:目立ちたがり && !TALENT:快感に素直
+	CALL RCHARA_TALENT_SINGLE, 32, 6
+ENDIF
+;孤高(素直を持たないキャラ限定)
+IF !TALENT:素直
+	CALL RCHARA_TALENT_SINGLE, 34, 6
+ENDIF
+;恥じらい、恥薄い(目立ちたがりを持つなら確率変動)
+IF TALENT:目立ちたがり
+	CALL RCHARA_TALENT_OPPOSE, 35, 36, 3, 13
+ELSE
+	CALL RCHARA_TALENT_OPPOSE, 35, 36, 13, 7
+ENDIF
+;無関心(一部素質と同居しない)
+IF !TALENT:好奇心 && !TALENT:目立ちたがり
+	CALL RCHARA_TALENT_SINGLE, 21, 7
+ENDIF
+;感情乏しい(一部素質と同居しない)
+IF !TALENT:臆病 && !TALENT:生意気 && !TALENT:好奇心 && !TALENT:目立ちたがり && !TALENT:恥じらい
+	CALL RCHARA_TALENT_SINGLE, 22, 8
+ENDIF
+;解放(同居しない素質多数)
+IF !TALENT:臆病 && !TALENT:ツンデレ && !TALENT:自制心 && !TALENT:感情乏しい && !TALENT:保守的 && !TALENT:悲観的
+	IF !TALENT:一線越えない && !TALENT:貞操観念 && !TALENT:抑圧 && !TALENT:孤高 && !TALENT:恥じらい && !TALENT:快感の否定
+		CALL RCHARA_TALENT_SINGLE, 33, 12
+	ENDIF
+ENDIF
+;痛みに強い、痛みに弱い(武闘の初期値に応じて確率変動)
+CALL RCHARA_TALENT_OPPOSE, 41, 40, ABL:武闘 / 4 - 5, 13 - ABL:武闘 / 4
+;濡れやすい、濡れにくい
+CALL RCHARA_TALENT_OPPOSE, 42, 43, 8, 5
+;習得早い、習得遅い(知略の初期値に応じて確率変動)
+CALL RCHARA_TALENT_OPPOSE, 50, 51, ABL:知略 / 4 - 5, 13 - ABL:知略 / 4
+;舌使い
+CALL RCHARA_TALENT_SINGLE, 52, 5
+;自慰しやすい
+CALL RCHARA_TALENT_SINGLE, 60, 7
+;汚臭鈍感、汚臭敏感
+CALL RCHARA_TALENT_OPPOSE, 61, 62, 8, 8
+;献身的
+CALL RCHARA_TALENT_SINGLE, 63, 9
+;中毒しやすい
+CALL RCHARA_TALENT_SINGLE, 72, 8
+;倒錯的
+CALL RCHARA_TALENT_SINGLE, 80, 8
+;両刀(女性は少し確率高め、男の娘は極端に確率が高い)
+IF TALENT:性別 == 0
+	CALL RCHARA_TALENT_SINGLE, 81, 8
+ELSEIF TALENT:性別 == 4
+	CALL RCHARA_TALENT_SINGLE, 81, 30
+ELSE
+	CALL RCHARA_TALENT_SINGLE, 81, 14
+ENDIF
+;男嫌い、女嫌い(異性限定)
+IF IS_MALE(TARGET)
+	CALL RCHARA_TALENT_SINGLE, 83, 9
+ELSE
+	CALL RCHARA_TALENT_SINGLE, 82, 9
+ENDIF
+;Ｓ気質、Ｍ気質
+CALL RCHARA_TALENT_OPPOSE, 84, 85, 8, 8
+;小悪魔(女性・男の娘は確率高め)
+IF TALENT:性別 == 0
+	CALL RCHARA_TALENT_SINGLE, 86, 3
+ELSE
+	CALL RCHARA_TALENT_SINGLE, 86, 10
+ENDIF
+;魅惑
+CALL RCHARA_TALENT_SINGLE, 87, 8
+;謎の魅力
+CALL RCHARA_TALENT_SINGLE, 88, 2
+;回復早い、回復遅い(武闘の初期値に応じて確率変動)
+CALL RCHARA_TALENT_OPPOSE, 111, 112, ABL:武闘 / 7 + 3, 12 - ABL:武闘 / 7
+;幼稚
+CALL RCHARA_TALENT_SINGLE, 132, 6
+
+;酒豪(武闘派の方が確率高め)
+CALL RCHARA_TALENT_SINGLE, 134, ABL:武闘 / 7 + 3
+
+;下戸(知略派の方が確率高め)
+IF !TALENT:酒豪
+	CALL RCHARA_TALENT_SINGLE, 136, ABL:知略 / 7 + 3
+ENDIF
+
+;指定の確率に応じて動物耳、尻尾
+IF RAND:100 < ARG:0
+	TALENT:動物耳 = 1
+	TALENT:しっぽ = RAND:8 != 0
+ENDIF
+
+;美脚
+SIF !TALENT:性別 == 0
+	CALL RCHARA_TALENT_SINGLE, 113, 12
+;美尻
+SIF !TALENT:性別 == 0
+	CALL RCHARA_TALENT_SINGLE, 114, 12
+
+;母乳体質
+SIF IS_FEMALE(TARGET)
+	CALL RCHARA_TALENT_SINGLE, GETNUM(TALENT, "母乳体質"), 5
+
+;■敏鈍感素質の決定
+CALL RANDOM_CHARA_SENSE
+
+;■性的能力の決定
+;処女・童貞の場合
+IF TALENT:処女 && TALENT:童貞
+	;1/7の確率で完全無垢に(全ての性経験・性知識が0)
+	IF RAND:7 != 0
+		LOCAL:0 = RAND:10
+		IF LOCAL:0 < 6
+			LOCAL:0 = -2
+			EXP:絶頂経験 = 0
+		ELSEIF LOCAL:0 < 9
+			LOCAL:0 = -1
+			EXP:絶頂経験 = (RAND:10 - 7) * 5
+		ELSE
+			LOCAL:0 = 0
+			EXP:絶頂経験 = (RAND:6 + 1) * 5
+		ENDIF
+
+		ABL:欲望 = MAX(LOCAL:0 + RAND:2 + RAND:2, 0)
+		ABL:性技 = MAX(LOCAL:0 + RAND:2 + RAND:2, 0)
+		ABL:奉仕 = MAX(LOCAL:0 + RAND:4 - 1, 0)
+		ABL:露出 = MAX(LOCAL:0 + RAND:20 - 17, 0)
+		ABL:自慰 = MAX(LOCAL:0 + RAND:7 - 4, 0)
+
+		IF HAS_PENIS(TARGET)
+			ABL:射精 = MAX(LOCAL:0 + RAND:4 - 1, 0)
+		ENDIF
+
+		IF TALENT:両刀
+			IF RAND:2
+				IF IS_MALE(TARGET)
+					ABL:ＢＬ = MAX(RAND:3 + 1)
+					ABL:性交 = MAX(ABL:ＢＬ + RAND:6 - 5, 0)
+					ABL:精愛 = MAX(ABL:ＢＬ + RAND:6 - 5, 0)
+					ABL:Ａ感 = MAX(ABL:ＢＬ + RAND:6 - 5, 0)
+				ELSE
+					ABL:レズ = MAX(RAND:3 + 1)
+				ENDIF
+			ENDIF
+		ELSE
+			IF RAND:15 == 0
+				IF IS_MALE(TARGET)
+					ABL:ＢＬ = MAX(RAND:2 + 1)
+					ABL:性交 = MAX(ABL:ＢＬ + RAND:6 - 5, 0)
+					ABL:精愛 = MAX(ABL:ＢＬ + RAND:6 - 5, 0)
+					ABL:Ａ感 = MAX(ABL:ＢＬ + RAND:6 - 5, 0)
+				ELSE
+					ABL:レズ = MAX(RAND:2 + 1)
+				ENDIF
+			ENDIF
+		ENDIF
+
+		LOCAL:1 = 30 - ABL:自慰 * 10
+		ABL:Ｃ感 = MAX(TALENT:Ｃ敏感 - TALENT:Ｃ鈍感 + RAND:(LOCAL:1 + 2) - LOCAL:1, 0)
+		ABL:Ｂ感 = MAX(TALENT:Ｂ敏感 - TALENT:Ｂ鈍感 + RAND:(LOCAL:1 + 2) - LOCAL:1, 0)
+
+		IF ABL:Ａ感 == 0
+			LOCAL:2 = 60 - ABL:自慰 * 15
+			ABL:Ａ感 = MAX(TALENT:Ａ敏感 - TALENT:Ａ鈍感 + RAND:(LOCAL:2 + 2) - LOCAL:2, 0)
+		ENDIF
+
+		IF !TALENT:キス未経験
+			ABL:Ｍ感 = MAX(TALENT:Ｍ敏感 - TALENT:Ｍ鈍感 + RAND:30 - 28, 0)
+		ENDIF
+
+		ABL:Ｕ感 = MAX(TALENT:Ｕ敏感 - TALENT:Ｕ鈍感 + RAND:8 - 6, 0)
+
+		LOCAL:0 = RAND:100
+		IF LOCAL:0 < 50
+			ABL:性知識 = 1
+		ELSEIF LOCAL:0 < 85
+			ABL:性知識 = 2
+		ELSEIF LOCAL:0 < 97
+			ABL:性知識 = 3
+		ELSE
+			ABL:性知識 = 4
+		ENDIF
+
+		SELECTCASE RAND:100
+			CASE IS < 60
+				ABL:サド = 0
+			CASE IS < 85
+				ABL:サド = 1
+			CASE IS < 90
+				ABL:サド = 2
+			CASEELSE
+				ABL:サド = 3
+		ENDSELECT
+		ABL:サド += TALENT:Ｓ気質
+
+		SELECTCASE RAND:100
+			CASE IS < 60
+				ABL:マゾ = 0
+			CASE IS < 85
+				ABL:マゾ = 1
+			CASE IS < 90
+				ABL:マゾ = 2
+			CASEELSE
+				ABL:マゾ = 3
+		ENDSELECT
+		ABL:サド += TALENT:Ｍ気質
+
+	ENDIF
+
+;経験ありの場合
+ELSE
+	LOCAL:0 = RAND:10
+	IF LOCAL:0 < 5
+		LOCAL:0 = -1
+		EXP:絶頂経験 = (RAND:10 - 7) * 5
+	ELSEIF LOCAL:0 < 9
+		LOCAL:0 = 0
+		EXP:絶頂経験 = (RAND:6 + 1) * 5
+	ELSE
+		LOCAL:0 = 1
+		EXP:絶頂経験 = (RAND:9 + 2) * 5
+	ENDIF
+
+	ABL:欲望 = MAX(LOCAL:0 + RAND:2 + RAND:2, 0)
+	ABL:性技 = MAX(LOCAL:0 + RAND:2 + RAND:2, 0)
+	ABL:奉仕 = MAX(LOCAL:0 + RAND:4 - 1, 0)
+	ABL:性交 = MAX(LOCAL:0 + RAND:4 - 1, 0)
+	ABL:露出 = MAX(LOCAL:0 + RAND:7 - 4, 0)
+	ABL:自慰 = MAX(LOCAL:0 + RAND:5 - 2, 0)
+
+	IF IS_FEMALE(TARGET)
+		ABL:精愛 = MAX(LOCAL:0 + RAND:5 - 2, 0)
+	ENDIF
+
+	IF HAS_PENIS(TARGET)
+		ABL:射精 = MAX(LOCAL:0 + RAND:4 - 1, 0)
+	ENDIF
+
+	IF TALENT:両刀
+		IF RAND:3 != 0
+			IF IS_MALE(TARGET)
+				ABL:ＢＬ = MAX(RAND:3 + 1)
+				ABL:精愛 = MAX(ABL:ＢＬ + RAND:4 - 3, 0)
+				ABL:Ａ感 = MAX(ABL:ＢＬ + RAND:4 - 3, 0)
+			ELSE
+				ABL:レズ = MAX(RAND:3 + 1)
+			ENDIF
+		ENDIF
+	ELSE
+		IF RAND:8 == 0
+			IF IS_MALE(TARGET)
+				ABL:ＢＬ = MAX(RAND:2 + 1)
+				ABL:精愛 = MAX(ABL:ＢＬ + RAND:4 - 3, 0)
+				ABL:Ａ感 = MAX(ABL:ＢＬ + RAND:4 - 3, 0)
+			ELSE
+				ABL:レズ = MAX(RAND:2 + 1)
+			ENDIF
+		ENDIF
+	ENDIF
+
+	ABL:Ｃ感 = MAX(TALENT:Ｃ敏感 - TALENT:Ｃ鈍感 + RAND:5 - 3, 0)
+	ABL:Ｂ感 = MAX(TALENT:Ｂ敏感 - TALENT:Ｂ鈍感 + RAND:5 - 3, 0)
+	ABL:Ｖ感 = MAX(TALENT:Ｖ敏感 - TALENT:Ｖ鈍感 + RAND:5 - 3, 0)
+
+	IF ABL:Ａ感 == 0
+		ABL:Ａ感 = MAX(TALENT:Ａ敏感 - TALENT:Ａ鈍感 + RAND:20 - 18, 0)
+	ENDIF
+
+	ABL:Ｍ感 = MAX(TALENT:Ｍ敏感 - TALENT:Ｍ鈍感 + RAND:8 - 6, 0)
+	ABL:Ｕ感 = MAX(TALENT:Ｕ敏感 - TALENT:Ｕ鈍感 + RAND:8 - 6, 0)
+
+	LOCAL:0 = RAND:100
+	IF LOCAL:0 < 35
+		ABL:性知識 = 1
+	ELSEIF LOCAL:0 < 75
+		ABL:性知識 = 2
+	ELSEIF LOCAL:0 < 94
+		ABL:性知識 = 3
+	ELSEIF LOCAL:0 < 98
+		ABL:性知識 = 4
+	ELSE
+		ABL:性知識 = 5
+	ENDIF
+
+	SELECTCASE RAND:100
+		CASE IS < 60
+			ABL:マゾ = 0
+		CASE IS < 85
+			ABL:マゾ = 1
+		CASE IS < 90
+			ABL:マゾ = 2
+		CASEELSE
+			ABL:マゾ = 3
+	ENDSELECT
+	ABL:サド += TALENT:Ｍ気質
+
+ENDIF
+
+IF TALENT:下戸
+	ABL:肝臓 = RAND(0, 3)
+ELSEIF TALENT:酒豪
+	ABL:肝臓 = RAND(4, 6)
+ELSE
+	ABL:肝臓 = RAND(2, 4)
+ENDIF
+
+;■バストサイズの決定
+CALL RANDOM_CHARA_BUSTSIZE
+CALL RANDOM_CHARA_PENISSIZE
+CALL RANDOM_CHARA_HIPSIZE
+
+SELECTCASE RAND:100
+	CASE 0 TO 60
+		TALENT:体格 = 体格_普通
+	CASE 61 TO 70
+		TALENT:体格 = 体格_小柄
+	CASE 71 TO 80
+		TALENT:体格 = 体格_長身
+	CASE 81 TO 87
+		TALENT:体格 = 体格_子供
+	CASE 88 TO 94
+		TALENT:体格 = 体格_大柄
+	CASEELSE
+		TALENT:体格 = 体格_巨大
+ENDSELECT
+
+SELECTCASE RAND:100
+	CASE 0 TO 60
+		TALENT:体型 = 体型_普通
+	CASE 61 TO 70
+		TALENT:体型 = 体型_スレンダー
+	CASE 71 TO 80
+		TALENT:体型 = 体型_グラマー
+	CASE 81 TO 86
+		TALENT:体型 = 体型_豊満
+	CASE 87 TO 93
+		TALENT:体型 = 体型_細身
+	CASE 94 TO 97
+		TALENT:体型 = 体型_肥満
+	CASEELSE
+		TALENT:体型 = 体型_痩せすぎ
+ENDSELECT
+
+;■性格の決定
+CALL SET_CHARACTER(TARGET)
+
+;■髪色・髪の長さの決定
+CALL SET_HAIR(TARGET)
+
+;■陰毛の長さの決定
+CALL SET_INMOU_RANDOM(TARGET)
+CALL SET_ARMPIT_RANDOM(TARGET)
+
+TALENT:TARGET:Ｖ締まり = GET_RANDOM_TIGHTNESS()
+TALENT:TARGET:Ａ締まり = GET_RANDOM_TIGHTNESS()
+
+ABL:野心 = RAND(30, 71)
+
+SIF TALENT:反抗的
+	ABL:野心 += 5
+SIF TALENT:気丈
+	ABL:野心 += 5
+SIF TALENT:プライド高い
+	ABL:野心 += 7
+SIF TALENT:生意気
+	ABL:野心 += 3
+SIF TALENT:好奇心
+	ABL:野心 += 3
+SIF TALENT:孤高
+	ABL:野心 += 15
+SIF TALENT:臆病
+	ABL:野心 -= 5
+SIF TALENT:素直
+	ABL:野心 -= 5
+SIF TALENT:大人しい
+	ABL:野心 -= 5
+SIF TALENT:自制心
+	ABL:野心 -= 5
+SIF TALENT:無関心
+	ABL:野心 -= 5
+SIF TALENT:プライド低い
+	ABL:野心 -= 10
+SIF TALENT:抑圧
+	ABL:野心 -= 10
+ABL:野心 = MAX(ABL:野心, 0)
+
+;-------------------------
+;汎用武将にスキルを設定する
+;-------------------------
+@RANDOM_CHARA_SKILL_SETTING()
+#DIM スキルID群, SKILL_GENRE_NUM, MAX_SKILLS
+#DIM スキルレベル群, SKILL_GENRE_NUM, MAX_SKILLS
+#DIM スキル数, SKILL_GENRE_NUM
+#DIM ジャンル
+#DIM スキルID
+#DIM スキル位置
+#DIM 試行回数
+#DIM 習得確率
+VARSET スキルID群
+VARSET スキルレベル群
+VARSET スキル数
+
+FOR ジャンル, 0, SKILL_GENRE_NUM
+	FOR スキルID, 0, MAX_SKILLS
+		TRYCCALLFORM SKILL_0_%SKILL_GENRE_ENG:ジャンル%_{スキルID}_NO_LEARN_INIT
+		CATCH
+			CONTINUE
+		ENDCATCH
+		TRYCCALLFORM SKILL_0_%SKILL_GENRE_ENG:ジャンル%_{スキルID}_EXIST
+			スキルID群:ジャンル:(スキル数:ジャンル) = スキルID
+			CALLFORM SKILL_0_%SKILL_GENRE_ENG:ジャンル%_{スキルID}_LEVEL
+			スキルレベル群:ジャンル:(スキル数:ジャンル) = RESULT
+			スキル数:ジャンル ++
+		CATCH
+		ENDCATCH
+	NEXT
+NEXT
+
+FOR 試行回数, 0, 4
+	ジャンル = RAND:SKILL_GENRE_NUM
+	;汎用スキルは今んとこ全ジャンルあるのでここは大丈夫
+	SIF スキル数:ジャンル == 0
+		CONTINUE
+	スキル位置 = RAND:(スキル数:ジャンル)
+	SELECTCASE スキルレベル群:ジャンル:スキル位置
+		CASE 5
+			習得確率 = 3
+		CASE 4
+			習得確率 = 10
+		CASE 3
+			習得確率 = 20
+		CASE 2
+			習得確率 = 30
+		CASE 1
+			習得確率 = 50
+	ENDSELECT
+	SIF 習得確率 <= RAND:100
+		CONTINUE
+	CALL SKILL_LEARN(TARGET, ジャンル, 0, スキルID群:ジャンル:スキル位置)
+NEXT
+
+;-------------------------
+;汎用武将にタグを設定する
+;-------------------------
+@RANDOM_CHARA_TAG_SETTING
+
+;人間か、人外か
+SIF 50 > RAND:100
+	CALL ADD_TAG(TARGET, タグ_人間)
+
+SIF 5 > RAND:100 || (50 > RAND:100 && !HAS_TAG(TARGET, タグ_人間))
+	CALL ADD_TAG(TARGET, タグ_人外)
+
+IF HAS_TAG(TARGET, タグ_人外)
+	SELECTCASE RAND:100
+		CASE IS < 20
+		CASE IS < 45
+			CALL ADD_TAG(TARGET, タグ_妖怪)
+		CASE IS < 65
+			CALL ADD_TAG(TARGET, タグ_妖精)
+		CASE IS < 75
+			CALL ADD_TAG(TARGET, タグ_幽霊)
+		CASE IS < 80
+			CALL ADD_TAG(TARGET, タグ_亡霊)
+		CASE IS < 85
+			CALL ADD_TAG(TARGET, タグ_神)
+		CASE IS < 88
+			CALL ADD_TAG(TARGET, タグ_人形)
+		CASE IS < 91
+			CALL ADD_TAG(TARGET, タグ_死神)
+		CASE IS < 93
+			CALL ADD_TAG(TARGET, タグ_天人)
+		CASE IS < 95
+			CALL ADD_TAG(TARGET, タグ_付喪神)
+		CASE IS < 97
+			CALL ADD_TAG(TARGET, タグ_月人)
+		CASE IS < 99
+			CALL ADD_TAG(TARGET, タグ_怨霊)
+		CASEELSE
+			CALL ADD_TAG(TARGET, タグ_魔界人)
+	ENDSELECT
+ENDIF
+
+IF HAS_TAG(TARGET, タグ_妖怪)
+	SELECTCASE RAND:100
+		CASE IS < 25
+		CASE IS < 45
+			CALL ADD_TAG(TARGET, タグ_妖獣)
+		CASE IS < 55
+			CALL ADD_TAG(TARGET, タグ_天狗)
+		CASE IS < 65
+			CALL ADD_TAG(TARGET, タグ_河童)
+		CASE IS < 75
+			CALL ADD_TAG(TARGET, タグ_魔法使い)
+		CASE IS < 80
+			CALL ADD_TAG(TARGET, タグ_吸血鬼)
+		CASE IS < 85
+			CALL ADD_TAG(TARGET, タグ_騒霊)
+		CASE IS < 90
+			CALL ADD_TAG(TARGET, タグ_悪魔)
+		CASE IS < 95
+			CALL ADD_TAG(TARGET, タグ_月兎)
+		CASEELSE
+			CALL ADD_TAG(TARGET, タグ_天邪鬼)
+	ENDSELECT
+ENDIF
+
+;-------------------------
+;バストサイズをランダムに設定する関数
+;-------------------------
+@RANDOM_CHARA_BUSTSIZE
+LOCAL:2 = RAND:100
+LOCAL = 0
+IF TALENT:体格 == 体格_子供
+	;並(40%)
+	IF LOCAL:2 < 40
+	;貧(48%)
+	ELSEIF LOCAL:2 < 88
+		LOCAL = -1
+	;巨(5%)
+	ELSEIF LOCAL:2 < 93
+		LOCAL = 1
+	;絶(7%)
+	ELSE
+		LOCAL = -2
+	ENDIF
+ELSEIF TALENT:体格 == 体格_小柄
+	;並(40%)
+	IF LOCAL:2 < 40
+	;貧(36%)
+	ELSEIF LOCAL:2 < 76
+		LOCAL = -1
+	;巨(16%)
+	ELSEIF LOCAL:2 < 92
+		LOCAL = 1
+	;爆(4%)
+	ELSEIF LOCAL:2 < 96
+		LOCAL = 2
+	;絶(4%)
+	ELSE
+		LOCAL = -2
+	ENDIF
+ELSE
+	;並(40%)
+	IF LOCAL:2 < 40
+	;貧(26%)
+	ELSEIF LOCAL:2 < 66
+		LOCAL = -1
+	;巨(26%)
+	ELSEIF LOCAL:2 < 92
+		LOCAL = 1
+	;爆(6%)
+	ELSEIF LOCAL:2 < 98
+		LOCAL = 2
+	;絶(2%)
+	ELSE
+		LOCAL = -2
+	ENDIF
+ENDIF
+CALL SET_BUSTSIZE(TARGET, LOCAL)
+
+;-------------------------
+;ペニスサイズをランダムに設定する関数
+;-------------------------
+@RANDOM_CHARA_PENISSIZE
+LOCAL:2 = RAND:100
+LOCAL = 0
+IF TALENT:体格 == 体格_子供
+	;並(40%)
+	IF LOCAL:2 < 40
+	;貧(48%)
+	ELSEIF LOCAL:2 < 88
+		LOCAL = -1
+	;巨(5%)
+	ELSEIF LOCAL:2 < 93
+		LOCAL = 1
+	;絶(7%)
+	ELSE
+		LOCAL = -2
+	ENDIF
+ELSEIF TALENT:体格 == 体格_小柄
+	;並(40%)
+	IF LOCAL:2 < 40
+	;貧(36%)
+	ELSEIF LOCAL:2 < 76
+		LOCAL = -1
+	;巨(16%)
+	ELSEIF LOCAL:2 < 92
+		LOCAL = 1
+	;爆(4%)
+	ELSEIF LOCAL:2 < 96
+		LOCAL = 2
+	;絶(4%)
+	ELSE
+		LOCAL = -2
+	ENDIF
+ELSE
+	;並(40%)
+	IF LOCAL:2 < 40
+	;貧(26%)
+	ELSEIF LOCAL:2 < 66
+		LOCAL = -1
+	;巨(26%)
+	ELSEIF LOCAL:2 < 92
+		LOCAL = 1
+	;爆(6%)
+	ELSEIF LOCAL:2 < 98
+		LOCAL = 2
+	;絶(2%)
+	ELSE
+		LOCAL = -2
+	ENDIF
+ENDIF
+
+CALL SET_PENISSIZE(TARGET, LOCAL)
+
+;-------------------------
+;バストサイズをランダムに設定する関数
+;-------------------------
+@RANDOM_CHARA_HIPSIZE
+LOCAL:2 = RAND:100
+LOCAL = 0
+IF TALENT:体格 == 体格_子供
+	;並(40%)
+	IF LOCAL:2 < 40
+	;貧(48%)
+	ELSEIF LOCAL:2 < 88
+		LOCAL = -1
+	;巨(5%)
+	ELSEIF LOCAL:2 < 93
+		LOCAL = 1
+	;絶(7%)
+	ELSE
+		LOCAL = -2
+	ENDIF
+ELSEIF TALENT:体格 == 体格_小柄
+	;並(40%)
+	IF LOCAL:2 < 40
+	;貧(36%)
+	ELSEIF LOCAL:2 < 76
+		LOCAL = -1
+	;巨(16%)
+	ELSEIF LOCAL:2 < 92
+		LOCAL = 1
+	;爆(4%)
+	ELSEIF LOCAL:2 < 96
+		LOCAL = 2
+	;絶(4%)
+	ELSE
+		LOCAL = -2
+	ENDIF
+ELSE
+	;並(40%)
+	IF LOCAL:2 < 40
+	;貧(26%)
+	ELSEIF LOCAL:2 < 66
+		LOCAL = -1
+	;巨(26%)
+	ELSEIF LOCAL:2 < 92
+		LOCAL = 1
+	;爆(6%)
+	ELSEIF LOCAL:2 < 98
+		LOCAL = 2
+	;絶(2%)
+	ELSE
+		LOCAL = -2
+	ENDIF
+ENDIF
+CALL SET_HIPSIZE(TARGET, LOCAL)
+
+
+;-------------------------
+;敏鈍感素質をランダムに設定する関数
+;-------------------------
+@RANDOM_CHARA_SENSE
+;ＭとＵは独立に決める
+LOCAL:0 = RAND:100
+IF LOCAL:0 < 5
+	TALENT:Ｍ敏感 = 1
+ELSEIF LOCAL:0 < 8
+	TALENT:Ｍ鈍感 = 1
+ENDIF
+LOCAL:0 = RAND:100
+IF LOCAL:0 < 3
+	TALENT:Ｕ敏感 = 1
+ELSEIF LOCAL:0 < 6
+	TALENT:Ｕ鈍感 = 1
+ENDIF
+
+LOCAL:0 = RAND:1000
+
+;一箇所敏感型(10%)
+IF LOCAL:0 < 100
+	CALL SET_SENSE_RANDOM(0)
+;一箇所鈍感型(5%)
+ELSEIF LOCAL:0 < 150
+	CALL SET_SENSE_RANDOM(1)
+;敏感＋鈍感型(3%)
+ELSEIF LOCAL:0 < 180
+	CALL SET_SENSE_RANDOM(0)
+	CALL SET_SENSE_RANDOM(1)
+;奥手(1%)
+ELSEIF LOCAL:0 < 190
+	TALENT:Ｃ鈍感 = 1
+	TALENT:Ｂ鈍感 = RAND:2 == 0
+	TALENT:Ｖ敏感 = RAND:6 == 0
+	TALENT:Ａ敏感 = RAND:6 == 0
+;表面(1%)
+ELSEIF LOCAL:0 < 200
+	TALENT:Ｃ敏感 = 1
+	TALENT:Ｂ敏感 = RAND:2 == 0
+	TALENT:Ｖ鈍感 = RAND:6 == 0
+	TALENT:Ａ鈍感 = RAND:6 == 0
+;全身敏感(0.4%)
+ELSEIF LOCAL:0 < 204
+	TALENT:Ｃ敏感 = 1
+	TALENT:Ｂ敏感 = 1
+	TALENT:Ｖ敏感 = 1
+	TALENT:Ａ敏感 = 1
+;全身鈍感(0.4%)
+ELSEIF LOCAL:0 < 208
+	TALENT:Ｃ鈍感 = 1
+	TALENT:Ｂ鈍感 = 1
+	TALENT:Ｖ鈍感 = 1
+	TALENT:Ａ鈍感 = 1
+;Ｖ敏＋鈍感型(0.6%)
+ELSEIF LOCAL:0 < 214
+	TALENT:Ｖ敏感 = 1
+	CALL SET_SENSE_RANDOM(1)
+	CALL SET_SENSE_RANDOM(1)
+	IF RAND:3 == 0
+		CALL SET_SENSE_RANDOM(1)
+	ENDIF
+;Ａ敏＋鈍感型(0.6%)
+ELSEIF LOCAL:0 < 220
+	TALENT:Ａ敏感 = 1
+	CALL SET_SENSE_RANDOM(1)
+	CALL SET_SENSE_RANDOM(1)
+	IF RAND:3 == 0
+		CALL SET_SENSE_RANDOM(1)
+	ENDIF
+ENDIF
+
+;-------------------------
+;同一部位に対して同時に敏感・鈍感が設定された場合に相殺する処理
+;-------------------------
+@KILL_INCOMPATIBLE_SENSE()
+IF TALENT:Ｖ敏感 && TALENT:Ｖ鈍感
+	TALENT:Ｖ敏感 = 0
+	TALENT:Ｖ鈍感 = 0
+ENDIF
+
+IF TALENT:Ａ敏感 && TALENT:Ａ鈍感
+	TALENT:Ａ敏感 = 0
+	TALENT:Ａ鈍感 = 0
+ENDIF
+
+IF TALENT:Ｃ敏感 && TALENT:Ｃ鈍感
+	TALENT:Ｃ敏感 = 0
+	TALENT:Ｃ鈍感 = 0
+ENDIF
+
+IF TALENT:Ｂ敏感 && TALENT:Ｂ鈍感
+	TALENT:Ｂ敏感 = 0
+	TALENT:Ｂ鈍感 = 0
+ENDIF
+
+IF TALENT:Ｍ敏感 && TALENT:Ｍ鈍感
+	TALENT:Ｍ敏感 = 0
+	TALENT:Ｍ鈍感 = 0
+ENDIF
+
+IF TALENT:Ｕ敏感 && TALENT:Ｕ鈍感
+	TALENT:Ｕ敏感 = 0
+	TALENT:Ｕ鈍感 = 0
+ENDIF
+
+;-------------------------
+;ＣＶＡＢで未設定のランダムな箇所を敏感(ARG:0=0)・鈍感(ARG:0=1)にする関数
+;-------------------------
+@SET_SENSE_RANDOM(ARG:0)
+LOCAL:5 = 4
+FOR LOCAL:0, 0, 4
+	IF TALENT:(101 + LOCAL:0 * 2) || TALENT:(102 + LOCAL:0 * 2)
+		LOCAL:5 --
+	ENDIF
+NEXT
+
+IF LOCAL:5 <= 0
+	RETURN
+ENDIF
+
+LOCAL:6 = RAND:(LOCAL:5)
+
+FOR LOCAL:0, 0, 4
+	IF !TALENT:(101 + LOCAL:0 * 2) && !TALENT:(102 + LOCAL:0 * 2)
+		LOCAL:6 --
+		IF LOCAL:6 < 0
+			LOCAL:7 = LOCAL:0
+			BREAK
+		ENDIF
+	ENDIF
+NEXT
+
+IF ARG:0 == 0
+	TALENT:(102 + LOCAL:7 * 2) = 1
+ELSE
+	TALENT:(101 + LOCAL:7 * 2) = 1
+ENDIF
+
+;-------------------------
+;ランダムキャラに特定の素質を指定の確率で持たせる関数
+;ARG:0=素質の番号、ARG:1=素質の取得確率(百分率)
+;-------------------------
+@RCHARA_TALENT_SINGLE, ARG:0, ARG:1
+LOCAL:0 = RAND:100
+IF LOCAL:0 < ARG:1
+	TALENT:(ARG:0) = 1
+ENDIF
+
+;-------------------------
+;ランダムキャラに相反する２つの素質を指定の確率で持たせる関数
+;ARG:0=素質１の番号、ARG:1=素質２の番号、ARG:2=素質１の取得確率(百分率)、ARG:3=素質２の取得確率(百分率)
+;-------------------------
+@RCHARA_TALENT_OPPOSE, ARG:0, ARG:1, ARG:2, ARG:3
+LOCAL:0 = RAND:100
+IF LOCAL:0 < ARG:2
+	TALENT:(ARG:0) = 1
+ELSEIF 99 - LOCAL:0 < ARG:3
+	TALENT:(ARG:1) = 1
+ENDIF
+
+;-------------------------
+;汎用武将の名前を決定する
+;-------------------------
+@RANDOM_CHARA_NAMING(ARG:0)
+;動物系キャラはカタカナ名
+IF TALENT:動物耳 || TALENT:しっぽ
+	TALENT:姓名逆転 = 1
+	CALL SET_RANDOM_NAME_K(TARGET)
+	;名からNAMEとCALLNAMEを設定
+	NAME = %CSTR:1%
+	CALLNAME = %CSTR:1%
+ELSE
+	SELECTCASE ARG:0
+		CASE 0
+			CALL SET_RANDOM_NAME_J(TARGET)
+			NAME = %CSTR:1%
+			CALLNAME = %CSTR:1%
+			CSTR:3 = %CSTR:6%
+		CASE 1
+			TALENT:姓名逆転 = 1
+			CALL SET_RANDOM_NAME_K(TARGET)
+			NAME = %CSTR:1%
+			CALLNAME = %CSTR:1%
+		CASE 2
+			CALL SET_RANDOM_NAME
+			CALL SET_MIDDLE_NAME
+			;姓名を合わせてNAMEを設定
+			NAME = %CSTR:0%%CSTR:1%
+			CALLNAME = %CSTR:0%%CSTR:1%
+			CSTR:3 = %CSTR:5%%CSTR:6%
+	ENDSELECT
+
+ENDIF
+
+;-------------------------
+;能力値に応じてキャラARG:0の最大精神力を設定する関数
+;-------------------------
+@SET_MIND_POWER(ARG:0)
+LOCAL:0 = ABL:(ARG:0):武闘 + ABL:(ARG:0):知略 + ABL:(ARG:0):政治 + ABL:(ARG:0):歌唱 + ABL:(ARG:0):料理
+MAXBASE:(ARG:0):精神力 = 500 + LOCAL:0 * 6 * (RAND:101 + 50) / 10000 * 100
+BASE:(ARG:0):精神力 = MAXBASE:(ARG:0):精神力
+
+;-------------------------
+;素質を考慮してキャラARG:0の性格タイプを設定する関数
+;-------------------------
+@SET_CHARACTER(ARG:0)
+;■性格タイプの決定
+;成長型に応じた確率の設定
+SELECTCASE TALENT:(ARG:0):成長型
+	CASE 1
+		LOCAL:0 = 70
+		LOCAL:1 = 60
+	CASE 2
+		LOCAL:0 = 90
+		LOCAL:1 = 60
+	CASE 3
+		LOCAL:0 = 25
+		LOCAL:1 = 70
+	CASE 4
+		LOCAL:0 = 10
+		LOCAL:1 = 40
+	CASE 5
+		LOCAL:0 = 80
+		LOCAL:1 = 60
+	CASE 6
+		LOCAL:0 = 80
+		LOCAL:1 = 60
+	CASE 7
+		LOCAL:0 = 40
+		LOCAL:1 = 40
+	CASEELSE
+		LOCAL:0 = 50
+		LOCAL:1 = 60
+ENDSELECT
+
+;素質による補正
+LOCAL:2 = 100
+IF TALENT:(ARG:0):大人しい
+	TIMES LOCAL:2, 4.00
+ENDIF
+IF TALENT:(ARG:0):感情乏しい
+	TIMES LOCAL:2, 4.00
+ENDIF
+IF TALENT:(ARG:0):反抗的
+	TIMES LOCAL:2, 0.25
+ENDIF
+IF LOCAL:2 > 100
+	LOCAL:0 = LOCAL:0 + (100 - LOCAL:0) * (LOCAL:2 - 1) / LOCAL:2
+ELSEIF LOCAL:2 < 100
+	LOCAL:0 = LOCAL:0 * LOCAL:2 / (LOCAL:2 + 1)
+ENDIF
+
+TALENT:(ARG:0):性格 = 1
+IF RAND:100 >= LOCAL:0
+	TALENT:(ARG:0):性格 += 1
+ENDIF
+IF RAND:100 >= LOCAL:1
+	TALENT:(ARG:0):性格 += 2
+ENDIF
+
+;-------------------------
+;髪型・髪の長さをランダムに設定する関数
+;-------------------------
+@SET_HAIR(ARG:0)
+LOCAL:5 = ID_TO_CHARA(CFLAG:(ARG:0):父親)
+LOCAL:6 = ID_TO_CHARA(CFLAG:(ARG:0):母親)
+LOCAL:7 = (LOCAL:5 >= 0 && TALENT:(LOCAL:5):髪色 != 0)
+LOCAL:8 = (LOCAL:6 >= 0 && TALENT:(LOCAL:6):髪色 != 0)
+
+;両親が設定されているならそれと近い色になる
+IF LOCAL:7 && (!LOCAL:8 || RAND:2)
+	LOCAL:10 = RGB_TO_H(TALENT:(LOCAL:5):髪色) + ((RAND:61 + RAND:61 + RAND:61) / (RAND:12 + 1)) * (RAND:2 * 2 - 1)
+	LOCAL:11 = RGB_TO_S(TALENT:(LOCAL:5):髪色) + RAND:21 - RAND:21
+	LOCAL:12 = RGB_TO_V(TALENT:(LOCAL:5):髪色) + RAND:51 - RAND:51
+	TALENT:(ARG:0):髪色 = HSV_TO_RGB((LOCAL:10 + 720) % 360, LIMIT(LOCAL:11, 0, 92), LIMIT(LOCAL:12, 30, 97))
+ELSEIF LOCAL:8
+	LOCAL:10 = RGB_TO_H(TALENT:(LOCAL:6):髪色) + ((RAND:61 + RAND:61 + RAND:61) / (RAND:12 + 1)) * (RAND:2 * 2 - 1)
+	LOCAL:11 = RGB_TO_S(TALENT:(LOCAL:6):髪色) + RAND:21 - RAND:21
+	LOCAL:12 = RGB_TO_V(TALENT:(LOCAL:6):髪色) + RAND:51 - RAND:51
+	TALENT:(ARG:0):髪色 = HSV_TO_RGB((LOCAL:10 + 720) % 360, LIMIT(LOCAL:11, 0, 92), LIMIT(LOCAL:12, 30, 97))
+ELSE
+	;両親不明ならHSV基準でランダム値を取る
+	TALENT:(ARG:0):髪色 = HSV_TO_RGB(RAND:360, RAND:93, RAND:68 + 30)
+ENDIF
+
+;男性・男ふたなりの場合
+IF GROUPMATCH(TALENT:(ARG:0):性別, 0, 3)
+	;低確率で長髪・スキンヘッド
+	IF RAND:20 == 0
+		TALENT:(ARG:0):髪の長さ = 1
+	ELSEIF RAND:12 == 0
+		TALENT:(ARG:0):髪の長さ = 5 + RAND:2
+	ELSE
+		TALENT:(ARG:0):髪の長さ = 2 + RAND:3
+	ENDIF
+;女性・女ふたなり・男の娘の場合
+ELSE
+	;超ショート・超ロングは確率低め
+	IF RAND:30 == 0
+		TALENT:(ARG:0):髪の長さ = 2 + RAND:2
+	ELSEIF RAND:12 == 0
+		TALENT:(ARG:0):髪の長さ = 6
+	ELSE
+		TALENT:(ARG:0):髪の長さ = 3 + RAND:3
+	ENDIF
+ENDIF
+
+
+;-------------------------
+;陰毛の長さをランダムに設定する関数
+;-------------------------
+@SET_INMOU_RANDOM(ARG:0)
+LOCAL:13 = RAND:100
+
+IF TALENT:(ARG:0):体格 == 体格_子供
+	IF RAND:4 == 0
+		TALENT:(ARG:0):陰毛目標値 = 陰毛_パイパン
+		TALENT:(ARG:0):陰毛現在値 = 陰毛_パイパン
+	ELSEIF RAND:300 == 0
+		TALENT:(ARG:0):陰毛目標値 = 陰毛_ハート型
+		TALENT:(ARG:0):陰毛現在値 = 陰毛_ハート型
+	ELSEIF LOCAL:13 < 90
+		IF TALENT:(ARG:0):動物耳
+			TALENT:(ARG:0):陰毛目標値 = RAND:8
+			TALENT:(ARG:0):陰毛現在値 = TALENT:(ARG:0):陰毛目標値
+		ELSE
+			TALENT:(ARG:0):陰毛目標値 = RAND:5
+			TALENT:(ARG:0):陰毛現在値 = TALENT:(ARG:0):陰毛目標値
+		ENDIF
+	ELSE
+		TALENT:(ARG:0):陰毛目標値 = RAND:10
+		TALENT:(ARG:0):陰毛現在値 = TALENT:(ARG:0):陰毛目標値
+	ENDIF
+;男性・男ふたなりの場合
+ELSEIF GROUPMATCH(TALENT:(ARG:0):性別, 0, 3)
+	IF RAND:30 == 0
+		TALENT:(ARG:0):陰毛目標値 = 陰毛_パイパン
+		TALENT:(ARG:0):陰毛現在値 = 陰毛_パイパン
+	ELSEIF RAND:500 == 0
+		TALENT:(ARG:0):陰毛目標値 = 陰毛_ハート型
+		TALENT:(ARG:0):陰毛現在値 = 陰毛_ハート型
+	ELSEIF LOCAL:13 < 80
+		IF TALENT:(ARG:0):動物耳
+			TALENT:(ARG:0):陰毛目標値 = RAND(2, 10)
+			TALENT:(ARG:0):陰毛現在値 = TALENT:(ARG:0):陰毛目標値
+		ELSE
+			TALENT:(ARG:0):陰毛目標値 = RAND(2, 9)
+			TALENT:(ARG:0):陰毛現在値 = TALENT:(ARG:0):陰毛目標値
+		ENDIF
+	ELSE
+		TALENT:(ARG:0):陰毛目標値 = RAND:10
+		TALENT:(ARG:0):陰毛現在値 = TALENT:(ARG:0):陰毛目標値
+	ENDIF
+;女性・女ふたなり・男の娘の場合
+ELSE
+	IF RAND:10 == 0
+		TALENT:(ARG:0):陰毛目標値 = 陰毛_パイパン
+		TALENT:(ARG:0):陰毛現在値 = 陰毛_パイパン
+	ELSEIF RAND:200 == 0
+		TALENT:(ARG:0):陰毛目標値 = 陰毛_ハート型
+		TALENT:(ARG:0):陰毛現在値 = 陰毛_ハート型
+	ELSEIF LOCAL:13 < 90 && !TALENT:(ARG:0):動物耳
+		TALENT:(ARG:0):陰毛目標値 = RAND:9
+		TALENT:(ARG:0):陰毛現在値 = TALENT:(ARG:0):陰毛目標値
+	ELSE
+		TALENT:(ARG:0):陰毛目標値 = RAND:10
+		TALENT:(ARG:0):陰毛現在値 = TALENT:(ARG:0):陰毛目標値
+	ENDIF
+ENDIF
+
+;-------------------------
+;陰毛の長さをランダムに設定する関数
+;-------------------------
+@SET_ARMPIT_RANDOM(ARG:0)
+LOCAL:13 = RAND:100
+
+IF TALENT:(ARG:0):体格 == 体格_子供
+	IF RAND:4 == 0
+		TALENT:(ARG:0):腋毛目標値 = 腋毛_つるつる
+		TALENT:(ARG:0):腋毛現在値 = 腋毛_つるつる
+	ELSEIF LOCAL:13 < 90
+		IF TALENT:(ARG:0):動物耳
+			TALENT:(ARG:0):腋毛目標値 = RAND:8
+			TALENT:(ARG:0):腋毛現在値 = TALENT:(ARG:0):腋毛目標値
+		ELSE
+			TALENT:(ARG:0):腋毛目標値 = RAND:5
+			TALENT:(ARG:0):腋毛現在値 = TALENT:(ARG:0):腋毛目標値
+		ENDIF
+	ELSE
+		TALENT:(ARG:0):腋毛目標値 = RAND:10
+		TALENT:(ARG:0):腋毛現在値 = TALENT:(ARG:0):腋毛目標値
+	ENDIF
+;男性・男ふたなりの場合
+ELSEIF GROUPMATCH(TALENT:(ARG:0):性別, 0, 3)
+	IF RAND:30 == 0
+		TALENT:(ARG:0):腋毛目標値 = 腋毛_脱毛済み
+		TALENT:(ARG:0):腋毛現在値 = 腋毛_脱毛済み
+	ELSEIF LOCAL:13 < 80
+		IF TALENT:(ARG:0):動物耳
+			TALENT:(ARG:0):腋毛目標値 = RAND(2, 10)
+			TALENT:(ARG:0):腋毛現在値 = TALENT:(ARG:0):腋毛目標値
+		ELSE
+			TALENT:(ARG:0):腋毛目標値 = RAND(2, 9)
+			TALENT:(ARG:0):腋毛現在値 = TALENT:(ARG:0):腋毛目標値
+		ENDIF
+	ELSE
+		TALENT:(ARG:0):腋毛目標値 = RAND:10
+		TALENT:(ARG:0):腋毛現在値 = TALENT:(ARG:0):腋毛目標値
+	ENDIF
+;女性・女ふたなり・男の娘の場合
+ELSE
+	IF RAND:10 == 0
+		TALENT:(ARG:0):腋毛目標値 = 腋毛_つるつる
+		TALENT:(ARG:0):腋毛現在値 = 腋毛_つるつる
+	ELSEIF LOCAL:13 < 90 && !TALENT:(ARG:0):動物耳
+		TALENT:(ARG:0):腋毛目標値 = RAND:9
+		TALENT:(ARG:0):腋毛現在値 = TALENT:(ARG:0):腋毛目標値
+	ELSE
+		TALENT:(ARG:0):腋毛目標値 = RAND:10
+		TALENT:(ARG:0):腋毛現在値 = TALENT:(ARG:0):腋毛目標値
+	ENDIF
+ENDIF
+
+
+;-------------------------
+;ARG:0勢力が士官を募るAI処理
+;-------------------------
+@RECRUIT_AI(ARG:0)
+LOCAL:9 = GET_COMMANDER_NUM(ARG:0)
+
+;士官が8人以下なら募集を掛ける
+IF LOCAL:9 < 8
+	;成否判定
+	IF RAND:100 < 2500 / (LOCAL:9 + 20) - 10
+		;君主が[動物耳]or[尻尾]を持つならケモ率高め
+		LOCAL:5 = GET_COUNTRY_BOSS(ARG:0)
+		IF LOCAL:5 >= 0 && (TALENT:(LOCAL:5):動物耳 || TALENT:(LOCAL:5):しっぽ)
+			LOCAL:6 = 75
+		ELSE
+			LOCAL:6 = 1
+		ENDIF
+
+		;●自軍の状況に合わせて募集するタイプを選択
+		VARSET LOCAL, -1, 20, 50
+		FOR LOCAL:0, 0, CHARANUM
+			IF CFLAG:(LOCAL:0):所属 == ARG:0
+				FOR LOCAL:1, 0, 3
+					LOCAL:10 = LOCAL:1 + 50
+					LOCAL:11 = LOCAL:1 * 10 + 20
+					FOR LOCAL:2, 0, 3
+						IF ABL:(LOCAL:0):(LOCAL:10) > LOCAL:(LOCAL:2 + LOCAL:11)
+							FOR LOCAL:3, 0, 2 - LOCAL:2
+								LOCAL:(2 - LOCAL:3 + LOCAL:11) = LOCAL:(1 - LOCAL:3 + LOCAL:11)
+							NEXT
+							LOCAL:(LOCAL:2 + LOCAL:11) = ABL:(LOCAL:0):(LOCAL:10)
+							BREAK
+						ENDIF
+					NEXT
+				NEXT
+			ENDIF
+		NEXT
+
+		;各能力の3位が最も貧弱な箇所を補う
+		LOCAL:7 = MIN(LOCAL:22, LOCAL:32, LOCAL:42)
+		IF LOCAL:7 >= 60
+			;全ての能力が十分なら多能な士官orアイドルorコックを募集
+			IF RAND:4 == 0
+				LOCAL:8 = 4
+			ELSEIF RAND:4 == 0
+				LOCAL:8 = 5
+			ELSE
+				LOCAL:8 = 0
+			ENDIF
+		ELSEIF LOCAL:7 == LOCAL:22
+			LOCAL:8 = 1
+		ELSEIF LOCAL:7 == LOCAL:32
+			LOCAL:8 = 2
+		ELSE
+			LOCAL:8 = 3
+		ENDIF
+		;名前はランダム
+		SELECTCASE RAND:100
+			CASE 0 TO 80
+				LOCAL:9 = 0
+			CASE 81 TO 95
+				LOCAL:9 = 1
+			CASE 96 TO 99
+				LOCAL:9 = 2
+			CASEELSE
+				LOCAL:9 = 0
+		ENDSELECT
+
+		;指定の条件でランダムキャラを作成
+		CALL CREATE_RANDOM_CHARA(LOCAL:6, LOCAL:8, -1, LOCAL:9)
+		IF RESULT >= 0
+			SETCOLOR カラー_注意
+			PRINTFORML %ANAME(RESULT)%が%ANAME(GET_COUNTRY_BOSS(ARG:0))%に登用された
+			RESETCOLOR
+			CALL CHANGE_COUNTRY(RESULT, ARG:0)
+		ENDIF
+	ENDIF
+ENDIF
+
+;-------------------------
+;士官を募る
+;-------------------------
+@RECRUIT_RANDOM_CHARA
+#DIM hold = -1
+#DIM showingHold = 0
+#DIM FIRST_LINE
+LOCAL:10 = 0
+LOCAL:11 = 0
+hold = -1
+showingHold = 0
+
+CALL SINGLE_DRAWLINE
+PRINTL 新たな士官を募集します
+PRINTL 求める人材を設定して下さい
+CALL SINGLE_DRAWLINE
+PRINTL ～募集要項～
+
+FIRST_LINE = LINECOUNT
+$SHOW_LOOP
+
+PRINTL ◆求める人材は
+PRINT    
+CALL PRINT_SELECT_BUTTON(" 10{多    能}", 10, LOCAL:10 == 0)
+CALL PRINT_SELECT_BUTTON(" 11{武    官}", 11, LOCAL:10 == 1)
+CALL PRINT_SELECT_BUTTON(" 12{軍    師}", 12, LOCAL:10 == 2)
+CALL PRINT_SELECT_BUTTON(" 13{政 務 官}", 13, LOCAL:10 == 3)
+CALL PRINT_SELECT_BUTTON(" 14{アイドル}", 14, LOCAL:10 == 4)
+CALL PRINT_SELECT_BUTTON(" 15{料 理 人}", 15, LOCAL:10 == 5)
+PRINTL 
+PRINTL 
+
+PRINTL ◆性別は
+PRINT    
+CALL PRINT_SELECT_BUTTON(" 20{問わない}", 20, LOCAL:11 == 0)
+CALL PRINT_SELECT_BUTTON(" 21{男    性}", 21, LOCAL:11 == 1)
+CALL PRINT_SELECT_BUTTON(" 22{女    性}", 22, LOCAL:11 == 2)
+CALL PRINT_SELECT_BUTTON(" 23{女    双}", 23, LOCAL:11 == 3)
+CALL PRINT_SELECT_BUTTON(" 23{男    双}", 24, LOCAL:11 == 4)
+CALL PRINT_SELECT_BUTTON(" 24{男 の 娘}", 25, LOCAL:11 == 5)
+CALL PRINT_SELECT_BUTTON(" 24{男 娘 双}", 26, LOCAL:11 == 6)
+
+PRINTL 
+PRINTL
+PRINTL ◆名前は
+PRINT    
+CALL PRINT_SELECT_BUTTON(" 30{和    名}", 30, LOCAL:13 == 0)
+CALL PRINT_SELECT_BUTTON(" 31{洋    風}", 31, LOCAL:13 == 1)
+CALL PRINT_SELECT_BUTTON(" 32{中    華}", 32, LOCAL:13 == 2)
+PRINTL
+CALL SINGLE_DRAWLINE
+PRINTBUTTON "  0[この条件で募集]", 0
+PRINTL 
+PRINTBUTTON "  1[キャンセル]", 1
+PRINTL 
+
+REDRAW 0
+
+$INPUT_LOOP
+INPUT
+
+IF RESULT == 1
+	REDRAW 1
+	RETURN 0
+ELSEIF RESULT >= 10 && RESULT <= 15 && LOCAL:10 != RESULT - 10
+	LOCAL:10 = RESULT - 10
+	CLEARLINE LINECOUNT - FIRST_LINE
+	GOTO SHOW_LOOP
+ELSEIF RESULT >= 20 && RESULT <= 26 && LOCAL:11 != RESULT - 20
+	LOCAL:11 = RESULT - 20
+	CLEARLINE LINECOUNT - FIRST_LINE
+	GOTO SHOW_LOOP
+ELSEIF RESULT >= 30 && RESULT <= 32 && LOCAL:13 != RESULT - 30
+	LOCAL:13 = RESULT - 30
+	CLEARLINE LINECOUNT - FIRST_LINE
+	GOTO SHOW_LOOP
+ELSEIF RESULT != 0
+	CLEARLINE 1
+	GOTO INPUT_LOOP
+ENDIF
+
+REDRAW 1
+
+LOCAL:0 = GET_COMMANDER_NUM(CFLAG:MASTER:所属)
+
+;君主が[動物耳]or[尻尾]を持つならケモ率高め
+LOCAL:4 = GET_COUNTRY_BOSS(CFLAG:MASTER:所属)
+IF LOCAL:4 >= 0 && (TALENT:(LOCAL:4):動物耳 || TALENT:(LOCAL:4):しっぽ)
+	LOCAL:5 = 75
+ELSE
+	LOCAL:5 = 1
+ENDIF
+
+$INPUT_LOOP_NEWCHARA
+
+;指定の条件でランダムキャラを作成
+CALL CREATE_RANDOM_CHARA(LOCAL:5, LOCAL:10, LOCAL:11 - 1, LOCAL:13)
+LOCAL:2 = RESULT
+
+;士官の作成に失敗した場合
+IF LOCAL:2 < 0
+	PRINTW 残念ながら目ぼしい士官は見つかりませんでした…
+
+;成功
+ELSE
+	CALL SINGLE_DRAWLINE
+	PRINTFORML %ANAME(LOCAL:2)%が仕官を求めてきました
+
+	$INPUT_LOOP_SELECT
+
+	;SHOW_INFOの初期画面を基本情報にする
+	FLAG:能力表示モード = 0
+
+	;キャラの情報を表示
+	CALL SINGLE_DRAWLINE
+	CALL SHOW_INFO(LOCAL:2)
+	CALL SINGLE_DRAWLINE
+
+	PRINTBUTTON "[このキャラを登用]", 0
+	PRINT    
+	PRINTBUTTON "[別のキャラを探す]", 1
+	PRINT    
+	IF hold == -1
+	ELSEIF showingHold
+		PRINTBUTTON "[進む]", 2
+	ELSE
+		PRINTBUTTON "[戻る]", 2
+	ENDIF
+
+	PRINT    
+	PRINTBUTTON "[中止]", 9
+	PRINTL 
+
+	$INPUT_LOOP_TREAT
+	INPUT
+
+	IF RESULT == 0
+		CALL CHANGE_COUNTRY(LOCAL:2, CFLAG:MASTER:所属)
+		PRINTFORMW %ANAME(LOCAL:2)%が我が国の士官になりました
+		IF hold != -1
+			CALL DELETE_CHARA(hold)
+		ENDIF
+		;このターンにおける登用済みフラグをON
+		SHOP_TIME = CALC_SHOP_TIME()
+		BEGIN TURNEND
+		RETURN 1
+	ELSEIF RESULT == 1
+		IF hold != -1
+			;いらないキャラを削除
+			CALL DELETE_CHARA(hold)
+		ENDIF
+		hold = CHARANUM - 1
+		showingHold = 0
+		GOTO INPUT_LOOP_NEWCHARA
+	ELSEIF RESULT == 2
+		IF showingHold
+			showingHold = 0
+		ELSE
+			showingHold = 1
+		ENDIF
+			;スワップ
+		LOCAL:21 = hold
+		hold    = LOCAL:2
+		LOCAL:2 = LOCAL:21
+		GOTO INPUT_LOOP_SELECT
+	ELSEIF RESULT == 9
+		;PRINTW 今回は登用を見送ることにしました
+		;作成したキャラを削除
+		CALL DELETE_CHARA(CHARANUM - 1)
+		IF hold != -1
+			CALL DELETE_CHARA(CHARANUM - 1)
+		ENDIF
+	ELSE
+		GOTO INPUT_LOOP_TREAT
+	ENDIF
+ENDIF
+
+RETURN 0

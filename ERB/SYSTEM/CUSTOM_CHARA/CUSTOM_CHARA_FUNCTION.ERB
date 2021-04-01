@@ -1,0 +1,153 @@
+﻿;-----------------------
+;カスタムキャラの初期化処理
+;-----------------------
+@INIT_CUSTOM_DATA()
+#DIM 対象
+CALL ADD_VOID_CHARA()
+対象 = RESULT
+CFLAG:対象:キャラＩＤ = 0
+FLAG:998 --
+NAME:対象 = カスタム太郎
+CALLNAME:対象 = カスタム太郎
+CSTR:対象:1 = カスタム太郎
+CSTR:対象:3 = カスタムタロウ
+CSTR:対象:4 = カスタムタロウ
+CSTR:対象:6 = カスタムタロウ
+MAXBASE:対象:体力 = 1500
+MAXBASE:対象:気力 = 1500
+MAXBASE:対象:精神力 = 1500
+BASE:対象:体力 = MAXBASE:対象:体力
+BASE:対象:気力 = MAXBASE:対象:気力
+BASE:対象:精神力 = MAXBASE:対象:精神力
+TALENT:対象:髪の長さ = 0
+TALENT:対象:髪色 = 1
+TALENT:対象:Ｖ締まり = 締まり_普通 + 50
+TALENT:対象:Ａ締まり = 締まり_普通 + 50
+RETURN 対象
+
+;-----------------------
+;カスタムキャラのセーブ処理
+;IDが存在しないキャラはINIT_CUSTOM_DATAで作成したものと考え保存して削除する
+;IDが存在するキャラは既存のキャラを突っ込んだものと考えコピーを作り保存、そのコピーを削除
+;-----------------------
+@SAVE_CUSTOM_DATA(番号, 対象)
+#DIM 番号
+#DIM 対象
+
+LOCAL = NO:対象
+NO:対象 = __INT_MIN__
+TALENT:対象:カスタムキャラバージョン = GAMEBASE_VERSION
+SAVECHARA TOSTR_CUSTOM_FILENAME(番号, ANAME(対象)), ANAME(対象), 対象
+TALENT:対象:カスタムキャラバージョン = 0
+NO:対象 = LOCAL
+
+;-----------------------
+;カスタムキャラのロード処理
+;-----------------------
+@LOAD_CUSTOM_DATA(番号)
+#DIM 番号
+#DIM 対象
+FIND_CHARADATA TOSTR(番号)
+SIF RESULT == 0
+	THROW 指定した番号のキャラデータは存在しません
+LOADCHARA RESULTS
+対象 = CHARANUM - 1
+NO:対象 = GET_EMPTY_NO()
+FLAG:998 ++
+CFLAG:対象:キャラＩＤ = FLAG:998
+FOR LOCAL, 0, PREGNANT_RECORD_MAX
+	PREGNANT_RECORD_FATHER:対象:LOCAL = 0
+	PREGNANT_RECORD_TIMES:対象:LOCAL = 0
+NEXT
+TALENT:対象:奴隷市場モブ = 0
+TALENT:対象:妊娠 = 0
+CSTR:対象:99 = 
+FOR LOCAL, 0, VARSIZE("CFLAG")
+	SIF GROUPMATCH(LOCAL, GETNUM(CFLAG, "キャラＩＤ"), GETNUM(CFLAG, "面識"), GETNUM(CFLAG, "好感度"), GETNUM(CFLAG, "従属度"), GETNUM(CFLAG, "依存度"))
+		CONTINUE
+	CFLAG:対象:LOCAL = 0
+NEXT
+
+CALL CUSTOM_DATA_VERSIONUP(対象)
+
+TALENT:対象:カスタムキャラ = 1
+TALENT:対象:カスタムキャラバージョン = 0
+
+RETURN 対象
+
+;-----------------------
+;カスタムキャラ編集のラッパ
+;-----------------------
+@EDIT_CUSTOM_DATA(番号, 対象)
+#DIM 番号
+#DIM 対象
+#DIM FIRST_LINE
+
+FIRST_LINE = LINECOUNT
+
+$EDIT_LOOP
+
+CALL CHARACTER_EDIT(対象)
+
+CALL SINGLE_DRAWLINE
+PRINTFORML 編集を確定しますか？
+CALL ASK_MULTI("確定する", "変更を破棄する", "まだ弄る")
+
+IF RESULT == 1
+	CALL DELETE_CHARA(対象)
+	RETURN
+ELSEIF RESULT == 2
+	CLEARLINE LINECOUNT - FIRST_LINE
+	GOTO EDIT_LOOP
+ENDIF
+
+CALL SAVE_CUSTOM_DATA(番号, 対象)
+
+;-----------------------
+;カスタムキャラ用のファイル名を取得（セーブ時用）
+;-----------------------
+@TOSTR_CUSTOM_FILENAME(番号, キャラ名)
+#FUNCTIONS
+#DIM 番号
+#DIMS キャラ名
+
+RETURNF TOSTR(番号);
+
+;-----------------------
+;古いカスタムキャラのデータファイルを読み込んだ場合の処理
+;-----------------------
+@CUSTOM_DATA_VERSIONUP(対象)
+#DIM 対象
+IF TALENT:対象:カスタムキャラバージョン < GET_VERSION_VALUE("1.7.0")
+	CALL SET_BODYSIZE(対象)
+	SELECTCASE TALENT:対象:髪の長さ
+		CASE IS < 2
+			TALENT:対象:髪の長さ = 0
+		CASE IS < 25
+			TALENT:対象:髪の長さ = 1
+		CASE IS < 175
+			TALENT:対象:髪の長さ = 2
+		CASE IS < 275
+			TALENT:対象:髪の長さ = 3
+		CASE IS < 475
+			TALENT:対象:髪の長さ = 4
+		CASE IS < 675
+			TALENT:対象:髪の長さ = 5
+		CASEELSE
+			TALENT:対象:髪の長さ = 6
+	ENDSELECT
+ENDIF
+
+IF TALENT:対象:カスタムキャラバージョン < GET_VERSION_VALUE("1.20.0")
+	CALL COLOR_PRINTL("1.20.0より古いバージョンでセーブされたカスタムキャラのため、スキルのリセットを行いました", カラー_注意)
+	FOR LOCAL, 0, SKILL_GENRE_NUM
+		FOR LOCAL:1, 0, MAX_SKILL_SLOT
+			SKILL_NO_SLOT:対象:(LOCAL):(LOCAL:1) = -1
+			SKILL_ID_SLOT:対象:(LOCAL):(LOCAL:1) = -1
+		NEXT
+	NEXT
+ENDIF
+
+
+
+RETURN

@@ -1,0 +1,419 @@
+﻿;共有しているボタンやボタンに追尾させる情報
+
+;-------------------------------------------------
+;右カラムキャラリスト用のキャラボタン
+;
+;ボタン表示対象キャラ=キャラ番号
+;選択中色表示フラグ=0:通常カラー 1:選択中色で表示
+;ボタン番号加算値=NO + ボタン番号加算値（100～）
+;キャラ表示可否判定結果
+;	@SHOP_LIFE_CHECKCHARA～系の返り値を代入
+;	メニューファイル内のボタン指定である
+;	@SHOP_LIFE_LIST1_BUTTON{メニュー番号}(ARG:0, ARG:1)や
+;	@SHOP_LIFE_LIST1_BUTTON{メニュー番号}(ARG:0, ARG:1)から指定するときは
+;	リスト関数内で既に判定され、結果（PRINTOPTION）がARG:1に保存されている
+;	ので、そのままARG:1を返すだけでいい
+;行動済表示フラグ=0:行動済みマークをつける 1:行動済みマークをつけない
+;上下=今上のリストか下のリストかを指定する
+;	メニューファイルでボタンの追尾情報を上下のリストで分けたいときに操作
+;
+;メニューファイルでの使用例）
+;	CALL COLUMN_RIGHT_CHARALIST_BUTTON(ARG:0, CFLAG:(ARG:0):閨に呼ぶで選択中, SHOP_LIFE_LIST2_ADD_INPUT, ARG:1, "BOTTOM")
+;リスト内での使用例）
+;	CALL COLUMN_RIGHT_CHARALIST_BUTTON(NOW_CHECK_CHARA, 0, SHOP_LIFE_LIST1_ADD_INPUT, PRINTOPTION)
+;-------------------------------------------------
+@COLUMN_RIGHT_CHARALIST_BUTTON(ボタン表示対象キャラ, 選択中色表示フラグ = 0, ボタン番号加算値 = SHOP_LIFE_LIST1_ADD_INPUT, キャラ表示可否判定結果 = 1, 行動済表示フラグ = 0, 上下 = "")
+#DIM ボタン表示対象キャラ
+#DIM 選択中色表示フラグ
+#DIM ボタン番号加算値
+#DIM キャラ表示可否判定結果
+#DIM 行動済表示フラグ
+#DIMS 上下
+#DIMS 名前
+
+;CHECKCHARAの戻り値が０なら表示しない
+SIF キャラ表示可否判定結果 <= 0
+	RETURN 0
+
+PRINT 
+
+SIF 選択中色表示フラグ
+	SETCOLOR カラー_選択中
+
+IF STRLENS(ANAME(ボタン表示対象キャラ)) >= MAX_CHARANAME_LENGTH
+	名前 = %SNAME(ボタン表示対象キャラ)%
+ELSE
+	名前 = %ANAME(ボタン表示対象キャラ)%
+ENDIF
+
+;通常表示
+IF キャラ表示可否判定結果 == 1
+	CALL PRINTBUTTON_CENTER(@"[%名前, MAX_CHARANAME_LENGTH, LEFT%]", NO:(ボタン表示対象キャラ) + ボタン番号加算値, 0)
+;グレー表示
+ELSEIF キャラ表示可否判定結果 == 2
+	CALL PRINTBUTTON_CENTER(@"[%名前, MAX_CHARANAME_LENGTH, LEFT%]", NO:(ボタン表示対象キャラ) + ボタン番号加算値, 0, 0)
+ENDIF
+
+SIF 選択中色表示フラグ
+	RESETCOLOR
+
+;行動済みマーク表示
+IF !行動済表示フラグ
+	CALL PRINT_RESTMARK(ボタン表示対象キャラ)
+	PRINT  
+ENDIF
+
+;ボタンに追加の情報を表示する指定があれば
+RESULT = 0
+IF 上下 == "TOP"
+	TRYCCALLFORM SHOP_LIFE_BUTTON_ADD_TOP{FLAG:拠点フェイズ選択コマンド}(ボタン表示対象キャラ)
+	CATCH
+		TRYCALLFORM SHOP_LIFE_BUTTON_ADD{FLAG:拠点フェイズ選択コマンド}(ボタン表示対象キャラ)
+	ENDCATCH
+ELSEIF 上下 == "BOTTOM"
+	TRYCCALLFORM SHOP_LIFE_BUTTON_ADD_BOTTOM{FLAG:拠点フェイズ選択コマンド}(ボタン表示対象キャラ)
+	CATCH
+		TRYCALLFORM SHOP_LIFE_BUTTON_ADD{FLAG:拠点フェイズ選択コマンド}(ボタン表示対象キャラ)
+	ENDCATCH
+ELSE
+	TRYCALLFORM SHOP_LIFE_BUTTON_ADD{FLAG:拠点フェイズ選択コマンド}(ボタン表示対象キャラ)
+ENDIF
+;戻り値が１なら他の情報は表示しない
+SIF RESULT
+	RETURN 0
+
+CALL IS_KOJO(NO:(ボタン表示対象キャラ))
+IF RESULT
+	PRINT *
+ELSE
+	PRINT  
+ENDIF
+
+CALL PRINT_SEX(ボタン表示対象キャラ, 1, 0, 2)
+
+IF ボタン表示対象キャラ == MASTER
+	PRINT   
+ELSEIF CFLAG:(ボタン表示対象キャラ):所属 == CFLAG:MASTER:所属
+	SETCOLOR 0x97f8e8
+	PRINT 自
+ELSEIF CFLAG:(ボタン表示対象キャラ):所属 != 0
+	SETCOLOR 0x28cc28
+	PRINT 他
+ELSEIF CFLAG:(ボタン表示対象キャラ):特殊状態 == 特殊状態_放浪
+	SETCOLOR 0x874b4e
+	PRINT 浪
+ELSE
+	SETCOLOR 0x808080
+	PRINT 無
+ENDIF
+RESETCOLOR
+PRINT  
+
+CALL TMP_PRINT_CHARA_STARS_NUM(ボタン表示対象キャラ)
+PRINT  
+
+IF ボタン表示対象キャラ == MASTER
+	PRINT   
+ELSEIF CFLAG:(ボタン表示対象キャラ):捕虜先
+	IF CFLAG:(ボタン表示対象キャラ):捕虜先 == CFLAG:MASTER:所属
+		IF CFLAG:(ボタン表示対象キャラ):軟禁中 == 0
+			SETCOLOR 0x4434E5
+			PRINT 監
+		ELSE
+			SETCOLOR 0xA39ED7
+			PRINT 軟
+		ENDIF
+	ELSE
+		SETCOLOR 0xdf0000
+		PRINT 囚
+	ENDIF
+ELSEIF CFLAG:(ボタン表示対象キャラ):外交調教中
+	IF CFLAG:(ボタン表示対象キャラ):外交要求成功フラグ == 2
+		SETCOLOR カラー_女
+		PRINT 虜
+	ELSE
+		SETCOLOR 0x489200
+		PRINT 脅
+	ENDIF
+ELSEIF CFLAG:(ボタン表示対象キャラ):面識
+	SETCOLOR 0xD0D0D0
+	PRINT 会
+ELSE
+	SETCOLOR 0x404040
+	PRINT 会
+ENDIF
+RESETCOLOR
+PRINT  
+IF TALENT:(ボタン表示対象キャラ):崩壊
+	SETCOLOR カラー_警告
+	PRINT 崩
+ELSEIF TALENT:(ボタン表示対象キャラ):虚ろ
+	SETCOLOR カラー_警告
+	PRINT 虚
+ELSEIF ID_TO_CHARA(FLAG:お気に入り指定キャラ) == ボタン表示対象キャラ
+	SETCOLOR カラー_注意
+	PRINT 推
+ELSEIF TALENT:(ボタン表示対象キャラ):特殊勢力陥落系
+	SETCOLOR カラー_警告
+	PRINT 堕
+ELSEIF TALENT:(ボタン表示対象キャラ):親愛
+	SETCOLOR 0xF5CE13
+	PRINT 愛
+ELSEIF TALENT:(ボタン表示対象キャラ):恋慕
+	SETCOLOR 0xFF4080
+	PRINT 慕
+ELSEIF TALENT:(ボタン表示対象キャラ):親友
+	SETCOLOR 0xFF8000
+	PRINT 友
+ELSEIF TALENT:(ボタン表示対象キャラ):隷属
+	SETCOLOR 0x00FFFF
+	PRINT 隷
+ELSEIF TALENT:(ボタン表示対象キャラ):服従
+	SETCOLOR 0x00D0D0
+	PRINT 服
+ELSEIF TALENT:(ボタン表示対象キャラ):所有者
+	SETCOLOR 0xc40055
+	PRINT 所
+ELSEIF TALENT:(ボタン表示対象キャラ):主人
+	SETCOLOR 0xc40055
+	PRINT 主
+
+ELSE
+	PRINT   
+ENDIF
+RESETCOLOR
+
+IF TALENT:(ボタン表示対象キャラ):正妻
+	SETCOLOR 0xF5CE13
+	PRINT 妻
+ELSEIF TALENT:(ボタン表示対象キャラ):妾
+	SETCOLOR 0xF56000
+	PRINT 妾
+ELSEIF TALENT:(ボタン表示対象キャラ):恋人
+	SETCOLOR 0xFF80C0
+	PRINT 恋
+ELSEIF TALENT:(ボタン表示対象キャラ):烙印
+	SETCOLOR 0x00FF80
+	PRINT 印
+ELSE
+	PRINT   
+ENDIF
+RESETCOLOR
+PRINT  
+
+IF CFLAG:(ボタン表示対象キャラ):行動不能状態 == 行動不能_子供
+	SETCOLOR カラー_緑
+	PRINTPLAIN 幼
+ELSEIF CFLAG:(ボタン表示対象キャラ):行動不能状態 == 行動不能_臨月
+	SETCOLOR カラー_妊娠
+	PRINTPLAIN 臨
+ELSEIF TALENT:(ボタン表示対象キャラ):妊娠
+	SETCOLOR カラー_妊娠
+	PRINTPLAIN 妊
+ELSEIF CFLAG:(ボタン表示対象キャラ):避妊薬残ターン
+	SETCOLOR カラー_妊娠
+	PRINTPLAIN 避
+ELSEIF IS_OVULATION(ボタン表示対象キャラ)
+	SETCOLOR カラー_ピンク
+	PRINTPLAIN 危
+ELSEIF CFLAG:(ボタン表示対象キャラ):行動不能状態 == 行動不能_育児
+	SETCOLOR 0xFFC0C0
+	PRINTPLAIN 育
+ELSEIF CFLAG:(ボタン表示対象キャラ):行動不能状態 == 3
+	SETCOLOR カラー_警告
+	PRINTPLAIN 傷
+ELSEIF COOLTIME:(ボタン表示対象キャラ):0
+	SETCOLOR カラー_警告
+	PRINTFORM %TOFULL(TOSTR(COOLTIME:(ボタン表示対象キャラ):0))%
+ELSE
+	PRINTPLAIN   
+ENDIF
+RESETCOLOR
+
+;-------------------------------------------------
+;「捕虜の調教」の右カラムキャラリストボタン（上）表示に追尾させる情報
+;　デフォルトの情報を表示しない場合はRETURN 1
+;-------------------------------------------------
+@SHOP_LIFE_BUTTON_ADD_TOP_PRISONER(ARG:0)
+PRINTPLAIN  
+IF ARG:0 == MASTER
+	PRINT   
+ELSEIF CFLAG:(ARG:0):所属 == CFLAG:MASTER:所属
+	SETCOLOR 0x97f8e8
+	PRINT 自
+ELSEIF CFLAG:(ARG:0):所属 != 0
+	SETCOLOR 0x28cc28
+	PRINT 他
+ELSE
+	SETCOLOR 0x808080
+	PRINT 無
+ENDIF
+IF TALENT:(ARG:0):崩壊
+	SETCOLOR カラー_警告
+	PRINT 崩
+ELSEIF TALENT:(ARG:0):虚ろ
+	SETCOLOR カラー_警告
+	PRINT 虚
+ELSEIF TALENT:(ARG:0):隷属
+	SETCOLOR 0x00FFFF
+	PRINT 隷
+ELSEIF TALENT:(ARG:0):服従
+	SETCOLOR 0x00D0D0
+	PRINT 服
+ELSEIF TALENT:(ARG:0):所有者
+	SETCOLOR 0xc40055
+	PRINT 所
+ELSEIF TALENT:(ARG:0):主人
+	SETCOLOR 0xc40055
+	PRINT 主
+ELSE
+	PRINT   
+ENDIF
+IF TALENT:(ARG:0):正妻
+	SETCOLOR 0xF5CE13
+	PRINT 妻
+ELSEIF TALENT:(ARG:0):妾
+	SETCOLOR 0xF56000
+	PRINT 妾
+ELSEIF TALENT:(ARG:0):恋人
+	SETCOLOR 0xFF80C0
+	PRINT 恋
+ELSEIF TALENT:(ARG:0):烙印
+	SETCOLOR 0x00FF80
+	PRINT 印
+ELSE
+	PRINT   
+ENDIF
+RESETCOLOR
+
+IF CFLAG:(ARG:0):行動不能状態 == 行動不能_子供
+	SETCOLOR カラー_緑
+	PRINTPLAIN 幼
+ELSEIF CFLAG:(ARG:0):行動不能状態 == 行動不能_臨月
+	SETCOLOR カラー_妊娠
+	PRINTPLAIN 臨
+ELSEIF TALENT:(ARG:0):妊娠
+	SETCOLOR カラー_妊娠
+	PRINTPLAIN 妊
+ELSEIF CFLAG:(ARG:0):避妊薬残ターン
+	SETCOLOR カラー_妊娠
+	PRINTPLAIN 避
+ELSEIF IS_OVULATION(ARG:0)
+	SETCOLOR カラー_ピンク
+	PRINTPLAIN 危
+ELSEIF CFLAG:(ARG:0):行動不能状態 == 行動不能_育児
+	SETCOLOR 0xFFC0C0
+	PRINTPLAIN 育
+ELSEIF CFLAG:(ARG:0):行動不能状態 == 3
+	SETCOLOR カラー_警告
+	PRINTPLAIN 傷
+ELSEIF COOLTIME:(ARG:0):0
+	SETCOLOR カラー_警告
+	PRINTFORM %TOFULL(TOSTR(COOLTIME:(ARG:0):0))%
+ELSE
+	PRINTPLAIN   
+ENDIF
+RESETCOLOR
+
+PRINTFORM  精:
+CALL PRINT_GRADATIONBAR(BASE:(ARG:0):精神力, MAXBASE:(ARG:0):精神力, 10, 0x5E9AFF)
+PRINTFORM 好:
+IF CFLAG:(ARG:0):好感度 > 99999
+	PRINTFORM %"多", 6, RIGHT% 
+ELSE
+	PRINTFORM {CFLAG:(ARG:0):好感度, 6, RIGHT} 
+ENDIF
+PRINTFORM 依:
+IF CFLAG:(ARG:0):依存度 > 99999
+	PRINTFORM %"多い", 6, RIGHT% 
+ELSE
+	PRINTFORM {CFLAG:(ARG:0):依存度, 6, RIGHT} 
+ENDIF
+PRINTFORM 従:
+IF CFLAG:(ARG:0):従属度 > 99999
+	PRINTFORM %"多い", 6, RIGHT% 
+ELSE
+	PRINTFORM {CFLAG:(ARG:0):従属度, 6, RIGHT} 
+ENDIF
+
+PRINTFORM 支:
+IF CFLAG:(ARG:0):支配度 > 99999
+	PRINTFORM %"多い", 6, RIGHT% 
+ELSE
+	PRINTFORM {CFLAG:(ARG:0):支配度, 6, RIGHT} 
+ENDIF
+
+RETURN 1
+
+;-------------------------------------------------
+;「捕虜の調教」の右カラムキャラリストボタン（下）表示に追尾させる情報
+;　デフォルトの情報を表示しない場合はRETURN 1
+;-------------------------------------------------
+@SHOP_LIFE_BUTTON_ADD_BOTTOM_PRISONER(ARG:0)
+PRINTPLAIN  
+CALL PRINT_SEX(ARG:0, 1, 0, 2)
+PRINTPLAIN  
+CALL SHOP_LIFE_BUTTON_ADD_ABL_INFO(ARG:0, GETNUM(ABL, "Ｃ感"), GETNUM(ABL, "Ｖ感"), GETNUM(ABL, "Ａ感"), GETNUM(ABL, "Ｂ感"), GETNUM(ABL, "Ｍ感"))
+PRINTPLAIN  
+IF TALENT:(ARG:0):処女 && IS_FEMALE(ARG:0)
+	PRINT 処
+ELSE
+	PRINT 　
+ENDIF
+IF TALENT:(ARG:0):アナル処女
+	PRINT Ａ
+ELSE
+	PRINT 　
+ENDIF
+IF TALENT:(ARG:0):キス未経験
+	PRINT 唇
+ELSE
+	PRINT 　
+ENDIF
+IF TALENT:(ARG:0):童貞 && HAS_PENIS(ARG:0)
+	PRINT 童
+ELSE
+	PRINT 　
+ENDIF
+IF IS_OVULATION(ARG:0)
+	SETCOLOR カラー_ピンク
+	PRINTPLAIN 危
+	RESETCOLOR
+ELSEIF CFLAG:(ARG:0):行動不能状態 == 行動不能_臨月
+	SETCOLOR カラー_妊娠
+	PRINTPLAIN 臨
+ELSEIF TALENT:(ARG:0):妊娠
+	SETCOLOR カラー_妊娠
+	PRINTPLAIN 妊
+ELSEIF CFLAG:(ARG:0):避妊薬残ターン
+	SETCOLOR カラー_妊娠
+	PRINTPLAIN 避
+ELSEIF IS_OVULATION(ARG:0)
+	SETCOLOR カラー_ピンク
+	PRINTPLAIN 危
+ELSE
+	PRINT 　
+ENDIF
+
+RESETCOLOR
+RETURN 1
+
+
+@SHOP_LIFE_BUTTON_ADD_ABL_INFO(ARG:0, ARG:1 = -1, ARG:2 = -1, ARG:3 = -1, ARG:4 = -1, ARG:5 = -1, ARG:6 = -1, ARG:7 = -1)
+PRINTPLAIN  
+FOR LOCAL, 1, 8
+	SIF ARG:LOCAL == -1
+		BREAK
+	PRINTFORM %SUBSTRINGU(ABLNAME:(ARG:LOCAL), 0, 1)%:
+	SELECTCASE ARG:LOCAL
+		CASE GETNUM(ABL, "武闘"), GETNUM(ABL, "防衛"), GETNUM(ABL, "知略"), GETNUM(ABL, "政治"), GETNUM(ABL, "妖術"), GETNUM(ABL, "料理"), GETNUM(ABL, "歌唱")
+			LOCAL:1 = ランク_ＳＬＧ
+		CASE GETNUM(ABL, "性知識")
+			LOCAL:1 = ランク_性知識
+		CASEELSE
+			LOCAL:1 = ランク_その他
+	ENDSELECT
+	CALL PRINT_ALPHABET_RANK(LOCAL:1, ABL:(ARG:0):(ARG:LOCAL))
+	PRINTFORM {ABL:(ARG:0):(ARG:LOCAL), 3}
+	PRINT  
+NEXT

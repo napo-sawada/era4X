@@ -1,0 +1,233 @@
+﻿;--------------------------------------
+;ターンエンド時のサキュバスの処理
+;--------------------------------------
+@TURNEND_SUCCUBUS
+;3ターンに1回、ドレイン
+CALL SUCCUBUS_DRAIN(DAY % 3 == 0)
+
+
+;--------------------------------------
+;滅亡時の処理
+;--------------------------------------
+@SUCCUBUS_DESTROY_MSG
+CALL SINGLE_DRAWLINE
+SETCOLOR カラー_注意
+PRINTFORML
+PRINTFORML
+PRINTFORML
+PRINTFORMW 壊滅的な被害を受けたサキュバスは、夢の世界に撤退していきました
+PRINTFORMW ドレミー・スイートが夢の世界への道をしっかり施錠したので、当面は大丈夫でしょう……
+PRINTFORML
+PRINTFORML
+PRINTFORML
+RESETCOLOR
+
+;--------------------------------------
+;サキュバスの初期化処理
+;--------------------------------------
+@SUCCUBUS_INIT(ARG:0)
+#DIM LCOUNT
+VARSET LOCAL
+
+SIF GET_COUNTRY_FROM_ID(SP_COUNTRY_ID:特殊勢力_サキュバス) != -1
+	RETURN 0
+
+SIF SP_COUNTRY_RANK:特殊勢力_サキュバス == 0
+	RETURN 0
+
+SIF GET_NEW_COUNTRY() == -1
+	RETURN 0
+
+CALL CREATE_SP_COUNTRY(特殊勢力_サキュバス)
+LOCAL = RESULT
+CALL INIT_SP_COUNTRY(LOCAL)
+
+RETURN LOCAL
+
+;-------------------------------------------------
+;DESC  :サキュバス所属時に閨・捕虜調教前にアイテムを追加する処理
+;-------------------------------------------------
+@START_TRAIN_COMMON_SUCCUBUS()
+ITEM:A_バイブ = 1
+ITEM:A_アナルバイブ = 1
+ITEM:A_ニプルキャップ = 1
+ITEM:A_クリキャップ = 1
+ITEM:A_双頭バイブ = 1
+ITEM:A_ペニスバンド = 1
+ITEM:A_媚薬 = 99
+ITEM:A_ローション = 99
+ITEM:A_目隠し = 1
+
+
+@SELECT_CHARA_RANDOM_LOGIC_SUCCUBUS_DRAIN(対象)
+#DIM 対象
+#DIM サキュバス
+
+サキュバス = GET_COUNTRY_FROM_ID(SP_COUNTRY_ID:(特殊勢力_サキュバス))
+
+;MASTERはサキュバスで特殊勢力スタートした場合は除外
+SIF 対象 == MASTER && SP_COUNTRY_START:特殊勢力_サキュバス
+	RETURN 0
+;サキュバス所属で捕虜でない　またはサキュバス勢力の捕虜　念のためSPキャラを除外
+RETURN ((CFLAG:対象:所属 == サキュバス && !CFLAG:対象:捕虜先) || CFLAG:対象:捕虜先 == サキュバス) && !IS_SP_CHARA(対象)
+
+;-----------------------------
+;サキュバスの定期イベント
+;-----------------------------
+@SUCCUBUS_DRAIN(条件)
+#DIM サキュバス
+#DIM 条件
+#DIM 対象, 2
+#DIM メッセージ
+#DIM 吸収候補, 5
+#DIM 吸収対象
+#DIM 吸収値
+
+サキュバス = GET_COUNTRY_FROM_ID(SP_COUNTRY_ID:(特殊勢力_サキュバス))
+
+
+;サキュバス勢力があり、条件を満たしている
+SIF サキュバス == -1 || !条件
+	RETURN -1
+
+CALL SELECT_CHARA_RANDOM("SUCCUBUS_DRAIN")
+
+対象 = RESULT
+
+SIF 対象 == -1
+	RETURN 0
+
+吸収候補:0 = (RAND:(MAX(ABL:対象:武闘, 1)))
+吸収候補:1 = (RAND:(MAX(ABL:対象:知略, 1)))
+吸収候補:2 = (RAND:(MAX(ABL:対象:政治, 1)))
+吸収候補:3 = (RAND:(MAX(ABL:対象:歌唱, 1)))
+吸収候補:4 = (RAND:(MAX(ABL:対象:料理, 1)))
+
+吸収対象 = FINDELEMENT(吸収候補, MAXARRAY(吸収候補))
+SELECTCASE 吸収対象
+	CASE 0
+		吸収対象 = GETNUM(ABL, "武闘")
+	CASE 1
+		吸収対象 = GETNUM(ABL, "知略")
+	CASE 2
+		吸収対象 = GETNUM(ABL, "政治")
+	CASE 3
+		吸収対象 = GETNUM(ABL, "歌唱")
+	CASE 4
+		吸収対象 = GETNUM(ABL, "料理")
+ENDSELECT
+
+SIF ABL:対象:吸収対象 < 10
+	RETURN -1
+
+吸収値 = LIMIT(ABL:対象:吸収対象 / 10, 1, 3)
+
+対象:1 = GET_COUNTRY_BOSS(サキュバス)
+
+SIF 対象:1 == -1
+	RETURN -1
+
+CALL SINGLE_DRAWLINE
+SETCOLOR カラー_ピンク
+PRINTFORMW サキュバスは%ANAME(対象)%から精気を吸収している……
+PRINTFORML 
+SETCOLOR カラー_警告
+PRINTFORMW サキュバスは%ANAME(対象)%の能力を奪い取った！
+PRINTFORMW %ANAME(対象)%の%ABLNAME:吸収対象%が{吸収値}下がった！
+PRINTFORMW %ANAME(対象:1)%の%ABLNAME:吸収対象%が{吸収値}上がった！
+RESETCOLOR
+PRINTFORML 
+ABL:(対象:0):吸収対象 -= 吸収値
+ABL:(対象:1):吸収対象 += 吸収値
+
+
+;-----------------------------
+;サキュバスに捕らえられたときのイベント
+;-----------------------------
+@MASTER_CAPTURED_SUCCUBUS(ARG:0)
+PRINTFORMW 捕らえられた%ANAME(MASTER)%はサキュバスの前に引きずり出された…
+IF IS_MALE(MASTER)
+	PRINTFORMW サキュバスは%ANAME(MASTER)%を見ると、いい男ねと呟く
+	PRINTFORMW 私たちの眷属になって、たくさんイイコトをしない？　と誘ってきた
+	PRINTFORMW それはつまり夢魔になるということだが、拒否するより待遇はマシになるようだ……
+	PRINTFORMW 受け入れますか？
+	CALL ASK_YN("受け入れる", "拒否する")
+	IF RESULT == 0
+		PRINTFORMW 投獄されるよりはマシだろう。%ANAME(MASTER)%が頷くと、サキュバスはにっこりと笑う
+		PRINTFORMW そのまま彼女らは%ANAME(MASTER)%を取り囲み、その身体を愛撫し始めた
+		PRINTFORMW 気が遠くなるほどの快楽の中で、%ANAME(MASTER)%の意識は夢に蕩けていった……
+		SETCOLOR カラー_注意
+		PRINTFORMW %ANAME(MASTER)%は淫魔になりました
+		RESETCOLOR
+	ELSE
+		PRINTFORMW お前達になど手を貸すか。%ANAME(MASTER)%は毅然として言い放つ	
+		PRINTFORMW 彼女らは苦笑しながらも、%ANAME(MASTER)%を投獄した……
+	ENDIF
+ELSEIF GETBIT(TALENT:MASTER:特殊勢力陥落系, 特殊勢力_サキュバス)
+	PRINTFORMW また来てくれたのねと、彼女らは%ANAME(MASTER)%の身体に手を這わせながらささやく
+	PRINTFORMW それだけで%ANAME(MASTER)%の身体は、彼らに刻み込まれた快楽を思い出して濡れてしまう
+	PRINTFORMW %ANAME(MASTER)%の声が甘く蕩け始めた頃、また私たちとイイコトをする？　と彼女らは尋ねる
+	PRINTFORMW 受け入れますか？
+	CALL ASK_YN("受け入れる", "拒否する")
+	IF RESULT == 0
+		PRINTFORMW 彼らによって育て上げられた女の本性が、%ANAME(MASTER)%を頷かせた
+		PRINTFORMW おかえりという言葉を%ANAME(MASTER)%にかけると、サキュバスは%ANAME(MASTER)%を愛撫しはじめた……
+		SETCOLOR カラー_注意
+		PRINTFORMW %ANAME(MASTER)%は再び、夢の世界の住人となった
+		RESETCOLOR
+	ELSE
+		PRINTFORMW 拒否されるということは考えになかったらしく、サキュバス達はしばし意外そうにしていた
+		PRINTFORMW それならそれで、夢の世界の素晴らしさを思い出させてあげると、不敵に笑う
+		PRINTFORMW サキュバス達は%ANAME(MASTER)%を投獄した……
+	ENDIF
+ELSE
+	PRINTFORMW サキュバスは%ANAME(MASTER)%の体をじっくりと眺める。
+	PRINTFORMW 私たちの眷属になって、たくさんイイコトをしない？　と誘ってきた
+	PRINTFORMW とんでもない提案だが、拒否しようと、受け入れるように仕向けてくるのだろう
+	PRINTFORMW 受け入れますか？
+	CALL ASK_YN("受け入れる", "拒否する")
+	IF RESULT == 0
+		PRINTFORMW どうせされることは変わらないのだ。%ANAME(MASTER)%は力なく頷く
+		PRINTFORMW そうこなくちゃと、サキュバスは淫蕩な笑みを浮かべた
+		PRINTFORMW %ANAME(MASTER)%は、夢魔として生まれ変わっていく……
+		SETCOLOR カラー_注意
+		PRINTFORMW %ANAME(MASTER)%はサキュバスになりました
+		RESETCOLOR
+	ELSE
+		PRINTFORMW そんなことができるか。%ANAME(MASTER)%がきっぱりと拒否すると、サキュバスは驚いた顔をする
+		PRINTFORMW どうして？　こんなに気持ちいいのにという彼女らとは、価値観を共有できそうもない
+		PRINTFORMW サキュバス達は%ANAME(MASTER)%を投獄した……
+	ENDIF
+ENDIF
+IF RESULT == 0
+	CALL CHANGE_COUNTRY(MASTER, ARG:0, 1)
+	SETBIT TALENT:MASTER:特殊勢力陥落系, 特殊勢力_サキュバス
+	CALL PLAYER_FALLEN_TO_SP_COUNTRY(ARG:0)
+	CALL SUCCUBUS_FALLEN_LEAVE_MARK(MASTER)
+
+	RETURN 0
+ELSE
+	CALL CAPTURE(MASTER, ARG:0)
+	RETURN 2
+ENDIF
+
+;--------------------------------------
+;エンディング
+;--------------------------------------
+@SUCCUBUS_ENDING
+
+PRINTFORML 夢魔達の放つ淫気の前に、幻想郷の少女たちはなすすべもなかった
+PRINTFORML 誰も彼もが甘い快楽の前に屈し、夢魔へと成り果てていった
+PRINTFORMW ……やがて、サキュバスは幻想郷全土を支配した
+PRINTFORMW 今や幻想郷は巨大な乱交会場となっており、あちこちで男女がまぐわい、快楽を楽しんでいる
+PRINTFORML 貞操という概念など、そこにはもはや存在していない……
+IF CFLAG:MASTER:所属 == GET_COUNTRY_FROM_ID(SP_COUNTRY_ID:特殊勢力_サキュバス) && IS_FEMALE(MASTER)
+	PRINTFORMW 
+	PRINTFORML ……その中に、%ANAME(MASTER)%の姿もあった
+	PRINTFORMW 淫らな衣装に身を包んだ%PRONOUN(MASTER)%は、他の少女たちと一緒になり、交わりあっている
+	PRINTFORMW 今の%ANAME(MASTER)%にとっては粘膜のこすれあう快感のみが真実であり、それ以外などどうでもよかった
+	PRINTFORMW そうしてずっと、心地よい快楽の海に溺れ続けるのだ……
+	CALL FUCK_SP(MASTER, "欲望, 奉仕, 性技, 性交, 射精, 精愛, レズ, キス, 口淫, Ｃ, Ｖ, Ｍ, Ｖ挿入, Ｖ性交", "童貞喪失, 処女喪失, キス喪失, 口内射精", GET_COUNTRY_FROM_ID(SP_COUNTRY_ID:特殊勢力_サキュバス), GET_SPERM_ID("サキュバス"), "サキュバスのペニス", "サキュバス", "サキュバスの膣", "強姦")
+ENDIF
+PRINTFORML 
+PRINTFORMW 少女達の淫らな声が、いつまでも幻想郷に響き続けていた……

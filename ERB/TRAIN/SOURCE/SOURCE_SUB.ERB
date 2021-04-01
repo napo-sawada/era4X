@@ -1,0 +1,1670 @@
+﻿;SOURCE_CHECKで使用する関数(雑多なもの)
+
+;-------------------------------------------------
+;好感度上昇の処理
+;-------------------------------------------------
+@LOVE_UP_CHECK(ARG:0)
+;能力固定フラグが立っているなら処理しない
+IF CFLAG:(ARG:0):能力固定フラグ
+	RETURN
+ENDIF
+
+;催眠術実行中はダメ
+SIF TCVAR:(ARG:0):催眠中 > 0
+	RETURN
+
+SIF FLAG:調教モード == 7
+	RETURN
+
+;●好感度の処理
+;素質による増減
+;LOCAL:1は上昇成分に掛かる補正
+LOCAL:1 = 100
+;LOCAL:2は減少成分に掛かる補正
+LOCAL:2 = 100
+
+SIF TALENT:(ARG:0):素直
+	LOCAL:1 += 10
+SIF TALENT:(ARG:0):献身的
+	LOCAL:1 += 5
+SIF TALENT:(ARG:0):恋慕
+	LOCAL:1 += 10
+SIF TALENT:(ARG:0):親友
+	LOCAL:1 += 10
+SIF TALENT:(ARG:0):親愛
+	LOCAL:1 += 10
+SIF TALENT:(ARG:0):恋人
+	LOCAL:1 += 10
+SIF TALENT:(ARG:0):服従
+	LOCAL:1 += 10
+SIF TALENT:(ARG:0):隷属
+	LOCAL:1 += 10
+SIF TALENT:(ARG:0):主人
+	LOCAL:1 += 10
+SIF TALENT:(ARG:0):所有者
+	LOCAL:1 += 10
+SIF TALENT:MASTER:天の御遣い
+	LOCAL:1 += 20
+SIF TALENT:MASTER:魅惑
+	LOCAL:1 += 10
+SIF TALENT:MASTER:謎の魅力
+	LOCAL:1 += 10
+SIF TALENT:MASTER:人気
+	LOCAL:1 += 10
+SIF TALENT:(ARG:0):幼稚
+	LOCAL:1 += 10
+SIF TALENT:(ARG:0):チョロイン
+	LOCAL:1 += 10
+
+SIF TALENT:(ARG:0):反抗的
+	LOCAL:2 += 10
+SIF TALENT:(ARG:0):生意気
+	LOCAL:2 += 10
+SIF TALENT:(ARG:0):プライド高い
+	LOCAL:2 += 10
+SIF TALENT:(ARG:0):男嫌い && IS_MALE(MASTER)
+	LOCAL:2 += 10
+SIF TALENT:(ARG:0):女嫌い && IS_FEMALE(MASTER)
+	LOCAL:2 += 10
+SIF TALENT:(ARG:0):幼稚
+	LOCAL:2 += 10
+SIF TALENT:(ARG:0):チョロイン
+	LOCAL:2 -= 10
+
+SIF TALENT:(ARG:0):反抗的
+	TIMES LOCAL:1, 0.90
+SIF TALENT:(ARG:0):生意気
+	TIMES LOCAL:1, 0.90
+SIF TALENT:(ARG:0):無関心
+	TIMES LOCAL:1, 0.90
+SIF TALENT:(ARG:0):感情乏しい
+	TIMES LOCAL:1, 0.90
+SIF TALENT:(ARG:0):孤高
+	TIMES LOCAL:1, 0.90
+SIF TALENT:(ARG:0):男嫌い && IS_MALE(MASTER)
+	TIMES LOCAL:1, 0.90
+SIF TALENT:(ARG:0):女嫌い && IS_FEMALE(MASTER)
+	TIMES LOCAL:1, 0.90
+SIF TALENT:(ARG:0):抑圧
+	LOCAL:1 = LOCAL:1 * (180 - YOKUATSU_RATE(ARG:0)) / 180
+SIF TALENT:(ARG:0):孤高
+	LOCAL:1 = LOCAL:1 * (250 - KOKOU_RATE(ARG:0)) / 250
+
+SIF TALENT:(ARG:0):献身的
+	TIMES LOCAL:2, 0.95
+SIF TALENT:(ARG:0):大人しい
+	TIMES LOCAL:2, 0.90
+SIF TALENT:(ARG:0):恋慕
+	TIMES LOCAL:2, 0.90
+SIF TALENT:(ARG:0):親友
+	TIMES LOCAL:2, 0.90
+SIF TALENT:(ARG:0):親愛
+	TIMES LOCAL:2, 0.90
+SIF TALENT:(ARG:0):服従
+	TIMES LOCAL:2, 0.90
+SIF TALENT:(ARG:0):隷属
+	TIMES LOCAL:2, 0.90
+SIF TALENT:(ARG:0):主人
+	TIMES LOCAL:2, 0.90
+SIF TALENT:(ARG:0):所有者
+	TIMES LOCAL:2, 0.90
+SIF TALENT:(ARG:0):烙印
+	TIMES LOCAL:2, 0.90
+SIF TALENT:MASTER:魅惑
+	TIMES LOCAL:2, 0.90
+SIF TALENT:MASTER:謎の魅力
+	TIMES LOCAL:2, 0.90
+SIF TALENT:MASTER:人気
+	TIMES LOCAL:2, 0.90
+SIF TALENT:(ARG:0):無関心
+	TIMES LOCAL:2, 0.90
+SIF TALENT:(ARG:0):感情乏しい
+	TIMES LOCAL:2, 0.90
+SIF TALENT:(ARG:0):チョロイン
+	TIMES LOCAL:2, 0.90
+SIF TALENT:(ARG:0):抑圧
+	LOCAL:2 = LOCAL:2 * (180 - YOKUATSU_RATE(ARG:0)) / 180
+
+;外交印象値補正
+LOCAL:1 = LOCAL:1 * (1500 + REL_LIKE:(ARG:0):MASTER / 2) / 1500
+LOCAL:2 = LOCAL:2 * (1500 + REL_HATE:(ARG:0):MASTER / 2) / 1500
+
+;素質による補正の最低値を50、最高値を180とする
+LOCAL:1 = LIMIT(LOCAL:1, 50, 180)
+LOCAL:2 = LIMIT(LOCAL:2, 50, 180)
+
+;機嫌に応じた上下
+SELECTCASE TOSTR_EMOTION(ARG:0)
+	CASE "幸"
+		TIMES LOCAL:1, 2.20
+		TIMES LOCAL:2, 0.50
+	CASE "悦"
+		TIMES LOCAL:1, 1.80
+		TIMES LOCAL:2, 0.60
+	CASE "良"
+		TIMES LOCAL:1, 1.30
+		TIMES LOCAL:2, 0.80
+	CASE "恨"
+		TIMES LOCAL:1, 0.30
+		TIMES LOCAL:2, 3.50
+	CASE "怒"
+		TIMES LOCAL:1, 0.60
+		TIMES LOCAL:2, 1.80
+	CASE "憤"
+		TIMES LOCAL:1, 0.85
+		TIMES LOCAL:2, 1.40
+	CASE "鬱"
+		TIMES LOCAL:1, 0.10
+		TIMES LOCAL:2, 1.50
+	CASE "悲"
+		TIMES LOCAL:1, 0.40
+		TIMES LOCAL:2, 1.20
+	CASE "憂"
+		TIMES LOCAL:1, 0.70
+		TIMES LOCAL:2, 1.10
+	CASE "狂"
+		TIMES LOCAL:1, 0.20
+		TIMES LOCAL:2, 2.00
+	CASE "恐"
+		TIMES LOCAL:1, 0.50
+		TIMES LOCAL:2, 1.50
+	CASE "怯"
+		TIMES LOCAL:1, 0.80
+		TIMES LOCAL:2, 1.20
+	CASE "壊"
+		LOCAL:1 = 0
+		LOCAL:2 = 0
+	CASE "虚"
+		TIMES LOCAL:1, 0.10
+		TIMES LOCAL:2, 0.10
+ENDSELECT
+
+TCVAR:(ARG:0):10 = TCVAR:(ARG:0):10 * LOCAL:1 / 100
+TCVAR:(ARG:0):15 = TCVAR:(ARG:0):15 * LOCAL:2 / 100
+
+;機嫌に応じた上下
+IF GROUPMATCH(TOSTR_EMOTION(ARG:0), "悦", "幸")
+	;絶頂による好感度上昇
+	TCVAR:(ARG:0):10 += SUM_NOWEX(ARG:0) * 5
+ENDIF
+
+;体力が尽きていると好感度にペナルティ
+IF TCVAR:(ARG:0):51
+	TIMES TCVAR:(ARG:0):10, 0.20
+	TIMES TCVAR:(ARG:0):15, 2.00
+ENDIF
+
+;●依存度の処理
+LOCAL:0 = 0
+
+;素質による増減
+;LOCAL:1は上昇成分に掛かる補正
+LOCAL:1 = 100
+;LOCAL:2は減少成分に掛かる補正
+LOCAL:2 = 100
+
+SIF TALENT:(ARG:0):素直
+	LOCAL:1 += 10
+SIF TALENT:(ARG:0):抑圧
+	LOCAL:1 += 20
+SIF TALENT:(ARG:0):孤高
+	LOCAL:1 += 20
+SIF TALENT:(ARG:0):恋慕
+	LOCAL:1 += 10
+SIF TALENT:(ARG:0):親友
+	LOCAL:1 += 10
+SIF TALENT:(ARG:0):親愛
+	LOCAL:1 += 10
+SIF TALENT:(ARG:0):恋人
+	LOCAL:1 += 10
+SIF TALENT:(ARG:0):服従
+	LOCAL:1 += 10
+SIF TALENT:(ARG:0):隷属
+	LOCAL:1 += 10
+SIF TALENT:(ARG:0):烙印
+	LOCAL:1 += 10
+SIF TALENT:(ARG:0):主人
+	LOCAL:1 += 10
+SIF TALENT:(ARG:0):所有者
+	LOCAL:1 += 10
+SIF TALENT:(ARG:0):プライド低い
+	LOCAL:1 += 10
+SIF TALENT:MASTER:求心力
+	LOCAL:1 += 20
+SIF TALENT:MASTER:小悪魔
+	LOCAL:1 += 10
+SIF TALENT:MASTER:魅惑
+	LOCAL:1 += 10
+SIF TALENT:MASTER:謎の魅力
+	LOCAL:1 += 10
+
+SIF TALENT:(ARG:0):プライド高い
+	LOCAL:2 += 10
+SIF TALENT:(ARG:0):反抗的
+	LOCAL:2 += 10
+SIF TALENT:(ARG:0):自制心
+	LOCAL:2 += 10
+SIF TALENT:(ARG:0):男嫌い && IS_MALE(MASTER)
+	LOCAL:2 += 10
+SIF TALENT:(ARG:0):女嫌い && IS_FEMALE(MASTER)
+	LOCAL:2 += 10
+
+SIF TALENT:(ARG:0):気丈
+	TIMES LOCAL:1, 0.90
+SIF TALENT:(ARG:0):プライド高い
+	TIMES LOCAL:1, 0.90
+SIF TALENT:(ARG:0):反抗的
+	TIMES LOCAL:1, 0.90
+SIF TALENT:(ARG:0):無関心
+	TIMES LOCAL:1, 0.90
+SIF TALENT:(ARG:0):感情乏しい
+	TIMES LOCAL:1, 0.90
+SIF TALENT:(ARG:0):自制心
+	TIMES LOCAL:1, 0.90
+SIF TALENT:(ARG:0):男嫌い && IS_MALE(MASTER)
+	TIMES LOCAL:1, 0.90
+SIF TALENT:(ARG:0):女嫌い && IS_FEMALE(MASTER)
+	TIMES LOCAL:1, 0.90
+
+SIF TALENT:(ARG:0):恋慕
+	TIMES LOCAL:2, 0.90
+SIF TALENT:(ARG:0):親友
+	TIMES LOCAL:2, 0.90
+SIF TALENT:(ARG:0):親愛
+	TIMES LOCAL:2, 0.90
+SIF TALENT:(ARG:0):服従
+	TIMES LOCAL:2, 0.90
+SIF TALENT:(ARG:0):隷属
+	TIMES LOCAL:2, 0.90
+SIF TALENT:(ARG:0):主人
+	TIMES LOCAL:2, 0.90
+SIF TALENT:(ARG:0):所有者
+	TIMES LOCAL:2, 0.90
+SIF TALENT:(ARG:0):プライド低い
+	TIMES LOCAL:2, 0.90
+SIF TALENT:MASTER:魅惑
+	TIMES LOCAL:2, 0.90
+SIF TALENT:MASTER:謎の魅力
+	TIMES LOCAL:2, 0.90
+SIF TALENT:(ARG:0):無関心
+	TIMES LOCAL:2, 0.90
+SIF TALENT:(ARG:0):感情乏しい
+	TIMES LOCAL:2, 0.90
+SIF TALENT:(ARG:0):抑圧
+	TIMES LOCAL:2, 0.30
+
+;外交印象値補正
+LOCAL:1 = LOCAL:1 * (1500 + REL_LIKE:(ARG:0):MASTER / 2) / 1500
+LOCAL:2 = LOCAL:2 * (1500 + REL_HATE:(ARG:0):MASTER / 2) / 1500
+
+;素質による補正の最低値を50、最高値を180とする
+LOCAL:1 = LIMIT(LOCAL:1, 50, 180)
+LOCAL:2 = LIMIT(LOCAL:2, 50, 180)
+
+;機嫌に応じた上下
+SELECTCASE TOSTR_EMOTION(ARG:0)
+	CASE "幸"
+		TIMES LOCAL:1, 2.00
+		TIMES LOCAL:2, 0.50
+	CASE "悦"
+		TIMES LOCAL:1, 1.50
+		TIMES LOCAL:2, 0.70
+	CASE "良"
+		TIMES LOCAL:1, 1.20
+		TIMES LOCAL:2, 0.90
+	CASE "恨"
+		TIMES LOCAL:1, 0.70
+		TIMES LOCAL:2, 1.30
+	CASE "怒"
+		TIMES LOCAL:1, 0.80
+		TIMES LOCAL:2, 1.20
+	CASE "憤"
+		TIMES LOCAL:1, 0.90
+		TIMES LOCAL:2, 1.10
+	CASE "鬱"
+		TIMES LOCAL:1, 0.70
+		TIMES LOCAL:2, 1.30
+	CASE "悲"
+		TIMES LOCAL:1, 0.80
+		TIMES LOCAL:2, 1.20
+	CASE "憂"
+		TIMES LOCAL:1, 0.90
+		TIMES LOCAL:2, 1.10
+	CASE "狂"
+		TIMES LOCAL:1, 2.00
+		TIMES LOCAL:2, 0.50
+	CASE "恐"
+		TIMES LOCAL:1, 1.60
+		TIMES LOCAL:2, 0.70
+	CASE "怯"
+		TIMES LOCAL:1, 1.30
+		TIMES LOCAL:2, 0.90
+	CASE "壊"
+		LOCAL:1 = 0
+		LOCAL:2 = 0
+	CASE "虚"
+		TIMES LOCAL:1, 0.10
+		TIMES LOCAL:2, 0.10
+ENDSELECT
+
+TCVAR:(ARG:0):11 = TCVAR:(ARG:0):11 * LOCAL:1 / 100
+TCVAR:(ARG:0):16 = TCVAR:(ARG:0):16 * LOCAL:2 / 100
+
+;機嫌に応じた上下
+IF GROUPMATCH(TOSTR_EMOTION(ARG:0), "壊", "虚") == 0
+	;絶頂による依存度上昇
+	TCVAR:(ARG:0):11 += SUM_NOWEX(ARG:0) * 50
+ENDIF
+
+;●従属度の処理
+;素質による増減
+;LOCAL:1は上昇成分に掛かる補正
+LOCAL:1 = 100
+;LOCAL:2は減少成分に掛かる補正
+LOCAL:2 = 100
+
+SIF TALENT:(ARG:0):素直
+	LOCAL:1 += 10
+SIF TALENT:(ARG:0):臆病
+	LOCAL:1 += 10
+SIF TALENT:(ARG:0):プライド低い
+	LOCAL:1 += 10
+SIF TALENT:(ARG:0):服従
+	LOCAL:1 += 10
+SIF TALENT:(ARG:0):隷属
+	LOCAL:1 += 10
+SIF TALENT:(ARG:0):烙印
+	LOCAL:1 += 10
+SIF TALENT:MASTER:君主の器
+	LOCAL:1 += 20
+SIF TALENT:MASTER:小悪魔
+	LOCAL:1 += 10
+SIF TALENT:MASTER:魅惑
+	LOCAL:1 += 10
+SIF TALENT:MASTER:謎の魅力
+	LOCAL:1 += 10
+SIF TALENT:(ARG:0):チョロイン
+	LOCAL:1 += 10
+
+SIF TALENT:(ARG:0):プライド高い
+	LOCAL:2 += 10
+SIF TALENT:(ARG:0):反抗的
+	LOCAL:2 += 10
+SIF TALENT:(ARG:0):孤高
+	LOCAL:2 += 10
+SIF TALENT:(ARG:0):自制心
+	LOCAL:2 += 10
+SIF TALENT:(ARG:0):チョロイン
+	LOCAL:2 -= 10
+
+SIF TALENT:(ARG:0):気丈
+	TIMES LOCAL:1, 0.90
+SIF TALENT:(ARG:0):プライド高い
+	TIMES LOCAL:1, 0.90
+SIF TALENT:(ARG:0):反抗的
+	TIMES LOCAL:1, 0.90
+SIF TALENT:(ARG:0):無関心
+	TIMES LOCAL:1, 0.90
+SIF TALENT:(ARG:0):感情乏しい
+	TIMES LOCAL:1, 0.90
+SIF TALENT:(ARG:0):孤高
+	TIMES LOCAL:1, 0.90
+SIF TALENT:(ARG:0):自制心
+	TIMES LOCAL:1, 0.90
+SIF TALENT:(ARG:0):男嫌い && IS_MALE(MASTER)
+	TIMES LOCAL:1, 0.90
+SIF TALENT:(ARG:0):女嫌い && IS_FEMALE(MASTER)
+	TIMES LOCAL:1, 0.90
+SIF TALENT:(ARG:0):抑圧
+	LOCAL:1 = LOCAL:1 * (180 - YOKUATSU_RATE(ARG:0)) / 180
+SIF TALENT:(ARG:0):孤高
+	LOCAL:1 = LOCAL:1 * (250 - KOKOU_RATE(ARG:0)) / 250
+
+SIF TALENT:(ARG:0):臆病
+	TIMES LOCAL:2, 0.90
+SIF TALENT:(ARG:0):プライド低い
+	TIMES LOCAL:2, 0.90
+SIF TALENT:(ARG:0):服従
+	TIMES LOCAL:2, 0.90
+SIF TALENT:(ARG:0):隷属
+	TIMES LOCAL:2, 0.90
+SIF TALENT:(ARG:0):烙印
+	TIMES LOCAL:2, 0.90
+SIF TALENT:(ARG:0):無関心
+	TIMES LOCAL:2, 0.90
+SIF TALENT:(ARG:0):感情乏しい
+	TIMES LOCAL:2, 0.90
+SIF TALENT:(ARG:0):チョロイン
+	TIMES LOCAL:2, 0.90
+SIF TALENT:(ARG:0):抑圧
+	LOCAL:2 = LOCAL:2 * (180 - YOKUATSU_RATE(ARG:0)) / 180
+
+;外交印象値補正
+LOCAL:1 = LOCAL:1 * (1500 + REL_LIKE:(ARG:0):MASTER / 2) / 1500
+LOCAL:2 = LOCAL:2 * (1500 + REL_HATE:(ARG:0):MASTER / 2) / 1500
+
+;最低値を50、最高値を180とする
+LOCAL:1 = LIMIT(LOCAL:1, 50, 180)
+LOCAL:2 = LIMIT(LOCAL:2, 50, 180)
+
+;機嫌に応じた上下
+SELECTCASE TOSTR_EMOTION(ARG:0)
+	CASE "幸"
+		TIMES LOCAL:1, 1.50
+		TIMES LOCAL:2, 0.70
+	CASE "悦"
+		TIMES LOCAL:1, 1.30
+		TIMES LOCAL:2, 0.80
+	CASE "良"
+		TIMES LOCAL:1, 1.15
+		TIMES LOCAL:2, 0.90
+	CASE "恨"
+		TIMES LOCAL:1, 0.20
+		TIMES LOCAL:2, 2.50
+	CASE "怒"
+		TIMES LOCAL:1, 0.50
+		TIMES LOCAL:2, 1.60
+	CASE "憤"
+		TIMES LOCAL:1, 0.80
+		TIMES LOCAL:2, 1.20
+	CASE "鬱"
+		TIMES LOCAL:1, 0.10
+		TIMES LOCAL:2, 1.50
+	CASE "悲"
+		TIMES LOCAL:1, 0.40
+		TIMES LOCAL:2, 1.25
+	CASE "憂"
+		TIMES LOCAL:1, 0.75
+		TIMES LOCAL:2, 1.10
+	CASE "狂"
+		TIMES LOCAL:1, 3.00
+		TIMES LOCAL:2, 0.20
+	CASE "恐"
+		TIMES LOCAL:1, 2.20
+		TIMES LOCAL:2, 0.50
+	CASE "怯"
+		TIMES LOCAL:1, 1.50
+		TIMES LOCAL:2, 0.75
+	CASE "壊"
+		LOCAL:1 = 0
+		LOCAL:2 = 0
+	CASE "虚"
+		TIMES LOCAL:1, 0.10
+		TIMES LOCAL:2, 0.10
+ENDSELECT
+
+IF FLAG:主導権所有者
+	TIMES TCVAR:(ARG:0):12, 0.7
+	TIMES TCVAR:(ARG:0):17, 1.2
+ENDIF	
+
+TCVAR:(ARG:0):12 = TCVAR:(ARG:0):12 * LOCAL:1 / 100
+TCVAR:(ARG:0):17 = TCVAR:(ARG:0):17 * LOCAL:2 / 100
+
+;機嫌に応じた上下
+IF GROUPMATCH(TOSTR_EMOTION(ARG:0), "壊", "虚", "狂", "恐") == 0
+	;絶頂による従属度上昇
+	TCVAR:(ARG:0):12 += SUM_NOWEX(ARG:0)
+ENDIF
+
+
+;●支配度の処理
+;素質による増減
+;LOCAL:1は上昇成分に掛かる補正
+LOCAL:1 = 100
+;LOCAL:2は減少成分に掛かる補正
+LOCAL:2 = 100
+
+SIF TALENT:(ARG:0):反抗的
+	LOCAL:1 += 10
+SIF TALENT:(ARG:0):気丈
+	LOCAL:1 += 10
+SIF TALENT:(ARG:0):プライド高い
+	LOCAL:1 += 10
+SIF TALENT:(ARG:0):主人
+	LOCAL:1 += 10
+SIF TALENT:(ARG:0):所有者
+	LOCAL:1 += 10
+SIF TALENT:(ARG:0):君主の器
+	LOCAL:1 += 20
+SIF TALENT:(ARG:0):小悪魔
+	LOCAL:1 += 10
+SIF TALENT:(ARG:0):魅惑
+	LOCAL:1 += 10
+SIF TALENT:(ARG:0):謎の魅力
+	LOCAL:1 += 10
+
+SIF TALENT:(ARG:0):プライド低い
+	LOCAL:2 += 10
+SIF TALENT:(ARG:0):素直
+	LOCAL:2 += 10
+SIF TALENT:(ARG:0):臆病
+	LOCAL:2 += 10
+SIF TALENT:(ARG:0):自制心
+	LOCAL:2 += 10
+SIF TALENT:(ARG:0):チョロイン
+	LOCAL:2 -= 10
+
+SIF TALENT:(ARG:0):素直
+	TIMES LOCAL:1, 0.90
+SIF TALENT:(ARG:0):プライド低い
+	TIMES LOCAL:1, 0.90
+SIF TALENT:(ARG:0):大人しい
+	TIMES LOCAL:1, 0.90
+SIF TALENT:(ARG:0):無関心
+	TIMES LOCAL:1, 0.90
+SIF TALENT:(ARG:0):感情乏しい
+	TIMES LOCAL:1, 0.90
+
+SIF TALENT:(ARG:0):男嫌い && IS_MALE(MASTER)
+	TIMES LOCAL:1, 0.90
+SIF TALENT:(ARG:0):女嫌い && IS_FEMALE(MASTER)
+	TIMES LOCAL:1, 0.90
+SIF TALENT:(ARG:0):抑圧
+	LOCAL:1 = LOCAL:1 * (180 - YOKUATSU_RATE(ARG:0)) / 180
+SIF TALENT:(ARG:0):孤高
+	LOCAL:1 = LOCAL:1 * (250 - KOKOU_RATE(ARG:0)) / 250
+
+SIF TALENT:(ARG:0):反抗的
+	TIMES LOCAL:2, 0.90
+SIF TALENT:(ARG:0):プライド高い
+	TIMES LOCAL:2, 0.90
+SIF TALENT:(ARG:0):主人
+	TIMES LOCAL:2, 0.90
+SIF TALENT:(ARG:0):所有者
+	TIMES LOCAL:2, 0.90
+SIF TALENT:(ARG:0):小悪魔
+	TIMES LOCAL:2, 0.90
+SIF TALENT:(ARG:0):気丈
+	TIMES LOCAL:2, 0.90
+SIF TALENT:(ARG:0):感情乏しい
+	TIMES LOCAL:2, 0.90
+SIF TALENT:(ARG:0):チョロイン
+	TIMES LOCAL:2, 0.90
+
+SIF TALENT:(ARG:0):抑圧
+	LOCAL:2 = LOCAL:2 * (180 - YOKUATSU_RATE(ARG:0)) / 180
+
+;外交印象値補正
+LOCAL:1 = LOCAL:1 * (1500 + REL_LIKE:(ARG:0):MASTER / 2) / 1500
+LOCAL:2 = LOCAL:2 * (1500 + REL_HATE:(ARG:0):MASTER / 2) / 1500
+
+;最低値を50、最高値を180とする
+LOCAL:1 = LIMIT(LOCAL:1, 50, 180)
+LOCAL:2 = LIMIT(LOCAL:2, 50, 180)
+
+;機嫌に応じた上下
+SELECTCASE TOSTR_EMOTION(ARG:0)
+	CASE "幸"
+		TIMES LOCAL:1, 1.50
+		TIMES LOCAL:2, 0.70
+	CASE "悦"
+		TIMES LOCAL:1, 1.30
+		TIMES LOCAL:2, 0.80
+	CASE "良"
+		TIMES LOCAL:1, 1.15
+		TIMES LOCAL:2, 0.90
+	CASE "恨"
+		TIMES LOCAL:1, 1.00
+		TIMES LOCAL:2, 1.50
+	CASE "怒"
+		TIMES LOCAL:1, 1.00
+		TIMES LOCAL:2, 1.30
+	CASE "憤"
+		TIMES LOCAL:1, 1.30
+		TIMES LOCAL:2, 1.00
+	CASE "鬱"
+		TIMES LOCAL:1, 0.10
+		TIMES LOCAL:2, 1.50
+	CASE "悲"
+		TIMES LOCAL:1, 0.40
+		TIMES LOCAL:2, 1.25
+	CASE "憂"
+		TIMES LOCAL:1, 0.75
+		TIMES LOCAL:2, 1.10
+	CASE "狂"
+		TIMES LOCAL:1, 0.75
+		TIMES LOCAL:2, 1.50
+	CASE "恐"
+		TIMES LOCAL:1, 0.75
+		TIMES LOCAL:2, 1.25
+	CASE "怯"
+		TIMES LOCAL:1, 1.00
+		TIMES LOCAL:2, 1.25
+	CASE "壊"
+		LOCAL:1 = 0
+		LOCAL:2 = 0
+	CASE "虚"
+		TIMES LOCAL:1, 0.10
+		TIMES LOCAL:2, 0.10
+ENDSELECT
+
+IF FLAG:主導権所有者 == ARG:0
+	TIMES TCVAR:(ARG:0):74, 1.2
+	TIMES TCVAR:(ARG:0):75, 0.7
+ENDIF
+
+IF GROUPMATCH(FLAG:調教モード, 調教_逆調教特殊, 調教_逆調教通常, 調教_慰安)
+	TIMES TCVAR:(ARG:0):74, 1.3
+	TIMES TCVAR:(ARG:0):75, 0.7
+ENDIF
+
+TCVAR:(ARG:0):74 = TCVAR:(ARG:0):74 * LOCAL:1 / 100
+TCVAR:(ARG:0):75 = TCVAR:(ARG:0):75 * LOCAL:2 / 100
+
+;機嫌に応じた上下
+IF GROUPMATCH(TOSTR_EMOTION(ARG:0), "壊", "虚") == 0
+	;絶頂による支配度上昇
+	TCVAR:(ARG:0):74 += SUM_NOWEX(MASTER) * 50
+ENDIF
+
+
+;●ウフフ中は好感度上昇量が低下
+IF FLAG:ウフフフラグ
+	TIMES TCVAR:(ARG:0):10, 0.30
+ENDIF
+
+;●特殊勢力に堕ちていると好感度・依存度・従属度全ての上昇率が低下
+;ただし救済策として最低保証がつく
+;なお支配度は上昇
+IF IS_FALLEN_TO_SP_COUNTRY(ARG:0) && !IS_SP_COUNTRY(CFLAG:MASTER:所属)
+	FOR LOCAL:0, 10, 13
+		TIMES TCVAR:(ARG:0):(LOCAL:0), 0.20
+		TCVAR:(ARG:0):(LOCAL:0) = MAX(TCVAR:(ARG:0):(LOCAL:0), RAND:10)
+	NEXT
+	TIMES TCVAR:(ARG:0):74, 1.25
+ENDIF
+
+;●浮気癖の場合上昇率が低下
+IF GETBIT(TALENT:(ARG:0):淫乱系, 素質_淫乱_浮気癖)
+	TIMES TCVAR:(ARG:0):10, 0.6
+	TIMES TCVAR:(ARG:0):11, 0.6
+	TIMES TCVAR:(ARG:0):12, 0.6
+		;TIMES TCVAR:(ARG:0):13, 0.6
+	TIMES TCVAR:(ARG:0):74, 0.6
+ENDIF
+
+;●実際の変動量をLOCAL:1～3にセット
+LOCAL:1 = (TCVAR:(ARG:0):10 - TCVAR:(ARG:0):15) / 100
+LOCAL:2 = (TCVAR:(ARG:0):11 - TCVAR:(ARG:0):16) / 100
+LOCAL:3 = (TCVAR:(ARG:0):12 - TCVAR:(ARG:0):17) / 100
+LOCAL:4 = (TCVAR:(ARG:0):74 - TCVAR:(ARG:0):75) / 100
+
+;依存度の変動は最低でも-1
+LOCAL:2 = MAX(LOCAL:2, -1)
+
+;●天の御遣いで上昇好感度が低い時さらに＋補正
+IF TALENT:MASTER:天の御遣い
+	SELECTCASE LOCAL:1
+		CASE IS < 0
+			LOCAL:1 += 10
+		CASE IS < 15
+			LOCAL:1 += 5
+		CASE IS < 25
+			LOCAL:1 += 3
+		CASE IS < 50
+			LOCAL:1 += 1
+	ENDSELECT
+ENDIF
+
+;●求心力で上昇依存度が低いときさらに＋補正
+IF TALENT:MASTER:求心力
+	SELECTCASE LOCAL:2
+		CASE IS < 0
+			LOCAL:2 += 10
+		CASE IS < 15
+			LOCAL:2 += 5
+		CASE IS < 25
+			LOCAL:2 += 3
+		CASE IS < 50
+			LOCAL:2 += 1
+	ENDSELECT
+ENDIF
+
+;●君主の器で上昇従属度が低いときさらに＋補正
+IF TALENT:MASTER:君主の器
+	SELECTCASE LOCAL:3
+		CASE IS < 0
+			LOCAL:3 += 10
+		CASE IS < 15
+			LOCAL:3 += 5
+		CASE IS < 25
+			LOCAL:3 += 3
+		CASE IS < 50
+			LOCAL:3 += 1
+	ENDSELECT
+ENDIF
+
+IF FLAG:主導権所有者 == ARG:0
+	SELECTCASE LOCAL:4
+		CASE IS < 0
+			LOCAL:4 += 3
+		CASE IS < 15
+			LOCAL:4 += 2
+		CASE IS < 25
+			LOCAL:4 += 1
+	ENDSELECT
+ENDIF
+
+IF TALENT:(ARG:0):君主の器 || GROUPMATCH(FLAG:調教モード, 調教_逆調教特殊, 調教_逆調教通常, 調教_慰安)
+	SELECTCASE LOCAL:4
+		CASE IS < 0
+			LOCAL:4 += 10
+		CASE IS < 15
+			LOCAL:4 += 5
+		CASE IS < 25
+			LOCAL:4 += 3
+		CASE IS < 50
+			LOCAL:4 += 1
+	ENDSELECT
+ENDIF
+
+
+;●主人公以外からの行為は好感度・依存度・従属度全ての変動量が低下
+;ただし浮気癖がある場合は無効化
+IF ((!IS_MPLY(MASTER) && !IS_MTAR(MASTER)) || (!IS_MPLY(ARG:0) && !IS_MTAR(ARG:0))) && !GETBIT(TALENT:(ARG:0):淫乱系, 素質_淫乱_浮気癖)
+	;捕虜調教のメインターゲットは影響緩和
+	IF FLAG:調教モード == 2 && FINDELEMENT(PRISONER_TARGET, ARG:0) != -1
+		TIMES LOCAL:1, 0.50
+		TIMES LOCAL:2, 0.50
+		TIMES LOCAL:3, 0.50
+		TIMES LOCAL:4, 0.50
+	ELSE
+		TIMES LOCAL:1, 0.25
+		TIMES LOCAL:2, 0.25
+		TIMES LOCAL:3, 0.25
+		TIMES LOCAL:4, 0.25
+	ENDIF
+ENDIF
+
+;●失神中・離脱中は好感度・依存度・従属度が変動しない
+IF TCVAR:(ARG:0):52 || TCVAR:(ARG:0):53
+	LOCAL:1 = 0
+	LOCAL:2 = 0
+	LOCAL:3 = 0
+	LOCAL:4 = 0
+ENDIF
+
+;●好感度・依存度・従属度を加算
+CFLAG:(ARG:0):好感度 = LIMIT(CFLAG:(ARG:0):好感度 + LOCAL:1, -1000, 999999999999)
+CFLAG:(ARG:0):依存度 = LIMIT(CFLAG:(ARG:0):依存度 + LOCAL:2, -1000, 999999999999)
+CFLAG:(ARG:0):従属度 = LIMIT(CFLAG:(ARG:0):従属度 + LOCAL:3, -1000, 999999999999)
+CFLAG:(ARG:0):支配度 = LIMIT(CFLAG:(ARG:0):支配度 + LOCAL:4, -1000, 999999999999)
+
+IF LOCAL:1 || LOCAL:2 || LOCAL:3 || LOCAL:4
+	PRINTFORM %SNAME(ARG:0), MAX_CHARANAME_LENGTH / 2%:
+	SIF ABS(LOCAL:1) > 0
+		PRINTFORM 好感度%TOSTR_SIGN(LOCAL:1)%{ABS(LOCAL:1), 3, RIGHT}(計:{CFLAG:(ARG:0):2, 5}) 
+	SIF ABS(LOCAL:2) > 0
+		PRINTFORM 依存度%TOSTR_SIGN(LOCAL:2)%{ABS(LOCAL:2), 3, RIGHT}(計:{CFLAG:(ARG:0):3, 5}) 
+	SIF ABS(LOCAL:3) > 0
+		PRINTFORM 従属度%TOSTR_SIGN(LOCAL:3)%{ABS(LOCAL:3), 3, RIGHT}(計:{CFLAG:(ARG:0):4, 5}) 
+	SIF ABS(LOCAL:4) > 0
+		PRINTFORM 支配度%TOSTR_SIGN(LOCAL:4)%{ABS(LOCAL:4), 3, RIGHT}(計:{CFLAG:(ARG:0):5, 5})
+	PRINTL 
+ENDIF
+
+;関係を改善
+LOCAL:4 = LIMIT((LOCAL:1 + LOCAL:3) / 10, 0, 20)
+CALL CHANGE_RELATION_O_TO_O(ARG:0, MASTER, LOCAL:4, LOCAL:4 * -1)
+
+SIF FLAG:調教モード == 調教_捕虜調教 && CFLAG:(ARG:0):所属 != CFLAG:MASTER:所属 && IS_COUNTRY(CFLAG:(ARG:0):所属)
+	CALL CHANGE_RELATION_O_TO_C(ARG:0, CFLAG:(ARG:0):所属, LOCAL:4 * -1 / 2, 0)
+
+;●今回の好感度・依存度・従属度の変動量をTCVAR:70～72に記録
+TCVAR:(ARG:0):70 = LOCAL:1
+TCVAR:(ARG:0):71 = LOCAL:2
+TCVAR:(ARG:0):72 = LOCAL:3
+TCVAR:(ARG:0):73 = LOCAL:4
+
+;●依存度の上昇量に応じて第三者への親密度を減少させる
+;CALL DECREASE_LOVE_FOR_OTHERSLOVE(ARG:0)
+
+;-------------------------------------------------
+;ARG:0番のキャラに対してソース以外の各種変動処理を行う
+;-------------------------------------------------
+@SOURCE_CHANGE_OTHER_STATUS(ARG:0)
+;ウフフ中限定
+IF FLAG:ウフフフラグ
+	;恐怖によるおもらしの設定が有効の場合
+	IF CONFIG:91 == 1
+		;尿意がある程度の状態で恐怖上昇量3000以上、または尿意が高い状態で恐怖上昇量1000以上
+		IF (CUP:(ARG:0):怖主 >= 1000 && TCVAR:(ARG:0):54 >= 3000) || (CUP:(ARG:0):怖主 >= 2500 && TCVAR:(ARG:0):54 >= 1000)
+			IF TCVAR:(ARG:0):54 >= 3000
+				TCVAR:(ARG:0):1 = 2
+			ELSE
+				TCVAR:(ARG:0):1 = 1
+			ENDIF
+
+			TCVAR:(ARG:0):0 = 4
+			EXP:(ARG:0):排泄経験値 += 1
+			EXP:(ARG:0):おもらし経験 += TCVAR:(ARG:0):1
+
+			;尿残量を0にする
+			TCVAR:(ARG:0):54 = 0
+		ENDIF
+	ENDIF
+
+	;利尿剤使用中なら尿残量を追加
+	IF TCVAR:(ARG:0):62
+		IF TALENT:(ARG:0):おもらし癖
+			TCVAR:(ARG:0):54 += 500
+		ELSE
+			TCVAR:(ARG:0):54 += 300
+		ENDIF
+	;おもらし癖なら常に尿残量を補充
+	ELSEIF TALENT:(ARG:0):おもらし癖 && TCVAR:(ARG:0):54 < 2000
+		TCVAR:(ARG:0):54 += 200
+	ENDIF
+
+	;絶頂・尿意限界によるおもらしの設定が無効の場合
+	IF CONFIG:90 == 0
+		;尿残量が最大でも2000までしか溜まらない
+		TCVAR:(ARG:0):54 = MIN(TCVAR:(ARG:0):54, 2000)
+
+	;設定が有効の場合
+	ELSE
+		;蜂蜜水を使用しても尿残量がたまっていく
+		IF TCVAR:(ARG:0):64 >= 1
+			TCVAR:(ARG:0):54 += TCVAR:(ARG:0):64 * 50
+			TCVAR:(ARG:0):64 --
+		ENDIF
+	ENDIF
+ENDIF
+
+;PALAMの値だけ気力が削れていく
+DOWNBASE:(ARG:0):気力 += MIN((CUP:(ARG:0):怖主 + (CUP:(ARG:0):哀主 / 2)) / 30, 300)
+
+;体力・気力・精神力の減少
+DOWNBASE:(ARG:0):体力 = CALC_LOSEBASE_EXP_CORRECTION(ARG:0, DOWNBASE:(ARG:0):体力)
+DOWNBASE:(ARG:0):気力 = CALC_LOSEBASE_EXP_CORRECTION(ARG:0, DOWNBASE:(ARG:0):気力)
+
+;素質<絶倫>またはアイテム「絶倫丸」使用で消耗を軽減
+IF TCVAR:(ARG:0):66
+	DOWNBASE:(ARG:0):体力 /= 10
+	DOWNBASE:(ARG:0):気力 /= 10
+ELSEIF TALENT:(ARG:0):絶倫
+	DOWNBASE:(ARG:0):体力 /= 5
+	DOWNBASE:(ARG:0):気力 /= 5
+ENDIF
+
+IF CFLAG:(ARG:0):調教中BASE減らない
+	DOWNBASE:(ARG:0):体力 = 0
+	DOWNBASE:(ARG:0):気力 = 0
+ENDIF
+
+SIF DOWNBASE:(ARG:0):体力 > 0
+	BASE:(ARG:0):体力 -= DOWNBASE:(ARG:0):体力
+
+SIF DOWNBASE:(ARG:0):気力 > 0
+	BASE:(ARG:0):気力 -= DOWNBASE:(ARG:0):気力
+
+IF FLAG:調教モード == 2 && FINDELEMENT(PRISONER_TARGET, ARG:0) != -1
+	;気絶してたら回復
+	IF TCVAR:(ARG:0):52
+		LOCAL = RAND(-100, 0)
+	ELSE
+		LOCAL = LIMIT(CUP:(ARG:0):怖主 * 50 / 100 - CUP:(ARG:0):怒主 * 10 / 100 - MAXBASE:(ARG:0):精神力 / RAND(14, 20), -500, MAXBASE:(ARG:0):精神力 / 4)
+		SIF LOCAL > 0
+			LOCAL = LOCAL * MAX(10000 - MAX(CFLAG:(ARG:0):好感度, CFLAG:(ARG:0):従属度, 0), 5000) / 10000
+	ENDIF
+	SELECTCASE INRANGEARRAY(PRISONER_TARGET, 0, CHARANUM + 1)
+		CASE 2
+			SIF LOCAL >= 0
+				TIMES LOCAL, 1.30
+		CASE 3
+			SIF LOCAL >= 0
+				TIMES LOCAL, 1.50
+	ENDSELECT
+	IF BASE:(ARG:0):精神力 - LOCAL < 0
+		TIMES LOCAL, 0.75
+	ENDIF
+	BASE:(ARG:0):精神力 = LIMIT(BASE:(ARG:0):精神力 - LOCAL, -500, MAXBASE:(ARG:0):精神力)
+	IF BASE:(ARG:0):精神力 < 0
+		CFLAG:(ARG:0):崩壊 += (100 - BASE:(ARG:0):精神力 / 2) * 1000 / (MAX(MAXBASE:(ARG:0):精神力, 1000))
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;体力気力消費量の、絶頂経験での補正
+;絶頂経験に比例して減る
+;-------------------------------------------------
+@CALC_LOSEBASE_EXP_CORRECTION(対象, 消費量)
+#FUNCTION
+#DIM 対象
+#DIM 消費量
+;PRINTFORML 消費量{消費量}
+;PRINTFORML 補正後{消費量 - 消費量 * MIN(EXP:対象:絶頂経験, 5000) / 10000}
+;絶頂経験1につき0.1%、700で70%で打ち止め
+RETURNF 消費量 - 消費量 * MIN(EXP:対象:絶頂経験, 700) / 1000
+
+;RETURNF 消費量 * (10000 / MAX(EXP:対象:絶頂経験 / 50, 1)) / 10000
+
+
+;-------------------------------------------------
+;@PRINT_EXP_UP内で使用する関数
+;-------------------------------------------------
+@PRINT_COM_RESULT(ARGS:0)
+IF TFLAG:95
+	TFLAG:95 = 0
+	PRINTFORM %ANAME(TFLAG:94), 8, RIGHT%:
+	LOCAL:0 = 9
+ELSE
+	PRINT  
+ENDIF
+
+LOCAL:0 += STRLENS(ARGS:0) + 1
+
+IF LOCAL:0 >= 80
+	PRINTL 
+	PRINT          
+	LOCAL:0 = 9
+ENDIF
+
+PRINTFORM %ARGS:0%
+
+
+;-------------------------------------------------
+;ARG:0番のキャラがコマンド実行により得た失った体力を表示
+;-------------------------------------------------
+@PRINT_BASE_LOSE(ARG:0)
+;●体力・気力の表示
+TFLAG:94 = ARG:0
+TFLAG:95 = 1
+
+FOR LOCAL:0, 0, 2
+	IF DOWNBASE:(ARG:0):(LOCAL:0) > 0
+		CALL PRINT_COM_RESULT(@"%BASENAME:(LOCAL:0)%-{DOWNBASE:(ARG:0):(LOCAL:0)}")
+	ENDIF
+NEXT
+
+IF !TFLAG:95
+	PRINTL 
+ENDIF
+
+;-------------------------------------------------
+;ARG:0番のキャラがコマンド実行により得たEXPを表示
+;主導度・倒錯度の変化もここで処理
+;-------------------------------------------------
+@PRINT_EXP_UP(対象)
+#DIM 対象
+#DIM 主導度変化量
+#DIM 倒錯度変化量
+#DIM 倒錯度変化基準
+LOCAL:5 = 1
+
+TFLAG:94 = 対象
+TFLAG:95 = 1
+
+;●主導度・倒錯度の変動と表示
+;能力固定フラグが立っている場合も変動させない
+IF !CFLAG:対象:能力固定フラグ
+	主導度変化量 = TFLAG:49
+	倒錯度変化量 = TFLAG:50 + TCVAR:対象:50
+	倒錯度変化基準 = TCVAR:対象:50
+
+	IF TALENT:対象:Ｓ気質 && TFLAG:49 > 0
+		TIMES 主導度変化量, 2.00
+	ENDIF
+	IF TALENT:対象:Ｍ気質 && TFLAG:49 < 0
+		TIMES 主導度変化量, 2.00
+	ENDIF
+	IF TALENT:対象:倒錯的 && TFLAG:50 > 0
+		TIMES 倒錯度変化量, 2.00
+		TIMES 倒錯度変化基準, 2.00
+	ENDIF
+
+	IF IS_MPLY(対象)
+		;ウフフ中
+		IF FLAG:ウフフフラグ
+			SELECTCASE GET_COM_INITIATIVE()
+				CASE 0
+				CASE 1
+					主導度変化量 *= -1
+				CASE 2
+					主導度変化量 = 1
+				CASE 3
+					主導度変化量 = -1
+			ENDSELECT
+			ABL:対象:主導度Ｕ = LIMIT(ABL:対象:主導度Ｕ + 主導度変化量, -1000, 1000)
+		;非ウフフ
+		ELSE
+			SELECTCASE GET_COM_INITIATIVE()
+				CASE 0
+				CASE 1
+					主導度変化量 *= -1
+			ENDSELECT
+			ABL:対象:主導度Ｎ = LIMIT(ABL:対象:主導度Ｎ + 主導度変化量, -1000, 1000)
+		ENDIF
+
+	ELSEIF IS_MTAR(対象)
+		;ウフフ中
+		IF FLAG:ウフフフラグ
+			SELECTCASE GET_COM_INITIATIVE()
+				CASE 0
+					主導度変化量 *= -1
+				CASE 1
+				CASE 2
+					主導度変化量 = -1
+				CASE 3
+					主導度変化量 = 1
+			ENDSELECT
+		;非ウフフ
+		ELSE
+			SELECTCASE GET_COM_INITIATIVE()
+				CASE 0
+					主導度変化量 *= -1
+				CASE 1
+			ENDSELECT
+		ENDIF
+
+	ELSE
+		主導度変化量 = 0
+		倒錯度変化量 = 倒錯度変化基準
+	ENDIF
+
+	IF FLAG:ウフフフラグ
+		;コマンドに参加しているほど、回復しにくくなる
+		FOR LOCAL:0, 0, MEQUIP_NUM
+			FOR LOCAL:1, 0, MEQUIP_PLAYER_NUM:(LOCAL:0)
+				IF MEQUIP_PLAYER:(LOCAL:0):(LOCAL:1) == 対象
+					FOR LOCAL:3, 0, MEQUIP_PLAYER_NUM:(LOCAL:0)
+						IF MEQUIP_INITIATIVE:(LOCAL:0) == MEQUIP_PLAYER:(LOCAL:0):(LOCAL:3)
+							主導度変化量 ++
+							GOTO FOUND
+						ENDIF
+					NEXT
+					FOR LOCAL:3, 0, MEQUIP_TARGET_NUM:(LOCAL:0)
+						IF MEQUIP_INITIATIVE:(LOCAL:0) == MEQUIP_TARGET:(LOCAL:0):(LOCAL:3)
+							主導度変化量 --
+							GOTO FOUND
+						ENDIF
+					NEXT
+					GOTO FOUND
+				ENDIF
+			NEXT
+			FOR LOCAL:1, 0, MEQUIP_TARGET_NUM:(LOCAL:0)
+				IF MEQUIP_TARGET:(LOCAL:0):(LOCAL:1) == 対象
+					FOR LOCAL:3, 0, MEQUIP_TARGET_NUM:(LOCAL:0)
+						IF MEQUIP_INITIATIVE:(LOCAL:0) == MEQUIP_TARGET:(LOCAL:0):(LOCAL:3)
+							主導度変化量 ++
+							GOTO FOUND
+						ENDIF
+					NEXT
+					FOR LOCAL:3, 0, MEQUIP_PLAYER_NUM:(LOCAL:0)
+						IF MEQUIP_INITIATIVE:(LOCAL:0) == MEQUIP_PLAYER:(LOCAL:0):(LOCAL:3)
+							主導度変化量 --
+							GOTO FOUND
+						ENDIF
+					NEXT
+					GOTO FOUND
+				ENDIF
+			NEXT
+			$FOUND
+		NEXT
+	ENDIF
+
+	ABL:対象:倒錯度 = LIMIT(ABL:対象:倒錯度 + 倒錯度変化量, 0, 1000)
+
+	IF FLAG:ウフフフラグ
+		ABL:対象:主導度Ｕ = LIMIT(ABL:対象:主導度Ｕ + 主導度変化量, -1000, 1000)
+	ELSE
+		ABL:対象:主導度Ｎ = LIMIT(ABL:対象:主導度Ｎ + 主導度変化量, -1000, 1000)
+	ENDIF
+
+	IF 主導度変化量 != 0
+		CALL PRINT_COM_RESULT(@"主導度%TOSTR_SIGN(主導度変化量)%{ABS(主導度変化量)}")
+	ENDIF
+	IF 倒錯度変化量 != 0
+		CALL PRINT_COM_RESULT(@"倒錯度%TOSTR_SIGN(倒錯度変化量)%{ABS(倒錯度変化量)}")
+	ENDIF
+ENDIF
+
+;●主人公が取得できない経験をリセット
+;IF 対象 == MASTER
+;	EXP:MASTER:10 = TCVAR:MASTER:110
+;	EXP:MASTER:11 = TCVAR:MASTER:111
+;	EXP:MASTER:12 = TCVAR:MASTER:112
+;	EXP:MASTER:13 = TCVAR:MASTER:113
+;	EXP:MASTER:14 = TCVAR:MASTER:114
+;	EXP:MASTER:15 = TCVAR:MASTER:115
+;	EXP:MASTER:16 = TCVAR:MASTER:116
+;	EXP:MASTER:19 = TCVAR:MASTER:119
+;	EXP:MASTER:20 = TCVAR:MASTER:120
+;	EXP:MASTER:21 = TCVAR:MASTER:121
+;	EXP:MASTER:31 = TCVAR:MASTER:131
+;ENDIF
+
+;●能力固定フラグが立っている場合、全ての経験をリセット
+IF CFLAG:対象:能力固定フラグ
+	FOR LOCAL:0, 0, 100
+		EXP:対象:(LOCAL:0) = TCVAR:対象:(LOCAL:0 + 100)
+	NEXT
+ENDIF
+
+;●経験の表示
+FOR LOCAL:0, 0, 94
+	IF EXP:対象:(LOCAL:0) > TCVAR:対象:(LOCAL:0 + 100)
+		CALL PRINT_COM_RESULT(@"%EXPNAME:(LOCAL:0)%+{EXP:対象:(LOCAL:0) - TCVAR:対象:(LOCAL:0 + 100)}")
+	ENDIF
+NEXT
+
+IF !TFLAG:95
+	PRINTL 
+ENDIF
+
+;-------------------------------------------------
+;キャラARG:0にレベルARG:1の既成事実を取得させる関数(既に指定以上のレベルなら無視)
+;-------------------------------------------------
+@SET_COUPLE_STEP(ARG:0, ARG:1)
+IF ARG:0 != MASTER && ARG:1 > MARK:(ARG:0):既成事実
+	MARK:(ARG:0):既成事実 = ARG:1
+	PRINTFORM %ANAME(ARG:0)%が
+	SETCOLOR カラー_注意
+	PRINTFORM 既成事実Lv{ARG:1}
+	RESETCOLOR
+	PRINTW を取得
+ENDIF
+
+;-------------------------------------------------
+;同性の場合のソース補正
+;-------------------------------------------------
+@SOURCE_SEX_CHECK(ARG:0)
+LOCAL:5 = -1
+;自身がターゲットなら、プレイヤーに少なくとも一人同性のキャラが必要
+IF IS_MTAR(ARG:0)
+	FOR LOCAL:0, 0, MPLY_NUM
+		IF IS_SAMESEX(MPLY:(LOCAL:0), ARG:0)
+			IF IS_MALE(ARG:0)
+				LOCAL:5 = ABL:(ARG:0):ＢＬ
+			ELSE
+				LOCAL:5 = ABL:(ARG:0):レズ
+			ENDIF
+			BREAK
+		ENDIF
+	NEXT
+;自身がプレイヤーなら、ターゲットに少なくとも一人同性のキャラが必要
+ELSEIF IS_MPLY(ARG:0)
+	FOR LOCAL:0, 0, MTAR_NUM
+		IF IS_SAMESEX(MTAR:(LOCAL:0), ARG:0)
+			IF IS_MALE(ARG:0)
+				LOCAL:5 = ABL:(ARG:0):ＢＬ
+			ELSE
+				LOCAL:5 = ABL:(ARG:0):レズ
+			ENDIF
+			BREAK
+		ENDIF
+	NEXT
+ENDIF
+
+;同性補正を受ける状況でないなら戻る
+IF LOCAL:5 == -1
+	RETURN
+ENDIF
+
+;●快感ソースの補正
+SELECTCASE LOCAL:5
+	CASE 0
+		LOCAL:6 = 700
+	CASE 1
+		LOCAL:6 = 850
+	CASE 2
+		LOCAL:6 = 1000
+	CASE 3
+		LOCAL:6 = 1050
+	CASE 4
+		LOCAL:6 = 1100
+	CASEELSE
+		LOCAL:6 = MIN(1150 + (LOCAL:5 - 5) * 5, 2000)
+ENDSELECT
+FOR LOCAL:0, 0, 5
+	SOURCE:(ARG:0):(LOCAL:0) = SOURCE:(ARG:0):(LOCAL:0) * LOCAL:6 / 1000
+NEXT
+
+;●快感以外のソースの補正
+;[両刀]がない相手にウフフコマンドを行った場合
+IF !TALENT:(ARG:0):両刀 && FLAG:ウフフフラグ
+	SELECTCASE LOCAL:5
+		CASE 0
+			SOURCE:(ARG:0):逸脱 += MIN(SOURCE:(ARG:0):接触, 150) * 3
+		CASE 1
+			SOURCE:(ARG:0):逸脱 += MIN(SOURCE:(ARG:0):接触, 150) * 2
+		CASE 2
+			SOURCE:(ARG:0):逸脱 += MIN(SOURCE:(ARG:0):接触, 150) * 1
+		CASE 3
+			SOURCE:(ARG:0):逸脱 += MIN(SOURCE:(ARG:0):接触, 150) / 2
+		CASE 4
+			SOURCE:(ARG:0):逸脱 += MIN(SOURCE:(ARG:0):接触, 150) / 5
+	ENDSELECT
+ENDIF
+
+SELECTCASE LOCAL:5
+	CASE 0
+		TIMES SOURCE:(ARG:0):愛情, 0.20
+		SOURCE:(ARG:0):中毒充足 += 0
+	CASE 1
+		TIMES SOURCE:(ARG:0):愛情, 0.50
+		SOURCE:(ARG:0):中毒充足 += MIN(SOURCE:(ARG:0):接触, 150) / 10
+	CASE 2
+		TIMES SOURCE:(ARG:0):愛情, 0.80
+		SOURCE:(ARG:0):中毒充足 += MIN(SOURCE:(ARG:0):接触, 150) / 3
+	CASE 3
+		TIMES SOURCE:(ARG:0):愛情, 1.00
+		SOURCE:(ARG:0):中毒充足 += MIN(SOURCE:(ARG:0):接触, 150) * 1
+	CASE 4
+		TIMES SOURCE:(ARG:0):愛情, 1.05
+		SOURCE:(ARG:0):中毒充足 += MIN(SOURCE:(ARG:0):接触, 150) * 3 / 2
+	CASEELSE
+		SOURCE:(ARG:0):愛情 = SOURCE:(ARG:0):愛情 * MIN(110 + (LOCAL:5 - 5), 150) / 100
+		SOURCE:(ARG:0):中毒充足 += MIN(SOURCE:(ARG:0):接触, 150) * ((LOCAL:5 - 5) * 1 + 20) / 10
+ENDSELECT
+
+;-------------------------------------------------
+;快感系の経験を取得
+;ARG:0=キャラ番号 ARG:1=EXP番号 ARG:2=変動前のPALAM
+;-------------------------------------------------
+@ADD_EXP_SENSE(ARG:0, ARG:1, ARG:2)
+
+IF NOWEX:(ARG:0):(ARG:1) >= 1
+	SELECTCASE CUP:(ARG:0):(ARG:1)
+		CASE IS < 1500
+			LOCAL:5 = 3
+		CASE IS < 3000
+			LOCAL:5 = 5
+		CASE IS < 6000
+			LOCAL:5 = 15
+		CASE IS < 30000
+			LOCAL:5 = 25
+		CASE IS < 50000
+			LOCAL:5 = 35
+		CASE IS < 100000
+			LOCAL:5 = 60
+		CASE IS < 200000
+			LOCAL:5 = 80
+		CASE IS < 400000
+			LOCAL:5 = 120
+		CASEELSE
+			LOCAL:5 = 160
+	ENDSELECT
+	GOTO FINALLY
+ENDIF
+
+
+
+SIF PALAM:(ARG:0):(ARG:1) - ARG:2 == 0
+	RETURN 0
+
+SELECTCASE PALAM:(ARG:0):(ARG:1) - ARG:2
+	CASE IS < 500
+		LOCAL:5 = 1
+	CASE IS < 1500
+		LOCAL:5 = 2
+	CASE IS < 3000
+		LOCAL:5 = 4
+	CASE IS < 5000
+		LOCAL:5 = 8
+	CASE IS < 7500
+		LOCAL:5 = 12
+	CASE IS < 10000
+		LOCAL:5 = 17
+	CASEELSE
+		LOCAL:5 = 22
+ENDSELECT
+
+$FINALLY
+
+SIF LOCAL:5 <= 0
+	RETURN
+
+FOR LOCAL, 0, 9
+	SIF LOCAL == ARG:1
+		CONTINUE
+	LOCAL:5 += NOWEX:(ARG:0):LOCAL
+NEXT
+EXP:(ARG:0):(ARG:1) += LOCAL:5
+
+;-------------------------------------------------
+;各種経験の取得
+;-------------------------------------------------
+@EXP_GOT_CHECK(ARG:0)
+
+IF IS_MPLY(ARG:0)
+	COM_EXP:(ARG:0):SELECTCOM = MIN(COM_EXP:(ARG:0):SELECTCOM + 10, 99999990)
+ELSEIF IS_MTAR(ARG:0)
+	COM_EXP:(ARG:0):(SELECTCOM + 1000) = MIN(COM_EXP:(ARG:0):(SELECTCOM + 1000) + 10, 99999990)
+ELSE
+	COM_EXP:(ARG:0):(SELECTCOM + 2000) = MIN(COM_EXP:(ARG:0):(SELECTCOM + 2000) + 10, 99999990)
+ENDIF
+
+;継続中のコマンドにも半分の経験が入る
+FOR LOCAL:0, 0, MAX_MEQUIP
+	IF MEQUIP:(LOCAL:0) >= 0 && MEQUIP:(LOCAL:0) != SELECTCOM
+		IF IS_MPLY_EQUIP(ARG:0, LOCAL:0)
+			COM_EXP:(ARG:0):(MEQUIP:(LOCAL:0)) = MIN(COM_EXP:(ARG:0):(MEQUIP:(LOCAL:0)) + 5, 99999990)
+		ELSEIF IS_MTAR_EQUIP(ARG:0, LOCAL:0)
+			COM_EXP:(ARG:0):(MEQUIP:(LOCAL:0) + 1000) = MIN(COM_EXP:(ARG:0):(MEQUIP:(LOCAL:0) + 1000) + 5, 99999990)
+		ELSE
+			COM_EXP:(ARG:0):(MEQUIP:(LOCAL:0) + 2000) = MIN(COM_EXP:(ARG:0):(MEQUIP:(LOCAL:0) + 2000) + 5, 99999990)
+		ENDIF
+	ENDIF
+NEXT
+
+IF TCVAR:(ARG:0):催眠中 > 0
+	EXP:(ARG:0):催眠経験値 += MAX(TCVAR:(ARG:0):催眠中 / 2 , 1)
+	EXP:(ARG:0):被催眠経験 ++
+	SEXUAL_PREFERENCE_EXP:(ARG:0):性的嗜好_催眠をかけられたい ++
+	EXP:MASTER:催眠経験値 ++
+ENDIF
+
+;獣姦経験(今回のコマンド)
+IF IS_MPLY(ARG:0)
+	FOR LOCAL, 0, MTAR_NUM
+		IF FLAG:ウフフフラグ && IS_ANIMAL(MTAR:(LOCAL))
+			EXP:(ARG:0):獣姦経験 ++
+			SEXUAL_PREFERENCE_EXP:(ARG:0):性的嗜好_獣と交わりたい ++
+		ENDIF
+		SIF TALENT:(MTAR:LOCAL):特殊勢力素質 == 特殊勢力_触手
+			EXP:(ARG:0):触手経験値 ++ 
+		IF FLAG:ウフフフラグ && (HAS_SAME_FATHER(ARG:0, MTAR:LOCAL) || HAS_SAME_MOTHER(ARG:0, MTAR:LOCAL) || IS_FATHER(ARG:0, MTAR:LOCAL) || IS_MOTHER(ARG:0, MTAR:LOCAL) || IS_FATHER(MTAR:LOCAL, ARG:0) || IS_MOTHER(MTAR:LOCAL, ARG:0))
+			EXP:(ARG:0):近親相姦経験 ++
+			SEXUAL_PREFERENCE_EXP:(ARG:0):性的嗜好_近親相姦したい ++
+		ENDIF
+	NEXT
+ENDIF
+
+IF IS_MTAR(ARG:0)
+	FOR LOCAL, 0, MPLY_NUM
+		IF FLAG:ウフフフラグ && IS_ANIMAL(MPLY:(LOCAL))
+			EXP:(ARG:0):獣姦経験 ++
+			SEXUAL_PREFERENCE_EXP:(ARG:0):性的嗜好_獣と交わりたい ++
+		ENDIF
+		IF TALENT:(MPLY:LOCAL):特殊勢力素質 == 特殊勢力_触手
+			EXP:(ARG:0):触手経験値 ++ 
+			SEXUAL_PREFERENCE_EXP:(ARG:0):性的嗜好_触手で犯されたい ++
+		ENDIF
+		IF FLAG:ウフフフラグ && (HAS_SAME_FATHER(ARG:0, MPLY:LOCAL) || HAS_SAME_MOTHER(ARG:0, MPLY:LOCAL) || IS_FATHER(ARG:0, MPLY:LOCAL) || IS_MOTHER(ARG:0, MPLY:LOCAL) || IS_FATHER(MPLY:LOCAL, ARG:0) || IS_MOTHER(MPLY:LOCAL, ARG:0))
+			EXP:(ARG:0):近親相姦経験 ++
+			SEXUAL_PREFERENCE_EXP:(ARG:0):性的嗜好_近親相姦したい ++
+		ENDIF
+	NEXT
+ENDIF
+
+;獣姦経験(MEQUIP)
+FOR LOCAL:0, 0, MEQUIP_NUM
+	IF MEQUIP:(LOCAL:0) >= 0 && MEQUIP:(LOCAL:0) != SELECTCOM
+		;対象のがプレイヤーになっているMEQUIPに関して、ターゲットに動物がいたら獣姦経験を加算
+		IF IS_MPLY_EQUIP(ARG:0, LOCAL:0)
+			FOR LOCAL:1, 0, MEQUIP_TARGET_NUM:(LOCAL:0)
+				LOCAL:2 = MEQUIP_TARGET:(LOCAL:0):(LOCAL:1)
+				IF FLAG:ウフフフラグ && IS_ANIMAL(LOCAL:2)
+					EXP:(ARG:0):獣姦経験 ++
+					SEXUAL_PREFERENCE_EXP:(ARG:0):性的嗜好_獣と交わりたい ++
+				ENDIF
+				IF FLAG:ウフフフラグ && (HAS_SAME_FATHER(ARG:0, LOCAL:2) || HAS_SAME_MOTHER(ARG:0, LOCAL:2) || IS_FATHER(ARG:0, LOCAL:2) || IS_MOTHER(ARG:0, LOCAL:2) || IS_FATHER(LOCAL:2, ARG:0) || IS_MOTHER(LOCAL:2, ARG:0))
+					EXP:(ARG:0):近親相姦経験 ++
+					SEXUAL_PREFERENCE_EXP:(ARG:0):性的嗜好_近親相姦したい ++
+				ENDIF
+				IF IS_SAMESEX(LOCAL:2, ARG:0)
+					IF IS_MALE(ARG:0)
+						EXP:(ARG:0):ＢＬ経験値 += 1
+					ELSE
+						EXP:(ARG:0):レズ経験値 += 1
+					ENDIF
+					SEXUAL_PREFERENCE_EXP:(ARG:0):性的嗜好_同性と交わりたい ++
+				ENDIF
+			NEXT
+
+		;上記のターゲットとプレイヤーが逆のバージョン
+		ELSEIF IS_MTAR_EQUIP(ARG:0, LOCAL:0)
+			FOR LOCAL:1, 0, MEQUIP_PLAYER_NUM:(LOCAL:0)
+				LOCAL:2 = MEQUIP_PLAYER:(LOCAL:0):(LOCAL:1)
+				IF FLAG:ウフフフラグ && IS_ANIMAL(LOCAL:2)
+					EXP:(ARG:0):獣姦経験 ++
+					SEXUAL_PREFERENCE_EXP:(ARG:0):性的嗜好_獣と交わりたい ++
+				ENDIF
+				IF FLAG:ウフフフラグ && (HAS_SAME_FATHER(ARG:0, LOCAL:2) || HAS_SAME_MOTHER(ARG:0, LOCAL:2) || IS_FATHER(ARG:0, LOCAL:2) || IS_MOTHER(ARG:0, LOCAL:2) || IS_FATHER(LOCAL:2, ARG:0) || IS_MOTHER(LOCAL:2, ARG:0))
+					EXP:(ARG:0):近親相姦経験 ++
+					SEXUAL_PREFERENCE_EXP:(ARG:0):性的嗜好_近親相姦したい ++
+				ENDIF
+				IF IS_SAMESEX(LOCAL:2, ARG:0)
+					IF IS_MALE(ARG:0)
+						EXP:(ARG:0):ＢＬ経験値 += 1
+					ELSE
+						EXP:(ARG:0):レズ経験値 += 1
+					ENDIF
+					SEXUAL_PREFERENCE_EXP:(ARG:0):性的嗜好_同性と交わりたい ++
+				ENDIF
+			NEXT
+		ENDIF
+	ENDIF
+NEXT
+
+;●レズ・ＢＬ経験
+IF TFLAG:51 > 0
+	IF IS_MTAR(ARG:0)
+		FOR LOCAL:0, 0, MPLY_NUM
+			IF IS_SAMESEX(MPLY:(LOCAL:0), ARG:0)
+				IF IS_MALE(ARG:0)
+					EXP:(ARG:0):ＢＬ経験値 += TFLAG:51
+				ELSE
+					EXP:(ARG:0):レズ経験値 += TFLAG:51
+				ENDIF
+				SEXUAL_PREFERENCE_EXP:(ARG:0):性的嗜好_同性と交わりたい ++
+			ENDIF
+		NEXT
+	ELSEIF IS_MPLY(ARG:0)
+		FOR LOCAL:0, 0, MTAR_NUM
+			IF IS_SAMESEX(MTAR:(LOCAL:0), ARG:0)
+				IF IS_MALE(ARG:0)
+					EXP:(ARG:0):ＢＬ経験値 += TFLAG:51
+				ELSE
+					EXP:(ARG:0):レズ経験値 += TFLAG:51
+				ENDIF
+				SEXUAL_PREFERENCE_EXP:(ARG:0):性的嗜好_同性と交わりたい ++
+			ENDIF
+		NEXT
+	ENDIF
+ENDIF
+
+IF FLAG:調教モード == 調教_慰安
+	SEXUAL_PREFERENCE_EXP:(ARG:0):性的嗜好_春を売りたい ++	
+ELSEIF FLAG:調教モード == 調教_捕虜調教 && FINDELEMENT(PRISONER_TARGET, ARG:0) != -1
+	SEXUAL_PREFERENCE_EXP:(ARG:0):性的嗜好_調教されたい ++
+ENDIF
+
+;●奉仕経験値
+;奉仕経験値を得られるコマンドのフラグ
+IF TCVAR:(ARG:0):4
+	LOCAL:0 = CUP_SENSE(ARG:0)
+	LOCAL:1 = 0
+	IF LOCAL:0 >= 12000
+		LOCAL:1 = 16
+		IF CUP:(ARG:0):怒主 > 0
+			TIMES CUP:(ARG:0):怒主, 0.40
+		ENDIF
+	ELSEIF LOCAL:0 >= 8000
+		LOCAL:1 = 12
+		IF CUP:(ARG:0):怒主 > 0
+			TIMES CUP:(ARG:0):怒主, 0.50
+		ENDIF
+	ELSEIF LOCAL:0 >= 5000
+		LOCAL:1 = 8
+		IF CUP:(ARG:0):怒主 > 0
+			TIMES CUP:(ARG:0):怒主, 0.60
+		ENDIF
+	ELSEIF LOCAL:0 >= 3000
+		LOCAL:1 = 4
+		IF CUP:(ARG:0):怒主 > 0
+			TIMES CUP:(ARG:0):怒主, 0.70
+		ENDIF
+	ELSEIF LOCAL:0 >= 1000
+		LOCAL:1 = 2
+		IF CUP:(ARG:0):怒主 > 0
+			TIMES CUP:(ARG:0):怒主, 0.80
+		ENDIF
+	ELSEIF LOCAL:0 >= 300
+		LOCAL:1 = 1
+		IF CUP:(ARG:0):怒主 > 0
+			TIMES CUP:(ARG:0):怒主, 0.90
+		ENDIF
+	ENDIF
+	CALL CALC_ABLUP_EXP20(ARG:0)
+	LOCAL:1 = MIN(LOCAL:1, RESULT * 2)
+
+	EXP:(ARG:0):奉仕経験値 += LOCAL:1
+ENDIF
+
+;●苦痛快楽経験
+LOCAL:0 = CUP_SENSE(ARG:0)
+LOCAL:1 = 0
+IF LOCAL:0 >= 3000 && SOURCE:(ARG:0):苦痛 >= 2000
+	LOCAL:1 = 16
+	IF CUP:(ARG:0):怒主 > 0
+		TIMES CUP:(ARG:0):怒主, 0.40
+	ENDIF
+ELSEIF LOCAL:0 >= 2500 && SOURCE:(ARG:0):苦痛 >= 1500
+	LOCAL:1 = 12
+	IF CUP:(ARG:0):怒主 > 0
+		TIMES CUP:(ARG:0):怒主, 0.50
+	ENDIF
+ELSEIF LOCAL:0 >= 1500 && SOURCE:(ARG:0):苦痛 >= 1000
+	LOCAL:1 = 8
+	IF CUP:(ARG:0):怒主 > 0
+		TIMES CUP:(ARG:0):怒主, 0.60
+	ENDIF
+ELSEIF LOCAL:0 >= 1000 && SOURCE:(ARG:0):苦痛 >= 500
+	LOCAL:1 = 4
+	IF CUP:(ARG:0):怒主 > 0
+		TIMES CUP:(ARG:0):怒主, 0.70
+	ENDIF
+ELSEIF LOCAL:0 >= 600 && SOURCE:(ARG:0):苦痛 >= 300
+	LOCAL:1 = 2
+	IF CUP:(ARG:0):怒主 > 0
+		TIMES CUP:(ARG:0):怒主, 0.80
+	ENDIF
+ELSEIF LOCAL:0 >= 300 && SOURCE:(ARG:0):苦痛 >= 100
+	LOCAL:1 = 1
+	IF CUP:(ARG:0):怒主 > 0
+		TIMES CUP:(ARG:0):怒主, 0.90
+	ENDIF
+ENDIF
+EXP:(ARG:0):苦痛快楽経験 += LOCAL:1
+
+;●露出快楽経験
+LOCAL:0 = CUP_SENSE(ARG:0)
+LOCAL:1 = 0
+IF LOCAL:0 >= 10000 && SOURCE:(ARG:0):露出保存 >= 2000
+	LOCAL:1 = 16
+ELSEIF LOCAL:0 >= 6000 && SOURCE:(ARG:0):露出保存 >= 1500
+	LOCAL:1 = 12
+ELSEIF LOCAL:0 >= 3000 && SOURCE:(ARG:0):露出保存 >= 1000
+	LOCAL:1 = 8
+ELSEIF LOCAL:0 >= 1500 && SOURCE:(ARG:0):露出保存 >= 600
+	LOCAL:1 = 4
+ELSEIF LOCAL:0 >= 600 && SOURCE:(ARG:0):露出保存 >= 300
+	LOCAL:1 = 2
+ELSEIF LOCAL:0 >= 300 && SOURCE:(ARG:0):露出保存 >= 100
+	LOCAL:1 = 1
+ENDIF
+EXP:(ARG:0):露出経験値 += LOCAL:1
+
+;●トラウマ経験の取得
+LOCAL:0 = CUP:(ARG:0):怖主
+IF LOCAL:0 >= 10000
+	EXP:(ARG:0):トラウマ経験 += 16
+ELSEIF LOCAL:0 >= 5000
+	EXP:(ARG:0):トラウマ経験 += 8
+ELSEIF LOCAL:0 >= 3000
+	EXP:(ARG:0):トラウマ経験 += 4
+ELSEIF LOCAL:0 >= 1500
+	EXP:(ARG:0):トラウマ経験 += 2
+ELSEIF LOCAL:0 >= 500
+	EXP:(ARG:0):トラウマ経験 += 1
+ENDIF
+
+;-------------------------------------------------
+;性癖設定に応じたソースの追加
+;-------------------------------------------------
+@ADD_SOURCE_TENDENCY(ARG:0)
+;今回実行したコマンドの処理
+IF IS_MPLY(ARG:0)
+	SELECTCASE COM_TENDENCY:(ARG:0):SELECTCOM
+		CASE 1
+			SOURCE:(ARG:0):中毒充足 += 200
+		CASE 2
+			SOURCE:(ARG:0):中毒充足 += 500
+		CASE 3
+			SOURCE:(ARG:0):中毒充足 += 1000
+	ENDSELECT
+ELSEIF IS_MTAR(ARG:0)
+	SELECTCASE COM_TENDENCY:(ARG:0):(SELECTCOM + 1000)
+		CASE 1
+			SOURCE:(ARG:0):中毒充足 += 200
+		CASE 2
+			SOURCE:(ARG:0):中毒充足 += 500
+		CASE 3
+			SOURCE:(ARG:0):中毒充足 += 1000
+	ENDSELECT
+ELSE
+	SELECTCASE COM_TENDENCY:(ARG:0):(SELECTCOM + 2000)
+		CASE 1
+			SOURCE:(ARG:0):中毒充足 += 100
+		CASE 2
+			SOURCE:(ARG:0):中毒充足 += 250
+		CASE 3
+			SOURCE:(ARG:0):中毒充足 += 500
+	ENDSELECT
+ENDIF
+
+;EQUIP関係の処理
+FOR LOCAL:0, 0, MAX_MEQUIP
+	IF MEQUIP:(LOCAL:0) >= 0
+		LOCAL:5 = 2
+		FOR LOCAL:1, 0, MEQUIP_PLAYER_NUM:(LOCAL:0)
+			IF MEQUIP_PLAYER:(LOCAL:0):(LOCAL:1) == ARG:0
+				LOCAL:5 = 0
+				BREAK
+			ENDIF
+		NEXT
+		IF LOCAL:5 == 2
+			FOR LOCAL:1, 0, MEQUIP_TARGET_NUM:(LOCAL:0)
+				IF MEQUIP_TARGET:(LOCAL:0):(LOCAL:1) == ARG:0
+					LOCAL:5 = 1
+					BREAK
+				ENDIF
+			NEXT
+		ENDIF
+		IF SELECTCOM >= 0 && SELECTCOM <= 299
+			IF LOCAL:5 == 0
+				SELECTCASE COM_TENDENCY:(ARG:0):SELECTCOM
+					CASE 1
+						SOURCE:(ARG:0):中毒充足 += 100
+					CASE 2
+						SOURCE:(ARG:0):中毒充足 += 250
+					CASE 3
+						SOURCE:(ARG:0):中毒充足 += 500
+				ENDSELECT
+			ELSEIF LOCAL:5 == 1
+				SELECTCASE COM_TENDENCY:(ARG:0):(SELECTCOM + 1000)
+					CASE 1
+						SOURCE:(ARG:0):中毒充足 += 100
+					CASE 2
+						SOURCE:(ARG:0):中毒充足 += 250
+					CASE 3
+						SOURCE:(ARG:0):中毒充足 += 500
+				ENDSELECT
+			ELSE
+
+				SELECTCASE COM_TENDENCY:(ARG:0):(SELECTCOM + 2000)
+					CASE 1
+						SOURCE:(ARG:0):中毒充足 += 50
+					CASE 2
+						SOURCE:(ARG:0):中毒充足 += 125
+					CASE 3
+						SOURCE:(ARG:0):中毒充足 += 250
+				ENDSELECT
+			ENDIF
+		ENDIF
+	ENDIF
+NEXT
+

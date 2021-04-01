@@ -1,0 +1,193 @@
+﻿;調教中の情報表示
+
+;-------------------------------------------------
+;調教中の情報表示
+;-------------------------------------------------
+@SHOW_STATUS
+;ターン最初の変数の初期化
+TFLAG:0 = 0
+
+;体力気力を0～最大値の範囲に収める
+CALL LIFE_LIMIT
+
+;逆調教なら常時主人公をプレイヤーに
+IF GROUPMATCH(FLAG:調教モード, 4, 5, 7)
+	CALL CLEAR_MPLY()
+	CALL CLEAR_MTAR()
+	SIF FLAG:調教モード != 7
+		CALL ADD_MPLY(MASTER)
+ENDIF
+
+;主導権を握っているキャラが疲労・失神・睡眠・離脱状態になっていれば主導権を解除
+IF FLAG:主導権所有者 >= 0
+	IF TCVAR:(FLAG:主導権所有者):51 || TCVAR:(FLAG:主導権所有者):52 || TCVAR:(FLAG:主導権所有者):53
+		FLAG:主導権所有者 = -1
+	ENDIF
+ENDIF
+
+CUSTOMDRAWLINE ─
+CALL TITLE_CATEGORY_GENERAL("現在の状態")
+PRINTFORM %TOSTR_SPACE(34)%
+IF FLAG:継続コマンド表示絞り込み
+	PRINTBUTTON "[絞り込み:有効]", 5904
+ELSE
+	PRINTBUTTON "[絞り込み:無効]", 5904
+ENDIF
+PRINT   
+IF FLAG:調教中表示簡略化
+	PRINTBUTTON "[表示:簡略]", 5903
+ELSE
+	PRINTBUTTON "[表示:詳細]", 5903
+ENDIF
+PRINTL 
+
+CALL SHOW_EQUIP
+CALL COLOR_LINE
+
+;調教コマンドの表示
+CALL SHOW_COMMAND
+
+CALL COLOR_LINE
+
+CALL TITLE_CATEGORY_GENERAL("システムコマンド")
+PRINTL
+PRINTPLAIN     
+IF GROUPMATCH(FLAG:調教モード, 調教_会う, 調教_閨, 調教_捕虜調教, 調教_捕虜会話)
+	PRINTBUTTON " [実行／対象の反転]", 5900
+	PRINTBUTTON " [命令させろ]", 5901
+ELSE
+	SETCOLOR カラー_選択不可
+	PRINTPLAIN  [実行／対象の反転]
+	PRINTPLAIN  [命令させろ]
+	RESETCOLOR
+ENDIF
+PRINT   
+
+
+PRINTBUTTON "[コマンドフィルタ]", 5905
+PRINT   
+
+;★added a help button
+PRINTBUTTON "[ヘルプ]", 5997
+PRINT   
+
+IF GROUPMATCH(FLAG:調教モード, 調教_会う, 調教_閨, 調教_捕虜調教, 調教_捕虜会話)
+	PRINTBUTTON "[ショップ]", 5998
+ELSE
+	SETCOLOR カラー_選択不可
+	PRINTPLAIN [ショップ]
+	RESETCOLOR
+ENDIF
+PRINT   
+
+;逆調教・主人公が行動不能のときは終了ボタンをグレー表示(自分の意志で終了できない)
+[IF_DEBUG]
+SIF GROUPMATCH(FLAG:調教モード, 調教_逆調教通常, 調教_慰安, 調教_逆調教特殊)
+	PRINTBUTTON "[次回コマンド指定]", 5996
+PRINTBUTTON "[調教終了]", 5999
+[ENDIF]
+[IF_NDEBUG]
+IF !GROUPMATCH(FLAG:調教モード, 4, 5, 7) && IS_PLAYABLE(MASTER)
+	PRINTBUTTON "[調教終了]", 5999
+ELSE
+	SETCOLOR カラー_選択不可
+	PRINTFORM [調教終了]
+	RESETCOLOR
+ENDIF
+[ENDIF]
+PRINTL
+
+CALL COLOR_LINE
+
+;逆調教または主人公が行動不能
+IF GROUPMATCH(FLAG:調教モード, 4, 5, 7) || !IS_PLAYABLE(MASTER)
+	CALL TITLE_CATEGORY_GENERAL("キャラの情報")
+ELSE
+	CALL TITLE_CATEGORY_GENERAL("現在の対象")
+ENDIF
+PRINTL 
+
+;逆調教
+IF GROUPMATCH(FLAG:調教モード, 4, 5, 7)
+	PRINTFORML %TOSTR_SPACE(13)%%TOSTR_SPACE(48)%機嫌 体力 気力    敏/鈍   状態
+;参加人数が2人以上
+ELSEIF TFLAG:44 >= 2
+	PRINTFORML %TOSTR_SPACE(13)%<主導権><実行>  <対象>%TOSTR_SPACE(17)%性感/処女%TOSTR_SPACE(20)%機嫌 体力 気力    敏/鈍   状態
+;参加人数が1人
+ELSE
+	;会いに行く
+	IF FLAG:調教モード == 0
+		IF FLAG:ウフフフラグ
+			PRINTFORML %TOSTR_SPACE(13)%<主導権>%TOSTR_SPACE(50)%機嫌 酔い 体力 気力    敏/鈍   状態
+		ELSE
+			PRINTFORML %TOSTR_SPACE(13)%<主導権>%TOSTR_SPACE(50)%機嫌 酔い
+		ENDIF
+	;子育て
+	ELSEIF FLAG:調教モード == 3
+		PRINTFORML %TOSTR_SPACE(13)%<主導権>%TOSTR_SPACE(50)%機嫌
+	ELSE
+		PRINTFORML %TOSTR_SPACE(13)%<主導権>%TOSTR_SPACE(50)%機嫌 体力 気力    敏/鈍   状態
+	ENDIF
+ENDIF
+
+;対象キャラの選択コマンド
+CALL SHOW_PARTICIPANT_SELECTOR
+
+CALL COLOR_LINE
+CALL TITLE_CATEGORY_GENERAL("現在の状況")
+
+;非ウフフ
+IF !FLAG:ウフフフラグ
+	;ムード表示
+	PRINT     ムード 
+	LOCAL:0 = MAX(0, TFLAG:37)
+	LOCAL:1 = MAX(0, TFLAG:37 - 60)
+	SETCOLOR 0x00FF00
+	FOR LOCAL:2, 0, 6
+		IF LOCAL:0 / 10 > LOCAL:2
+			PRINTFORM %UNICODE(0x2665)%
+		ELSE
+			PRINTFORM _
+		ENDIF
+	NEXT
+	SETCOLOR 0xFF80FF
+	FOR LOCAL:2, 0, 26
+		IF LOCAL:1 / 10 > LOCAL:2
+			PRINTFORM %UNICODE(0x2665)%
+		ELSE
+			PRINTFORM _
+		ENDIF
+	NEXT
+	RESETCOLOR
+	PRINTL
+	PRINT         
+ENDIF
+
+;状況表示
+PRINTFORML               場所 <%TRAIN_PLACE%>
+
+
+;残り時間表示
+PRINT   残り時間 
+FOR LOCAL:0, 0, TFLAG:56
+	IF FLAG:ウフフフラグ
+		SETCOLOR 0xFF8080
+	;デートにより追加された時間(7番以降)は紫色で表示
+	ELSEIF LOCAL:0 >= 7
+		SETCOLOR 0xFF00FF
+	ELSE
+		SETCOLOR カラー_注意
+	ENDIF
+	IF TFLAG:55 > LOCAL:0
+		PRINT ★
+	ELSE
+		PRINT ☆
+	ENDIF
+	SIF LOCAL:0 != 0 && LOCAL:0 % 5 == 4
+		PRINT |
+NEXT
+RESETCOLOR
+
+PRINTL
+
+

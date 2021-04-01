@@ -1,0 +1,495 @@
+﻿;-------------------------------------------------
+;アイテム開発イベント
+;-------------------------------------------------
+@ITEM_DEVELOPMENT
+CALL SINGLE_DRAWLINE
+PRINTFORML アイテム開発報告
+CALL COLOR_LINE
+FOR LOCAL:0, 200, 300
+	IF ITEMTIME:(LOCAL:0) >= 1
+		IF ITEMTIME:(LOCAL:0) >= ITEMTERM:(LOCAL:0)
+			ITEMTIME:(LOCAL:0) = 0
+			IF LOCAL:0 < 280
+				ITEM:(LOCAL:0) ++
+			ENDIF
+			IF LOCAL:0 >= 250
+				ITEMSALES:(LOCAL:0) = 1
+			ENDIF
+			SETCOLOR カラー_注意
+			PRINTFORMW 『%ITEMNAME:(LOCAL:0)%』が完成しました！
+			RESETCOLOR
+		ELSE
+			ITEMTIME:(LOCAL:0) ++
+		ENDIF
+	ENDIF
+NEXT
+
+;-------------------------------------------------
+;アイテムの開発期間を設定(ニューゲーム・ロード時に呼び出される)
+;-------------------------------------------------
+@SET_ITEMTERM
+ITEMTERM:200 = 1
+ITEMTERM:201 = 2
+ITEMTERM:202 = 3
+ITEMTERM:203 = 1
+ITEMTERM:204 = 2
+ITEMTERM:206 = 2
+ITEMTERM:207 = 2
+ITEMTERM:208 = 1
+ITEMTERM:209 = 2
+ITEMTERM:210 = 3
+ITEMTERM:211 = 4
+ITEMTERM:212 = 1
+ITEMTERM:213 = 2
+ITEMTERM:214 = 2
+ITEMTERM:215 = 2
+ITEMTERM:216 = 2
+ITEMTERM:217 = 5
+ITEMTERM:218 = 2
+ITEMTERM:219 = 3
+ITEMTERM:218 = 3
+ITEMTERM:219 = 10
+ITEMTERM:220 = 5
+ITEMTERM:240 = 2
+ITEMTERM:241 = 2
+ITEMTERM:242 = 2
+ITEMTERM:243 = 1
+ITEMTERM:244 = 1
+ITEMTERM:245 = 1
+ITEMTERM:250 = 3
+ITEMTERM:251 = 2
+ITEMTERM:252 = 8
+ITEMTERM:253 = 12
+ITEMTERM:260 = 1
+ITEMTERM:261 = 1
+ITEMTERM:262 = 2
+ITEMTERM:263 = 2
+ITEMTERM:264 = 2
+ITEMTERM:265 = 2
+ITEMTERM:266 = 2
+ITEMTERM:267 = 2
+ITEMTERM:280 = 2
+ITEMTERM:281 = 2
+ITEMTERM:282 = 2
+ITEMTERM:283 = 2
+ITEMTERM:284 = 4
+ITEMTERM:285 = 3
+ITEMTERM:286 = 3
+ITEMTERM:287 = 3
+ITEMTERM:288 = 5
+ITEMTERM:289 = 2
+ITEMTERM:290 = 2
+ITEMTERM:291 = 2
+ITEMTERM:292 = 2
+ITEMTERM:293 = 5
+ITEMTERM:294 = 3
+ITEMTERM:295 = 3
+ITEMTERM:296 = 3
+
+;-------------------------------------------------
+;開発アイテムARG:0の真の購入価格を取得
+;-------------------------------------------------
+@GET_PRICE(ARG:0)
+RESULT = ITEMPRICE:(ARG:0)
+TRYCALLFORM GET_PRICE{ARG:0}
+RETURN RESULT
+
+;-------------------------------------------------
+;開発アイテムの購入価格
+;-------------------------------------------------
+;●醸造酒
+@GET_PRICE250
+RETURN 3000
+
+;●果実酒
+@GET_PRICE251
+RETURN 2000
+
+;●日本酒
+@GET_PRICE252
+RETURN 4000
+
+;●蒸留酒
+@GET_PRICE253
+RETURN 5000
+
+;●媚薬
+@GET_PRICE260
+RETURN 2000
+
+;●排卵誘発剤
+@GET_PRICE261
+RETURN 3000
+
+;●絶倫丸
+@GET_PRICE262
+RETURN 3000
+
+;●麻薬
+@GET_PRICE263
+RETURN 10000
+
+;●ピアス
+@GET_PRICE264
+RETURN 7000
+
+;●桃源香
+@GET_PRICE265
+RETURN 3500
+
+;●ビデオテープ
+@GET_PRICE266
+RETURN 1000
+
+;●不思議な懐中時計
+@GET_PRICE267
+RETURN 5000
+
+;●ふたなり薬
+@GET_PRICE280
+RETURN 30000
+
+;●性転換薬
+@GET_PRICE281
+RETURN 30000
+
+;●獣変化の秘薬
+@GET_PRICE283
+RETURN 40000
+
+;●再生の秘薬
+@GET_PRICE284
+RETURN 100000
+
+;●犬
+@GET_PRICE285
+RETURN 30000
+
+;●豚
+@GET_PRICE286
+RETURN 30000
+
+;永久脱毛剤
+@GET_PRICE287
+RETURN 50000
+
+;タトゥー除去手術
+@GET_PRICE288
+RETURN 100000
+
+;穴トレ
+@GET_PRICE289
+RETURN 50000
+
+;美容手術
+@GET_PRICE290
+RETURN 50000
+
+;危険日ずらし
+@GET_PRICE291
+RETURN 20000
+
+;避妊薬
+@GET_PRICE292
+RETURN 20000
+
+;堕胎薬
+@GET_PRICE293
+RETURN 50000
+
+;主導半減法
+@GET_PRICE294
+RETURN 20000
+
+;馬
+@GET_PRICE295
+RETURN 50000
+
+;猿
+@GET_PRICE296
+RETURN 50000
+
+;-------------------------------------------------
+;開発アイテムの開発条件
+;-------------------------------------------------
+;●アナルバイブ
+@ITEM_ABLE202
+;バイブを開発済み
+IF ITEM:バイブ >= 1
+	RETURN 1
+ENDIF
+RETURN 0
+
+;●クリキャップ
+@ITEM_ABLE206
+;ローターを開発済み
+IF ITEM:ローター >= 1
+	RETURN 1
+ENDIF
+RETURN 0
+
+;●ニプルキャップ
+@ITEM_ABLE207
+;ローターを開発済み
+IF ITEM:ローター >= 1
+	RETURN 1
+ENDIF
+RETURN 0
+
+;●双頭バイブ
+@ITEM_ABLE208
+;ペニスバンドを開発済み
+IF ITEM:ペニスバンド >= 1
+	RETURN 1
+ENDIF
+RETURN 0
+
+;●触手部屋
+@ITEM_ABLE210
+;触手部屋の管理が可能なキャラが必要
+FOR LOCAL:0, 0, CHARANUM
+	IF CFLAG:(LOCAL:0):所属 == CFLAG:MASTER:所属 && CFLAG:(LOCAL:0):捕虜先 == 0 && TALENT:(LOCAL:0):妖術知識 && (ABL:(LOCAL:0):触手 >= 3 || LOCAL:0 == MASTER)
+		RETURN 1
+	ENDIF
+NEXT
+RETURN 0
+
+;●遠隔通信用スキマ
+@ITEM_ABLE211
+;淫具目録を持っている
+IF ITEM:淫具目録
+	RETURN 1
+ENDIF
+RETURN 0
+
+;●首輪
+@ITEM_ABLE212
+;淫具目録を持っている
+IF ITEM:淫具目録
+	RETURN 1
+ENDIF
+RETURN 0
+
+;●ニードルアンドインク
+@ITEM_ABLE213
+;淫具目録を持っている
+IF ITEM:淫具目録
+	RETURN 1
+ENDIF
+RETURN 0
+
+;搾乳機
+@ITEM_ABLE216
+;ニプルキャップを開発済み
+IF ITEM:ニプルキャップ >= 1
+	RETURN 1
+ENDIF
+RETURN 0
+
+;●催眠術
+@ITEM_ABLE217
+;淫具目録を持っており、主人公が妖術知識もち
+IF ITEM:淫具目録 && TALENT:MASTER:妖術知識
+	RETURN 1
+ENDIF
+RETURN 0
+
+;●おもちゃの注射器
+@ITEM_ABLE218
+;淫具目録を持っている
+IF ITEM:淫具目録
+	RETURN 1
+ENDIF
+RETURN 0
+
+;●ペニスリボン
+@ITEM_ABLE219
+;淫具目録を持っている&ふたなり薬開発済み
+IF ITEM:淫具目録 && ITEMSALES:ふたなり薬
+	RETURN 1
+ENDIF
+RETURN 0
+
+;●尿道カテーテル
+@ITEM_ABLE220
+;淫具目録を持っている
+IF ITEM:淫具目録
+	RETURN 1
+ENDIF
+RETURN 0
+
+
+;●果実酒
+@ITEM_ABLE251
+;醸造酒を開発済み
+IF ITEMSALES:醸造酒
+	RETURN 1
+ENDIF
+RETURN 0
+
+;●蒸留酒
+@ITEM_ABLE253
+;醸造酒を開発済み
+IF ITEMSALES:醸造酒
+	RETURN 1
+ENDIF
+RETURN 0
+
+;●絶倫丸
+@ITEM_ABLE262
+;媚薬を開発済み
+IF ITEMSALES:媚薬
+	RETURN 1
+ENDIF
+RETURN 0
+
+;●麻薬
+@ITEM_ABLE263
+;淫具目録を持っている
+IF ITEM:淫具目録
+	RETURN 1
+ENDIF
+RETURN 0
+
+;●ピアス
+@ITEM_ABLE264
+;淫具目録を持っている
+IF ITEM:淫具目録
+	RETURN 1
+ENDIF
+RETURN 0
+
+;●桃源香
+@ITEM_ABLE265
+;媚薬を開発済み、且つ淫具目録を持っている
+IF ITEMSALES:媚薬 && ITEM:淫具目録
+	RETURN 1
+ENDIF
+RETURN 0
+
+;●懐中時計
+@ITEM_ABLE267
+;淫具目録を持っており、主人公が妖術知識もち
+IF ITEM:淫具目録
+	RETURN 1
+ENDIF
+RETURN 0
+
+;●ふたなり薬
+@ITEM_ABLE280
+;淫具目録を持っている
+IF ITEM:淫具目録
+	RETURN 1
+ENDIF
+RETURN 0
+
+;●性転換薬
+@ITEM_ABLE281
+;淫具目録を持っている
+IF ITEM:淫具目録
+	RETURN 1
+ENDIF
+RETURN 0
+
+;●獣変化の秘薬
+@ITEM_ABLE283
+;淫具目録を持っている
+IF ITEM:淫具目録
+	RETURN 1
+ENDIF
+RETURN 0
+
+;●再生の秘薬
+@ITEM_ABLE284
+;ふたなり、性転換、獣変化のうち２つ以上を開発済み
+IF (ITEMSALES:ふたなり薬 != 0) + (ITEMSALES:性転換薬 != 0) + (ITEMSALES:獣変化の秘薬 != 0) >= 2
+	RETURN 1
+ENDIF
+
+;犬と豚
+@ITEM_ABLE285
+;淫具目録を持っている
+IF ITEM:淫具目録
+	RETURN 1
+ENDIF
+RETURN 0
+
+@ITEM_ABLE286
+;淫具目録を持っている
+IF ITEM:淫具目録
+	RETURN 1
+ENDIF
+RETURN 0
+
+;永久脱毛剤
+@ITEM_ABLE287
+;ふたなり、性転換、獣変化のうち２つ以上を開発済み
+IF (ITEMSALES:ふたなり薬 != 0) + (ITEMSALES:性転換薬 != 0) + (ITEMSALES:獣変化の秘薬 != 0) >= 2
+	RETURN 1
+ENDIF
+RETURN 0
+
+;タトゥー除去手術
+@ITEM_ABLE288
+;ニードル＆インクを所持
+IF ITEM:刺青針
+	RETURN 1
+ENDIF
+RETURN 0
+
+;穴トレ
+@ITEM_ABLE289
+;淫具目録を持っている
+IF ITEM:淫具目録
+	RETURN 1
+ENDIF
+RETURN 0
+
+;美容
+@ITEM_ABLE290
+;淫具目録を持っている
+RETURN 1
+
+;危険日ずらし
+@ITEM_ABLE291
+;淫具目録を持っていて、排卵誘発剤開発済み
+IF ITEM:淫具目録 && ITEMSALES:排卵誘発剤
+	RETURN 1
+ENDIF
+RETURN 0
+
+
+;避妊薬
+@ITEM_ABLE292
+RETURN 1
+
+;堕胎薬
+@ITEM_ABLE293
+IF ITEM:淫具目録
+	RETURN 1
+ENDIF
+RETURN 0
+
+;能動受動
+@ITEM_ABLE294
+IF ITEM:淫具目録
+	RETURN 1
+ENDIF
+RETURN 0
+
+;馬
+@ITEM_ABLE295
+;淫具目録を持っている
+IF ITEM:淫具目録
+	RETURN 1
+ENDIF
+RETURN 0
+
+;猿
+@ITEM_ABLE296
+;淫具目録を持っており、犬と豚開発済み
+IF ITEM:淫具目録 && ITEMSALES:犬 && ITEMSALES:豚
+	RETURN 1
+ENDIF
+RETURN 0
+

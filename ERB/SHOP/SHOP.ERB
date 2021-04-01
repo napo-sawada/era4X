@@ -1,0 +1,198 @@
+﻿;ショップ画面の処理(共通)
+
+;-------------------------------------------------
+;ショップ画面開始時の処理
+;-------------------------------------------------
+@EVENTSHOP
+;オートセーブ判定
+TFLAG:99 = 1
+
+;情報表示対象の都市を初期化
+SHOWN_CITY = -1
+
+;ページ番号を初期化
+FLAG:拠点フェイズページ = 1
+FLAG:最後に実行したコマンド = FLAG:拠点フェイズ選択コマンド
+;デッドエンディングなら戻る
+;IF FLAG:強制エンドフラグ == 1
+;	FLAG:強制エンドフラグ = 0
+;	BEGIN TITLE
+;ENDIF
+
+;-------------------------------------------------
+;ショップ画面の表示処理
+;-------------------------------------------------
+@SHOW_SHOP
+;オートセーブ判定を解除
+TFLAG:99 = 0
+
+;コマンドの選択可否判定フラグをクリア
+VARSET SHOP_AVAIL, 1
+
+;所持金の上限設定
+MONEY = LIMIT(MONEY, 0, 9999999999999)
+
+;国家関係マップの作成
+CALL TMP_CREATE_RELATION_MAP
+
+;士官の部隊所属マップを作成
+CALL TMP_CREATE_IS_FREE_MAP
+
+;士官の星評価を用意
+CALL TMP_PREPARE_CHARA_STARS
+CALL TMP_PREPARE_COUNTRY_STARS
+
+CALL TMP_CREATE_COUNTRY_NEIBORING_MAP
+
+CALL TMP_CREATE_SUM_ECONOMY_MAP
+CALL TMP_CREATE_SUM_SOLDIER_MAP
+
+;無効な入力時に消去する時の行数
+LINES_SHOP = LINECOUNT
+
+CALL SINGLE_DRAWLINE
+PRINTFORM  {DAY}期  
+
+PRINTBUTTON "[QSAVE]", 94
+PRINT   
+CALL PRINTBUTTON_EX("[QLOAD]", 95, CHKDATA(9999) == 0)
+PRINT   
+
+IF TIME == 0
+	PRINTBUTTON "<<", 87
+	PRINTBUTTON @"[%STR_NOW_SORTKEY:ソートキー, 4, LEFT%]", 85
+	RESETCOLOR
+	PRINTBUTTON ">>", 88
+	PRINT  
+	PRINTBUTTON @"[\@ 降順ソート ? 降順 # 昇順\@]", 86
+	PRINT   
+	PRINTBUTTON "[地図]", 89
+	;縦に並べる行がなくそろえたほうがずれて見えるので隙間側を整えるように変更
+	;最大13桁カンマ4足して17
+	PRINTFORM  金:%NUM_FORMAT(MONEY)%  
+	PRINTFORM 陥落:%NUM_FORMAT(FLAG:陥落人数)% 
+	IF COOLTIME:MASTER:0 >= 2
+		CALL COLOR_PRINT(@"ｸｰﾙﾀｲﾑ{COOLTIME:MASTER:0}", カラー_赤)
+	ELSEIF CFLAG:MASTER:行動不能状態 == 行動不能_臨月
+		CALL COLOR_PRINT("臨月", カラー_赤)
+	ENDIF
+	PRINTL 
+ELSE
+	IF IS_COUNTRY(CFLAG:MASTER:所属)
+		PRINTFORM 所持金金:\@%NUM_FORMAT(MONEY)%\@
+	ELSE
+		SIF !FLAG:観戦モード
+			PRINTFORM 金:%NUM_FORMAT(MONEY)%  
+	ENDIF
+	LOCALS:0 = 
+	SIF DAY < SLG_PP:0
+		LOCALS:0 = %LOCALS:0%外交/
+	SIF DAY < SLG_PP:1
+		LOCALS:0 = %LOCALS:0%軍事
+	SIF LOCALS:0 != ""
+		LOCALS:0 = %LOCALS:0%未解禁
+	PRINTFORM %LOCALS:0%
+	SIF TREATY_U_TARGET:0 != 0
+		CALL COLOR_PRINT(@"%ANAME(GET_COUNTRY_BOSS(TREATY_U_TARGET:0))%", COUNTRY_COLOR:(TREATY_U_TARGET:0), "討伐連合")
+	PRINTL 
+ENDIF
+CALL SINGLE_DRAWLINE
+
+CALL SHOW_SHOP_LIFE
+
+REDRAW 0
+
+;-------------------------------------------------
+;ショップ画面の入力処理
+;-------------------------------------------------
+@USERSHOP
+LOCAL:0 = RESULT
+
+REDRAW 1
+
+;拠点フェイズ
+IF TIME == 0
+	CALL USERSHOP_LIFE(LOCAL:0)
+;戦略フェイズ
+ELSE
+	CALL USERSHOP_SLG(LOCAL:0)
+ENDIF
+
+;処理を行わなかった場合
+IF !RESULT
+	REDRAW 0
+	CLEARLINE LINECOUNT - LINES_SHOP
+ENDIF
+
+;-------------------------------------------------
+;ショップ画面で0～99が入力されたときのダミー処理
+;-------------------------------------------------
+@EVENTBUY
+ITEM:BOUGHT = 0
+LOCAL:0 = BOUGHT
+
+REDRAW 1
+
+;拠点フェイズ
+IF TIME == 0
+	CALL EVENTBUY_LIFE(LOCAL:0)
+;戦略フェイズ
+ELSE
+	CALL EVENTBUY_SLG(LOCAL:0)
+ENDIF
+
+;処理を行わなかった場合
+IF !RESULT
+	;コンフィグ
+	IF LOCAL:0 == 91
+		CALL SHOW_CONFIG
+	;セーブ
+	ELSEIF LOCAL:0 == 92
+		DUMPRAND
+		CALL SAVE_GAME
+	;ロード
+	ELSEIF LOCAL:0 == 93
+		CALL LOAD_GAME
+	ELSEIF LOCAL:0 == 94
+		CALL QUICK_SAVE
+		PRINTFORMW セーブしました
+		REDRAW 0
+		CLEARLINE LINECOUNT - LINES_SHOP
+	ELSEIF LOCAL:0 == 95
+		CALL QUICK_LOAD
+	ELSEIF TIME == 0
+		IF LOCAL:0 == 85
+			CALL SINGLE_DRAWLINE
+			FOR LOCAL, 0, NUM_SORTKEY
+				PRINTFORML [{LOCAL}] %STR_NOW_SORTKEY:LOCAL%
+			NEXT
+			INPUT
+			SIF INRANGE(RESULT, 0, NUM_SORTKEY - 1)
+				ソートキー = RESULT
+		ELSEIF LOCAL:0 == 86
+			降順ソート = !降順ソート
+		ELSEIF LOCAL:0 == 87
+			ソートキー = ROUND_DECREMENT(ソートキー, 0, NUM_SORTKEY - 1)
+		ELSEIF LOCAL:0 == 88
+			ソートキー = ROUND_INCREMENT(ソートキー, 0, NUM_SORTKEY - 1)
+		;地図
+		ELSEIF LOCAL:0 == 89
+			CALL SINGLE_DRAWLINE
+			CALL SET_CITY_COLOR_COUNTRY
+			CALL SET_CITY_COLOR_UNIT
+			CALL DRAWMAP
+			CALL RESET_CITY_COLOR
+			DRAWLINE
+			WAIT
+		ELSE
+			REDRAW 0
+			CLEARLINE LINECOUNT - LINES_SHOP
+		ENDIF
+	ELSE
+		REDRAW 0
+		CLEARLINE LINECOUNT - LINES_SHOP
+	ENDIF
+ENDIF
+
+
+RETURN

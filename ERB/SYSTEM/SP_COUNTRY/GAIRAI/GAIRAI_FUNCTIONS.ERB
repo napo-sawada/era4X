@@ -1,0 +1,233 @@
+﻿;--------------------------------------
+;ターンエンド時の外来兵の処理
+;--------------------------------------
+@TURNEND_GAIRAI
+#DIM 外来人
+
+外来人 = GET_COUNTRY_FROM_ID(SP_COUNTRY_ID:特殊勢力_外来人)
+
+;兵力の増える処理
+IF DAY % 3 == 0
+	CALL SINGLE_DRAWLINE
+	LOCAL:0 = MAX(RAND:3000, 1000)
+	PRINTFORML 外来人につけば「実験」のおこぼれにあずかれると聞いた野良妖怪たちが、次々と寝返っているようです……
+	PRINTFORML 外来人軍の兵力が{LOCAL:0}増加した
+	COUNTRY_SOLDIER:外来人 += LOCAL:0
+ENDIF
+
+;5ターンに1回、ブレインコントロール
+CALL GAIRAI_BRAINCONTROL(DAY % 5 == 0)
+
+;--------------------------------------
+;滅亡時の処理
+;--------------------------------------
+@GAIRAI_DESTROY_MSG
+CALL SINGLE_DRAWLINE
+SETCOLOR カラー_注意
+PRINTFORML
+PRINTFORML
+PRINTFORML
+PRINTFORMW 壊滅的な被害を受けた外来人は、結界の外に撤退していきました
+PRINTFORMW 幻想郷の勝利です！
+PRINTFORML
+PRINTFORML
+PRINTFORML
+RESETCOLOR
+CALL SINGLE_DRAWLINE
+
+;--------------------------------------
+;外来勢力の初期化処理
+;--------------------------------------
+@GAIRAI_INIT(ARG:0)
+#DIM LCOUNT
+VARSET LOCAL
+
+SIF GET_COUNTRY_FROM_ID(SP_COUNTRY_ID:特殊勢力_外来人) != -1
+	RETURN 0
+
+SIF SP_COUNTRY_RANK:特殊勢力_外来人 == 0
+	RETURN 0
+
+SIF GET_NEW_COUNTRY() == -1
+	RETURN 0
+
+CALL CREATE_SP_COUNTRY(特殊勢力_外来人)
+LOCAL = RESULT
+CALL INIT_SP_COUNTRY(LOCAL)
+
+RETURN LOCAL
+
+;-------------------------------------------------
+;DESC  :外来人所属時に閨・捕虜調教前にアイテムを追加する処理
+;-------------------------------------------------
+@START_TRAIN_COMMON_GAIRAI()
+ITEM:A_バイブ = 1
+ITEM:A_アナルバイブ = 1
+ITEM:A_ニプルキャップ = 1
+ITEM:A_クリキャップ = 1
+ITEM:A_搾乳機 = 1
+ITEM:A_拡張バルーン = 1
+ITEM:A_媚薬 = 99
+ITEM:A_利尿剤 = 99
+ITEM:A_おもちゃの注射器 = 1
+ITEM:A_コンドーム = 99
+
+@SELECT_CHARA_RANDOM_LOGIC_GAIRAI_BRAINCONTROL(対象)
+#DIM 対象
+#DIM 外来人
+
+外来人 = GET_COUNTRY_FROM_ID(SP_COUNTRY_ID:(特殊勢力_外来人))
+
+SIF IS_SP_CHARA(対象)
+	RETURN 0
+SIF 対象 == MASTER
+	RETURN 0
+SIF 対象 == GET_COUNTRY_BOSS(CFLAG:対象:所属)
+	RETURN 0
+SIF CFLAG:対象:捕虜先 && CFLAG:対象:捕虜先 != 外来人
+	RETURN 0
+SIF CFLAG:対象:所属 == 外来人
+	RETURN 0
+SIF CFLAG:対象:特殊状態 == 特殊状態_死亡
+	RETURN 0
+SIF !CFLAG:対象:所属 && CFLAG:対象:特殊状態 != 特殊状態_放浪
+	RETURN 0
+SIF TALENT:対象:幼児
+	RETURN 0
+
+RETURN 1
+
+;--------------------------------------
+;外来人によるブレインコントロールイベント
+;引数には発動条件を書く。書かなければ常時発動。
+;--------------------------------------
+@GAIRAI_BRAINCONTROL(条件 = 1)
+#DIM 外来
+#DIM 条件
+#DIM 対象
+#DIM メッセージ
+
+外来 = GET_COUNTRY_FROM_ID(SP_COUNTRY_ID:特殊勢力_外来人)
+
+;外来所属でなく、条件を満たしている
+SIF 外来 == -1 || !条件
+	RETURN -1
+
+CALL SELECT_CHARA_RANDOM("GAIRAI_BRAINCONTROL")
+
+対象 = RESULT
+
+SIF 対象 == -1
+	RETURN 0
+
+IF CFLAG:対象:捕虜先 == 外来
+	CALL SINGLE_DRAWLINE
+	SETCOLOR カラー_ピンク
+	PRINTFORMW 外来人たちは実験と称し、怪しげなヘルメット型装置を%ANAME(対象)%に被せた……
+	PRINTFORMW 最初は暴れていた%ANAME(対象)%だが、外来人が装置の電源を入れると、途端に大人しくなる
+	PRINTFORML 装置の内では、彼らの作った洗脳用ムービー・音声が流れている
+	PRINTFORML さらに、装置から頭に流れされる微弱な電流が、%ANAME(対象)%の深層心理から書き換えていく
+	PRINTFORMW 自分は外来人たちの奴隷に過ぎないのだと
+	PRINTFORML %ANAME(対象)%の心が幸福感に満たされていく
+	PRINTFORMW こんなに幸せなのに、どうして逆らう必要があるだろう？
+	PRINTFORML ある程度経過を見た後、外来人たちは装置の洗脳映像に、オナニーせよという信号を混ぜ込んだ
+	PRINTFORMW 外来人の従順な研究対象と成り下がった%ANAME(対象)%は、何の疑問も抱かず、
+	PRINTFORMW ただ言われるがままに自らの秘部を激しく慰め始めた……
+	PRINTFORML
+	CALL COLOR_PRINTW(@"%ANAME(対象)%が外来人の奴隷となりました", カラー_警告)
+	RESETCOLOR
+	SETBIT TALENT:対象:特殊勢力陥落系, 特殊勢力_外来人
+	CALL CHANGE_COUNTRY(対象, 外来, 1)
+ELSE
+	CALL SINGLE_DRAWLINE
+	SETCOLOR カラー_ピンク
+	PRINTFORML 外来人たちは大型の音響装置を野外に持ち出した
+	PRINTFORMW そして、そこから耳に聞こえない洗脳音波を大音量でながし始めた
+	PRINTFORMW たまたま近くにいた%ANAME(対象)%はそれをもろに聞いてしまい、音波の発生元へふらふらと近寄った……
+	PRINTFORML 虚ろな瞳で外来人の元に馳せ参じた%ANAME(対象)%は、檻に入るように言われる
+	PRINTFORMW 音波の影響下にある%ANAME(対象)%は、言われるがまま従った
+	PRINTFORMW 研究対象を確保できたと、外来人たちはそのまま%ANAME(対象)%を持ち帰った
+	PRINTFORMW %ANAME(対象)%が我にかえったころには、もう手遅れだった
+	PRINTFORML
+	CALL COLOR_PRINTW(@"%ANAME(対象)%が外来人に囚われました", カラー_警告)
+	RESETCOLOR
+	CALL CAPTURE(対象, 外来)
+ENDIF
+
+;-----------------------------------
+;外来勢力に捕らえられたときのイベント
+;-----------------------------------
+@MASTER_CAPTURED_GAIRAI(ARG:0)
+PRINTFORMW 捕らえられた%ANAME(MASTER)%は外来人たちの研究者の前に引きずり出された…
+IF GETBIT(TALENT:MASTER:特殊勢力陥落系, 特殊勢力_外来人)
+	PRINTFORML 君は脱走した研究対象XXX番じゃないか、よく戻ってきた
+	PRINTFORMW さあ、また実験を行うから、この首輪をつけなさい
+	PRINTFORMW 外来人たちは当然のように、首輪を嵌めようとしてくるが……
+	CALL ASK_YN("受け入れる", "拒否する")
+	IF RESULT == 0
+		PRINTFORMW これをつければ、また沢山研究してもらえる
+		PRINTFORMW %ANAME(MASTER)%の身体は疼き、首輪を自ら受け入れてしまった
+		PRINTFORMW 途端、彼らに対しては絶対服従であるという考えが、頭の中を埋め尽くした
+		PRINTFORMW 付いてきたまえ、そんな簡単な命令に従うことにすら、深い喜びを感じる
+		PRINTFORMW 彼らの作った特殊な首輪を嵌め、%ANAME(MASTER)%は再び、奴隷に成り下がった……
+		SETCOLOR カラー_注意
+		PRINTFORMW %ANAME(MASTER)%は再び、外来人たちの研究用奴隷となりました
+		RESETCOLOR
+	ELSE
+		PRINTFORMW 誰がそんなもの。%ANAME(MASTER)%ははねのける
+		PRINTFORMW 外来人たちにはその態度が理解できないようだった
+		PRINTFORMW どういう反応だろうかこれは、興味深いぞ、是非とも調べねば
+		PRINTFORMW わきたつ外来人たちは、%ANAME(MASTER)%を取り押さえ、枷で縛り、研究用の牢獄へと放り込んだ……
+	ENDIF
+ELSE
+	PRINTFORML 研究者は%ANAME(MASTER)%の体を研究対象を見る瞳で舐めるように見定めた後、
+	PRINTFORMW 君は研究価値がありそうだと呟いた
+	PRINTFORMW 自ら研究に協力してくれるなら、手ひどい真似はしないと言っているが……
+	PRINTFORMW 受け入れますか？
+	CALL ASK_YN("受け入れる", "拒否する")
+	IF RESULT == 0
+		PRINTFORMW 投獄されるよりはマシだろう。%ANAME(MASTER)%が頷くと、外来人たちは満足げに頷いた
+		PRINTFORMW では管理用タグを付けようと、彼らは言い出した
+		PRINTFORMW 「タグ」として用意された焼きごては、あろうことか、%ANAME(MASTER)%の下腹に押し当てられた……
+		SETCOLOR カラー_注意
+		PRINTFORMW %ANAME(MASTER)%は外来人たちの研究用奴隷となりました
+		RESETCOLOR
+	ELSE
+		PRINTFORMW お前達になど手を貸すか。%ANAME(MASTER)%は毅然として言い放つ	
+		PRINTFORMW ではしかたないと、彼らはそのまま%ANAME(MASTER)%を投獄した……
+	ENDIF
+ENDIF
+IF RESULT == 0
+	SETBIT TALENT:MASTER:特殊勢力陥落系, 特殊勢力_外来人
+	CFLAG:MASTER:所属 = ARG:0
+	CALL PLAYER_FALLEN_TO_SP_COUNTRY(ARG:0)
+	CALL GAIRAI_FALLEN_LEAVE_MARK(MASTER)
+	RETURN 0
+ELSE
+	CALL CAPTURE(MASTER, ARG:0)
+	RETURN 2
+ENDIF
+
+;--------------------------------------
+;エンディング
+;--------------------------------------
+@GAIRAI_ENDING
+PRINTFORML 外来人たちの幻想郷侵攻計画は成功した
+PRINTFORMW 彼らは科学の力で、幻想郷全土を支配下においた
+PRINTFORML 今日も彼らは少女達を使い、非道な「実験」を繰り返している
+PRINTFORML 彼らの研究所には、少女の悲鳴や嬌声が響き渡る
+PRINTFORMW だが、それを止める者はいない。彼らに刃向かう者は全て、滅ぼされてしまったのだから……
+IF CFLAG:MASTER:所属 == GET_COUNTRY_FROM_ID(SP_COUNTRY_ID:特殊勢力_外来人) && IS_FEMALE(MASTER)
+	PRINTFORMW 
+	PRINTFORMW 研究用奴隷たちのなかに、%ANAME(MASTER)%の姿もあった
+	PRINTFORMW 研究に協力的な模範的奴隷ということで、比較的待遇は良い
+	PRINTFORMW ……奴隷にしては、という但し書きつきであるが
+	PRINTFORML 今日の彼女に課せられたのは、異種生物との交配実験だ
+	PRINTFORMW 特殊な排卵誘発剤をあらかじめ下腹に子宮に注射されている%ANAME(MASTER)%は、妊娠の期待に下腹を疼かせている
+	PRINTFORML 彼女が実験室に入るなり、大型犬が彼女を組み伏せ、犯し始める
+	PRINTFORMW %ANAME(MASTER)%は、たまらないといった声をあげ、何度も放たれる精液を肉穴で受け止めていく 
+	PRINTFORMW 科学者たちは、それを無感動に眺め、時折記録をとっていた……
+	CALL FUCK_SP(MASTER, "欲望, 性交, 奉仕, 精愛, Ｖ, Ａ, Ｍ, 輪姦, 獣姦, Ｖ性交, Ａ性交", "処女喪失, 膣内射精, Ａ処女喪失, キス喪失, 腸内射精, 口内射精", GET_COUNTRY_FROM_ID(SP_COUNTRY_ID:特殊勢力_外来人), GET_SPERM_ID("犬"), "犬のペニス", "犬", "", "強姦")
+ENDIF
+PRINTFORML 
+PRINTFORMW もはや救世主などない地に、ただただ女の嬌声が響き渡り続ける……

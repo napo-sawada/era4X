@@ -1,0 +1,270 @@
+﻿;ピアシング
+
+;-------------------------------------------------
+;コマンド名称
+;-------------------------------------------------
+@COM_NAME92
+LOCALS:0 = タトゥー
+
+RESULTS:0 = %LOCALS:0%する
+RESULTS:1 = %LOCALS:0%させられる
+RESULTS:2 = %LOCALS:0%させる
+RESULTS:3 = %LOCALS:0%される
+RESULTS:4 = %LOCALS:0%させる
+RESULTS:5 = %LOCALS:0%見せつけ
+
+;-------------------------------------------------
+;選択可否判定
+;-------------------------------------------------
+@COM_ABLE92
+;共通部分
+CALL COM_ABLE_COMMON(92)
+SIF RESULT == 0
+	RETURN 0
+;プレイヤーは最大で1人まで
+SIF MPLY_NUM <= 0 || MPLY_NUM > 1
+	RETURN 0
+;ターゲットは最大で1人まで
+SIF MTAR_NUM <= 0 || MTAR_NUM > 1
+	RETURN 0
+SIF ITEM:刺青針 <= 0
+	RETURN 0
+;プレイヤーが行動不能なら不可
+SIF !IS_PLAYABLE(MPLY:0)
+	RETURN 0
+;プレイヤーが拘束中なら不可
+SIF IS_BIND(MPLY:0)
+	RETURN 0
+;ターゲットに一箇所はタトゥーできる場所がないとだめ
+SIF !CAN_TATTOO_ANYWHERE(MTAR:0)
+	RETURN 0
+SIF !CAN_REACH_BODY(MPLY:0, MTAR:0)
+    RETURN 0
+RETURN 1
+
+;-------------------------------------------------
+;メイン処理
+;-------------------------------------------------
+@COM92
+#DIM FIRST_LINE, 2
+
+;実行判定
+CALL COM_ORDER_COMMON
+SIF RESULT == 0
+	RETURN 0
+
+FIRST_LINE = LINECOUNT
+PRINTFORML %ANAME(MPLY:0)%は%ANAME(MTAR:0)%におしゃれさせてやることにした……
+PRINTFORML どこに彫り入れてやろうか？
+PRINTFORML
+FOR LOCAL, 0, VARSIZE("TATTOO")
+	IF CAN_TATTOO(MTAR:0, LOCAL)
+		PRINTBUTTON @"[{LOCAL:0}] %GET_TATTOO_NAME(LOCAL:0), 8, LEFT%", LOCAL:0
+		PRINTBUTTON @"[{LOCAL:0 + 100}] %GET_TATTOO_NAME(LOCAL:0) + "(ランダム)", 20, LEFT%", LOCAL:0 + 100
+		PRINTL
+	ELSE
+		SETCOLOR カラー_選択不可
+		PRINTPLAINFORM [{LOCAL:0}] %GET_TATTOO_NAME(LOCAL:0)%には既にタトゥーが入っている
+		RESETCOLOR
+		PRINTL
+	ENDIF
+NEXT
+PRINTFORML [99] 戻る
+$INPUT_LOOP
+INPUT
+LOCAL:1 = RESULT
+IF LOCAL:1 == 99
+	$CANCEL
+	PRINTFORML やはりやめておいた
+	RETURN 0
+ELSEIF 0 <= LOCAL:1 && LOCAL:1 < VARSIZE("TATTOO") && CAN_TATTOO(MTAR:0, LOCAL:1)
+	PRINTFORML 何と彫り入れようか……(未入力でキャンセル)
+	INPUTS
+	SIF RESULTS:0 == ""
+		GOTO CANCEL
+	CALL SET_TATTOO(MTAR:0, LOCAL:1, RESULTS:0)
+ELSEIF 100 <= LOCAL:1 && LOCAL:1 < VARSIZE("TATTOO") + 100 && CAN_TATTOO(MTAR:0, LOCAL:1 - 100)
+	FIRST_LINE:1 = LINECOUNT
+	$RANDOM_LOOP
+	LOCALS:0 = %STR_FOR_TATTOO(LOCAL:1 - 100)%
+	PRINTFORML 「%LOCALS:0%」を彫り入れるのはどうだろう……
+	CALL ASK_MULTI("彫る", "別ので", "やめる")
+	IF RESULT == 0
+		CALL SET_TATTOO(MTAR:0, LOCAL:1 - 100, LOCALS:0)
+	ELSEIF RESULT == 1
+		CLEARLINE LINECOUNT - FIRST_LINE:1
+		GOTO RANDOM_LOOP
+	ELSEIF RESULT == 2
+		CLEARLINE LINECOUNT - FIRST_LINE:0
+		RESTART
+	ENDIF
+ELSE
+	GOTO INPUT_LOOP
+ENDIF
+
+;●プレイヤーについて判定
+DOWNBASE:(MPLY:0):体力 += 100
+SOURCE:(MPLY:0):嗜虐 = 150
+SOURCE:(MPLY:0):逸脱 = 50
+SOURCE:(MPLY:0):接触 = 30
+;主導権に応じた優越・受動のソース追加
+CALL ADD_SOURCE_INITIATIVE_U(MPLY:0, 160, 60)
+DOWNBASE:(MTAR:0):体力 += 500
+;●ターゲットについて判定
+SOURCE:(MTAR:0):苦痛 = 500
+SOURCE:(MTAR:0):露出 = 50
+SOURCE:(MTAR:0):逸脱 = 150
+SOURCE:(MTAR:0):接触 = 30
+;主導権に応じた優越・受動のソース追加
+CALL ADD_SOURCE_INITIATIVE_U(MTAR:0, 50, 150)
+
+;主導度変化基準値
+TFLAG:49 = 5
+
+;倒錯度変化基準値
+TFLAG:50 = 7
+
+;レズ・ＢＬ経験基準値
+TFLAG:51 = 7
+
+
+
+RETURN 1
+
+;-------------------------------------------------
+;固有の実行判定
+;-------------------------------------------------
+@COM_ORDER_PLAYER92(ARG:0)
+;実行値の設定
+TCVAR:(ARG:0):25 = 110
+
+;共通部分
+CALL COM_ORDER(ARG:0)
+
+CALL COM_ORDER_ELEMENT(ARG:0, @"欲望Lv{ABL:(ARG:0):欲望}", ABL:(ARG:0):欲望 * 4)
+CALL COM_ORDER_ELEMENT(ARG:0, @"サドLv{ABL:(ARG:0):サド}", ABL:(ARG:0):サド * 3)
+
+LOCAL:0 = GET_PALAMLV(PALAM:(ARG:0):欲情)
+CALL COM_ORDER_ELEMENT(ARG:0, @"欲情Lv{LOCAL:0}", MIN(LOCAL:0 * 1, 10))
+
+IF TALENT:(ARG:0):大人しい
+	CALL COM_ORDER_ELEMENT(ARG:0, "大人しい", -3)
+ENDIF
+IF TALENT:(ARG:0):恥じらい
+	CALL COM_ORDER_ELEMENT(ARG:0, "恥じらい", -2)
+ENDIF
+IF TALENT:(ARG:0):献身的
+	CALL COM_ORDER_ELEMENT(ARG:0, "献身的", 3)
+ENDIF
+IF TALENT:(ARG:0):Ｓ気質
+	CALL COM_ORDER_ELEMENT(ARG:0, "Ｓ気質", 6)
+ENDIF
+
+IF GETBIT(TALENT:(ARG:0):淫乱系, 素質_淫乱_サド)
+	CALL COM_ORDER_ELEMENT(ARG:0, "サド", 15)
+ELSE
+	IF ABL:(ARG:0):主導度Ｕ >= 500
+		CALL COM_ORDER_ELEMENT(ARG:0, "主導度", 15)
+	ELSEIF ABL:(ARG:0):主導度Ｕ >= 300
+		CALL COM_ORDER_ELEMENT(ARG:0, "主導度", 10)
+	ELSEIF ABL:(ARG:0):主導度Ｕ >= 100
+		CALL COM_ORDER_ELEMENT(ARG:0, "主導度", 5)
+	ELSEIF ABL:(ARG:0):主導度Ｕ > -100
+		CALL COM_ORDER_ELEMENT(ARG:0, "主導度", 0)
+	ELSE
+		CALL COM_ORDER_ELEMENT(ARG:0, "主導度", -5)
+	ENDIF
+
+	IF ABL:(ARG:0):倒錯度 >= 800
+		CALL COM_ORDER_ELEMENT(ARG:0, "倒錯度", 20)
+	ELSEIF ABL:(ARG:0):倒錯度 >= 500
+		CALL COM_ORDER_ELEMENT(ARG:0, "倒錯度", 15)
+	ELSEIF ABL:(ARG:0):倒錯度 >= 300
+		CALL COM_ORDER_ELEMENT(ARG:0, "倒錯度", 10)
+	ELSEIF ABL:(ARG:0):倒錯度 >= 100
+		CALL COM_ORDER_ELEMENT(ARG:0, "倒錯度", 5)
+	ELSE
+		CALL COM_ORDER_ELEMENT(ARG:0, "倒錯度", 0)
+	ENDIF
+ENDIF
+
+RETURN 1
+
+;-------------------------------------------------
+;固有の実行判定(ターゲット側)
+;-------------------------------------------------
+@COM_ORDER_TARGET92(ARG:0)
+;実行値の設定
+TCVAR:(ARG:0):25 = 120
+;共通部分
+CALL COM_ORDER(ARG:0)
+
+CALL COM_ORDER_ELEMENT(ARG:0, @"欲望Lv{ABL:(ARG:0):欲望}", ABL:(ARG:0):欲望 * 4)
+CALL COM_ORDER_ELEMENT(ARG:0, @"マゾLv{ABL:(ARG:0):マゾ}", ABL:(ARG:0):マゾ * 3)
+
+LOCAL:0 = GET_PALAMLV(PALAM:(ARG:0):欲情)
+CALL COM_ORDER_ELEMENT(ARG:0, @"欲情Lv{LOCAL:0}", MIN(LOCAL:0 * 1, 10))
+
+IF TALENT:(ARG:0):大人しい
+	CALL COM_ORDER_ELEMENT(ARG:0, "大人しい", 3)
+ENDIF
+IF TALENT:(ARG:0):恥じらい
+	CALL COM_ORDER_ELEMENT(ARG:0, "恥じらい", -5)
+ENDIF
+IF TALENT:(ARG:0):Ｍ気質
+	CALL COM_ORDER_ELEMENT(ARG:0, "Ｍ気質", 6)
+ENDIF
+
+IF GETBIT(TALENT:(ARG:0):淫乱系, 素質_淫乱_マゾ)
+	CALL COM_ORDER_ELEMENT(ARG:0, "マゾ", 15)
+ELSE
+	IF ABL:(ARG:0):主導度Ｕ <= -500
+		CALL COM_ORDER_ELEMENT(ARG:0, "主導度", 15)
+	ELSEIF ABL:(ARG:0):主導度Ｕ <= -300
+		CALL COM_ORDER_ELEMENT(ARG:0, "主導度", 10)
+	ELSEIF ABL:(ARG:0):主導度Ｕ <= -100
+		CALL COM_ORDER_ELEMENT(ARG:0, "主導度", 5)
+	ELSEIF ABL:(ARG:0):主導度Ｕ < 100
+		CALL COM_ORDER_ELEMENT(ARG:0, "主導度", 0)
+	ELSE
+		CALL COM_ORDER_ELEMENT(ARG:0, "主導度", -5)
+	ENDIF
+
+	IF ABL:(ARG:0):倒錯度 >= 800
+		CALL COM_ORDER_ELEMENT(ARG:0, "倒錯度", 20)
+	ELSEIF ABL:(ARG:0):倒錯度 >= 500
+		CALL COM_ORDER_ELEMENT(ARG:0, "倒錯度", 15)
+	ELSEIF ABL:(ARG:0):倒錯度 >= 300
+		CALL COM_ORDER_ELEMENT(ARG:0, "倒錯度", 10)
+	ELSEIF ABL:(ARG:0):倒錯度 >= 100
+		CALL COM_ORDER_ELEMENT(ARG:0, "倒錯度", 5)
+	ELSE
+		CALL COM_ORDER_ELEMENT(ARG:0, "倒錯度", 0)
+	ENDIF
+ENDIF
+
+RETURN 1
+
+
+;-------------------------------------------------
+;地の文(前文)
+;-------------------------------------------------
+@COM_TEXT_BEFORE92
+
+;-------------------------------------------------
+
+;コマンド区分
+;-------------------------------------------------
+
+@COM_AVAILABLE_WHEN92
+RETURN コマンド_ウフフ
+
+;--------------------
+;性嗜好用関数
+;--------------------
+@COM_PREFERENCE_PLAYER_92()
+RETURN POWER(2, 性的嗜好_虐げたい)
+
+@COM_PREFERENCE_TARGET_92()
+RETURN POWER(2, 性的嗜好_虐げられたい)
+

@@ -1,0 +1,305 @@
+﻿;---------------------------
+;対象キャラが対象勢力による調教でFORCE_FUCKされたときに、CFLAGが減少するか
+;---------------------------
+@SP_TRAIN_IS_DECREASE_CFLAG(対象, 勢力番号)
+#FUNCTION
+#DIM 対象
+#DIM 勢力番号
+SIF !IS_SP_COUNTRY(勢力番号)
+	RETURNF 0
+LOCAL = SP_COUNTRY_TO_CONST(勢力番号)
+
+SIF 対象 == MASTER || FLAG:観戦モード
+	RETURNF 0
+;士官か奴隷としてスタートし、対象が堕ちている
+SIF GROUPMATCH(SP_COUNTRY_START:LOCAL, 特殊勢力スタート_士官, 特殊勢力スタート_奴隷) && GETBIT(TALENT:対象:特殊勢力陥落系, LOCAL)
+	RETURNF 0
+;MASTERが対象勢力に所属している、または捕虜で対象が堕ちている
+SIF CFLAG:MASTER:所属 == 勢力番号 || (CFLAG:MASTER:捕虜先 == 勢力番号 && GETBIT(TALENT:対象:特殊勢力陥落系, LOCAL))
+	RETURNF 0
+
+RETURNF 1
+
+
+;-------------------------------------------------
+;渡されたIDのキャラの特殊勢力素質に対応する特殊精液を返す
+;-------------------------------------------------	
+@SP_CHARA_TO_SPERM_ID(ID)
+#FUNCTION
+#DIM ID
+;SP_COUNTRY_NAMEの各インデックスと、各特殊勢力素質の値が、同じ特殊勢力を示していることを利用する
+RETURNF GET_SPERM_ID(SP_COUNTRY_NAME:(TALENT:ID_TO_CHARA(ID):特殊勢力素質))
+
+;-------------------------------------------------
+;渡された勢力番号が特殊勢力であるかを判断する
+;-------------------------------------------------	
+@IS_SP_COUNTRY(勢力)
+#FUNCTION
+#DIM 勢力
+SIF 勢力 < 0 || 勢力 >= MAX_COUNTRY
+	RETURNF 0
+RETURNF (FINDELEMENT(SP_COUNTRY_ID, COUNTRY_EVENT_ID:勢力) != -1 ? 1 # 0)
+
+;-------------------------------------------------
+;対象が渡された勢力に調教されうるかを判断する
+;-------------------------------------------------	
+@IS_TRAIN_BY_SP_COUNTRY(対象, 勢力番号)
+#FUNCTION
+#DIM 対象
+#DIM 勢力番号
+;その勢力所属でも、その勢力の捕虜でもないキャラは駄目（あたりまえ）
+SIF CFLAG:対象:所属 != 勢力番号 && CFLAG:対象:捕虜先 != 勢力番号
+	RETURNF 0
+;その勢力に所属はしているが、その勢力以外に捕虜にされているなら駄目
+SIF CFLAG:対象:所属 == 勢力番号 && !GROUPMATCH(CFLAG:対象:捕虜先, 勢力番号, 0)
+	RETURNF 0
+;特殊勢力のキャラは駄目
+SIF TALENT:対象:特殊勢力素質
+	RETURNF 0
+SIF IS_ANIMAL(対象)
+	RETURNF 0
+SIF CFLAG:対象:行動不能状態 == 行動不能_子供
+	RETURNF 0
+;MASTERは士官スタートなら抜ける
+SIF 対象 == MASTER && GROUPMATCH(SP_COUNTRY_START:SP_COUNTRY_TO_CONST(勢力番号), 特殊勢力スタート_士官, 特殊勢力スタート_君主)
+	RETURNF 0
+;軟禁中はスキップ
+SIF CFLAG:対象:捕虜先 == 勢力番号 && CFLAG:対象:軟禁中
+	RETURNF 0
+;自勢力以外をはじく設定
+SIF CONFIG:81 == 1 && CFLAG:MASTER:所属 != 勢力番号
+	RETURNF 0
+;自勢力をはじく設定
+SIF CONFIG:81 == 2 && CFLAG:MASTER:所属 == 勢力番号
+	RETURNF 0
+;テキスト非表示な設定ならスキップ
+SIF	!SP_COUNTRY_IS_TRAINED(対象)
+	RETURNF 0
+;その勢力に所属するMASTER以外の堕ちていないキャラはスキップ
+;綺麗なまま捕らえておきたい人向け
+;	SIF !GETBIT(TALENT:対象:特殊勢力陥落系, COUNTRY_TO_CONST(勢力番号)) && CFLAG:対象:所属 == 勢力番号 && 対象 != MASTER
+;		RETURNF 0
+;対象勢力に所属して、しかも堕ちているキャラは2/3でカット（いちいち出るとうっとうしいので）
+SIF CFLAG:対象:所属 == 勢力番号 && GETBIT(TALENT:対象:特殊勢力陥落系, SP_COUNTRY_TO_CONST(勢力番号)) && RAND:3
+	RETURNF 0
+RETURNF 1
+
+;-------------------------------------------------
+;対象が渡された勢力に寝返るかどうか判断する
+;-------------------------------------------------	
+@IS_BETRAY_TO_SP_COUNTRY(対象, 勢力番号)
+#FUNCTION
+#DIM 対象
+#DIM 勢力番号
+#DIM 勢力定数
+
+勢力定数 = SP_COUNTRY_TO_CONST(勢力番号)
+
+;堕ちていないなら、ターン数不足なら駄目
+LOCAL = TRAIN_FALLEN_TERM:3 - (CFLAG:対象:所属 == 勢力番号)
+SIF !GETBIT(TALENT:対象:特殊勢力陥落系, 勢力定数) && SP_TRAIN_COUNT:対象:勢力定数 < LOCAL
+	RETURNF 0
+;堕ちていて、その勢力に士官しているならスキップ（既に寝返っているので。士官でない場合、一度よそに登用されるかなにかしているので例外）
+SIF CFLAG:対象:所属 == 勢力番号 && GETBIT(TALENT:対象:特殊勢力陥落系, 勢力定数)
+	RETURNF 0
+RETURNF 1
+
+;-------------------------------------------------
+;渡されたキャラが特殊勢力の陥落系素質を持っているかを判断する
+;-------------------------------------------------	
+@IS_FALLEN_TO_SP_COUNTRY(対象)
+#FUNCTION
+#DIM 対象
+RETURNF (TALENT:対象:特殊勢力陥落系 != 0)
+
+;-------------------------------------------------
+;主人公が特殊勢力に陥落した場合の処理
+;-------------------------------------------------	
+@PLAYER_FALLEN_TO_SP_COUNTRY(勢力)
+#DIM 勢力
+FOR LOCAL, 1, CHARANUM
+	IF CFLAG:LOCAL:所属 == 勢力
+		TALENT:LOCAL:合意 = 1
+		CFLAG:LOCAL:好感度 = MAX(CFLAG:LOCAL:好感度, 500)
+		CFLAG:LOCAL:従属度 = MAX(CFLAG:LOCAL:従属度, 500)
+		CFLAG:LOCAL:依存度 = MAX(CFLAG:LOCAL:依存度, 500)
+		CFLAG:LOCAL:支配度 = MAX(CFLAG:LOCAL:支配度, 1000)
+	ENDIF
+NEXT
+
+;-------------------------------------------------
+;渡されたキャラが特殊勢力のキャラであるかどうかを判断する
+;-------------------------------------------------	
+@IS_SP_COUNTRY_CHARA(対象)
+#FUNCTION
+#DIM 対象
+RETURNF TALENT:対象:特殊勢力素質
+
+
+;---------------------------------------------------
+;与えられた勢力番号を、対応する定数割り当てに変換する
+;勢力番号だけ分かる状態で定数割り当てが拾いたいときに
+;---------------------------------------------------
+@SP_COUNTRY_TO_CONST(勢力番号)
+#FUNCTION
+#DIM 勢力番号
+SIF 勢力番号 < 0 || 勢力番号 >= MAX_COUNTRY
+	RETURNF 0
+RETURNF (FINDELEMENT(SP_COUNTRY_ID, COUNTRY_EVENT_ID:勢力番号) != -1 ? FINDELEMENT(SP_COUNTRY_ID, COUNTRY_EVENT_ID:勢力番号) # 0)
+
+;---------------------------------------------------
+;与えられたEVENTIDを、対応する定数割り当てに変換する
+;おそらく使わない
+;---------------------------------------------------
+@SP_COUNTRY_ID_TO_COSNT(EVENTID)
+#FUNCTION
+#DIM EVENTID
+SIF GET_COUNTRY_FROM_ID(EVENTID) != -1
+	RETURNF SP_COUNTRY_TO_CONST(GET_COUNTRY_FROM_ID(EVENTID))
+RETURNF 0
+
+
+;---------------------------------------------------
+;蜂起するか判定する汎用関数
+;---------------------------------------------------
+@CHECK_SP_COUNTRY_RISE(勢力定数)
+#FUNCTION
+#DIM 基礎確率
+#DIM 勢力定数
+#DIM 最大都市数
+#DIM 特殊勢力数
+
+基礎確率 = 30
+特殊勢力数 = 0
+
+SIF DAY < SLG_PP:1
+	RETURNF 0
+
+FOR LOCAL, 1, MAX_COUNTRY
+	SIF !IS_COUNTRY(LOCAL)
+		CONTINUE
+	最大都市数 = MAX(最大都市数, GET_OWN_CITY(LOCAL))
+NEXT
+
+基礎確率 += 最大都市数 * 2
+
+SELECTCASE SP_COUNTRY_RANK:勢力定数
+	CASE 1
+		基礎確率 = 基礎確率 * 150 / 100
+	CASE 2
+		基礎確率 = 基礎確率 * 125 / 100
+	CASE 3
+		基礎確率 = 基礎確率 * 100 / 100
+	CASE 4
+		基礎確率 = 基礎確率 * 60 / 100
+	CASE 5
+		基礎確率 = 基礎確率 * 45 / 100
+ENDSELECT
+
+FOR LOCAL, 0, MAX_COUNTRY
+	SIF IS_SP_COUNTRY(LOCAL) && COUNTRY_EVENT_ID:LOCAL != SP_COUNTRY_ID:特殊勢力_野盗
+		特殊勢力数 ++
+NEXT
+
+SIF DAY % 10 == 0
+	基礎確率 += 100
+
+RETURNF 基礎確率 > RAND:1000
+
+
+;-------------------------------------------------
+;desc  :指定したIDの特殊勢力を生成する
+;param :勢力ID:COUNTRY_EVENT_ID
+;return:0:生成失敗
+;return:勢力番号
+;-------------------------------------------------
+@CREATE_SP_COUNTRY(勢力定数)
+#DIM 勢力定数
+#DIM 勢力
+
+勢力 = GET_NEW_COUNTRY()
+
+SIF 勢力 == -1
+	RETURN 0
+
+SELECTCASE 勢力定数
+	CASE 特殊勢力_野盗
+		COUNTRY_COLOR:勢力 = 0x800000
+	CASE 特殊勢力_ホフゴブリン
+		COUNTRY_COLOR:勢力 = 0x2B5C1B
+	CASE 特殊勢力_外来人
+		COUNTRY_COLOR:勢力 = 0x483D8B
+	CASE 特殊勢力_触手
+		COUNTRY_COLOR:勢力 = 0xFF1493
+	CASE 特殊勢力_自警団
+		COUNTRY_COLOR:勢力 = 0x33CC66
+	CASE 特殊勢力_サキュバス
+		COUNTRY_COLOR:勢力 = 0x8B008B
+	CASE 特殊勢力_狂信者
+		COUNTRY_COLOR:勢力 = 0xB43104
+ENDSELECT
+
+COUNTRY_EVENT_ID:勢力 = SP_COUNTRY_ID:勢力定数
+
+;ボス生成
+CALL ADD_SP_CHARA(勢力, 1)
+
+COUNTRY_BOSS:勢力 = GET_ID(RESULT)
+
+FOR LOCAL, 0, SP_COUNTRY_RANK:勢力定数 * 3 / 2
+	CALL ADD_SP_CHARA(勢力, 0, LOCAL)
+NEXT
+
+FOR LOCAL, 0, MAX_COUNTRY
+	SIF !IS_COUNTRY(LOCAL)
+		CONTINUE
+	SIF LOCAL == 勢力
+		CONTINUE
+	CALL CHANGE_RELATION_C_TO_C(LOCAL, 勢力, 0, 300)
+NEXT
+
+RETURN 勢力
+
+;-------------------------------------------------
+;desc  :指定した勢力の特殊勢力を初期化する
+;param :勢力ID:COUNTRY_EVENT_ID
+;return:0:生成失敗
+;return:勢力番号
+;-------------------------------------------------
+@INIT_SP_COUNTRY(勢力)
+#DIM 勢力
+#DIM 勢力定数
+#DIM 最大都市勢力
+#DIM 最大都市数
+勢力定数 = SP_COUNTRY_TO_CONST(勢力)
+
+CALL COUNTRY_INIT_ARMY(勢力)
+
+CALL SET_COUNTRY_AI_TYPE(勢力)
+
+IF SP_COUNTRY_RANK:勢力定数 == 5
+	FOR LOCAL, 1, MAX_COUNTRY
+		SIF !IS_COUNTRY(LOCAL)
+			CONTINUE
+		IF 最大都市数 < GET_OWN_CITY(LOCAL)
+			最大都市数 = GET_OWN_CITY(LOCAL)
+			最大都市勢力 = LOCAL
+		ENDIF
+	NEXT
+	COUNTRY_SOLDIER:勢力 = MAX(GET_SUM_SOLDIER(最大都市勢力) * 2, 30000)
+ELSE
+	COUNTRY_SOLDIER:勢力 += MIN(DAY / 3 * 1500, 20000)
+
+	FOR LOCAL, 1, MAX_COUNTRY
+		SIF !IS_COUNTRY(LOCAL)
+			CONTINUE
+		最大都市数 = MAX(最大都市数, GET_OWN_CITY(LOCAL))
+	NEXT
+
+	SIF 最大都市数 >= 15
+		COUNTRY_SOLDIER:勢力 += MIN(最大都市数 * 1000, SP_COUNTRY_RANK:勢力定数 * 10000)
+ENDIF
+
+MONEY:勢力 = GET_SUM_ECONOMY(勢力) / 50
+
+CALL COUNTRY_SET_TECHNOLOGY(勢力)

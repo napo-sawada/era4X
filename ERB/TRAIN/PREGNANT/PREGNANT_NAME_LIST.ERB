@@ -1,0 +1,219 @@
+﻿;-------------------------
+;精液マップを作成
+;下に下に追加していくこと
+;-------------------------
+@CREATE_SPERM_MAP
+SPERM_NAME_ARRAY:0 = 不明
+;CALL ADD_SPERM("野盗")
+;CALL ADD_SPERM("ホフゴブリン")
+;CALL ADD_SPERM("外来人")
+;CALL ADD_SPERM("触手")
+;CALL ADD_SPERM("自警団")
+;CALL ADD_SPERM("サキュバス")
+;CALL ADD_SPERM("「実験動物」")
+;CALL ADD_SPERM("犬")
+;CALL ADD_SPERM("豚")
+;CALL ADD_SPERM("馬")
+;CALL ADD_SPERM("薬売り")
+;CALL ADD_SPERM("金貸しの客")
+;CALL ADD_SPERM("催眠術師")
+;CALL ADD_SPERM("娼館の客")
+;CALL ADD_SPERM("兵士")
+;CALL ADD_SPERM("鬼")
+;CALL ADD_SPERM("野良妖怪")
+;CALL ADD_SPERM("浮浪者")
+;CALL ADD_SPERM("チャラ男")
+;CALL ADD_SPERM("山賊")
+;CALL ADD_SPERM("やくざ")
+;CALL ADD_SPERM("チンピラ")
+;CALL ADD_SPERM("ごろつき")
+;CALL ADD_SPERM("奴隷商人")
+;CALL ADD_SPERM("痴漢")
+;CALL ADD_SPERM("子供")
+;CALL ADD_SPERM("地主")
+;CALL ADD_SPERM("ならず者")
+;CALL ADD_SPERM("行きずりの男")
+;CALL ADD_SPERM("医者")
+;CALL ADD_SPERM("貴族")
+;CALL ADD_SPERM("領民")
+;CALL ADD_SPERM("老人")
+;CALL ADD_SPERM("悪魔")
+;CALL ADD_SPERM("ゾンビ")
+;CALL ADD_SPERM("天狗")
+;CALL ADD_SPERM("オーク")
+;CALL ADD_SPERM("AV男優")
+;CALL ADD_SPERM("カジノの客")
+;CALL ADD_SPERM("狂信者")
+
+;-------------------------
+;指定した名前をもつ精液を追加
+;二重登録禁止
+;-------------------------
+@ADD_SPERM(SPERMNAME)
+#DIMS SPERMNAME
+;登録済みならスルー
+SIF FINDELEMENT(SPERM_NAME_ARRAY, SPERMNAME, 0, SPERM_MAX_ADDRESS, 1) != -1
+	RETURN 0
+FOR LOCAL, 0, SPERM_MAX_ADDRESS
+	SIF SPERM_NAME_ARRAY:LOCAL == ""
+		GOTO FOUND
+NEXT
+
+THROW SPERM_NAME_ARRAYがいっぱいです
+
+$FOUND
+
+SPERM_NAME_ARRAY:LOCAL = %SPERMNAME%
+
+RETURN 1
+
+
+;-------------------------
+;指定した名前の精液が動物のものかどうか判断
+;-------------------------
+@IS_ANIMAL_SPERM(SPERM)
+#FUNCTION
+#DIM SPERM
+RETURNF GROUPMATCH(GET_SPERM_NAME(SPERM), "犬", "豚", "馬", "牛", "猿")
+
+;-------------------------
+;指定した名前をもつ精液のIDを取得
+;-------------------------
+@GET_SPERM_ID(SPERMNAME)
+#FUNCTION
+#DIMS SPERMNAME
+LOCAL = FINDELEMENT(SPERM_NAME_ARRAY, SPERMNAME, 0, SPERM_MAX_ADDRESS, 1)
+IF LOCAL == -1
+	FOR LOCAL, 0, SPERM_MAX_ADDRESS
+		SIF SPERM_NAME_ARRAY:LOCAL == ""
+			GOTO FOUND
+	NEXT
+	$FOUND
+	SPERM_NAME_ARRAY:LOCAL = %SPERMNAME%
+ENDIF
+RETURNF LOCAL * -1
+
+;-------------------------
+;指定したキャラがモブの場合、対応する精液IDを返す
+;でなければ普通にIDを返す
+;-------------------------
+@TO_MOB_SPERM_ID(対象)
+#FUNCTION
+#DIM 対象
+
+;対象が特殊勢力の場合、IDを変換
+SIF TALENT:対象:特殊勢力素質
+	RETURNF GET_SPERM_ID(SP_COUNTRY_NAME:(TALENT:対象:特殊勢力素質))
+;対象が慰安モブの場合、IDを変換
+SIF TALENT:対象:慰安モブ
+	RETURNF GET_SPERM_ID(IAN_SPERM_ARRAY:(TALENT:対象:慰安モブ))
+
+RETURNF GET_ID(対象)
+
+;-------------------------
+;指定したIDをもつ精液の名前を取得
+;-------------------------
+@GET_SPERM_NAME(SPERMID)
+#FUNCTIONS
+#DIM SPERMID
+IF SPERMID > 0
+	LOCAL = ID_TO_CHARA(SPERMID)
+	SIF LOCAL == -1
+		RETURNF "不明"
+	RETURNF ANAME(LOCAL)
+ENDIF
+LOCALS = %SPERM_NAME_ARRAY:(SPERMID * -1)%
+SIF LOCALS == ""
+	RETURNF "不明"
+RETURNF LOCALS
+
+;-------------------------
+;ゲームのバージョンが上がった場合に、精液マップをクリーンする処理
+;領地探索とか絶対に（絶対に）表記ゆれさせてくるに違いないので。
+;-------------------------
+@CLEAN_SPERM_MAP()
+FOR LOCAL, 1, SPERM_MAX_ADDRESS
+	SIF SPERM_NAME_ARRAY:LOCAL == ""
+		CONTINUE
+	FOR LOCAL:1, 0, CHARANUM
+		SIF CFLAG:(LOCAL:1):父親 * -1 == LOCAL
+			GOTO FOUND
+		FOR LOCAL:2, 0, PREGNANT_RECORD_MAX
+			SIF PREGNANT_RECORD_FATHER:(LOCAL:1):(LOCAL:2) * -1 == LOCAL
+				GOTO FOUND
+		NEXT
+		FOR LOCAL:2, 0, WOMB_RECORD_MAX
+			SIF WOMB_SPERM_ID:(LOCAL:1):(LOCAL:2) * -1 == LOCAL
+				GOTO FOUND
+		NEXT
+	NEXT
+	SPERM_NAME_ARRAY:LOCAL = ""
+	$FOUND
+NEXT
+
+
+;-------------------------
+;指定した東方キャラ間に兄弟・姉妹の関係を設定
+;-------------------------
+@SET_SIBLING_RELATION(ARG:0 = -1, ARG:1 = -1, ARG:2 = -1, ARG:3 = -1, ARG:4 = -1, ARG:5 = -1, ARG:6 = -1, ARG:7 = -1, ARG:8 = -1, ARG:9 = -1)
+
+
+;Look for existing fathers/mothers
+LOCAL:5 = 0
+LOCAL:6 = 0
+FOR LOCAL:1, 0, 10
+	SIF ARG:(LOCAL:1) == -1
+		BREAK
+	SIF CFLAG:(ARG:(LOCAL:1)):父親 > 0 && !LOCAL:5
+		LOCAL:5 = CFLAG:(ARG:(LOCAL:1)):父親
+	SIF CFLAG:(ARG:(LOCAL:1)):母親 > 0 && !LOCAL:6
+		LOCAL:6 = CFLAG:(ARG:(LOCAL:1)):母親
+NEXT
+;Copy the first one found onto all characters
+FOR LOCAL:1, 0, 10
+	SIF ARG:(LOCAL:1) == -1
+		BREAK
+	SIF LOCAL:5 > 0
+		CFLAG:(ARG:(LOCAL:1)):父親 = LOCAL:5
+	SIF LOCAL:6 > 0
+		CFLAG:(ARG:(LOCAL:1)):母親 = LOCAL:6
+NEXT
+
+;If one was found, the characters are now at least half-siblings. We return.
+SIF LOCAL:5 || LOCAL:6
+	RETURN 0
+
+;Otherwise, generate a unique sperm named "Unknown" and use that as both their parents
+FOR LOCAL, 0, SPERM_MAX_ADDRESS
+	IF SPERM_NAME_ARRAY:LOCAL == ""
+		LOCAL:2 = LOCAL
+		LOCAL --
+		BREAK
+	ENDIF
+NEXT
+
+SIF LOCAL == SPERM_MAX_ADDRESS
+	THROW SPERM_NAME_ARRAYがいっぱいです
+
+SPERM_NAME_ARRAY:(LOCAL:2) = 不明
+BROTHER_SPERM_FLAG:(LOCAL:2) = 1
+FOR LOCAL:1, 0, 10
+	SIF ARG:(LOCAL:1) == -1
+		BREAK
+	CFLAG:(ARG:(LOCAL:1)):父親 = LOCAL:2 * -1
+	CFLAG:(ARG:(LOCAL:1)):母親 = LOCAL:2 * -1
+NEXT
+
+RETURN 1
+
+@INIT_CHARA_SIBLING_RELATION()
+CALL SET_SIBLING_RELATION(NAME_TO_CHARA("レミリア"), NAME_TO_CHARA("フランドール"))
+CALL SET_SIBLING_RELATION(NAME_TO_CHARA("静葉"), NAME_TO_CHARA("穣子"))
+CALL SET_SIBLING_RELATION(NAME_TO_CHARA("ルナサ"), NAME_TO_CHARA("リリカ"), NAME_TO_CHARA("メルラン"))
+CALL SET_SIBLING_RELATION(NAME_TO_CHARA("豊姫"), NAME_TO_CHARA("依姫"))
+CALL SET_SIBLING_RELATION(NAME_TO_CHARA("さとり"), NAME_TO_CHARA("こいし"))
+CALL SET_SIBLING_RELATION(NAME_TO_CHARA("弁々"), NAME_TO_CHARA("八橋"))
+CALL SET_SIBLING_RELATION(NAME_TO_CHARA("夢月"), NAME_TO_CHARA("幻月"))
+CALL SET_SIBLING_RELATION(NAME_TO_CHARA("命蓮"), NAME_TO_CHARA("白蓮"))
+CALL SET_SIBLING_RELATION(NAME_TO_CHARA("紫苑"), NAME_TO_CHARA("女苑"))
+

@@ -1,0 +1,710 @@
+﻿;全般的に使用する変数を定義(SLG部分のみで使用する変数は SLG\SLG_VARIABLE.ERH へ)
+
+;-------------------------------------------------
+;■システムに関する変数
+;-------------------------------------------------
+;調教の行われている場所
+#DIMS TRAIN_PLACE
+
+;マルチターゲット、ターゲットを複数取るために導入する変数
+;※ターゲットを追加・削除するときは必ずADD_MTAR、DEL_MTAR関数を使うこと
+#DIM MTAR, 100
+#DIM MTAR_TMP, 100
+
+;現在のターゲット数
+#DIM MTAR_NUM
+#DIM MTAR_NUM_TMP
+
+;マルチプレイヤー、プレイヤーを複数取るために導入する変数
+;※プレイヤーを追加・削除するときは必ずADD_MPLY、DEL_MPLY関数を使うこと
+#DIM MPLY, 100
+#DIM MPLY_TMP, 100
+
+;現在のプレイヤー数
+#DIM MPLY_NUM
+#DIM MPLY_NUM_TMP
+
+;捕虜調教のターゲット
+#DIM SAVEDATA PRISONER_TARGET, 3
+
+;選んだ登録キャラID
+#DIM MASTER_ID
+
+;USERCOMでこのコマンドが使用できるか
+#DIM COM_ABLE_FLAG, 1000
+;排他的なコマンドの自動キャンセルをするようにしている際、
+;当該コマンドをマークするためのリスト
+#DIM COM_CONFLICT_FLAG, 1000
+
+;これが0だと全てのコマンドが無効になる(USERCOMにおけるコマンドの自動表示・実行を防止)
+#DIM COM_ENABLE
+
+;今回選択したコマンドの名称
+#DIMS SELECTCOM_NAME
+
+;前回選択したコマンドの名称
+#DIMS PREVCOM_NAME
+
+;COSの値を保存する関数(処理の高速化のため事前に計算)
+#DIM COS_LIST, 360
+
+;SHOP画面におけるキャラクタの表示順
+#DIM SHOP_CHARA_LIST, MAX_CHARA_NUM
+
+;それぞれ今回・前回のコマンドの実行状態(0=主人公がプレイヤー、1=主人公がターゲット、2=どちらでもない)
+#DIM SELECTCOM_TYPE
+#DIM PREVCOM_TYPE
+
+;それぞれ能力値の最小と最大を定義する変数
+#DIM ABL_MIN, 100
+#DIM ABL_MAX, 100
+
+;各コマンドを実行した回数
+;0～999=プレイヤー 1000～1999=ターゲット 2000-2999=第三者
+#DIM SAVEDATA CHARADATA COM_EXP, 3000
+
+;各コマンドの知識
+#DIM SAVEDATA CHARADATA COM_KNOWLEDGE, 1000
+
+;各コマンドの好み度(0～3、高いほど中毒充足＋＆おまかせ実行率アップ)
+;0～999=プレイヤー 1000～1999=ターゲット 2000-2999=第三者
+#DIM SAVEDATA CHARADATA COM_TENDENCY, 3000
+
+;コマンドがどのタイミングで使用できるかを示す定数
+#DIM コマンド_ウフフ = 0
+#DIM コマンド_日常   = 1
+#DIM コマンド_育児   = 2
+#DIM コマンド_共通   = 3
+
+;性的嗜好の値がどういう嗜好を示すかを対応づける定数
+
+#DIM SAVEDATA CHARADATA SEXUAL_PREFERENCE
+;有無をビット演算で処理するので64ぶん確保
+#DIM SAVEDATA CHARADATA SEXUAL_PREFERENCE_EXP, 64
+
+#DIM CONST 性的嗜好_愛撫したい = 0
+#DIM CONST 性的嗜好_奉仕したい = 1
+#DIM CONST 性的嗜好_性交したい = 2
+#DIM CONST 性的嗜好_道具を使いたい = 3
+#DIM CONST 性的嗜好_虐げたい = 4
+#DIM CONST 性的嗜好_辱めたい = 5
+#DIM CONST 性的嗜好_触手で犯したい = 6
+#DIM CONST 性的嗜好_愛撫されたい = 7
+#DIM CONST 性的嗜好_奉仕されたい = 8
+#DIM CONST 性的嗜好_性交されたい = 9
+#DIM CONST 性的嗜好_道具を使われたい = 10
+#DIM CONST 性的嗜好_虐げられたい = 11
+#DIM CONST 性的嗜好_辱められたい = 12
+#DIM CONST 性的嗜好_触手で犯されたい = 13
+#DIM CONST 性的嗜好_縛られたい = 14
+#DIM CONST 性的嗜好_獣と交わりたい = 15
+#DIM CONST 性的嗜好_露出したい = 16
+#DIM CONST 性的嗜好_催眠をかけられたい = 17
+#DIM CONST 性的嗜好_春を売りたい = 18
+#DIM CONST 性的嗜好_撮影されたい = 19
+#DIM CONST 性的嗜好_汚されたい = 20
+#DIM CONST 性的嗜好_調教されたい = 21
+#DIM CONST 性的嗜好_輪姦されたい = 22
+#DIM CONST 性的嗜好_妊娠したい = 23
+#DIM CONST 性的嗜好_近親相姦したい = 24
+#DIM CONST 性的嗜好_同性と交わりたい = 25
+{
+	#DIMS CONST SEXUAL_PREFERENCE_STR = 
+		"愛撫したい", "奉仕したい", "性交したい", "道具を使いたい", "虐げたい", 
+		"辱めたい", "触手で犯したい", "愛撫されたい", "奉仕されたい", "性交されたい", 
+		"道具を使われたい", "虐げられたい", "辱められたい", "触手で犯されたい", "縛られたい", 
+		"獣と交わりたい", "露出したい", "催眠をかけられたい", "春を売りたい", "撮影されたい", "汚されたい", 
+		"調教されたい", "輪姦されたい", "妊娠したい", "近親相姦したい", "同性と交わりたい"
+		
+}
+
+
+;日常フェーズのコマンド実行回数
+#DIM SAVEDATA SHOP_TIME, 1
+
+;日常フェーズの労働実行回数
+#DIM SAVEDATA SHOP_WORK_COUNT, 1
+
+;配列の読み込み順をランダムにするための配列。FISHER_YATES_SHAFFLEにてシャッフルします
+#DIM SHAFFLE_ARRAY, 5000
+
+;SELECT_CHARA_LIST_MULTIで利用する
+#DIM SELECTED_CHARA, MAX_CHARA_NUM
+#DIM SELECTED_CHARA_NUM
+
+;一番長い名前の長さを意味する定数　とりあえず名前の長さで表示が崩れてるのを見つけたらこれに置き換えてみよう
+#DIM CONST MAX_CHARANAME_LENGTH = STRLENS("スターサファイア") + 1
+
+;「あてがう」時、好感度やら従属度やらを待避させておく領域。
+#DIM TMP_MASTER
+#DIM TMP_参加者, 10
+#DIM TMP_好感度, 10
+#DIM TMP_従属度, 10
+#DIM TMP_依存度, 10
+
+#DIM ランク閾値, 4, 9
+#DIM CONST ランク_無 = 8
+#DIM CONST ランク_G = 7
+#DIM CONST ランク_F = 6
+#DIM CONST ランク_E = 5
+#DIM CONST ランク_D = 4
+#DIM CONST ランク_C = 3
+#DIM CONST ランク_B = 2
+#DIM CONST ランク_A = 1
+#DIM CONST ランク_S = 0
+#DIM CONST ランク_ＳＬＧ = 0
+#DIM CONST ランク_その他 = 1
+#DIM CONST ランク_部隊 = 2
+#DIM CONST ランク_性知識 = 3
+#DIMS CONST ランク文字列 = "S", "A", "B", "C", "D", "E", "F", "G", "-"
+
+;ファーストキス、処女、童貞を奪った相手を記録
+#DIMS SAVEDATA CHARADATA SEXUAL_EXPERIENCE, 4
+#DIMS SAVEDATA CHARADATA SEXUAL_LAST_EXPERIENCE, 4
+#DIM CONST 初体験_キス = 0
+#DIM CONST 初体験_童貞 = 1
+#DIM CONST 初体験_処女 = 2
+#DIM CONST 初体験_アナル処女 = 3
+
+#DIMS SAVEDATA CHARADATA SEXUAL_EXPERIENCE_SITUATION, 4
+#DIMS SAVEDATA CHARADATA SEXUAL_LAST_EXPERIENCE_SITUATION, 4
+
+;賭場の資金
+#DIM SAVEDATA GAMBLE_MONEY
+
+#DIM CONST CUM_SLOT_NUM = 16
+;射精部位
+#DIM CONST 射精部位_無駄 = 0
+#DIM CONST 射精部位_膣内 = 1
+#DIM CONST 射精部位_アナル = 2
+#DIM CONST 射精部位_手 = 3
+#DIM CONST 射精部位_口 = 4
+#DIM CONST 射精部位_胸 = 5
+#DIM CONST 射精部位_足 = 6
+#DIM CONST 射精部位_尻尾 = 7
+#DIM CONST 射精部位_顔 = 8
+#DIM CONST 射精部位_髪 = 9
+#DIM CONST 射精部位_腋 = 10
+#DIM CONST 射精部位_尻 = 11
+#DIM CONST 射精部位_オナホ = 12
+#DIM CONST 射精部位_触手 = 13
+#DIM CONST 射精部位_ゴム = 14
+#DIM CONST 射精部位_尿道 = 15
+
+;その調教で射精された回数
+#DIM CHARADATA CUM_GET_COUNT, CUM_SLOT_NUM
+#DIM CHARADATA CUM_GET_AMOUNT, CUM_SLOT_NUM
+
+;Mod - tracks current amount of cum instead of 'total taken this session'. Allows it to be swallowed etc. 
+#DIM CHARADATA CUM_CUR_AMOUNT, CUM_SLOT_NUM
+
+;その調教で射精した回数
+#DIM CHARADATA CUM_TO_COUNT, CUM_SLOT_NUM
+#DIM CHARADATA CUM_TO_AMOUNT, CUM_SLOT_NUM
+
+{
+	#DIMS CONST CUM_SLOT_NAME = 
+		"無駄打ち", "膣内", "腸内", "手", "口", "胸", "足", "尻尾", "顔", "髪", "腋", "尻", "オナホ", "触手", "ゴム", "尿道"
+}
+
+;0=体(指定なし) 1=膣内 2=アナル 3=手 4=口 5=胸 6=足 7=尻尾 8=顔 9=髪 10=腋 11=尻 12=オナホ 13=触手 14 = ゴム
+
+;オートセーブ領域
+#DIM CONST AUTOSAVE_DOMAIN_NUM = 5
+#DIM GLOBAL SAVEDATA AUTOSAVE_DOMAIN
+
+;最後に使ったセーブデータのページ
+#DIM GLOBAL SAVEDATA SAVELOAD_LASTPAGE
+
+;EVENTTRAINCで呼ぶ関数を指定する
+#DIMS EVENTTRAIN_CALLEE, 10
+#DIM EVENTTRAIN_CALLEE_NUM
+
+;EVENTENDで呼ぶ関数を指定する
+#DIMS EVENTEND_CALLEE, 10
+#DIM EVENTEND_CALLEE_NUM
+
+;調教中に実行するコマンドを強制指定する
+#DIM TRAIN_FORCED_COM, 100
+#DIM TRAIN_FORCED_COM_EQUIP, 100
+#DIM TRAIN_FORCED_COM_INITIATOR, 100
+#DIM TRAIN_FORCED_COM_MPLY, 100, 10
+#DIM TRAIN_FORCED_COM_MTAR, 100, 10
+#DIM TRAIN_FORCED_COM_NUM
+#DIM TRAIN_FORCED_COM_CUR
+
+;SHOW_INFOの折り畳みを指定
+#DIM SHOW_INFO_FOLD
+
+#DIM CONST MEET_MAX_CANDIDATES = 5
+#DIM SAVEDATA MEET_CANDIDATES, MEET_MAX_CANDIDATES
+#DIM SAVEDATA MEET_CANDIDATES_REST_TURN
+;-------------------------------------------------
+;■継続状態に関する変数
+;-------------------------------------------------
+;継続状態に関する最大数
+#DIM CONST MAX_MEQUIP = 50
+#DIM CONST MAX_MEQUIP_PLAYER = 10
+#DIM CONST MAX_MEQUIP_TARGET = 10
+
+;継続状態の種類
+#DIM MEQUIP, MAX_MEQUIP
+#DIM MEQUIP_TMP, MAX_MEQUIP
+
+;継続状態の数
+#DIM MEQUIP_NUM
+
+;継続状態のプレイヤーとその数
+#DIM MEQUIP_PLAYER, MAX_MEQUIP, MAX_MEQUIP_PLAYER
+#DIM MEQUIP_PLAYER_TMP, MAX_MEQUIP, MAX_MEQUIP_PLAYER
+#DIM MEQUIP_PLAYER_NUM, MAX_MEQUIP
+#DIM MEQUIP_PLAYER_NUM_TMP, MAX_MEQUIP
+
+;継続状態のターゲットとその数
+#DIM MEQUIP_TARGET, MAX_MEQUIP, MAX_MEQUIP_TARGET
+#DIM MEQUIP_TARGET_TMP, MAX_MEQUIP, MAX_MEQUIP_TARGET
+#DIM MEQUIP_TARGET_NUM, MAX_MEQUIP
+#DIM MEQUIP_TARGET_NUM_TMP, MAX_MEQUIP
+
+;継続状態のコマンドで主導権を握っていたやつ
+#DIM MEQUIP_INITIATIVE, MAX_MEQUIP
+#DIM MEQUIP_INITIATIVE_TMP, MAX_MEQUIP
+
+
+;継続状態の地の文カットフラグ
+#DIM MEQUIP_CUT, MAX_MEQUIP
+
+;継続状態がセットされてからのターン数
+#DIM MEQUIP_TURN, MAX_MEQUIP
+#DIM MEQUIP_TURN_TMP, MAX_MEQUIP
+
+;ソースを一時的に保存する変数
+#DIM CHARADATA MEMORY_SOURCE, 100
+
+;各コマンドごとの射精先マップ
+#DIM CHARADATA STACK_SPERM_CHARA_MAP, MAX_CHARA_NUM
+#DIM CHARADATA STACK_SPERM_TO_MAP, MAX_CHARA_NUM
+#DIM CHARADATA STACK_SPERM_CHARA_NUM
+
+;-------------------------------------------------
+;■設定に関する変数
+;-------------------------------------------------
+;コンフィグ設定
+;0～299:一般  300～499:SLG関係  500～:予備
+#DIM SAVEDATA CONFIG, 1000
+
+;コマンドフィルタ
+#DIM SAVEDATA COM_FILTER, 1000
+
+;コンフィグ設定の保存用変数
+#DIM GLOBAL SAVEDATA G_CONFIG, 5, 1000
+
+;コマンドフィルタ・継続フィルタの保存用変数
+#DIM GLOBAL SAVEDATA G_FILTER, 5, 1000
+
+;コンフィグ設定セーブデータの名称設定
+#DIMS GLOBAL SAVEDATA G_CONFIG_NAME, 5
+#DIMS GLOBAL SAVEDATA G_CONFIG_FILTER_NAME, 5
+#DIMS GLOBAL SAVEDATA G_CONFIG_DAILY_NAME, 5
+
+;-------------------------------------------------
+;■アイテムに関する変数
+;-------------------------------------------------
+;アイテム開発に必要な期間
+#DIM ITEMTERM, 1000
+
+;現在のアイテム開発期間
+#DIM SAVEDATA ITEMTIME, 1000
+
+;-------------------------------------------------
+;■キャラ間の関係を表す変数
+;-------------------------------------------------
+;キャラ間の好感度
+#DIM CHARADATA SAVEDATA REL_LIKE, MAX_CHARA_NUM
+
+;キャラ間の敵対度
+#DIM CHARADATA SAVEDATA REL_HATE, MAX_CHARA_NUM
+
+;※REL_LIKE、REL_HATEはキャラ番号で管理するため、キャラのソートや削除に同期して変更する必要あり
+
+;-------------------------------------------------
+;■登録キャラに関する変数
+;-------------------------------------------------
+#DIM CONST MAX_MASTER = 30
+#DIM GLOBAL SAVEDATA MASTER_MAXBASE, MAX_MASTER, 100
+#DIM GLOBAL SAVEDATA MASTER_ABL, MAX_MASTER, 100
+#DIM GLOBAL SAVEDATA MASTER_EXP, MAX_MASTER, 100
+#DIM GLOBAL SAVEDATA MASTER_TALENT, MAX_MASTER, 1000
+#DIMS GLOBAL SAVEDATA MASTER_NAME, MAX_MASTER, 15
+#DIM GLOBAL SAVEDATA MASTER_NAMETYPE, MAX_MASTER
+;妊娠した子供の父親の名前の記録に使う変数
+
+;-------------------------------------------------
+;■色に関する定数
+;-------------------------------------------------
+;廃止されました。_FUNCTION.ERB内@COLORに移動してます。
+
+;-------------------------------------------------
+;■マクロ
+;-------------------------------------------------
+
+;-------------------------------------------------
+;■ショップに関する定数
+;-------------------------------------------------
+;戦略画面のマップ部分の高さ
+#DIM CONST MENU_HEIGHT = 27
+;ショップで描画する行数
+#DIM CONST LINES_SHOP_DRAW = MENU_HEIGHT + 12
+;ショップで消去する行数
+#DIM LINES_SHOP
+
+;戦略画面で利用する行数
+#DIM MAP_LINES
+;ショップで利用できる項目
+#DIM SHOP_AVAIL, 100
+
+;調教時に削除する行数
+#DIM LINES_TRAIN
+
+#DIM CONST 労働_建設 = 1
+#DIM CONST 労働_巡回 = 2
+#DIM CONST 労働_広報 = 3
+#DIM CONST 労働_街宣 = 4
+#DIM CONST 労働_炊き出し = 5
+#DIM CONST 労働_ライブ = 6
+#DIM CONST 労働_娼館 = 7
+#DIM CONST 労働_ＡＶ = 8
+#DIM CONST 労働_搾乳 = 9
+
+
+
+;-------------------------------------------------
+;■素質に関する変数と定数
+;-------------------------------------------------
+;素質ピアスとピアス穴の、装着箇所に対する対応ビットを表す定数
+#DIM CONST ピアス_鼻 = 0
+#DIM CONST ピアス_耳 = 1
+#DIM CONST ピアス_舌 = 2
+#DIM CONST ピアス_乳首 = 3
+#DIM CONST ピアス_へそ = 4
+#DIM CONST ピアス_クリトリス = 5
+#DIM CONST ピアス_ラビア = 6
+#DIM CONST ピアス_ペニス = 7
+
+#DIM CONST ピアス_最大ビット = 7
+
+;素質陰毛の、値に対する状況の対応を表す定数
+#DIM CONST 陰毛_パイパン = -1
+#DIM CONST 陰毛_つるつる = 0
+#DIM CONST 陰毛_うっすら = 1
+#DIM CONST 陰毛_柔毛 = 2
+#DIM CONST 陰毛_ふんわり = 3
+#DIM CONST 陰毛_標準 = 4
+#DIM CONST 陰毛_多め = 5
+#DIM CONST 陰毛_ふさふさ = 6
+#DIM CONST 陰毛_もっさり = 7
+#DIM CONST 陰毛_剛毛 = 8
+#DIM CONST 陰毛_尻毛 = 9
+#DIM CONST 陰毛_ハート型 = 10
+
+;素質腋毛の、値に対する状況の対応を表す定数
+#DIM CONST 腋毛_脱毛済み = -1
+#DIM CONST 腋毛_つるつる = 0
+#DIM CONST 腋毛_手入れ済み = 1
+#DIM CONST 腋毛_うっすら = 2
+#DIM CONST 腋毛_ふんわり = 3
+#DIM CONST 腋毛_普通 = 4
+#DIM CONST 腋毛_多め = 5
+#DIM CONST 腋毛_ふさふさ = 6
+#DIM CONST 腋毛_もっさり = 7
+#DIM CONST 腋毛_剛毛 = 8
+#DIM CONST 腋毛_密林 = 9
+
+#DIMS CHARADATA SAVEDATA  TATTOO, 10
+#DIM CONST タトゥー_額 = 0
+#DIM CONST タトゥー_頬 = 1
+#DIM CONST タトゥー_肩 = 2
+#DIM CONST タトゥー_胸 = 3
+#DIM CONST タトゥー_背 = 4
+#DIM CONST タトゥー_腹 = 5
+#DIM CONST タトゥー_秘部 = 6
+#DIM CONST タトゥー_尻 = 7
+#DIM CONST タトゥー_腿 = 8
+#DIM CONST タトゥー_足首 = 9
+
+#DIMS TATTOO_SAMPLE_LIST_COMMON, 200
+#DIMS TATTOO_SAMPLE_LIST, 10, 200
+#DIM TATTOO_SAMPLE_ADDRESS, 10
+#DIM TATTOO_SAMPLE_COMMON_ADDRESS
+
+
+;締まり系
+#DIM CONST 締まり_最高値 = 1000
+#DIM CONST 締まり_ぎちぎち = 900
+#DIM CONST 締まり_きつきつ  = 800
+#DIM CONST 締まり_きゅっきゅっ = 700
+#DIM CONST 締まり_名器 = 600
+#DIM CONST 締まり_普通 = 500
+#DIM CONST 締まり_ゆるめ = 400
+#DIM CONST 締まり_ゆるゆる = 300
+#DIM CONST 締まり_ぽっかり = 200
+#DIM CONST 締まり_がばがば = 100
+#DIM CONST 締まり_崩壊 = 0
+#DIM CONST 締まり_最低値 = -100
+
+#DIM CONST 動物_犬 = 1
+#DIM CONST 動物_豚 = 2
+#DIM CONST 動物_馬 = 3
+#DIM CONST 動物_猿 = 4
+
+;-------------------------------------------------
+;■特殊勢力に関する変数
+;-------------------------------------------------
+;#DIM CONST 特殊勢力_野盗 = 0
+;#DIM CONST 特殊勢力_外来人 = 1
+;#DIM CONST 特殊勢力_ホフゴブリン = 2
+;#DIM CONST 特殊勢力_触手 = 3
+
+;#DIM CONST 特殊勢力_野盗 = 1
+;#DIM CONST 特殊勢力_外来人 = 2
+;#DIM CONST 特殊勢力_ホフゴブリン = 3
+;#DIM CONST 特殊勢力_触手 = 4
+
+
+#DIM CONST 素質_淫乱_淫乱 = 0
+#DIM CONST 素質_淫乱_淫核 = 1
+#DIM CONST 素質_淫乱_淫壷 = 2
+#DIM CONST 素質_淫乱_尻穴狂い = 3
+#DIM CONST 素質_淫乱_淫乳 = 4
+#DIM CONST 素質_淫乱_蕩唇 = 5
+#DIM CONST 素質_淫乱_射精狂い = 6
+#DIM CONST 素質_淫乱_サド = 7
+#DIM CONST 素質_淫乱_マゾ = 8
+#DIM CONST 素質_淫乱_雌犬 = 9
+#DIM CONST 素質_淫乱_精液便女 = 10
+#DIM CONST 素質_淫乱_苗床 = 11
+#DIM CONST 素質_淫乱_薬物中毒 = 12
+#DIM CONST 素質_淫乱_娼婦 = 13
+#DIM CONST 素質_淫乱_生ハメ依存 = 14
+#DIM CONST 素質_淫乱_孕みたがり = 15
+#DIM CONST 素質_淫乱_ＡＶ女優 = 16
+#DIM CONST 素質_淫乱_露出狂 = 17
+#DIM CONST 素質_淫乱_良質母胎 = 18
+#DIM CONST 素質_淫乱_濃厚精液 = 19
+#DIM CONST 素質_淫乱_傀儡 = 20
+#DIM CONST 素質_淫乱_浮気癖 = 21
+#DIM CONST 素質_淫乱_自慰狂い = 22
+#DIM CONST 素質_淫乱_雌牛 = 23
+#DIM CONST 素質_淫乱_尿道狂い = 24
+
+{
+	#DIMS CONST SEX_TALENT_NAME = 
+		"淫乱",	"淫核",	"淫壷",	"尻穴狂い", "淫乳",
+		"蕩唇", "射精狂い", "サド", "マゾ", "雌犬",
+		"精液便女", "苗床", "薬物中毒", "娼婦", "生ハメ依存",
+		"孕みたがり", "ＡＶ女優", "露出狂", "良質母胎", "濃厚精液",
+		"傀儡", "浮気癖", "自慰狂い", "雌牛", "尿道狂い"
+}
+
+
+
+;-------------------------------------------------
+;■処女とかの喪失に関する定数
+;-------------------------------------------------
+{
+	#DIMS CONST LOST_SITUATION = 
+		"",		"和姦",	"調教",	"強姦",	"輪姦",
+		"売春",	"乱交",	"催眠",	"洗脳",	"道具",
+		"外交"
+}
+
+#DIM CONST 喪失_和姦 = 1
+#DIM CONST 喪失_調教 = 2
+#DIM CONST 喪失_強姦 = 3
+#DIM CONST 喪失_輪姦 = 4
+#DIM CONST 喪失_売春 = 5
+#DIM CONST 喪失_乱交 = 6
+#DIM CONST 喪失_催眠 = 7
+#DIM CONST 喪失_洗脳 = 8
+#DIM CONST 喪失_道具 = 9
+#DIM CONST 喪失_外交 = 10
+
+#DIM CONST 調教_会う = 0
+#DIM CONST 調教_閨 = 1
+#DIM CONST 調教_捕虜調教 = 2
+#DIM CONST 調教_子育て = 3
+#DIM CONST 調教_逆調教特殊 = 4
+#DIM CONST 調教_逆調教通常 = 5
+#DIM CONST 調教_捕虜会話 = 6
+#DIM CONST 調教_慰安 = 7
+
+{
+	#DIMS CONST IAN_PLACE = 
+		"スラム" , "街の広場" , "上級居住区" , "妖怪の山" , "旧地獄" , "竹林"   , "野盗のアジト" , "子供たちの秘密基地" , "兵舎" , "犬舎" ,
+		"畜舎"   , "魔界"     , "妖精の森"   , "彼岸"     , "紅魔館" , "月の都" , "天界"         , "湖"                 , "森", "寺子屋"
+}
+#DIM CONST 慰安_行き先_スラム             = 0
+#DIM CONST 慰安_行き先_一般住宅街         = 1
+#DIM CONST 慰安_行き先_貴族の居住地       = 2
+#DIM CONST 慰安_行き先_妖怪の山           = 3
+#DIM CONST 慰安_行き先_旧地獄             = 4
+#DIM CONST 慰安_行き先_竹林               = 5
+#DIM CONST 慰安_行き先_野盗のアジト       = 6
+#DIM CONST 慰安_行き先_子供たちの秘密基地 = 7
+#DIM CONST 慰安_行き先_兵舎               = 8
+#DIM CONST 慰安_行き先_犬舎               = 9
+#DIM CONST 慰安_行き先_畜舎               = 10
+#DIM CONST 慰安_行き先_魔界               = 11
+#DIM CONST 慰安_行き先_魔法の森           = 12
+#DIM CONST 慰安_行き先_彼岸               = 13
+#DIM CONST 慰安_行き先_紅魔館             = 14
+#DIM CONST 慰安_行き先_月の都             = 15
+#DIM CONST 慰安_行き先_天界               = 16
+#DIM CONST 慰安_行き先_湖                 = 17
+#DIM CONST 慰安_行き先_森                 = 18
+#DIM CONST 慰安_行き先_寺子屋             = 19  
+#DIM CONST 慰安_キャラ_民           = 1
+#DIM CONST 慰安_キャラ_貧民         = 2
+#DIM CONST 慰安_キャラ_浮浪者       = 3
+#DIM CONST 慰安_キャラ_ごろつき     = 4
+#DIM CONST 慰安_キャラ_富豪         = 5
+#DIM CONST 慰安_キャラ_貴族         = 6
+#DIM CONST 慰安_キャラ_資産家       = 7
+#DIM CONST 慰安_キャラ_天狗         = 8
+#DIM CONST 慰安_キャラ_河童         = 9
+#DIM CONST 慰安_キャラ_鬼           = 10
+#DIM CONST 慰安_キャラ_妖怪         = 11
+#DIM CONST 慰安_キャラ_露出狂       = 12
+#DIM CONST 慰安_キャラ_兎           = 13
+#DIM CONST 慰安_キャラ_野盗         = 14
+#DIM CONST 慰安_キャラ_子供         = 15
+#DIM CONST 慰安_キャラ_兵士         = 16
+#DIM CONST 慰安_キャラ_犬           = 17
+#DIM CONST 慰安_キャラ_豚           = 18
+#DIM CONST 慰安_キャラ_悪魔         = 19
+#DIM CONST 慰安_キャラ_妖精         = 20
+#DIM CONST 慰安_キャラ_死神         = 21
+#DIM CONST 慰安_キャラ_幽霊         = 22
+#DIM CONST 慰安_キャラ_ホフゴブリン = 23
+#DIM CONST 慰安_キャラ_月人         = 24
+#DIM CONST 慰安_キャラ_月兎         = 25
+#DIM CONST 慰安_キャラ_天人         = 26
+#DIM CONST 慰安_キャラ_チャラ男     = 27
+#DIM CONST 慰安_キャラ_馬           = 28
+#DIM CONST 慰安_キャラ_猿           = 29
+#DIM CONST 慰安_キャラ_保護者       = 30
+
+{
+	#DIMS CONST IAN_SPERM_ARRAY = 
+		"ダミー" , "民"   , "貧民"   , "浮浪者"       , "ごろつき" , "富豪" , "貴族" , "資産家"   , "天狗" , "河童" ,
+		"鬼"     , "妖怪" , "露出狂" , "兎"           , "野盗"     , "子供" , "兵士" , "犬"       , "豚"   , "悪魔" ,
+		"妖精"   , "死神" , "幽霊"   , "ホフゴブリン" , "月人"     , "月兎" , "天人" , "チャラ男" , "馬"   , "猿"   ,
+		"保護者"
+}
+
+;-------------------------------------------------
+;ランダムキャラ・子供に関する定数
+;-------------------------------------------------
+#DIM CONST MAX_CHARA_NUM = 3000
+#DIM CONST MAX_FIXED_CHARA = 500
+#DIM CONST MIN_NO_RANDOM_CHARA = 500
+#DIM CONST MAX_RANDOM_CHARA = 750
+#DIM CONST MIN_NO_CHILD = 1250
+#DIM CONST MAX_CHILD = 750
+#DIM CONST MIN_NO_SP_CHARA = 2000
+
+
+;-------------------------------------------------
+;タグに関する変数・定数
+;-------------------------------------------------
+#DIM CONST MAX_TAG = 10
+#DIM SAVEDATA CHARADATA TAG, MAX_TAG
+#DIM CONST タグ_人間 = 0
+#DIM CONST タグ_人外 = 1
+#DIM CONST タグ_妖怪 = 2
+#DIM CONST タグ_妖精 = 3
+#DIM CONST タグ_魔法使い = 4
+#DIM CONST タグ_吸血鬼 = 5
+#DIM CONST タグ_妖獣 = 6
+#DIM CONST タグ_騒霊 = 7
+#DIM CONST タグ_幽霊 = 8
+#DIM CONST タグ_亡霊 = 9
+#DIM CONST タグ_鬼 = 10
+#DIM CONST タグ_蓬莱人 = 11
+#DIM CONST タグ_天狗 = 12
+#DIM CONST タグ_人形 = 13
+#DIM CONST タグ_死神 = 14
+#DIM CONST タグ_閻魔 = 15
+#DIM CONST タグ_神 = 16
+#DIM CONST タグ_河童 = 17
+#DIM CONST タグ_天人 = 18
+#DIM CONST タグ_付喪神 = 19
+#DIM CONST タグ_仙人 = 20
+#DIM CONST タグ_天邪鬼 = 21
+#DIM CONST タグ_小人 = 22
+#DIM CONST タグ_月兎 = 23
+#DIM CONST タグ_月人 = 24
+#DIM CONST タグ_怨霊 = 25
+#DIM CONST タグ_ロボット = 26
+#DIM CONST タグ_悪魔 = 27
+#DIM CONST タグ_魔界人 = 28
+#DIM CONST タグ_天使 = 29
+#DIM CONST タグ_仙霊 = 30
+
+{
+	#DIMS CONST TAG_NAME =
+		"人間", "人外", "妖怪","妖精","魔法使い","吸血鬼","妖獣","騒霊","幽霊","亡霊","鬼","蓬莱人","天狗","人形","死神",
+		"閻魔","神","河童","天人","付喪神","仙人","天邪鬼","小人","月兎","月人","怨霊","ロボット","悪魔","魔界人","天使","仙霊"
+}
+
+;-------------------------------------------------
+;状態に関する変数・定数
+;-------------------------------------------------
+#DIM CONST 特殊状態_放浪 = 1
+#DIM CONST 特殊状態_死亡 = 2
+
+#DIM CONST 行動不能_臨月 = 1
+#DIM CONST 行動不能_育児 = 2
+#DIM CONST 行動不能_怪我 = 3
+#DIM CONST 行動不能_子供 = 4
+
+
+;mod variables
+#DIM SAVEDATA ソートキー = 0
+#DIM SAVEDATA 降順ソート = 0
+#DIM ソートキー保存 = 0
+#DIM ソート順保存 = 0
+
+#DIM CONST NUM_SORTKEY = 18
+#DIM CONST ソート_NO = 0
+#DIM CONST ソート_所属 = 1
+#DIM CONST ソート_星 = 2
+#DIM CONST ソート_名前 = 3
+#DIM CONST ソート_好感度 = 4
+#DIM CONST ソート_従属度 = 5
+#DIM CONST ソート_支配度 = 6
+#DIM CONST ソート_妊娠 = 7
+#DIM CONST ソート_性別 = 8
+#DIM CONST ソート_面識 = 9
+
+#DIM CONST ソート_武闘 = 10
+#DIM CONST ソート_防衛 = 11
+#DIM CONST ソート_知略 = 12
+#DIM CONST ソート_政治 = 13
+#DIM CONST ソート_歌唱 = 14
+#DIM CONST ソート_料理 = 15
+#DIM CONST ソート_妖術 = 16
+#DIM CONST ソート_四能力 = 17
+#DIM CONST ソート_七能力 = 18
+;これらは最後尾、通常いじれない
+#DIM CONST ソート_夜這い助手 = 19
+#DIM CONST ソート_手引助手 = 20
+{
+	#DIMS CONST STR_NOW_SORTKEY =
+		"NO", "所属", "★", "名前", "好感", "従属", "支配", "妊娠", "性別", "面識",
+		"武闘", "防衛", "知略", "政治", "歌唱", "料理", "妖術", "四能", "七能"
+}
+
+
+#DIM SAVEDATA ARENA_DONE
+#DIM SAVEDATA APPOINT_DONE

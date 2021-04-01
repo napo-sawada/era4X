@@ -1,0 +1,228 @@
+﻿;-------------------------------------------------
+;「お気に入り」の名称
+;-------------------------------------------------
+@SHOP_LIFE_NAME64
+RESULTS:0 '= "お気に入り"
+
+;-------------------------------------------------
+;「お気に入り」の選択可否
+;-------------------------------------------------
+@SHOP_LIFE_CHECK64
+SIF CFLAG:MASTER:捕虜先
+	RETURN 0
+SIF FLAG:お気に入り指定キャラ
+	RETURN 0
+RETURN 1
+
+;-------------------------------------------------
+;「お気に入り」の選択可能キャラ存在判定
+;-------------------------------------------------
+@SHOP_LIFE_CHECKCHARA64(ARG:0)
+;非主人公、捕虜でない
+RETURN ARG:0 != MASTER && CFLAG:(ARG:0):所属 == CFLAG:MASTER:所属 && CFLAG:(ARG:0):捕虜先 == 0 && !IS_ANIMAL(ARG:0)
+
+;-------------------------------------------------
+;「お気に入り」の左カラムメニューの入力処理
+;-------------------------------------------------
+@SHOP_LIFE_EVENTBUY64
+FLAG:拠点フェイズページ = 1
+FLAG:夜這い = 0
+RETURN 0
+
+;-------------------------------------------------
+;「お気に入り」の右カラム表示処理
+;-------------------------------------------------
+@SHOP_LIFE_EVENTBUY_SHOW64
+CALL COLUMN_RIGHT_TITLE("対象者選択", "0", "1", "0", "0")
+;注釈をオレンジにして目立たせたいので分ける
+CALL COLOR_PRINT("  1回限り", カラー_選択中)
+CALL COLUMN_RIGHT_PRINTL
+CALL COLUMN_RIGHT_LINE
+CALL COLUMN_RIGHT_PRINTL
+
+CALL COLOR_PRINT(" 能力値を再振りできます  ", カラー_注釈)
+CALL COLOR_PRINT("一回限り", カラー_選択中)
+CALL COLOR_PRINT("で", カラー_注釈)
+CALL COLOR_PRINT("一人", カラー_選択中)
+CALL COLOR_PRINT("しか選べないので注意してください", カラー_注釈)
+CALL COLUMN_RIGHT_PRINTL
+CALL COLUMN_RIGHT_LINE
+CALL COLUMN_RIGHT_PRINTL
+
+;標準的なキャラリストとページ移動
+CALL COLUMN_RIGHT_CHARALIST
+RETURN 0
+
+;-------------------------------------------------
+;「お気に入り」のリスト１入力処理
+;-------------------------------------------------
+@SHOP_LIFE_USERSHOP64(対象)
+#DIM FIRST_LINE
+#DIM 対象
+#DIM 元の能力, 7
+#DIM 選択項目,1
+#DIM 選択詳細,1
+#DIM 変化量,1
+#DIM ポイント, 1
+#DIM 振り分け後, 7
+#DIM LOOPCOUNT, 1
+#DIM LOOPMAX, 1
+VARSET ポイント
+VARSET 振り分け後
+元の能力:0 = ABL:対象:武闘
+元の能力:1 = ABL:対象:防衛
+元の能力:2 = ABL:対象:知略
+元の能力:3 = ABL:対象:政治
+元の能力:4 = ABL:対象:妖術
+元の能力:5 = ABL:対象:歌唱
+元の能力:6 = ABL:対象:料理
+ポイント = SUMARRAY(元の能力)
+
+FLAG:能力表示モード = 0
+
+FIRST_LINE = LINECOUNT
+REDRAW 0
+$SHOW_LOOP
+CALL SINGLE_DRAWLINE
+PRINTFORML %ANAME(対象)%をお気に入りにし、元の能力値の範囲内で、能力値を振り直すことができます
+PRINTFORML お気に入りにはほかにもいろんな補正がかかったりします
+PRINTFORML ただし、お気に入りは一度しか設定できません。よく考えましょう
+PRINTFORML 残りポイント:{ポイント}
+CALL SINGLE_DRAWLINE
+CALL ICPRINT(@"<%ANAME(対象)%>を設定中", "L", カラー_注意)
+CALL SINGLE_DRAWLINE
+PRINTFORM 武闘:{振り分け後:0, 3} 元:{元の能力:0, 3} -- 
+CALL PRINTBUTTON_FAVORITE("[ +1]", 200, 振り分け後:0, ポイント,   1)
+CALL PRINTBUTTON_FAVORITE("[ -1]", 201, 振り分け後:0, ポイント,  -1)
+CALL PRINTBUTTON_FAVORITE("[+10]", 202, 振り分け後:0, ポイント,  10)
+CALL PRINTBUTTON_FAVORITE("[-10]", 203, 振り分け後:0, ポイント, -10)
+PRINTL
+PRINTFORM 防衛:{振り分け後:1, 3} 元:{元の能力:1, 3} -- 
+CALL PRINTBUTTON_FAVORITE("[ +1]", 210, 振り分け後:1, ポイント,   1)
+CALL PRINTBUTTON_FAVORITE("[ -1]", 211, 振り分け後:1, ポイント,  -1)
+CALL PRINTBUTTON_FAVORITE("[+10]", 212, 振り分け後:1, ポイント,  10)
+CALL PRINTBUTTON_FAVORITE("[-10]", 213, 振り分け後:1, ポイント, -10)
+PRINTL
+PRINTFORM 知略:{振り分け後:2, 3} 元:{元の能力:2, 3} -- 
+CALL PRINTBUTTON_FAVORITE("[ +1]", 220, 振り分け後:2, ポイント,   1)
+CALL PRINTBUTTON_FAVORITE("[ -1]", 221, 振り分け後:2, ポイント,  -1)
+CALL PRINTBUTTON_FAVORITE("[+10]", 222, 振り分け後:2, ポイント,  10)
+CALL PRINTBUTTON_FAVORITE("[-10]", 223, 振り分け後:2, ポイント, -10)
+PRINTL
+PRINTFORM 政治:{振り分け後:3, 3} 元:{元の能力:3, 3} -- 
+CALL PRINTBUTTON_FAVORITE("[ +1]", 230, 振り分け後:3, ポイント,   1)
+CALL PRINTBUTTON_FAVORITE("[ -1]", 231, 振り分け後:3, ポイント,  -1)
+CALL PRINTBUTTON_FAVORITE("[+10]", 232, 振り分け後:3, ポイント,  10)
+CALL PRINTBUTTON_FAVORITE("[-10]", 233, 振り分け後:3, ポイント, -10)
+PRINTL
+IF TALENT:対象:妖術知識
+	PRINTFORM 妖術:{振り分け後:4, 3} 元:{元の能力:4, 3} -- 
+	CALL PRINTBUTTON_FAVORITE("[ +1]", 240, 振り分け後:4, ポイント,   1)
+	CALL PRINTBUTTON_FAVORITE("[ -1]", 241, 振り分け後:4, ポイント,  -1)
+	CALL PRINTBUTTON_FAVORITE("[+10]", 242, 振り分け後:4, ポイント,  10)
+	CALL PRINTBUTTON_FAVORITE("[-10]", 243, 振り分け後:4, ポイント, -10)
+	PRINTL
+ENDIF
+PRINTFORM 歌唱:{振り分け後:5, 3} 元:{元の能力:5, 3} -- 
+CALL PRINTBUTTON_FAVORITE("[ +1]", 250, 振り分け後:5, ポイント,   1)
+CALL PRINTBUTTON_FAVORITE("[ -1]", 251, 振り分け後:5, ポイント,  -1)
+CALL PRINTBUTTON_FAVORITE("[+10]", 252, 振り分け後:5, ポイント,  10)
+CALL PRINTBUTTON_FAVORITE("[-10]", 253, 振り分け後:5, ポイント, -10)
+PRINTL
+PRINTFORM 料理:{振り分け後:6, 3} 元:{元の能力:6, 3} -- 
+CALL PRINTBUTTON_FAVORITE("[ +1]", 260, 振り分け後:6, ポイント,   1)
+CALL PRINTBUTTON_FAVORITE("[ -1]", 261, 振り分け後:6, ポイント,  -1)
+CALL PRINTBUTTON_FAVORITE("[+10]", 262, 振り分け後:6, ポイント,  10)
+CALL PRINTBUTTON_FAVORITE("[-10]", 263, 振り分け後:6, ポイント, -10)
+PRINTL
+CALL SINGLE_DRAWLINE
+PRINTFORML [0] 決定
+PRINTFORML [999] 戻る
+$INPUT_LOOP_1
+INPUT 999
+IF RESULT == 999
+	REDRAW 1
+	RETURN 0
+ELSEIF RESULT == 0
+	REDRAW 1
+	PRINTFORML 以上でお気に入り設定を終えますか？
+	SIF ポイント > 0
+		CALL COLOR_PRINTL("ポイントが残ってますよ？　残しててもマジで何もいいことないですよ？", カラー_注意)
+	CALL ASK_YN("終える", "もうちょっといじる")
+	IF RESULT == 0
+		ABL:対象:武闘 = 振り分け後:0
+		ABL:対象:防衛 = 振り分け後:1
+		ABL:対象:知略 = 振り分け後:2
+		ABL:対象:政治 = 振り分け後:3
+		ABL:対象:妖術 = 振り分け後:4
+		ABL:対象:歌唱 = 振り分け後:5
+		ABL:対象:料理 = 振り分け後:6
+		PRINTFORMW %ANAME(対象)%をお気に入りにしました！
+		FLAG:拠点フェイズ選択コマンド = DEFAULT_MENU_NUM
+		FLAG:お気に入り指定キャラ = GET_ID(対象)
+		RETURN 1
+	ELSEIF RESULT == 1
+		CLEARLINE LINECOUNT - FIRST_LINE
+		GOTO SHOW_LOOP
+	ENDIF
+ELSE
+	選択項目 = (RESULT - 200) / 10
+	選択詳細 = (RESULT - 200) % 10
+	SELECTCASE 選択詳細
+		CASE 0
+			選択詳細 = 1
+		CASE 1
+			選択詳細 = -1
+		CASE 2
+			選択詳細 = 10
+		CASE 3
+			選択詳細 = -10
+		CASEELSE
+			CLEARLINE LINECOUNT - FIRST_LINE
+			GOTO SHOW_LOOP
+	ENDSELECT
+	IF !INRANGE(選択項目, 0, 6) || 選択項目 == 4 && !TALENT:対象:妖術知識 || !FAVORITE_CAN_CHOOSE(振り分け後:選択項目, ポイント, 選択詳細)
+		CLEARLINE LINECOUNT - FIRST_LINE
+		GOTO SHOW_LOOP
+	ENDIF
+	振り分け後:選択項目 += 選択詳細
+	ポイント -= 選択詳細
+ENDIF
+
+CLEARLINE LINECOUNT - FIRST_LINE
+GOTO SHOW_LOOP
+
+;-------------------------------------------------
+;「お気に入り」の処理用ボタン
+;-------------------------------------------------
+@PRINTBUTTON_FAVORITE(文字列, 番号, 現在値, ポイント, 変化量)
+#DIMS 文字列
+#DIM 番号
+#DIM 現在値
+#DIM ポイント
+#DIM 変化量
+IF FAVORITE_CAN_CHOOSE(現在値, ポイント, 変化量)
+	PRINTBUTTON 文字列, 番号
+ELSE
+	SETCOLOR カラー_選択不可
+	PRINTPLAINFORM %文字列%
+	RESETCOLOR
+ENDIF
+
+;-------------------------------------------------
+;「お気に入り」の処理の選択可否
+;-------------------------------------------------
+@FAVORITE_CAN_CHOOSE(現在値, ポイント, 変化量)
+#FUNCTION
+#DIM 現在値
+#DIM ポイント
+#DIM 変化量
+SIF 変化量 > ポイント
+	RETURNF 0
+SIF 変化量 + 現在値 > 300
+	RETURNF 0
+SIF 変化量 + 現在値 < 0
+	RETURNF 0
+
+RETURNF 1
+

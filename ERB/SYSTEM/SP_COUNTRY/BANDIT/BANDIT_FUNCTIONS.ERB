@@ -1,0 +1,225 @@
+﻿;--------------------------------------
+;ターンエンド時の野盗の処理
+;--------------------------------------
+@TURNEND_BANDIT
+#DIM 野盗
+
+;-------------------------------------------------
+;野盗の追加
+;-------------------------------------------------
+@BANDIT_INIT(メッセージ = 0)
+#DIM メッセージ
+#DIM LCOUNT
+VARSET LOCAL
+
+SIF GET_COUNTRY_FROM_ID(SP_COUNTRY_ID:特殊勢力_野盗) != -1
+	RETURN 0
+
+SIF SP_COUNTRY_RANK:特殊勢力_野盗 == 0
+	RETURN 0
+
+SIF GET_NEW_COUNTRY() == -1
+	RETURN 0
+
+CALL CREATE_SP_COUNTRY(特殊勢力_野盗)
+LOCAL = RESULT
+CALL INIT_SP_COUNTRY(LOCAL)
+
+COUNTRY_IS_CLOSED:LOCAL = 1
+
+IF メッセージ
+	CALL SINGLE_DRAWLINE
+	SETCOLOR カラー_警告
+	PRINTFORMW 幻想郷の治安悪化により、悪漢どもが集っているようです……
+	RESETCOLOR
+	CALL SINGLE_DRAWLINE
+ENDIF
+
+RETURN LOCAL
+
+;-------------------------------------------------
+;DESC  :野盗所属時に閨・捕虜調教前にアイテムを追加する処理
+;-------------------------------------------------
+@START_TRAIN_COMMON_BANDIT()
+ITEM:A_バイブ = 1
+ITEM:A_アナルバイブ = 1
+ITEM:A_縄 = 1
+ITEM:A_鞭 = 1
+ITEM:A_針 = 1
+ITEM:A_鼻フック = 1
+ITEM:A_口枷 = 1
+ITEM:A_媚薬 = 99
+ITEM:A_麻薬 = 99
+
+;--------------------------------------
+;野盗が捕虜を得たときに確率で発動するエロイベント
+;--------------------------------------
+@TREAT_PRISONER_BANDIT(対象)
+#DIM 対象
+#DIM 陥落済み
+SIF !(RAND:100 < 3 && IS_FEMALE(対象))
+	RETURN 0
+IF GETBIT(TALENT:対象:特殊勢力陥落系, 特殊勢力_野盗)
+	陥落済み = 1
+ELSE
+	陥落済み = 0
+ENDIF
+
+SETCOLOR カラー_ピンク
+PRINTFORML ……
+SELECTCASE RAND:4
+	CASE 0
+		IF 陥落済み
+			PRINTFORML %ANAME(対象)%は野盗に自ら捕らえられ、その%STR_BODY("身体", 対象)%をゆだねてみせる
+			PRINTFORML 俺たちの下から離れてる間にナマッてねぇか見てやるよと、野盗は彼女の服を剥ぎ取っていく
+			PRINTFORML %ANAME(対象)%が自分から股を開き誘うと、興奮した野盗は一も二にもなくその股に己の一物をねじ込んだ
+			PRINTFORML 膣内を犯すモノのたくましさに、%ANAME(対象)%はたまらないという声をあげてよがり、腰を振りたくる
+			PRINTFORML やがて、%ANAME(対象)%の両穴に、「ご主人様」の貴重な種がたっぷりと植え付けられた……
+		ELSE
+			PRINTFORML %ANAME(対象)%を捕らえた野盗は、暴れる%ANAME(対象)%を殴りつけると、地面に組み敷いた
+			PRINTFORML 親分に下手な女ァ差し出しちゃいけねぇ、味見しねぇとなと、服を剥ぎ取っていく
+			PRINTFORML そして嫌がる%ANAME(対象)%の両脚を無理矢理に開くと、その股に己の一物をねじ込んだ
+			PRINTFORML %STR_BODY("陰唇：処女確認：修飾", 対象)%膣内を荒らし回るおぞましいモノに、%ANAME(対象)%は半狂乱になり暴れるが、野盗はそれをあっさりと押さえ、腰を振りたくる
+			PRINTFORML やがて、%ANAME(対象)%の両穴に、野盗の汚らわしい種がたっぷりとつけられてしまった……
+		ENDIF
+	CASE 1
+		IF 陥落済み
+			PRINTFORML 野盗に自ら身を差し出した%ANAME(対象)%は、その肌を晒し、枷を着けてもらい、彼らの行軍に付き添っている
+			PRINTFORML %ANAME(対象)%はすっかり彼らのトロフィー扱いをされており、時折好き勝手に%STR_BODY("尻", 対象)%や%STR_BODY("胸", 対象)%に触れられる
+			PRINTFORML 理不尽に詰られ、頬や尻を張られ、殴られるたび、%ANAME(対象)%は嫌がるどころかもっと嬲って欲しいといわんばかりの艶やかな声を上げる
+			PRINTFORML やがて彼らが休憩に入ると、%ANAME(対象)%は自ら名乗り出て、彼らの慰安役を買って出た
+			PRINTFORML 結局、その両穴が閉じなくなるまで、%ANAME(対象)%は彼らの欲望を満足させ続けた……
+		ELSE
+			PRINTFORML 野盗に捕らえられた%ANAME(対象)%は裸に剥かれ、枷を着けられた状態で、彼らの行軍に付き合わされている
+			PRINTFORML %ANAME(対象)%はすっかり彼らのトロフィー扱いをされており、時折好き勝手に%STR_BODY("尻", 対象)%や%STR_BODY("胸", 対象)%に触れられる
+			PRINTFORML 少しでもその手から逃れようとすれば、容赦なく詰られ、頬や尻を張られ、殴られる
+			PRINTFORML やがて彼らが休憩に入ると、彼らは当然のように%ANAME(対象)%に群がり、彼女を犯し始めた
+			PRINTFORML 結局、その両穴が閉じなくなるまで、%ANAME(対象)%は犯され続けた……
+		ENDIF
+	CASE 2
+		IF 陥落済み
+			PRINTFORML 野盗のアジトに連れ込まれた%ANAME(対象)%は、武器を持っていないことを証明するため、身体検査をしてもらった
+			PRINTFORML 検査と言っても名ばかりのもの、その実態は陵辱だが、%ANAME(対象)%は彼らの自分勝手な愛撫に、積極的己の身体を捧げている
+			PRINTFORML まだ検査が足りないと、男達が彼女のあらゆる穴にペニスをねじ込んでいくと、%ANAME(対象)%はくぐもった声をあげながら激しく絶頂する
+			PRINTFORML %ANAME(対象)%は快楽にヨガりながらも淫らに腰を振り、彼らの種を己の肉畑で受け止めていく
+			PRINTFORML やがて「検査」が終了すると、%ANAME(対象)%は自ら牢に入り、性交の余韻に昂ぶる身体を慰めながら、また呼ばれるときを待ち始めた……
+		ELSE
+			PRINTFORML 野盗のアジトに連れ帰られた%ANAME(対象)%は、武器を隠し持っていないか調べると、身体検査にかけられた
+			PRINTFORML 検査といっても名ばかりのもので、男達の手は彼女の%STR_BODY("胸：修飾", 対象)%乳房を、%STR_BODY("尻", 対象)%を、%STR_BODY("陰唇：処女確認：修飾", 対象)%秘部を弄り、無理矢理に快楽を引き出していく
+			PRINTFORML それだけではまだ検査が不十分だと、彼らは己の一物を、%ANAME(対象)%のあらゆる穴にねじ込んでいく
+			PRINTFORML 暴れる%ANAME(対象)%を無理矢理に押さえつけては、次から次へ種を植え付けていく
+			PRINTFORML 結局、%ANAME(対象)%が解放され、牢に放り込まれたときには、彼女は疲弊しきって放心状態になっていた……
+		ENDIF
+	CASE 3
+		IF 陥落済み
+			PRINTFORML 野盗に自ら身を差し出した%ANAME(対象)%は、服を剥かれ、目隠しや枷や縄で拘束された……そんなものがなくとも、抵抗しなかったろうが
+			PRINTFORML 彼らは%ANAME(対象)%を担ぎ上げると、浮浪者の溜まり場に彼女の身柄を放置した
+			PRINTFORML 当然、%ANAME(対象)%はすぐ浮浪者に見つかった。これから何をされるか察した%ANAME(対象)%は、期待に股を濡らす
+			PRINTFORML そんな彼女を変態だ淫乱だと嘲笑いながら、浮浪者たちは汚らしいペニスを次から次へ%ANAME(対象)%にねじ込んでいく……
+			PRINTFORML だらしないアヘ顔を晒し、白濁まみれで生ゴミ捨て場に放置された%ANAME(対象)%を、野盗どもは鼻を摘まみながら連れて帰った
+		ELSE
+			PRINTFORML 野盗に捕らえられた%ANAME(対象)%は、服を剥かれ、何一つ抵抗できないよう、目隠しや枷や縄でがんじがらめに拘束された
+			PRINTFORML 野盗どもは%ANAME(対象)%を担ぎ上げると、浮浪者の溜まり場に彼女の身柄を放置した
+			PRINTFORML 当然、%ANAME(対象)%はすぐ浮浪者に見つかった。野盗とつながりのある彼らに、%ANAME(対象)%を救い出すような良心など当然ない
+			PRINTFORML それどころか、女日照りの彼らは、汚らしいペニスを次から次へ%ANAME(対象)%にねじ込んでいく……
+			PRINTFORML 白濁まみれで生ゴミ捨て場に放置された%ANAME(対象)%を、野盗どもはくせぇくせぇと鼻を摘まみながら連れて帰った
+		ENDIF
+ENDSELECT
+RESETCOLOR
+CALL FUCK_GANGBANG_SP(対象, GET_SPERM_ID("野盗"), @"野盗の\@ RAND:2 ? ペニス # 唇\@", "野盗", GET_COUNTRY_FROM_ID(SP_COUNTRY_ID:特殊勢力_野盗))
+
+
+;-----------------------------------
+;野盗に捕らえられたときのイベント
+;-----------------------------------
+@MASTER_CAPTURED_BANDIT(ARG:0)
+PRINTFORMW 捕らえられた%ANAME(MASTER)%は野盗の前に引きずり出された…
+IF IS_MALE(MASTER)
+	PRINTFORMW 野盗は%ANAME(MASTER)%を見、兵士にちょうどいいと判断したらしい
+	PRINTFORMW 俺達の側につくなら、イイ思いをさせてやるぜ？　と言った
+	PRINTFORMW 奴隷という扱いにはなるようだが、拒否するより待遇はマシになるようだ……
+	PRINTFORMW 受け入れますか？
+	CALL ASK_YN("受け入れる", "拒否する")
+	IF RESULT == 0
+		PRINTFORMW 投獄されるよりはマシだろう。%ANAME(MASTER)%が頷くと、野盗はニヤリと笑う
+		PRINTFORMW 何を笑っているのかといぶかる%ANAME(MASTER)%に、奴隷としての証をつけてやるよと彼らは言い出した
+		PRINTFORMW %ANAME(MASTER)%に、頑丈な首輪が嵌められた……
+		SETCOLOR カラー_注意
+		PRINTFORMW %ANAME(MASTER)%は野盗の配下となりました
+		RESETCOLOR
+	ELSE
+		PRINTFORMW お前達になど手を貸すか。%ANAME(MASTER)%は毅然として言い放つ	
+		PRINTFORMW そうかよと、彼らはそのまま興味なさげに、%ANAME(MASTER)%を投獄した……
+	ENDIF
+ELSEIF GETBIT(TALENT:MASTER:特殊勢力陥落系, 特殊勢力_野盗)
+	PRINTFORMW 肉便器ちゃんが戻ってきたぜと、彼らは%ANAME(MASTER)%を取り囲む
+	PRINTFORMW 眼前にペニスを突き出され、%ANAME(MASTER)%の身体は、彼らに刻み込まれた快楽を思い出して濡れてしまう
+	PRINTFORMW %ANAME(MASTER)%の声が甘く蕩け始めた頃、また俺達のところに来るか？　と彼らは尋ねる
+	PRINTFORMW 受け入れますか？
+	CALL ASK_YN("受け入れる", "拒否する")
+	IF RESULT == 0
+		PRINTFORMW 彼らによって育て上げられた雌の本性が、%ANAME(MASTER)%を頷かせた
+		PRINTFORMW 再び服従しますという意思表示として、%ANAME(MASTER)%は突き出されたペニスに熱烈なキスをした……
+		SETCOLOR カラー_注意
+		PRINTFORMW %ANAME(MASTER)%は、自分が野盗の性奴隷にすぎないことを思い出した
+		RESETCOLOR
+	ELSE
+		PRINTFORMW 拒否されるということは考えになかったらしく、野盗達は爆笑した
+		PRINTFORMW その強がりがいつまで続くかなと、%ANAME(MASTER)%に唾を吐きかける
+		PRINTFORMW 野盗達は%ANAME(MASTER)%に手枷と足枷を嵌め、投獄した……
+	ENDIF
+ELSE
+	PRINTFORMW 野盗は%ANAME(MASTER)%の体をいやらしい目で眺める
+	PRINTFORMW どうせ結果は同じなんだから、性奴隷になっちまえよと言い始めた
+	PRINTFORMW 屈辱的な提案だが、受け入れずとも、女である%ANAME(MASTER)%がされることは変わるまい
+	PRINTFORMW 受け入れますか？
+	CALL ASK_YN("受け入れる", "拒否する")
+	IF RESULT == 0
+		PRINTFORMW 受け入れなくとも、どうせされることは変わらない
+		PRINTFORMW なら、従順な姿勢を見せた方が、まだ待遇はマシなはずだ……%ANAME(MASTER)%は力なく頷く
+		PRINTFORMW マジで受け入れやがったぜと、野盗どもはゲラゲラと笑う
+		PRINTFORMW 彼らは%ANAME(MASTER)%を取り押さえ、その下腹に、「性奴隷」の三文字の焼き印を入れた……
+		SETCOLOR カラー_注意
+		PRINTFORMW %ANAME(MASTER)%は野盗の性奴隷に成り下がった
+		RESETCOLOR
+	ELSE
+		PRINTFORMW そんなことができるか。%ANAME(MASTER)%がきっぱりと拒否すると、野盗はへらへらと笑う
+		PRINTFORMW その強がりがいつまで続くかなと、%ANAME(MASTER)%に唾を吐きかける
+		PRINTFORMW 野盗達は%ANAME(MASTER)%に手枷と足枷を嵌め、投獄した……
+	ENDIF
+ENDIF
+IF RESULT == 0
+	CALL CHANGE_COUNTRY(MASTER, ARG:0, 1)
+	IF IS_FEMALE(MASTER)
+		SETBIT TALENT:MASTER:特殊勢力陥落系, 特殊勢力_野盗
+		CALL PLAYER_FALLEN_TO_SP_COUNTRY(ARG:0)
+	ENDIF
+	CALL BANDIT_FALLEN_LEAVE_MARK(MASTER)
+	RETURN 0
+ELSE
+	CALL CAPTURE(MASTER, ARG:0)
+	RETURN 2
+ENDIF
+
+;--------------------------------------
+;エンディング
+;--------------------------------------
+@BANDIT_ENDING
+PRINTFORML 幻想郷に瞬く間に広がった野盗の勢力は、
+PRINTFORMW あっという間に幻想郷全土を覆い尽くした
+PRINTFORML 彼らの拠点には何人、いや何十人という少女が捕らえられ、彼らの性欲の犠牲となっている
+PRINTFORMW だが、それを止める者はいない。彼らに刃向かう者は全て、滅ぼされてしまったのだから……
+IF CFLAG:MASTER:所属 == GET_COUNTRY_FROM_ID(SP_COUNTRY_ID:特殊勢力_野盗) && IS_FEMALE(MASTER)
+	PRINTFORMW 
+	PRINTFORMW 幻想郷統一を祝う酒宴に、%ANAME(MASTER)%の姿もあった
+	PRINTFORMW 彼女は野盗勢力がここまで広まる立役者であり、この軍において、女でありながら比較的待遇は良い
+	PRINTFORMW ……女にしては、という但し書きつきであるが
+	PRINTFORML 酔っ払った野盗の一人が、意味深な目配せをする
+	PRINTFORML すると、%ANAME(MASTER)%は服を脱ぎ捨て、音をたてて彼の一物をしゃぶりはじめる
+	PRINTFORMW その様を見て興奮した別の男が、%ANAME(MASTER)%の秘部に肉棒をねじ込むと、%ANAME(MASTER)%はたまらないといった声を上げ、腰を振る
+	PRINTFORML ……野盗の中心にいるということは、一番深く彼らの思想に染まっているということでもある
+	PRINTFORMW 女は男の性奴隷。%ANAME(MASTER)%の頭には、それが心底まで刻み込まれているのだ……
+	CALL FUCK_SP(MASTER, "欲望, 性交, 奉仕, 精愛, 性技, Ｖ, Ｂ, Ｃ, Ａ, 口淫, 薬物依存, 輪姦, Ｖ性交, Ａ性交", "処女喪失, Ａ処女喪失, キス喪失, 膣内射精, 腸内射精, 口内射精", GET_COUNTRY_FROM_ID(SP_COUNTRY_ID:特殊勢力_野盗), GET_SPERM_ID("野盗"), @"野盗の\@ RAND:2 ? 唇 # ペニス \@", "野盗", "", "輪姦")
+ENDIF
+PRINTFORML 
+PRINTFORMW もはや救世主などない地に、ただただ女の嬌声と男の罵声が響き渡り続ける……

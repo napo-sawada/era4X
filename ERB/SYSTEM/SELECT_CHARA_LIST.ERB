@@ -1,0 +1,746 @@
+﻿;-------------------------------------------------
+;desc  :キャラリストを表示する関数
+;param :表示関数名:キャラクタをリストに表示するかを判定する関数の名前 SELECT_CHARA_LIST_SHOW_LOGIC_●●(ARG:0)の●●の部分
+;param :選択関数名:キャラクタをリストで選択できるようにするかを判定する関数の名前 SELECT_CHARA_LIST_SHOW_LOGIC_●●(ARG:0)の●●の部分
+;param :色指定関数名:キャラクタが選択できる場合、リストでどんな色でできるようにするかを判定する関数の名前 SELECT_CHARA_LIST_COLOR_LOGIC_●●(ARG:0)の●●の部分
+;param :表示文字:各カラムの要素 ABLの名前
+;-------------------------------------------------
+@SELECT_CHARA_LIST(表示関数名 = "", 選択関数名="", 色指定関数名="", 表示文字:0 = "", 表示文字:1 = "", 表示文字:2 = "", 表示文字:3 = "", 表示文字:4 = "", 表示文字:5 = "", 表示文字:6 = "")
+#DIMS 表示関数名
+#DIMS 選択関数名
+#DIMS 色指定関数名
+#DIMS 表示文字, 7
+#DIM 表示数値, 7
+#DIM FIRST_LINE
+#DIM 対象
+#DIM 表示位置
+#DIM 表示ページ
+#DIM 総ページ数
+#DIM キャラ数
+#DIM キャラカウンタ
+#DIM 表示開始位置
+#DIM 表示終了位置
+#DIM ランク種別
+#DIM 直前総ページ数
+#DIMS 直前表示関数名
+#DIMS 直前選択関数名
+
+VARSET キャラ数
+VARSET 表示数値, -1
+
+;ガード節
+TRYCCALLFORM SELECT_CHARA_LIST_SHOW_LOGIC_%表示関数名%(MASTER)
+CATCH
+	THROW 指定された関数SELECT_CHARA_LIST_SHOW_LOGIC_%表示関数名%が存在しません
+ENDCATCH
+
+TRYCCALLFORM SELECT_CHARA_LIST_SELECT_LOGIC_%選択関数名%(MASTER)
+CATCH
+	THROW 指定された関数SELECT_CHARA_LIST_SELECT_LOGIC_%選択関数名%が存在しません
+ENDCATCH
+
+TRYCCALLFORM SELECT_CHARA_LIST_COLOR_LOGIC_%色指定関数名%(MASTER)
+CATCH
+	THROW 指定された関数SELECT_CHARA_LIST_COLOR_LOGIC_%色指定関数名%が存在しません
+ENDCATCH
+
+
+;一行目を用意
+FOR LOCAL, 0, VARSIZE("表示文字")
+	FOR LOCAL:1, 0, VARSIZE("ABL")
+		SIF ABLNAME:(LOCAL:1) == ""
+			CONTINUE
+		IF 表示文字:LOCAL == ABLNAME:(LOCAL:1)
+			表示文字:LOCAL = %TOSTR_SPACE(2)%%SUBSTRINGU(ABLNAME:(LOCAL:1), 0, 1)%\@ LOCAL == VARSIZE("表示文字") - 1 ?   # | \@
+			表示数値:LOCAL = LOCAL:1
+			BREAK
+		ENDIF
+	NEXT
+	SIF LOCAL:1 == VARSIZE("ABL")
+		表示文字:LOCAL = %TOSTR_SPACE(5)%
+NEXT
+
+;ページ数計算
+FOR LOCAL, 0, CHARANUM
+	CALLFORM SELECT_CHARA_LIST_SHOW_LOGIC_%表示関数名%(LOCAL)
+	SIF RESULT
+		キャラ数 ++
+NEXT
+
+総ページ数 = (キャラ数 - 1) / 40 + 1
+
+;直前の呼び出しとページ数、表示する関数、選択する関数名が同一であれば連続した呼び出しと判断しページを切り替えない
+SIF 総ページ数 != 直前総ページ数 || 表示関数名 != 直前表示関数名 || 選択関数名 != 直前選択関数名
+	表示ページ = 1
+
+直前総ページ数  = 総ページ数
+直前表示関数名 '= 表示関数名
+直前選択関数名 '= 選択関数名
+
+;ヘッダ表示
+PRINTFORM %TOSTR_SPACE(15)%
+FOR LOCAL:1, 0, VARSIZE("表示文字")
+	PRINTFORM %表示文字:(LOCAL:1)%
+NEXT
+PRINTFORM %TOSTR_SPACE(20)%
+FOR LOCAL:1, 0, VARSIZE("表示文字")
+	PRINTFORM %表示文字:(LOCAL:1)%
+NEXT
+
+PRINTL
+FIRST_LINE = LINECOUNT
+
+CALL CREATE_SELECTOR_SORT_LIST(0)
+
+;本体部分の表示
+$SHOW_LOOP
+
+VARSET 表示位置
+VARSET キャラカウンタ
+
+表示開始位置 = (表示ページ - 1) * 40
+表示終了位置 = 表示ページ * 40
+
+
+FOR LOCAL:0, 0, CHARANUM
+	LOCAL:1 = SHOP_CHARA_LIST:LOCAL
+	SIF LOCAL:1 == -1
+		CONTINUE
+	;表示ロジックにあてはまらないなら飛ばす
+	CALLFORM SELECT_CHARA_LIST_SHOW_LOGIC_%表示関数名%(LOCAL:1)
+	SIF !RESULT
+		CONTINUE
+	IF 表示開始位置 <= キャラカウンタ && キャラカウンタ < 表示終了位置
+		IF 表示位置 % 2 != 0
+			PRINT   
+		ELSEIF 表示位置 > 0
+			PRINTL 
+		ENDIF
+		;選択ロジックに当てはまるキャラだけ通常表示
+		;あてはまらなければ灰色表示
+		CALLFORM SELECT_CHARA_LIST_SELECT_LOGIC_%選択関数名%(LOCAL:1)
+		IF RESULT
+			CALLFORM SELECT_CHARA_LIST_COLOR_LOGIC_%色指定関数名%(LOCAL:1)
+			CALL COLOR_PRINT(@"[{LOCAL:1 + 99, 4}]%SNAME(LOCAL:1), MAX_CHARANAME_LENGTH/2, RIGHT%", RESULT)
+			PRINTFORM %TOSTR_SPACE(1)%
+			FOR LOCAL:2, 0, VARSIZE("表示数値")
+				IF 表示数値:(LOCAL:2) != -1
+					SELECTCASE 表示数値:(LOCAL:2)
+						CASE GETNUM(ABL, "武闘"), GETNUM(ABL, "防衛"), GETNUM(ABL, "知略"), GETNUM(ABL, "政治"), GETNUM(ABL, "妖術"), GETNUM(ABL, "料理"), GETNUM(ABL, "歌唱")
+							ランク種別 = ランク_ＳＬＧ
+						CASE GETNUM(ABL, "性知識")
+							ランク種別 = ランク_性知識
+						CASEELSE
+							ランク種別 = ランク_その他
+					ENDSELECT
+					CALL PRINT_ALPHABET_RANK(ランク種別, ABL:(LOCAL:1):(表示数値:(LOCAL:2)))
+					PRINTFORM {ABL:(LOCAL:1):(表示数値:(LOCAL:2)), 3}
+					SIF LOCAL:2 != VARSIZE("表示数値") -1
+						PRINT |
+				ELSE
+					PRINTFORM %TOSTR_SPACE(5)%
+				ENDIF
+			NEXT
+			PRINTBUTTON " 情", LOCAL:1 + 10099
+		ELSE
+			LOCALS:0 = [{NO:(LOCAL:1) + 99, 4}]%SNAME(LOCAL:1), MAX_CHARANAME_LENGTH/2, RIGHT%%TOSTR_SPACE(1)%
+			FOR LOCAL:2, 0, VARSIZE("表示数値")
+				IF 表示数値:(LOCAL:2) != -1
+					SELECTCASE 表示数値:(LOCAL:2)
+						CASE GETNUM(ABL, "武闘"), GETNUM(ABL, "防衛"), GETNUM(ABL, "知略"), GETNUM(ABL, "政治"), GETNUM(ABL, "妖術"), GETNUM(ABL, "料理"), GETNUM(ABL, "歌唱")
+							ランク種別 = ランク_ＳＬＧ
+						CASE GETNUM(ABL, "性知識")
+							ランク種別 = ランク_性知識
+						CASEELSE
+							ランク種別 = ランク_その他
+					ENDSELECT
+					LOCALS:0 = %LOCALS:0%%ALPHABET_RANK(ランク種別, ABL:(LOCAL:1):(表示数値:(LOCAL:2)))%{ABL:(LOCAL:1):(表示数値:(LOCAL:2)), 3}
+					SIF LOCAL:2 != VARSIZE("表示数値") -1
+						LOCALS:0 = %LOCALS:0%|
+				ELSE
+					LOCALS:0 = %LOCALS:0%%TOSTR_SPACE(5)%
+				ENDIF
+			NEXT
+			SETCOLOR カラー_選択不可
+			PRINTPLAINFORM %LOCALS:0%
+			PRINTPLAINFORM    
+			RESETCOLOR
+		ENDIF
+		表示位置 ++
+	ENDIF
+	キャラカウンタ ++
+NEXT
+
+PRINTL 
+CALL COLOR_LINE
+
+;フッタ部分
+IF 総ページ数 >= 2
+	PRINT [  1] 最初のページ    
+	PRINT [  2] 前のページ        
+	PRINTPLAINFORM ページ{表示ページ}/{総ページ数}        
+	PRINT [  8] 後のページ    
+	PRINT [  9] 最後のページ
+	PRINTL 
+	CALL COLOR_LINE
+ENDIF
+PRINTBUTTON "<<", 20000
+PRINT  
+PRINTBUTTON @"[%STR_NOW_SORTKEY:ソートキー, 4, LEFT%]", 20001
+PRINT  
+PRINTBUTTON ">>", 20002
+PRINT  
+PRINTBUTTON @"[\@ 降順ソート ? 降順 # 昇順\@]", 20003
+PRINTL
+CALL SINGLE_DRAWLINE
+PRINTL [  0] やっぱりやめる
+
+REDRAW 0
+
+
+$INPUT_LOOP
+INPUT
+IF RESULT == 1
+	表示ページ = 1
+	CLEARLINE LINECOUNT - FIRST_LINE
+	GOTO SHOW_LOOP
+ELSEIF RESULT == 2
+	表示ページ = ROUND_DECREMENT(表示ページ, 1, 総ページ数)
+	CLEARLINE LINECOUNT - FIRST_LINE
+	GOTO SHOW_LOOP
+ELSEIF RESULT == 8
+	表示ページ = ROUND_INCREMENT(表示ページ, 1, 総ページ数)
+	CLEARLINE LINECOUNT - FIRST_LINE
+	GOTO SHOW_LOOP
+ELSEIF RESULT == 9
+	表示ページ = 総ページ数
+	CLEARLINE LINECOUNT - FIRST_LINE
+	GOTO SHOW_LOOP
+ELSEIF RESULT == 0
+	REDRAW 1
+	RETURN -1
+ELSEIF RESULT == 20000
+	ソートキー = ROUND_DECREMENT(ソートキー, 0, NUM_SORTKEY - 1)
+	CALL CREATE_SELECTOR_SORT_LIST(0)
+	CLEARLINE LINECOUNT - FIRST_LINE
+	GOTO SHOW_LOOP
+ELSEIF RESULT == 20001
+	CALL SINGLE_DRAWLINE
+	FOR LOCAL, 0, NUM_SORTKEY
+		PRINTFORML [{LOCAL}] %STR_NOW_SORTKEY:LOCAL%
+	NEXT
+	INPUT
+	SIF INRANGE(RESULT, 0, NUM_SORTKEY - 1)
+		ソートキー = RESULT
+	CALL CREATE_SELECTOR_SORT_LIST(0)
+	CLEARLINE LINECOUNT - FIRST_LINE
+	GOTO SHOW_LOOP
+ELSEIF RESULT == 20002
+	ソートキー = ROUND_INCREMENT(ソートキー, 0, NUM_SORTKEY - 1)
+	CALL CREATE_SELECTOR_SORT_LIST(0)
+	CLEARLINE LINECOUNT - FIRST_LINE
+	GOTO SHOW_LOOP
+ELSEIF RESULT == 20003
+	降順ソート = !降順ソート
+	CALL CREATE_SELECTOR_SORT_LIST(0)
+	CLEARLINE LINECOUNT - FIRST_LINE
+	GOTO SHOW_LOOP
+ENDIF
+
+;ガード節・特殊ボタン
+IF RESULT >= 10099
+	対象 = RESULT - 10099
+	IF 対象 > CHARANUM || 対象 < 0
+		CLEARLINE 1
+		GOTO INPUT_LOOP
+	ENDIF
+	CALLFORM SELECT_CHARA_LIST_SHOW_LOGIC_%表示関数名%(対象)
+	IF !RESULT
+		CLEARLINE 1
+		GOTO INPUT_LOOP
+	ENDIF
+	CALLFORM SELECT_CHARA_LIST_SELECT_LOGIC_%選択関数名%(対象)
+	IF !RESULT
+		CLEARLINE 1
+		GOTO INPUT_LOOP
+	ENDIF
+	FOR LOCAL, 0, CHARANUM
+		SIF SHOP_CHARA_LIST:LOCAL == -1
+			CONTINUE
+		CALLFORM SELECT_CHARA_LIST_SHOW_LOGIC_%表示関数名%(SHOP_CHARA_LIST:LOCAL)
+		SIF RESULT
+			CALLFORM SELECT_CHARA_LIST_SELECT_LOGIC_%選択関数名%(SHOP_CHARA_LIST:LOCAL)
+		SIF RESULT
+			CONTINUE
+		SHOP_CHARA_LIST:LOCAL = -1
+	NEXT
+	CALL SHOW_INFO_WITH_UI(対象, 1)
+	CALL CREATE_SELECTOR_SORT_LIST(0)
+	CLEARLINE LINECOUNT - FIRST_LINE
+	GOTO SHOW_LOOP
+ENDIF
+
+;入力本体
+対象 = RESULT - 99
+IF 対象 > CHARANUM || 対象 < 0
+	CLEARLINE 1
+	GOTO INPUT_LOOP
+ENDIF
+CALLFORM SELECT_CHARA_LIST_SHOW_LOGIC_%表示関数名%(対象)
+IF !RESULT
+	CLEARLINE 1
+	GOTO INPUT_LOOP
+ENDIF
+CALLFORM SELECT_CHARA_LIST_SELECT_LOGIC_%選択関数名%(対象)
+IF !RESULT
+	CLEARLINE 1
+	GOTO INPUT_LOOP
+ENDIF
+RETURN 対象
+
+;-------------------------------------------------
+;キャラリスト表示　大まかな使い方はSELECT_CHARA_LISTと同様
+;人数に-1を指定すれば無制限になる
+;選択したキャラはSELECTED_CHARAにぶち込まれる
+;選択した人数はSELECTED_CHARA_NUMにぶち込まれる
+;-------------------------------------------------
+@SELECT_CHARA_LIST_MULTI(人数, 表示関数名="", 選択関数名 = "", 色指定関数名 = "", 表示文字:0 = "", 表示文字:1 = "", 表示文字:2 = "", 表示文字:3 = "", 表示文字:4 = "", 表示文字:5 = "", 表示文字:6 = "")
+#DIMS 表示関数名
+#DIMS 選択関数名
+#DIMS 色指定関数名
+#DIMS 表示文字, 7
+#DIM 表示数値, 7
+#DIM FIRST_LINE
+#DIM 対象
+#DIM 表示位置
+#DIM 表示ページ
+#DIM 総ページ数
+#DIM キャラ数
+#DIM キャラカウンタ
+#DIM 選択フラグ, VARSIZE("SELECTED_CHARA")
+#DIM 人数
+#DIM 表示開始位置
+#DIM 表示終了位置
+#DIM ランク種別
+#DIM 直前総ページ数
+#DIMS 直前選択関数名
+#DIMS 直前表示関数名
+VARSET 選択フラグ
+VARSET キャラ数
+VARSET 表示数値, -1
+
+VARSET SELECTED_CHARA
+VARSET SELECTED_CHARA_NUM
+
+;ガード節
+TRYCCALLFORM SELECT_CHARA_LIST_SHOW_LOGIC_%表示関数名%(MASTER)
+CATCH
+	THROW 指定された関数SELECT_CHARA_LIST_SHOW_LOGIC_%表示関数名%が存在しません
+ENDCATCH
+
+TRYCCALLFORM SELECT_CHARA_LIST_SELECT_LOGIC_%選択関数名%(MASTER)
+CATCH
+	THROW 指定された関数SELECT_CHARA_LIST_SELECT_LOGIC_%選択関数名%が存在しません
+ENDCATCH
+
+
+;ヘッダ用意
+FOR LOCAL, 0, VARSIZE("表示文字")
+	FOR LOCAL:1, 0, VARSIZE("ABL")
+		SIF ABLNAME:(LOCAL:1) == ""
+			CONTINUE
+		IF 表示文字:LOCAL == ABLNAME:(LOCAL:1)
+			表示文字:LOCAL = %TOSTR_SPACE(2)%%SUBSTRINGU(ABLNAME:(LOCAL:1), 0, 1)%\@ LOCAL == VARSIZE("表示文字") - 1 ?   # | \@
+			表示数値:LOCAL = LOCAL:1
+			BREAK
+		ENDIF
+	NEXT
+	SIF LOCAL:1 == VARSIZE("ABL")
+		表示文字:LOCAL = %TOSTR_SPACE(5)%
+NEXT
+
+;ページ数計算
+FOR LOCAL, 0, CHARANUM
+	CALLFORM SELECT_CHARA_LIST_SHOW_LOGIC_%表示関数名%(LOCAL)
+	SIF RESULT
+		キャラ数 ++
+NEXT
+
+総ページ数 = (キャラ数 - 1) / 40 + 1
+
+;直前の呼び出しとページ数、表示する関数、選択する関数名が同一であれば連続した呼び出しと判断しページを切り替えない
+SIF 総ページ数 != 直前総ページ数 || 表示関数名 != 直前表示関数名 || 選択関数名 != 直前選択関数名
+	表示ページ = 1
+
+直前総ページ数  = 総ページ数
+直前表示関数名 '= 表示関数名
+直前選択関数名 '= 選択関数名
+
+;ヘッダ描画
+PRINTFORM %TOSTR_SPACE(15)%
+FOR LOCAL:1, 0, VARSIZE("表示文字")
+	PRINTFORM %表示文字:(LOCAL:1)%
+NEXT
+PRINTFORM %TOSTR_SPACE(20)%
+FOR LOCAL:1, 0, VARSIZE("表示文字")
+	PRINTFORM %表示文字:(LOCAL:1)%
+NEXT
+
+;ここから本体
+PRINTL
+FIRST_LINE = LINECOUNT
+
+CALL CREATE_SELECTOR_SORT_LIST(0)
+
+$SHOW_LOOP
+
+VARSET 表示位置
+VARSET キャラカウンタ
+表示開始位置 = (表示ページ - 1) * 40
+表示終了位置 = 表示ページ * 40
+
+
+FOR LOCAL:0, 0, CHARANUM
+	LOCAL:1 = SHOP_CHARA_LIST:LOCAL
+	SIF LOCAL:1 == -1
+		CONTINUE
+	CALLFORM SELECT_CHARA_LIST_SHOW_LOGIC_%表示関数名%(LOCAL:1)
+	SIF !RESULT
+		CONTINUE
+	IF 表示開始位置 <= キャラカウンタ && キャラカウンタ < 表示終了位置
+		IF 表示位置 % 2 != 0
+			PRINT   
+		ELSEIF 表示位置 > 0
+			PRINTL 
+		ENDIF
+		CALLFORM SELECT_CHARA_LIST_SELECT_LOGIC_%選択関数名%(LOCAL:1)
+		IF RESULT	
+			IF 選択フラグ:(LOCAL:1)
+				SETCOLOR カラー_選択中
+			ELSE
+				CALLFORM SELECT_CHARA_LIST_COLOR_LOGIC_%色指定関数名%(LOCAL:1)
+				SETCOLOR RESULT
+			ENDIF
+			PRINTFORM [{LOCAL:1 + 99, 4}]%SNAME(LOCAL:1), MAX_CHARANAME_LENGTH/2, RIGHT%
+			RESETCOLOR
+			PRINTFORM %TOSTR_SPACE(1)%
+			FOR LOCAL:2, 0, VARSIZE("表示数値")
+				IF 表示数値:(LOCAL:2) != -1
+					SELECTCASE 表示数値:(LOCAL:2)
+						CASE GETNUM(ABL, "武闘"), GETNUM(ABL, "防衛"), GETNUM(ABL, "知略"), GETNUM(ABL, "政治"), GETNUM(ABL, "妖術"), GETNUM(ABL, "料理"), GETNUM(ABL, "歌唱")
+							ランク種別 = ランク_ＳＬＧ
+						CASE GETNUM(ABL, "性知識")
+							ランク種別 = ランク_性知識
+						CASEELSE
+							ランク種別 = ランク_その他
+					ENDSELECT
+					CALL PRINT_ALPHABET_RANK(ランク種別, ABL:(LOCAL:1):(表示数値:(LOCAL:2)))
+					PRINTFORM {ABL:(LOCAL:1):(表示数値:(LOCAL:2)), 3}
+					SIF LOCAL:2 != VARSIZE("表示数値") -1
+						PRINT |
+				ELSE
+					PRINTFORM %TOSTR_SPACE(5)%
+				ENDIF
+			NEXT
+			PRINTBUTTON " 情", LOCAL:1 + 10099
+		ELSE
+			LOCALS:0 = [{NO:(LOCAL:1) + 99, 4}]%SNAME(LOCAL:1), MAX_CHARANAME_LENGTH/2, RIGHT%%TOSTR_SPACE(1)%
+			FOR LOCAL:2, 0, VARSIZE("表示数値")
+				IF 表示数値:(LOCAL:2) != -1
+					SELECTCASE 表示数値:(LOCAL:2)
+						CASE GETNUM(ABL, "武闘"), GETNUM(ABL, "防衛"), GETNUM(ABL, "知略"), GETNUM(ABL, "政治"), GETNUM(ABL, "妖術"), GETNUM(ABL, "料理"), GETNUM(ABL, "歌唱")
+							ランク種別 = ランク_ＳＬＧ
+						CASE GETNUM(ABL, "性知識")
+							ランク種別 = ランク_性知識
+						CASEELSE
+							ランク種別 = ランク_その他
+					ENDSELECT
+					LOCALS:0 = %LOCALS:0%%ALPHABET_RANK(ランク種別, ABL:(LOCAL:1):(表示数値:(LOCAL:2)))%{ABL:(LOCAL:1):(表示数値:(LOCAL:2)), 3}
+					SIF LOCAL:2 != VARSIZE("表示数値") -1
+						LOCALS:0 = %LOCALS:0%|
+				ELSE
+					LOCALS:0 = %LOCALS:0%%TOSTR_SPACE(5)%
+				ENDIF
+			NEXT
+			SETCOLOR カラー_選択不可
+			PRINTPLAINFORM %LOCALS:0%
+			PRINTPLAINFORM    
+			RESETCOLOR
+		ENDIF
+		表示位置 ++
+	ENDIF
+	キャラカウンタ ++
+NEXT
+
+;フッタ描画
+PRINTL 
+CALL SINGLE_DRAWLINE
+
+IF 総ページ数 >= 2
+	PRINT [  1] 最初のページ    
+	PRINT [  2] 前のページ        
+	PRINTPLAINFORM ページ{表示ページ}/{総ページ数}        
+	PRINT [  8] 後のページ    
+	PRINT [  9] 最後のページ
+	PRINTL 
+	CALL COLOR_LINE
+ENDIF
+
+IF 人数 != -1
+	PRINTFORM {MATCH(選択フラグ, 1)} / {人数}    
+ELSE
+	PRINTFORM [97] 全員設定
+	PRINTPLAIN    
+	PRINTFORM [98] 全員解除
+	PRINTL
+ENDIF
+CALL COLOR_LINE
+PRINTBUTTON "<<", 20000
+PRINT  
+PRINTBUTTON @"[%STR_NOW_SORTKEY:ソートキー, 4, LEFT%]", 20001
+PRINT  
+PRINTBUTTON ">>", 20002
+PRINT  
+PRINTBUTTON @"[\@ 降順ソート ? 降順 # 昇順\@]", 20003
+PRINTL
+CALL SINGLE_DRAWLINE
+PRINTL [  0] これでよし
+
+REDRAW 0
+
+;入力
+$INPUT_LOOP
+INPUT
+
+;ガード節・特殊処理
+IF RESULT == 1
+	表示ページ = 1
+	CLEARLINE LINECOUNT - FIRST_LINE
+	GOTO SHOW_LOOP
+ELSEIF RESULT == 2
+	表示ページ = ROUND_DECREMENT(表示ページ, 1, 総ページ数)
+	CLEARLINE LINECOUNT - FIRST_LINE
+	GOTO SHOW_LOOP
+ELSEIF RESULT == 8
+	表示ページ = ROUND_INCREMENT(表示ページ, 1, 総ページ数)
+	CLEARLINE LINECOUNT - FIRST_LINE
+	GOTO SHOW_LOOP
+ELSEIF RESULT == 9
+	表示ページ = 総ページ数
+	CLEARLINE LINECOUNT - FIRST_LINE
+	GOTO SHOW_LOOP
+ELSEIF RESULT == 97 && 人数 == -1
+	FOR LOCAL, 0, CHARANUM
+		CALLFORM SELECT_CHARA_LIST_SHOW_LOGIC_%表示関数名%(LOCAL)
+		SIF !RESULT
+			CONTINUE
+		CALLFORM SELECT_CHARA_LIST_SELECT_LOGIC_%選択関数名%(LOCAL)
+		SIF !RESULT
+			CONTINUE
+		選択フラグ:LOCAL = 1
+	NEXT
+	CLEARLINE LINECOUNT - FIRST_LINE
+	GOTO SHOW_LOOP
+ELSEIF RESULT == 98 && 人数 == -1
+	VARSET 選択フラグ
+	CLEARLINE LINECOUNT - FIRST_LINE
+	GOTO SHOW_LOOP
+ELSEIF RESULT == 0
+	REDRAW 1
+	FOR LOCAL, 0, VARSIZE("SELECTED_CHARA")
+		IF 選択フラグ:LOCAL
+			SELECTED_CHARA:SELECTED_CHARA_NUM = LOCAL
+			SELECTED_CHARA_NUM ++
+		ENDIF
+	NEXT
+	RETURN
+ELSEIF RESULT == 20000
+	ソートキー = ROUND_DECREMENT(ソートキー, 0, NUM_SORTKEY - 1)
+	CALL CREATE_SELECTOR_SORT_LIST(0)
+	CLEARLINE LINECOUNT - FIRST_LINE
+	GOTO SHOW_LOOP
+ELSEIF RESULT == 20001
+	CALL SINGLE_DRAWLINE
+	FOR LOCAL, 0, NUM_SORTKEY
+		PRINTFORML [{LOCAL}] %STR_NOW_SORTKEY:LOCAL, 4, LEFT%
+	NEXT
+	INPUT
+	SIF INRANGE(RESULT, 0, NUM_SORTKEY - 1)
+		ソートキー = RESULT
+	CALL CREATE_SELECTOR_SORT_LIST(0)
+	CLEARLINE LINECOUNT - FIRST_LINE
+	GOTO SHOW_LOOP
+ELSEIF RESULT == 20002
+	ソートキー = ROUND_INCREMENT(ソートキー, 0, NUM_SORTKEY - 1)
+	CALL CREATE_SELECTOR_SORT_LIST(0)
+	CLEARLINE LINECOUNT - FIRST_LINE
+	GOTO SHOW_LOOP
+ELSEIF RESULT == 20003
+	降順ソート = !降順ソート
+	CALL CREATE_SELECTOR_SORT_LIST(0)
+	CLEARLINE LINECOUNT - FIRST_LINE
+	GOTO SHOW_LOOP
+ENDIF
+
+IF RESULT >= 10099
+	対象 = RESULT - 10099
+	IF 対象 > CHARANUM || 対象 < 0
+		CLEARLINE 1
+		GOTO INPUT_LOOP
+	ENDIF
+	CALLFORM SELECT_CHARA_LIST_SHOW_LOGIC_%表示関数名%(対象)
+	IF !RESULT
+		CLEARLINE 1
+		GOTO INPUT_LOOP
+	ENDIF
+	CALLFORM SELECT_CHARA_LIST_SELECT_LOGIC_%選択関数名%(対象)
+	IF !RESULT
+		CLEARLINE 1
+		GOTO INPUT_LOOP
+	ENDIF
+	FOR LOCAL, 0, CHARANUM
+		SIF SHOP_CHARA_LIST:LOCAL == -1
+			CONTINUE
+		CALLFORM SELECT_CHARA_LIST_SHOW_LOGIC_%表示関数名%(SHOP_CHARA_LIST:LOCAL)
+		SIF RESULT
+			CALLFORM SELECT_CHARA_LIST_SELECT_LOGIC_%選択関数名%(SHOP_CHARA_LIST:LOCAL)
+		SIF RESULT
+			CONTINUE
+		SHOP_CHARA_LIST:LOCAL = -1
+	NEXT
+	CALL SHOW_INFO_WITH_UI(対象, 1)
+	CALL CREATE_SELECTOR_SORT_LIST(0)
+	CLEARLINE LINECOUNT - FIRST_LINE
+	GOTO SHOW_LOOP
+ENDIF
+
+;入力
+対象 = RESULT - 99
+IF 対象 > CHARANUM || 対象 < 0
+	CLEARLINE 1
+	GOTO INPUT_LOOP
+ENDIF
+
+IF 選択フラグ:対象
+	選択フラグ:対象 = 0
+	CLEARLINE LINECOUNT - FIRST_LINE
+	GOTO SHOW_LOOP
+ENDIF
+
+CALLFORM SELECT_CHARA_LIST_SHOW_LOGIC_%表示関数名%(対象)
+IF !RESULT
+	CLEARLINE 1
+	GOTO INPUT_LOOP
+ENDIF
+CALLFORM SELECT_CHARA_LIST_SELECT_LOGIC_%選択関数名%(対象)
+IF !RESULT
+	CLEARLINE 1
+	GOTO INPUT_LOOP
+ENDIF
+IF 選択フラグ:対象 == 0
+	SIF (人数 != -1 && MATCH(選択フラグ, 1) < 人数) || 人数 == -1
+		選択フラグ:対象 = 1
+	CLEARLINE LINECOUNT - FIRST_LINE
+	GOTO SHOW_LOOP
+ENDIF
+
+CLEARLINE 1
+GOTO INPUT_LOOP
+
+;-------------------------------------------------
+;キャラリスト表示用の汎用関数の表示ロジック
+;-------------------------------------------------
+@SELECT_CHARA_LIST_SHOW_LOGIC_DEFAULT(対象)
+#DIM 対象
+;育児対象,別勢力,放浪,脂肪,未登場,動物をはじく
+SIF CFLAG:対象:行動不能状態 == 行動不能_子供
+	RETURN 0
+SIF CFLAG:対象:所属 != CFLAG:MASTER:所属
+	RETURN 0
+SIF GROUPMATCH(CFLAG:対象:特殊状態, 1, 2)
+	RETURN 0
+SIF CFLAG:対象:特殊状態 == 0 && !IS_COUNTRY(CFLAG:対象:所属)
+	RETURN 0
+SIF IS_ANIMAL(対象)
+	RETURN 0
+RETURN 1
+
+@SELECT_CHARA_LIST_SHOW_LOGIC_NONE(対象)
+#DIM 対象
+RETURN 1
+
+;-------------------------------------------------
+;キャラリスト表示用の汎用関数の洗濯用ロジック
+;-------------------------------------------------
+@SELECT_CHARA_LIST_SELECT_LOGIC_DEFAULT(対象)
+#DIM 対象
+;捕虜をはじく
+SIF CFLAG:対象:捕虜先
+	RETURN 0
+RETURN 1
+
+@SELECT_CHARA_LIST_SELECT_LOGIC_NONE(対象)
+#DIM 対象
+RETURN 1
+
+@SELECT_CHARA_LIST_COLOR_LOGIC_DEFAULT(対象)
+#DIM 対象
+RETURN GETDEFCOLOR()
+
+;-------------------------------------------------
+;キャラリスト表示用の汎用関数 能力表示SLG版
+;-------------------------------------------------
+@SELECT_CHARA_LIST_SLG()
+CALL SELECT_CHARA_LIST("DEFAULT", "DEFAULT", "DEFAULT", "武闘", "防衛", "知略", "政治", "妖術", "歌唱", "料理")
+RETURN RESULT
+
+@SELECT_CHARA_LIST_ONLY_LOGIC_SLG(表示関数名, 選択関数名, 色指定関数名 = "DEFAULT")
+#DIMS 表示関数名
+#DIMS 選択関数名
+#DIMS 色指定関数名
+CALL SELECT_CHARA_LIST(表示関数名, 選択関数名, 色指定関数名, "武闘", "防衛", "知略", "政治", "妖術", "歌唱", "料理")
+RETURN RESULT
+
+;-------------------------------------------------
+;キャラリスト表示用の汎用関数 能力表示すけべ版
+;-------------------------------------------------
+@SELECT_CHARA_LIST_SEX()
+CALL SELECT_CHARA_LIST("DEFAULT", "DEFAULT", "DEFAULT", "Ｃ感", "Ｖ感", "Ｂ感", "Ａ感", "Ｍ感", "Ｕ感", "欲望")
+RETURN RESULT
+
+@SELECT_CHARA_LIST_ONLY_LOGIC_SEX(表示関数名, 選択関数名, 色指定関数名 = "DEFAULT")
+#DIMS 表示関数名
+#DIMS 選択関数名
+#DIMS 色指定関数名
+CALL SELECT_CHARA_LIST(表示関数名, 選択関数名, 色指定関数名,  "Ｃ感", "Ｖ感", "Ｂ感", "Ａ感", "Ｍ感", "Ｕ感", "欲望")
+RETURN RESULT
+
+
+;-------------------------------------------------
+;キャラリスト表示用の汎用関数 マルチ版SLG
+;-------------------------------------------------
+@SELECT_CHARA_LIST_MULTI_SLG(人数)
+#DIM 人数
+CALL SELECT_CHARA_LIST_MULTI(人数, "DEFAULT", "DEFAULT", "DEFAULT", "武闘", "防衛", "知略", "政治", "妖術", "歌唱", "料理")
+
+@SELECT_CHARA_LIST_MULTI_ONLY_LOGIC_SLG(人数, 表示関数名, 選択関数名, 色指定関数名 = "DEFAULT")
+#DIM 人数
+#DIMS 表示関数名
+#DIMS 選択関数名
+#DIMS 色指定関数名
+CALL SELECT_CHARA_LIST_MULTI(人数, 表示関数名, 選択関数名, 色指定関数名,  "武闘", "防衛", "知略", "政治", "妖術", "歌唱", "料理")
+
+;-------------------------------------------------
+;キャラリスト表示用の汎用関数 マルチ版すけべ
+;-------------------------------------------------
+@SELECT_CHARA_LIST_MULTI_SEX(人数)
+#DIM 人数
+CALL SELECT_CHARA_LIST_MULTI(人数, "DEFAULT", "DEFAULT", "DEFAULT", "Ｃ感", "Ｖ感", "Ｂ感", "Ａ感", "Ｍ感", "Ｕ感", "欲望")
+
+@SELECT_CHARA_LIST_MULTI_ONLY_LOGIC_SEX(人数, 表示関数名, 選択関数名, 色指定関数名 = "DEFAULT")
+#DIM 人数
+#DIMS 表示関数名
+#DIMS 選択関数名
+#DIMS 色指定関数名
+CALL SELECT_CHARA_LIST_MULTI(人数, 表示関数名, 選択関数名, 色指定関数名,  "Ｃ感", "Ｖ感", "Ｂ感", "Ａ感", "Ｍ感", "Ｕ感", "欲望")
+

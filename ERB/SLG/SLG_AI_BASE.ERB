@@ -1,0 +1,121 @@
+﻿;-------------------------------------------------
+;AIの行動値設定
+;-------------------------------------------------
+@AI_BASE_SETTING
+
+;各AIの相性を設定（通常、好戦、防衛、外交、内政、蛮行、ホフの順）
+AI_RELATION:AI_通常:0         =  95, 100, 110,  90, 100, 100, 100
+AI_RELATION:AI_好戦:0         = 100, 120,  90,  75, 100,  80,  90
+AI_RELATION:AI_防衛:0         = 100,  75, 110, 100, 110,  70,  85
+AI_RELATION:AI_外交:0         =  90, 110,  90,  75, 110,  50,  70
+AI_RELATION:AI_内政:0         = 110,  80, 100,  90, 110,  80,  90
+AI_RELATION:AI_蛮行:0         =  70,  70,  70,  70,  70,  70,  70
+AI_RELATION:AI_ホフゴブリン:0 =  90,  90,  90,  90,  90,  90,  90
+
+;AI毎の重要視する能力の重さ（比較時の倍率）
+AI_PRIORITY:AI_通常:0 =         100, 100, 100, 100, 80
+AI_PRIORITY:AI_好戦:0 =         100,  70,  40,  50, 80
+AI_PRIORITY:AI_防衛:0 =          70, 100,  90,  80, 80
+AI_PRIORITY:AI_外交:0 =          60,  80, 100,  90, 80
+AI_PRIORITY:AI_内政:0 =         100, 100,  90,  80, 80
+AI_PRIORITY:AI_蛮行:0 =         100,  80,  20,  60, 80
+AI_PRIORITY:AI_ホフゴブリン:0 = 100,  60,  40,  40, 80
+
+;部隊編成時に編成候補から除外する武将の政治力割合（全体に対する割合がこの値以上であれば除外）
+AI_POLITICAL_LIMIT:AI_通常 = 25
+AI_POLITICAL_LIMIT:AI_好戦 = 50
+AI_POLITICAL_LIMIT:AI_防衛 = 20
+AI_POLITICAL_LIMIT:AI_外交 = 30
+AI_POLITICAL_LIMIT:AI_内政 = 25
+AI_POLITICAL_LIMIT:AI_蛮行 = 40
+AI_POLITICAL_LIMIT:AI_ホフゴブリン = 30
+
+
+;AI毎の政策優先度
+;防衛、経済、徴兵
+AI_POLICY_PRIORITY:AI_通常:0 =         100, 100, 100
+AI_POLICY_PRIORITY:AI_好戦:0 =         100,  80, 130
+AI_POLICY_PRIORITY:AI_防衛:0 =         120,  90, 100
+AI_POLICY_PRIORITY:AI_外交:0 =         100, 110, 100
+AI_POLICY_PRIORITY:AI_内政:0 =         100, 130,  90
+AI_POLICY_PRIORITY:AI_蛮行:0 =          60,  60, 150
+AI_POLICY_PRIORITY:AI_ホフゴブリン:0 =  70, 130, 130
+
+;AI毎の侵攻判断
+;第1引数 AIタイプ
+;第2引数 判断に用いるパラメータ 0:防衛を100としたとき攻撃をどれだけ優先するか, 1:最低数 2:最大数 3:許容疲労度
+AI_ARMY_PROPERTY:AI_通常:0 =         100, 2500, 100000, 15
+AI_ARMY_PROPERTY:AI_好戦:0 =         130, 1500, 100000, 20
+AI_ARMY_PROPERTY:AI_防衛:0 =          70, 3000, 100000, 10
+AI_ARMY_PROPERTY:AI_外交:0 =          90, 4000, 100000, 10
+AI_ARMY_PROPERTY:AI_内政:0 =          80, 2500, 100000, 10
+AI_ARMY_PROPERTY:AI_蛮行:0 =         150, 1000, 100000, 20
+AI_ARMY_PROPERTY:AI_ホフゴブリン:0 = 3000, 100000, 30
+
+;AI毎の外交判断
+;第1引数 AIタイプ
+;第2引数 判断に用いるパラメータ 0:行動回数 1,会談時の支払額 2,停戦条約の支払額 3,同盟の支払額
+;支払額は全てパーセント
+;                                         0,  1,  2,   3
+AI_DIPLOMACY_PROPERTY:AI_通常:0 =         3,  3,  10, 20
+AI_DIPLOMACY_PROPERTY:AI_好戦:0 =         2,  5,  15, 30
+AI_DIPLOMACY_PROPERTY:AI_防衛:0 =         4,  8,  15, 25
+AI_DIPLOMACY_PROPERTY:AI_外交:0 =         5,  2,   8, 15
+AI_DIPLOMACY_PROPERTY:AI_内政:0 =         4,  5,  10, 25
+AI_DIPLOMACY_PROPERTY:AI_蛮行:0 =         2, 10,  20, 40
+AI_DIPLOMACY_PROPERTY:AI_ホフゴブリン:0 = 1,  5,  15, 30
+
+;AI毎の緊急徴兵
+;第1引数 AIタイプ
+;第2引数 徴兵について 0:雇用上限(本来徴兵で集められる数に対する%), 1:保管しておく国庫(%) 2:保管しておく国庫(%)、勢力の星が少ない（弱い）とき
+AI_DEPLOY:AI_通常:0 =         150, 50, 20
+AI_DEPLOY:AI_好戦:0 =         200, 20, 0
+AI_DEPLOY:AI_防衛:0 =         130, 70, 20
+AI_DEPLOY:AI_外交:0 =         110, 80, 40
+AI_DEPLOY:AI_内政:0 =         150, 80, 40
+;この二つはだいたい特殊勢力用
+AI_DEPLOY:AI_蛮行:0 =         300, 10, 0
+AI_DEPLOY:AI_ホフゴブリン:0 = 150, 10, 0
+
+;第1引数 AIタイプ
+;第2引数 判断に用いるパラメータ 0:投資する都市数 1,支払合計額割合 2,支払合計額上限
+;                                      0 , 1  , 2
+AI_INVEST_PROPERTY:AI_通常:0 =         3 , 30 , 10000
+AI_INVEST_PROPERTY:AI_好戦:0 =         2 , 20 , 7000
+AI_INVEST_PROPERTY:AI_防衛:0 =         4 , 40 , 15000
+AI_INVEST_PROPERTY:AI_外交:0 =         5 , 40 , 20000
+AI_INVEST_PROPERTY:AI_内政:0 =         5 , 50 , 30000
+AI_INVEST_PROPERTY:AI_蛮行:0 =         1 , 10 , 5000
+AI_INVEST_PROPERTY:AI_ホフゴブリン:0 = 1 , 5  , 5000
+
+
+;第1引数 AIタイプ
+;第2引数 判断に用いるパラメータ 0: 建設費用の国庫に占める割合がこれ以下なら建設 
+;1: どのレベルまで敵と隣接した都市まで建てるか 0,安全 1,警戒 2,危険
+;2: 都市の数がこれ以下なら弓櫓を最優先する
+
+AI_DEVELOPMENT_PROPERTY:AI_通常:0 =         30 ,  1, 1
+AI_DEVELOPMENT_PROPERTY:AI_好戦:0 =         20 ,  2, 2
+AI_DEVELOPMENT_PROPERTY:AI_防衛:0 =         40 ,  0, 2
+AI_DEVELOPMENT_PROPERTY:AI_外交:0 =         30 ,  0, 1
+AI_DEVELOPMENT_PROPERTY:AI_内政:0 =         40 ,  1, 0
+AI_DEVELOPMENT_PROPERTY:AI_蛮行:0 =         10 ,  2, 1
+AI_DEVELOPMENT_PROPERTY:AI_ホフゴブリン:0 = 10 ,  1, 1
+
+;参考
+;合計100になるように割り振る
+;TECHNOLOGY_BATTLE_SKILL   = 0
+;TECHNOLOGY_BATTLE_PASSIVE = 1
+;TECHNOLOGY_DIPLOMACY      = 2
+;TECHNOLOGY_CONSCRIPTION   = 3
+;TECHNOLOGY_TAX            = 4
+;TECHNOLOGY_EMPLOYMENT     = 5
+
+
+AI_TECHNOLOGY_PREFERENCE:AI_通常:0 =  20,  20,  10,  20,  20,  10
+AI_TECHNOLOGY_PREFERENCE:AI_好戦:0 =  40,  40, -20,  30, -20,  10
+AI_TECHNOLOGY_PREFERENCE:AI_防衛:0 =   0,  60,  40,   0,   0,   0
+AI_TECHNOLOGY_PREFERENCE:AI_外交:0 =   0,   0,  80,   0,  20,   0
+AI_TECHNOLOGY_PREFERENCE:AI_内政:0 =   0,   0,  20,   0,  80,   0
+AI_TECHNOLOGY_PREFERENCE:AI_蛮行:0 =  50,  50, -30,  50, -20,   0
+

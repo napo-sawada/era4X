@@ -1,0 +1,784 @@
+﻿;勢力が滅亡した場合や捕縛された場合の処理
+
+;-------------------------------------------------
+;ARG:1勢力がARG:0勢力を滅亡させた時の敗将の処理
+;-------------------------------------------------
+@LOSERS_ACTION(滅亡勢力, 滅ぼした勢力)
+#DIM 滅亡勢力
+#DIM 滅ぼした勢力
+#DIM 滅亡君主
+#DIM 滅ぼした君主
+
+滅亡君主 = GET_COUNTRY_BOSS(滅亡勢力)
+滅ぼした君主 = GET_COUNTRY_BOSS(滅ぼした勢力)
+
+;プレイヤー勢力が特殊勢力に滅ぼされた場合は特殊イベント
+IF 滅亡勢力 == CFLAG:MASTER:所属 && IS_SP_COUNTRY(滅ぼした勢力)
+	TRYCCALLFORM MASTER\CAPTURED_%SP_COUNTRY_NAME_ENG:SP_COUNTRY_TO_CONST(滅ぼした勢力)%(滅ぼした勢力)
+		;プレイヤー勢力の所属キャラ、ないしプレイヤー勢力の捕虜は全て無所属となり、特殊勢力に囚われる
+		FOR LOCAL, 0, CHARANUM
+			IF CFLAG:LOCAL:所属 == 滅亡勢力 || CFLAG:LOCAL:捕虜先 == 滅亡勢力
+				CALL CHANGE_COUNTRY(LOCAL, 0, 1)
+				CALL CAPTURE(LOCAL, 滅ぼした勢力)
+			ENDIF
+		NEXT
+		RETURN 1
+	CATCH
+	ENDCATCH
+ENDIF
+
+;主人公勢力の手で滅亡させた場合
+IF 滅ぼした勢力 == CFLAG:MASTER:所属
+	WAIT
+	PRINTL 
+	PRINTW ………………
+	PRINTW ……
+	PRINTL 
+ENDIF
+
+FOR LOCAL, 0, CHARANUM
+	SIF LOCAL == MASTER
+		CONTINUE
+	SIF CFLAG:LOCAL:所属 != 滅亡勢力
+		CONTINUE
+	SIF !CFLAG:LOCAL:捕虜先
+		CONTINUE
+	SIF CFLAG:LOCAL:捕虜先 == CFLAG:MASTER:所属
+		CONTINUE
+	;特殊勢力の捕虜にはなにもしない(調教堕ち)
+	SIF IS_SP_COUNTRY(CFLAG:LOCAL:捕虜先)
+		CONTINUE
+	;滅亡した勢力自身の捕虜は、TREAT_PRISONERで判断(捕まったキャラとして考える)
+	;現状ではプレイヤー自ら投獄していた場合
+	IF CFLAG:LOCAL:捕虜先 == 滅亡勢力
+		CALL TREAT_PRISONER(LOCAL, 滅亡勢力, 滅ぼした勢力)
+	;他のCPU勢力の捕虜になっていたら登用判定を行う。失敗したら解放・放浪
+	ELSEIF JUDGE_ASSIGN(LOCAL, CFLAG:(LOCAL:0):所属, CFLAG:(LOCAL:0):捕虜先) == 1
+		CALL COLOR_PRINTL(@"囚われていた%ANAME(LOCAL)%は、%ANAME(GET_COUNTRY_BOSS(CFLAG:(LOCAL:0):捕虜先))%に登用された", カラー_注意)
+		CALL CHANGE_COUNTRY(LOCAL, CFLAG:LOCAL:捕虜先, 1)
+	ELSE
+		CALL COLOR_PRINTL(@"%ANAME(GET_COUNTRY_BOSS(CFLAG:(LOCAL:0):捕虜先))%に囚われていた%ANAME(LOCAL)%は解放され、放浪した", カラー_注意)
+		CALL CHANGE_COUNTRY(LOCAL:0, 0, 1)
+	ENDIF
+NEXT
+
+;●まず君主について処理する(主人公を含む)
+;逃走判定
+PRINTFORML ----------君主の逃亡----------
+CALL JUDGE_ESCAPE(滅亡君主, 滅亡勢力, 滅ぼした勢力)
+
+;逃走失敗
+IF RESULT == 1
+	CALL TREAT_PRISONER(滅亡君主, 滅亡勢力, 滅ぼした勢力)
+ENDIF
+
+
+PRINTFORML ----------士官の逃亡----------
+;その他士官(主人公は最後)
+FOR LOCAL:0, 0, CHARANUM
+	SIF CFLAG:LOCAL:所属 != 滅亡勢力 || CFLAG:LOCAL:捕虜先 || LOCAL == 滅亡君主 || LOCAL == MASTER
+		CONTINUE
+	CALL JUDGE_ESCAPE(LOCAL, 滅亡勢力, 滅ぼした勢力)
+	SIF RESULT == 1
+		CALL TREAT_PRISONER(LOCAL, 滅亡勢力, 滅ぼした勢力)
+NEXT
+
+;滅亡した勢力の捕虜の処理
+;滅ぼした側の士官が先
+FOR LOCAL:0, 0, CHARANUM
+	IF CFLAG:(LOCAL:0):捕虜先 == 滅亡勢力 && CFLAG:LOCAL:所属 == 滅ぼした勢力
+		CALL CAPTURE(LOCAL:0, 0)
+		CALL COLOR_PRINTL(@"%ANAME(滅亡君主)%勢力に囚えられていた%ANAME(LOCAL:0)%は、元の勢力に復帰した", カラー_注意)
+	ENDIF
+NEXT
+;第三勢力の士官なら、滅ぼした側が扱いを決定
+FOR LOCAL:0, 0, CHARANUM
+	SIF CFLAG:(LOCAL:0):捕虜先 == 滅亡勢力
+		CALL TREAT_PRISONER(LOCAL, 滅亡勢力, 滅ぼした勢力)
+NEXT
+
+;主人公が士官の場合はラストになる
+IF CFLAG:MASTER:所属 == 滅亡勢力 && MASTER != 滅亡君主
+	IF CFLAG:MASTER:捕虜先
+		CALL CHANGE_COUNTRY(MASTER, 0)
+	ELSE
+		CALL JUDGE_ESCAPE(MASTER, 滅亡勢力, 滅ぼした勢力)
+		SIF RESULT == 1
+			CALL TREAT_PRISONER(MASTER, 滅亡勢力, 滅ぼした勢力)
+	ENDIF
+ENDIF
+
+;これでもなお所属が滅亡勢力のままなら、一気に無所属にする
+FOR LOCAL:0, 0, CHARANUM
+	IF CFLAG:(LOCAL:0):所属 == 滅亡勢力
+		CFLAG:(LOCAL:0):所属 = 0
+	ENDIF
+NEXT
+
+;-------------------------------------------------
+;ARG:2番のキャラの、勢力滅亡時の逃走判定(ARG:0=滅亡した勢力、ARG:1=滅亡させた勢力)
+;ARG:3……0=戦闘中、1=滅亡時
+;-------------------------------------------------
+@JUDGE_ESCAPE(対象, 滅亡勢力, 滅ぼした勢力)
+#DIM 対象
+#DIM 滅亡勢力
+#DIM 滅ぼした勢力
+#DIM 滅亡君主
+#DIM 滅ぼした君主
+#DIM 捕縛率
+
+
+滅亡君主 = GET_COUNTRY_BOSS(滅亡勢力)
+滅ぼした君主 = GET_COUNTRY_BOSS(滅ぼした勢力)
+
+;主人公は逃げられない
+SIF 対象 == MASTER
+	RETURN 1
+
+;主人公勢力が滅ぼし、対象が陥落済み
+IF 滅ぼした勢力 == CFLAG:MASTER:所属 && (IS_LOVER(対象) || IS_SLAVE(対象))
+	CALL KOJO_EVENT(対象, 331)
+	PRINTFORML %ANAME(対象)%は自ら捕縛されにきました
+	RETURN 1
+;むしろ滅ぼした側の方が好き
+ELSEIF REL_LIKE:対象:滅ぼした君主 - REL_LIKE:対象:滅亡君主 > 300 && REL_HATE:対象:滅ぼした君主 - REL_HATE:対象:滅亡君主 < 300
+	IF 滅ぼした勢力 == CFLAG:MASTER:所属
+		CALL KOJO_EVENT(対象, 331)
+		PRINTFORML %ANAME(対象)%は大人しく捕縛されました
+	ELSE
+		PRINTFORML %ANAME(対象)%は捕らえられたようです…
+	ENDIF
+	RETURN 1
+ENDIF
+
+SELECTCASE CONFIG:306
+	CASE 1
+		IF 対象 == 滅亡君主
+			捕縛率 = 0
+		ELSE
+			捕縛率 = 2000
+		ENDIF
+	CASEELSE
+		IF 対象 == 滅亡君主
+			捕縛率 = 1000
+		ELSE
+			捕縛率 = 3000
+		ENDIF
+ENDSELECT
+
+;四能力が高いほど捕縛率への補正が小さくなる（逃げられやすくなる）
+捕縛率 += (6000 - (ABL:対象:武闘 * 2 + ABL:対象:防衛 * 2 + ABL:対象:知略 + ABL:対象:政治) * 10)
+
+;部隊にいないと逃げやすい
+SIF IS_FREE(対象)
+	捕縛率 -= 1000
+
+;イベントキャラは捕まらない
+IF IS_SP_CHARA(対象)
+	捕縛率 = 0
+ELSE
+	SELECTCASE CONFIG:306
+		CASE 1
+			捕縛率 = LIMIT(捕縛率, 0, 6000)
+		CASEELSE
+			捕縛率 = LIMIT(捕縛率, 2000, 9000)
+	ENDSELECT
+	SIF IS_SP_COUNTRY(滅ぼした勢力) && 滅ぼした勢力 != CFLAG:MASTER:所属
+		捕縛率 = SP_COUNTRY_RANK:SP_COUNTRY_TO_CONST(滅ぼした勢力) * 2000
+ENDIF
+
+IF RAND:10000 < 捕縛率
+	IF 滅ぼした勢力 == CFLAG:MASTER:所属
+		CALL KOJO_EVENT(対象, 331)
+		PRINTFORML %ANAME(対象)%を捕縛しました
+	ELSE
+		PRINTFORML %ANAME(対象)%は捕らえられたようです…
+	ENDIF
+	RETURN 1
+ENDIF
+
+PRINTFORML %ANAME(対象)%は逃走したようです…
+;状態フラグを逃走状態に
+CFLAG:対象:特殊状態 = 特殊状態_放浪
+RETURN 0
+
+
+;-------------------------------------------------
+;捕らえた捕虜の扱いを決定する
+;戻り値 0=登用 1=解放 2=投獄 3=処刑
+;-------------------------------------------------
+@TREAT_PRISONER(対象, 敗北勢力, 勝利勢力)
+#DIM 対象
+#DIM 敗北勢力
+#DIM 勝利勢力
+#DIM 敗北君主
+#DIM 勝利君主
+#DIM 友好度
+#DIM 敵対度
+#DIM 要求額
+#DIM 支払限度
+
+勝利君主 = GET_COUNTRY_BOSS(勝利勢力)
+敗北君主 = GET_COUNTRY_BOSS(敗北勢力)
+
+;滅亡させたのが主人公の勢力
+IF 勝利勢力 == CFLAG:MASTER:所属
+	;自動
+	IF GROUPMATCH(CONFIG:301, 1, 2)
+		CALL AUTO_PRISONER_TREATMENT(対象, 敗北勢力, 勝利勢力)
+	;手動
+	ELSE
+		CALL SELECT_PRISONER_TREATMENT(対象, 敗北勢力, 勝利勢力)
+	ENDIF
+	RETURN RESULT
+ENDIF
+
+IF IS_SP_COUNTRY(勝利勢力)
+	IF 対象 == MASTER
+		CALL MASTER_CAPTURED(勝利勢力)
+		RETURN RESULT
+	ENDIF
+	CALL CAPTURE(対象, 勝利勢力)
+	SIF COUNTRY_EVENT_ID:勝利勢力 == SP_COUNTRY_ID:特殊勢力_野盗 && SP_COUNTRY_IS_TRAINED(対象)
+		CALL TREAT_PRISONER_BANDIT(対象)
+	RETURN 2
+ENDIF
+
+;主人公の場合は専用の処理
+IF 対象 == MASTER
+	CALL MASTER_CAPTURED(勝利勢力)
+	RETURN RESULT
+ELSE
+	;主人公以外は登用を試みる
+	SELECTCASE JUDGE_ASSIGN(対象, 敗北勢力, 勝利勢力)
+		CASE 1
+			$ASSIGN_ACCEPT
+			IF 対象 == 敗北君主
+				PRINTFORMW 君主である%ANAME(対象)%は%ANAME(勝利君主)%の前に引きずり出された…
+				PRINTFORMW %ANAME(対象)%は頭を垂れて%ANAME(勝利君主)%に忠誠を誓いました
+			ELSE
+				IF CFLAG:対象:所属 == CFLAG:MASTER:所属
+					SETCOLOR カラー_警告
+					PRINTFORMW %ANAME(対象)%が登用に応じました
+				ELSE
+					SETCOLOR カラー_注意
+					PRINTFORML %ANAME(対象)%は登用に応じたようです
+				ENDIF
+				RESETCOLOR
+			ENDIF
+			CALL CHANGE_COUNTRY(対象, 勝利勢力, 1)
+			RETURN 0
+		CASE 2
+			IF 対象 != 敗北君主
+				要求額 = JUDGE_ASSIGN_REQUIRE_MONEY(対象, 敗北勢力, 勝利勢力)
+				支払限度 = MIN(MONEY:勝利勢力, SCOUT_CALC_PRICE_BASIS(対象) * (1500 + REL_LIKE:勝利君主:対象 - REL_HATE:勝利君主:対象) / 1500)
+				PRINTFORML %ANAME(対象)%は金{要求額}を要求したようです
+				IF 要求額　<= 支払限度
+					MONEY:勝利勢力 -= 要求額
+					PRINTFORML %ANAME(勝利君主)%は受け入れました
+					GOTO ASSIGN_ACCEPT
+				ELSE
+					PRINTFORML %ANAME(勝利君主)%は拒否しました
+				ENDIF
+			ENDIF
+	ENDSELECT
+ENDIF
+
+;登用に失敗
+友好度 = REL_LIKE:勝利君主:対象
+敵対度 = REL_HATE:勝利君主:対象
+
+;好感度が低く敵対値が特に高い場合は処刑(処刑禁止の設定なら処刑しない)
+IF 友好度 < 100 && 敵対度 >= 800 && (CONFIG:304 == 0 || (CONFIG:304 == 2 && !IS_TOHO_CHARA(対象)))
+	;主人公勢力所属
+	IF 敗北勢力 == CFLAG:MASTER:所属
+		SETCOLOR カラー_警告
+		;君主
+		IF 対象 == 敗北君主
+			PRINTFORMW 君主である%ANAME(対象)%は%ANAME(勝利君主)%の前に引きずり出された…
+			PRINTFORMW %ANAME(対象)%にあまり良い感情を持たない%ANAME(勝利君主)%は、躊躇なく部下に%ANAME(対象)%の処刑を命じた
+			PRINTFORMW ………………
+		ELSEIF CFLAG:対象:捕虜先 == 敗北勢力
+			LOCALS:0 = %ANAME(GET_COUNTRY_BOSS(CFLAG:対象:捕虜先))%
+			PRINTFORMW 捕虜となっていた%LOCALS:0%勢力の%ANAME(対象)%は処刑されたようです…
+		ELSE
+			PRINTFORMW %ANAME(対象)%は処刑されたようです…
+		ENDIF
+		RESETCOLOR
+	ELSE
+		CALL COLOR_PRINTL(@"%ANAME(対象)%が処刑されたという報告が入っています", カラー_注意)
+	ENDIF
+	CALL EXECUTION(対象)
+	CFLAG:対象:特殊状態 = 特殊状態_死亡
+	RETURN 3
+;好感度が特に高く敵対値が低い場合は解放
+ELSEIF 友好度 >= 800 && 敵対度 < 100
+	IF 敗北勢力 == CFLAG:MASTER:所属
+		IF 対象 == 敗北君主
+			PRINTFORMW 君主である%ANAME(対象)%は%ANAME(勝利君主)%の前に引きずり出された…
+			PRINTFORMW だが%ANAME(勝利君主)%に%ANAME(対象)%の首を獲る気はないようだ
+			PRINTFORMW %ANAME(対象)%は解放されました
+		ELSEIF CFLAG:対象:捕虜先 == 敗北勢力
+			LOCALS:0 = %ANAME(GET_COUNTRY_BOSS(CFLAG:対象:捕虜先))%
+			PRINTFORMW 捕虜となっていた%LOCALS:0%勢力の%ANAME(対象)%は解放されたようです
+		ELSE
+			PRINTFORMW %ANAME(対象)%は解放されたようです
+		ENDIF
+	ELSE
+		PRINTFORMW %ANAME(対象)%は解放されたようです
+	ENDIF
+	;対象が無所属、ないし所属勢力の都市0（滅亡時）なら放浪させる
+	IF !IS_COUNTRY(CFLAG:対象:所属) || GET_OWN_CITY(CFLAG:対象:所属) == 0
+		SIF CFLAG:対象:捕虜先
+			CALL CAPTURE(対象, 0)
+		CFLAG:対象:特殊状態 = 特殊状態_放浪
+	ELSE
+		;好感度を上昇、敵対値を減少
+		CALL CHANGE_RELATION_O_TO_C(対象, 勝利勢力, 25, -25)
+	ENDIF
+	RETURN 1
+;そうでないなら投獄
+ELSE
+	IF 敗北勢力 == CFLAG:MASTER:所属
+		IF 対象 == 敗北君主
+			PRINTFORMW 君主である%ANAME(対象)%は%ANAME(勝利君主)%の前に引きずり出された…
+			PRINTFORMW だが%ANAME(勝利君主)%に%ANAME(対象)%の首を獲る気はないようだ
+			PRINTFORMW %ANAME(対象)%は投獄されました
+		ELSEIF CFLAG:対象:捕虜先 == 敗北勢力
+			LOCALS:0 = %ANAME(GET_COUNTRY_BOSS(CFLAG:対象:捕虜先))%
+			PRINTFORMW 捕虜となっていた%LOCALS:0%勢力の%ANAME(対象)%は、引き続き投獄されたようです
+		ELSE
+			PRINTFORMW %ANAME(対象)%は投獄されたようです
+		ENDIF
+	ELSE
+		PRINTFORMW %ANAME(対象)%は投獄されたようです
+	ENDIF
+	CALL CAPTURE(対象, 勝利勢力)
+	RETURN 2
+ENDIF
+
+;-------------------------------------------------
+;ARG:2番のキャラの、捕虜としての扱いを手動で決める関数(ARG:0=捕獲されたキャラの勢力、ARG:1=捕獲した勢力)
+;戦闘による捕獲の場合はARG:3に1を設定すること
+;戻り値 0=登用 1=解放 2=投獄 3=処刑
+;-------------------------------------------------
+@SELECT_PRISONER_TREATMENT(対象, 対象勢力, 捕獲勢力)
+#DIM 対象勢力
+#DIM 捕獲勢力
+#DIM 対象
+#DIM 拒否フラグ
+#DIM 要求額
+拒否フラグ = 0
+
+
+$RESELECT_LOOP
+;捕虜の場合
+IF IS_COUNTRY(対象勢力) && CFLAG:対象:捕虜先 == 対象勢力
+	LOCAL:1 = GET_COUNTRY_BOSS(対象勢力)
+	LOCAL:2 = GET_COUNTRY_BOSS(CFLAG:対象:所属)
+	PRINTFORML %LOCAL:1 != -1 ? ANAME(LOCAL:1) + "の" # ""%捕虜となっていた%LOCAL:2 != -1 ? ANAME(LOCAL:2) + "所属の" # ""%%ANAME(対象)%を保護しました
+	PRINTFORML %ANAME(対象)%の処遇を決めて下さい
+ELSE
+	PRINTFORML %ANAME(対象)%の処遇を決めて下さい
+ENDIF
+CALL SHOW_SIMPLE_INFO(対象)
+IF !拒否フラグ
+	PRINTL [0] 登用
+ELSE
+	SETCOLOR カラー_選択不可
+	PRINTPLAIN [0] 登用
+	PRINTL 
+	RESETCOLOR
+ENDIF
+PRINTL [1] 解放
+PRINTL [2] 投獄
+PRINTL [3] 処刑
+PRINTL [4] 軟禁
+
+$INPUT_LOOP
+INPUT
+
+IF RESULT == 0 && !拒否フラグ
+	拒否フラグ = 1
+	;登用に応じるかどうかを判定
+	SELECTCASE JUDGE_ASSIGN(対象, 対象勢力, 捕獲勢力)
+		CASE 1
+			$ACCEPT
+			CALL KOJO_EVENT(対象, 332)
+			PRINTFORMW %ANAME(対象)%を登用しました
+			CALL CHANGE_COUNTRY(対象, 捕獲勢力, 1)
+			;好感度を上昇、敵対値を減少
+			CALL CHANGE_RELATION_O_TO_C(対象, 捕獲勢力, 50, -50)
+		CASE 2
+			要求額 = JUDGE_ASSIGN_REQUIRE_MONEY(対象, 対象勢力,　捕獲勢力)
+			CALL ICPRINT(@"%ANAME(対象)%は金<{要求額}>を要求してきました", "L", カラー_注意)
+			PRINTFORML 現在の所持金:{MONEY}
+			CALL ASK_MULTI_JUDGE("払う", 要求額 <= MONEY, "払わない", 1)
+			IF RESULT == 0
+				MONEY -= 要求額
+				GOTO ACCEPT
+			ENDIF
+			GOTO DENY
+		CASE 0
+			$DENY
+			CALL KOJO_EVENT(対象, 333)
+			PRINTFORMW %ANAME(対象)%は応じる気はないようです…
+			;好感度を上昇、敵対値を減少
+			CALL CHANGE_RELATION_O_TO_C(対象, 捕獲勢力, 50, -50)
+			GOTO RESELECT_LOOP
+	ENDSELECT
+	RETURN 0
+ELSEIF RESULT == 1
+	CALL KOJO_EVENT(対象, 334)
+	PRINTFORMW %ANAME(対象)%を解放しました
+	IF CFLAG:対象:捕虜先 != 0
+		;捕虜設定を解除
+		CALL CAPTURE(対象, 0)
+	ELSE
+		;状態フラグを逃走状態に
+		CFLAG:(対象):特殊状態 = 特殊状態_放浪
+	ENDIF
+
+	;好感度を上昇、敵対値を減少
+	CALL CHANGE_RELATION_O_TO_C(対象, 捕獲勢力, 50, -50)
+	RETURN 1
+
+ELSEIF RESULT == 2
+	CALL KOJO_EVENT(対象, 335)
+	PRINTFORMW %ANAME(対象)%を投獄しました
+	CALL CAPTURE(対象, 捕獲勢力)
+	RETURN 2
+
+ELSEIF RESULT == 4
+	CALL KOJO_EVENT(対象, 335)
+	PRINTFORMW %ANAME(対象)%を軟禁しました
+	CALL CAPTURE(対象, 捕獲勢力)
+	CFLAG:対象:軟禁中 = 1
+	RETURN 4
+
+ELSEIF RESULT == 3
+	CALL KOJO_EVENT(対象, 336)
+	PRINTFORMW ……………………
+	PRINTFORMW ……
+	PRINTFORMW %ANAME(対象)%を処刑しました
+	CALL EXECUTION(対象)
+	CALL CHANGE_COUNTRY(対象, 0, 1, 1)
+	RETURN 3
+ELSE
+	GOTO INPUT_LOOP
+ENDIF
+
+;-------------------------------------------------
+;CONFIG:301が立っているときの、プレイヤー勢力による捕虜の自動処遇
+;ARG:2番のキャラの、捕虜としての扱いを手動で決める関数(ARG:0=捕獲されたキャラの勢力、ARG:1=捕獲した勢力)
+;戦闘による捕獲の場合はARG:3に1を設定すること
+;戻り値 0=登用 1=解放 2=投獄 3=処刑
+;-------------------------------------------------
+@AUTO_PRISONER_TREATMENT(対象, 対象勢力, 捕獲勢力)
+#DIM 対象勢力
+#DIM 捕獲勢力
+#DIM 対象
+
+;登用に応じるかどうかを判定
+IF JUDGE_ASSIGN(対象, 対象勢力, 捕獲勢力) == 1
+	CALL KOJO_EVENT(対象, 332)
+	PRINTFORMW %ANAME(対象)%を登用しました
+	CALL CHANGE_COUNTRY(対象, 捕獲勢力, 1)
+	;好感度を上昇、敵対値を減少
+	CALL CHANGE_RELATION_O_TO_C(対象, 捕獲勢力, 50, -50)
+	RETURN 0
+ENDIF
+
+CALL KOJO_EVENT(対象, 333)
+PRINTFORMW %ANAME(対象)%は登用に応じる気はないようです…
+;好感度を上昇、敵対値を減少
+CALL CHANGE_RELATION_O_TO_C(対象, 捕獲勢力, 50, -50)
+
+IF CONFIG:301 == 1
+	CALL KOJO_EVENT(対象, 334)
+	PRINTFORMW %ANAME(対象)%を解放しました
+	IF CFLAG:対象:捕虜先 != 0
+		;捕虜設定を解除
+		CALL CAPTURE(対象, 0)
+	ELSE
+		;状態フラグを逃走状態に
+		CFLAG:(対象):特殊状態 = 特殊状態_放浪
+	ENDIF
+
+	;好感度を上昇、敵対値を減少
+	CALL CHANGE_RELATION_O_TO_C(対象, 捕獲勢力, 50, -50)
+	RETURN 1
+ELSEIF CONFIG:301 == 2
+	CALL KOJO_EVENT(対象, 335)
+	PRINTFORMW %ANAME(対象)%を投獄しました
+	CALL CAPTURE(対象, 捕獲勢力)
+	RETURN 2
+ENDIF
+
+;-------------------------------------------------
+;主人公がARG:0勢力に捕らえられた場合の処理
+;戻り値 0=登用 1=解放 2=投獄 3=処刑
+;-------------------------------------------------
+@MASTER_CAPTURED(勢力)
+#DIM 勢力
+#DIM 君主
+#DIM 友好度
+#DIM 敵対度
+
+君主 = GET_COUNTRY_BOSS(勢力)
+友好度 = REL_LIKE:君主:MASTER
+敵対度 = REL_HATE:君主:MASTER
+
+FLAG:逆調教メイン調教者 = 0
+
+TRYCCALLFORM MASTER_CAPTURED_%SP_COUNTRY_NAME_ENG:SP_COUNTRY_TO_CONST(勢力)%(勢力)
+	RETURN RESULT
+CATCH
+ENDCATCH
+
+IF CFLAG:MASTER:捕虜先
+	PRINTFORMW 捕虜として捕えられていた%ANAME(MASTER)%は、%ANAME(君主)%の前に引き立てられた…
+ELSE
+	PRINTFORMW 捕らえられた%ANAME(MASTER)%は%ANAME(君主)%の前に引きずり出された…
+ENDIF
+
+;王からの好感度が低く敵対値が特に高い場合で、王の好感度・依存度・依存度が共に500未満なら選択肢を表示せずに処刑
+IF 友好度 < 100 && 敵対度 >= 800 && MAX(CFLAG:君主:好感度, CFLAG:君主:依存度, CFLAG:君主:従属度, CFLAG:君主:支配度) < 500
+	PRINTFORMW %ANAME(MASTER)%にあまり良い感情を持たない%ANAME(君主)%は、躊躇なく部下に%ANAME(MASTER)%の処刑を命じた
+	CALL EXECUTION(MASTER)
+	FLAG:強制エンドフラグ = 1
+	RETURN 3
+ENDIF
+
+IF CFLAG:MASTER:捕虜先
+	PRINTFORML %ANAME(君主)%は%ANAME(MASTER)%に対し、力を貸す気はないかと持ち掛けてきた
+	CALL ASK_MULTI("私でよければ喜んで", "お断りだ", "解放してほしい")
+
+	SELECTCASE RESULT 
+		CASE 0
+			PRINTFORML %ANAME(MASTER)%は%ANAME(君主)%の士官になりました
+			PRINTFORMW 以降は%ANAME(君主)%勢力として行動します
+			CALL CHANGE_COUNTRY(MASTER, 勢力, 1)
+			RETURN 0
+		CASE 1
+			IF 友好度 > 300 && 敵対度 < 300
+				PRINTFORMW %ANAME(MASTER)%が仕官を拒むと、%ANAME(君主)%は少し残念そうにしながらも%ANAME(MASTER)%を解放した
+				CALL CAPTURE(MASTER, 0)
+				RETURN 1
+			ELSE
+				PRINTFORMW %ANAME(MASTER)%が仕官を拒むと、%ANAME(君主)%は%ANAME(MASTER)%を投獄した
+				CALL CAPTURE(MASTER, 勢力)
+				RETURN 2
+			ENDIF
+		CASE 2
+			IF 友好度 > 300 && 敵対度 < 300
+				PRINTFORMW %ANAME(MASTER)%が解放してくれと頼むと、%ANAME(君主)%は少し残念そうにしながらも%ANAME(MASTER)%を解放した
+				CALL CAPTURE(MASTER, 0)
+				RETURN 1
+			ELSE
+				PRINTFORMW %ANAME(MASTER)%が解放してくれと頼むと、%ANAME(君主)%は首を横に振り、%ANAME(MASTER)%を投獄した
+				CALL CAPTURE(MASTER, 勢力)
+				RETURN 2
+			ENDIF
+	ENDSELECT
+ELSE
+	PRINTFORML 忠誠を誓い力を貸すならば命は助ける、とのことだが
+	CALL ASK_MULTI("受け入れる", "拒否する", "解放してほしい")
+	SELECTCASE RESULT
+		CASE 0
+			PRINTFORML %ANAME(MASTER)%は%ANAME(君主)%の士官になりました
+			PRINTFORMW 以降は%ANAME(君主)%勢力として行動します
+			CALL CHANGE_COUNTRY(MASTER, 勢力, 1)
+			RETURN 0
+		CASE 2
+			IF 友好度 > 300 && 敵対度 < 300
+				PRINTFORMW %ANAME(MASTER)%が解放してくれと頼むと、%ANAME(君主)%は少し残念そうにしながらも%ANAME(MASTER)%を解放した
+				CALL CAPTURE(MASTER, 0)
+				RETURN 1
+			ELSE
+				PRINTFORMW %ANAME(MASTER)%が解放してくれと頼むと、%ANAME(君主)%は首を横に振り、%ANAME(MASTER)%を投獄した
+				CALL CAPTURE(MASTER, 勢力)
+				RETURN 2
+			ENDIF
+		CASE 1
+			CALL MASTER_CAPTURED_DOES_EXECUTE(勢力)
+			IF RESULT == 1
+				PRINTFORMW %ANAME(MASTER)%が仕官を拒むと、%ANAME(君主)%は残念そうにしながらも部下に%ANAME(MASTER)%の処刑を命じた
+				CALL EXECUTION(MASTER)
+				FLAG:強制エンドフラグ = 1
+				RETURN 3
+			ELSE
+				CALL CAPTURE(MASTER, 勢力)
+				RETURN 2
+			ENDIF
+	ENDSELECT
+ENDIF
+
+;-------------------------------------------------
+;主人公がARG:0勢力に捕らえられ、登用を拒否した場合の処刑判定
+;戻り値 0=投獄 1=処刑
+;-------------------------------------------------
+@MASTER_CAPTURED_DOES_EXECUTE(勢力)
+#DIM 勢力
+#DIM 君主
+#DIM 友好度
+#DIM 敵対度
+#DIM 好感度保存	
+#DIM 申し出キャラ
+君主 = GET_COUNTRY_BOSS(勢力)
+友好度 = REL_LIKE:君主:MASTER
+敵対度 = REL_HATE:君主:MASTER
+
+
+申し出キャラ = -1
+好感度保存 = 0
+FOR LOCAL:0, 0, CHARANUM
+	SIF CFLAG:(LOCAL:0):所属 != 勢力 || CFLAG:(LOCAL:0):捕虜先
+		CONTINUE
+	SIF CFLAG:(LOCAL:0):好感度 < 500
+		CONTINUE
+	SIF ABL:(LOCAL:0):主導度Ｕ < 100 && !GETBIT(TALENT:(LOCAL:0):淫乱系, 素質_淫乱_サド)
+		CONTINUE
+	SIF LOCAL == 君主
+		CONTINUE
+	IF CFLAG:(LOCAL:0):好感度 > 好感度保存
+		;条件を満たすキャラのうち、好感度が最大のキャラを探索
+		申し出キャラ = LOCAL
+		好感度保存 = CFLAG:LOCAL:好感度
+	ENDIF
+NEXT
+
+;条件を満たすキャラが見つかった場合
+IF 申し出キャラ >= 0
+	PRINTFORML %ANAME(MASTER)%が仕官を拒むと、それを見ていた%ANAME(申し出キャラ)%が%ANAME(君主)%に対して、
+	PRINTFORMW 自分に説得を任せてほしいと申し出た
+	PRINTFORMW %ANAME(君主)%は%ANAME(申し出キャラ)%の言葉を聞き入れて、%ANAME(MASTER)%の処遇を%ANAME(申し出キャラ)%に任せた…
+	CALL COLOR_PRINTW(@"%ANAME(MASTER)%は%ANAME(君主)%の捕虜となりました", カラー_注意)
+	FLAG:逆調教メイン調教者 = GET_ID(申し出キャラ)
+	RETURN 0
+ENDIF
+
+IF MAX(CFLAG:君主:好感度, CFLAG:君主:依存度, CFLAG:君主:従属度, CFLAG:君主:支配度) >= 1500
+	PRINTFORMW %ANAME(君主)%には%ANAME(MASTER)%を斬ることが出来ないようだ…
+	PRINTFORMW %ANAME(君主)%は部下に対し、%ANAME(MASTER)%を投獄するように命じた
+	CALL COLOR_PRINTW(@"%ANAME(MASTER)%は%ANAME(君主)%の捕虜となりました", カラー_注意)
+	RETURN 0
+ENDIF
+
+申し出キャラ = -1
+好感度保存 = 0
+FOR LOCAL:0, 0, CHARANUM
+	IF CFLAG:(LOCAL:0):所属 == 勢力 && !CFLAG:(LOCAL:0):捕虜先 && CFLAG:(LOCAL:0):好感度 >= 1500
+		IF CFLAG:(LOCAL:0):好感度 > 好感度保存
+			;条件を満たすキャラのうち、好感度が最大のキャラを探索
+			申し出キャラ = LOCAL
+			好感度保存 = CFLAG:LOCAL:好感度
+		ENDIF
+	ENDIF
+NEXT
+
+;条件を満たすキャラが見つかった場合
+IF 申し出キャラ >= 0
+	PRINTFORMW %ANAME(MASTER)%が仕官を拒むと、%ANAME(君主)%は部下に%ANAME(MASTER)%の処刑を命じた
+	PRINTFORMW すると、それを見ていた%ANAME(申し出キャラ)%が%ANAME(君主)%に駆け寄り、必死になって%ANAME(MASTER)%の助命を嘆願した…
+	PRINTFORML %ANAME(申し出キャラ)%の勢いに押された%ANAME(君主)%は、
+	PRINTFORMW どうやら%ANAME(MASTER)%の首を取らずに捕虜として投獄しておくことにしたようだ
+	CALL COLOR_PRINTW(@"%ANAME(MASTER)%は%ANAME(君主)%の捕虜となりました", カラー_注意)
+	RETURN 0
+ENDIF
+
+;3能力に応じた確率で
+IF ABL:MASTER:武闘 + ABL:MASTER:防衛 + ABL:MASTER:知略 + ABL:MASTER:政治 >= RAND:400
+	PRINTFORMW %ANAME(君主)%は、%ANAME(MASTER)%のような人材を斬るのを惜しんだようだ
+	PRINTFORMW %ANAME(君主)%は部下に対し、%ANAME(MASTER)%を投獄するように命じた
+	CALL COLOR_PRINTW(@"%ANAME(MASTER)%は%ANAME(君主)%の捕虜となりました", カラー_注意)
+	RETURN 0
+ENDIF
+
+RETURN 1
+
+;-------------------------------------------------
+;ARG:0番のキャラが登用に応じるかどうかを判定(ARG:1=登用側の勢力、ARG:2=ARG:0の所属する勢力
+;戻り値 0=拒否 1=応じる
+;-------------------------------------------------
+@JUDGE_ASSIGN(対象, 所属勢力, 捕縛勢力)
+#FUNCTION
+#DIM 対象
+#DIM 捕縛勢力
+#DIM 所属勢力
+#DIM 捕縛君主
+#DIM 所属君主
+#DIM 基準値
+#DIM 乱数
+捕縛君主 = GET_COUNTRY_BOSS(捕縛勢力)
+所属君主 = GET_COUNTRY_BOSS(所属勢力)
+
+;特殊勢力所属なら1/2で判定を無視して応じる
+;SIF RAND:2 && IS_SP_COUNTRY(所属勢力)
+;	RETURNF 1
+
+;登用側が特殊勢力で、特殊勢力に堕ちていないなら却下する
+SIF RAND:2 && IS_SP_COUNTRY(捕縛勢力) && !IS_FALLEN_TO_SP_COUNTRY(対象)
+	RETURNF 0
+
+;基本は30%。1000分率
+基準値 = 3000
+
+;登用側への君主の好感度・敵対度で補正する
+SIF 捕縛君主 >= 0
+	基準値 += REL_LIKE:対象:捕縛君主 * 2 - REL_HATE:対象:捕縛君主
+
+;所属側への好感度・敵対度で補正する
+SIF 所属君主 >= 0
+	基準値 -= REL_LIKE:対象:所属君主 * 3 - REL_HATE:対象:所属君主
+
+;主人公が登用側
+IF CFLAG:MASTER:所属 == 捕縛勢力
+	基準値 += MAX(CFLAG:対象:好感度, CFLAG:対象:依存度, CFLAG:対象:従属度, CFLAG:対象:支配度)
+;主人公が所属側
+ELSEIF CFLAG:MASTER:所属 == 所属勢力
+	基準値 -= MAX(CFLAG:対象:好感度, CFLAG:対象:依存度, CFLAG:対象:従属度, CFLAG:対象:支配度)
+ENDIF
+
+;自分が君主
+IF 対象 == 所属君主
+	基準値 -= 1000
+;所属無
+ELSEIF 所属勢力 == 0
+	基準値 += 2000
+ENDIF
+
+乱数 = RAND:10000
+
+;基準値を満たさないが、乱数の3/4よりは大きいなら金を要求する
+SIF INRANGE(基準値, 乱数 / 2, 乱数)
+	RETURNF 2
+RETURNF 乱数 < 基準値
+
+;-------------------------------------------------
+;ARG:0番のキャラが条件付きで登用に応じるときの判定(ARG:1=登用側の勢力、ARG:2=ARG:0の所属する勢力
+;戻り値 0=拒否 1=応じる
+;-------------------------------------------------
+@JUDGE_ASSIGN_REQUIRE_MONEY(対象, 所属勢力, 捕縛勢力)
+#FUNCTION
+#DIM 対象
+#DIM 捕縛勢力
+#DIM 所属勢力
+#DIM 捕縛君主
+#DIM 所属君主
+#DIM 要求額
+捕縛君主 = GET_COUNTRY_BOSS(捕縛勢力)
+所属君主 = GET_COUNTRY_BOSS(所属勢力)
+
+;ベースはスカウトした時の額ないし（国庫の10%と10000とでやすい方）を要求する
+要求額 = MAX(SCOUT_CALC_PRICE_BASIS(対象), MIN(MONEY:捕縛勢力 / 10, 10000))
+
+;登用側への君主の好感度・敵対度で補正する
+SIF 捕縛君主 >= 0
+	要求額 = 要求額 * (3000 - REL_LIKE:対象:捕縛君主 + REL_HATE:対象:捕縛君主) / 3000
+
+;登用側への君主の好感度・敵対度で補正する
+SIF 所属君主 >= 0
+	要求額 = 要求額 * (3000 - REL_HATE:対象:所属君主 + REL_LIKE:対象:所属君主) / 3000
+
+RETURNF 要求額

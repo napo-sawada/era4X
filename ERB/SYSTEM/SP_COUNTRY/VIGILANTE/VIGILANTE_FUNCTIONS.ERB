@@ -1,0 +1,283 @@
+﻿;--------------------------------------
+;ターンエンド時の自警団の処理
+;--------------------------------------
+@TURNEND_VIGILANTE
+#DIM 自警団
+自警団 = GET_COUNTRY_FROM_ID(SP_COUNTRY_ID:特殊勢力_自警団)
+
+;兵力の増える処理
+IF DAY % 3 == 0
+	CALL SINGLE_DRAWLINE
+	LOCAL:0 = MAX(RAND:4000, 1000)
+	LOCAL:0 += RAND:500 * SP_COUNTRY_RANK:(特殊勢力_自警団)
+	PRINTFORML 自警団が徴兵を行っているようです……
+	PRINTFORML 自警団の兵力が{LOCAL:0}増加した
+	COUNTRY_SOLDIER:(自警団) += LOCAL:0
+ENDIF
+;4ターンに1回、特別な徴兵
+CALL VIGILANTE_SPECIAL_REQRUITMENT(DAY % 4 == 0)
+CALL VIGILANTE_KIDNAP(DAY % 5 == 0)
+;--------------------------------------
+;滅亡時の処理
+;--------------------------------------
+@VIGILANTE_DESTROY_MSG
+CALL SINGLE_DRAWLINE
+SETCOLOR カラー_注意
+PRINTFORML
+PRINTFORML
+PRINTFORML
+PRINTFORMW 壊滅的な被害を受けた自警団は、活動を継続することができなくなったようです……
+PRINTFORMW 彼らは解散してしまいました
+PRINTFORM
+PRINTFORML
+PRINTFORML
+RESETCOLOR
+
+;-------------------------------------------------
+;DESC  :自警団所属時に閨・捕虜調教前にアイテムを追加する処理
+;-------------------------------------------------
+@START_TRAIN_COMMON_VIGILANTE()
+ITEM:A_縄 = 1
+ITEM:A_鞭 = 1
+ITEM:A_針 = 1
+ITEM:A_縄 = 1
+ITEM:A_目隠し = 1
+ITEM:A_口枷 = 1
+ITEM:A_鼻フック = 1
+ITEM:A_浣腸 = 1
+ITEM:A_利尿剤 = 99
+
+;--------------------------------------
+;自警団の初期化処理
+;--------------------------------------
+@VIGILANTE_INIT(ARG:0)
+#DIM LCOUNT
+VARSET LOCAL
+
+SIF GET_COUNTRY_FROM_ID(SP_COUNTRY_ID:特殊勢力_自警団) != -1
+	RETURN 0
+
+SIF SP_COUNTRY_RANK:特殊勢力_自警団 == 0
+	RETURN 0
+
+SIF GET_NEW_COUNTRY() == -1
+	RETURN 0
+
+CALL CREATE_SP_COUNTRY(特殊勢力_自警団)
+LOCAL = RESULT
+CALL INIT_SP_COUNTRY(LOCAL)
+
+RETURN LOCAL
+
+;--------------------------------------
+;自警団の定期イベント。
+;陥落済みキャラを使って兵数を増やす
+;--------------------------------------
+@VIGILANTE_SPECIAL_REQRUITMENT(条件 = 1)
+#DIM 自警団
+#DIM 条件
+#DIM 対象
+#DIM メッセージ
+
+自警団 = GET_COUNTRY_FROM_ID(SP_COUNTRY_ID:(特殊勢力_自警団))
+
+;自警団勢力があり、条件を満たしている
+SIF 自警団 == -1 || !条件
+	RETURN -1
+
+CALL SELECT_CHARA_RANDOM("VIGILANTE_SPECIAL_REQRUITMENT")
+
+対象 = RESULT
+SIF 対象 == -1
+	RETURN
+
+LOCAL = MAX(RAND:3000, 1000)
+CALL SINGLE_DRAWLINE
+SETCOLOR カラー_ピンク
+SELECTCASE RAND:3
+	CASE 0
+		PRINTFORMW 自警団は勧誘活動を行っている……
+		PRINTFORMW ……その中には、%ANAME(対象)%の姿もあった
+		PRINTFORML %ANAME(対象)%は何人もの男性に声をかけては、笑顔とトークで拠点へと誘う
+		PRINTFORML 拠点に連れ込んだ男達の前で、%ANAME(対象)%は自ら衣服を脱ぎ捨てる
+		PRINTFORML 仰天する男達をよそに、%ANAME(対象)%は彼らの前に跪き、口や手でもって肉棒に奉仕する
+		PRINTFORMW %ANAME(対象)%にとって「勧誘」とは、つまりこういう行為のことだった
+		PRINTFORML 戸惑う男達だったが、ぐぷぐぷという唾液の音と股間の快楽には逆らえない
+		PRINTFORML 一人が%ANAME(対象)%を押し倒し、既に濡れそぼっていた肉穴を貫くと、あとはあっという間だった
+		PRINTFORML 一人が射精してはまた別の男がと、彼らは次々%ANAME(対象)%の身体に精を放っていく
+		PRINTFORMW %ANAME(対象)%も悦んで、自ら口や手、乳房に両穴を捧げてみせた
+		PRINTFORML たっぷりと精を解き放ち、%ANAME(対象)%の肉体に夢中になった男達は、二つ返事で入団を了承する
+		PRINTFORML 満足した彼らが拠点を後にすると、同期の団員が「おかわり」を連れてくる
+		PRINTFORML 全身精液にまみれた淫らな姿で、%ANAME(対象)%が自ら秘唇を割り開く
+		PRINTFORMW 今度の男達は事情を把握していたらしく、下卑た笑みを浮かべながら%ANAME(対象)%を貫いていった……
+		PRINTFORMW %ANAME(対象)%の努力により、入団希望者はずいぶんと増えたようだ……
+		CALL FUCK_SP(対象, "欲望, 精愛, 性交, Ａ, Ｖ, Ｂ, Ｃ, Ｍ, 輪姦, 口淫, Ｖ性交, Ａ性交", "膣内射精, 処女喪失, Ａ処女喪失, キス喪失, 腸内射精, 口内射精", 自警団, GET_SPERM_ID("行きずりの男"), @"行きずりの男の\@ RAND:2 ? 唇 # ペニス \@", "行きずりの男", "", "輪姦")
+	CASE 1
+		PRINTFORMW 自警団は地元の有力者と会合を開いている……
+		PRINTFORMW ……代表者は、%ANAME(対象)%だった
+		PRINTFORML 肥満体の男と%ANAME(対象)%は、ベッドの上で肌を重ねている
+		PRINTFORML そり勃つペニスに音をたててしゃぶりつきながら、自ら秘貝を彼の顔面に押しつける
+		PRINTFORML ねっとりとした舌が陰核をこねくり回すと、%ANAME(対象)%は甘い声をあげてよがってみせる
+		PRINTFORMW 男が耐えきれず精を放つと、%ANAME(対象)%は瞳を蕩かせ、音を立てて白濁を飲み下していく
+		PRINTFORML 呼吸を整える彼の前で、%ANAME(対象)%は淫具を手に取り、自らオナニーショーを披露する
+		PRINTFORML ぐちゅぐちゅと淫らな音を立ててバイブで秘裂を掻き回す様に、男もすぐに元気を取り戻したようだ
+		PRINTFORML もっといい物をあげようとのしかかってくる男を前に、%ANAME(対象)%は自らの秘貝を手で隠した
+		PRINTFORML もっといいことがしたいなら、私たちに協力してください
+		PRINTFORML %ANAME(対象)%がそのように要求すると、焦れた男は二つ返事で了承する
+		PRINTFORMW ヒクつく雌穴に勃起した一物が挿入されると、%ANAME(対象)%はたまらないという声をあげてよがった
+		PRINTFORMW %ANAME(対象)%はその後も、丸々一夜をかけ、その身体でもって男からあらゆる支援の約束を取り付けた……
+		CALL FUCK_SP(対象, "欲望, 精愛, 性交, Ａ, Ｖ, Ｂ, Ｃ, Ｍ, 輪姦, 口淫, Ｖ性交, Ａ性交, 売春", "膣内射精, 処女喪失, Ａ処女喪失, キス喪失, 腸内射精, 口内射精", 自警団, GET_SPERM_ID("富豪"), @"富豪の\@ RAND:2 ? 唇 # ペニス \@", "富豪", "", "売春")
+	CASE 2
+		PRINTFORMW 自警団は地元のごろつき達と会合を開いている……
+		PRINTFORMW ……代表者は、%ANAME(対象)%だ
+		PRINTFORMW 悪事をやめ、自警団に参加するよう、%ANAME(対象)%は彼らに説いている
+		PRINTFORMW もちろんそれだけではない。%ANAME(対象)%自身がセットでついていた
+		PRINTFORMW ごろつきの頭に命じられ、%ANAME(対象)%は自ら衣服を脱ぎ捨てる
+		PRINTFORMW 彼の下衣を口でずらし、肉棒を露出させると、艶やかな唇で迎え入れる
+		PRINTFORMW 音をたてて扱き下ろし、音をたてて白濁を嚥下する様は、極めて淫らだった
+		PRINTFORMW その後、%ANAME(対象)%はねそべる男に自らまたがり、%STR_BODY("膣：欲情：感度", 対象)%でもってペニスを悦ばせ始める
+		PRINTFORMW 男が精を解き放つと、悦びの声をあげながら、粘つく濁液を子宮で受け止めて見せた
+		PRINTFORMW もちろんそれで終わりではない
+		PRINTFORMW 頭目が%ANAME(対象)%を顎でしゃくり、周囲を取り囲む部下達にも奉仕するように命じる
+		PRINTFORMW %ANAME(対象)%は瞳を蕩かせ、口や手、乳房に両穴でもって、丸一日かけて何人もの男達の欲望を受け止めていった……
+		CALL FUCK_SP(対象, "欲望, 精愛, 性交, Ａ, Ｖ, Ｂ, Ｃ, Ｍ, 輪姦, 口淫, Ｖ性交, Ａ性交", "膣内射精, 処女喪失, Ａ処女喪失, キス喪失, 腸内射精, 口内射精", 自警団, GET_SPERM_ID("ごろつき"), @"ごろつきの\@ RAND:2 ? 唇 # ペニス \@", "ごろつき", "", "輪姦")
+ENDSELECT
+PRINTFORML 
+PRINTFORMW 自警団の兵数が{LOCAL}増加した
+
+RESETCOLOR
+
+COUNTRY_SOLDIER:自警団 += LOCAL
+
+RETURN 1
+
+@SELECT_CHARA_RANDOM_LOGIC_VIGILANTE_SPECIAL_REQRUITMENT(対象)
+#DIM 対象
+RETURN IS_FEMALE(対象) && CFLAG:対象:所属 == GET_COUNTRY_FROM_ID(SP_COUNTRY_ID:特殊勢力_自警団) && !CFLAG:対象:捕虜先 && !IS_SP_CHARA(対象)
+
+
+;--------------------------------------
+;自警団の定期イベント。
+;キャラを「勧誘」する
+;--------------------------------------
+@VIGILANTE_KIDNAP(条件 = 1)
+#DIM 対象
+#DIM 条件
+#DIM 自警団
+自警団 = GET_COUNTRY_FROM_ID(SP_COUNTRY_ID:(特殊勢力_自警団))
+
+;自警団勢力があり、条件を満たしている
+SIF 自警団 == -1 || !条件
+	RETURN -1
+
+CALL SELECT_CHARA_RANDOM("VIGILANTE_KIDNAP")
+
+対象 = RESULT
+
+SIF 対象 == -1
+	RETURN
+
+CALL SINGLE_DRAWLINE()
+SETCOLOR カラー_ピンク
+PRINTFORML 突然、%ANAME(対象)%は得体の知れない男達に取り囲まれた！
+PRINTFORML 口を塞がれ、すぐ近くの建物に連れ込まれた
+PRINTFORMW ……そこは自警団の拠点だった
+PRINTFORML 君は見込みがありそうだ、我々の一員として教育してあげようと、異様に瞳をキラキラさせた男達は言う
+PRINTFORMW そして%ANAME(対象)%の服を剥ぎ取ると、思想教育とセットで陵辱しはじめた……
+PRINTFORML 
+PRINTFORML 
+PRINTFORML 
+CALL FUCK_SP(対象, "欲望, 精愛, 性交, Ａ, Ｖ, Ｂ, Ｃ, Ｍ, 輪姦, 口淫, Ｖ性交, Ａ性交", "膣内射精, 処女喪失, Ａ処女喪失, キス喪失, 腸内射精, 口内射精", 自警団, GET_SPERM_ID("自警団員"), @"自警団員の\@ RAND:2 ? 唇 # ペニス \@", "自警団員", "", "輪姦")
+
+PRINTFORMW 激しい陵辱で、%ANAME(対象)%はすっかり体力を使い果たしてしまった
+PRINTFORMW 今日はこれくらいにしておこう、明日からも研修は続くから準備しておくようにと、男達は%ANAME(対象)%を室内に閉じ込めた……
+
+CALL COLOR_PRINTW(@"%ANAME(対象)%が自警団に囚われました", カラー_警告)
+RESETCOLOR
+CALL CAPTURE(対象, 自警団)
+
+RETURN 1
+
+@SELECT_CHARA_RANDOM_LOGIC_VIGILANTE_KIDNAP(対象)
+#DIM 対象
+RETURN IS_APPEAR(対象) && CFLAG:対象:行動不能状態 != 行動不能_子供 && !TALENT:対象:幼児 && IS_FEMALE(対象) && !IS_SP_CHARA(対象) && (CFLAG:対象:所属 || CFLAG:対象:特殊状態 == 特殊状態_放浪) && !CFLAG:対象:捕虜先 && CFLAG:対象:所属 != GET_COUNTRY_FROM_ID(SP_COUNTRY_ID:特殊勢力_自警団) && GET_COUNTRY_BOSS(CFLAG:対象:所属) != 対象
+
+;-----------------------------------
+;自警団に捕らえられたときのイベント
+;-----------------------------------
+@MASTER_CAPTURED_VIGILANTE(ARG:0)
+PRINTFORMW 捕らえられた%ANAME(MASTER)%は自警団員の前に引きずり出された…
+IF GETBIT(TALENT:MASTER:特殊勢力陥落系, 特殊勢力_自警団)
+	PRINTFORML 君は団を抜けた%ANAME(MASTER)%じゃないか
+	PRINTFORMW 本来退団者は二度と戻れない規則だが、君は特別だから出戻りを認めよう
+	PRINTFORMW 団員は当然のように、%ANAME(MASTER)%に団の衣装を着せようとしてくるが……
+	CALL ASK_YN("受け入れる", "拒否する")
+	IF RESULT == 0
+		PRINTFORMW これをつければ、また団員として皆様に尽くすことができる
+		PRINTFORMW %ANAME(MASTER)%の身体は疼き、自ら制服に袖を通す
+		PRINTFORMW ユニフォームを着ることで、一体感・連帯感といったものが心を満たしていく
+		PRINTFORMW では復帰するまえに、一度しっかり「研修」を受けないとなと、団員は%ANAME(MASTER)%を連行する
+		PRINTFORMW %ANAME(MASTER)%は再び、自警団の思想の下動く、忠実な道具に成り下がった……
+		SETCOLOR カラー_注意
+		PRINTFORMW %ANAME(MASTER)%は再び、自警団人となりました
+		RESETCOLOR
+	ELSE
+		PRINTFORMW 誰がそんなもの。%ANAME(MASTER)%ははねのける
+		PRINTFORMW すると団員達は激高した
+		PRINTFORMW 本来許されない退団者にこれほど寛大に接しているというのに、一体なんだその態度は
+		PRINTFORMW そのゆがんだ性根をたたき直してやると、団員達は%ANAME(MASTER)%を取り押さえ、連行した……
+	ENDIF
+ELSE
+	PRINTFORML 団員は異様にきらきらとした瞳と笑顔で%ANAME(MASTER)%を迎え、
+	PRINTFORMW 君も自警団の一員として働かないか？　と言い始めた
+	PRINTFORMW 我々の一員になるとここで決めるなら、「教育」の手順はいくらか省けると言っているが……
+	PRINTFORMW 受け入れますか？
+	CALL ASK_YN("受け入れる", "拒否する")
+	IF RESULT == 0
+		PRINTFORMW 投獄されるよりはマシだろう。%ANAME(MASTER)%が頷くと、彼らは満足げに頷いた
+		PRINTFORMW では早速これを着てくれと、ユニフォームを差し出してきた
+		PRINTFORMW %ANAME(MASTER)%は気が進まないながら、差し出された衣装に袖を通した……
+		SETCOLOR カラー_注意
+		PRINTFORMW %ANAME(MASTER)%は自警団員となりました
+		RESETCOLOR
+	ELSE
+		PRINTFORMW お前達になど手を貸すか。%ANAME(MASTER)%は毅然として言い放つ	
+		PRINTFORMW 我々がせっかく勧誘してやったのにと団員達は激高し、%ANAME(MASTER)%を口汚く罵り始めた
+		PRINTFORMW そのゆがんだ性根をたたき直してやると、団員達は%ANAME(MASTER)%を取り押さえ、連行した……
+	ENDIF
+ENDIF
+IF RESULT == 0
+	SETBIT TALENT:MASTER:特殊勢力陥落系, 特殊勢力_自警団
+	CFLAG:MASTER:所属 = ARG:0
+	CALL PLAYER_FALLEN_TO_SP_COUNTRY(ARG:0)
+	CALL VIGILANTE_FALLEN_LEAVE_MARK(MASTER)
+	RETURN 0
+ELSE
+	CALL CAPTURE(MASTER, ARG:0)
+	RETURN 2
+ENDIF
+
+
+
+;--------------------------------------
+;エンディング
+;--------------------------------------
+@VIGILANTE_ENDING
+
+PRINTFORML 自警団の活動は、日に日に大きくなっていった
+PRINTFORML 和を乱すものは駆逐され、彼らに捕らえられ、「教育」を受けることとなった
+PRINTFORMW ……そしてとうとう、彼らが幻想郷を席巻する日が訪れた
+PRINTFORMW 最初は自警団に興味のなかった少女たちも、熱心な「教育」によって、いつしか団員としての志を得るようになっていた
+PRINTFORMW 今や彼女らは、その肉体で団員を勧誘することに、何らの疑問も覚えていない……
+IF CFLAG:MASTER:所属 == GET_COUNTRY_FROM_ID(SP_COUNTRY_ID:特殊勢力_自警団) && IS_FEMALE(MASTER)
+	PRINTFORMW 
+	PRINTFORML ……団員の中に、%ANAME(MASTER)%の姿もあった
+	PRINTFORMW 勧誘活動と称して、無数の男に取り囲まれ、奉仕している
+	PRINTFORMW 両穴ともに評判である%PRONOUN(MASTER)%は、勧誘上手だと団員の間でも高評価だった
+	PRINTFORML あらゆる穴に肉棒を咥え込む%PRONOUN(MASTER)%の様は、まるで性奴隷のようだ
+	PRINTFORMW けれども%ANAME(MASTER)%は、自らを惨めだなどとは一切考えていない
+	PRINTFORMW むしろ、崇高なる自警団の理念に身を捧げることができて、光栄だとすら考えている……
+	CALL FUCK_SP(MASTER, "欲望, 精愛, 性交, Ａ, Ｖ, Ｂ, Ｃ, Ｍ, 苦痛快楽, 緊縛, 輪姦, 口淫, Ｖ性交, Ａ性交", "膣内射精, 処女喪失, Ａ処女喪失, キス喪失, 腸内射精, 口内射精", GET_COUNTRY_FROM_ID(SP_COUNTRY_ID:特殊勢力_自警団), GET_SPERM_ID("自警団員"), @"自警団員の\@ RAND:2 ? 唇 # ペニス \@", "自警団員", "", "輪姦")
+ENDIF
+PRINTFORML 
+PRINTFORMW 幻想郷は今後も、自警団の名の下に平和であり続けるだろう……

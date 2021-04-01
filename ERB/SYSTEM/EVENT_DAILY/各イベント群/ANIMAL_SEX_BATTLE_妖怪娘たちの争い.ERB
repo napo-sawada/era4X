@@ -1,0 +1,145 @@
+﻿;---------------------
+;基本的な発生確率(1000分率 100で10%)
+;これにコンフィグ項目の発生頻度がかけられるので、必ずしもこの通りにはならない
+;---------------------
+@EVENT_DAILY_ANIMAL_SEX_BATTLE_RATE()
+RETURN 25
+
+
+;---------------------
+;確率以外の発生判定
+;〇期以降になると発生するとか、デイリー側で利用している変数が-1だったら起こさない　みたいなはじき方をするときに使う
+;---------------------
+@EVENT_DAILY_ANIMAL_SEX_BATTLE_DECISION()
+SIF !HAS_PENIS(MASTER)
+	RETURN 0
+SIF DVAR:種族間抗争_娘惚れフラグ > 1
+	RETURN 0
+RETURN DAY >= 15
+
+;---------------------
+;ジャンル
+;コンフィグ設定で使用
+;---------------------
+@EVENT_DAILY_ANIMAL_SEX_BATTLE_GENRE()
+RETURN デイリー_ジャンル_エロ
+
+
+;---------------------
+;本体
+;イベントが発生した場合は1、発生しなかった場合は0を返す
+;発生しなかったというのは例えば、特定条件を満たすキャラからランダムに一人選ぶデイリーで、そもそもその条件を満たすキャラが一人もいないみたいなとき
+;旧仕様で作ったことある人向けにいうと「旧仕様のデイリー本体冒頭で-1を返すような状況」
+;---------------------
+
+;だいぶ手入れしました　by喚く
+@EVENT_DAILY_ANIMAL_SEX_BATTLE()
+#DIMS 妖怪の種族
+#DIMS 妖怪の種族二
+#DIM 対象
+#DIM 上昇, 2
+
+PRINTFORML 幻想郷で様々な妖怪達が人間たちを支配しようと争っている
+PRINTFORML 争いといっても水面下のゲームの様な物らしいが
+PRINTFORMW 勝手に駒扱いされる人間にとってはたまったものではない
+PRINTFORML …ところで最近、若い妖怪娘たちの間では性技を用いた抗争がブームらしい
+PRINTFORML 性の力で人間を骨抜きにするのは確かに古くから妖たちの得意とするところではあるが
+PRINTFORMW まったく人間にとってはたまらない！
+PRINTFORML そんなわけで、%ANAME(MASTER)%のところにもその余波が訪れた
+PRINTFORML 狐、狸、兎、天狗…多種多様な妖怪娘たちが%ANAME(MASTER)%の家に押しかけてきた
+PRINTFORML どうやら%ANAME(MASTER)%の噂を聞きつけ、誰が選ばれるかの勝負をしにきた様だ
+PRINTFORMW ぜひ自分を抱いてくれと口々にアピールしてくる…
+PRINTFORML どうしようか？
+CALL ASK_MULTI("遠慮する", "狐娘" ,"狸娘" ,"兎娘" ,"天狗娘")
+IF RESULT == 0
+	PRINTFORML 今はそんな気分ではない
+	PRINTFORMW 申し訳ないが遠慮することにした
+	RETURN 1
+ENDIF
+
+対象 = RESULT
+
+SELECTCASE RAND:5
+	CASE 0
+		PRINTFORMW 彼女ははにかみながら%ANAME(MASTER)%の手を優しく握ってきた
+	CASE 1
+		PRINTFORMW 彼女は満面の笑みを浮かべて%ANAME(MASTER)%の首にキスをしてきた
+	CASE 2
+		PRINTFORMW 彼女はするりと腕を絡ませて熱っぽく%ANAME(MASTER)%を見つめてきた
+	CASE 3
+		PRINTFORMW 彼女は%ANAME(MASTER)%に勢いよく抱きつくと身体を擦り付けてきた
+	CASE 4
+		PRINTFORMW 彼女は照れ臭そうに%ANAME(MASTER)%を見つめながらもじもじしていた
+ENDSELECT
+PRINTFORMW %種族間抗争_種類:対象%の娘の腰に手を回すと寝室に連れ込んだ
+PRINTFORML 
+SELECTCASE RAND:5
+	CASE 0
+		PRINTFORML 彼女の肌に指を這わせると敏感に身体を震わせて可愛らしい吐息を漏らした
+	CASE 1
+		PRINTFORML 彼女が服を脱ぐと小柄ながらも立派に雌を主張する豊満な肢体が露になる
+	CASE 2
+		PRINTFORML 彼女は%ANAME(MASTER)%を熱っぽい視線で見つめながら甘える様に股を擦り付けてきた
+	CASE 3
+		PRINTFORML 彼女の肌は指が吸い付くように柔らかくその感触が%ANAME(MASTER)%の雄を刺激する
+	CASE 4
+		PRINTFORML 彼女の身体からは甘い雌の匂いが漂いたまらなく%ANAME(MASTER)%の鼻腔をくすぐった
+ENDSELECT
+SELECTCASE RAND:5
+	CASE 0
+		PRINTFORMW %種族間抗争_種類:対象%の娘の可愛い嬌声とペニスに絡みついてくるとろとろの媚肉を心行くまで堪能した
+	CASE 1
+		PRINTFORMW こちらの腰の動きに合わせて淫らに身体をくねらせ喘ぐ%種族間抗争_種類:対象%の娘をたっぷり可愛がった
+	CASE 2
+		PRINTFORMW 瞳に♥を浮かべながら両手を開いて求めてくる%種族間抗争_種類:対象%の娘と汗だくになりながらまぐわった
+	CASE 3
+		PRINTFORMW %ANAME(MASTER)%に跨りながら淫らに腰をくねらせる彼女にねだられるままに何度も精を放った
+	CASE 4
+		PRINTFORMW 彼女は%ANAME(MASTER)%が腰を打ち付ける度に可愛く身体を跳ねさせて存分に楽しませてくれた
+ENDSELECT
+CALL FUCK(MASTER, "性技, 性交, Ｃ, 射精, Ｖ挿入", "童貞喪失", 0, "", "", @"%種族間抗争_種類:対象%の娘の膣", "和姦")
+PRINTFORMW 
+
+IF (ABL:MASTER:性技 + ABL:MASTER:性交 + ABL:MASTER:奉仕 + ABL:MASTER:射精) < 12 + (DAY / 12)
+	PRINTFORML 「噂程じゃなかったわね…」
+	PRINTFORMW 翌朝、彼女はそんなことを呟いてさっさと立ち去ってしまった
+	RETURN 1
+ENDIF
+
+;すでに惚れられているキャラでなければ通い始める
+IF !GROUPMATCH(対象, DVAR:種族間抗争_娘の種族, DVAR:種族間抗争_娘2の種族)
+	PRINTFORML 「あの…あの…ま、また来てもいい、ですか…？」
+	PRINTFORMW 翌朝、名残惜しそうな彼女とまた会う約束をして別れた
+	DVAR:種族間抗争_娘惚れフラグ ++
+	DVAR:(DVAR:種族間抗争_娘2の種族 == 0 ? 種族間抗争_娘2の種族 # 種族間抗争_娘の種族) = 対象
+ENDIF
+
+VARSET 上昇, -1
+
+SELECTCASE 対象
+	CASE 種族間抗争_狐
+		上昇:0 = NAME_TO_CHARA("藍")
+	CASE 種族間抗争_狸
+		上昇:0 = NAME_TO_CHARA("マミゾウ")
+	CASE 種族間抗争_兎
+		上昇:0 = NAME_TO_CHARA("てゐ")
+		上昇:1 = NAME_TO_CHARA("鈴仙")
+	CASE 種族間抗争_天狗
+		上昇:0 = NAME_TO_CHARA("文")
+		上昇:1 = NAME_TO_CHARA("はたて")
+ENDSELECT
+
+SIF GROUPMATCH(MASTER, 上昇:0, 上昇:1)
+	RETURN 1
+PRINTFORML %種族間抗争_種類:対象%の娘との情事が同種族の耳に入ったらしい
+
+SETCOLOR カラー_シアン
+PRINTFORM %ANAME(上昇:0)%
+SIF 上昇:1 != -1
+	PRINTFORM と%ANAME(上昇:1)%
+PRINTFORMW の関心をひいた
+RESETCOLOR
+
+CFLAG:(上昇:0):好感度 += 200
+SIF 上昇:1 != -1
+CFLAG:(上昇:1):好感度 += 200

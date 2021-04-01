@@ -1,0 +1,268 @@
+﻿;拠点フェイズにおけるショップ画面の処理
+
+;-------------------------------------------------
+;左右カラム表示開始
+;使用）CALL START_COLUMN
+;想定）コンテンツ表示時・ページ移動時
+;備考）行番号リセットとCOLUMN_LEFT_MENU_SHOW(0)の互換
+;-------------------------------------------------
+@START_COLUMN
+FIRST_COLUMN_RIGHT_LINE = LINECOUNT
+CALL COLUMN_LEFT_MENU_SHOW(0)
+
+;-------------------------------------------------
+;ショップ画面の表示処理(拠点フェイズ)
+;-------------------------------------------------
+@SHOW_SHOP_LIFE
+
+VARSET LOCAL, 0
+
+;コマンドの選択可否判定
+CALL CHECK_CHECKCHARA_SAVE
+
+;キャラクタ表示順のリストを作成
+CALL CREATE_SELECTOR_SORT_LIST
+
+;全員の調教参加フラグをクリア
+CVARSET CFLAG, 6, 0
+
+TRYCCALLFORM SHOP_LIFE_EVENTBUY_COLUMN_RIGHT_OFF_CHECK{FLAG:拠点フェイズ選択コマンド}
+	;右カラムオフなら最新の右カラムに表示のあるメニュー番号でFLAG:拠点フェイズ選択コマンドをリセット
+	FLAG:拠点フェイズ選択コマンド = COLUMN_RIGHT_MENU_SAVE_NUM
+CATCH
+ENDCATCH
+
+;メニュー番号範囲外なら、メニューの選択状態をリセット
+IF FLAG:拠点フェイズ選択コマンド < 1 || FLAG:拠点フェイズ選択コマンド > 99
+	FLAG:拠点フェイズ選択コマンド = DEFAULT_MENU_NUM
+ENDIF
+
+;メニュー番号範囲内だが実行不能なら、メニューの選択状態をリセット
+IF FLAG:拠点フェイズ選択コマンド >= 1 || FLAG:拠点フェイズ選択コマンド <= 99 && !SHOP_AVAIL:(FLAG:拠点フェイズ選択コマンド)
+	FLAG:拠点フェイズ選択コマンド = DEFAULT_MENU_NUM
+ENDIF
+
+;システム設定ならリセット
+IF FLAG:拠点フェイズ選択コマンド > COLUMN_LEFT_MENU_END_VALUE
+	FLAG:拠点フェイズ選択コマンド = DEFAULT_MENU_NUM
+ENDIF
+
+;デフォルトメニューにリセットしてもメニュー実行不能なら、メニューの選択状態を解除
+IF FLAG:拠点フェイズ選択コマンド == DEFAULT_MENU_NUM && !SHOP_AVAIL:(FLAG:拠点フェイズ選択コマンド)
+	FLAG:拠点フェイズ選択コマンド = 0
+ENDIF
+
+;それぞれの行番号に割り当てるカテゴリ番号とメニュー番号を保存する配列のリセット
+CALL COLUMN_LEFT_MENULINE_SAVE
+
+;左右カラムの行番号をリセットし、ひとつめのメニュー（残行動回数表示）を表示
+CALL START_COLUMN
+
+;右カラムの表示処理呼び出し（右カラム用改行関数に付随する左メニューの表示も行う）
+TRYCCALLFORM SHOP_LIFE_EVENTBUY_SHOW{FLAG:拠点フェイズ選択コマンド}
+CATCH
+	;白紙のページの場合
+	;今回のメニュー番号が右カラムオフかつ
+	;最新の右カラムに表示のあるメニュー番号も実行不可になっていた場合
+	CALL COLUMN_RIGHT_CLEAR
+ENDCATCH
+
+;-------------------------------------------------
+;ショップ画面の入力処理(拠点フェイズ 0～99)
+;ARG:0に入力した値が入る
+;処理を行った場合は1を、行わなかった場合は0を返す
+;SHOP.ERBでまとめてREDRAW 0 CLEARLINEしたい場合は0
+;-------------------------------------------------
+@EVENTBUY_LIFE(ARG:0)
+;左カラムの入力処理
+IF SHOP_AVAIL:(ARG:0) && ARG:0 >= COLUMN_LEFT_MENU_START_VALUE && ARG:0 <= COLUMN_LEFT_MENU_END_VALUE
+	;メニュー移動したのでメニュー用の汎用変数をリセット
+	VARSET MENUVAR, 0
+	;入力値をメニュー番号に受け取る
+	FLAG:拠点フェイズ選択コマンド = ARG:0
+	TRYCCALLFORM SHOP_LIFE_EVENTBUY_COLUMN_RIGHT_OFF_CHECK{FLAG:拠点フェイズ選択コマンド}
+	CATCH
+		;右カラムオンなら、最新の右カラムとしてメニュー番号を保存する
+		COLUMN_RIGHT_MENU_SAVE_NUM = FLAG:拠点フェイズ選択コマンド
+	ENDCATCH
+	;入力処理呼び出し
+	TRYCALLFORM SHOP_LIFE_EVENTBUY{ARG:0}
+	RETURN RESULT
+
+;右カラムの入力処理補助
+ELSEIF ARG:0 < COLUMN_LEFT_MENU_START_VALUE
+	TRYCALLFORM SHOP_LIFE_EVENTBUY_SUB{FLAG:拠点フェイズ選択コマンド}(ARG:0)
+	RETURN RESULT
+
+;共通処理
+ELSE
+	;前のページ
+	IF ARG:0 == SHOP_LIFE_LIST1_PAGE_BACK
+		FLAG:拠点フェイズページ --
+		RETURN 0
+	;次のページ
+	ELSEIF ARG:0 == SHOP_LIFE_LIST1_PAGE_NEXT
+		FLAG:拠点フェイズページ ++
+		RETURN 0
+	;前のページ
+	ELSEIF ARG:0 == SHOP_LIFE_LIST2_PAGE_BACK
+		FLAG:拠点フェイズページ2 --
+		RETURN 0
+	;次のページ
+	ELSEIF ARG:0 == SHOP_LIFE_LIST2_PAGE_NEXT
+		FLAG:拠点フェイズページ2 ++
+		RETURN 0
+	ELSE
+		RETURN 0
+	ENDIF
+	RETURN 1
+ENDIF
+
+;-------------------------------------------------
+;ショップ画面の入力処理(拠点フェイズ 100～9999)
+;ARG:0に入力した値が入る
+;-------------------------------------------------
+@USERSHOP_LIFE(ARG:0)
+LOCAL:0 = 0
+;右カラムボタン入力値をキャラ番号に変換する処理のオフ判定があれば
+TRYCCALLFORM SHOP_LIFE_USERSHOP_COLUMN_RIGHT_CONVERT_CHARANUM_OFF_CHECK{FLAG:拠点フェイズ選択コマンド}
+	;入力値をそのまま受け取って直接呼ぶ
+	TRYCALLFORM SHOP_LIFE_USERSHOP{FLAG:拠点フェイズ選択コマンド}(ARG:0)
+	LOCAL:0 |= RESULT
+;なければ
+CATCH
+	;通常のキャラリストをキャラ関係の入力処理を通して呼ぶ
+	CALL USERSHOP_LIFE_CHARA1(NO_TO_CHARA(ARG:0 - SHOP_LIFE_LIST1_ADD_INPUT))
+	LOCAL:0 |= RESULT
+	CALL USERSHOP_LIFE_CHARA2(NO_TO_CHARA(ARG:0 - SHOP_LIFE_LIST2_ADD_INPUT))
+	LOCAL:0 |= RESULT
+ENDCATCH
+RETURN LOCAL:0
+
+;-------------------------------------------------
+;ショップ画面におけるキャラ関係の入力処理(その１)
+;ARG:0はキャラ番号、再描画が必要な場合は1を返す
+;-------------------------------------------------
+@USERSHOP_LIFE_CHARA1(ARG:0)
+#DIM FIRST_LINE
+
+;キャラが存在しなければ戻る
+IF ARG:0 < 0 || ARG:0 >= CHARANUM
+	RETURN 0
+ENDIF
+
+;選択可能な条件を満たしていないキャラなら戻る
+RESULT = 0
+TRYCALLFORM SHOP_LIFE_CHECKCHARA{FLAG:拠点フェイズ選択コマンド}(ARG:0)
+IF RESULT != 1
+	RETURN 0
+ENDIF
+
+FIRST_LINE = LINECOUNT
+
+;リスト１入力処理呼び出し
+TRYCCALLFORM SHOP_LIFE_USERSHOP{FLAG:拠点フェイズ選択コマンド}(ARG:0)
+	RETURN RESULT
+CATCH
+	RETURN 0
+ENDCATCH
+
+;-------------------------------------------------
+;ショップ画面におけるキャラ関係の入力処理(その２)
+;ARG:0はキャラ番号、再描画が必要な場合は1を返す
+;-------------------------------------------------
+@USERSHOP_LIFE_CHARA2(ARG:0)
+
+;キャラが存在しなければ戻る
+IF ARG:0 < 0 || ARG:0 >= CHARANUM
+	RETURN 0
+ENDIF
+
+;選択可能な条件を満たしていないキャラなら戻る
+RESULT = 0
+TRYCALLFORM SHOP_LIFE_CHECKCHARA_SUB{FLAG:拠点フェイズ選択コマンド}(ARG:0)
+IF RESULT != 1
+	RETURN 0
+ENDIF
+
+;リスト２入力処理呼び出し
+TRYCCALLFORM SHOP_LIFE_USERSHOP_SUB{FLAG:拠点フェイズ選択コマンド}(ARG:0)
+	RETURN RESULT
+CATCH
+	RETURN 0
+ENDCATCH
+
+;-------------------------------------------------
+;行動開始時の共通処理
+;-------------------------------------------------
+@START_TRAIN_COMMON
+;全ての参加キャラについて処理
+FOR LOCAL:0, 0, CHARANUM
+	IF CFLAG:(LOCAL:0):調教参加フラグ
+		;現在の機嫌を保存
+		FOR LOCAL:1, 0, 10
+			CFLAG:(LOCAL:0):(LOCAL:1 + 190) = PALAM:(LOCAL:0):(LOCAL:1 + 10)
+		NEXT
+		;チョロインもちなら強制友好化を立てる
+		SIF TALENT:(LOCAL:0):チョロイン
+			CFLAG:(LOCAL:0):強制友好化 = 1
+		;参加済みに
+		CFLAG:(LOCAL:0):行動済み = 1
+		IF GROUPMATCH(FLAG:調教モード, 調教_逆調教通常, 調教_逆調教特殊) && LOCAL:0 != MASTER
+			CFLAG:(LOCAL:0):調教中BASE減らない = 1
+		ELSEIF FLAG:調教モード == 調教_慰安 && CFLAG:(LOCAL:0):慰安参加者
+			CFLAG:(LOCAL:0):調教中BASE減らない = 1
+		ENDIF
+		SIF (CFLAG:LOCAL:捕虜調教の助手 || CFLAG:LOCAL:夜這いの助手) && TALENT:LOCAL:親友
+			CFLAG:(LOCAL:0):調教中帰らない = 1
+	ENDIF
+NEXT
+
+SIF GROUPMATCH(FLAG:調教モード, 調教_閨, 調教_捕虜調教) && IS_SP_COUNTRY(CFLAG:MASTER:所属)
+	TRYCALLFORM START_TRAIN_COMMON_%SP_COUNTRY_NAME_ENG:SP_COUNTRY_TO_CONST(CFLAG:MASTER:所属)%
+
+SHOP_TIME += 1
+BEGIN TRAIN
+
+;-------------------------------------------------
+;ARG:0番のキャラを調教対象としてセットする(対象が一人の場合のみ)
+;-------------------------------------------------
+@TRAIN_TARGET_SETTING(ARG:0)
+;ターゲットを設定
+CALL ADD_MTAR(ARG:0)
+
+;ターゲットの調教参加フラグをＯＮ
+CFLAG:(ARG:0):調教参加フラグ = 1
+
+RETURN 1
+
+;-------------------------------------------------
+;活動可能回数の計算
+;ARG:0 = 一人追放しての計算
+;-------------------------------------------------
+@CALC_SHOP_TIME(ARG:0 = 0)
+#FUNCTION
+#DIM 行動回数
+#DIM 士官数
+#DIM NOW
+#DIM PREV
+
+SIF !CFLAG:MASTER:所属
+	RETURNF 3
+
+;GET_COMMANDER_NUMは主人公も引っかけてくるので、1引いて除外
+士官数 = GET_COMMANDER_NUM(CFLAG:MASTER:所属) - GET_ANIMAL_NUM(CFLAG:MASTER:所属) - 1
+
+SIF ARG:0
+	士官数 --
+行動回数 = 0
+PREV = 2
+NOW = 3
+DO
+	NOW += PREV
+	PREV = NOW - PREV
+	行動回数 ++
+LOOP 士官数 >= NOW
+
+RETURNF MAX(行動回数, 2)
+

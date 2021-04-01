@@ -1,0 +1,263 @@
+﻿;ゲーム開始時やロード時の処理
+
+;-------------------------
+;タイトル画面
+;-------------------------
+@SYSTEM_TITLE
+RESETDATA
+CALL SINGLE_DRAWLINE
+ALIGNMENT CENTER
+PRINTL era4X
+PRINTFORML %GAMEBASE_AUTHOR%
+PRINTFORML Ver%GET_VERSION_STRING(GAMEBASE_VERSION)%
+PRINTFORML %GAMEBASE_INFO%
+CALL SINGLE_DRAWLINE
+PRINTBUTTON " 0[最初から]", 0
+PRINTL 
+PRINTBUTTON " 1[続きから]", 1
+PRINTL 
+PRINTBUTTON " 2[カスタムキャラ]", 2
+PRINTL
+PRINTBUTTON " 3[ヘルプ]", 3
+PRINTL
+[IF_DEBUG]
+PRINTBUTTON "99[   DEBUG]", 99
+PRINTL 
+[ENDIF]
+ALIGNMENT LEFT
+$INPUT_LOOP
+INPUT
+
+IF RESULT == 0
+	BEGIN FIRST
+ELSEIF RESULT == 1
+	CALL LOAD_GAME
+	RESTART
+ELSEIF RESULT == 2
+	CALL CUSTOM_CHARA_MENU
+	RESTART
+ELSEIF RESULT == 3
+	CALL CREATE_HELP_MAP
+	CALL CONFIG_HELPMENU
+	RESTART
+ELSEIF RESULT == 99
+	[IF_DEBUG]
+	CALL DEBUGMENU()
+	RESTART
+	[ENDIF]
+ENDIF
+GOTO INPUT_LOOP
+
+;-------------------------------------------------
+;ニューゲーム
+;-------------------------------------------------
+@EVENTFIRST
+;初期化処理
+CALL INIT_NEWGAME
+
+CALL NEWLOOP
+CALL SLG_INIT
+
+BEGIN SHOP
+BEGIN TITLE
+
+
+;-------------------------------------------------
+;ロード時とニューゲーム時の共通初期化処理
+;-------------------------------------------------
+@INIT_COMMON
+;グローバル変数の読み込み
+LOADGLOBAL
+
+;乱数初期化
+INITRAND
+
+;ターゲットの初期化
+CALL CLEAR_MTAR
+
+;PALAMLVの設定
+PALAMLV:0 = 0
+PALAMLV:1 = 100
+PALAMLV:2 = 300
+PALAMLV:3 = 500
+PALAMLV:4 = 1500
+PALAMLV:5 = 3000
+PALAMLV:6 = 6000
+PALAMLV:7 = 10000
+PALAMLV:8 = 30000
+PALAMLV:9 = 50000
+PALAMLV:10 = 100000
+PALAMLV:11 = 250000
+PALAMLV:12 = 500000
+PALAMLV:13 = 1000000
+PALAMLV:14 = 2500000
+PALAMLV:15 = 5000000
+PALAMLV:16 = 10000000
+PALAMLV:17 = 25000000
+PALAMLV:18 = 50000000
+PALAMLV:19 = 100000000
+PALAMLV:20 = 250000000
+PALAMLV:21 = 500000000
+PALAMLV:22 = 1000000000
+PALAMLV:23 = 2500000000
+PALAMLV:24 = 5000000000
+PALAMLV:25 = 9999999999
+
+;COSの値を事前に計算してリストに記録する
+FOR LOCAL:0, 0, 360
+	COS_LIST:(LOCAL:0) = CALC_COS(LOCAL:0)
+NEXT
+
+VARSET TRAIN_FORCED_COM_MPLY, -1
+VARSET TRAIN_FORCED_COM_MTAR, -1
+
+;アイテムの開発期間を設定
+CALL SET_ITEMTERM
+
+;都市の文字色リセット
+CALL RESET_CITY_COLOR
+
+;ランダムキャラの名前候補リストを作成
+CALL CREATE_NAME_LIST
+
+;タトゥーのランダム入力内容リストを作成
+CALL CREATE_TATTOO_LIST
+
+;精液マップを作成
+CALL CREATE_SPERM_MAP
+
+;デイリーマップを作製
+CALL CREATE_DAILY_MAP
+
+;口上デイリーマップを作製
+CALL CREATE_KOJO_DAILY_MAP
+
+;領地探索マップを作成
+CALL CREATE_TERRITORY_EVENT_MAP()
+
+;ヘルプマップを作製
+CALL CREATE_HELP_MAP
+
+;ランク閾値の生成
+CALL INIT_RANK
+
+;テクノロジの名前など
+CALL INIT_TECHNOLOGY
+
+CALL SET_ABL_MIN_MAX
+
+;AI用の各種変数を設定
+CALL AI_BASE_SETTING
+
+CALL TMP_CREATE_OWN_CITY_MAP
+CALL TMP_CREATE_SUM_ECONOMY_MAP
+CALL TMP_CREATE_UNIT_MAP
+
+;-------------------------------------------------
+;ランク閾値の初期化
+;-------------------------------------------------
+@INIT_RANK
+ランク閾値:ランク_ＳＬＧ:ランク_S = 100
+ランク閾値:ランク_ＳＬＧ:ランク_A = 80
+ランク閾値:ランク_ＳＬＧ:ランク_B = 70
+ランク閾値:ランク_ＳＬＧ:ランク_C = 60
+ランク閾値:ランク_ＳＬＧ:ランク_D = 50
+ランク閾値:ランク_ＳＬＧ:ランク_E = 40
+ランク閾値:ランク_ＳＬＧ:ランク_F = 30
+ランク閾値:ランク_ＳＬＧ:ランク_G = 0
+ランク閾値:ランク_ＳＬＧ:ランク_無 = 0
+
+ランク閾値:ランク_その他:ランク_S = 10
+ランク閾値:ランク_その他:ランク_A = 8
+ランク閾値:ランク_その他:ランク_B = 6
+ランク閾値:ランク_その他:ランク_C = 4
+ランク閾値:ランク_その他:ランク_D = 3
+ランク閾値:ランク_その他:ランク_E = 2
+ランク閾値:ランク_その他:ランク_F = 1
+ランク閾値:ランク_その他:ランク_G = 0
+ランク閾値:ランク_その他:ランク_無 = 0
+
+ランク閾値:ランク_部隊:ランク_S = 80000
+ランク閾値:ランク_部隊:ランク_A = 60000
+ランク閾値:ランク_部隊:ランク_B = 40000
+ランク閾値:ランク_部隊:ランク_C = 27000
+ランク閾値:ランク_部隊:ランク_D = 20000
+ランク閾値:ランク_部隊:ランク_E = 8000
+ランク閾値:ランク_部隊:ランク_F = 5000
+ランク閾値:ランク_部隊:ランク_G = 0
+ランク閾値:ランク_部隊:ランク_無 = 0
+
+ランク閾値:ランク_性知識:ランク_S = 5
+ランク閾値:ランク_性知識:ランク_A = 4
+ランク閾値:ランク_性知識:ランク_B = 3
+ランク閾値:ランク_性知識:ランク_C = 2
+ランク閾値:ランク_性知識:ランク_D = 1
+ランク閾値:ランク_性知識:ランク_E = 0
+ランク閾値:ランク_性知識:ランク_F = -1
+ランク閾値:ランク_性知識:ランク_G = -1
+ランク閾値:ランク_性知識:ランク_無 = -1
+
+;能力値の最小・最大を設定
+@SET_ABL_MIN_MAX()
+FOR LOCAL:0, 0, 50
+	ABL_MIN:(LOCAL:0) = 0
+	ABL_MAX:(LOCAL:0) = 9999
+NEXT
+FOR LOCAL:0, 50, 70
+	ABL_MIN:(LOCAL:0) = 0
+	ABL_MAX:(LOCAL:0) = 300
+NEXT
+ABL_MAX:14 = 5
+ABL_MIN:60 = -99
+ABL_MIN:61 = -99
+ABL_MIN:90 = -1000
+ABL_MAX:90 = 1000
+ABL_MIN:91 = -1000
+ABL_MAX:91 = 1000
+ABL_MIN:92 = 0
+ABL_MAX:92 = 1000
+
+ABL_MIN:99 = 0
+ABL_MAX:99 = 100
+
+;-------------------------------------------------
+;ニューゲーム時の初期化処理
+;-------------------------------------------------
+@INIT_NEWGAME
+;念のため全データ初期化
+RESETDATA
+;乱数ダンプ
+DUMPRAND
+;コンフィグの初期設定
+CALL INIT_CONFIG
+
+;全ての東方キャラと「あなた」を作成する
+FOR LOCAL:0, 0, MAX_FIXED_CHARA
+	;CSVファイルの存在判定
+	SIF EXISTCSV(LOCAL:0)
+		CALL ADD_CHARA_FROM_CSV(LOCAL:0)
+NEXT
+
+;CSVでは設定できないキャラデータの初期設定
+CALL ADDITIONAL_CHARA_SETTING
+
+;ロード時とニューゲーム時の共通初期化処理
+CALL INIT_COMMON
+
+;INIT_COMMONのあとに呼ばないとCREATE_SPERM_MAPが呼ばれてないのでこまる
+CALL INIT_CHARA_SIBLING_RELATION()
+
+;0～199番のアイテムを売りに出す
+VARSET ITEMSALES, 1, 0, 200
+
+CALL DAILY_SET_DISABLE("DRUG_SEX", 1)
+CALL DAILY_SET_DISABLE("YOU_SEXHARA", 1)
+CALL DAILY_SET_DISABLE("YOU_WANDERING", 1)
+
+;周回を0に設定
+FLAG:周回数 = 0
+
+;-------------------------------------------------
+;CSVでは設定できないキャラデータの初期設定
+;-------------------------------------------------
+@ADDITIONAL_CHARA_SETTING

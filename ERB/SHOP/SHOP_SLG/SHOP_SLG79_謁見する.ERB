@@ -1,0 +1,65 @@
+﻿;-------------------------------------------------
+;「謁見する」の名称
+;-------------------------------------------------
+@SHOP_SLG_NAME79
+RESULTS:0 '= "謁見する"
+
+;-------------------------------------------------
+;「謁見する」の選択可否
+;-------------------------------------------------
+@SHOP_SLG_CHECK79
+SIF FLAG:観戦モード
+	RETURN 0
+SIF CFLAG:MASTER:所属 != 0
+	RETURN 0
+RETURN 1
+
+;-------------------------------------------------
+;「謁見する」の左カラムメニューの入力処理
+;-------------------------------------------------
+@SHOP_SLG_EVENTBUY79
+CALL SLG_AUDIENCE
+RETURN 1
+
+;-------------------------------------------------
+;「謁見する」
+;-------------------------------------------------
+@SLG_AUDIENCE
+#DIM 対象勢力
+CALL SINGLE_DRAWLINE
+PRINTFORML 各勢力の君主と謁見し、関係改善を狙います
+PRINTFORML 誰に謁見しますか？
+CALL SINGLE_DRAWLINE
+FOR LOCAL, 0, MAX_COUNTRY
+	SIF !IS_COUNTRY(LOCAL) || COUNTRY_IS_CLOSED:LOCAL
+		CONTINUE
+	LOCAL:1 = GET_COUNTRY_BOSS(LOCAL)
+	PRINTFORM [{LOCAL, 2, RIGHT}] %ANAME(LOCAL:1), 16, LEFT%
+	PRINTFORM 好:{REL_LIKE:(LOCAL:1):MASTER, 6, LEFT}
+	PRINTFORML 嫌:{REL_HATE:(LOCAL:1):MASTER, 6, LEFT}
+NEXT
+CALL SINGLE_DRAWLINE
+PRINTFORML [99] 戻る
+
+$INPUT_LOOP
+INPUT
+
+IF RESULT == 99
+	RETURN 0
+ELSEIF RESULT < 0 || MAX_COUNTRY < RESULT
+	GOTO INPUT_LOOP
+ELSEIF !IS_COUNTRY(RESULT) || COUNTRY_IS_CLOSED:RESULT
+	GOTO INPUT_LOOP
+ELSE
+	対象勢力 = RESULT
+	CALL COLOR_PRINTW(@"%ANAME(GET_COUNTRY_BOSS(対象勢力))%に謁見しました", カラー_注意)
+	CALL CHANGE_RELATION_C_TO_O(対象勢力, MASTER, RAND(50, 100), RAND(50, 100) * -1)
+	FOR LOCAL, 0, CHARANUM
+		SIF CFLAG:LOCAL:所属 != 対象勢力
+			CONTINUE
+		CFLAG:LOCAL:好感度 += 100
+	NEXT
+	RESULT = 1
+	BEGIN TURNEND
+ENDIF
+

@@ -1,0 +1,854 @@
+﻿;-------------------------------------------------
+;時間経過イベント
+;-------------------------------------------------
+@EVENTTURNEND
+#PRI
+
+FLAG:戦略フェイズページ = 1
+
+;拠点フェイズ
+IF TIME == 0
+	IF SHOP_TIME >= CALC_SHOP_TIME() || CFLAG:MASTER:捕虜先
+		CALL TURNEND_LIFE
+	ELSE
+		BASE:MASTER:体力 = MAXBASE:MASTER:体力
+		BASE:MASTER:気力 = MAXBASE:MASTER:気力
+		BEGIN SHOP
+	ENDIF
+;戦略フェイズ
+ELSE
+	CALL TURNEND_POLITICS
+ENDIF
+
+;逆調教要求日数が残っている場合
+IF DIPLOMACY_TRAINED_DAY > 0 && !FLAG:ターンエンド調教 && !FLAG:調教要求フラグ
+	DIPLOMACY_TRAINED_DAY --
+	;全員の調教参加フラグを解除
+	CVARSET CFLAG, 6, 0
+	CFLAG:DIPLOMACY_TRAINING_CHARA:調教参加フラグ = 1
+	;捕虜逆調教モード
+	FLAG:調教モード = 5
+	;ウフフモード
+	FLAG:ウフフフラグ = 1
+	PRINTFORML %ANAME(MASTER)%は外交交渉の見返りとして、%ANAME(DIPLOMACY_TRAINING_CHARA)%の寝室へ向かった……
+	CALL START_TRAIN_COMMON
+	RETURN
+ENDIF
+
+;君主逆調教要求日数が残っている場合
+IF DIPLOMACY_TRAINED_DAY < 0 && !FLAG:調教要求フラグ
+	DIPLOMACY_TRAINED_DAY ++
+	;捕虜逆調教モード
+	FLAG:調教モード = 調教_慰安
+	FLAG:慰安モード = 3
+	FLAG:慰安場所 = 慰安_行き先_貴族の居住地
+	;ウフフモード
+	FLAG:ウフフフラグ = 1
+	FLAG:調教要求フラグ = 1
+	FLAG:夜這い = 0
+	;アイテムを一通り追加
+	ITEM:A_ローター = 1
+	ITEM:A_バイブ = 1
+	ITEM:A_アナルバイブ = 1
+	ITEM:A_ペニスバンド = 1
+	ITEM:A_オナホール = 1
+	ITEM:A_クリキャップ = 1
+	ITEM:A_ニプルキャップ = 1
+	ITEM:A_媚薬 = 99
+	ITEM:A_排卵誘発剤 = 99
+	;全員の調教参加フラグを解除
+	CVARSET CFLAG, 6, 0
+	CFLAG:DIPLOMACY_TRAINING_CHARA:調教参加フラグ = 1
+	CFLAG:DIPLOMACY_TRAINING_CHARA:慰安参加者 = 1
+	CFLAG:DIPLOMACY_TRAINING_CHARA:行動済み = 1
+	CFLAG:GET_COUNTRY_BOSS(CFLAG:MASTER:所属):調教参加フラグ = 1
+	PRINTFORMW %ANAME(GET_COUNTRY_BOSS(CFLAG:MASTER:所属))%は外交交渉の見返りとして、%ANAME(DIPLOMACY_TRAINING_CHARA)%の寝室へ向かった……
+
+	;時間の処理をしないと、「拠点フェイズの終了時にここに到達、調教→調教終了でSLGフェイズのターンエンドが呼ばれ、次期の拠点フェイズに飛ぶ」みたいな挙動になる
+	;IF TIME == 0
+	;	DAY --
+	;	SIF !FLAG:クリアフラグ
+	;		TIME = 1
+	;ELSEIF TIME == 1
+	;	TIME = 0
+	;	SHOP_TIME = CALC_SHOP_TIME()
+	;ENDIF
+
+	;行動開始時の共通設定
+	CALL START_TRAIN_COMMON
+	REDRAW 1
+	RETURN
+ENDIF
+
+$SKIPPED
+
+;デッドエンディングならBEGIN TITLE
+IF FLAG:強制エンドフラグ == 1
+
+	SETCOLOR カラー_注意
+	PRINTFORMW 現時点でのデータを利用し、「周回用セーブ」を作ることができます
+	PRINTFORMW 周回用セーブをロードすることで、今の武将やアイテムを引き継いで新規にシナリオを開始できます
+	RESETCOLOR
+
+	FLAG:クリア直後フラグ = 1
+
+	CALL SAVE_GAME
+
+	BEGIN TITLE
+;ターンエンド調教が立っているなら即時調教モードに入る
+ELSEIF FLAG:ターンエンド調教
+	SELECTCASE FLAG:ターンエンド調教
+		CASE 1
+			FLAG:調教モード = 1
+		CASE 2
+			FLAG:調教モード = 5
+			FLAG:ウフフフラグ = 1
+		CASE 3
+			FLAG:調教モード = 7
+			FLAG:慰安モード = 3
+	ENDSELECT
+	FLAG:ターンエンド調教 = 0
+	FLAG:ウフフフラグ = 1
+	FLAG:夜這い = 0
+	;時間の処理をしないと、「拠点フェイズの終了時にここに到達、調教→調教終了でSLGフェイズのターンエンドが呼ばれ、次期の拠点フェイズに飛ぶ」みたいな挙動になる
+	IF TIME == 0
+		IF !FLAG:クリアフラグ
+			TIME = 1
+			DAY --
+		ENDIF
+	ELSEIF TIME == 1
+		TIME = 0
+		SHOP_TIME = CALC_SHOP_TIME()
+	ENDIF
+	FLAG:イベント発生禁止 = 1
+	CALL START_TRAIN_COMMON
+ELSE
+	SIF FLAG:調教要求フラグ
+		FLAG:調教要求フラグ = 0
+	FLAG:イベント発生禁止 = 0
+	BEGIN SHOP
+ENDIF
+
+;-------------------------------------------------
+;拠点フェイズ終了時の処理
+;-------------------------------------------------
+@TURNEND_LIFE
+SHOP_TIME = 0
+SHOP_WORK_COUNT = 0
+
+SIF FLAG:イベント発生禁止
+	GOTO SKIPPED
+
+;夜に起こるイベント(夜這いなど)
+;CALL EVENT_NIGHT
+
+CALL EVENT_WORK
+
+IF CONFIG:7 == 0
+	;捕虜の扱いを設定
+	CALL SETSTATE_PRISONER
+ELSE
+	;捕虜の人数をカウント
+	LOCAL:5 = 0
+	FOR LOCAL:0, 0, CHARANUM
+		IF LOCAL:0 != MASTER && CFLAG:(LOCAL:0):捕虜先 != 0 && CFLAG:(LOCAL:0):捕虜先 == CFLAG:MASTER:所属 && CFLAG:(LOCAL:0):軟禁中 == 0
+			LOCAL:5 ++
+		ENDIF
+	NEXT
+	;捕虜が一人でもいればラインを引く
+	IF LOCAL:5 >= 1
+		CALL SINGLE_DRAWLINE
+	ENDIF
+ENDIF
+
+
+CALL EVENT_PRISONER
+
+;捕虜でなければ、FLAG:逆調教回数（捕虜調教回数）を消す
+IF !CFLAG:MASTER:捕虜先
+	FLAG:逆調教メイン調教者 = 0
+	FLAG:逆調教回数 = 0
+ENDIF
+
+;口上呼び出し
+FOR LOCAL:0, 0, CHARANUM
+	;主人公と同一勢力の仕官で、捕虜でない
+	IF CFLAG:(LOCAL:0):所属 != 0 && LOCAL:0 != MASTER && CFLAG:(LOCAL:0):所属 == CFLAG:MASTER:所属 && CFLAG:(LOCAL:0):捕虜先 == 0
+		CALL KOJO_EVENT(LOCAL:0, 30)
+	ENDIF
+NEXT
+
+;デイリーイベント
+CALL EVENT_DAILY
+CALL EVENT_KOJO_DAILY
+
+$SKIPPED
+
+
+;統一後の場合
+;一期終了時の処理
+SIF !FLAG:ターンエンド調教
+	CALL TURNEND_COMMON
+;クールタイムのリセット
+CVARSET COOLTIME, 0
+;ターンを進める
+DAY ++
+
+;-------------------------------------------------
+;戦略フェイズ終了時の処理
+;-------------------------------------------------
+@TURNEND_POLITICS
+
+SIF FLAG:イベント発生禁止
+	GOTO SKIPPED
+
+; 防衛兵と部隊兵を保存
+ARRAYCOPY "CITY_SOLDIER", "CITY_SOLDIER_PREV"
+FOR LOCAL:0, 0, MAX_COUNTRY
+	FOR LOCAL:1, 0, MAX_UNIT
+		UNIT_SOLDIER_PREV:(LOCAL:0):(LOCAL:1) = UNIT_SOLDIER:(LOCAL:0):(LOCAL:1)
+	NEXT
+NEXT
+
+;戦闘関係の処理
+CALL SLG_TURNEND
+
+;損害を計算
+FOR LOCAL:0, 0, MAX_CITY
+	CITY_SOLDIER_PREV:(LOCAL:0) = CITY_SOLDIER_PREV:(LOCAL:0) - CITY_SOLDIER:(LOCAL:0)
+NEXT
+FOR LOCAL:0, 0, MAX_COUNTRY
+	FOR LOCAL:1, 0, MAX_UNIT
+		UNIT_SOLDIER_PREV:(LOCAL:0):(LOCAL:1) = UNIT_SOLDIER_PREV:(LOCAL:0):(LOCAL:1) - UNIT_SOLDIER:(LOCAL:0):(LOCAL:1)
+	NEXT
+NEXT
+
+;デッドエンディングなら戻る
+IF FLAG:強制エンドフラグ == 1
+	RETURN
+ENDIF
+
+;一期終了時の処理
+SIF !FLAG:ターンエンド調教
+	CALL TURNEND_COMMON
+
+$SKIPPED
+
+;時間を進める
+DAY ++
+IF FLAG:観戦モード
+	TIME = 1
+ELSE
+	TIME = 0
+ENDIF
+
+;-------------------------------------------------
+;一期終了時の処理
+;統一前なら戦略フェイズ終了後、統一後なら拠点フェイズ終了後に呼ばれる
+;-------------------------------------------------
+@TURNEND_COMMON
+VARSET LOCAL, 0
+VARSET PRISONER_TARGET, -1
+
+;奴隷市場の商品リストを更新
+CALL SLAVEMARKET_PREPARE_GOODS
+;スカウトの対象リストを更新
+CALL SCOUT_PREPARE_CANDIDATES
+;「会いに行く」の対象リストのチェック
+CALL MEET_CHECK_CANDIDATES
+
+;このターンの特別訓練実施回数をリセット
+;CALC_SPECIAL_TRAIN_PRICEより先にリセットしないと割引が正常に動作しない
+SPECIAL_TRAIN_COUNT_THIS_TURN = 0
+
+;特別訓練の価格を更新
+;次のターンの特別訓練価格になるので、いったんDAYを1増やした（次のターンの値で）計算し、戻す
+DAY ++
+CALL CALC_SPECIAL_TRAIN_PRICE
+DAY --
+
+;雇用カウンターの操作
+PLAYER_HIRED_COUNTER = MAX(0, PLAYER_HIRED_COUNTER - 1)
+COUNTRY_PLAYER_BELONGED_COUNTER++
+IF COUNTRY_PLAYER_BELONGED_COUNTER == 2 
+	ARRAYSHIFT COUNTRY_PLAYER_BELONGED, 1, 0
+	COUNTRY_PLAYER_BELONGED_COUNTER = 0
+ENDIF
+
+;野盗出現しない期間を1へらす
+BANDIT_POP_SUSPENDED = MAX(BANDIT_POP_SUSPENDED - 1, 0)
+
+;自勢力でなくなった動物の削除
+FOR LOCAL:0, CHARANUM - 1, -1, -1
+	IF IS_ANIMAL(LOCAL:0) && CFLAG:(LOCAL:0):所属 != CFLAG:MASTER:所属
+		CALL DELETE_CHARA(LOCAL:0)
+	ENDIF
+NEXT
+
+
+ARENA_DONE = 0
+APPOINT_DONE = 0
+
+;都市への投資をクリア
+VARSET CITY_INVESTED
+NOW_INVEST = 0
+
+;捕虜用変数のクリア
+CVARSET CFLAG, 30, 0
+CVARSET CFLAG, 31, 0
+CVARSET CFLAG, 32, 0
+
+;各子育てコマンドの選択回数をクリア
+FOR LOCAL:0, 110, 130
+	CVARSET CFLAG, LOCAL:0, 0
+NEXT
+
+;口上呼び出し
+FOR LOCAL:0, 0, CHARANUM
+	IF CFLAG:(LOCAL:0):所属 == CFLAG:MASTER:所属 && LOCAL:0 != MASTER
+		CALL SINGLE_DRAWLINE()
+		CALL KOJO_EVENT(LOCAL:0, 31)
+	ENDIF
+NEXT
+
+;触手部屋の管理者に経験値を加算
+IF ITEM:触手部屋 && ID_TO_CHARA(FLAG:触手部屋管理者) >= 0 && IS_SYOKUSYU_MANAGE(ID_TO_CHARA(FLAG:触手部屋管理者))
+	EXP:(ID_TO_CHARA(FLAG:触手部屋管理者)):触手経験値 += 2
+	EXP:(ID_TO_CHARA(FLAG:触手部屋管理者)):妖術経験値 += 2
+	CALL TRAIN_AUTO_ABLUP(ID_TO_CHARA(FLAG:触手部屋管理者), 1)
+ENDIF
+
+CUSTOMDRAWLINE =
+PRINTFORML 各種報告
+CUSTOMDRAWLINE =
+
+;主人公用の捕虜状態からの脱出イベント呼び出し
+CALL MASTER_ESCAPE_FROM_PRISON
+
+IF CFLAG:MASTER:所属 <= 0
+	WAIT
+;給料の支給(観戦中・捕虜のときはスキップ)◆
+ELSEIF CFLAG:MASTER:捕虜先 == 0
+	CALL SINGLE_DRAWLINE
+	PRINTFORML 給与/徴税報告
+	CALL COLOR_LINE
+	LOCAL:0 = CALC_SALARY()
+	MONEY += LOCAL:0
+	PRINTFORML %ANAME(MASTER)%に今期分の俸給が支払われました
+	IF IS_COUNTRY(CFLAG:MASTER:所属)
+		PRINTFORML 所持金＋{LOCAL:0}（現在:{MONEY}）
+	ELSE
+		PRINTFORMW 所持金＋{LOCAL:0}（現在:{MONEY}）
+	ENDIF
+ENDIF
+
+;各勢力都市の経済規模変動及び税収処理
+CALL VARY_ECONOMY
+CALL GAIN_COUNTRY_TAX
+
+CALL RESET_CITY_TIRED_COUNT
+
+;経済成長・兵数増強の補正値をクリア
+FLAG:経済成長追加値 = 0
+FLAG:兵数増加追加値 = 0
+
+;外交による調教要求フラグの解除判定
+CALL CHECK_DIPLOMACY_TRAIN_FLAG
+
+;塾による成長
+CALL CRAM_SCHOOL
+
+CALL BREWERY
+
+;朝のイベント
+;CALL EVENT_MORNING
+
+;アイテム開発イベント
+CALL ITEM_DEVELOPMENT
+
+;特殊な朝イベント
+;CALL EVENT_MORNING_SP
+
+CALL SINGLE_DRAWLINE
+PRINTFORML 特殊勢力による調教報告
+CALL COLOR_LINE
+
+;特殊勢力による調教
+FOR LOCAL, 0, MAX_COUNTRY
+	CALL SP_TRAIN(LOCAL)
+NEXT
+
+;妊娠出産関連の処理
+CALL TURNEND_PREGNANT_PHASE
+
+
+CALL SINGLE_DRAWLINE
+PRINTFORML 脱走・解放
+CALL COLOR_LINE
+
+
+;解放カウンタに基づいて解放
+CALL RELEASE_PRISONERS
+
+;捕虜になったときの解放カウンタを加算
+;ただし、特殊勢力は自然解放しない
+FOR LOCAL:0, 0, CHARANUM
+	IF CFLAG:(LOCAL:0):捕虜先 && !IS_SP_COUNTRY(CFLAG:(LOCAL:0):捕虜先)
+		CFLAG:(LOCAL:0):解放カウンタ ++
+	ELSE
+		CFLAG:(LOCAL:0):解放カウンタ = 0
+	ENDIF
+NEXT
+
+CALL SINGLE_DRAWLINE
+PRINTFORML 素質獲得報告
+CALL COLOR_LINE
+
+FOR LOCAL:0, 0, CHARANUM
+	SIF IS_APPEAR(LOCAL:0)
+		;恋慕などの素質変化の処理(二回目)
+		CALL TALENT_CHECK(LOCAL:0)
+NEXT
+
+;キャラクタの能力をどうこうする処理
+CALL TURNEND_CHARA_PROCESS
+
+;-------------------------------------------------
+;キャラの能力の変動
+;-------------------------------------------------
+@TURNEND_CHARA_PROCESS
+#DIM 対象
+#DIM 湯治場カウント, MAX_COUNTRY
+
+VARSET 湯治場カウント
+
+FOR LOCAL, 0, MAX_COUNTRY
+	SIF !IS_COUNTRY(LOCAL)
+		CONTINUE
+	湯治場カウント:LOCAL = GET_DEVELOPMENT_COUNT(建造物_湯治場, LOCAL)
+	;そこのお前！　大宴会場に含まれる関係改善効果は湯治場6個分だぜ！
+	湯治場カウント:LOCAL += GET_DEVELOPMENT_COUNT(建造物_大宴会場, LOCAL) * 6
+NEXT
+
+
+FOR LOCAL:0, 0, CHARANUM
+
+	SIF !IS_APPEAR(LOCAL:0)
+		CONTINUE
+	;全員の体力・気力を最大まで回復
+	BASE:(LOCAL:0):0 = MAXBASE:(LOCAL:0):0
+	BASE:(LOCAL:0):1 = MAXBASE:(LOCAL:0):1
+
+	;毛が成長
+	CALL INMOU_GROW(LOCAL:0)
+	CALL ARMPIT_GROW(LOCAL:0)
+	;締まりの改善
+	CALL TIGHTNESS_GROW(LOCAL:0)
+
+
+	IF HAS_TAG(LOCAL, タグ_蓬莱人) && CFLAG:LOCAL:特殊状態 == 特殊状態_死亡
+		CALL COLOR_PRINTW("リザレクション！", カラー_注意)
+		CALL COLOR_PRINTW(@"%NAME_FORMAL(LOCAL)%が蘇りました", カラー_注意)
+		CALL CHANGE_COUNTRY(LOCAL, 0, 1)
+	ENDIF
+
+	;このターン～系フラグを折る
+	CFLAG:(LOCAL:0):行動済み = 0
+
+	;捕虜でなく、所属が特殊勢力でないなら、調教カウンタを減らしていく
+	IF !IS_SP_COUNTRY(CFLAG:LOCAL:捕虜先) && !IS_SP_COUNTRY(CFLAG:LOCAL:所属)
+		FOR LOCAL:1, 0, VARSIZE("SP_TRAIN_COUNT")
+			SP_TRAIN_COUNT:LOCAL:(LOCAL:1) = MAX(SP_TRAIN_COUNT:LOCAL:(LOCAL:1) - 1, 0)
+		NEXT
+	ENDIF
+
+	IF CFLAG:(LOCAL:0):避妊薬残ターン
+		CFLAG:(LOCAL:0):避妊薬残ターン = MAX(CFLAG:(LOCAL:0):避妊薬残ターン - 1, 0)
+		IF CFLAG:(LOCAL:0):避妊薬残ターン == 0
+			CALL COLOR_PRINTL(@"%ANAME(LOCAL)%の避妊薬の効果が切れました", カラー_注意)
+			CALL CLEAR_CREAMPIE_HISTORY(LOCAL)
+		ENDIF
+	ENDIF
+
+	IF CFLAG:(LOCAL:0):排卵誘発剤
+		CFLAG:(LOCAL:0):排卵誘発剤 = MAX(CFLAG:(LOCAL:0):排卵誘発剤 - 1, 0)
+		SIF CFLAG:(LOCAL:0):排卵誘発剤 == 0
+			CALL COLOR_PRINTL(@"%ANAME(LOCAL)%の排卵誘発剤の効果が切れました", カラー_注意)
+	ENDIF
+
+	;薬物依存値を減らす 薬物中毒あると300以下にならない
+	IF GETBIT(TALENT:(LOCAL:0):淫乱系, 素質_淫乱_薬物中毒)
+		CFLAG:(LOCAL:0):薬物依存 = MAX(CFLAG:(LOCAL:0):薬物依存 * 9 / 10, 300)
+	ELSE
+		CFLAG:(LOCAL:0):薬物依存 = MAX(CFLAG:(LOCAL:0):薬物依存 - RAND:(MAX(CFLAG:(LOCAL:0):薬物依存 * 1 / 10, 1)), 0)
+
+	ENDIF
+
+	;特定勢力に所属していて捕虜でない
+	IF IS_COUNTRY(CFLAG:(LOCAL:0):所属) && !IS_SP_COUNTRY(CFLAG:(LOCAL:0):所属) && CFLAG:(LOCAL:0):捕虜先 == 0
+		FOR LOCAL:1, 0, CHARANUM
+			;同一勢力に所属するキャラの間で好感度を上昇させ、敵対度を減少させる
+			IF LOCAL:1 != LOCAL:0 && CFLAG:(LOCAL:1):所属 == CFLAG:(LOCAL:0):所属 && CFLAG:(LOCAL:1):捕虜先 == 0
+
+				LOCAL:2 = (1500 - REL_LIKE:(LOCAL:0):(LOCAL:1)) / 50 + TALENT:(LOCAL:1):謎の魅力 * 5 + 湯治場カウント:(CFLAG:(LOCAL:0):所属) * 5
+				LOCAL:3 = REL_HATE:(LOCAL:0):(LOCAL:1) / 50 + TALENT:(LOCAL:1):謎の魅力 * 5 + 湯治場カウント:(CFLAG:(LOCAL:0):所属) * 5
+
+				;自然に上がる好感度は1000まで
+				IF REL_LIKE:(LOCAL:0):(LOCAL:1) < 1000 + 10 * 湯治場カウント:(CFLAG:(LOCAL:0):所属)
+					REL_LIKE:(LOCAL:0):(LOCAL:1) = MIN(REL_LIKE:(LOCAL:0):(LOCAL:1) + LOCAL:2, 1000)
+				ENDIF
+				REL_HATE:(LOCAL:0):(LOCAL:1) = MAX(REL_HATE:(LOCAL:0):(LOCAL:1) - LOCAL:3, 0)
+			ENDIF
+		NEXT
+	;捕虜である
+	ELSEIF CFLAG:(LOCAL:0):捕虜先
+		CALL CHANGE_RELATION_O_TO_C(LOCAL:0, CFLAG:(LOCAL:0):捕虜先, 湯治場カウント * 5, 湯治場カウント * -5)
+	;放浪中
+	ELSEIF CFLAG:LOCAL:特殊状態 == 特殊状態_放浪
+		;特殊勢力以外への印象値をフラットにする
+		FOR LOCAL:1, 0, MAX_COUNTRY
+			IF IS_COUNTRY(LOCAL:1) && !IS_SP_COUNTRY(LOCAL:1)
+				LOCAL:2 = GET_COUNTRY_BOSS(LOCAL:1)
+				CALL CHANGE_RELATION_O_TO_C(LOCAL, LOCAL:1, REL_LIKE:LOCAL:(LOCAL:2) / 50 * -1, REL_HATE:LOCAL:(LOCAL:2) / 10 * -1)
+			ENDIF
+		NEXT
+	ENDIF
+
+	;捕虜の場合
+	IF CFLAG:(LOCAL:0):捕虜先 != 0 && CFLAG:(LOCAL:0):捕虜先 == CFLAG:MASTER:所属
+		;捕虜の機嫌変化
+		CALL PRISONER_CHANGE_EMOTION(LOCAL:0)
+
+	;被育児状態の子供の場合
+	ELSEIF CFLAG:(LOCAL:0):行動不能状態 == 行動不能_子供
+		;機嫌は変動しない
+
+	;捕虜でなく、被育児状態の子供でもない場合
+	ELSEIF CFLAG:(LOCAL:0):行動不能状態 != 行動不能_子供
+		;現在の機嫌を減衰させる
+		TIMES PALAM:(LOCAL:0):怒外, 0.60
+		TIMES PALAM:(LOCAL:0):哀外, 0.60
+		TIMES PALAM:(LOCAL:0):怖外, 0.60
+		TIMES PALAM:(LOCAL:0):怒主, 0.05
+		TIMES PALAM:(LOCAL:0):哀主, 0.05
+		TIMES PALAM:(LOCAL:0):怖主, 0.05
+
+		;●外的要因による機嫌にランダム値を加える
+		;<抑圧>持ちは機嫌が変動しない
+		IF !TALENT:(LOCAL:0):抑圧
+			;怪我をしている場合
+			IF CFLAG:(LOCAL:0):行動不能状態 == 3
+				IF RAND:2 == 0
+					PALAM:(LOCAL:0):怒外 += RAND:1001
+				ELSE
+					PALAM:(LOCAL:0):怒外 += RAND:301
+				ENDIF
+				IF RAND:2 == 0
+					PALAM:(LOCAL:0):哀外 += RAND:1001
+				ELSE
+					PALAM:(LOCAL:0):哀外 += RAND:301
+				ENDIF
+
+			ELSE
+				IF RAND:15 == 0
+					PALAM:(LOCAL:0):怒外 += RAND:2001 - 1000
+				ELSE
+					PALAM:(LOCAL:0):怒外 += RAND:601 - 300
+				ENDIF
+				IF RAND:15 == 0
+					PALAM:(LOCAL:0):哀外 += RAND:2001 - 1000
+				ELSE
+					PALAM:(LOCAL:0):哀外 += RAND:601 - 300
+				ENDIF
+			ENDIF
+		ENDIF
+	ENDIF
+
+	;捕虜の収監によるRELATIONの変化
+	SIF CFLAG:(LOCAL:0):捕虜先 != 0
+		CALL PRISONER_CHANGE_RELATION(LOCAL:0)
+
+	;精神力の回復
+	IF CFLAG:(LOCAL:0):精神力回復量補正 == 0
+		BASE:(LOCAL:0):精神力 = MIN(BASE:(LOCAL:0):精神力 + MAXBASE:(LOCAL:0):精神力 / 2, MAXBASE:(LOCAL:0):精神力)
+	ELSE
+		BASE:(LOCAL:0):精神力 = MIN(BASE:(LOCAL:0):精神力 + (MAXBASE:(LOCAL:0):精神力 / 2 * CFLAG:(LOCAL:0):精神力回復量補正 / 100), MAXBASE:(LOCAL:0):精神力)
+		CFLAG:(LOCAL:0):精神力回復量補正 = 0
+	ENDIF
+
+	;崩壊値の減少
+	SIF !TALENT:(LOCAL:0):崩壊
+		CFLAG:(LOCAL:0):崩壊 -= 600 + (MAXBASE:(LOCAL:0):精神力 / 5)
+
+	CFLAG:(LOCAL:0):崩壊 = LIMIT(CFLAG:(LOCAL:0):崩壊, 0, 10000)
+
+	;超成長力か努力家があればランダムに能力経験値獲得
+	IF FIND_PASSIVE_SKILL(LOCAL:0, "超成長力")|| FIND_PASSIVE_SKILL(LOCAL:0, "努力家")
+		LOCAL:1 = RAND(1, 4)
+		SELECTCASE IFRAND("0TO5", 1, "6", TALENT:LOCAL:妖術知識)
+			CASE 0
+				LOCAL:2 = GETNUM(EXP, "武闘経験値")
+			CASE 1
+				LOCAL:2 = GETNUM(EXP, "防衛経験値")
+			CASE 2
+				LOCAL:2 = GETNUM(EXP, "知略経験値")
+			CASE 3
+				LOCAL:2 = GETNUM(EXP, "政治経験値")
+			CASE 4
+				LOCAL:2 = GETNUM(EXP, "料理経験値")
+			CASE 5
+				LOCAL:2 = GETNUM(EXP, "歌唱経験値")
+			CASE 6
+				LOCAL:2 = GETNUM(EXP, "妖術経験値")
+				LOCAL:1 *= 20
+		ENDSELECT
+		EXP:(LOCAL:0):(LOCAL:2) += LOCAL:1
+		CALL TRAIN_AUTO_ABLUP(LOCAL:0, 1)
+	ENDIF
+
+	;子供の成長度を加算
+	SIF TALENT:(LOCAL:0):幼児
+		CFLAG:(LOCAL:0):子の成長度 = MIN(CFLAG:(LOCAL:0):子の成長度 + 1, 999999)
+
+NEXT
+
+;-------------------------------------------------
+;「会いに行く」での放浪中キャラの用意
+;-------------------------------------------------
+@MEET_CHECK_CANDIDATES()
+
+MEET_CANDIDATES_REST_TURN --
+
+FOR LOCAL, 0, MEET_MAX_CANDIDATES
+	LOCAL:1 = ID_TO_CHARA(MEET_CANDIDATES:LOCAL)
+	SIF LOCAL:1 == -1
+		CONTINUE
+	IF CFLAG:(LOCAL:1):特殊状態 != 特殊状態_放浪 || CFLAG:(LOCAL:1):捕虜先
+		MEET_CANDIDATES:LOCAL = 0
+	ENDIF
+NEXT
+
+IF !IS_COUNTRY(CFLAG:MASTER:所属) || IS_SP_COUNTRY(CFLAG:MASTER:所属)
+	VARSET MEET_CANDIDATES, 0
+	VARSET MEET_CANDIDATES_REST_TURN, 0
+	RETURN 0
+ENDIF
+
+LOCAL:2 = 1
+
+FOR LOCAL, 0, MEET_MAX_CANDIDATES
+	LOCAL:1 = ID_TO_CHARA(MEET_CANDIDATES:LOCAL)
+	IF LOCAL:1 != -1
+		LOCAL:2 = 0
+		BREAK
+	ENDIF
+NEXT
+
+SIF LOCAL:2
+	MEET_CANDIDATES_REST_TURN = 0
+
+SIF MEET_CANDIDATES_REST_TURN > 0
+	RETURN 0
+
+VARSET MEET_CANDIDATES, 0
+VARSET MEET_CANDIDATES_REST_TURN, 0
+
+CALL SELECT_CHARA_RANDOM_MULTI(MEET_MAX_CANDIDATES, "MEET_CHECK_CANDIDATES")
+
+FOR LOCAL, 0, MIN(MEET_MAX_CANDIDATES, SELECTED_CHARA_NUM)
+	MEET_CANDIDATES:LOCAL = GET_ID(SELECTED_CHARA:LOCAL)
+NEXT
+
+SIF SELECTED_CHARA_NUM > 0
+	MEET_CANDIDATES_REST_TURN = 4
+
+@SELECT_CHARA_RANDOM_LOGIC_MEET_CHECK_CANDIDATES(対象)
+#DIM 対象
+RETURN 対象 != MASTER && !CFLAG:対象:捕虜先 && CFLAG:対象:特殊状態 == 特殊状態_放浪
+
+;-------------------------------------------------
+;脱出イベント
+;-------------------------------------------------
+@MASTER_ESCAPE_FROM_PRISON
+
+SIF !(CFLAG:MASTER:捕虜先 && RAND:100 < 15)
+	RETURN -1
+
+CALL SINGLE_DRAWLINE
+PRINTFORMW 囚われていた%ANAME(MASTER)%だが、看守の隙を見つけた
+PRINTFORMW 今ならば脱出できるかもしれない……
+CALL ASK_YN("脱出を試みる", "危険な真似はよそう")
+
+IF RESULT == 1
+	PRINTFORMW 失敗したらどんな酷い目に合わされるかもわからない
+	PRINTFORMW 今はまだ大人しくしていたほうが良さそうだ……
+	CALL SINGLE_DRAWLINE
+	RETURN
+ENDIF
+
+
+PRINTFORMW この機を逃す手はない！
+PRINTFORMW %ANAME(MASTER)%は脱出を試みた
+PRINTFORML ・
+PRINTFORML ・
+PRINTFORMW ・
+
+IF RAND:5 <= 3
+	IF !CFLAG:MASTER:所属
+		PRINTFORMW 脱出に成功した！
+		PRINTFORMW %ANAME(MASTER)%は放浪する事にしました
+	ELSE
+		PRINTFORMW 脱出に成功した！
+		PRINTFORMW %ANAME(MASTER)%は勢力に復帰しました
+	ENDIF
+	CALL CAPTURE(MASTER, 0)
+	CALL SINGLE_DRAWLINE
+	RETURN
+ENDIF
+
+IF IS_MALE(MASTER)
+	PRINTFORMW 脱出に失敗してしまった……
+	PRINTFORMW 見つかった%ANAME(MASTER)%はキツイ拷問を受けた後、牢屋に戻された
+	RETURN
+ENDIF
+
+PRINTFORMW 脱出に失敗してしまった……
+PRINTFORMW 兵士達に見つかった%ANAME(MASTER)%は、仕置きと称して連れて行かれた
+PRINTFORML 
+SELECTCASE RAND:5
+	CASE 0
+		PRINTFORMW %ANAME(MASTER)%は兵舎の隅にある飼育場に連れてこられた
+		PRINTFORML 手足を縛られ、素っ裸の状態で豚の群れの中に放り込まれると
+		PRINTFORMW たちまち盛りのついた豚達に群がられ、いきなり濡れていない膣にペニスを挿入された
+		PRINTFORML 痛みと嫌悪感で悲鳴を上げる%ANAME(MASTER)%だったが、盛りのついた畜生に気遣う心などあるはずもなく
+		PRINTFORMW 目の前の雌を確実に孕ませようとする豚の激しいピストンで、膣を蹂躙されていく
+		PRINTFORML 必死で逃れようとする%ANAME(MASTER)%の努力も空しく、がっちりと奥深くまで挿入されており、それもかなわない
+		PRINTFORMW やがて豚が一際大きな鳴き声を上げると、ぶびゅるぶびゅるとねっとりとした精液が%ANAME(MASTER)%の中へと放たれた
+		PRINTFORMW そのおぞましい感触に%ANAME(MASTER)%は涙ながらに許しを請うが、兵士達はその姿を見てゲラゲラと笑うばかりだった
+		PRINTFORMW その後も%ANAME(MASTER)%は数えきれないほどの豚に種付けされ、身体の中も外もドロドロにされてしまった
+	CASE 1
+		PRINTFORMW %ANAME(MASTER)%は男囚用の牢獄に連れてこられた
+		PRINTFORML 牢の中には大量の囚人がいる。彼らは%ANAME(MASTER)%を見ると　女だ！犯させろ！　と狂気に近い叫びをあげる
+		PRINTFORMW 何をされるか悟った%ANAME(MASTER)%は顔をひきつらせ許しを請うが、兵士達は無視して牢に%ANAME(MASTER)%を放り込んだ
+		PRINTFORML 牢獄の中は薄暗く、怯える%ANAME(MASTER)%は、周囲の暗がりから注がれる無数の飢えた視線を感じた
+		PRINTFORMW 危機を感じ逃れようとする%ANAME(MASTER)%に、無数の手が伸びてきて床に押さえつけると、その服を乱暴に剥ぎ取っていく
+		PRINTFORML 絶叫を上げて抵抗する%ANAME(MASTER)%だが、屈強な男たちに囲まれてはなすすべもなく、全身を好き放題に弄られる
+		PRINTFORMW やがて一際体躯の良い男が押さえつけられた%ANAME(MASTER)%の前に現れ、その凶悪なペニスを露わにした
+		PRINTFORMW これ以上は止める様に震える声で説得する%ANAME(MASTER)%だったが、それがむしろ彼らの加虐心に火をつけてしまった
+		PRINTFORMW 男達は泣き喚く%ANAME(MASTER)%を容赦なく犯しつくし、兵士に回収される頃には%ANAME(MASTER)%はボロボロにされてしまっていた
+	CASE 2
+		PRINTFORMW %ANAME(MASTER)%は牢屋ではなく拷問部屋に連れてこられた
+		PRINTFORMW %ANAME(MASTER)%が拷問器具の数々に釘付けになっていると、隣の部屋から耳を覆いたくなる様な悲鳴が聞こえてきた
+		PRINTFORML 使ってみたかった道具があるんだと兵士達は笑い、いかにも女性用といった器具を%ANAME(MASTER)%の前に並べる
+		PRINTFORMW 一つ一つ丁寧に使い方を説明され、何をされるのか想像してしまった%ANAME(MASTER)%はガクガクと身体を震わせる
+		PRINTFORML その姿に兵士達はニヤニヤと笑い、俺たちに奉仕するならやめてやってもいいぞと優しく囁いた
+		PRINTFORMW 再び隣の部屋から聞こえてきた悲鳴に、%ANAME(MASTER)%の抵抗心は折れてしまい、奉仕させてくださいとすがりついた
+		PRINTFORML ニヤケる兵士達がペニスを露出し%ANAME(MASTER)%に押し付けると、%ANAME(MASTER)%はひざまづいて口と手を使いそれを扱き出した
+		PRINTFORMW %ANAME(MASTER)%は必死で兵士達に奉仕し、彼らが射精すると、両手と口で受け止め下品な音を立てながら飲み干していく
+		PRINTFORMW 精液でドロドロになった%ANAME(MASTER)%だが、それで彼らが収まるはずもなく、その後は雌穴と尻穴も使い兵士達に奉仕し続けた
+	CASE 3
+		PRINTFORMW %ANAME(MASTER)%は裸に剥かれると、首輪とリードを付けた格好で連れ回された
+		PRINTFORMW  他の兵士に出会うたびに好奇と欲情の混じった視線を投げられるが、身体を隠す事も許されず羞恥で顔を真っ赤にする
+		PRINTFORML 更に、首輪をつけたのだからそれらしく四つん這いで歩け　と命令される
+		PRINTFORML 睨みつける%ANAME(MASTER)%に対し、兵士達は剣を突き付け、脱走の罪で処刑されたくなければ大人しく従うように脅す
+		PRINTFORMW ここは大人しく従うしかないと自分に言い聞かせ、%ANAME(MASTER)%は震える身体で四つん這いになる
+		PRINTFORML その恰好のまま、犬の散歩の様に兵舎内を練り歩かされ、屈辱と羞恥で%ANAME(MASTER)%の頭は沸騰しそうになる
+		PRINTFORMW 気付かぬうちに雌穴から愛液が垂れだしており　そのことを兵に指摘されると、ブルブルと身体を震わせ弁明の言葉をぼそぼそと呟く
+		PRINTFORML しかし兵士達は%ANAME(MASTER)%の言葉を無視して、お待ちかねの物だぞと、%ANAME(MASTER)%の雌穴にペニスをぶち込んだ
+		PRINTFORMW 想像以上に昂ぶっていた%ANAME(MASTER)%の身体はビクンと跳ね上がり、あられもない喘ぎ声をあげてしまった
+		PRINTFORMW その後も繰り返し、まるで動物の交尾の様な濃厚な種付けをされてしまった
+	CASE 4
+		PRINTFORMW %ANAME(MASTER)%は見せしめとして、晒し台に拘束された
+		PRINTFORML 必死で抜け出そうともがくが、頭を両手をがっちりと拘束されており抜け出せそうもない
+		PRINTFORMW その姿に兵士達は、まるで自ら尻を振って誘っているようだと、嘲りの声を上げる
+		PRINTFORMW やがて一人の兵士が%ANAME(MASTER)%の腰を掴み、汗で濡れだしている秘所にペニスを擦り付けてくる
+		PRINTFORML 必死でやめる様に説得する%ANAME(MASTER)%に、兵士はもうこんなことはしないと誓うなら許してやると告げる
+		PRINTFORMW %ANAME(MASTER)%が、ここで犯されるよりはと誓いの言葉を言おうとした瞬間、ずん！と強烈な衝撃が下半身に走った
+		PRINTFORML 電撃が走ったような激しい衝撃に%ANAME(MASTER)%が悲鳴を上げる。目がチカチカして一瞬何が起こったのかわからなかったが
+		PRINTFORMW 膣から伝わりだした熱ですぐに挿入されたのだとわかった。兵士は%ANAME(MASTER)%との約束など守るつもりはなかったのだ
+		PRINTFORMW 屈辱で涙目になる%ANAME(MASTER)%を嘲笑いながら、兵士達は散々%ANAME(MASTER)%を犯しつくした
+ENDSELECT
+CALL FUCK_GANGBANG(MASTER, GET_SPERM_ID("兵士"), @"誰とも知らぬ兵士の\@ RAND:2 ? ペニス # 唇\@", "誰とも知らぬ兵士たち")
+CALL FUCK_GANGBANG(MASTER, GET_SPERM_ID("兵士"), @"誰とも知らぬ兵士の\@ RAND:2 ? ペニス # 唇\@", "誰とも知らぬ兵士たち")
+
+PRINTFORML 
+PRINTFORMW %ANAME(MASTER)%は散々凌辱された後、牢屋に放り込まれた
+
+RETURN 0
+
+
+;-------------------------------------------------
+;解放カウンタに基づいて捕虜を解放する処理
+;-------------------------------------------------
+@RELEASE_PRISONERS()
+#DIM 特殊捕虜先
+VARSET LOCAL
+
+;主人公が捕虜で監禁日数が4日以上ときのみ発生
+IF CFLAG:MASTER:捕虜先 && CFLAG:MASTER:解放カウンタ >= 5 && RAND:100 < (CFLAG:MASTER:解放カウンタ - 5) * 15 + 15
+	CALL SINGLE_DRAWLINE
+	PRINTFORMW 兵士たちが%ANAME(MASTER)%の牢を開け、%ANAME(MASTER)%に対して外に出るように言った
+	PRINTFORMW どうやら%ANAME(MASTER)%は解放されることになったようだ…
+	PRINTL 
+	IF CFLAG:MASTER:所属 == 0
+		SETCOLOR カラー_注意
+		PRINTFORMW %ANAME(MASTER)%は放浪の身になりました
+		RESETCOLOR
+	ELSE
+		SETCOLOR カラー_注意
+		PRINTFORMW %ANAME(MASTER)%は君主の元へと戻りました
+		RESETCOLOR
+	ENDIF
+	CALL CAPTURE(MASTER, 0)
+ENDIF
+
+FOR LOCAL, 1, CHARANUM
+	特殊捕虜先 = IS_SP_COUNTRY(CFLAG:LOCAL:捕虜先)
+	;もしその国が何らかの理由で滅んでいるのにまだ捕らえられていたら、強制的に解放する
+	IF CFLAG:LOCAL:捕虜先 && !IS_COUNTRY(CFLAG:LOCAL:捕虜先)
+		IF !LOCAL:1
+			CALL SINGLE_DRAWLINE
+			LOCAL:1 = 1
+		ENDIF
+		SETCOLOR カラー_注意
+		IF IS_COUNTRY(CFLAG:LOCAL:所属)
+			PRINTFORML 囚われていた%ANAME(LOCAL)%は解放され、%ANAME(GET_COUNTRY_BOSS(CFLAG:LOCAL:所属))%のところに戻りました
+		ELSE
+			PRINTFORML 囚われていた%ANAME(LOCAL)%は解放され、放浪しました
+			CFLAG:LOCAL:特殊状態 = 特殊状態_放浪
+		ENDIF
+		RESETCOLOR
+	;通常の解放処理
+	ELSEIF LOCAL != MASTER && CFLAG:LOCAL:捕虜先 && CFLAG:LOCAL:捕虜先 != CFLAG:MASTER:所属 && MIN((CFLAG:LOCAL:解放カウンタ - 5) * 5, 30) > RAND:100 && !特殊捕虜先
+		IF !LOCAL:1
+			CALL SINGLE_DRAWLINE
+			LOCAL:1 = 1
+		ENDIF
+		SETCOLOR カラー_注意
+		IF IS_COUNTRY(CFLAG:LOCAL:所属)
+			PRINTFORML %ANAME(GET_COUNTRY_BOSS(CFLAG:LOCAL:捕虜先))%に囚われていた%ANAME(LOCAL)%は\@ CFLAG:LOCAL:解放カウンタ >= 10 ? ようやく# \@解放され、%ANAME(GET_COUNTRY_BOSS(CFLAG:LOCAL:所属))%のところに戻りました
+		ELSE
+			PRINTFORML %ANAME(GET_COUNTRY_BOSS(CFLAG:LOCAL:捕虜先))%に囚われていた%ANAME(LOCAL)%は解放され、放浪しました
+		ENDIF
+		RESETCOLOR
+		CALL CAPTURE(LOCAL:0, 0)
+	;たまに脱走する。特殊勢力なら率高め
+	ELSEIF (LOCAL != MASTER && CFLAG:LOCAL:捕虜先 && CFLAG:LOCAL:捕虜先 != CFLAG:MASTER:所属 && 特殊捕虜先 * 12 + 3 > RAND:100)
+		IF !LOCAL:1
+			CALL SINGLE_DRAWLINE
+			LOCAL:1 = 1
+		ENDIF
+		IF CFLAG:LOCAL:捕虜先 != CFLAG:LOCAL:所属 && (!特殊捕虜先 || CFLAG:LOCAL:所属)
+			SETCOLOR カラー_注意
+			IF IS_COUNTRY(CFLAG:LOCAL:所属)
+				PRINTFORML %ANAME(GET_COUNTRY_BOSS(CFLAG:LOCAL:捕虜先))%に囚われていた%ANAME(LOCAL)%は脱走し、%ANAME(GET_COUNTRY_BOSS(CFLAG:LOCAL:所属))%のところに戻りました
+			ELSE
+				PRINTFORML %ANAME(GET_COUNTRY_BOSS(CFLAG:LOCAL:捕虜先))%に囚われていた%ANAME(LOCAL)%は脱走し、放浪しました
+			ENDIF
+			RESETCOLOR
+			CALL CAPTURE(LOCAL:0, 0)
+		ENDIF
+	ENDIF
+NEXT
+CALL KILL_EMPTY_LINE()
+

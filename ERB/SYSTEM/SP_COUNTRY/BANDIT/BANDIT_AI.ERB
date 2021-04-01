@@ -1,0 +1,185 @@
+﻿;-------------------------------------------------
+;野盗の処理
+;-------------------------------------------------
+@BANDIT_AI(勢力)
+#DIM 勢力
+#DIM 兵数
+#DIM 増加量
+#DIM 部隊番号
+#DIM 出兵先
+#DIM 中継点の数
+#DIM 接続都市所有者,2
+#DIM 解散フラグ
+#DIM 都市数, MAX_COUNTRY
+
+;クールタイム減少処理と、このターンに割り当てたフラグ削除処理
+FOR LOCAL, 0, CHARANUM
+	IF CFLAG:LOCAL:所属 == 勢力
+		COOLTIME:LOCAL:0 = MAX(COOLTIME:LOCAL:0 - 1 , 0)
+		ASSIGNED_THIS_TURN:LOCAL:0 = 0
+	ENDIF
+NEXT
+
+;野盗湧かない期間中だとなにもせずにおわる
+SIF BANDIT_POP_SUSPENDED > 0
+	RETURN 0
+
+CALL BANDIT_ADD_SOLDIER(勢力)
+
+CALL BANDIT_CLEAR_UNIT(勢力)
+
+CALL BANDIT_CREATE_UNIT(勢力)
+
+
+;-------------------------------------------------
+;野盗の徴兵処理
+;-------------------------------------------------
+@BANDIT_ADD_SOLDIER(勢力)
+#DIM 勢力
+#DIM 利用経済
+#DIM 兵数
+#DIM 経済合計, MAX_COUNTRY
+VARSET 経済合計, __INT_MIN__
+
+FOR LOCAL, 0, MAX_COUNTRY
+	SIF IS_COUNTRY(LOCAL) && LOCAL != 勢力
+		経済合計:LOCAL = TMP_SUM_ECONOMY:LOCAL
+NEXT
+
+ARRAYSORT 経済合計, BACK
+
+利用経済 = MAX(経済合計:0, 0)
+
+IF 経済合計:1 != __INT_MIN__
+	利用経済 += 経済合計:1
+	利用経済 /= 2
+ENDIF
+
+;DEBUGPRINTFORML 利用経済{利用経済}
+
+兵数 = MAX(利用経済 / 100, 0)
+
+COUNTRY_SOLDIER:勢力 = MIN(COUNTRY_SOLDIER:勢力 + 兵数, 利用経済 / 10)
+
+;DEBUGPRINTFORML 野盗徴兵 兵数 + {兵数} COUNTRY_SOLDIER:{COUNTRY_SOLDIER:勢力}
+
+;-------------------------------------------------
+;部隊の解体処理
+;-------------------------------------------------
+@BANDIT_CLEAR_UNIT(勢力)
+#DIM 勢力
+#DIM 部隊
+#DIM 部隊現在地
+#DIM 都市所有者,2
+#DIM 確定兵数
+FOR 部隊, 0, MAX_UNIT
+	部隊現在地 = UNIT_POSITION:勢力:部隊
+	FOR LOCAL, 0, VARSIZE("CITY_ROUTE", 1)
+		都市所有者:0 = CITY_OWNER:(CITY_ROUTE:部隊現在地:LOCAL)
+		FOR LOCAL:1, LOCAL + 1, VARSIZE("CITY_ROUTE", 1)
+			都市所有者:1 = CITY_OWNER:(CITY_ROUTE:部隊現在地:(LOCAL:1))
+			IF TMP_COUNTRY_RELATION:(都市所有者:0):(都市所有者:1) != 0
+				CALL CLEAR_UNIT(勢力, 部隊)
+				GOTO CLEARED
+			ENDIF
+		NEXT
+	NEXT
+	;そうでなければ、
+	TIMES UNIT_SOLDIER:勢力:部隊, 1.05
+	UNIT_SOLDIER:勢力:部隊 = MIN(UNIT_SOLDIER:勢力:部隊, 30000)
+	$CLEARED
+NEXT
+
+
+;-------------------------------------------------
+;部隊の生成処理
+;-------------------------------------------------
+@BANDIT_CREATE_UNIT(勢力)
+#DIM 勢力
+#DIM 部隊
+#DIM 中継地点
+#DIM 位置
+#DIM 都市所有者,2
+#DIM 候補, MAX_CITY
+#DIM 候補数
+#DIM 兵数
+
+SIF DAY % 3 != 0
+	RETURN
+
+VARSET 候補
+VARSET 候補数
+
+;GET_CITY_NUMの戻り値以降が中継地点である前提
+FOR 中継地点, GET_CITY_NUM(), MAX_CITY
+	$SKIPPED
+	;中継地点でない、またはCITY_ROUTEが一切登録されていない場合は飛ばす
+	SIF CITY_TYPE:中継地点 != 1 || CITY_ROUTE:中継地点:0 == 0
+		CONTINUE
+	;戦略
+	;両方の都市所有者を比較する
+	;両方無所属、または所属があっても敵同士でない場合は出現位置として含めない
+	FOR LOCAL, 0, VARSIZE("CITY_ROUTE", 1)
+		;登録されてなければ飛ばす
+		SIF CITY_ROUTE:中継地点:LOCAL == 0
+			CONTINUE
+		都市所有者:0 = CITY_OWNER:(CITY_ROUTE:中継地点:LOCAL)
+		FOR LOCAL:1, LOCAL, VARSIZE("CITY_ROUTE", 1)
+			;登録されてなければ飛ばす
+			SIF CITY_ROUTE:中継地点:(LOCAL:1) == 0
+				CONTINUE
+			都市所有者:1 = CITY_OWNER:(CITY_ROUTE:中継地点:(LOCAL:1))
+			SIF (!IS_COUNTRY(都市所有者:0) && !IS_COUNTRY(都市所有者:1)) || TMP_COUNTRY_RELATION:(都市所有者:0):(都市所有者:1) != 0
+				CONTINUE
+			;すでに自分とこの部隊がいたら駄目
+			;GOTO使わないといけないのはネックだが、ここでやらないと中継地点*MAX_UNITのループが必ず発生することになりダルい
+			FOR 部隊, 0, MAX_UNIT
+				IF UNIT_POSITION:勢力:部隊 == 中継地点
+					中継地点 ++
+					GOTO SKIPPED
+				ENDIF
+			NEXT
+			;条件を満たす場合は候補に入れる
+			;次の中継地点を見る
+			候補:候補数 = 中継地点
+			候補数 ++
+			中継地点 ++
+			GOTO SKIPPED
+		NEXT
+	NEXT
+NEXT
+
+SIF 候補数 == 0
+	RETURN
+
+CALL FISHER_YATES_SHAFFLE(候補数)
+
+FOR 部隊, 0, MAX_UNIT
+
+	SIF UNIT_SOLDIER:勢力:部隊 != 0
+		CONTINUE
+
+	兵数 = MIN(COUNTRY_SOLDIER:勢力 / 2, 30000)
+
+	SIF 兵数 < 5000
+		BREAK
+
+	UNIT_SOLDIER:勢力:部隊 = 兵数
+	COUNTRY_SOLDIER:勢力 -= 兵数
+
+	CALL CHECK_BEST_COMMANDER(勢力)
+
+	FOR 位置, 0, MAX_UNIT_COMMANDER
+		SIF BEST_COMMANDER:位置 == -1
+			BREAK
+		CALL SET_UNIT_COMMANDER(勢力, 部隊, 位置, BEST_COMMANDER:位置)
+		TMP_IS_FREE:(BEST_COMMANDER:位置):0 = 1
+	NEXT
+
+	UNIT_POSITION:勢力:部隊 = 候補:(SHAFFLE_ARRAY:0)
+	候補数 --
+	ARRAYSHIFT SHAFFLE_ARRAY:0, -1, 0
+	SIF 候補数 == 0
+		BREAK
+	;DEBUGPRINTFORML 野盗出兵:%GET_CITYNAME(UNIT_POSITION:勢力:部隊)% 兵数{UNIT_SOLDIER:勢力:部隊}
+NEXT

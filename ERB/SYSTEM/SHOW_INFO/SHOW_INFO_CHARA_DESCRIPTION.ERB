@@ -1,0 +1,417 @@
+﻿;-------------------------------------------------
+;エロステータス表示
+;-------------------------------------------------
+@SHOW_INFO_ERO_DESCRIPTION(対象)
+#DIM 対象
+CALL SINGLE_DRAWLINE
+PRINTFORML 肉体
+CALL COLOR_LINE
+
+CALL SHOW_INFO_ERO_DESCRIPTION_BODY(対象)
+
+CALL SINGLE_DRAWLINE
+PRINTFORML 感覚
+CALL COLOR_LINE
+
+CALL SHOW_INFO_ERO_DESCRIPTION_SENSE(対象)
+
+CALL SINGLE_DRAWLINE
+PRINTFORML 性的嗜好
+CALL COLOR_LINE
+
+CALL SHOW_INFO_ERO_DESCRIPTION_FETISH(対象)
+
+CALL SINGLE_DRAWLINE
+PRINTFORML 陥落
+CALL COLOR_LINE
+
+CALL SHOW_INFO_ERO_DESCRIPTION_FALLEN(対象)
+
+CALL SINGLE_DRAWLINE
+PRINTFORML 特殊な陥落
+CALL COLOR_LINE
+
+CALL SHOW_INFO_ERO_DESCRIPTION_SP_FALLEN(対象)
+
+CALL SINGLE_DRAWLINE
+PRINTFORML SLG説明
+CALL COLOR_LINE
+TRYCCALLFORM SHOW_CHARA_EXPLANATION_{NO:(対象)}
+	CALL SINGLE_EMPTY_LINE()
+CATCH
+	PRINTFORML SLG説明なし　
+	CALL SINGLE_EMPTY_LINE()
+ENDCATCH
+
+;-------------------------------------------------
+;エロステータス表示　肉体
+;-------------------------------------------------
+@SHOW_INFO_ERO_DESCRIPTION_BODY(対象)
+#DIM 対象
+IF TALENT:対象:キス未経験
+	PRINTFORML 口づけを交わしたことがない
+ELSE
+	CALL COLOR_PRINT(SEXUAL_EXPERIENCE:対象:初体験_キス == "不明" ? "誰か" # SEXUAL_EXPERIENCE:対象:初体験_キス, カラー_ピンク, "に", GETDEFCOLOR())
+	SIF SEXUAL_EXPERIENCE_SITUATION:対象:初体験_キス != ""
+		CALL COLOR_PRINT(SEXUAL_EXPERIENCE_SITUATION:対象:初体験_キス, カラー_ピンク, "で", GETDEFCOLOR())
+	PRINTFORML 唇の初めてを捧げた
+	IF SEXUAL_LAST_EXPERIENCE:対象:初体験_キス != ""
+		CALL COLOR_PRINT("直近では", GETDEFCOLOR(), SEXUAL_LAST_EXPERIENCE:対象:初体験_キス == "不明" ? "誰か" # SEXUAL_LAST_EXPERIENCE:対象:初体験_キス, カラー_ピンク, "に", GETDEFCOLOR())
+		SIF SEXUAL_LAST_EXPERIENCE_SITUATION:対象:初体験_キス != ""
+			CALL COLOR_PRINT(SEXUAL_LAST_EXPERIENCE_SITUATION:対象:初体験_キス, カラー_ピンク, "で", GETDEFCOLOR())
+		PRINTFORML 口づけている
+	ENDIF
+ENDIF
+
+IF HAS_VAGINA(対象)
+	IF TALENT:対象:処女
+		PRINTFORML 膣穴は純潔を保っている
+	ELSE
+		CALL COLOR_PRINT(SEXUAL_EXPERIENCE:対象:初体験_処女 == "不明" ? "誰か" # SEXUAL_EXPERIENCE:対象:初体験_処女, カラー_ピンク, "に", GETDEFCOLOR())
+		SIF SEXUAL_EXPERIENCE_SITUATION:対象:初体験_処女 != ""
+			CALL COLOR_PRINT(SEXUAL_EXPERIENCE_SITUATION:対象:初体験_処女, カラー_ピンク, "で", GETDEFCOLOR())
+		PRINTFORML 純潔を捧げた
+		IF SEXUAL_LAST_EXPERIENCE:対象:初体験_処女 != ""
+			CALL COLOR_PRINT("直近では", GETDEFCOLOR(), SEXUAL_LAST_EXPERIENCE:対象:初体験_処女 == "不明" ? "誰か" # SEXUAL_LAST_EXPERIENCE:対象:初体験_処女, カラー_ピンク, "と", GETDEFCOLOR())
+			SIF SEXUAL_LAST_EXPERIENCE_SITUATION:対象:初体験_処女 != ""
+				CALL COLOR_PRINT(SEXUAL_LAST_EXPERIENCE_SITUATION:対象:初体験_処女, カラー_ピンク, "で", GETDEFCOLOR())
+			PRINTFORML 交わっている
+		ENDIF
+	ENDIF
+ENDIF
+
+IF TALENT:対象:アナル処女
+	PRINTFORML 尻穴は純潔を保っている
+ELSE
+	CALL COLOR_PRINT(SEXUAL_EXPERIENCE:対象:初体験_アナル処女 == "不明" ? "誰か" # SEXUAL_EXPERIENCE:対象:初体験_アナル処女, カラー_ピンク, "に", GETDEFCOLOR())
+	SIF SEXUAL_EXPERIENCE_SITUATION:対象:初体験_アナル処女 != ""
+		CALL COLOR_PRINT(SEXUAL_EXPERIENCE_SITUATION:対象:初体験_アナル処女, カラー_ピンク, "で", GETDEFCOLOR())
+	PRINTFORML 尻穴での初体験を捧げた
+	IF SEXUAL_LAST_EXPERIENCE:対象:初体験_アナル処女 != ""
+		CALL COLOR_PRINT("直近では", GETDEFCOLOR(), SEXUAL_LAST_EXPERIENCE:対象:初体験_アナル処女 == "不明" ? "誰か" # SEXUAL_LAST_EXPERIENCE:対象:初体験_アナル処女, カラー_ピンク, "と", GETDEFCOLOR())
+		SIF SEXUAL_LAST_EXPERIENCE_SITUATION:対象:初体験_アナル処女 != ""
+			CALL COLOR_PRINT(SEXUAL_LAST_EXPERIENCE_SITUATION:対象:初体験_アナル処女, カラー_ピンク, "で", GETDEFCOLOR())
+		PRINTFORML 交わっている
+	ENDIF
+ENDIF
+
+IF HAS_PENIS(対象)
+	IF TALENT:対象:童貞
+		PRINTFORML 未だ童貞だ
+	ELSE
+		CALL COLOR_PRINT(SEXUAL_EXPERIENCE:対象:初体験_童貞 == "不明" ? "誰か" # SEXUAL_EXPERIENCE:対象:初体験_童貞, カラー_ピンク, "に", GETDEFCOLOR())
+		SIF SEXUAL_EXPERIENCE_SITUATION:対象:初体験_童貞 != ""
+			CALL COLOR_PRINT(SEXUAL_EXPERIENCE_SITUATION:対象:初体験_童貞, カラー_ピンク, "で", GETDEFCOLOR())
+		PRINTFORML 童貞を捧げた
+		IF SEXUAL_LAST_EXPERIENCE:対象:初体験_童貞 != ""
+			CALL COLOR_PRINT("直近では", GETDEFCOLOR(), SEXUAL_LAST_EXPERIENCE:対象:初体験_童貞 == "不明" ? "誰か" # SEXUAL_LAST_EXPERIENCE:対象:初体験_童貞, カラー_ピンク, "と", GETDEFCOLOR())
+			SIF SEXUAL_LAST_EXPERIENCE_SITUATION:対象:初体験_童貞 != ""
+				CALL COLOR_PRINT(SEXUAL_LAST_EXPERIENCE_SITUATION:対象:初体験_童貞, カラー_ピンク, "で", GETDEFCOLOR())
+			PRINTFORML 交わっている
+		ENDIF
+	ENDIF
+ENDIF
+
+IF IS_FEMALE(対象)
+	SELECTCASE GET_BUSTSIZE(対象)
+		CASE -2
+			PRINTFORML 胸にはふくらみがなく、まったくの平らだ
+		CASE -1
+			PRINTFORML 乳房は小ぶりながらも整った形をしている
+		CASE 0
+			PRINTFORML 乳房はちょうどいい大きさの魅力的な形をしている
+		CASE 1
+			PRINTFORML 豊かで柔らかそうな乳房が目をひく
+		CASE 2
+			PRINTFORML はちきれんほどたわわに実った乳房が視線をくぎ付けにする
+	ENDSELECT
+	SELECTCASE GET_HIPSIZE(対象)
+		CASE -2
+			PRINTFORML 尻の肉付きはかなり薄く、まったくの平らだ
+		CASE -1
+			PRINTFORML 尻は小ぶりながらも整った形をしている
+		CASE 0
+			PRINTFORML 尻はちょうどいい大きさの魅力的な形をしている
+		CASE 1
+			PRINTFORML 豊かで弾力のある尻が目をひく
+		CASE 2
+			PRINTFORML はちきれんほど肉の詰まった尻が視線をくぎ付けにする
+	ENDSELECT
+	SIF TALENT:対象:母乳体質
+		CALL COLOR_PRINTL("乳房からは母乳が分泌されている", カラー_ピンク)
+	SIF TALENT:対象:美脚
+		PRINTFORML すらりとした美しい脚が異性を魅了する
+	SIF TALENT:対象:美尻
+		PRINTFORML 尻肉は美しく、きゅっと引き締まっている
+ENDIF
+
+IF TALENT:対象:妊娠
+	CALL ICPRINT(@"<\@ GET_SPERM_NAME(CFLAG:対象:子の父親) == "不明" ? 父親不明 # %GET_SPERM_NAME(CFLAG:(対象):子の父親)% \@>の子を宿している", "L", カラー_ピンク)
+	SIF CFLAG:対象:行動不能状態 == 行動不能_臨月
+		CALL COLOR_PRINTL("臨月を迎えた腹は大きく膨れている", カラー_ピンク)
+ENDIF 
+
+FOR LOCAL, 0, 2
+	IF LOCAL == 0
+		SIF !HAS_VAGINA(対象)
+			CONTINUE
+		LOCAL:1 = TALENT:対象:Ｖ締まり
+		LOCALS = 女穴
+	ELSE
+		LOCAL:1 = TALENT:対象:Ａ締まり
+		LOCALS = 尻穴
+	ENDIF
+	SELECTCASE LOCAL:1
+		CASE IS >= 締まり_ぎちぎち
+			PRINTFORML %LOCALS%は小指すら拒むほど狭い
+		CASE IS >= 締まり_きつきつ
+			PRINTFORML %LOCALS%は小指でもきゅうと締め付ける狭さだ
+		CASE IS >= 締まり_きゅっきゅっ
+			PRINTFORML %LOCALS%は指をきゅうきゅうと締め付けてくる
+		CASE IS >= 締まり_名器
+			PRINTFORML %LOCALS%は咥えたものに快感を与える名器だ
+		CASE IS >= 締まり_普通
+			PRINTFORML %LOCALS%の締まりは普通といったところだ
+		CASE IS >= 締まり_ゆるめ
+			PRINTFORML %LOCALS%の締まりはゆるめだ
+		CASE IS >= 締まり_ゆるゆる
+			PRINTFORML %LOCALS%はずいぶん緩くなってしまっている
+		CASE IS >= 締まり_ぽっかり
+			PRINTFORML 使い込まれた%LOCALS%はぽっかりと開いて閉じなくなっている
+		CASE IS >= 締まり_がばがば
+			PRINTFORML 使い込まれすぎて、%LOCALS%は型崩れしてがばがばになっている
+		CASE IS >= 締まり_崩壊
+			PRINTFORML 使い込まれすぎて、%LOCALS%は元の形がわからないほど崩れてしまっている
+		CASEELSE
+			PRINTFORML 使い込まれすぎて、%LOCALS%は醜く黒ずみ、ぐずぐずになり、濃厚な牝臭を放っている
+	ENDSELECT
+NEXT
+
+SELECTCASE TALENT:対象:陰毛現在値
+	CASE 陰毛_パイパン
+		PRINTFORML 陰毛は脱毛され、恥丘はつるつるとしている
+	CASE 陰毛_つるつる
+		PRINTFORML 陰毛の生えていない恥丘はつるつるとしている
+	CASE 陰毛_うっすら
+		PRINTFORML 恥丘にはうっすらと、陰毛が産毛のように生えている
+	CASE 陰毛_柔毛
+		PRINTFORML 陰毛は生えかけのようだ
+	CASE 陰毛_ふんわり
+		PRINTFORML 薄めの陰毛が恥丘で草むらを形作っている
+	CASE 陰毛_標準
+		PRINTFORML 陰毛は平均的に生えそろっている
+	CASE 陰毛_多め
+		PRINTFORML 陰毛は普通よりやや多めだ
+	CASE 陰毛_ふさふさ
+		PRINTFORML 陰毛はふさふさと生い茂っている
+	CASE 陰毛_もっさり
+		PRINTFORML かなり濃い陰毛がもっさりと生い茂っている
+	CASE 陰毛_剛毛
+		PRINTFORML 太い陰毛が密林のように生い茂り、陰部を覆っている
+	CASE 陰毛_尻毛
+		PRINTFORML 手入れされていない陰毛は、生え放題で尻まで達している
+	CASE 陰毛_ハート型
+		CALL COLOR_PRINTL("陰毛は異性を誘うようなハート形に整えられている", カラー_ピンク)
+	CASEELSE
+		PRINTFORML 陰毛は平均的に生えそろっている
+ENDSELECT
+
+SELECTCASE TALENT:対象:腋毛現在値
+	CASE 腋毛_脱毛済み
+		PRINTFORML 腋毛は脱毛され、腋窩はつるつるとしている
+	CASE 腋毛_つるつる
+		PRINTFORML 腋毛の生えていない腋窩はつるつるとしている
+	CASE 腋毛_手入れ済み
+		PRINTFORML 腋はきちんと手入れされている
+	CASE 腋毛_うっすら
+		PRINTFORML 腋窩にはうっすらと、腋毛が産毛のように生えている
+	CASE 腋毛_ふんわり
+		PRINTFORML 薄めの腋毛が腋窩で草むらを形作っている
+	CASE 腋毛_普通
+		PRINTFORML 腋毛は平均的に生えそろっている
+	CASE 腋毛_多め
+		PRINTFORML 腋毛は普通よりやや多めだ
+	CASE 腋毛_ふさふさ
+		PRINTFORML 腋毛はふさふさと生い茂っている
+	CASE 腋毛_もっさり
+		PRINTFORML かなり濃い腋毛がもっさりと生い茂っている
+	CASE 腋毛_剛毛
+		PRINTFORML 濃い腋毛が密林のように生い茂り、腋窩を覆っている
+	CASE 腋毛_密林
+		PRINTFORML 手入れされていない腋毛は、生え放題で腋窩からはみ出している
+	CASEELSE
+		PRINTFORML 腋毛は平均的に生えそろっている
+ENDSELECT
+
+
+SIF IS_PIERCED(対象, ピアス_乳首) || IS_PIERCED(対象, ピアス_クリトリス) || IS_PIERCED(対象, ピアス_ペニス) || IS_PIERCED(対象, ピアス_ラビア)
+	CALL COLOR_PRINTL("卑猥な部位にピアスがなされている", カラー_ピンク)
+
+SIF IS_TATTOOED(対象, タトゥー_頬) || IS_TATTOOED(対象, タトゥー_額)
+	CALL COLOR_PRINTL("顔の目立つあたりにタトゥーがいれられている", カラー_ピンク)
+
+SIF IS_TATTOOED(対象, タトゥー_胸) || IS_TATTOOED(対象, タトゥー_秘部) || IS_TATTOOED(対象, タトゥー_尻)
+	CALL COLOR_PRINTL("卑猥な部位にタトゥーがいれられている", カラー_ピンク)
+
+CALL SINGLE_EMPTY_LINE()
+
+;-------------------------------------------------
+;エロステータス表示　感覚
+;-------------------------------------------------
+@SHOW_INFO_ERO_DESCRIPTION_SENSE(対象)
+#DIM 対象
+#DIM 表示項目 = GETNUM(ABL, "Ｃ感"), GETNUM(ABL, "Ｖ感"), GETNUM(ABL, "Ａ感"), GETNUM(ABL, "Ｂ感"), GETNUM(ABL, "Ｍ感"), GETNUM(ABL, "Ｕ感")
+
+FOR LOCAL, 0, VARSIZE("表示項目")
+	TRYCALLFORM SHOW_INFO_ERO_DESCRIPTION_{表示項目:LOCAL}(対象, ABL:対象:(表示項目:LOCAL))
+NEXT
+
+CALL SINGLE_EMPTY_LINE()
+
+;-------------------------------------------------
+;エロステータス表示　性癖
+;-------------------------------------------------
+@SHOW_INFO_ERO_DESCRIPTION_FETISH(対象)
+#DIM 対象
+{
+	#DIM 表示項目 = 
+		GETNUM(ABL, "欲望"), GETNUM(ABL, "性技"), GETNUM(ABL, "性知識"), GETNUM(ABL, "奉仕"), GETNUM(ABL, "性交"),
+		GETNUM(ABL, "レズ"), GETNUM(ABL, "ＢＬ"), GETNUM(ABL, "露出"), GETNUM(ABL, "自慰"), GETNUM(ABL, "精愛"),
+		GETNUM(ABL, "射精"), GETNUM(ABL, "噴乳"), GETNUM(ABL, "触手"), GETNUM(ABL, "出産"), GETNUM(ABL, "マゾ"), GETNUM(ABL, "サド")
+}
+
+FOR LOCAL, 0, VARSIZE("表示項目")
+	TRYCALLFORM SHOW_INFO_ERO_DESCRIPTION_{表示項目:LOCAL}(対象, ABL:対象:(表示項目:LOCAL))
+NEXT
+
+TRYCALLFORM SHOW_INFO_SEXUAL_PREFERENCE_DESCRIPTION(対象)
+
+CALL SINGLE_EMPTY_LINE()
+
+;-------------------------------------------------
+;エロステータス表示　陥落
+;-------------------------------------------------
+@SHOW_INFO_ERO_DESCRIPTION_FALLEN(対象)
+#DIM 対象
+IF TALENT:対象:親愛
+	PRINTFORML %ANAME(MASTER)%のことをいつも想っているようだ
+ELSEIF TALENT:対象:恋慕
+	PRINTFORML %ANAME(MASTER)%に慕情を抱いている
+ENDIF
+
+IF TALENT:対象:隷属
+	PRINTFORML %ANAME(MASTER)%に魂の底からの忠誠を誓っている
+ELSEIF TALENT:対象:服従
+	PRINTFORML %ANAME(MASTER)%に屈し、忠誠を誓っている
+ENDIF
+
+SIF TALENT:対象:烙印
+	PRINTFORML %ANAME(MASTER)%のものだという烙印を押されている
+
+IF TALENT:対象:所有者
+	PRINTFORML %ANAME(MASTER)%を心の底から屈服させ、所有している
+ELSEIF TALENT:対象:主人
+	PRINTFORML %ANAME(MASTER)%を屈服させた主人である
+ENDIF
+
+IF TALENT:対象:崩壊
+	CALL COLOR_PRINTL("その心は破壊され、二度と戻ることはない", カラー_警告)
+ELSEIF TALENT:対象:虚ろ
+	CALL COLOR_PRINTL("度を越した負担により、心に傷を負っている", カラー_注意)
+ENDIF
+CALL SINGLE_EMPTY_LINE()
+
+;-------------------------------------------------
+;エロステータス表示　特殊な陥落
+;-------------------------------------------------
+@SHOW_INFO_ERO_DESCRIPTION_SP_FALLEN(対象)
+#DIM 対象
+SIF GETBIT(TALENT:対象:淫乱系, 素質_淫乱_淫乱)
+	CALL COLOR_PRINTL("淫らなことが大好きな淫乱だ", カラー_ピンク)
+SIF GETBIT(TALENT:対象:淫乱系, 素質_淫乱_淫核)
+	CALL COLOR_PRINTL("敏感な秘核は常に快楽を求め、恥ずかしげもなくぴんと尖っている", カラー_ピンク)
+SIF GETBIT(TALENT:対象:淫乱系, 素質_淫乱_淫壷)
+	CALL COLOR_PRINTL("女穴は常に疼き、貫かれなくては落ち着いていられず、涎のように蜜を垂らしている", カラー_ピンク)
+SIF GETBIT(TALENT:対象:淫乱系, 素質_淫乱_尻穴狂い)
+	CALL COLOR_PRINTL("肛門は性器として作り替えられ、常に性の悦びに疼いて貪欲にヒクついている", カラー_ピンク)
+SIF GETBIT(TALENT:対象:淫乱系, 素質_淫乱_淫乳)
+	CALL COLOR_PRINTL("淫らに開発されきった乳房は、風が吹いただけで感じるほど敏感になっている", カラー_ピンク)
+SIF GETBIT(TALENT:対象:淫乱系, 素質_淫乱_蕩唇)
+	CALL COLOR_PRINTL("性感帯として生まれ変わった唇は、いつでも接吻や口淫の快感を求めている", カラー_ピンク)
+SIF GETBIT(TALENT:対象:淫乱系, 素質_淫乱_射精狂い)
+	CALL COLOR_PRINTL("幾度となく子種を放った肉棒は常に勃起したままで、射精欲で頭を埋め尽くしている", カラー_ピンク)
+SIF GETBIT(TALENT:対象:淫乱系, 素質_淫乱_尿道狂い)
+	CALL COLOR_PRINTL(@"尿道は性感帯として作り変えられ、排尿しただけで感じるほど敏感になっている", カラー_ピンク)
+SIF GETBIT(TALENT:対象:淫乱系, 素質_淫乱_サド)
+	CALL COLOR_PRINTL("他者を嬲ることを至上の悦びとしており、暴力をふるうことで絶頂してしまう", カラー_ピンク)
+SIF GETBIT(TALENT:対象:淫乱系, 素質_淫乱_マゾ)
+	CALL COLOR_PRINTL("他者に嬲られることを至上の悦びとしており、暴力を振るわれて絶頂してしまう", カラー_ピンク)
+SIF GETBIT(TALENT:対象:淫乱系, 素質_淫乱_雌犬)
+	CALL COLOR_PRINTL("獣との交わりに快楽を見出しており、彼らの子種を受け止めたいと願っている", カラー_ピンク)
+SIF GETBIT(TALENT:対象:淫乱系, 素質_淫乱_精液便女)
+	CALL COLOR_PRINTL("慰み者にされることに快楽を見出しており、望まれれば誰にでも股を開く", カラー_ピンク)
+SIF GETBIT(TALENT:対象:淫乱系, 素質_淫乱_苗床)
+	CALL COLOR_PRINTL("触手との交わりに快楽を見出しており、彼らの母体となるのを悦びとしている", カラー_ピンク)
+SIF GETBIT(TALENT:対象:淫乱系, 素質_淫乱_薬物中毒)
+	CALL COLOR_PRINTL("薬物に依存しきっており、それなしではもはや生きていられない", カラー_ピンク)
+SIF GETBIT(TALENT:対象:淫乱系, 素質_淫乱_娼婦)
+	CALL COLOR_PRINTL("金のために股を開くことに快感を見出した、卑しい娼婦に成り果てている", カラー_ピンク)
+SIF GETBIT(TALENT:対象:淫乱系, 素質_淫乱_生ハメ依存)
+	CALL COLOR_PRINTL("生のペニスの快感に溺れ、もはやゴムありのセックスなど考えられない", カラー_ピンク)
+SIF GETBIT(TALENT:対象:淫乱系, 素質_淫乱_孕みたがり)
+	CALL COLOR_PRINTL("子宮で精を受け止める感覚に溺れ、いつでも子を宿し産みたいと考えている", カラー_ピンク)
+SIF GETBIT(TALENT:対象:淫乱系, 素質_淫乱_ＡＶ女優)
+	CALL COLOR_PRINTL("自らの痴態を売り物にすることに快感を見出し、ＡＶ女優として活動している", カラー_ピンク)
+SIF GETBIT(TALENT:対象:淫乱系, 素質_淫乱_露出狂)
+	CALL COLOR_PRINTL("自らの肉体を衆目にさらして悦ぶ変態だ", カラー_ピンク)
+SIF GETBIT(TALENT:対象:淫乱系, 素質_淫乱_良質母胎)
+	CALL COLOR_PRINTL("何度も子を孕み産んできた子宮は母胎として最適だ", カラー_ピンク)
+SIF GETBIT(TALENT:対象:淫乱系, 素質_淫乱_濃厚精液)
+	CALL COLOR_PRINTL("一発妊娠間違いなしの濃厚な精液の持ち主だ", カラー_ピンク)
+SIF GETBIT(TALENT:対象:淫乱系, 素質_淫乱_傀儡)
+	CALL COLOR_PRINTL("自我の根底まで催眠により絡め取られた人形だ", カラー_ピンク)
+SIF GETBIT(TALENT:対象:淫乱系, 素質_淫乱_浮気癖)
+	CALL COLOR_PRINTL("少し優しくされただけで誰にでも股を開く尻軽だ", カラー_ピンク)
+SIF GETBIT(TALENT:対象:淫乱系, 素質_淫乱_自慰狂い)
+	CALL COLOR_PRINTL("オナニーが大好きで、気づけば体を弄っている", カラー_ピンク)
+SIF GETBIT(TALENT:対象:淫乱系, 素質_淫乱_雌牛)
+	CALL COLOR_PRINTL("母乳を絞られる悦びに乳房を疼かせており、常に乳首が尖がり勃っている", カラー_ピンク)
+
+SIF GETBIT(TALENT:対象:特殊勢力陥落系, 特殊勢力_野盗)
+	CALL COLOR_PRINTL(@"野盗の果てしない輪姦に屈し、性奴隷に成り果てた", カラー_ピンク)
+SIF GETBIT(TALENT:対象:特殊勢力陥落系, 特殊勢力_ホフゴブリン)
+	CALL COLOR_PRINTL(@"ホフゴブリンのペニスに負け、肉便器の立場を受け入れた", カラー_ピンク)
+SIF GETBIT(TALENT:対象:特殊勢力陥落系, 特殊勢力_外来人)
+	CALL COLOR_PRINTL(@"外来人からの研究によって、実験動物に成り下がった", カラー_ピンク)
+SIF GETBIT(TALENT:対象:特殊勢力陥落系, 特殊勢力_触手)
+	CALL COLOR_PRINTL(@"触手に寄生され、繁殖のため使われている", カラー_ピンク)
+SIF GETBIT(TALENT:対象:特殊勢力陥落系, 特殊勢力_自警団)
+	CALL COLOR_PRINTL(@"自警団の維持のためならば、異性と寝ることも当然と考えている", カラー_ピンク)
+SIF GETBIT(TALENT:対象:特殊勢力陥落系, 特殊勢力_サキュバス)
+	CALL COLOR_PRINTL(@"人々の夢に現れる淫魔として生まれ変わった", カラー_ピンク)
+SIF GETBIT(TALENT:対象:特殊勢力陥落系, 特殊勢力_狂信者)
+	CALL COLOR_PRINTL(@"邪悪な神のもと性交を教義とする狂信者だ", カラー_ピンク)
+
+SIF GETBIT(TALENT:対象:デイリー系, 素質_デイリー_薬売りの性奴隷)
+	CALL COLOR_PRINTL(@"薬売りの薬と調教に堕ち、性奴隷に成り果てた", カラー_ピンク)
+SIF GETBIT(TALENT:対象:デイリー系, 素質_デイリー_貴族の虜)
+	CALL COLOR_PRINTL(@"貴族の性技巧の前に、虜にされてしまった", カラー_ピンク)
+SIF GETBIT(TALENT:対象:デイリー系, 素質_デイリー_貴族の愛人)
+	CALL COLOR_PRINTL(@"貴族の愛人の一人として、日々寵愛を受けている", カラー_ピンク)
+SIF GETBIT(TALENT:対象:デイリー系, 素質_デイリー_淫紋)
+	CALL COLOR_PRINTL(@"下腹に刻まれた淫紋が、頭の中を淫らな考えで埋め尽くしている", カラー_ピンク)
+SIF GETBIT(TALENT:対象:デイリー系, 素質_デイリー_愛欲の淫紋)
+	CALL COLOR_PRINTL(@"下腹に刻まれた淫紋が、頭の中を%ANAME(MASTER)%への淫らな愛欲で埋め尽くしている", カラー_ピンク)
+SIF GETBIT(TALENT:対象:デイリー系, 素質_デイリー_富豪の愛妾)
+	CALL COLOR_PRINTL(@"富豪からの陵辱で堕ち、愛妾の立場を受け入れた", カラー_ピンク)
+SIF GETBIT(TALENT:対象:デイリー系, 素質_デイリー_元愛妾)
+	CALL COLOR_PRINTL(@"かつては富豪の愛妾だったが、今や飽きて捨てられた", カラー_ピンク)
+SIF GETBIT(TALENT:対象:デイリー系, 素質_デイリー_催眠中毒)
+	CALL COLOR_PRINTL(@"催眠術に人格を作り替えられ、都合の良い淫らな穴となった", カラー_ピンク)
+SIF GETBIT(TALENT:対象:デイリー系, 素質_デイリー_カジノの従業員)
+	CALL COLOR_PRINTL(@"カジノの景品として引き渡され、従業員として働かされている", カラー_ピンク)
+SIF GETBIT(TALENT:対象:デイリー系, 素質_デイリー_マセガキの奴隷)
+	CALL COLOR_PRINTL(@"マセガキの性奴隷として、可愛がられる日々を送っている", カラー_ピンク)
+CALL SINGLE_EMPTY_LINE()
+
+

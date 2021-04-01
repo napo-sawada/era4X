@@ -1,0 +1,258 @@
+﻿
+;排卵誘発剤
+
+;-------------------------------------------------
+;コマンド名称
+;-------------------------------------------------
+@COM_NAME72
+LOCALS:0 = 排卵誘発剤
+
+RESULTS:0 = %LOCALS:0%を飲ませる
+RESULTS:1 = %LOCALS:0%を飲まさせられる
+RESULTS:2 = %LOCALS:0%を飲まさせる
+RESULTS:3 = %LOCALS:0%を飲まされる
+RESULTS:4 = %LOCALS:0%を飲まさせる
+RESULTS:5 = %LOCALS:0%使用見せつけ
+
+;-------------------------------------------------
+;選択可否判定
+;-------------------------------------------------
+@COM_ABLE72
+;共通部分
+CALL COM_ABLE_COMMON(72)
+SIF RESULT == 0
+	RETURN 0
+;プレイヤーは最大で1人まで
+SIF MPLY_NUM <= 0 || MPLY_NUM > 1
+	RETURN 0
+;ターゲットは1人以上
+SIF MTAR_NUM <= 0 
+	RETURN 0
+;排卵誘発剤が必要
+SIF ITEM:排卵誘発剤 < MTAR_NUM && ITEM:A_排卵誘発剤 < MTAR_NUM
+	RETURN 0
+FOR LOCAL, 0, MTAR_NUM
+	;ターゲットの口が塞がっているなら不可
+	SIF IS_M_HOLD(MTAR:LOCAL)
+		RETURN 0
+	;ターゲットが女でないなら不可（飲んだって意味ねぇだろ）
+	SIF !IS_FEMALE(MTAR:LOCAL)
+		RETURN 0
+	SIF TALENT:(MTAR:LOCAL):妊娠
+		RETURN 0
+	;既にターゲットが排卵誘発剤を使われているなら不可
+	SIF CFLAG:(MTAR:LOCAL):排卵誘発剤 && !FLAG:RECHECKING
+		RETURN 0
+	SIF !CAN_REACH_BODY(MPLY:0, MTAR:0)
+		RETURN 0
+NEXT
+RETURN 1
+
+;-------------------------------------------------
+;メイン処理
+;-------------------------------------------------
+@COM72
+;実行判定
+CALL COM_ORDER_COMMON
+SIF RESULT == 0
+	RETURN 0
+
+;排卵誘発剤を１つ減少させる(追加アイテム使用時は減少させない)
+IF ITEM:A_排卵誘発剤 <= 0
+	ITEM:排卵誘発剤 = MAX(ITEM:排卵誘発剤 - MTAR_NUM, 0)
+ENDIF
+
+;●プレイヤー側の処理
+
+;●ターゲット側の処理
+FOR LOCAL, 0, MTAR_NUM
+	;排卵誘発剤使用フラグを立てる
+	CFLAG:(MTAR:LOCAL):排卵誘発剤 = 1
+
+	IF TALENT:(MTAR:LOCAL):恋慕
+		;主人公がプレイヤーなら愛情のソース追加
+		IF IS_MPLY(MASTER)
+			CALL ADD_SOURCE_AIZYOU(LOCAL:2, 50)
+		ENDIF
+	ELSE
+		LOCAL:1 = MAX(CFLAG:(MTAR:LOCAL):2, CFLAG:(MTAR:LOCAL):4)
+
+		IF LOCAL:1 < 500
+			SOURCE:(MTAR:LOCAL):反感 = 500
+			SOURCE:(MTAR:LOCAL):不安 = 800
+		ELSEIF LOCAL:1 < 800
+			SOURCE:(MTAR:LOCAL):反感 = 250
+			SOURCE:(MTAR:LOCAL):不安 = 500
+		ELSEIF LOCAL:1 < 1500
+			SOURCE:(MTAR:LOCAL):反感 = 150
+			SOURCE:(MTAR:LOCAL):不安 = 350
+		ELSE
+			SOURCE:(MTAR:LOCAL):不安 = 100
+		ENDIF
+
+		SELECTCASE ABL:(MTAR:LOCAL):出産
+			CASE 0
+			CASE 1
+				TIMES SOURCE:(MTAR:LOCAL):反感, 0.80
+				TIMES SOURCE:(MTAR:LOCAL):不安, 0.80
+				SOURCE:(MTAR:LOCAL):中毒充足 = 50
+			CASE 2
+				TIMES SOURCE:(MTAR:LOCAL):反感, 0.60
+				TIMES SOURCE:(MTAR:LOCAL):不安, 0.60
+				SOURCE:(MTAR:LOCAL):中毒充足 = 100
+			CASE 3
+				TIMES SOURCE:(MTAR:LOCAL):反感, 0.40
+				TIMES SOURCE:(MTAR:LOCAL):不安, 0.40
+				SOURCE:(MTAR:LOCAL):中毒充足 = 200
+			CASE 4
+				TIMES SOURCE:(MTAR:LOCAL):反感, 0.20
+				TIMES SOURCE:(MTAR:LOCAL):不安, 0.20
+				SOURCE:(MTAR:LOCAL):中毒充足 = 400
+			CASEELSE
+				SOURCE:(MTAR:LOCAL):反感 = 0
+				SOURCE:(MTAR:LOCAL):不安 = 0
+				SOURCE:(MTAR:LOCAL):中毒充足 = 600 + (ABL:(MTAR:LOCAL):出産 - 5) * 3
+		ENDSELECT
+	ENDIF
+
+	;主導権に応じた優越・屈従のソース追加
+	CALL ADD_SOURCE_INITIATIVE_U(MTAR:LOCAL, 40, 50)
+
+NEXT
+
+;主導度変化基準値
+TFLAG:49 = 1
+
+;倒錯度変化基準値
+TFLAG:50 = 0
+
+;レズ・ＢＬ経験基準値
+TFLAG:51 = 0
+
+;経過時間を無理矢理1減らす
+TFLAG:55 --
+
+RETURN 1
+
+;-------------------------------------------------
+;固有の実行判定(プレイヤー側)
+;-------------------------------------------------
+@COM_ORDER_PLAYER72(ARG:0)
+;実行値の設定
+TCVAR:(ARG:0):25 = 65
+
+;共通部分
+CALL COM_ORDER(ARG:0)
+
+CALL COM_ORDER_ELEMENT(ARG:0, @"欲望Lv{ABL:(ARG:0):欲望}", ABL:(ARG:0):欲望 * 1)
+CALL COM_ORDER_ELEMENT(ARG:0, @"奉仕Lv{ABL:(ARG:0):奉仕}", ABL:(ARG:0):奉仕 * 4)
+
+LOCAL:0 = GET_PALAMLV(PALAM:(ARG:0):欲情)
+CALL COM_ORDER_ELEMENT(ARG:0, @"欲情Lv{LOCAL:0}", MIN(LOCAL:0 * 1, 10))
+
+IF TALENT:(ARG:0):恥じらい
+	CALL COM_ORDER_ELEMENT(ARG:0, "恥じらい", -1)
+ENDIF
+IF TALENT:(ARG:0):献身的
+	CALL COM_ORDER_ELEMENT(ARG:0, "献身的", 6)
+ENDIF
+IF TALENT:(ARG:0):快感の否定
+	CALL COM_ORDER_ELEMENT(ARG:0, "快感の否定", -1)
+ENDIF
+
+IF !TALENT:(ARG:0):合意 && !TALENT:(ARG:0):親友
+	CALL COM_ORDER_ELEMENT(ARG:0, "合意なし", -10)
+ENDIF
+
+RETURN 1
+
+;-------------------------------------------------
+;地の文(前文)
+;-------------------------------------------------
+@COM_TEXT_BEFORE72
+IF MTAR_NUM > 1
+	LOCALS:0 = たち
+ELSE
+	LOCALS:0 = 
+ENDIF
+
+SELECTCASE GET_COM_INITIATIVE()
+	;プレイヤーに主導権
+	CASE 0
+		PRINTFORML %ANAME(MPLY:0)%は%ANAME(MTAR:0)%%LOCALS:0%に排卵誘発剤を飲ませ%TARGET_STR("た", "てきた")%…
+	;ターゲットに主導権
+	CASE 1
+		PRINTFORML %ANAME(MTAR:0)%%LOCALS:0%は%ANAME(MPLY:0)%に排卵誘発剤を飲ませるように命令した
+		PRINTFORML %ANAME(MPLY:0)%は言われるまま%ANAME(MTAR:0)%%LOCALS:0%に排卵誘発剤を飲み込ませた…
+	;第三者に主導権
+	CASEELSE
+		PRINTFORML %ANAME(TFLAG:45)%は%ANAME(MPLY:0)%に対して、%ANAME(MTAR:0)%%LOCALS:0%に排卵誘発剤を飲ませるように命令した
+		PRINTFORML %ANAME(MPLY:0)%は言われるまま%ANAME(MTAR:0)%%LOCALS:0%に排卵誘発剤を飲み込ませた…
+ENDSELECT
+;-------------------------------------------------
+;地の文(実行後)
+;-------------------------------------------------
+@COM_TEXT_AFTER72
+IF MTAR_NUM > 1
+	LOCALS:0 = たち
+ELSE
+	LOCALS:0 = 
+ENDIF
+IF MTAR:0 != MASTER || CONFIG:441
+	IF (TCVAR:(MTAR:0):52) || (TCVAR:(MTAR:0):53 == 1)
+		SIF TALENT:(MTAR:0):育児中
+			PRINT まだ育児中にも関わらず
+		PRINTFORML 意識のないまま薬によって%ANAME(MTAR:0)%%LOCALS:0%の体は%ANAME(MPLY:0)%の子を孕もうとしている
+	ELSE
+		SIF TCVAR:(MTAR:0):51
+			PRINT 疲れて身動きできぬまま
+		SIF TALENT:(MTAR:0):妖術知識 || TALENT:(MTAR:0):技師
+			PRINT 飲まされた薬の効果に思い当り、
+		SIF EXP:(MTAR:0):出産経験 >= 1
+			PRINT 過去の出産の経験から
+		IF IS_LOVER(MTAR:0) && MPLY:0 == MASTER
+			SIF TALENT:(MTAR:0):育児中
+				PRINT すでに育児中にも関わらず
+			PRINTFORML %ANAME(MTAR:0)%%LOCALS:0%は%ANAME(MPLY:0)%の子を孕む期待感に頬を緩ませている
+		ELSEIF ABL:(MTAR:0):出産 >= 3
+			PRINTFORML %ANAME(MTAR:0)%は子を孕み出産することを想像し、興奮を隠せずにいる
+		;捕虜調教のメインターゲット
+		ELSEIF FLAG:調教モード == 2 && FINDELEMENT(PRISONER_TARGET, MTAR:0) != -1
+			SELECTCASE RAND:4
+				CASE 0
+					PRINTFORML %ANAME(MTAR:0)%%LOCALS:0%は%ANAME(MPLY:0)%の子を孕むことを想像して恐怖に顔を引きつらせた
+				CASE 1
+					PRINTFORML %ANAME(MTAR:0)%%LOCALS:0%は望まぬ妊娠の恐怖に顔を青ざめさせている
+				CASE 2
+					PRINTFORML 妊娠を強制される恐怖に%ANAME(MTAR:0)%%LOCALS:0%は震えている
+				CASE 3
+					PRINTFORML 薬がもたらそうとする未来を受け入れられず、%ANAME(MTAR:0)%%LOCALS:0%はわめき散らしている
+			ENDSELECT
+			SIF TALENT:(MTAR:0):子供人質
+				PRINTFORML だが、子どもが人質に取られていることを思い出した%ANAME(MTAR:0)%%LOCALS:0%は、%ANAME(MPLY:0)%の思惑に従うしかなかった
+		ELSE
+			SIF TALENT:(MTAR:0):育児中
+				PRINT まだ育児中のため
+			PRINTFORML %ANAME(MTAR:0)%%LOCALS:0%は不安そうな表情を浮かべている
+		ENDIF
+	ENDIF
+ENDIF
+WAIT
+
+;-------------------------------------------------
+
+;コマンド区分
+;-------------------------------------------------
+
+@COM_AVAILABLE_WHEN72
+RETURN コマンド_ウフフ
+
+;--------------------
+;性嗜好用関数
+;--------------------
+@COM_PREFERENCE_PLAYER_72()
+RETURN POWER(2, 性的嗜好_道具を使いたい)
+
+@COM_PREFERENCE_TARGET_72()
+RETURN POWER(2, 性的嗜好_道具を使われたい) + POWER(2, 性的嗜好_妊娠したい)
+

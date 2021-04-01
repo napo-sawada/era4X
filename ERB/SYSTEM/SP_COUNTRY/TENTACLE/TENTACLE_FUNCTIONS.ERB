@@ -1,0 +1,195 @@
+﻿;--------------------------------------
+;ターンエンド時の触手の処理
+;--------------------------------------
+@TURNEND_TENTACLE
+;2ターンに1度、無理矢理妊娠
+CALL TENTACLE_FORCE_PREGNATE(DAY % 2 == 0)
+
+;--------------------------------------
+;滅亡時の処理
+;--------------------------------------
+@TENTACLE_DESTROY_MSG
+CALL SINGLE_DRAWLINE
+SETCOLOR カラー_注意
+PRINTFORML
+PRINTFORML
+PRINTFORML
+PRINTFORMW 各勢力の努力あって、触手を殲滅することに成功しました
+PRINTFORMW 幻想郷に平穏が戻りました……
+PRINTFORML
+PRINTFORML
+PRINTFORML
+RESETCOLOR
+
+;--------------------------------------
+;触手の初期化処理
+;--------------------------------------
+@TENTACLE_INIT(ARG:0)
+#DIM LCOUNT
+VARSET LOCAL
+
+SIF GET_COUNTRY_FROM_ID(SP_COUNTRY_ID:特殊勢力_触手) != -1
+	RETURN 0
+
+SIF SP_COUNTRY_RANK:特殊勢力_触手 == 0
+	RETURN 0
+
+SIF GET_NEW_COUNTRY() == -1
+	RETURN 0
+
+CALL CREATE_SP_COUNTRY(特殊勢力_触手)
+LOCAL = RESULT
+CALL INIT_SP_COUNTRY(LOCAL)
+
+RETURN LOCAL
+
+@SELECT_CHARA_RANDOM_LOGIC_TENTACLE_FORCE_PREGNANT(対象)
+#DIM 対象
+#DIM 触手
+
+触手 = GET_COUNTRY_FROM_ID(SP_COUNTRY_ID:(特殊勢力_触手))
+
+;触手所属で捕虜でないまたは触手の捕虜
+RETURN 	((CFLAG:対象:所属 == 触手 && !CFLAG:対象:捕虜先) || CFLAG:対象:捕虜先 == 触手) && IS_FEMALE(対象) && GETBIT(TALENT:対象:特殊勢力陥落系, 特殊勢力_触手) && !TALENT:対象:妊娠
+
+;--------------------------------------
+;触手勢力用の定期イベント。
+;--------------------------------------
+@TENTACLE_FORCE_PREGNATE(条件 = 0)
+#DIM 触手
+#DIM 条件
+#DIM 対象
+
+SIF !条件
+	RETURN 0
+
+触手 = GET_COUNTRY_FROM_ID(SP_COUNTRY_ID:(特殊勢力_触手))
+
+SIF 触手 == -1
+	RETURN 0
+
+CALL SELECT_CHARA_RANDOM("TENTACLE_FORCE_PREGNANT")
+
+対象 = RESULT
+
+SIF 対象 == -1
+	RETURN 0
+
+CALL SINGLE_DRAWLINE
+SETCOLOR カラー_ピンク
+PRINTFORML 触手は%ANAME(対象)%を繁殖のため利用したようだ……
+PRINTFORML 
+IF GETBIT(TALENT:対象:特殊勢力陥落系, 特殊勢力_触手)
+	PRINTFORMW 彼らに寄生され、従順な苗床と化していた%ANAME(対象)%は、嬉々として彼らに身体を提供した
+	PRINTFORMW その肉穴に触手達は次々と己を差し入れては、卵を産み付けていく
+	PRINTFORMW さらに触手は、特殊な液体を彼女に打ち込み、彼女の体質をより卵を育てるため相応しいものにしていく
+	PRINTFORMW 子宮の奥の強烈な疼きにヨガりながら、%ANAME(対象)%は何度も絶頂した……
+ELSE
+	PRINTFORMW 彼らに捕らえられ、犯され続けていた%ANAME(対象)%を、触手は本格的に苗床として使うつもりらしい
+	PRINTFORMW その肉穴に触手達は次々と己を差し入れては、卵を産み付けていく
+	PRINTFORMW さらに触手は、特殊な液体を彼女に打ち込み、彼女の体質をより卵を育てるため相応しいものにしていく
+	PRINTFORMW 己が得体のしれないものになっていく%ANAME(対象)%は悲鳴をあげるが、誰も助けてはくれない……
+ENDIF
+PRINTFORML
+PRINTFORMW 解放された頃には、その子宮を妊婦のように膨れあがらせた%ANAME(対象)%が残されるばかりだった……
+RESETCOLOR
+FOR LOCAL, 0, 3
+	CALL FUCK_GANGBANG_SP(対象, GET_SPERM_ID("触手"), @"触手", @"触手", 触手)
+NEXT
+
+CFLAG:対象:触手産卵実行者 = GET_SPERM_ID("触手")
+CFLAG:対象:触手Ａ産卵実行者 = GET_SPERM_ID("触手")
+CFLAG:対象:触手Ｕ産卵実行者 = GET_SPERM_ID("触手")
+
+TALENT:(対象):触手妊娠 = 1
+TALENT:(対象):Ａ触手妊娠 = 1
+TALENT:対象:Ｕ触手妊娠 = 1
+;------------------------------
+;触手に捕らえられたときのイベント
+;------------------------------
+@MASTER_CAPTURED_TENTACLE(ARG:0)
+PRINTFORMW 捕らえられた%ANAME(MASTER)%は触手にとり囲まれた…
+IF IS_MALE(MASTER)
+	PRINTFORMW 触手は%ANAME(MASTER)%を見、兵士にちょうどいいと判断したらしい
+	PRINTFORMW 触手兵が、その口を強引に開かせた
+	PRINTFORMW 寄生されることをこちらが飲めば、ひどいことはしないつもりのようだが……
+	PRINTFORMW 受け入れますか？
+	CALL ASK_YN("受け入れる", "拒否する")
+	IF RESULT == 0
+		PRINTFORMW 投獄されるよりはマシだろう。%ANAME(MASTER)%が頷くと、触手は早速、口内に入り込んだ
+		PRINTFORMW そしてその胃袋に、寄生体を流し込んだ……
+		SETCOLOR カラー_注意
+		PRINTFORMW %ANAME(MASTER)%は触手に寄生された
+		RESETCOLOR
+	ELSE
+		PRINTFORMW お前達になど手を貸すか。%ANAME(MASTER)%は毅然として言い放つ	
+		PRINTFORMW すると触手兵たちがどこからともなく現れ、%ANAME(MASTER)%を投獄した……
+	ENDIF
+ELSEIF GETBIT(TALENT:MASTER:特殊勢力陥落系, 特殊勢力_触手)
+	PRINTFORMW 触手はかつて苗床だった%ANAME(MASTER)%を取り囲む
+	PRINTFORMW 眼前に触手を突き出され、%ANAME(MASTER)%の身体は、苗床だったころの快楽を思い出していく
+	PRINTFORMW %ANAME(MASTER)%の声が甘く蕩け始めた頃、触手は寄生しようとしてきた……
+	PRINTFORMW 受け入れますか？
+	CALL ASK_YN("受け入れる", "拒否する")
+	IF RESULT == 0
+		PRINTFORMW 彼らによって育て上げられた雌の本性が、%ANAME(MASTER)%を頷かせた
+		PRINTFORMW 触手はさっそく%ANAME(MASTER)%に群がり、寄生した……
+		SETCOLOR カラー_注意
+		PRINTFORMW %ANAME(MASTER)%は、再び触手に肉体を明け渡した
+		RESETCOLOR
+	ELSE
+		PRINTFORMW お前達になど手を貸すか。%ANAME(MASTER)%は毅然として言い放つ
+		PRINTFORMW すると触手兵たちがどこからともなく現れ、%ANAME(MASTER)%を投獄した……
+	ENDIF
+ELSE
+	PRINTFORMW 触手は%ANAME(MASTER)%を見、兵士にちょうどいいと判断したらしい
+	PRINTFORMW 触手兵が、その口を強引に開かせる
+	PRINTFORMW 寄生されることをこちらが飲めば、ひどいことはしないつもりのようだが……
+	PRINTFORMW 受け入れますか？
+	CALL ASK_YN("受け入れる", "拒否する")
+	IF RESULT == 0
+		PRINTFORMW 受け入れなくとも、どうせされることは変わらない
+		PRINTFORMW なら、従順な姿勢を見せた方が、まだマシだ……%ANAME(MASTER)%は力なく頷く
+		PRINTFORMW すると、触手は%ANAME(MASTER)%に殺到していった
+		PRINTFORMW 彼らは%ANAME(MASTER)%の体内に入り込み、その肉体を棲家とし始めた……
+		SETCOLOR カラー_注意
+		PRINTFORMW %ANAME(MASTER)%は触手に寄生された
+		RESETCOLOR
+	ELSE
+		PRINTFORMW お前達になど手を貸すか。%ANAME(MASTER)%は毅然として言い放つ	
+		PRINTFORMW すると触手兵たちがどこからともなく現れ、%ANAME(MASTER)%を投獄した……
+	ENDIF
+ENDIF
+IF RESULT == 0
+	CALL CHANGE_COUNTRY(MASTER, ARG:0, 1)
+	SETBIT TALENT:MASTER:特殊勢力陥落系, 特殊勢力_触手
+	CALL PLAYER_FALLEN_TO_SP_COUNTRY(ARG:0)
+	CALL TENTACLE_FALLEN_LEAVE_MARK(MASTER)
+	RETURN 0
+ELSE
+	CALL CAPTURE(MASTER, ARG:0)
+	RETURN 2
+ENDIF
+
+;--------------------------------------
+;エンディング
+;--------------------------------------
+@TENTACLE_ENDING
+
+PRINTFORML 突如として現れた触手たちに、幻想郷の少女たちはなすすべもなくやられてしまった
+PRINTFORML 膝を屈したものから取り込まれ、彼らのための苗床へと作り替えられていった
+PRINTFORMW ……そしてとうとう、彼らが幻想郷全土を支配するときがきた
+PRINTFORMW 左を見ても右を見ても、触手が目に入らないところはない
+PRINTFORMW 少女らはグロテスクな肉塊にありとあらゆる穴を犯され、彼らの繁殖のための道具にされている……
+PRINTFORML 
+IF CFLAG:MASTER:所属 == GET_COUNTRY_FROM_ID(SP_COUNTRY_ID:特殊勢力_触手) && IS_FEMALE(MASTER)
+	PRINTFORMW 
+	PRINTFORML ……その中に、%ANAME(MASTER)%の姿もあった
+	PRINTFORMW 他の少女同様、触手に脳髄まで浸食された%ANAME(MASTER)%は、自らその胎を触手に明け渡している
+	PRINTFORMW ぽっこりと膨らんだ腹の内では、グロテスクな肉塊が、すくすくと育っているのだろう……
+	PRINTFORMW 触手はそんな%PRONOUN(MASTER)%の口を陵辱しながら、高栄養価の濁液を流し込んでいく
+	PRINTFORMW そうして死ぬまで、彼らのための苗床として飼われ続けるのだ……
+	CALL FUCK_SP(MASTER, "欲望, 性交, 射精, 精愛, Ｃ, Ｖ, Ｂ, Ａ, Ｍ, 触手, Ｖ性交, Ａ性交", "処女喪失, 童貞喪失, キス喪失, Ａ処女喪失, 膣内射精, 腸内射精, 口内射精", GET_COUNTRY_FROM_ID(SP_COUNTRY_ID:特殊勢力_触手), GET_SPERM_ID("触手"), "触手", "触手", "触手", "強姦")
+ENDIF
+PRINTFORML 
+PRINTFORMW 巨大な繁殖場となった幻想郷に、苗床達の嬌声が響き渡る……

@@ -1,0 +1,190 @@
+﻿;麻薬
+
+;-------------------------------------------------
+;コマンド名称
+;-------------------------------------------------
+@COM_NAME74
+LOCALS:0 = 麻薬
+
+RESULTS:0 = %LOCALS:0%を打つ
+RESULTS:1 = %LOCALS:0%を打たされる
+RESULTS:2 = %LOCALS:0%を打たせる
+RESULTS:3 = %LOCALS:0%を打たれる
+RESULTS:4 = %LOCALS:0%を打たせる
+RESULTS:5 = %LOCALS:0%使用見せつけ
+
+;-------------------------------------------------
+;選択可否判定
+;-------------------------------------------------
+@COM_ABLE74
+;共通部分
+CALL COM_ABLE_COMMON(74)
+SIF RESULT == 0
+	RETURN 0
+;プレイヤーは最大で1人まで
+SIF MPLY_NUM <= 0 || MPLY_NUM > 1
+	RETURN 0
+;ターゲットは1人以上
+SIF MTAR_NUM <= 0
+	RETURN 0
+;麻薬が必要
+SIF ITEM:麻薬 < MTAR_NUM && ITEM:A_麻薬 < MTAR_NUM
+	RETURN 0
+
+FOR LOCAL, 0, MTAR_NUM
+	;既に麻薬が媚薬を使われているなら不可
+	SIF TCVAR:(MTAR:LOCAL):麻薬 && !FLAG:RECHECKING
+		RETURN 0
+	;ターゲットの口が塞がっているなら不可
+	SIF IS_M_HOLD(MTAR:LOCAL)
+		RETURN 0
+	SIF !CAN_REACH_BODY(MPLY:0, MTAR:0)
+		RETURN 0
+NEXT
+
+
+RETURN 1
+
+;-------------------------------------------------
+;メイン処理
+;-------------------------------------------------
+@COM74
+;実行判定
+CALL COM_ORDER_COMMON
+SIF RESULT == 0
+	RETURN 0
+
+;麻薬を減少させる(追加アイテム使用時は減少させない)
+IF ITEM:A_麻薬 <= 0
+	ITEM:麻薬 = MAX(ITEM:麻薬 - MTAR_NUM, 0)
+ENDIF
+
+;●プレイヤー側の処理
+FOR LOCAL, 0, MTAR_NUM
+	;●ターゲット側の処理
+	;麻薬使用フラグを立てる
+	TCVAR:(MTAR:LOCAL):麻薬 = 1
+
+	;ソースとCFLAGの増加
+	SELECTCASE CFLAG:(MTAR:LOCAL):薬物依存
+		CASE IS < 100
+			SOURCE:(MTAR:LOCAL):反感 = 300
+			SOURCE:(MTAR:LOCAL):不安 = 600
+			SOURCE:(MTAR:LOCAL):薬物追加 += 3000
+			CFLAG:(MTAR:LOCAL):薬物依存 += RAND(80, 100)
+		CASE IS < 200
+			SOURCE:(MTAR:LOCAL):反感 = 200
+			SOURCE:(MTAR:LOCAL):不安 = 400
+			SOURCE:(MTAR:LOCAL):薬物追加 += 2000
+			CFLAG:(MTAR:LOCAL):薬物依存 += RAND(60, 100)
+		CASE IS < 300
+			SOURCE:(MTAR:LOCAL):反感 = 50
+			SOURCE:(MTAR:LOCAL):不安 = 150
+			SOURCE:(MTAR:LOCAL):薬物追加 += 1000
+			CFLAG:(MTAR:LOCAL):薬物依存 += RAND(40, 100)
+		CASEELSE
+			CFLAG:(MTAR:LOCAL):薬物依存 += 100
+			SOURCE:(MTAR:LOCAL):薬物追加 += 1000
+	ENDSELECT
+
+	;主導権に応じた優越・屈従のソース追加
+	CALL ADD_SOURCE_INITIATIVE_U(MTAR:LOCAL, 30, 60)
+
+NEXT
+;主導度変化基準値
+TFLAG:49 = 1
+
+;倒錯度変化基準値
+TFLAG:50 = 1
+
+;レズ・ＢＬ経験基準値
+TFLAG:51 = 0
+
+;経過時間を無理矢理1減らす
+TFLAG:55 --
+
+RETURN 1
+
+;-------------------------------------------------
+;固有の実行判定(プレイヤー側)
+;-------------------------------------------------
+@COM_ORDER_PLAYER74(ARG:0)
+;実行値の設定
+TCVAR:(ARG:0):25 = 90
+
+;共通部分
+CALL COM_ORDER(ARG:0)
+
+CALL COM_ORDER_ELEMENT(ARG:0, @"欲望Lv{ABL:(ARG:0):欲望}", ABL:(ARG:0):欲望 * 1)
+CALL COM_ORDER_ELEMENT(ARG:0, @"奉仕Lv{ABL:(ARG:0):奉仕}", ABL:(ARG:0):奉仕 * 4)
+
+LOCAL:0 = GET_PALAMLV(PALAM:(ARG:0):欲情)
+CALL COM_ORDER_ELEMENT(ARG:0, @"欲情Lv{LOCAL:0}", MIN(LOCAL:0 * 1, 10))
+
+IF TALENT:(ARG:0):恥じらい
+	CALL COM_ORDER_ELEMENT(ARG:0, "恥じらい", -1)
+ENDIF
+IF TALENT:(ARG:0):献身的
+	CALL COM_ORDER_ELEMENT(ARG:0, "献身的", 6)
+ENDIF
+IF TALENT:(ARG:0):快感の否定
+	CALL COM_ORDER_ELEMENT(ARG:0, "快感の否定", -1)
+ENDIF
+
+IF !TALENT:(ARG:0):合意 && !TALENT:(ARG:0):親友
+	CALL COM_ORDER_ELEMENT(ARG:0, "合意なし", -10)
+ENDIF
+
+RETURN 1
+
+;-------------------------------------------------
+;地の文(前文)
+;-------------------------------------------------
+@COM_TEXT_BEFORE74
+IF MTAR_NUM > 1
+	LOCALS:0 = たち
+ELSE
+	LOCALS:0 = 
+ENDIF
+
+SELECTCASE GET_COM_INITIATIVE()
+	;プレイヤーに主導権
+	CASE 0
+		PRINTFORML %ANAME(MPLY:0)%は%ANAME(MTAR:0)%%LOCALS:0%に麻薬を打っ%TARGET_STR("た", "てきた")%…
+	;ターゲットに主導権
+	CASE 1
+		PRINTFORML %ANAME(MTAR:0)%は%ANAME(MPLY:0)%%LOCALS:0%に麻薬を打つように命令した
+		PRINTFORML %ANAME(MPLY:0)%は言われるまま%ANAME(MTAR:0)%%LOCALS:0%に麻薬を打った…
+	;第三者に主導権
+	CASEELSE
+		PRINTFORML %ANAME(TFLAG:45)%は%ANAME(MPLY:0)%に対して、%ANAME(MTAR:0)%%LOCALS:0%に麻薬を打つように命令した
+		PRINTFORML %ANAME(MPLY:0)%は言われるまま%ANAME(MTAR:0)%%LOCALS:0%に麻薬を打った…
+ENDSELECT
+
+;-------------------------------------------------
+;地の文(実行後)
+;-------------------------------------------------
+@COM_TEXT_AFTER74
+IF GETBIT(TALENT:(MTAR:0):淫乱系, 素質_淫乱_薬物中毒)
+	PRINTFORML %ANAME(MTAR:0)%%LOCALS:0%は、待ち望んでいたものを打ち込まれ、心底幸せそうにえへえへと笑っている…
+ELSE
+	PRINTFORML 薬が回ってきたのか、%ANAME(MTAR:0)%%LOCALS:0%は虚ろな瞳でえへらえへらと笑っている…
+ENDIF
+
+;-------------------------------------------------
+
+;コマンド区分
+;-------------------------------------------------
+
+@COM_AVAILABLE_WHEN74
+RETURN コマンド_ウフフ
+
+;--------------------
+;性嗜好用関数
+;--------------------
+@COM_PREFERENCE_PLAYER_74()
+RETURN POWER(2, 性的嗜好_道具を使いたい) + POWER(2, 性的嗜好_虐げたい)
+
+@COM_PREFERENCE_TARGET_74()
+RETURN POWER(2, 性的嗜好_道具を使われたい) + POWER(2, 性的嗜好_虐げられたい)
+

@@ -1,561 +1,1581 @@
-﻿;---------------------------------
-; SLG COMBAT
-;---------------------------------
+﻿;-------------------------------------------------
+;侵攻部隊(ARG:0勢力、ARG:1部隊) vs 侵攻部隊(ARG:2勢力、ARG:3部隊)の戦闘
+;-------------------------------------------------
+@BATTLE_UNIT_TO_UNIT(ARG:0, ARG:1, ARG:2, ARG:3)
+#DIM FIRST_LINE
+#DIM 攻撃側壊滅
+LOCAL:5 = UNIT_POSITION:(ARG:0):(ARG:1)
+BATTLE_NAME:0 = %ANAME(GET_COUNTRY_BOSS(ARG:0))%
+BATTLE_NAME:1 = %ANAME(GET_COUNTRY_BOSS(ARG:2))%
 
-;---------------------------------
-; 戦闘
-;---------------------------------
-@COMBAT(ID)
-#DIM ID
-#DIM ITER, 2
-#DIM COUNTER
-#DIM COUNTRY_LIST, MAX_COUNTRY
-#DIM SHIPS, 2, MAX_SHIP
-#DIM SHIPS_LENGTH, 2
-#DIM SHIP_ID
-#DIM POS_X
-#DIM POS_Y
-#DIM SELECTED
-#DIM SETTLEMENT_FLAG ;戦闘終了フラグ
-#DIM BATTLE_COUNTRY, 2
+PRINTFORML ◆◆◆◆◆◆遭遇戦◆◆◆◆◆◆
+SETCOLOR カラー_注釈
+SIF GET_COUNTRY_BOSS(CITY_OWNER:(LOCAL:5)) != -1
+	PRINTFORM %ANAME(GET_COUNTRY_BOSS(CITY_OWNER:(LOCAL:5)))%の所領である
+PRINTFORML %GET_RELAYNAME(LOCAL:5)%において、
+PRINTFORML %BATTLE_NAME:0%と%BATTLE_NAME:1%の戦闘が発生しました
 
-CALL GET_SHIP_LIST_FROM_POS(ID)
-IF SHIP_LIST_LENGTH < 2
-	RETURN
+RESETCOLOR
+
+SIF (CONFIG:300 == 1 && ARG:0 != CFLAG:MASTER:所属 && ARG:2 != CFLAG:MASTER:所属 && IS_COUNTRY(CFLAG:MASTER:所属)) || CONFIG:300 == 2
+	SKIPDISP 1
+
+;部隊能力を表示
+CALL COLOR_PRINTL("----------互いの力量----------", カラー_選択不可)
+CALL PRINT_UNIT_INFO(ARG:0, ARG:1, 0, 0)
+PRINTL
+CALL PRINT_UNIT_INFO(ARG:2, ARG:3, 0, 0)
+PRINTL
+;片方が主人公勢力なら口上表示
+IF ARG:0 == CFLAG:MASTER:所属 || ARG:2 == CFLAG:MASTER:所属
+	FOR LOCAL:0, 0, 3
+		LOCAL:1 = GET_UNIT_COMMANDER(ARG:0, ARG:1, LOCAL:0)
+		IF LOCAL:1 >= 0
+			CALL KOJO_EVENT(LOCAL:1, 300)
+		ENDIF
+	NEXT
+	FOR LOCAL:0, 0, 3
+		LOCAL:1 = GET_UNIT_COMMANDER(ARG:2, ARG:3, LOCAL:0)
+		IF LOCAL:1 >= 0
+			CALL KOJO_EVENT(LOCAL:1, 300)
+		ENDIF
+	NEXT
 ENDIF
 
-; 参加国の設定
-FOR LOCAL, 0, SHIP_LIST_LENGTH
-	COUNTRY_LIST:(SHIP_COUNTRY:(SHIP_LIST:LOCAL)) = 1
-NEXT
+;■戦闘の計算
+CALL BATTLE_CALC(ARG:0, ARG:1, ARG:2, ARG:3)
 
-; 互いの好感度を見て交戦判定
-FOR BATTLE_COUNTRY, 0, MAX_COUNTRY
-	; 宙域に艦船が存在しない国は省く
-	SIF COUNTRY_LIST:BATTLE_COUNTRY == 0
-		CONTINUE
+SIF GROUPMATCH(0, BATTLE_SOL:0, BATTLE_SOL:1)
+	GOTO BATTLE_CANCEL
 
-	FOR BATTLE_COUNTRY:1, BATTLE_COUNTRY, MAX_COUNTRY
+;■ダメージの適用
+CALL COLOR_PRINTL("---------補正後の力量---------", カラー_選択不可)
+CALL PRINT_UNIT_INFO_COMBAT(ARG:0, ARG:1, 0, 0, 0)
+PRINTL
+CALL PRINT_UNIT_INFO_COMBAT(ARG:2, ARG:3, 1, 0, 0)
+PRINTL
+CALL COLOR_PRINTL("------------激突！------------", カラー_選択不可)
+CALL DECREASE_SOLDIER(ARG:0, ARG:1, BATTLE_DMG:0, 1)
+CALL DECREASE_SOLDIER(ARG:2, ARG:3, BATTLE_DMG:1, 1)
 
-		; 宙域に艦船が存在しない国は省く
-		SIF COUNTRY_LIST:(BATTLE_COUNTRY:1) == 0
-			CONTINUE
+$BATTLE_CANCEL
+CALL COLOR_PRINTL("----------戦闘後処理----------", カラー_選択不可)
 
-		;BATTLE_COUNTRY: 勢力A, (BATTLE_COUNTRY:1): 勢力B
-		IF REL_LIKE:BATTLE_COUNTRY:(BATTLE_COUNTRY:1) <= -1000 || REL_LIKE:(BATTLE_COUNTRY:1):BATTLE_COUNTRY <= -1000
-			CALL BATTLE(BATTLE_COUNTRY, BATTLE_COUNTRY:1, ID)
-			SIF BATTLE_COUNTRY:1 == 10
-				CALL ESCAPE_PIRATE
-		ENDIF
-	NEXT
-NEXT
+SIF (CONFIG:300 == 1 && ARG:0 != CFLAG:MASTER:所属 && ARG:2 != CFLAG:MASTER:所属 && IS_COUNTRY(CFLAG:MASTER:所属)) || CONFIG:300 == 2
+	SKIPDISP 0
 
-@BATTLE(COUNTRY_1, COUNTRY_2, POSID)
-#DIM COUNTRY_1
-#DIM COUNTRY_2
-#DIM POSID
-#DIM SHIP_LIST1, MAX_SHIP
-#DIM SHIP_LIST2, MAX_SHIP
-#DIM SHIP_LIST1_COUNT
-#DIM SHIP_LIST2_COUNT
-#DIM DISPLAY_UI
-#DIM DISTANCE, MAX_SHIP
-#DIM SHIP_ACTION, MAX_SHIP
-#DIM ATTACK_TARGET, MAX_SHIP
-#DIM SHIP_ID
-#DIM BROKEN_BY, MAX_SHIP
-#DIM SETTLEMENT
+;好感度・敵対値の変動
+LOCAL:1 = COUNTRY_AI_TYPE:(ARG:0)
+LOCAL:2 = COUNTRY_AI_TYPE:(ARG:2)
 
-; 変数初期化
-DISPLAY_UI = 0
-VARSET SHIP_ACTION, 0
-VARSET DISTANCE, 3
-VARSET ATTACK_TARGET, -1
-VARSET BROKEN_BY, -1
-SETTLEMENT = 0
-
-; 艦隊リスト取得
-CALL GET_SHIP_LIST(SHIP_LIST1, POSID, COUNTRY_1)
-CALL GET_SHIP_LIST(SHIP_LIST2, POSID, COUNTRY_2)
-FINDELEMENT SHIP_LIST1, -1, 0
-SHIP_LIST1_COUNT = RESULT
-SIF RESULT == 0
-	RETURN
-FINDELEMENT SHIP_LIST2, -1, 0
-SHIP_LIST2_COUNT = RESULT
-SIF RESULT == 0
-	RETURN
-
-; UI表示判定
-IF COUNTRY_1 == PLAYER_COUNTRY || COUNTRY_2 == PLAYER_COUNTRY
-	DISPLAY_UI = 1
-ELSEIF SHIP_LIST1_COUNT >= 30 && SHIP_LIST2_COUNT >= 30
-	DISPLAY_UI = 1
-	CALL ID2POS(POSID)
-	PRINTFORMW セクター＃{RESULT}にて発生した大規模戦闘が全世界に中継されました
+IF ARG:2 != CFLAG:MASTER:所属
+	CALL CHANGE_RELATION_C_TO_C(ARG:0, ARG:2, (-3 * AI_RELATION:(LOCAL:1):(LOCAL:2) / 100), (10 * 100 / AI_RELATION:(LOCAL:1):(LOCAL:2)))
+ELSE
+	CALL CHANGE_RELATION_C_TO_C(ARG:0, ARG:2, (-3 * AI_RELATION:(LOCAL:1):0 / 100), (10 * 100 / AI_RELATION:(LOCAL:1):0))
 ENDIF
 
-WHILE SETTLEMENT == 0
-	; 行動決定
-	FOR SHIP_ID, 0, SHIP_LIST1_COUNT
-		IF SHIP_ACTION:(SHIP_LIST1:SHIP_ID) != 大破
-			CALL GET_ACTION(SHIP_LIST1:SHIP_ID, DISTANCE:(SHIP_LIST1:SHIP_ID), LOCAL)
-			SHIP_ACTION:(SHIP_LIST1:SHIP_ID) = LOCAL
-		ENDIF
-	NEXT
-	FOR SHIP_ID, 0, SHIP_LIST2_COUNT
-		IF SHIP_ACTION:(SHIP_LIST2:SHIP_ID) != 大破
-			CALL GET_ACTION(SHIP_LIST2:SHIP_ID, DISTANCE:(SHIP_LIST2:SHIP_ID), LOCAL)
-			SHIP_ACTION:(SHIP_LIST2:SHIP_ID) = LOCAL
-		ENDIF
-	NEXT
+IF ARG:0 != CFLAG:MASTER:所属
+	CALL CHANGE_RELATION_C_TO_C(ARG:2, ARG:0, (-3 * AI_RELATION:(LOCAL:2):(LOCAL:1) / 100), (10 * 100 / AI_RELATION:(LOCAL:2):(LOCAL:1)))
+ELSE
+	CALL CHANGE_RELATION_C_TO_C(ARG:2, ARG:0, (-3 * AI_RELATION:(LOCAL:2):0 / 100), (10 * 100 / AI_RELATION:(LOCAL:2):0))
+ENDIF
 
-	; 攻撃対象選択
-	FOR SHIP_ID, 0, SHIP_LIST1_COUNT
-		SIF SHIP_ACTION:(SHIP_LIST1:SHIP_ID) != 攻撃
-			CONTINUE
-		CALL GET_ATTACK_TARGET(SHIP_LIST2, DISTANCE, SHIP_ACTION)
-		IF RESULT != -1
-			ATTACK_TARGET:(SHIP_LIST1:SHIP_ID) = RESULT
+UNIT_FBATTLE:(ARG:0):(ARG:1) = 1
+UNIT_FBATTLE:(ARG:2):(ARG:3) = 1
+
+攻撃側壊滅 = 0
+
+;攻撃側部隊の兵数が0
+IF UNIT_SOLDIER:(ARG:0):(ARG:1) <= 0
+	攻撃側壊滅 = 1
+	IF ARG:0 == CFLAG:MASTER:所属
+		LOCALS:2 = %GET_UNIT_COMMANDER_NAME(ARG:0, ARG:1)%
+		IF LOCALS:2 == ""
+			LOCALS:2 = 我が軍の
 		ELSE
-			THROW 攻撃対象が見つかりませんでした
+			LOCALS:2 = <%LOCALS:2%>
 		ENDIF
-	NEXT
-	FOR SHIP_ID, 0, SHIP_LIST2_COUNT
-		SIF SHIP_ACTION:(SHIP_LIST2:SHIP_ID) != 攻撃
-			CONTINUE
-		CALL GET_ATTACK_TARGET(SHIP_LIST1, DISTANCE, SHIP_ACTION)
-		IF RESULT != -1
-			ATTACK_TARGET:(SHIP_LIST2:SHIP_ID) = RESULT
+		CALL COLOR_PRINTW(@"%LOCALS:2%部隊が潰走しました……", カラー_警告)
+	ELSE
+		PRINTFORML %BATTLE_NAME:0%軍は潰走しました
+	ENDIF
+	IF ARG:2 != CFLAG:MASTER:所属
+		CALL CHANGE_RELATION_C_TO_C(ARG:0, ARG:2, (-10 * AI_RELATION:(LOCAL:1):(LOCAL:2) / 100), (50 * 100 / AI_RELATION:(LOCAL:1):(LOCAL:2)))
+	ELSE
+		CALL CHANGE_RELATION_C_TO_C(ARG:0, ARG:2, (-10 * AI_RELATION:(LOCAL:1):0 / 100), (50 * 100 / AI_RELATION:(LOCAL:1):0))
+	ENDIF
+
+	SIF IS_COUNTRY(ARG:0) && FINDELEMENT(TREATY_U_TARGET, ARG:0) != -1
+		CALL SLG_COMBAT_BEAT_TREATY_TARGET(ARG:2, ARG:0)
+
+	;将の捕獲
+	CALL UNIT_BREAK(1, ARG:2, ARG:3, ARG:0, ARG:1)
+	;壊滅した部隊の後始末
+	CALL CLEAR_UNIT(ARG:0, ARG:1)
+ENDIF
+
+;防御側部隊の兵数が0
+IF UNIT_SOLDIER:(ARG:2):(ARG:3) <= 0
+	IF ARG:2 == CFLAG:MASTER:所属
+		LOCALS:2 = %GET_UNIT_COMMANDER_NAME(ARG:2, ARG:3)%
+		IF LOCALS:2 == ""
+			LOCALS:2 = 我が軍の
 		ELSE
-			THROW 攻撃対象が見つかりませんでした
+			LOCALS:2 = <%LOCALS:2%>
+		ENDIF
+		CALL COLOR_PRINTW(@"%LOCALS:2%部隊が潰走しました……", カラー_警告)
+	ELSE
+		PRINTFORML %BATTLE_NAME:1%軍は潰走しました
+	ENDIF
+	IF ARG:0 != CFLAG:MASTER:所属
+		CALL CHANGE_RELATION_C_TO_C(ARG:2, ARG:0, (-10 * AI_RELATION:(LOCAL:2):(LOCAL:1) / 100), (50 * 100 / AI_RELATION:(LOCAL:2):(LOCAL:1)))
+	ELSE
+		CALL CHANGE_RELATION_C_TO_C(ARG:2, ARG:0, (-10 * AI_RELATION:(LOCAL:2):0 / 100), (50 * 100 / AI_RELATION:(LOCAL:2):0))
+	ENDIF
+
+	SIF IS_COUNTRY(ARG:2) && FINDELEMENT(TREATY_U_TARGET, ARG:2) != -1
+		CALL SLG_COMBAT_BEAT_TREATY_TARGET(ARG:0, ARG:2)
+
+	;将の捕獲
+	SIF !攻撃側壊滅
+		CALL UNIT_BREAK(0, ARG:0, ARG:1, ARG:2, ARG:3)
+
+	;壊滅した部隊の後始末
+	CALL CLEAR_UNIT(ARG:2, ARG:3)
+ENDIF
+
+;戦闘が行われたところが中継点でなければその都市に攻撃カウント＋1
+;町の近くでドンパチしていたら、ね
+SIF !CITY_TYPE:(LOCAL:5)
+	CITY_TIRED_COUNT:(LOCAL:5) ++
+
+;戦闘モブをぜんぶ削除
+LOCAL:2 = CHARANUM
+FOR LOCAL:0, 0, LOCAL:2
+	LOCAL:1 = LOCAL:2 - LOCAL:0 - 1
+	SIF TALENT:(LOCAL:1):戦闘モブ
+		CALL DELETE_CHARA(LOCAL:1)
+NEXT
+
+WAIT
+
+;-------------------------------------------------
+;侵攻部隊(ARG:0勢力、ARG:1部隊) vs 防衛部隊(都市ARG:2)の戦闘
+;-------------------------------------------------
+@BATTLE_UNIT_TO_CITY(ARG:0, ARG:1, ARG:2)
+#DIM FIRST_LINE
+#DIM 都市奪取
+LOCAL:9 = 0
+
+LOCAL:6 = CITY_OWNER:(ARG:2)
+BATTLE_NAME:0 = %ANAME(GET_COUNTRY_BOSS(ARG:0))%
+LOCAL:5 = GET_COUNTRY_BOSS(CITY_OWNER:(ARG:2))
+BATTLE_NAME:1 = %LOCAL:5 != -1 ? NAME:(LOCAL:5) # "無所属"%
+
+PRINTFORML ◆◆◆◆◆◆侵攻戦◆◆◆◆◆◆
+SETCOLOR カラー_注釈
+SIF GET_COUNTRY_BOSS(CITY_OWNER:(ARG:2)) != -1
+	PRINTFORM %ANAME(GET_COUNTRY_BOSS(CITY_OWNER:(ARG:2)))%の所領である
+PRINTFORML %GET_CITYNAME(ARG:2)%が、
+PRINTFORML %BATTLE_NAME:0%に侵攻されました
+RESETCOLOR
+
+SIF (CONFIG:300 == 1 && (ARG:0 != CFLAG:MASTER:所属 && LOCAL:6 != CFLAG:MASTER:所属) && IS_COUNTRY(CFLAG:MASTER:所属)) || CONFIG:300 == 2
+	SKIPDISP 1
+
+;その都市がその勢力にとって最後の1都市なら、全兵力を傾ける
+IF LOCAL:5 >= 0 && GET_OWN_CITY(CITY_OWNER:(ARG:2)) == 1
+	PRINTFORML %BATTLE_NAME:1%は最後の所領の防衛に全兵力を注いだ！
+	CALL TMP_CREATE_IS_FREE_MAP
+	PRINTFORM 変動前:
+	CALL PRINT_CITY_INFO(ARG:2, 0)
+	PRINTL
+	CALL CLEAR_CITY_COMMANDER(ARG:2, 0)
+	CALL CLEAR_CITY_COMMANDER(ARG:2, 1)
+	CALL TMP_CREATE_IS_FREE_MAP()
+	CALL SET_CITY_COMMANDER_BEST(ARG:2, 1)
+	CALL INCREASE_SOLDIER(ARG:2, -1, COUNTRY_SOLDIER:(CITY_OWNER:(ARG:2)))
+	COUNTRY_SOLDIER:(CITY_OWNER:(ARG:2)) = 0
+	PRINTFORM 変動後:
+	CALL PRINT_CITY_INFO(ARG:2, 0)
+	PRINTL
+ENDIF
+
+;部隊能力を表示
+CALL COLOR_PRINTL("----------互いの力量----------", カラー_選択不可)
+CALL PRINT_UNIT_INFO(ARG:0, ARG:1, 0, 0)
+PRINTL
+CALL PRINT_CITY_INFO(ARG:2, 0)
+PRINTL
+;片方が主人公勢力なら口上表示
+IF ARG:0 == CFLAG:MASTER:所属 || CITY_OWNER:(ARG:2) == CFLAG:MASTER:所属
+	FOR LOCAL:0, 0, 3
+		LOCAL:1 = GET_UNIT_COMMANDER(ARG:0, ARG:1, LOCAL:0)
+		IF LOCAL:1 >= 0
+			CALL KOJO_EVENT(LOCAL:1, 301)
 		ENDIF
 	NEXT
+	FOR LOCAL:0, 0, 2
+		LOCAL:1 = GET_CITY_COMMANDER(ARG:2, LOCAL:0)
+		IF LOCAL:1 >= 0
+			CALL KOJO_EVENT(LOCAL:1, 302)
+		ENDIF
+	NEXT
+ENDIF
+
+;■戦闘の計算
+CALL BATTLE_CALC(ARG:0, ARG:1, ARG:2, -1)
+
+SIF GROUPMATCH(0, BATTLE_SOL:0, BATTLE_SOL:1)
+	GOTO BATTLE_CANCEL
+
+;■ダメージの適用
+CALL COLOR_PRINTL("---------補正後の力量---------", カラー_選択不可)
+CALL PRINT_UNIT_INFO_COMBAT(ARG:0, ARG:1, 0, 0, 0)
+PRINTL
+CALL PRINT_CITY_INFO_COMBAT(ARG:2, 1, 0)
+PRINTL
+CALL COLOR_PRINTL("------------激突！------------", カラー_選択不可)
+
+CALL DECREASE_SOLDIER(ARG:0, ARG:1, BATTLE_DMG:0, 1)
+CALL DECREASE_SOLDIER(ARG:2, -1,    BATTLE_DMG:1, 1)
+
+$BATTLE_CANCEL
+CALL COLOR_PRINTL("----------戦闘後処理----------", カラー_選択不可)
+
+SIF (CONFIG:300 == 1 && (ARG:0 != CFLAG:MASTER:所属 && LOCAL:6 != CFLAG:MASTER:所属) && IS_COUNTRY(CFLAG:MASTER:所属)) || CONFIG:300 == 2
+	SKIPDISP 0
 
 
-	; UI表示
-	SIF DISPLAY_UI
-		CALL DISPLAY_UI(SHIP_LIST1, SHIP_LIST2, SHIP_ACTION, ATTACK_TARGET, DISTANCE, BROKEN_BY)
+UNIT_FBATTLE:(ARG:0):(ARG:1) = 1
+CITY_IS_ATTACKED:(ARG:2) = 1
 
-	; 行動
-	CALL EXECUTE_ACTION(SHIP_LIST1, SHIP_LIST2, SHIP_ACTION, ATTACK_TARGET, DISTANCE, BROKEN_BY)
+都市奪取 = 0
 
-	; 決着判定
-	CALL CHECK_SETTLEMENT(SHIP_LIST1, SHIP_LIST2, SHIP_ACTION)
-	SETTLEMENT = RESULT
-WEND
-IF DISPLAY_UI
-	PRINTL ◆戦果
-	IF SETTLEMENT == 1
-		PRINTFORML %COUNTRY_NAME:COUNTRY_2%の勝利
-		PRINTFORMW %COUNTRY_NAME:COUNTRY_1%は敗走しました
-		RETURN 1
-	ELSEIF SETTLEMENT == 2
-		PRINTFORMl %COUNTRY_NAME:COUNTRY_1%の勝利
-		PRINTFORMW %COUNTRY_NAME:COUNTRY_2%は敗走しました
-		RETURN 0
+;都市の兵数が0
+IF CITY_SOLDIER:(ARG:2) <= 0
+	都市奪取 = 1
+	CITY_TIRED_COUNT:(ARG:2) = 0
+	CITY_IS_ATTACKED:(ARG:2) = 0
+
+	;都市占領による略奪
+	;LOCAL 10:その都市に備蓄されていた財産
+	;無所属の都市は経済規模の30%を備蓄しているとみなす
+	IF LOCAL:6 > 0
+		LOCAL:10 = MONEY:(LOCAL:6) * CITY_ECONOMY:(ARG:2) / GET_SUM_ECONOMY(LOCAL:6)
+		MONEY:(LOCAL:6) -= LOCAL:10
+		MONEY:(ARG:0) += LOCAL:10 * 90 / 100
+	ELSE
+		LOCAL:10 = CITY_ECONOMY:(ARG:2) * 30 / (100 * 10)
+		MONEY:(ARG:0) += LOCAL:10 * 90 / 100
+	ENDIF
+	;DEBUGPRINTFORML {DAY,3}【略奪】\@LOCAL:6 ? %ANAME(GET_COUNTRY_BOSS(LOCAL:6))% # 無所属\@＞%ANAME(GET_COUNTRY_BOSS(ARG:0))%:{LOCAL:10}
+	IF IS_COUNTRY(CITY_OWNER:(ARG:2)) && CITY_OWNER:(ARG:2) == CFLAG:MASTER:所属 && !FLAG:観戦モード
+		CALL COLOR_PRINTL(@"%BATTLE_NAME:0%軍に%GET_CITYNAME(ARG:2)%を奪われました！", カラー_警告)
+	ELSEIF ARG:0 == CFLAG:MASTER:所属
+		CALL COLOR_PRINTL(@"%GET_CITYNAME(ARG:2)%を占領しました！", カラー_注意)
+	ELSE
+		PRINTFORML %BATTLE_NAME:0%軍が%GET_CITYNAME(ARG:2)%を占領しました
+	ENDIF
+
+	SIF IS_COUNTRY(CITY_OWNER:(ARG:2)) && FINDELEMENT(TREATY_U_TARGET, CITY_OWNER:(ARG:2)) != -1
+		CALL SLG_COMBAT_BEAT_TREATY_TARGET(ARG:0, CITY_OWNER:(ARG:2))
+
+
+	;部隊壊滅時の士官の捕獲
+	CALL UNIT_BREAK(0, ARG:0, ARG:1, ARG:2, -1)
+
+	CITY_OWNER:(ARG:2) = ARG:0
+	CITY_COMMANDER:(ARG:2) = 0
+
+
+	;都市の経済変動
+	IF CITY_ECONOMY_LIMIT:(ARG:2) > 800
+		CITY_ECONOMY_LIMIT:(ARG:2) = MAX(CITY_ECONOMY_LIMIT:(ARG:2) * 93 / 100, 800)
+	ENDIF
+	CITY_ECONOMY:(ARG:2) = MIN(CITY_ECONOMY:(ARG:2), CITY_ECONOMY_LIMIT:(ARG:2))
+	IF CITY_ECONOMY:(ARG:2) > 500
+		CITY_ECONOMY:(ARG:2) = MAX(CITY_ECONOMY:(ARG:2) * 80 / 100, 500)
+	ENDIF
+
+	;都市占領フラグのセット
+	UNIT_CAPTURE_CITY:(ARG:0):(ARG:1) = 1
+
+	;好感度・敵対値の変動
+	LOCAL:1 = COUNTRY_AI_TYPE:(ARG:0)
+	LOCAL:2 = COUNTRY_AI_TYPE:(LOCAL:6)
+
+	IF ARG:0 != CFLAG:MASTER:所属
+		CALL CHANGE_RELATION_C_TO_C(LOCAL:6, ARG:0, (-10 * AI_RELATION:(LOCAL:2):(LOCAL:1) / 100), (100 * 100 / AI_RELATION:(LOCAL:2):(LOCAL:1)))
+	ELSE
+		CALL CHANGE_RELATION_C_TO_C(LOCAL:6, ARG:0, (-10 * AI_RELATION:(LOCAL:2):0 / 100), (100 * 100 / AI_RELATION:(LOCAL:2):0))
+	ENDIF
+
+	;勢力の滅亡判定
+	IF IS_COUNTRY(LOCAL:6) && GET_OWN_CITY(LOCAL:6) <= 0
+		IF COUNTRY_EVENT_ID:(LOCAL:6) == SP_COUNTRY_ID:(特殊勢力_野盗)
+			IF CFLAG:MASTER:所属 == LOCAL:6
+				SETCOLOR カラー_警告
+				PRINTFORMW %ANAME(MASTER)%の仕えていた%BATTLE_NAME:1%たちは、都市を全て失いました…
+				PRINTFORMW そのごたごたで、捕らえていた捕虜たちが全て逃げていってしまいました
+				PRINTFORMW ですが、%BATTLE_NAME:1%たちは滅亡したわけではありません
+				PRINTFORMW どこにでも湧くのが%BATTLE_NAME:1%、また蜂起すればよいのです…
+				RESETCOLOR
+			ELSE
+				SETCOLOR カラー_注意
+				PRINTFORMW %BATTLE_NAME:1%の奪った都市は全て取り返されました！
+				PRINTFORMW そのごたごたで、捕らえていた捕虜たちが全て解放されました
+				PRINTFORMW しかし、%BATTLE_NAME:1%たちは滅亡したわけではありません
+				PRINTFORMW どこにでも湧くのが%BATTLE_NAME:1%、根絶せしめるのは不可能です
+				RESETCOLOR
+			ENDIF
+			SETCOLOR カラー_シアン
+			PRINTFORMW %BATTLE_NAME:1%を撤退せしめた%ANAME(GET_COUNTRY_BOSS(ARG:0))%は、他の勢力から深く感謝されています…
+			RESETCOLOR
+			FOR LOCAL:0, 0, CHARANUM
+				SIF CFLAG:LOCAL:捕虜先 == LOCAL:6
+					CALL CAPTURE(LOCAL, 0)
+			NEXT
+			FOR LOCAL:0, 0, MAX_COUNTRY
+				SIF IS_COUNTRY(LOCAL) && LOCAL != ARG:0 && LOCAL != LOCAL:6
+					CALL CHANGE_RELATION_C_TO_C(LOCAL, ARG:0, 300, -300)
+			NEXT
+			;外交禁止フラグを立てる
+			COUNTRY_IS_CLOSED:(LOCAL:6) = 1
+		ELSE
+			IF CFLAG:MASTER:所属 == LOCAL:6
+				SETCOLOR カラー_警告
+				PRINTFORMW %ANAME(MASTER)%の仕えていた%BATTLE_NAME:1%勢力は滅亡してしまいました…
+				RESETCOLOR
+			ELSE
+				SETCOLOR カラー_警告
+				PRINTFORMW %BATTLE_NAME:1%勢力は滅亡しました
+				RESETCOLOR
+			ENDIF
+			SIF !IS_SP_COUNTRY(LOCAL:6)
+				DIPLOMACY_HATE:(ARG:0) += 3
+
+			;敗将の処理
+			CALL LOSERS_ACTION(LOCAL:6, ARG:0)
+
+			IF ARG:0 == CFLAG:MASTER:所属
+				LOCAL:9 = 1
+			ENDIF
+
+			;後始末
+			CALL DESTROY_COUNTRY(LOCAL:6)
+		ENDIF
 	ENDIF
 ENDIF
 
-;---------------------------------
-; アクション取得
-;---------------------------------
-@GET_ACTION(SHIP_ID, DISTANCE, ACTION)
-#DIM SHIP_ID
-#DIM DISTANCE
-#DIM REF ACTION
-#DIM RANGE
-#DIM CURRENT_SHIP_HP
-#DIM MAX_SHIP_HP
-
-
-IF SHIP_CATEGORY:SHIP_ID == 調査船 || SHIP_CATEGORY:SHIP_ID == 輸送船 || SHIP_CATEGORY:SHIP_ID == 作業船
-	IF DISTANCE == 3
-		ACTION = 撤退
+;侵攻部隊の兵数が0
+IF UNIT_SOLDIER:(ARG:0):(ARG:1) <= 0
+	IF ARG:0 == CFLAG:MASTER:所属
+		LOCALS:2 = %GET_UNIT_COMMANDER_NAME(ARG:0, ARG:1)%
+		IF LOCALS:2 == ""
+			LOCALS:2 = 我が軍の
+		ELSE
+			LOCALS:2 = <%LOCALS:2%>
+		ENDIF
+		CALL COLOR_PRINTL(@"%LOCALS:2%部隊が潰走しました……", カラー_警告)
 	ELSE
-		ACTION = 後退
+		PRINTFORML %BATTLE_NAME:0%軍は潰走しました
+	ENDIF
+
+	;このパターンのみ、倒した側がIS_COUNTRYであるかのチェックも行う(都市側が無所属である可能性もあるので)
+	SIF IS_COUNTRY(ARG:0) && IS_COUNTRY(CITY_OWNER:(ARG:2)) && FINDELEMENT(TREATY_U_TARGET, ARG:0) != -1
+		CALL SLG_COMBAT_BEAT_TREATY_TARGET(CITY_OWNER:(ARG:2), ARG:0)
+
+	;都市所有勢力が居た場合のみ
+	IF LOCAL:5 >= 0 && !都市奪取
+		;部隊壊滅時の士官の捕獲
+		CALL UNIT_BREAK(1, ARG:2, -1, ARG:0, ARG:1)
+	ENDIF
+
+	;壊滅した部隊の後始末
+	CALL CLEAR_UNIT(ARG:0, ARG:1)
+
+ELSE
+	;好感度・敵対値の変動
+	LOCAL:1 = COUNTRY_AI_TYPE:(ARG:0)
+	LOCAL:2 = COUNTRY_AI_TYPE:(LOCAL:6)
+
+	IF ARG:0 != CFLAG:MASTER:所属
+		CALL CHANGE_RELATION_C_TO_C(LOCAL:6, ARG:0, (-5 * AI_RELATION:(LOCAL:2):(LOCAL:1) / 100), (50 * 100 / AI_RELATION:(LOCAL:2):(LOCAL:1)))
+	ELSE
+		CALL CHANGE_RELATION_C_TO_C(LOCAL:6, ARG:0, (-5 * AI_RELATION:(LOCAL:2):0 / 100), (50 * 100 / AI_RELATION:(LOCAL:2):0))
+	ENDIF
+ENDIF
+
+;戦闘モブをぜんぶ削除
+LOCAL:2 = CHARANUM
+FOR LOCAL:0, 0, LOCAL:2
+	LOCAL:1 = LOCAL:2 - LOCAL:0 - 1
+	SIF TALENT:(LOCAL:1):戦闘モブ
+		CALL DELETE_CHARA(LOCAL:1)
+NEXT
+
+WAIT
+
+;-------------------------------------------------
+;戦闘の共通計算
+;引数 0:攻撃側勢力 1:攻撃側部隊 2:対象勢力 3:対象部隊 ※ARG:3が0未満の場合、防衛部隊とみなし、ARG:2を都市番号として使用
+;-------------------------------------------------
+@BATTLE_CALC(ARG:0, ARG:1, ARG:2, ARG:3)
+
+;戦闘関連の変数の初期化
+VARSET BATTLE_RATE_DMG, 0
+VARSET BATTLE_RATE_ATC, 0
+VARSET BATTLE_RATE_GRD, 0
+VARSET BATTLE_RATE_GRD_B, 0
+VARSET BATTLE_FORCE_SCHEME, -1
+VARSET BATTLE_SKILL_SEALED, 0
+VARSET BATTLE_SUMMONED_CHARA, 0
+
+CALL GET_COMMANDER_ALL(ARG:0, ARG:1)
+CALL SET_BATTLE_MIRROR_VAL(0, RESULT:0, RESULT:1, RESULT:2)
+CALL GET_COMMANDER_ALL(ARG:2, ARG:3)
+CALL SET_BATTLE_MIRROR_VAL(1, RESULT:0, RESULT:1, RESULT:2)
+
+CALL COLOR_PRINTL("---------スキル・計略---------", カラー_選択不可)
+
+;戦闘力計算に先んじて発動する特殊計略の処理
+CALL BATTLE_SP_SKILL(0, ARG:0, ARG:1, ARG:2, ARG:3)
+CALL BATTLE_SP_SKILL(1, ARG:2, ARG:3, ARG:0, ARG:1)
+
+;SPスキルに準ずる国家方針・研究スキルの処理
+CALL TECHNOLOGY_PERSONAL_SKILL_COMBAT_INVOKE(0, ARG:0, ARG:1, ARG:2, ARG:3)
+CALL TECHNOLOGY_PERSONAL_SKILL_COMBAT_INVOKE(1, ARG:2, ARG:3, ARG:0, ARG:1)
+
+;先んじて用意
+CALL BATTLE_PREPARE_VARS(ARG:0, ARG:1, ARG:2, ARG:3)
+
+IF BATTLE_SOL:0 == 0 || BATTLE_SOL:1 == 0
+	BATTLE_DMG:0 = 0
+	BATTLE_DMG:1 = 0
+	RETURN
+ENDIF
+
+;基本値に影響を与える素質発動処理はここに
+CALL BATTLE_BASE_SKILL(0, ARG:0, ARG:1, ARG:2, ARG:3)
+CALL BATTLE_BASE_SKILL(1, ARG:2, ARG:3, ARG:0, ARG:1)
+CALL TECHNOLOGY_TROOP_SKILL_COMBAT_INVOKE(0, ARG:0, ARG:1, ARG:2, ARG:3)
+CALL TECHNOLOGY_TROOP_SKILL_COMBAT_INVOKE(1, ARG:2, ARG:3, ARG:0, ARG:1)
+
+;コア計算
+CALL BATTLE_CALC_CORE(ARG:0, ARG:1, ARG:2, ARG:3)
+
+
+;-------------------------------------------------
+;戦闘計算用変数の用意部分
+;SP_SKILLなどから呼べるように
+;引数 0:攻撃側勢力 1:攻撃側部隊 2:対象勢力 3:対象部隊 ※ARG:3が0未満の場合、防衛部隊とみなし、ARG:2を都市番号として使用
+;-------------------------------------------------
+@BATTLE_PREPARE_VARS(ARG:0, ARG:1, ARG:2, ARG:3)
+LOCAL:5 = 1
+BATTLE_SOL:0 = UNIT_SOLDIER:(ARG:0):(ARG:1)
+CALL BATTLE_PREPARE_VARS_EACH(0, 0)
+
+
+IF ARG:3 >= 0
+	BATTLE_SOL:1 = GET_SOLDIER(ARG:2, ARG:3)
+	CALL BATTLE_PREPARE_VARS_EACH(1, 0)
+
+ELSE
+	BATTLE_SOL:1 = GET_SOLDIER(ARG:2, ARG:3)
+	CALL BATTLE_PREPARE_VARS_EACH(1, ARG:2)
+ENDIF
+
+;-------------------------------------------------
+;戦闘計算用変数の用意部分
+;SP_SKILLなどから呼べるように
+;引数 0:攻撃側勢力 1:攻撃側部隊 2:対象勢力 3:対象部隊 ※ARG:3が0未満の場合、防衛部隊とみなし、ARG:2を都市番号として使用
+;-------------------------------------------------
+@BATTLE_PREPARE_VARS_EACH(SIDE, CITY)
+#DIM SIDE
+#DIM CITY
+IF CITY
+	BATTLE_ATK:SIDE = ATTACK_LEVEL(SIDE, CITY)
+	BATTLE_DEF:SIDE = DEFENSE_LEVEL(SIDE, CITY)
+	BATTLE_INT:SIDE = INTELLIGENCE_LEVEL(SIDE, CITY)
+	BATTLE_MAG:SIDE = MAGIC_LEVEL(SIDE, CITY)
+	BATTLE_F_UNIT:SIDE = 0
+ELSE
+	BATTLE_ATK:SIDE = ATTACK_LEVEL(SIDE, 0)
+	BATTLE_DEF:SIDE = DEFENSE_LEVEL(SIDE, 0)
+	BATTLE_INT:SIDE = INTELLIGENCE_LEVEL(SIDE, 0)
+	BATTLE_MAG:SIDE = MAGIC_LEVEL(SIDE, 0)
+	BATTLE_F_UNIT:SIDE = 1
+ENDIF
+
+;-------------------------------------------------
+;戦闘計算のコア部分
+;SP_SKILLなどから呼べるように
+;引数 0:攻撃側勢力 1:攻撃側部隊 2:対象勢力 3:対象部隊 ※ARG:3が0未満の場合、防衛部隊とみなし、ARG:2を都市番号として使用
+;-------------------------------------------------
+@BATTLE_CALC_CORE(ARG:0, ARG:1, ARG:2, ARG:3, ARG:4 = 1)
+#DIM 最終被ダメージ, 2
+#DIM 攻撃ゆらぎ, 2
+#DIM 防御ゆらぎ, 2
+#DIM 兵数ゆらぎ, 2
+#DIM 攻防差基礎被ダメージ, 2
+#DIM 兵数比基礎被ダメージ, 2
+#DIM 割合被ダメージ, 2
+#DIM 兵数比
+#DIM 被ダメージ比, 2
+#DIM 過剰被ダメージ
+
+FOR LOCAL, 0, 2
+	IF BATTLE_SOL:LOCAL == 0
+		BATTLE_ATK:LOCAL = 0
+		BATTLE_DEF:LOCAL = 0
+		BATTLE_INT:LOCAL = 0
+		BATTLE_MAG:LOCAL = 0
+	ENDIF
+NEXT
+
+IF ARG:4
+	CALL BATTLE_SOLDIER_RATE_CORRECTION(ARG:0, ARG:1, ARG:2, ARG:3)
+	; CALL BATTLE_DIFFICULTY_CORRECTION(ARG:0, ARG:1, ARG:2, ARG:3)
+	CALL BATTLE_TIREDNESS_CORRECTION(ARG:0, ARG:1, ARG:2, ARG:3)
+	CALL BATTLE_COMMANDER_POWER_CORRECTION(ARG:0, ARG:1, ARG:2, ARG:3)
+
+	;PRINTFORML 攻撃0={BATTLE_ATK:0, 8}   防御0={BATTLE_DEF:0, 8}
+	;PRINTFORMW 攻撃1={BATTLE_ATK:1, 8}   防御1={BATTLE_DEF:1, 8}
+
+	;PRINTFORML 攻撃0={BATTLE_ATK:0, 8}   防御0={BATTLE_DEF:0, 8}
+	;PRINTFORMW 攻撃1={BATTLE_ATK:1, 8}   防御1={BATTLE_DEF:1, 8}
+
+	CALL BATTLE_SCHEME(ARG:0, ARG:1, ARG:2, ARG:3)
+ENDIF
+
+;妖術パワーによる割合ダメージの追加
+SIF BATTLE_MAG:0 > 0
+	BATTLE_RATE_DMG:0 += MAX(BATTLE_MAG:0 / 2000, 1)
+SIF BATTLE_MAG:1 > 0
+	BATTLE_RATE_DMG:1 += MAX(BATTLE_MAG:1 / 2000, 1)
+
+;PRINTFORML BATTLE_RATE_DMG:0 {BATTLE_RATE_DMG:0}
+;PRINTFORML BATTLE_RATE_DMG:1 {BATTLE_RATE_DMG:1}
+
+;割合ダメージの算出
+割合被ダメージ:0 = MIN(BATTLE_SOL:0 * BATTLE_RATE_DMG:1 / 100, BATTLE_SOL:1)
+割合被ダメージ:1 = MIN(BATTLE_SOL:1 * BATTLE_RATE_DMG:0 / 100, BATTLE_SOL:0)
+
+;PRINTFORML 割合被ダメ:0 {割合被ダメージ:0}
+;PRINTFORML 割合被ダメ:1 {割合被ダメージ:1}
+
+;基礎ダメ
+;(攻撃力 - 防御力) / 100
+兵数ゆらぎ:0 = MAX(BATTLE_SOL:0 * RAND(800, 1200) / 1000, 1)
+兵数ゆらぎ:1 = MAX(BATTLE_SOL:1 * RAND(800, 1200) / 1000, 1)
+攻撃ゆらぎ:0 = MAX(BATTLE_ATK:0 * RAND(800, 1200) / 1000, 1)
+攻撃ゆらぎ:1 = MAX(BATTLE_ATK:1 * RAND(800, 1200) / 1000, 1)
+防御ゆらぎ:0 = MAX(BATTLE_DEF:0 * RAND(800, 1200) / 1000, 1)
+防御ゆらぎ:1 = MAX(BATTLE_DEF:1 * RAND(800, 1200) / 1000, 1)
+
+兵数比基礎被ダメージ:0 = MAX((兵数ゆらぎ:1 * 50 / 兵数ゆらぎ:0), 10)
+兵数比基礎被ダメージ:1 = MAX((兵数ゆらぎ:0 * 50 / 兵数ゆらぎ:1), 10)
+攻防差基礎被ダメージ:0 = MAX((攻撃ゆらぎ:1 - 防御ゆらぎ:0) / 100, 10)
+攻防差基礎被ダメージ:1 = MAX((攻撃ゆらぎ:0 - 防御ゆらぎ:1) / 100, 10)
+
+;PRINTFORML 兵数基礎:0 {兵数比基礎被ダメージ:0}
+;PRINTFORML 兵数基礎:1 {兵数比基礎被ダメージ:1}
+;PRINTFORML 攻防基礎:0 {攻防差基礎被ダメージ:0}
+;PRINTFORML 攻防基礎:1 {攻防差基礎被ダメージ:1}
+
+最終被ダメージ:0 = (兵数比基礎被ダメージ:0 + 攻防差基礎被ダメージ:0) * RAND(8000, 12000) / 1000
+最終被ダメージ:1 = (兵数比基礎被ダメージ:1 + 攻防差基礎被ダメージ:1) * RAND(8000, 12000) / 1000
+
+;PRINTFORML 乱数適用:0 {最終被ダメージ:0}
+;PRINTFORML 乱数適用:1 {最終被ダメージ:1}
+
+;ダメージの比が1.00以上2.00以下、かつ兵数比が2.00以下の場合の場合、反比例でダメージを4倍まで増やす。
+;かといって即死されても困るので元兵力の半分までに制限する。
+;「兵数・能力の似通った部隊が延々殴り合う」のを防止する。
+;兵数比で条件をかけているのは、「能力的に劣るが兵数で圧倒する部隊」と「兵数で劣るが能力で圧倒する部隊」がぶつかった場合に、後者の兵が不自然に削れるのを防ぐため。
+被ダメージ比 = MAX(最終被ダメージ:0 * 100 / 最終被ダメージ:1, 最終被ダメージ:1 * 100 / 最終被ダメージ:0)
+兵数比 = MAX(BATTLE_SOL:0 * 100 / BATTLE_SOL:1, BATTLE_SOL:1 * 100 / BATTLE_SOL:0)
+IF 被ダメージ比 < 200 && 兵数比 < 200
+	;PRINTFORML 被ダメ比 {被ダメージ比}
+	;小さいほうが出ていた場合は大きい方に変換
+	SIF 被ダメージ比 < 100
+		被ダメージ比 = 200 - 被ダメージ比
+	最終被ダメージ:0 = MIN(最終被ダメージ:0 * (40000 / 被ダメージ比) / 100, BATTLE_SOL:0 / 2)
+	最終被ダメージ:1 = MIN(最終被ダメージ:1 * (40000 / 被ダメージ比) / 100, BATTLE_SOL:1 / 2)
+	;PRINTFORML 比率適用:0 {最終被ダメージ:0}
+	;PRINTFORML 比率適用:1 {最終被ダメージ:1}
+ENDIF
+
+;与被害倍率と被害軽減率の適用
+最終被ダメージ:0 = 最終被ダメージ:0 * (BATTLE_RATE_ATC:1 + 100) / 100
+最終被ダメージ:0 = 最終被ダメージ:0 * (100 - LIMIT(BATTLE_RATE_GRD:0, 0, 100)) / 100
+最終被ダメージ:1 = 最終被ダメージ:1 * (BATTLE_RATE_ATC:0 + 100) / 100
+最終被ダメージ:1 = 最終被ダメージ:1 * (100 - LIMIT(BATTLE_RATE_GRD:1, 0, 100)) / 100
+
+;PRINTFORML 被害適用:0 {最終被ダメージ:0}
+;PRINTFORML 被害適用:1 {最終被ダメージ:1}
+最終被ダメージ:0 += 割合被ダメージ:0
+最終被ダメージ:1 += 割合被ダメージ:1
+
+最終被ダメージ:0 = 最終被ダメージ:0 * (100 - LIMIT(BATTLE_RATE_GRD_B:0, 0, 100)) / 100
+最終被ダメージ:1 = 最終被ダメージ:1 * (100 - LIMIT(BATTLE_RATE_GRD_B:1, 0, 100)) / 100
+
+;PRINTFORML 割合適用:0 {最終被ダメージ:0}
+;PRINTFORML 割合適用:1 {最終被ダメージ:1}
+;★
+;PRINTFORMW 割合ダメージ0:{BATTLE_RATE_DMG:0}  ダメージ{LOCAL:12}  妖術評価{BATTLE_MAG:0}  防御評価{BATTLE_DEF:0}
+;PRINTFORMW 割合ダメージ1:{BATTLE_RATE_DMG:1}  ダメージ{LOCAL:13}  妖術評価{BATTLE_MAG:1}  防御評価{BATTLE_DEF:1}
+
+;どちらかの兵数が0未満になった場合、過剰ダメージが元の兵数に占める割合の1/3だけ相手の被害を軽減。ただし30%まで（上限にかかるにはものすごいオーバーキルしてる必要があるが……）
+IF BATTLE_SOL:0 < 最終被ダメージ:0
+	過剰被ダメージ = 最終被ダメージ:0 - BATTLE_SOL:0
+	最終被ダメージ:0 = BATTLE_SOL:0
+	最終被ダメージ:1 = 最終被ダメージ:1 - MIN((最終被ダメージ:1 * (過剰被ダメージ * 10000 / BATTLE_SOL:0)) / 30000, 最終被ダメージ:1 * 3 / 10)
+ENDIF
+IF BATTLE_SOL:1 < 最終被ダメージ:1
+	過剰被ダメージ = 最終被ダメージ:1 - BATTLE_SOL:1
+	最終被ダメージ:1 = BATTLE_SOL:1
+	最終被ダメージ:0 = 最終被ダメージ:0 - MIN((最終被ダメージ:0 * (過剰被ダメージ * 10000 / BATTLE_SOL:1)) / 30000, 最終被ダメージ:0 * 3 / 10)
+ENDIF
+
+;PRINTFORML 軽減適用:0 {最終被ダメージ:0}
+;PRINTFORML 軽減適用:1 {最終被ダメージ:1}
+
+CALL BATTLE_ADD_TIREDNESS(ARG:0, ARG:1, ARG:2, ARG:3)
+
+BATTLE_DMG:0 = 最終被ダメージ:0
+BATTLE_DMG:1 = 最終被ダメージ:1
+
+
+;-------------------------------------------------
+;戦力比計算
+;兵数の多い方の攻撃/防御が、兵数比 * 5000 - 5000だけ増える
+;さらに割合ダメージを(兵数比 - 1) / 20だけ与える
+;-------------------------------------------------
+@BATTLE_SOLDIER_RATE_CORRECTION(ARG:0, ARG:1, ARG:2, ARG:3)
+#DIM 兵数比,2
+
+兵数比:0 = BATTLE_SOL:0 * 100 / MAX(BATTLE_SOL:1, 1)
+兵数比:1 = BATTLE_SOL:1 * 100 / MAX(BATTLE_SOL:0, 1)
+
+LOCAL = FINDELEMENT(兵数比, MAXARRAY(兵数比))
+
+;LOCAL:1 = MIN((兵数比:LOCAL - 100) / 10, 20)
+LOCAL:2 = MIN(兵数比:LOCAL * 50 - 5000, 30000)
+LOCAL:3 = MIN((兵数比:LOCAL - 100) / 20, 10)
+;PRINTFORML 兵数差により%BATTLE_NAME:LOCAL%軍強化 強化{LOCAL:2} + 割合ダメージ{LOCAL:3}％
+
+;BATTLE_ATK:LOCAL = BATTLE_ATK:LOCAL * (100 + LOCAL:1) / 100
+;BATTLE_DEF:LOCAL = BATTLE_DEF:LOCAL * (100 + LOCAL:1) / 100
+BATTLE_ATK:LOCAL += LOCAL:2
+BATTLE_DEF:LOCAL += LOCAL:2
+;1.4倍の場合4が入る。最大は3倍のときの20
+BATTLE_RATE_DMG:LOCAL += LOCAL:3
+
+
+
+;IF 兵数比:0 > 兵数比:1
+;	BATTLE_ATK:0 = BATTLE_ATK:0 * SQRT(兵数比:0 * 100) / 100
+;	BATTLE_DEF:0 = BATTLE_DEF:0 * SQRT(兵数比:0 * 100) / 100
+;	;単にx倍だと弱い部隊が報われないので固定値も足しておく
+;	;0.1倍相手より多い度に500増える
+;	BATTLE_ATK:0 += 5000 * (兵数比:0 * 10 - 1000) / 1000
+;	BATTLE_DEF:0 += 5000 * (兵数比:0 * 10 - 1000) / 1000
+;	;1.4倍の場合4が入る。最大は3倍のときの20
+;	BATTLE_RATE_DMG:0 += MIN(兵数比:0 / 10 - 10, 20)
+;ELSE
+;	BATTLE_ATK:1 = BATTLE_ATK:1 * SQRT(兵数比:1 * 100) / 100
+;	BATTLE_DEF:1 = BATTLE_DEF:1 * SQRT(兵数比:1 * 100) / 100
+;	BATTLE_ATK:1 += 5000 * (兵数比:1 * 10 - 1000) / 1000
+;	BATTLE_DEF:1 += 5000 * (兵数比:1 * 10 - 1000) / 1000
+;	BATTLE_RATE_DMG:1 += MIN(兵数比:1 / 10 - 10, 20)
+;ENDIF
+
+;-------------------------------------------------
+;敵軍補正
+;主人公の所属する勢力が敵対勢力と戦う際、敵側に補正をかける。
+;-------------------------------------------------
+; @BATTLE_DIFFICULTY_CORRECTION(ARG:0, ARG:1, ARG:2, ARG:3)
+; #DIM 補正倍率
+
+; 補正倍率 = GET_DIFFICULTY_CORRECTION()
+
+; ;共に主人公の所属しない勢力であれば補正は計算しない
+; SIF NOSAMES(CFLAG:MASTER:所属, ARG:0, ARG:3 < 0 ? CITY_OWNER:(ARG:2) # ARG:2)
+; 	補正倍率 = 100
+
+; ;補正計算
+; IF ARG:3 < 0 ? CITY_OWNER:(ARG:2) == CFLAG:MASTER:所属 # ARG:2 == CFLAG:MASTER:所属
+; 	BATTLE_ATK:0 = BATTLE_ATK:0 * 補正倍率 / 100
+; 	BATTLE_DEF:0 = BATTLE_DEF:0 * 補正倍率 / 100
+; 	BATTLE_INT:0 = BATTLE_INT:0 * 補正倍率 / 100
+; 	BATTLE_MAG:0 = BATTLE_MAG:0 * 補正倍率 / 100
+; 	;オーバフローして符号が反転する問題対策
+; 	;しかたないので負数なら整数の最大値ブチ込みます
+; 	SIF BATTLE_ATK:0 < 0
+; 		BATTLE_ATK:0 = __INT_MAX__
+; 	SIF BATTLE_DEF:0 < 0
+; 		BATTLE_DEF:0 = __INT_MAX__
+; 	SIF BATTLE_INT:0 < 0
+; 		BATTLE_INT:0 = __INT_MAX__
+; 	SIF BATTLE_MAG:0 < 0
+; 		BATTLE_MAG:0 = __INT_MAX__
+; ELSEIF ARG:0 == CFLAG:MASTER:所属
+; 	BATTLE_ATK:1 = BATTLE_ATK:1 * 補正倍率 / 100
+; 	BATTLE_DEF:1 = BATTLE_DEF:1 * 補正倍率 / 100
+; 	BATTLE_INT:1 = BATTLE_INT:1 * 補正倍率 / 100
+; 	BATTLE_MAG:1 = BATTLE_MAG:1 * 補正倍率 / 100
+; 	;オーバフローして符号が反転する問題対策
+; 	;しかたないので負数なら整数の最大値ブチ込みます
+; 	SIF BATTLE_ATK:1 < 0
+; 		BATTLE_ATK:1 = __INT_MAX__
+; 	SIF BATTLE_DEF:1 < 0
+; 		BATTLE_DEF:1 = __INT_MAX__
+; 	SIF BATTLE_INT:1 < 0
+; 		BATTLE_INT:1 = __INT_MAX__
+; 	SIF BATTLE_MAG:1 < 0
+; 		BATTLE_MAG:1 = __INT_MAX__
+; ENDIF
+
+;-------------------------------------------------
+;難易度による補正を取得
+;-------------------------------------------------
+@GET_DIFFICULTY_CORRECTION()
+#FUNCTION
+SELECTCASE CONFIG:314
+;EASY 許されるのは小学生まで
+	CASE 0
+		RETURNF 100
+;NORMAL 変更なし
+	CASE 1
+		RETURNF 120
+;HARD 好感度でなんとかできんこともない
+	CASE 2
+		RETURNF 140
+;LUNATIC 鍛えないと無理
+	CASE 3
+		RETURNF 180
+;EXTRA たぶん無理じゃねぇかな
+	CASE 4
+		RETURNF 250
+	CASEELSE
+		RETURNF 100
+ENDSELECT
+
+
+;-------------------------------------------------
+;疲労度によるペナルティ
+;-------------------------------------------------
+@BATTLE_TIREDNESS_CORRECTION(ARG:0, ARG:1, ARG:2, ARG:3)
+
+IF UNIT_TIRED_COUNT:(ARG:0):(ARG:1) > 0
+	BATTLE_ATK:0 = BATTLE_ATK:0 * MAX(100 - UNIT_TIRED_COUNT:(ARG:0):(ARG:1), 0) / 100
+	BATTLE_DEF:0 = BATTLE_DEF:0 * MAX(100 - UNIT_TIRED_COUNT:(ARG:0):(ARG:1), 0) / 100
+	BATTLE_INT:0 = BATTLE_INT:0 * MAX(100 - UNIT_TIRED_COUNT:(ARG:0):(ARG:1), 0) / 100
+	BATTLE_MAG:0 = BATTLE_MAG:0 * MAX(100 - UNIT_TIRED_COUNT:(ARG:0):(ARG:1), 0) / 100
+	;PRINTFORML 疲労補正:%BATTLE_NAME:0 + "軍", MAX_CHARANAME_LENGTH, LEFT% 弱体{UNIT_TIRED_COUNT:(ARG:0):(ARG:1), 2}％
+ENDIF
+
+IF ARG:3 >= 0 && UNIT_TIRED_COUNT:(ARG:2):(ARG:3) > 0
+	BATTLE_ATK:1 = BATTLE_ATK:1 * MAX(100 - UNIT_TIRED_COUNT:(ARG:2):(ARG:3), 0) / 100
+	BATTLE_DEF:1 = BATTLE_DEF:1 * MAX(100 - UNIT_TIRED_COUNT:(ARG:2):(ARG:3), 0) / 100
+	BATTLE_INT:1 = BATTLE_INT:1 * MAX(100 - UNIT_TIRED_COUNT:(ARG:2):(ARG:3), 0) / 100
+	BATTLE_MAG:1 = BATTLE_MAG:1 * MAX(100 - UNIT_TIRED_COUNT:(ARG:2):(ARG:3), 0) / 100
+	;PRINTFORML 疲労補正:%BATTLE_NAME:1 + "軍", MAX_CHARANAME_LENGTH, LEFT% 弱体{UNIT_TIRED_COUNT:(ARG:2):(ARG:3), 2}％
+ELSEIF ARG:3 < 0 && CITY_TIRED_COUNT:(ARG:2)
+	BATTLE_ATK:1 = BATTLE_ATK:1 * MAX(100 - CITY_TIRED_COUNT:(ARG:2), 0) / 100
+	BATTLE_DEF:1 = BATTLE_DEF:1 * MAX(100 - CITY_TIRED_COUNT:(ARG:2), 0) / 100
+	BATTLE_INT:1 = BATTLE_INT:1 * MAX(100 - CITY_TIRED_COUNT:(ARG:2), 0) / 100
+	BATTLE_MAG:1 = BATTLE_MAG:1 * MAX(100 - CITY_TIRED_COUNT:(ARG:2), 0) / 100
+	;PRINTFORML 疲労補正:%BATTLE_NAME:1 + "軍", MAX_CHARANAME_LENGTH, LEFT% 弱体{CITY_TIRED_COUNT:(ARG:2), 2}％
+ENDIF
+
+;-------------------------------------------------
+;士官の能力差による補正
+;-------------------------------------------------
+@BATTLE_COMMANDER_POWER_CORRECTION(ARG:0, ARG:1, ARG:2, ARG:3)
+#DIM 武闘最大,2
+#DIM 防衛最大,2
+#DIM 知略最大,2
+#DIM 武闘比, 2
+#DIM 防衛比, 2
+#DIM 知略比, 2
+IF BATTLE_COMMANDER_NUM:0 > 0
+	武闘最大:0 = MAX(BATTLE_武闘パワー:0:0, BATTLE_武闘パワー:0:1, BATTLE_武闘パワー:0:2, 1)
+	防衛最大:0 = MAX(BATTLE_防衛パワー:0:0, BATTLE_防衛パワー:0:1, BATTLE_防衛パワー:0:2, 1)
+	知略最大:0 = MAX(BATTLE_知略パワー:0:0, BATTLE_知略パワー:0:1, BATTLE_知略パワー:0:2, 1)
+ELSE
+	武闘最大:0 = ABL_POWER(10, -1)
+	防衛最大:0 = ABL_POWER(10, -1)
+	知略最大:0 = ABL_POWER(10, -1)
+ENDIF
+
+IF BATTLE_COMMANDER_NUM:1 > 0
+	武闘最大:1 = MAX(BATTLE_武闘パワー:1:0, BATTLE_武闘パワー:1:1, BATTLE_武闘パワー:1:2, 1)
+	防衛最大:1 = MAX(BATTLE_防衛パワー:1:0, BATTLE_防衛パワー:1:1, BATTLE_防衛パワー:1:2, 1)
+	知略最大:1 = MAX(BATTLE_知略パワー:1:0, BATTLE_知略パワー:1:1, BATTLE_知略パワー:1:2, 1)
+ELSE
+	武闘最大:1 = ABL_POWER(10, -1)
+	防衛最大:1 = ABL_POWER(10, -1)
+	知略最大:1 = ABL_POWER(10, -1)
+ENDIF
+
+;比は元の値の100倍とする（小数点二けたまで保持する）
+武闘比:0 = 武闘最大:0 * 100 / 武闘最大:1
+武闘比:1 = 武闘最大:1 * 100 / 武闘最大:0
+防衛比:0 = 防衛最大:0 * 100 / 防衛最大:1
+防衛比:1 = 防衛最大:1 * 100 / 防衛最大:0
+知略比:0 = 知略最大:0 * 100 / 知略最大:1
+知略比:1 = 知略最大:1 * 100 / 知略最大:0
+
+;補正は比0.1ごとに5%
+LOCAL = FINDELEMENT(武闘比, MAXARRAY(武闘比))
+LOCAL:1 = MIN((武闘比:LOCAL - 100) / 2, 50)
+BATTLE_ATK:LOCAL = BATTLE_ATK:LOCAL * (100 + LOCAL:1) / 100
+;PRINTFORML 武闘補正:%BATTLE_NAME:LOCAL + "軍", MAX_CHARANAME_LENGTH, LEFT% 攻撃強化{LOCAL:1, 2}％
+LOCAL = FINDELEMENT(防衛比, MAXARRAY(防衛比))
+LOCAL:1 = MIN((防衛比:LOCAL - 100) / 2, 50)
+BATTLE_DEF:LOCAL = BATTLE_DEF:LOCAL * (100 + LOCAL:1) / 100
+;PRINTFORML 防衛補正:%BATTLE_NAME:LOCAL + "軍", MAX_CHARANAME_LENGTH, LEFT% 防御強化{LOCAL:1, 2}％
+
+LOCAL = FINDELEMENT(知略比, MAXARRAY(知略比))
+LOCAL:1 = MIN((知略比:LOCAL - 100) / 2, 50)
+BATTLE_INT:LOCAL = BATTLE_INT:LOCAL * (100 + LOCAL:1) / 100
+;PRINTFORML 知略補正:%BATTLE_NAME:LOCAL + "軍", MAX_CHARANAME_LENGTH, LEFT% 知略強化{LOCAL:1, 2}％
+
+;-------------------------------------------------
+;計略が発動するかを判定する
+;-------------------------------------------------
+@BATTLE_SCHEME(攻撃側勢力, 攻撃側部隊, 防御側勢力, 防御側部隊)
+#DIM SCHEME_BASE
+#DIM 攻撃側勢力
+#DIM 攻撃側部隊
+#DIM 防御側勢力
+#DIM 防御側部隊
+#DIM 士官
+#DIM 発動者
+#DIM 攻撃側知略
+#DIM 防御側知略
+
+;防御側は都市だった場合ざっくり1.5倍して3人いるものと無理やりみなす
+攻撃側知略 = BATTLE_INT:0
+防御側知略 = BATTLE_INT:1
+SIF 防御側部隊 < 0
+	TIMES 防御側知略, 1.5
+
+;工作員所持者をチェック
+FOR LOCAL, 0, BATTLE_COMMANDER_NUM:0
+	士官 = BATTLE_COMMANDER:0:LOCAL
+	SIF FIND_PASSIVE_SKILL(士官, "工作員")
+		攻撃側知略 += ABL_POWER(15, -1)
+NEXT
+FOR LOCAL, 0, BATTLE_COMMANDER_NUM:1
+	士官 = BATTLE_COMMANDER:1:LOCAL
+	SIF FIND_PASSIVE_SKILL(士官, "工作員")
+		防御側知略 += ABL_POWER(15, -1)
+NEXT
+
+
+;基準値は能力20の武将の数から算出する 都市戦においては4人いるものとして発生しにくく
+SCHEME_BASE = ABL_POWER(20, -1) * (防御側部隊 < 0 ? 4 # 3)
+
+;BATTLE_FORCE_SCHEMEによる強制策略
+IF BATTLE_FORCE_SCHEME == 0
+	CALL TRY_SCHEME(0, 1, 攻撃側勢力, 攻撃側部隊, 防御側勢力, 防御側部隊)
+	RETURN
+ELSEIF BATTLE_FORCE_SCHEME == 1
+	CALL TRY_SCHEME(1, 0, 防御側勢力, 防御側部隊, 攻撃側勢力, 攻撃側部隊)
+	RETURN
+ENDIF
+
+;両軍の差が大きいほど発生しやすくなる
+IF MAX(攻撃側知略, 防御側知略) - MIN(攻撃側知略, 防御側知略) >= RAND:SCHEME_BASE
+	発動者 = 攻撃側知略 > 防御側知略 ? 0 # 1
+	;計略の発動
+	IF 発動者 == 0
+		CALL TRY_SCHEME(0, 1, 攻撃側勢力, 攻撃側部隊, 防御側勢力, 防御側部隊)
+	ELSE
+		CALL TRY_SCHEME(1, 0, 防御側勢力, 防御側部隊, 攻撃側勢力, 攻撃側部隊)
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;疲労度の算出処理
+;相手側の武将数+1が加算値となる（守将は二人分）
+;LOCAL 36:武将カウンタ 37:攻撃側の武将数 38:防御側の武将数
+;なお、この値はコンフィグで不使用の設定でも内部的に保持させる
+;-------------------------------------------------
+@BATTLE_ADD_TIREDNESS(ARG:0, ARG:1, ARG:2, ARG:3)
+#DIM 攻撃側疲労度
+#DIM 防御側疲労度
+
+;最低でも1
+攻撃側疲労度 = 1
+防御側疲労度 = 1
+
+FOR LOCAL , 0 , 3
+	SIF GET_UNIT_COMMANDER(ARG:0 , ARG:1 , LOCAL) > 0
+		防御側疲労度 ++
+NEXT
+
+FOR LOCAL, 0, ARG:3 >= 0 ? 3 # 2
+	SIF ARG:3 >= 0 && GET_UNIT_COMMANDER(ARG:2 , ARG:3 , LOCAL) > 0
+		攻撃側疲労度 += 1
+	SIF ARG:3 < 0 && GET_CITY_COMMANDER(ARG:2 , LOCAL) > 0
+		攻撃側疲労度 += 2
+
+NEXT
+UNIT_TIRED_COUNT:(ARG:0):(ARG:1) += 攻撃側疲労度
+IF ARG:3 >= 0
+	UNIT_TIRED_COUNT:(ARG:2):(ARG:3) += 防御側疲労度 
+ELSE
+	CITY_TIRED_COUNT:(ARG:2) += 防御側疲労度
+ENDIF
+
+;研究による変化
+IF ARG:3 != -1 && TECHNOLOGY_STATUS:(ARG:0):TECHNOLOGY_BATTLE_PASSIVE >= 3
+	PRINTL 敵補給路への攻撃により、敵疲労度が増加！
+	UNIT_TIRED_COUNT:(ARG:2):(ARG:3) = MAX(UNIT_TIRED_COUNT:(ARG:2):(ARG:3) + 1, 0)
+ENDIF
+IF ARG:1 != -1 && TECHNOLOGY_STATUS:(ARG:0):TECHNOLOGY_BATTLE_PASSIVE >= 4
+	PRINTL 増強された補給路により、疲労度が回復！
+	UNIT_TIRED_COUNT:(ARG:0):(ARG:1) = MAX(UNIT_TIRED_COUNT:(ARG:0):(ARG:1) - 1, 0)
+ENDIF
+
+
+
+;-------------------------------------------------
+;優先して発動する特殊計略の処理
+;引数0～1には計算用変数の配列番号(0 or 1)を取る ARG:0=計略発動側 ARG:1=対象側
+;引数 2:発動側勢力 3:発動側部隊 4:対象勢力 5:対象部隊
+;※ARG:3、ARG:5が0未満の場合は防衛部隊とみなし、それぞれARG:2、ARG:4を都市番号として使用
+;-------------------------------------------------
+@BATTLE_SP_SKILL(発動側, 発動勢力, 発動部隊, 対象勢力, 対象部隊)
+#DIM 発動側
+#DIM 対象側
+#DIM 発動勢力
+#DIM 発動部隊
+#DIM 対象勢力
+#DIM 対象部隊
+#DIM 発動側キャラ, 3
+#DIM 対象側キャラ, 3
+#DIM 発動キャラ
+#DIM 対象キャラ
+#DIM 発動キャラ素質
+#DIM シャッフル保存, MAX_UNIT_COMMANDER
+
+対象側 = !発動側
+
+SIF BATTLE_COMMANDER_NUM:発動側 == 0
+	RETURN 
+
+CALL FISHER_YATES_SHAFFLE(BATTLE_COMMANDER_NUM:発動側)
+
+FOR LOCAL:0, 0, BATTLE_COMMANDER_NUM:発動側
+	シャッフル保存:LOCAL = SHAFFLE_ARRAY:LOCAL
+NEXT
+
+
+FOR LOCAL:0, 0, BATTLE_COMMANDER_NUM:発動側
+	発動キャラ = BATTLE_COMMANDER:(発動側):(シャッフル保存:LOCAL)
+	SIF 発動キャラ < 0 || BATTLE_SKILL_SEALED:(発動側):(シャッフル保存:LOCAL) || BATTLE_SUMMONED_CHARA:(発動側):(シャッフル保存:LOCAL)
+		CONTINUE
+	CALL SKILL_COMBAT_INVOKE(発動キャラ, シャッフル保存:LOCAL, スキル_ジャンル_PERSONAL, 発動側, 発動勢力, 発動部隊, 対象勢力, 対象部隊)
+NEXT
+
+
+;-------------------------------------------------
+;優先して発動する特殊計略の処理
+;引数0～1には計算用変数の配列番号(0 or 1)を取る ARG:0=計略発動側 ARG:1=対象側
+;※部隊が0未満の場合防衛部隊とみなし、勢力を都市番号として使用
+;-------------------------------------------------
+@BATTLE_BASE_SKILL(発動側, 発動勢力, 発動部隊, 対象勢力, 対象部隊)
+#DIM 勢力
+#DIM 部隊
+#DIM 発動側
+#DIM 対象側
+#DIM 発動勢力
+#DIM 発動部隊
+#DIM 対象勢力
+#DIM 対象部隊
+#DIM 発動側キャラ, 3
+#DIM 対象側キャラ, 3
+#DIM 発動キャラ
+#DIM 対象キャラ
+#DIM 発動キャラ素質
+#DIM シャッフル保存, MAX_UNIT_COMMANDER
+VARSET 発動側キャラ, -1
+VARSET 対象側キャラ, -1
+
+対象側 = !発動側
+
+SIF BATTLE_COMMANDER_NUM:発動側 == 0
+	RETURN 
+
+CALL FISHER_YATES_SHAFFLE(BATTLE_COMMANDER_NUM:発動側)
+
+FOR LOCAL:0, 0, BATTLE_COMMANDER_NUM:発動側
+	シャッフル保存:LOCAL = SHAFFLE_ARRAY:LOCAL
+NEXT
+
+FOR LOCAL:0, 0, BATTLE_COMMANDER_NUM:発動側
+	発動キャラ = BATTLE_COMMANDER:(発動側):(シャッフル保存:LOCAL)
+	SIF 発動キャラ < 0 || BATTLE_SKILL_SEALED:(発動側):(シャッフル保存:LOCAL) || BATTLE_SUMMONED_CHARA:(発動側):(シャッフル保存:LOCAL)
+		CONTINUE
+	CALL SKILL_COMBAT_INVOKE(発動キャラ, シャッフル保存:LOCAL, スキル_ジャンル_TROOP, 発動側, 発動勢力, 発動部隊, 対象勢力, 対象部隊)
+NEXT
+
+;-------------------------------------------------
+;計略の発動
+;引数0～1には計算用変数の配列番号(0 or 1)を取る ARG:0=計略発動側 ARG:1=対象側
+;引数 2:発動側勢力 3:発動側部隊 4:対象勢力 5:対象部隊
+;-------------------------------------------------
+@TRY_SCHEME(発動側, 対象側, 発動勢力, 発動部隊, 対象勢力, 対象部隊)
+#DIM 発動側
+#DIM 対象側
+#DIM 発動勢力
+#DIM 発動部隊
+#DIM 対象勢力
+#DIM 対象部隊
+#DIM 明察キャラ
+
+
+PRINTFORML %BATTLE_NAME:(発動側)%軍の計略発動！
+
+
+;発動勢力勢力部隊の《貫計》判定(武力)
+IF RAND:MAX(BATTLE_ATK:(対象側), 1) + BATTLE_ATK:(対象側) >= RAND:MAX(BATTLE_INT:(発動側) * 3, 1) + BATTLE_INT:(発動側)
+	PRINTFORM 《貫計》
+	PRINTDATAL
+		DATAFORM %BATTLE_NAME:(対象側)%軍は力で%BATTLE_NAME:(発動側)%軍の計略をねじ伏せ無効化した
+		DATAFORM %BATTLE_NAME:(対象側)%軍は%BATTLE_NAME:(発動側)%軍の計略を圧倒的な力で無効化した
+		DATAFORM %BATTLE_NAME:(発動側)%軍の計略は%BATTLE_NAME:(対象側)%軍がもつ力の前では無意味だった
+	ENDDATA
+	BATTLE_RATE_DMG:対象側 += 5
+	BATTLE_RATE_ATC:対象側 += 30
+	BATTLE_RATE_GRD:対象側 += 30
+	CALL WHOES_SCHEME(対象側, 対象勢力, 対象部隊, GETNUM(ABL, "武闘"))
+	IF RESULT >= 0
+		;口上の表示
+		CALL KOJO_EVENT(RESULT, 312)
 	ENDIF
 ELSE
-	CALL GET_SHIP_TOTAL_HP(SHIP_ID)
-	MAX_SHIP_HP = RESULT
-	CALL GET_SHIP_HP(SHIP_ID)
-	CURRENT_SHIP_HP = RESULT
-	; HPが1/3切ったら撤退
-	IF MAX_SHIP_HP > CURRENT_SHIP_HP * 3
-		IF DISTANCE == 3
-			ACTION = 撤退
-		ELSE
-			ACTION = 後退
+	;明察の発動判定
+	FOR LOCAL, 0, BATTLE_COMMANDER_NUM:対象側
+		明察キャラ = BATTLE_COMMANDER:対象側:LOCAL
+		SIF 明察キャラ < 0 || BATTLE_SKILL_SEALED:対象側:(LOCAL:0) || BATTLE_SUMMONED_CHARA:(発動側):(LOCAL:0)
+			CONTINUE
+		IF FIND_PASSIVE_SKILL(明察キャラ, "明察") && 30 > RAND:100
+			PRINTFORM 《明察》
+			PRINTFORML %ANAME(明察キャラ)%は敵部隊の計略を見透かした
+			BATTLE_RATE_DMG:対象側 += 10
+			BATTLE_RATE_ATC:対象側 += 25
+			BATTLE_RATE_GRD:対象側 += 20
+			RETURN
 		ENDIF
-	; 攻撃
-	ELSE
-		CALL GET_MAIN_WEAPON_RANGE(SHIP_ID)
-		RANGE = RESULT
-		IF RANGE < DISTANCE
-			ACTION = 前進
-		ELSE
-			ACTION = 攻撃
-		ENDIF
+	NEXT
+	;通ったら計略の選択
+	CALL SELECT_SCHEME(発動側, 対象側)
+	CALL WHOES_SCHEME(発動側, 発動勢力, 発動部隊, GETNUM(ABL, "知略"))
+	IF RESULT >= 0
+		;口上の表示
+		CALL KOJO_EVENT(RESULT, 310)
 	ENDIF
+
 ENDIF
 
-;---------------------------------
-; 攻撃対象取得
-;---------------------------------
-@GET_ATTACK_TARGET(LIST, DISTANCE, SHIP_ACTION)
-#DIM REF LIST
-#DIM REF DISTANCE
-#DIM REF SHIP_ACTION
-#DIM DISTANCE_LIST, 3, MAX_SHIP
-#DIM DISTANCE_COUNTER, 3
-#DIM LIST_ITER
-#DIM _DISTANCE
-#DIM CURRENT_ITER
 
-VARSET DISTANCE_COUNTER, 0
-FINDELEMENT LIST, -1
-FOR LIST_ITER, 0, RESULT
-	SIF SHIP_ACTION:(LIST:LIST_ITER) == 大破
-		CONTINUE
-	_DISTANCE = DISTANCE:(LIST:LIST_ITER) - 1
-	DISTANCE_LIST:_DISTANCE:(DISTANCE_COUNTER:_DISTANCE) = LIST:LIST_ITER
-	DISTANCE_COUNTER:_DISTANCE ++
+;-------------------------------------------------
+;どのキャラが計略を発動させたか決定する関数(口上表示の対象を決める)
+;引数0には計算用変数の配列番号(0 or 1)を取る ARG:0=計略発動側
+;引数 1:発動側勢力(or都市) 2:発動側部隊 3:関連能力
+;-------------------------------------------------
+@WHOES_SCHEME(ARG:0, ARG:1, ARG:2, ARG:3)
+VARSET LOCAL, 0
+FOR LOCAL:0, 0, 3
+	IF BATTLE_F_UNIT:(ARG:0)
+		LOCAL:2 = GET_UNIT_COMMANDER(ARG:1, ARG:2, LOCAL:0)
+	ELSE
+		IF LOCAL:0 >= 2
+			BREAK
+		ELSE
+			LOCAL:2 = GET_CITY_COMMANDER(ARG:1, LOCAL:0)
+		ENDIF
+	ENDIF
+
+	IF LOCAL:2 >= 0
+		LOCAL:(LOCAL:0 + 10) = LOCAL:2
+		LOCAL:(LOCAL:0 + 20) = ABL_POWER(ABL:(LOCAL:2):(ARG:3), LOCAL:2)
+	ELSE
+		LOCAL:(LOCAL:0 + 10) = -1
+	ENDIF
 NEXT
 
-FOR LIST_ITER, 0, 3
-	SIF DISTANCE_COUNTER:LIST_ITER == 0
-		CONTINUE
-	RETURN DISTANCE_LIST:LIST_ITER:(RAND:(DISTANCE_COUNTER:LIST_ITER))
+LOCAL:6 = MAX(LOCAL:20, LOCAL:21, LOCAL:22)
+LOCAL:7 = 0
+
+IF LOCAL:6 <= 0
+	RETURN -1
+ENDIF
+
+FOR LOCAL:0, 0, 3
+	LOCAL:(LOCAL:0 + 20) = MAX(LOCAL:(LOCAL:0 + 20) * 8 / LOCAL:6 - 4, 0)
+	LOCAL:7 += LOCAL:(LOCAL:0 + 20)
 NEXT
 
+LOCAL:8 = RAND:(LOCAL:7)
+
+FOR LOCAL:0, 0, 3
+	LOCAL:8 -= LOCAL:(LOCAL:0 + 20)
+	IF LOCAL:8 < 0
+		RETURN LOCAL:(LOCAL:0 + 10)
+	ENDIF
+NEXT
 RETURN -1
 
-; UI表示
-@DISPLAY_UI(LIST1, LIST2, SHIP_ACTION, ATTACK_TARGET, DISTANCE, BROKEN_BY)
-#DIM REF LIST1
-#DIM REF LIST2
-#DIM REF SHIP_ACTION
-#DIM REF ATTACK_TARGET
-#DIM REF DISTANCE
-#DIM REF BROKEN_BY
-#DIM MAX_COUNT
-#DIM COUNTER
-#DIM CONST BETWEEN = 45
+;-------------------------------------------------
+;知略パワーに応じた計略の選択
+;引数には計算用変数の配列番号(0 or 1)を取る ARG:0=計略発動側 ARG:1=対象側
+;-------------------------------------------------
+@SELECT_SCHEME(ARG:0, ARG:1)
+#DIM TINT
+TINT = BATTLE_INT:(ARG:0) - BATTLE_INT:(ARG:1)
 
-FINDELEMENT LIST1, -1
-MAX_COUNT = RESULT
-FINDELEMENT LIST2, -1
-SIF MAX_COUNT < RESULT
-	MAX_COUNT = RESULT
+{
+	SELECTCASE IFRAND("0, 1", 1, "2", TINT >= ABL_POWER(50, -1), "3", TINT >= ABL_POWER(70, -1), "4", TINT >= ABL_POWER(75, -1), "5", TINT >= ABL_POWER(85, -1),
+		"6", TINT >= ABL_POWER(90, -1), "7", TINT >= ABL_POWER(100, -1), "8, 9", TINT >= ABL_POWER(110, -1))
+}
+	CASE 0
+		PRINTFORML %BATTLE_NAME:(ARG:0)%軍は%BATTLE_NAME:(ARG:1)%軍を挑発し、城から討って出させた
+		BATTLE_RATE_DMG:(ARG:0) += 0
+		BATTLE_RATE_ATC:(ARG:0) += 60
+		BATTLE_RATE_GRD:(ARG:0) += 0
+	CASE 1
+		PRINTFORML %BATTLE_NAME:(ARG:0)%軍は%BATTLE_NAME:(ARG:1)%軍の先鋒部隊を誘い出して孤立させ、優位に戦闘を進めた
+		BATTLE_RATE_DMG:(ARG:0) += 0
+		BATTLE_RATE_ATC:(ARG:0) += 50
+		BATTLE_RATE_GRD:(ARG:0) += 25
+	CASE 2
+		PRINTFORML %BATTLE_NAME:(ARG:0)%軍は%BATTLE_NAME:(ARG:1)%軍の突出した部隊を包囲し各個撃破した
+		BATTLE_RATE_DMG:(ARG:0) += 0
+		BATTLE_RATE_ATC:(ARG:0) += 60
+		BATTLE_RATE_GRD:(ARG:0) += 30
+	CASE 3
+		PRINTFORML %BATTLE_NAME:(ARG:0)%軍は%BATTLE_NAME:(ARG:1)%軍に夜襲を掛けて戦果を上げた
+		BATTLE_RATE_DMG:(ARG:0) += 0
+		BATTLE_RATE_ATC:(ARG:0) += 70
+		BATTLE_RATE_GRD:(ARG:0) += 30
+	CASE 4
+		PRINTFORML %BATTLE_NAME:(ARG:0)%軍は%BATTLE_NAME:(ARG:1)%軍の部隊を分断し指揮系統を混乱させた
+		BATTLE_RATE_DMG:(ARG:0) += 2
+		BATTLE_RATE_ATC:(ARG:0) += 80
+		BATTLE_RATE_GRD:(ARG:0) += 40
+	CASE 5
+		PRINTFORML %BATTLE_NAME:(ARG:0)%軍は内通者を利用して%BATTLE_NAME:(ARG:1)%軍を撹乱した
+		BATTLE_RATE_DMG:(ARG:0) += 4
+		BATTLE_RATE_ATC:(ARG:0) += 80
+		BATTLE_RATE_GRD:(ARG:0) += 50
+	CASE 6
+		PRINTFORML %BATTLE_NAME:(ARG:0)%軍は%BATTLE_NAME:(ARG:1)%軍を有利な地形に誘い込んで大打撃を与えた
+		BATTLE_RATE_DMG:(ARG:0) += 12
+		BATTLE_RATE_ATC:(ARG:0) += 70
+		BATTLE_RATE_GRD:(ARG:0) += 70
+	CASE 7
+		PRINTFORML %BATTLE_NAME:(ARG:0)%軍は兵器を利用して%BATTLE_NAME:(ARG:1)%軍に大攻勢を仕掛けました
+		BATTLE_RATE_DMG:(ARG:0) += 5
+		BATTLE_RATE_ATC:(ARG:0) += 120
+		BATTLE_RATE_GRD:(ARG:0) += 60
+	CASE 8
+		PRINTFORML %BATTLE_NAME:(ARG:0)%軍は周到な策謀により%BATTLE_NAME:(ARG:1)%軍を同士討ちさせることに成功した
+		BATTLE_RATE_DMG:(ARG:0) += 20
+		BATTLE_RATE_ATC:(ARG:0) += 60
+		BATTLE_RATE_GRD:(ARG:0) += 80
+	CASE 9
+		PRINTFORML %BATTLE_NAME:(ARG:0)%軍は%BATTLE_NAME:(ARG:1)%軍の稚拙な策を逆に利用した
+		BATTLE_RATE_DMG:(ARG:0) += 20
+		BATTLE_RATE_ATC:(ARG:0) += 80
+		BATTLE_RATE_GRD:(ARG:0) += 80
+ENDSELECT
 
-$MAIN_LOOP
+;-------------------------------------------------
+;部隊壊滅時の一連の処理
+;-------------------------------------------------
+@UNIT_BREAK(勝利側, 勝利勢力, 勝利部隊, 敗北勢力, 敗北部隊)
 
-PRINTL ◆戦闘
-DRAWLINE
-FOR COUNTER, 0, MAX_COUNT
-	IF LIST1:COUNTER == -1
-		PRINTFORM [%"", BETWEEN, LEFT%]
-	ELSE
-		SIF SHIP_ACTION:(LIST1:COUNTER) == 大破
-			SETCOLOR 0X666666
-		PRINTBUTTON @"[%"",(BETWEEN - DISTANCE:(LIST1:COUNTER) * (BETWEEN / 3)), LEFT%%SHIP_NAME:(LIST1:COUNTER), (DISTANCE:(LIST1:COUNTER) * 10), LEFT%]", LIST1:COUNTER
-		RESETCOLOR
-	ENDIF
-	PRINT 　｜　
-	IF LIST2:COUNTER == -1
-		PRINTFORM [%"", BETWEEN, RIGHT%]
-	ELSE
-		SIF SHIP_ACTION:(LIST2:COUNTER) == 大破
-			SETCOLOR 0X666666
-		PRINTBUTTON @"[%SHIP_NAME:(LIST2:COUNTER), (DISTANCE:(LIST2:COUNTER) * 10), RIGHT%%"",(BETWEEN - DISTANCE:(LIST2:COUNTER) * (BETWEEN / 3)), LEFT%]", LIST2:COUNTER
-		RESETCOLOR
-	; "
-	ENDIF
-	PRINTL
+#DIM 勝利側
+#DIM 敗北側
+#DIM 勝利勢力
+#DIM 勝利部隊
+#DIM 敗北勢力
+#DIM 敗北部隊
+
+;勝利側・敗北側の勢力番号
+#DIM COUNTRY_W
+#DIM COUNTRY_L
+
+敗北側 = !勝利側
+
+COUNTRY_W = (勝利部隊 >= 0 ? 勝利勢力 # CITY_OWNER:(勝利勢力))
+COUNTRY_L = (敗北部隊 >= 0 ? 敗北勢力 # CITY_OWNER:(敗北勢力))
+
+;召喚キャラは関わらない
+FOR LOCAL, 0, BATTLE_COMMANDER_NUM:勝利側
+	SIF BATTLE_SUMMONED_CHARA:勝利側:LOCAL
+		BATTLE_COMMANDER:勝利側:LOCAL = -1
 NEXT
-DRAWLINE
-PRINTBUTTON "[9999] 進行", 9999
 
-INPUT
+;召喚キャラは関わらない
+FOR LOCAL, 0, BATTLE_COMMANDER_NUM:敗北側
+	SIF BATTLE_SUMMONED_CHARA:敗北側:LOCAL
+		BATTLE_COMMANDER:敗北側:LOCAL = -1
+NEXT
 
-IF RESULT >= 0 && RESULT < MAX_SHIP
-	SELECTCASE SHIP_ACTION:RESULT
-		CASE 撤退
-			PRINTL 撤退中
-		CASE 前進
-			PRINTL 前進中
-		CASE 攻撃
-			PRINTFORML 攻撃中(%SHIP_NAME:(ATTACK_TARGET:RESULT)%)
-			; )
-		CASE 後退
-			PRINTL 後退中
-		CASE 大破
-			PRINTFORML 大破(%SHIP_NAME:(BROKEN_BY:RESULT)%の攻撃による)
-	ENDSELECT
-	CALL SHOW_SHIP_INFO(RESULT)
-	GOTO MAIN_LOOP
-ELSEIF RESULT == 9999
-	RETURN
+CALL UNIT_BREAK_DIE(勝利側, 勝利勢力, 勝利部隊, 敗北勢力, 敗北部隊, COUNTRY_W, COUNTRY_L)
+CALL UNIT_BREAK_CAPTURE(勝利側, 勝利勢力, 勝利部隊, 敗北勢力, 敗北部隊, COUNTRY_W, COUNTRY_L)
+CALL UNIT_BREAK_GROW(勝利側, 勝利勢力, 勝利部隊, 敗北勢力, 敗北部隊, COUNTRY_W, COUNTRY_L)
+;-------------------------------------------------
+;部隊壊滅時の士官の死亡
+;ARG:0=勝利した勢力 ARG:1=勝利した部隊の番号 ARG:2=敗北した勢力 敗北部隊=敗北した部隊の番号
+;※ARG:1、敗北部隊が負のときはARG:0、ARG:2を都市番号とみなす
+;-------------------------------------------------
+@UNIT_BREAK_DIE(勝利側, 勝利勢力, 勝利部隊, 敗北勢力, 敗北部隊, COUNTRY_W, COUNTRY_L)
+
+#DIM 勝利側
+#DIM 敗北側
+#DIM 勝利勢力
+#DIM 勝利部隊
+#DIM 敗北勢力
+#DIM 敗北部隊
+
+;戦死率
+#DIM DEATH_RATE
+
+;勝利側・敗北側の勢力番号
+#DIM COUNTRY_W
+#DIM COUNTRY_L
+
+敗北側 = !勝利側
+
+;戦死設定が無効なら戻す
+SIF CONFIG:305 <= 0
+	RETURN 
+
+;設定に応じた戦死率を設定(DEATH_RATE / 1000)
+IF CONFIG:305 == 3
+	DEATH_RATE = 250
+ELSEIF CONFIG:305 == 2
+	DEATH_RATE = 100
 ELSE
-	GOTO MAIN_LOOP
+	DEATH_RATE = 20
 ENDIF
-
-@EXECUTE_ACTION(LIST1, LIST2, SHIP_ACTION, ATTACK_TARGET, DISTANCE, BROKEN_BY)
-#DIM REF LIST1
-#DIM REF LIST2
-#DIM REF SHIP_ACTION
-#DIM REF ATTACK_TARGET
-#DIM REF DISTANCE
-#DIM REF BROKEN_BY
-#DIM LIST_ITER
-
-FINDELEMENT LIST1, -1
-FOR LIST_ITER, 0, RESULT
-	SELECTCASE SHIP_ACTION:(LIST1:LIST_ITER)
-		CASE 撤退
-			; 何もしない
-		CASE 前進
-			DISTANCE:(LIST1:LIST_ITER) = LIMIT(DISTANCE:(LIST1:LIST_ITER) - 1, 1, 3)
-		CASE 攻撃
-			CALL ATTACK(LIST1:LIST_ITER, ATTACK_TARGET:(LIST1:LIST_ITER))
-			IF RESULT == 1
-				SHIP_ACTION:(ATTACK_TARGET:(LIST1:LIST_ITER)) = 大破
-				BROKEN_BY:(ATTACK_TARGET:(LIST1:LIST_ITER)) = LIST1:LIST_ITER
-			ENDIF
-		CASE 後退
-			DISTANCE:(LIST1:LIST_ITER) = LIMIT(DISTANCE:(LIST1:LIST_ITER) + 1, 1, 3)
-		CASE 大破
-			; 何もしない	
-	ENDSELECT
-NEXT
-FINDELEMENT LIST2, -1
-FOR LIST_ITER, 0, RESULT
-	SELECTCASE SHIP_ACTION:(LIST2:LIST_ITER)
-		CASE 撤退
-			; 何もしない
-		CASE 前進
-			DISTANCE:(LIST2:LIST_ITER) = LIMIT(DISTANCE:(LIST2:LIST_ITER) - 1, 1, 3)
-		CASE 攻撃
-			CALL ATTACK(LIST2:LIST_ITER, ATTACK_TARGET:(LIST2:LIST_ITER))
-			IF RESULT == 1
-				SHIP_ACTION:(ATTACK_TARGET:(LIST2:LIST_ITER)) = 大破
-				BROKEN_BY:(ATTACK_TARGET:(LIST2:LIST_ITER)) = LIST2:LIST_ITER
-			ENDIF
-		CASE 後退
-			DISTANCE:(LIST2:LIST_ITER) = LIMIT(DISTANCE:(LIST2:LIST_ITER) + 1, 1, 3)
-		CASE 大破
-			; 何もしない	
-	ENDSELECT
-NEXT
-
-; 攻撃
-@ATTACK(SHIP_ID, TARGET_ID)
-#DIM SHIP_ID
-#DIM TARGET_ID
-#DIM FIRE_COUNT
-#DIM TARGET_AVOID
-#DIM TOTAL_DAMAGE
-#DIM SUB_WEAPON_RANGE
-#DIM MAX_SIELD_HP
-#DIM SIELD_HP
-#DIM MAX_HP
-#DIM 対空ダメージ
-#DIM 敵対空ダメージ
-#DIM 敵戦闘機最大HP
-#DIM 攻撃回数
-#DIM STATUS, STATUS_LENGTH
-#DIM ENEMY_STATUS, STATUS_LENGTH
-#DIM SHIP_STATUS, SHIP_STATUS_LENGTH
-#DIM SLOT_ID
-TOTAL_DAMAGE = 0
-
-CALL GET_AVOID(TARGET_ID)
-TARGET_AVOID = RESULT
-; 主砲タイプ判定用
-TRYCALLFORM GET_MAIN_WEAPON_STATUS_{SHIP_EQUIP:主砲:0:SHIP_ID}(STATUS)
-IF STATUS:WEAPON_TYPE == 戦闘機
-	対空ダメージ = 0
-	敵戦闘機最大HP = 0
-	敵対空ダメージ = 0
-	;敵艦載機による反撃
-	; 主砲タイプ判定
-	TRYCALLFORM GET_MAIN_WEAPON_STATUS_{SHIP_EQUIP:主砲:0:TARGET_ID}(ENEMY_STATUS)
-	IF ENEMY_STATUS:WEAPON_TYPE == 戦闘機
-		TRYCALLFORM GET_SHIP_STATUS_{SHIP_MODEL:TARGET_ID}(SHIP_STATUS)
-		FOR SLOT_ID, 0, SHIP_STATUS:SHIP_MAIN_WEAPON_SLOT
-			CALL GET_JOIN_AIR_SHIP(TARGET_ID, SLOT_ID)
-			FOR FIRE_COUNT, 0, ENEMY_STATUS:FIRE_RATE * RESULT
-				SIF RAND:100 > ENEMY_STATUS:HIT_RATE
-					CONTINUE
-				SIF RAND:100 > AIR_SHIP_AVOID
-					CONTINUE
-				敵対空ダメージ = ENEMY_STATUS:ANTI_AIR
-				CALL GET_MAX_AIR_SHIP_HP(SHIP_ID)
-				AIR_SHIP_DAMAGE:SHIP_ID = LIMIT(AIR_SHIP_DAMAGE:SHIP_ID + 敵対空ダメージ, 0, RESULT)
-			NEXT
-		NEXT
-	ENDIF
-	;対空砲の撃墜判定
-	;敵副砲による対空射撃
-	TRYCALLFORM GET_SHIP_STATUS_{SHIP_MODEL:TARGET_ID}(SHIP_STATUS)
-	FOR SLOT_ID, 0, SHIP_STATUS:SHIP_SUB_WEAPON_SLOT
-		TRYCALLFORM GET_SUB_WEAPON_STATUS_{SHIP_EQUIP:副砲:SLOT_ID:TARGET_ID}(STATUS)
-		FOR FIRE_COUNT, 0, STATUS:FIRE_RATE
-			SIF RAND:100 > STATUS:HIT_RATE
-				CONTINUE
-			SIF RAND:100 > AIR_SHIP_AVOID
-				CONTINUE
-			対空ダメージ += STATUS:ANTI_AIR
-		NEXT
-		AIR_SHIP_DAMAGE:SHIP_ID = LIMIT(AIR_SHIP_DAMAGE:SHIP_ID + 対空ダメージ, 0, STATUS:AIR_SHIP_HP * STATUS:AIR_SHIP_COUNT)
-	NEXT
-ENDIF
-
-; 主砲攻撃と命中判定
-TRYCALLFORM GET_SHIP_STATUS_{SHIP_MODEL:SHIP_ID}(SHIP_STATUS)
-FOR SLOT_ID, 0, SHIP_STATUS:SHIP_MAIN_WEAPON_SLOT
-	TRYCALLFORM GET_MAIN_WEAPON_STATUS_{SHIP_EQUIP:主砲:SLOT_ID:SHIP_ID}(STATUS)
-	IF STATUS:WEAPON_TYPE == 戦闘機
-		CALL GET_JOIN_AIR_SHIP(SHIP_ID, SLOT_ID)
-		攻撃回数 = RESULT * STATUS:FIRE_RATE
-	ELSEIF STATUS:WEAPON_TYPE == ミサイル
-		CALL GET_MISSILE_FALL(TARGET_ID)
-		攻撃回数 = STATUS:FIRE_RATE - RESULT
-	ELSEIF STATUS:WEAPON_TYPE == 魚雷
-		CALL GET_TORPED_FALL(TARGET_ID)
-		攻撃回数 = STATUS:FIRE_RATE - RESULT
+FOR LOCAL:0, BATTLE_COMMANDER_NUM:敗北側 - 1, -1, -1
+	LOCAL:4 = BATTLE_COMMANDER:敗北側:LOCAL
+	;戦死判定。なお、スキルで呼ばれたキャラと君主およびイベントキャラ(NOが2000以上)は戦死しない
+	SIF LOCAL:4 < 0 || LOCAL:4 == GET_COUNTRY_BOSS(COUNTRY_L) || IS_SP_CHARA(LOCAL:4) || DEATH_RATE <= RAND:1000
+		CONTINUE
+	;東方キャラ死なない設定なら東方キャラはしなない
+	SIF CONFIG:309 == 1 && IS_TOHO_CHARA(LOCAL:4)
+		CONTINUE
+	IF LOCAL:4 == MASTER
+		SETCOLOR カラー_警告
+		PRINTFORML %ANAME(LOCAL:4)%は戦死しました…
+		RESETCOLOR
+		;戦死エンドフラグ
+		FLAG:戦死エンドフラグ = 1
 	ELSE
-		攻撃回数 = STATUS:FIRE_RATE
+		;戦死口上
+		CALL KOJO_EVENT(LOCAL:4, 337)
+
+		IF COUNTRY_W == CFLAG:MASTER:所属
+			SETCOLOR カラー_警告
+			PRINTFORML %ANAME(LOCAL:4)%を討ち取りました！
+			RESETCOLOR
+		ELSEIF COUNTRY_L == CFLAG:MASTER:所属
+			SETCOLOR カラー_警告
+			PRINTFORMW %ANAME(LOCAL:4)%は戦死しました…
+			RESETCOLOR
+		ELSE
+			SETCOLOR カラー_警告
+			PRINTFORML %ANAME(LOCAL:4)%は戦死したようです
+			RESETCOLOR
+		ENDIF
 	ENDIF
-	FOR FIRE_COUNT, 0, 攻撃回数
-		SIF RAND:100 > STATUS:HIT_RATE
-			CONTINUE
-		SIF RAND:100 < TARGET_AVOID
-			CONTINUE
-		TOTAL_DAMAGE += STATUS:DAMAGE
-	NEXT
+	;BATTLE_COMMANDERを操作しとかないとCAPTURE系スキルで死んだキャラが対象になりうる
+	CALL BATTLE_COMMANDER_WITHDRAWAL(敗北側, LOCAL)
+	CALL CHANGE_COUNTRY(LOCAL:4, 0, 1, 1)
 NEXT
 
-; 副砲命中判定
-FOR SLOT_ID, 0, SHIP_STATUS:SHIP_SUB_WEAPON_SLOT
-	TRYCALLFORM GET_SUB_WEAPON_STATUS_{SHIP_EQUIP:副砲:SLOT_ID:SHIP_ID}(STATUS)
-	攻撃回数 = STATUS:FIRE_RATE
-	SUB_WEAPON_RANGE = STATUS:FIRE_RANGE
-	CALL GET_MAIN_WEAPON_RANGE(SHIP_ID)
-	IF RESULT <= SUB_WEAPON_RANGE
-		FOR FIRE_COUNT, 0, 攻撃回数
-			SIF RAND:100 > STATUS:HIT_RATE
+
+;-------------------------------------------------
+;部隊壊滅時の士官の捕獲
+;ARG:0=勝利した勢力 ARG:1=勝利した部隊の番号 ARG:2=敗北した勢力 敗北部隊=敗北した部隊の番号
+;※ARG:1、敗北部隊が負のときはARG:0、ARG:2を都市番号とみなす
+;-------------------------------------------------
+@UNIT_BREAK_CAPTURE(勝利側, 勝利勢力, 勝利部隊, 敗北勢力, 敗北部隊, COUNTRY_W, COUNTRY_L)
+
+#DIM 勝利側
+#DIM 敗北側
+#DIM 勝利勢力
+#DIM 勝利部隊
+#DIM 敗北勢力
+#DIM 敗北部隊
+#DIM 対象
+
+;勝利側・敗北側の勢力番号
+#DIM COUNTRY_W
+#DIM COUNTRY_L
+
+#DIM 能力合計, 2
+
+
+敗北側 = !勝利側
+
+
+VARSET CAPTURE_RATE, 0
+VARSET 能力合計, 0
+
+FOR LOCAL, 0, BATTLE_COMMANDER_NUM:勝利側
+	SIF BATTLE_COMMANDER:勝利側:LOCAL < 0
+		CONTINUE
+	能力合計:勝利側 += BATTLE_武闘:勝利側:LOCAL
+	能力合計:勝利側 += BATTLE_知略:勝利側:LOCAL
+NEXT
+
+FOR LOCAL, 0, BATTLE_COMMANDER_NUM:敗北側
+	SIF BATTLE_COMMANDER:敗北側:LOCAL < 0
+		CONTINUE
+	能力合計:敗北側 += BATTLE_武闘:敗北側:LOCAL
+	能力合計:敗北側 += BATTLE_知略:敗北側:LOCAL
+NEXT
+
+FOR LOCAL:0, 0, BATTLE_COMMANDER_NUM:敗北側
+	対象 = BATTLE_COMMANDER:敗北側:LOCAL
+	SIF !CAN_CAPTURE(対象)
+		CONTINUE
+	CAPTURE_RATE:LOCAL += (300 - BATTLE_武闘:敗北側:LOCAL * 2 + BATTLE_知略:敗北側:LOCAL) * 10 / 3 / 3
+	CAPTURE_RATE:LOCAL += LIMIT(能力合計:勝利側 - 能力合計:敗北側, -200, 200)
+	CAPTURE_RATE:LOCAL += (BATTLE_COMMANDER_NUM:勝利側 - BATTLE_COMMANDER_NUM:敗北側) * 50
+	SELECTCASE CONFIG:306
+		CASE 1
+			;低い
+			TIMES CAPTURE_RATE:LOCAL, 0.5
+			;CAPTURE_RATE:LOCAL = MAX(CAPTURE_RATE:LOCAL, 5, 50)
+		CASEELSE
+			;素の値
+			;CAPTURE_RATE:LOCAL = LIMIT(CAPTURE_RATE:LOCAL, 10, 80)
+	ENDSELECT
+	;相手が特殊勢力で、その勢力に落ちている場合、ドチャクソ捕らえられやすくなる
+	;堕ちてなければ、特殊勢力の強さ設定に基づいて決める
+	IF IS_SP_COUNTRY(COUNTRY_W)
+		IF GETBIT(TALENT:(対象):特殊勢力陥落系, SP_COUNTRY_TO_CONST(COUNTRY_W))
+			CAPTURE_RATE:LOCAL = 800
+		ELSE
+			SELECTCASE SP_COUNTRY_RANK:SP_COUNTRY_TO_CONST(COUNTRY_W)
+				CASE 5
+					TIMES CAPTURE_RATE:LOCAL, 1.1
+				CASE 3
+					TIMES CAPTURE_RATE:LOCAL, 0.9
+				CASE 2
+					TIMES CAPTURE_RATE:LOCAL, 0.85
+				CASE 1
+					TIMES CAPTURE_RATE:LOCAL, 0.8
+			ENDSELECT
+		ENDIF
+	ENDIF
+NEXT
+
+;勝利側・敗北側スキル使用
+;ただしコンフィグで100％逃亡・100％捕縛にしている場合はスキップ
+SIF GROUPMATCH(CONFIG:306, 2, 3)
+	GOTO CAPTURE_SKILL_USED
+
+FOR LOCAL:0, 0, BATTLE_COMMANDER_NUM:勝利側
+	LOCAL:1 = BATTLE_COMMANDER:勝利側:LOCAL
+	SIF LOCAL:1 < 0 || BATTLE_SKILL_SEALED:勝利側:(LOCAL:0) || BATTLE_SUMMONED_CHARA:勝利側:(LOCAL:0)
+		CONTINUE
+	CALL SKILL_COMBAT_INVOKE(LOCAL:1, LOCAL, スキル_ジャンル_CAPTURE, 勝利側, 勝利勢力, 勝利部隊, 敗北勢力, 敗北部隊)
+NEXT
+
+FOR LOCAL:0, 0, BATTLE_COMMANDER_NUM:敗北側
+	LOCAL:1 = BATTLE_COMMANDER:敗北側:LOCAL
+	SIF	!CAN_CAPTURE(LOCAL:1)
+		CONTINUE
+	CALL SKILL_COMBAT_INVOKE(LOCAL:1, LOCAL, スキル_ジャンル_ESCAPE, 敗北側, 敗北勢力, 敗北部隊, 勝利勢力, 勝利部隊)
+NEXT
+
+$CAPTURE_SKILL_USED
+
+FOR LOCAL, 0, BATTLE_COMMANDER_NUM:敗北側
+	;捕縛判定
+	LOCAL:4 = BATTLE_COMMANDER:敗北側:LOCAL
+	SIF LOCAL:4 < 0
+		CONTINUE
+	IF CAN_CAPTURE(LOCAL:4) && RAND:1000 < CAPTURE_RATE:LOCAL 
+		IF IS_SP_COUNTRY(COUNTRY_W) && GETBIT(TALENT:(LOCAL:4):特殊勢力陥落系, SP_COUNTRY_TO_CONST(COUNTRY_W))
+			CALL COLOR_PRINTW(@"%ANAME(LOCAL:4)%は自ら捕らえられました", カラー_警告)
+		ELSEIF COUNTRY_L == CFLAG:MASTER:所属
+			CALL COLOR_PRINTW(@"%ANAME(LOCAL:4)%は捕らえられました…", カラー_警告)
+		ELSEIF COUNTRY_W == CFLAG:MASTER:所属
+			CALL COLOR_PRINTW(@"%ANAME(LOCAL:4)%を捕らえました！", カラー_注意)
+		ELSE
+			PRINTFORML %ANAME(LOCAL:4)%は捕らえられた模様です
+		ENDIF
+		;捕虜の扱いを決定
+		CALL TREAT_PRISONER(LOCAL:4, COUNTRY_L, COUNTRY_W)
+		;解放したなら自勢力に戻ってもらう
+		IF RESULT == 1
+			CFLAG:(LOCAL:4):特殊状態 = 0
+		;処刑したなら無所属に
+		ELSEIF RESULT == 3
+			CALL CHANGE_COUNTRY(LOCAL:4, 0, 0, 1)
+		ENDIF
+	;逃走した場合
+	ELSE
+		IF COUNTRY_L == CFLAG:MASTER:所属
+			PRINTFORML %ANAME(LOCAL:4)%は何とか逃げ帰りました
+		ELSEIF COUNTRY_W == CFLAG:MASTER:所属
+			PRINTFORML %ANAME(LOCAL:4)%は逃走したようです…
+		ELSE
+			PRINTFORML %ANAME(LOCAL:4)%は逃走した模様です
+		ENDIF
+		;とりま25%の確率で負傷
+		SIF RAND:4
+			CONTINUE
+		CALL SET_COOLTIME(LOCAL:4, RAND:3 + 1)
+		;蓬莱人は1/3の確率で怪我を無効化
+		IF HAS_TAG(LOCAL:4, タグ_蓬莱人) && !RAND:3
+			COOLTIME:(LOCAL:4):0 = 0
+			SETCOLOR カラー_素質発動
+			PRINTFORML 蓬莱人である%ANAME(LOCAL:4)%の怪我は、あっという間にふさがった
+			PRINTFORML クールタイムが無効化された
+			RESETCOLOR
+			CONTINUE
+		ENDIF
+		RESETCOLOR
+		LOCAL:5 = 0
+		FOR LOCAL:1, 0, BATTLE_COMMANDER_NUM:敗北側
+			LOCAL:2 = BATTLE_COMMANDER:敗北側:(LOCAL:1)
+			SIF LOCAL:2 < 0
 				CONTINUE
-			SIF RAND:100 < TARGET_AVOID
+			SIF !FIND_PASSIVE_SKILL(LOCAL:2, "治療")
 				CONTINUE
-			TOTAL_DAMAGE += STATUS:DAMAGE
+			;治療もちが同じ部隊にいれば確率で、本人の場合は確定で、負傷を軽減する
+			IF COOLTIME:(LOCAL:4):0 > 1 && (LOCAL:2 == LOCAL:4 || RAND:100 < 15)
+				COOLTIME:(LOCAL:4):0 = MAX(COOLTIME:(LOCAL:4):0 - 2, 1)
+				SETCOLOR カラー_スキル発動
+				PRINTFORML %ANAME(LOCAL:2)%の治療で、%ANAME(LOCAL:4)%の怪我が軽くなった
+				PRINTFORML 全治{COOLTIME:(LOCAL:4):0}ターンになった！
+				RESETCOLOR
+			ENDIF
 		NEXT
 	ENDIF
 NEXT
 
-; シールドダメージ
-CALL GET_SHIP_SIELD(TARGET_ID)
-SIELD_HP = RESULT
-IF TOTAL_DAMAGE > SIELD_HP
-	SIELD_DAMAGE:TARGET_ID += SIELD_HP
-	TOTAL_DAMAGE -= SIELD_HP
-ELSE
-	SIELD_DAMAGE:TARGET_ID += TOTAL_DAMAGE
-	RETURN 0
-ENDIF
-; 装甲ダメージ
-SHIP_DAMAGE:TARGET_ID += TOTAL_DAMAGE
-CALL GET_SHIP_HP(TARGET_ID)
-IF RESULT == 0
-	CALL GET_SHIP_TOTAL_HP(TARGET_ID)
-	SHIP_DAMAGE:TARGET_ID = RESULT
-	RETURN 1
-ENDIF
-RETURN 0
 
-; 決着判定
-@CHECK_SETTLEMENT(SHIP_LIST1, SHIP_LIST2, SHIP_ACTION)
-#DIM REF SHIP_LIST1
-#DIM REF SHIP_LIST2
-#DIM REF SHIP_ACTION
-#DIM LIST_COUNT
-#DIM BROKEN_COUNT
-#DIM SHIP_LIST_COUNT
+;-------------------------------------------------
+;部隊壊滅時の勝利側武将の成長処理
+;ARG:0=勝利した勢力 ARG:1=勝利した部隊の番号 ARG:2=敗北した勢力 敗北部隊=敗北した部隊の番号
+;※ARG:1、敗北部隊が負のときはARG:0、ARG:2を都市番号とみなす
+;-------------------------------------------------
+@UNIT_BREAK_GROW(勝利側, 勝利勢力, 勝利部隊, 敗北勢力, 敗北部隊, COUNTRY_W, COUNTRY_L)
 
-BROKEN_COUNT = 0
+#DIM 勝利側
+#DIM 敗北側
+#DIM 勝利勢力
+#DIM 勝利部隊
+#DIM 敗北勢力
+#DIM 敗北部隊
 
-FINDELEMENT SHIP_LIST1, -1
-SHIP_LIST_COUNT = RESULT
-FOR LIST_COUNT, 0, SHIP_LIST_COUNT
-	SIF SHIP_ACTION:(SHIP_LIST1:LIST_COUNT) == 大破 || SHIP_ACTION:(SHIP_LIST1:LIST_COUNT) == 撤退
-		BROKEN_COUNT ++
+;勝利側・敗北側の勢力番号
+#DIM COUNTRY_W
+#DIM COUNTRY_L
+
+VARSET GROW_ABL
+VARSET GROW_AMOUNT
+
+敗北側 = !勝利側
+
+FOR LOCAL,0, BATTLE_COMMANDER_NUM:勝利側
+	LOCAL:1 = BATTLE_COMMANDER:勝利側:LOCAL
+	SIF LOCAL:1 < 0
+		CONTINUE
+	;上昇能力の算出
+	SELECTCASE IFRAND("0TO99", 1, "100TO109", TALENT:(LOCAL:1):妖術知識)
+		CASE IS < 25
+			GROW_ABL:LOCAL = GETNUM(ABL, "武闘")
+		CASE IS < 50
+			GROW_ABL:LOCAL = GETNUM(ABL, "防衛")
+		CASE IS < 70
+			GROW_ABL:LOCAL = GETNUM(ABL, "知略")
+		CASE IS < 80
+			GROW_ABL:LOCAL = GETNUM(ABL, "政治")
+		CASE IS < 90
+			GROW_ABL:LOCAL = GETNUM(ABL, "歌唱")
+		CASE IS < 100
+			GROW_ABL:LOCAL = GETNUM(ABL, "料理")
+		CASEELSE
+			GROW_ABL:LOCAL = GETNUM(ABL, "妖術")
+	ENDSELECT
+
+	LOCAL:2 = ABLUP_NEED_EXP_SLG(ABL:(LOCAL:1):(GROW_ABL:LOCAL))
+	SELECTCASE ABL:(LOCAL:1):(GROW_ABL:LOCAL)
+		CASE IS >= ランク閾値:ランク_ＳＬＧ:ランク_A
+			GROW_AMOUNT:LOCAL = 0
+		CASE IS >= ランク閾値:ランク_ＳＬＧ:ランク_B
+			GROW_AMOUNT:LOCAL = RAND(0, LOCAL:2 / 2)
+		CASE IS >= ランク閾値:ランク_ＳＬＧ:ランク_C
+			GROW_AMOUNT:LOCAL = RAND(0, LOCAL:2)
+		CASE IS >= ランク閾値:ランク_ＳＬＧ:ランク_F
+			GROW_AMOUNT:LOCAL = RAND(0, LOCAL:2 * 2)
+		CASEELSE
+			GROW_AMOUNT:LOCAL = RAND(LOCAL:2, LOCAL:2 * 3)
+	ENDSELECT
+	;妖術の場合は必要経験値が三能力の20倍なので、とりま20倍で
+	SIF GROW_ABL:LOCAL == GETNUM(ABL, "妖術")
+		GROW_AMOUNT:LOCAL *= 20
+
+	SIF FIND_PASSIVE_SKILL(LOCAL:1, "努力家")
+		GROW_AMOUNT:LOCAL += RAND(0, LOCAL:2)
+	IF TALENT:(LOCAL:1):習得早い
+		SELECTCASE RAND:100
+			CASE IS < 20
+				GROW_AMOUNT:LOCAL += RAND(0, LOCAL:2 / 2)
+			CASE IS < 30
+				GROW_AMOUNT:LOCAL += RAND(LOCAL:2 / 2 , LOCAL:2)
+		ENDSELECT
+	ENDIF
 NEXT
-SIF SHIP_LIST_COUNT == BROKEN_COUNT
-	RETURN 1
 
-BROKEN_COUNT = 0
-FINDELEMENT SHIP_LIST2, -1
-SHIP_LIST_COUNT = RESULT
-FOR LIST_COUNT, 0, SHIP_LIST_COUNT
-	SIF SHIP_ACTION:(SHIP_LIST2:LIST_COUNT) == 大破 || SHIP_ACTION:(SHIP_LIST2:LIST_COUNT) == 撤退
-		BROKEN_COUNT ++
+FOR LOCAL, 0, BATTLE_COMMANDER_NUM:勝利側
+	SIF GROW_AMOUNT:LOCAL <= 0
+		CONTINUE
+	SIF BATTLE_COMMANDER:勝利側:LOCAL < 0
+		CONTINUE
+	;本来の必要経験値の100倍が入ってるので、100で割っとく
+	GROW_AMOUNT:LOCAL /= 100
+	CALL PRINT_ADD_EXP(BATTLE_COMMANDER:勝利側:LOCAL, EXPNAME:(GET_EXP(GROW_ABL:LOCAL)), GROW_AMOUNT:LOCAL)
+	SIF GROW_AMOUNT:LOCAL > 0
+		CLEARLINE 1
+	CALL TRAIN_AUTO_ABLUP(BATTLE_COMMANDER:勝利側:LOCAL)
 NEXT
-SIF SHIP_LIST_COUNT == BROKEN_COUNT
-	RETURN 2
 
-RETURN 0
+;-------------------------------------------------
+;都市ARG:0の防衛倍率を計算
+;-------------------------------------------------
+@CITY_GUARD_RATE(ARG:0)
+#FUNCTION
+#DIM 追加倍率
+追加倍率 = 100
+SIF TECHNOLOGY_STATUS:(CITY_OWNER:(ARG:0)):TECHNOLOGY_BATTLE_PASSIVE >= 7
+	追加倍率 += 7
+SIF GET_DEVELOPMENT_COUNT(建造物_本拠地, CITY_OWNER:(ARG:0)) > 0
+	追加倍率 += 7
+SIF TECHNOLOGY_STATUS:(CITY_OWNER:(ARG:0)):TECHNOLOGY_BATTLE_PASSIVE >= 2
+	追加倍率 += 7
+LOCAL:0 = CITY_GUARD:(ARG:0) * (CITY_ECONOMY:(ARG:0) / 50 + 10000) * 追加倍率 / 10000
 
+SIF IS_COUNTRY(CITY_OWNER:(ARG:0)) && COUNTRY_POLICY:(CITY_OWNER:(ARG:0)) == 政策_防衛
+	TIMES LOCAL:0, 1.2
 
-;ミサイルの攻撃系の撃墜数
-@GET_MISSILE_FALL(TARGET_ID)
-#DIM TARGET_ID
-#DIM SLOT_ID
-#DIM FIRE_COUNT
-#DIM 攻撃回数
-#DIM 対空ダメージ
-#DIM STATUS, STATUS_LENGTH
-#DIM ENEMY_STATUS, STATUS_LENGTH
-#DIM SHIP_STATUS, SHIP_STATUS_LENGTH
-
-対空ダメージ = 0
-
-;敵副砲による対空射撃
-TRYCALLFORM GET_SHIP_STATUS_{SHIP_MODEL:TARGET_ID}(ENEMY_STATUS)
-FOR SLOT_ID, 0, ENEMY_STATUS:SHIP_SUB_WEAPON_SLOT
-	TRYCALLFORM GET_SUB_WEAPON_STATUS_{SHIP_EQUIP:副砲:SLOT_ID:TARGET_ID}(STATUS)
-	FOR FIRE_COUNT, 0, STATUS:FIRE_RATE
-		SIF RAND:100 > STATUS:HIT_RATE
-			CONTINUE
-		SIF RAND:100 > MISSILE_AVOID
-			CONTINUE
-		対空ダメージ += STATUS:ANTI_AIR
-	NEXT
-NEXT
-RETURN 対空ダメージ / MISSILE_HP
-
-;魚雷の攻撃系の撃墜数
-@GET_TORPED_FALL(TARGET_ID)
-#DIM TARGET_ID
-#DIM SLOT_ID
-#DIM FIRE_COUNT
-#DIM 攻撃回数
-#DIM 対空ダメージ
-#DIM STATUS, STATUS_LENGTH
-#DIM ENEMY_STATUS, STATUS_LENGTH
-#DIM SHIP_STATUS, SHIP_STATUS_LENGTH
-
-対空ダメージ = 0
-
-;敵副砲による対空射撃
-TRYCALLFORM GET_SHIP_STATUS_{SHIP_MODEL:TARGET_ID}(ENEMY_STATUS)
-FOR SLOT_ID, 0, ENEMY_STATUS:SHIP_SUB_WEAPON_SLOT
-	TRYCALLFORM GET_SUB_WEAPON_STATUS_{SHIP_EQUIP:副砲:SLOT_ID:TARGET_ID}(STATUS)
-	FOR FIRE_COUNT, 0, STATUS:FIRE_RATE
-		SIF RAND:100 > STATUS:HIT_RATE
-			CONTINUE
-		SIF RAND:100 > TORPED_AVOID
-			CONTINUE
-		対空ダメージ += STATUS:ANTI_AIR
-	NEXT
-NEXT
-RETURN 対空ダメージ / TORPED_HP
+RETURNF LOCAL:0 / 100

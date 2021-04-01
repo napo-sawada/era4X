@@ -1,0 +1,51 @@
+﻿;-------------------------------------------------
+;定期イベント
+;-------------------------------------------------
+@SUCCUBUS_REV_TRAIN_REGULAR_EVENT(勢力)
+#DIM 勢力
+
+SIF FLAG:逆調教回数 == 0 || FLAG:逆調教回数 % 4 != 0
+	RETURN 0
+
+PRINTFORML 調教の時間が近づくと、%ANAME(MASTER)%はいつものように夢の世界で拘束され、
+PRINTFORMW あとはサキュバス達に弄ばれるのを待つのみとなった
+PRINTFORML やってきたサキュバスは、そろそろ素直になってくれたかしらと訪ねてきた
+PRINTFORMW 私たちの仲間になれば、こういうコトもし放題よ、と……
+PRINTFORML このまま拒否し続けても、こいつらは自分を弄び続けるだろう
+PRINTFORML 首を縦に振れば、いくらかは楽になれるのかもしれない
+PRINTFORMW どうするべきだろうか……
+CALL ASK_YN("諦めて受け入れる（夢魔化)", "こんなやつらの仲間なんてごめんだ")
+IF RESULT == 0
+	PRINTFORML %ANAME(MASTER)%が頷くと、サキュバスたちは歓迎してくれた
+	CALL COLOR_PRINTW(@"そして%ANAME(MASTER)%を、夢魔として生まれ変わらせた……", カラー_ピンク)
+	TALENT:MASTER:陰毛目標値 = 陰毛_ハート型
+	TALENT:MASTER:陰毛現在値 = 陰毛_ハート型
+	SETCOLOR カラー_注意
+	PRINTFORMW %ANAME(MASTER)%は夢魔になりました
+	RESETCOLOR
+	SETBIT TALENT:MASTER:特殊勢力陥落系, 特殊勢力_サキュバス
+	CALL CHANGE_COUNTRY(MASTER, 勢力, 1)
+	CALL PLAYER_FALLEN_TO_SP_COUNTRY(勢力)
+	RETURN 1
+ELSE
+	PRINTFORML そう、と、%ANAME(MASTER)%の拒否を特に気にした風でもなくサキュバスは受け止める
+	PRINTFORML ならもっと気持ちいいことを教えてあげなくちゃねと、その顔は淫蕩な笑みを浮かべた……
+	PRINTFORMW 彼女らはそのまま、%ANAME(MASTER)%に群がっていく……
+ENDIF
+
+;-------------------------------------------------
+;知り合いがきたときのイベント
+;-------------------------------------------------
+@SUCCUBUS_REV_TRAIN_MSG(勢力, 知り合い参加者, 知り合い参加数)
+#DIM 勢力
+#DIM REF 知り合い参加者
+#DIM 知り合い参加数
+CALL SINGLE_DRAWLINE
+PRINTFORML 調教の時間が近づくと、%ANAME(MASTER)%はいつものように夢の世界で拘束され、
+PRINTFORMW あとは彼女達に、弄ばれるのを待つのみとなった
+PRINTFORMW やってきたサキュバスは、%ANAME(MASTER)%が良く見知った相手を連れてきていた
+PRINTFORMW %ANAME(知り合い参加者:0, 知り合い参加数)%…
+PRINTFORMW かつての%ANAME(知り合い参加者:0, 知り合い参加数)%ではない。どうやら夢魔になり果ててしまったようだ
+PRINTFORMW 淫蕩な視線は、%ANAME(MASTER)%のからだに注がれている……
+PRINTFORMW サキュバスはニコニコ笑いながら、お知り合いとシたほうが気持ちよくなれるわ、と言ってきた
+PRINTFORMW さあ楽しみましょう。サキュバスがそのように言うと、%ANAME(知り合い参加者:0, 知り合い参加数)%は%ANAME(MASTER)%に群がった……

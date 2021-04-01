@@ -1,0 +1,424 @@
+﻿;-------------------------------------------------
+;「捕虜の調教」の名称
+;-------------------------------------------------
+@SHOP_LIFE_NAME31
+RESULTS:0 '= "捕虜の調教"
+
+;-------------------------------------------------
+;「捕虜の調教」の選択可否判定
+;-------------------------------------------------
+@SHOP_LIFE_CHECK31
+SIF CFLAG:MASTER:行動不能状態 == 行動不能_臨月 || COOLTIME:MASTER:0 > 1
+	RETURN 0
+SIF CFLAG:MASTER:捕虜先
+	RETURN 0
+SIF !CFLAG:MASTER:所属
+	RETURN 0
+RETURN 1
+
+;-------------------------------------------------
+;「捕虜の調教」の選択可能キャラ存在判定
+;-------------------------------------------------
+@SHOP_LIFE_CHECKCHARA31(ARG:0)
+;非主人公、主人公勢力の捕虜、牢獄で監禁中
+RETURN CHECK91(ARG:0, 2, (ARG:0 != MASTER && CFLAG:(ARG:0):捕虜先 == CFLAG:MASTER:所属 && CFLAG:(ARG:0):軟禁中 == 0) || CFLAG:(ARG:0):外交調教中)
+
+;-------------------------------------------------
+;「捕虜の調教」の追加チェック
+;-------------------------------------------------
+@SHOP_LIFE_CHECK_ADDITIONAL_CHECK31()
+FOR LOCAL, 0, CHARANUM
+	SIF CFLAG:LOCAL:捕虜先 == CFLAG:MASTER:所属 && CFLAG:LOCAL:軟禁中 != 1
+		RETURN 1
+NEXT
+
+
+;-------------------------------------------------
+;「捕虜の調教」の助手の選択可能キャラ存在判定
+;-------------------------------------------------
+@SHOP_LIFE_CHECKCHARA_SUB31(ARG:0)
+;閨に呼ぶの選択可能キャラ存在判定
+CALL SHOP_LIFE_CHECKCHARA_NEYA(ARG:0)
+RETURN CHECK91(ARG:0, 2, RESULT && SHOP_LIFE_CHECKCHARA_ZYOSYU(ARG:0) && CFLAG:(ARG:0):所属 == CFLAG:MASTER:所属)
+RETURN 0
+
+;-------------------------------------------------
+;「捕虜の調教」の左カラムメニューの入力処理
+;-------------------------------------------------
+@SHOP_LIFE_EVENTBUY31
+FLAG:拠点フェイズページ = 1
+FLAG:夜這い = 0
+RETURN 0
+
+;-------------------------------------------------
+;「捕虜の調教」の右カラムキャラリスト１のボタン（関数未指定なら選択中色なし表示）
+;-------------------------------------------------
+@SHOP_LIFE_LIST1_BUTTON31(ARG:0, ARG:1)
+;キャラ, 選択中カラー表示フラグ, ボタン番号に追加する数値, CHECKCHARAの戻り値
+CALL COLUMN_RIGHT_CHARALIST_BUTTON(ARG:0, FINDELEMENT(PRISONER_TARGET, ARG:0) != -1, SHOP_LIFE_LIST1_ADD_INPUT, ARG:1, 0, "TOP")
+RETURN
+
+;-------------------------------------------------
+;「捕虜の調教」の右カラムキャラリスト２のボタン（関数未指定なら選択中色なし表示）
+;-------------------------------------------------
+@SHOP_LIFE_LIST2_BUTTON31(ARG:0, ARG:1)
+;キャラ, 選択中カラー表示フラグ, ボタン番号に追加する数値, CHECKCHARAの戻り値
+CALL COLUMN_RIGHT_CHARALIST_BUTTON(ARG:0, CFLAG:(ARG:0):捕虜調教の助手, SHOP_LIFE_LIST2_ADD_INPUT, ARG:1, 0, "BOTTOM")
+RETURN 0
+
+;-------------------------------------------------
+;「捕虜の調教」の右カラムキャラリストボタン（上）表示に追尾させる情報
+;　デフォルトの情報を表示しない場合はRETURN 1
+;-------------------------------------------------
+@SHOP_LIFE_BUTTON_ADD_TOP31(ARG:0)
+CALL SHOP_LIFE_BUTTON_ADD_TOP_PRISONER(ARG:0)
+RETURN RESULT
+
+;-------------------------------------------------
+;「捕虜の調教」の右カラムキャラリストボタン（上）表示に追尾させる情報
+;　デフォルトの情報を表示しない場合はRETURN 1
+;-------------------------------------------------
+@SHOP_LIFE_BUTTON_ADD_BOTTOM31(ARG:0)
+CALL SHOP_LIFE_BUTTON_ADD_BOTTOM_PRISONER(ARG:0)
+RETURN RESULT
+
+;-------------------------------------------------
+;「捕虜の調教」の右カラム表示処理
+;-------------------------------------------------
+@SHOP_LIFE_EVENTBUY_SHOW31
+#DIM 選択人数
+選択人数 = INRANGEARRAY(PRISONER_TARGET, 0, CHARANUM + 1)
+
+CALL COLUMN_RIGHT_TITLE("対象者選択", TOSTR(選択人数), TOSTR(VARSIZE("PRISONER_TARGET")), "1", "0", "助手選択可  管理も可")
+CALL COLUMN_RIGHT_PRINTL
+CALL COLUMN_RIGHT_LINE
+CALL COLUMN_RIGHT_PRINTL
+
+IF 選択人数 >= 1
+	PRINTBUTTON "[このメンバーで決定]", 1
+ELSE
+	SETCOLOR カラー_選択不可
+	PRINTPLAINFORM [このメンバーで決定]
+	RESETCOLOR
+ENDIF
+PRINTPLAIN   
+CALL COLOR_PRINT("管理(軟禁/解放/兵士の性奴隷化/処刑等)は行動消費なし", カラー_注釈)
+CALL COLUMN_RIGHT_PRINTL
+CALL COLUMN_RIGHT_LINE
+CALL COLUMN_RIGHT_PRINTL
+CALL COLOR_PRINT("一括管理", カラー_注釈)
+PRINTPLAIN   
+PRINTBUTTON "[解放]", 2
+PRINTBUTTON "[追放]", 3
+PRINTBUTTON "[軟禁]", 4
+PRINTBUTTON "[処刑]", 5
+SIF ITEM:触手部屋 && ID_TO_CHARA(FLAG:触手部屋管理者) >= 0
+	PRINTBUTTON "[触手処刑]", 6
+
+CALL COLUMN_RIGHT_PRINTL
+CALL COLUMN_RIGHT_LINE
+CALL COLUMN_RIGHT_PRINTL
+
+;右カラムの上下２のキャラリスト上とページ移動を呼ぶ
+CALL COLUMN_RIGHT_CHARALIST_TOP(1)
+CALL COLUMN_RIGHT_PRINTL
+CALL COLUMN_RIGHT_LINE
+CALL COLUMN_RIGHT_PRINTL
+
+;助手を数える
+LOCAL:1 = 0
+FOR LOCAL:0, 0, CHARANUM
+	;選択可能な条件を満たしているかどうかを判定
+	TRYCALLFORM SHOP_LIFE_CHECKCHARA_SUB{FLAG:拠点フェイズ選択コマンド}(LOCAL:0)
+	IF RESULT == 1
+		;選択中の人数を数える
+		IF CFLAG:(LOCAL:0):捕虜調教の助手
+			LOCAL:1 ++
+		ENDIF
+	ELSE
+		;条件を満たしていなければ強制的にＯＦＦ
+		CFLAG:(LOCAL:0):捕虜調教の助手 = 0
+	ENDIF
+NEXT
+
+PRINTFORM 助手を最大4人まで連れて行く事が可能です
+SIF LOCAL:1 >= 4
+	SETCOLOR カラー_オレンジ
+PRINTFORM (現在{LOCAL:1}/4人)
+RESETCOLOR
+PRINTPLAIN   
+PRINTBUTTON @"[%ZYOSYU_MODE()%]", 7
+CALL COLUMN_RIGHT_PRINTL
+CALL COLUMN_RIGHT_LINE
+CALL COLUMN_RIGHT_PRINTL
+
+;右カラムの上下２のキャラリスト下とページ移動を呼ぶ
+CALL COLUMN_RIGHT_CHARALIST_BOTTOM(1)
+RETURN 0
+
+;-------------------------------------------------
+;「捕虜の調教」の右カラムボタンの入力処理補佐
+;-------------------------------------------------
+@SHOP_LIFE_EVENTBUY_SUB31(ARG:0)
+;このメンバーで決定
+SELECTCASE ARG:0 
+	CASE 1
+		SELECTCASE INRANGEARRAY(PRISONER_TARGET, 0, CHARANUM + 1)
+			CASE 0
+				;ないと思うんだけど一応
+			CASE 1
+				CALL PRISONER_TRAIT(PRISONER_TARGET:0)
+			CASEELSE
+				CALL DECIDE_PRISONER_MEMBER()
+		ENDSELECT
+		IF RESULT
+			RETURN 1
+		ENDIF
+	CASE 2, 3, 4, 5, 6
+		CALL PRISONER_BULK_MANAGEMENT(ARG:0)
+		RETURN RESULT
+	CASE 7
+		FLAG:助手フィルタ = ROUND_INCREMENT(FLAG:助手フィルタ, 0, 3)
+ENDSELECT
+RETURN 0
+
+;-------------------------------------------------
+;「捕虜の調教」のリスト１入力処理
+;-------------------------------------------------
+@SHOP_LIFE_USERSHOP31(ARG:0)
+LOCAL = FINDELEMENT(PRISONER_TARGET, ARG:0)
+;いたら消す
+IF LOCAL != -1
+	PRISONER_TARGET:LOCAL = -1
+	;配列のケツ以外を消した場合は、その一個後ろからケツまでを、一個手前にずらす
+	SIF LOCAL != VARSIZE("PRISONER_TARGET") -1
+		ARRAYSHIFT PRISONER_TARGET, -1, -1, LOCAL, VARSIZE("PRISONER_TARGET")
+;いなかったら追加する
+ELSE
+	FOR LOCAL, 0, VARSIZE("PRISONER_TARGET")
+		IF PRISONER_TARGET:LOCAL == -1
+			PRISONER_TARGET:LOCAL = ARG:0
+			BREAK
+		ENDIF
+	NEXT
+ENDIF
+RETURN 0
+
+;-------------------------------------------------
+;「捕虜の調教」のリスト２入力処理
+;-------------------------------------------------
+@SHOP_LIFE_USERSHOP_SUB31(ARG:0)
+;参加キャラの数を数える
+LOCAL:5 = 0
+FOR LOCAL:0, 0, CHARANUM
+	IF CFLAG:(LOCAL:0):捕虜調教の助手
+		LOCAL:5 ++
+	ENDIF
+NEXT
+IF CFLAG:(ARG:0):捕虜調教の助手 || LOCAL:5 < 4
+	;調教参加フラグを反転
+	CFLAG:(ARG:0):捕虜調教の助手 = !CFLAG:(ARG:0):捕虜調教の助手
+ENDIF
+RETURN 0
+
+;-------------------------------------------------
+;「捕虜の調教」の処理
+;-------------------------------------------------
+@DECIDE_PRISONER_MEMBER()
+CVARSET CFLAG, 6, 0
+FOR LOCAL:0, 0, CHARANUM
+	IF LOCAL:0 != MASTER && CFLAG:(LOCAL:0):捕虜調教の助手
+		CFLAG:(LOCAL:0):調教参加フラグ = 1
+	ENDIF
+NEXT
+;このターン調教された
+FOR LOCAL:0, 0, VARSIZE("PRISONER_TARGET")
+	IF PRISONER_TARGET:LOCAL != -1
+		CFLAG:(PRISONER_TARGET:LOCAL):調教参加フラグ = 1
+	ENDIF
+NEXT
+;調教初期設定
+IF INRANGEARRAY(PRISONER_TARGET, 0, CHARANUM + 1) == 1
+	CALL TRAIN_TARGET_SETTING(PRISONER_TARGET:0)
+ENDIF
+;初期のウフフフラグをＯＮにする
+FLAG:ウフフフラグ = 1
+;捕虜調教モード
+FLAG:調教モード = 2
+;行動開始時の共通設定
+CALL START_TRAIN_COMMON
+REDRAW 1
+RETURN 1
+
+;-------------------------------------------------
+;捕虜の調教の一括管理
+;-------------------------------------------------
+@PRISONER_BULK_MANAGEMENT(ARG:0)
+#DIMS 内容
+#DIMS 内容英
+#DIM 触手管理人
+#DIM 対象
+SELECTCASE ARG:0
+	CASE 2
+		内容 = 解放
+		内容英 = PURGE
+	CASE 3
+		内容 = 追放
+		内容英 = BANISH
+	CASE 4
+		内容 = 軟禁
+		内容英 = NANKIN
+	CASE 5
+		内容 = 処刑
+		内容英 = EXECUTE
+	CASE 6
+		内容 = 触手処刑
+		内容英 = TENTACLE_EXECUTE
+		触手管理人 = ID_TO_CHARA(FLAG:触手部屋管理者)
+ENDSELECT
+
+CALL SINGLE_DRAWLINE
+PRINTFORML %内容%する対象を選択してください
+PRINTFORML （一括管理では、処刑時のイベント等は発生しません）
+CALL SINGLE_DRAWLINE
+CALL SELECT_CHARA_LIST_MULTI_ONLY_LOGIC_SLG(-1, "PRISONER_MANAGE_" + 内容英, "NONE")
+
+SIF SELECTED_CHARA_NUM == 0
+	RETURN 0
+
+FOR LOCAL, 0, SELECTED_CHARA_NUM
+	対象 = SELECTED_CHARA:LOCAL
+	PRINTFORML %ANAME(対象)%を%内容%しました
+	SELECTCASE ARG:0
+		CASE 2
+			CALL CAPTURE(対象, 0, TALENT:対象:崩壊)
+		CASE 3
+			CALL CHANGE_COUNTRY(対象, 0, 1)
+			CALL CAPTURE(対象, 0, TALENT:対象:崩壊)
+		CASE 4
+			CFLAG:対象:軟禁中 = 1
+		CASE 5
+			CALL CHANGE_COUNTRY(対象, 0, 1, 1)
+		CASE 6
+			CALL CHANGE_COUNTRY(対象, 0, 1, 1)
+			;Values based on @PRISONER_TRAIT_EXECUTE_TENTACLE
+			CALL PRINT_ADD_EXP(触手管理人, "妖術経験値", (30 + BASE:対象:精神力 / 20 + ABL:対象:触手 * 10))
+			CALL TRAIN_AUTO_ABLUP(触手管理人)
+	ENDSELECT
+NEXT
+
+VARSET PRISONER_TARGET, -1
+
+IF CALC_SHOP_TIME() <= SHOP_TIME
+	PRINTFORML 人数不足による仕事のしわ寄せにより自由時間がなくなったので拠点フェイズを終了します
+	LINES_SHOP = LINECOUNT
+	BEGIN TURNEND
+ENDIF
+
+RETURN 1
+
+@SELECT_CHARA_LIST_SHOW_LOGIC_PRISONER_MANAGE_PURGE(対象)
+#DIM 対象
+RETURN CFLAG:対象:捕虜先 == CFLAG:MASTER:所属 && !CFLAG:対象:軟禁中
+
+@SELECT_CHARA_LIST_SHOW_LOGIC_PRISONER_MANAGE_BANISH(対象)
+#DIM 対象
+RETURN ALLSAMES(CFLAG:対象:捕虜先, CFLAG:対象:所属, CFLAG:MASTER:所属)
+
+@SELECT_CHARA_LIST_SHOW_LOGIC_PRISONER_MANAGE_NANKIN(対象)
+#DIM 対象
+RETURN CFLAG:対象:捕虜先 == CFLAG:MASTER:所属 && CFLAG:対象:所属 != CFLAG:MASTER:所属 && !CFLAG:対象:軟禁中
+
+@SELECT_CHARA_LIST_SHOW_LOGIC_PRISONER_MANAGE_EXECUTE(対象)
+#DIM 対象
+RETURN CFLAG:対象:捕虜先 == CFLAG:MASTER:所属 && !CFLAG:対象:軟禁中
+
+@SELECT_CHARA_LIST_SHOW_LOGIC_PRISONER_MANAGE_TENTACLE_EXECUTE(対象)
+#DIM 対象
+RETURN CFLAG:対象:捕虜先 == CFLAG:MASTER:所属 && !CFLAG:対象:軟禁中
+
+
+;-------------------------------------------------
+;「捕虜の調教」で対象が一人のとき、別の捕虜が身代わりになろうとする
+;-------------------------------------------------
+@PRISONER_SCAPEGOAT(対象)
+#DIM 対象
+#DIM 候補
+#DIM 判定値, MAX_CHARA_NUM
+VARSET 判定値, 0
+FOR LOCAL, 0, CHARANUM
+	SIF GROUPMATCH(LOCAL, 対象, MASTER)
+		CONTINUE
+	SIF GROUPMATCH(1, TALENT:LOCAL:崩壊, TALENT:LOCAL:虚ろ)
+		CONTINUE
+	SIF CFLAG:(LOCAL):所属 == CFLAG:MASTER:所属
+		CONTINUE
+	IF CFLAG:対象:捕虜先 && CFLAG:LOCAL:捕虜先 == CFLAG:対象:捕虜先
+		SIF REL_LIKE:LOCAL:対象 > 0
+			判定値:LOCAL += RAND(REL_LIKE:LOCAL:対象, REL_LIKE:LOCAL:対象 * 2) 
+		SIF RELATION:LOCAL:対象 >= 100
+			判定値:LOCAL += (RELATION:LOCAL:対象 - 100) * RAND(50, 100)
+		SIF CFLAG:LOCAL:所属 != CFLAG:対象:所属
+			判定値:LOCAL = 判定値:LOCAL * 2 / 3
+	ENDIF
+NEXT
+
+候補 = FINDELEMENT(判定値, MAXARRAY(判定値, 0, CHARANUM), 0, CHARANUM)
+
+SIF 判定値:候補 <= 0
+	RETURN 0
+
+IF 判定値:候補 > 10000
+	PRINTFORMW %ANAME(MASTER)%が%ANAME(対象)%の調教を開始しようとすると、%ANAME(候補)%がすがりついてきた
+	PRINTFORML 自分が代わりになる、だから%ANAME(対象)%のことは見逃して欲しい、ということだそうだが……
+	CALL ASK_MULTI("受け入れる", @"受け入れつつ、%ANAME(対象)%に見せつける", "無視する")
+	SELECTCASE RESULT
+		CASE 0
+			PRINTFORMW そこまでいうなら、認めてやろう
+			PRINTFORMW %ANAME(MASTER)%は%ANAME(候補)%を調教することにした……
+			PRISONER_TARGET:FINDELEMENT(PRISONER_TARGET, 対象) = 候補
+		CASE 1
+			PRINTFORMW そこまでいうなら、認めてやろう
+			PRINTFORMW ただし、%ANAME(候補)%が犯される様を、%ANAME(対象)%に見せつけてやろう
+			PRINTFORMW どんな顔をするか、今から楽しみだ……
+			PRISONER_TARGET:FINDELEMENT(PRISONER_TARGET, 対象) = 候補
+			CFLAG:対象:捕虜調教の助手 = 1
+			CFLAG:対象:調教中帰らない = 1
+		CASE 2
+			PRINTFORMW 何を馬鹿なことを言っているのだろう
+			PRINTFORMW %ANAME(MASTER)%は%ANAME(候補)%を無視し、%ANAME(対象)%の調教にとりかかった
+	ENDSELECT
+ENDIF
+
+;-------------------------------------------------
+;「捕虜の調教とかの」のメニュー表示で使用するフィルタリングのモード文字列
+;-------------------------------------------------
+@ZYOSYU_MODE
+#FUNCTIONS
+SELECTCASE FLAG:助手フィルタ
+	CASE 0
+		RETURNF "全"
+	CASE 1
+		RETURNF "男"
+	CASE 2
+		RETURNF "女"
+	CASE 3
+		RETURNF "双"
+ENDSELECT
+
+;-------------------------------------------------
+;「捕虜の調教とかの」のメニュー表示で、フィルタに性別が適合するか
+;-------------------------------------------------
+@SHOP_LIFE_CHECKCHARA_ZYOSYU(ARG:0)
+#FUNCTION
+SELECTCASE FLAG:助手フィルタ
+	CASE 0
+		RETURNF 1
+	CASE 1
+		RETURNF IS_MALE(ARG:0)
+	CASE 2
+		RETURNF IS_FEMALE(ARG:0)
+	CASE 3
+		RETURNF (HAS_PENIS(ARG:0) && IS_FEMALE(ARG:0)) || (HAS_VAGINA(ARG:0) && IS_MALE(ARG:0))
+ENDSELECT
+

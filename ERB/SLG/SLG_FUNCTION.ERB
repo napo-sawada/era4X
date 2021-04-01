@@ -1,0 +1,2501 @@
+﻿;SLG部分の各種関数まとめ
+;-------------------------------------------------
+;現存する勢力数を返す関数
+;-------------------------------------------------
+@GET_COUNTRY_NUM()
+#FUNCTION
+LOCAL:1 = 0
+FOR LOCAL, 0, MAX_COUNTRY
+	SIF IS_COUNTRY(LOCAL)
+		LOCAL:1 ++
+NEXT
+RETURNF LOCAL:1
+
+;-------------------------------------------------
+;ARG:0番の勢力の存在判定
+;-------------------------------------------------
+@IS_COUNTRY(ARG:0)
+#FUNCTION
+SIF !INRANGE(ARG:0, 0, MAX_COUNTRY - 1)
+	RETURNF 0
+RETURNF COUNTRY_BOSS:(ARG:0) >= 1
+
+;-------------------------------------------------
+;ARG:0番の勢力について、頭首のキャラ番号を返す関数
+;-------------------------------------------------
+@GET_COUNTRY_BOSS(ARG:0)
+#FUNCTION
+RETURNF ID_TO_CHARA(COUNTRY_BOSS:(ARG:0))
+
+;-------------------------------------------------
+;ARG:0番の勢力について、防衛兵力の合計値を返す関数
+;-------------------------------------------------
+@GET_SUM_ARMY_DF(ARG:0)
+#FUNCTION
+LOCAL:1 = 0
+FOR LOCAL:0, 0, MAX_CITY
+	SIF CITY_OWNER:(LOCAL:0) == ARG:0
+		LOCAL:1 += CITY_SOLDIER:(LOCAL:0)
+NEXT
+RETURNF LOCAL:1
+
+;-------------------------------------------------
+;ARG:0番の勢力について、所持兵数の合計値を返す関数
+;-------------------------------------------------
+@GET_SUM_SOLDIER(ARG:0)
+#FUNCTION
+LOCAL:1 = COUNTRY_SOLDIER:(ARG:0)
+FOR LOCAL:0, 0, MAX_CITY
+	SIF CITY_OWNER:(LOCAL:0) == ARG:0
+		LOCAL:1 += CITY_SOLDIER:(LOCAL:0)
+NEXT
+FOR LOCAL:0, 0, 10
+	LOCAL:1 += MAX(0, UNIT_SOLDIER:(ARG:0):(LOCAL:0))
+NEXT
+RETURNF LOCAL:1
+
+;-------------------------------------------------
+;ARG:0番の勢力について、徴兵限界を返す関数
+;-------------------------------------------------
+@GET_RECRUIT_LIMIT(勢力)
+#FUNCTION
+#DIM 勢力
+#DIM 最大保持数
+#DIM 兵舎数
+
+最大保持数 = GET_SUM_ECONOMY(勢力) / 10
+
+兵舎数 = GET_DEVELOPMENT_COUNT(建造物_兵舎, 勢力)
+
+SIF TECHNOLOGY_STATUS:勢力:TECHNOLOGY_CONSCRIPTION >= 1
+	TIMES 最大保持数, 1.10
+SIF TECHNOLOGY_STATUS:勢力:TECHNOLOGY_CONSCRIPTION >= 3
+	TIMES 最大保持数, 1.15
+SIF TECHNOLOGY_STATUS:勢力:TECHNOLOGY_CONSCRIPTION >= 6
+	TIMES 最大保持数, 1.20
+
+SIF GET_DEVELOPMENT_COUNT(建造物_集積所, 勢力) > 0
+	最大保持数 += 3000
+
+最大保持数 += 兵舎数 * 500
+
+;経済の生値 / 10(表示数値の10倍) ベースで兵舎数が補正
+RETURNF 最大保持数
+
+
+;-------------------------------------------------
+;ARG:0番の勢力について、経済規模の合計値を返す関数
+;-------------------------------------------------
+@GET_SUM_ECONOMY(ARG:0)
+#FUNCTION
+LOCAL:1 = 0
+FOR LOCAL:0, 0, MAX_CITY
+	SIF CITY_OWNER:(LOCAL:0) == ARG:0
+		LOCAL:1 += CITY_ECONOMY:(LOCAL:0)
+NEXT
+RETURNF LOCAL:1
+
+;-------------------------------------------------
+;ARG:0番の勢力について、都市防衛力の合計値を返す関数
+;-------------------------------------------------
+@GET_SUM_GUARD(ARG:0)
+#FUNCTION
+LOCAL:1 = 0
+FOR LOCAL:0, 0, MAX_CITY
+	SIF CITY_OWNER:(LOCAL:0) == ARG:0
+		LOCAL:1 += CITY_GUARD:(LOCAL:0)
+NEXT
+RETURNF LOCAL:1
+
+
+;-------------------------------------------------
+;ARG:0番の勢力について、支配都市数を返す関数
+;-------------------------------------------------
+@GET_OWN_CITY(ARG:0)
+#FUNCTION
+
+RETURNF MATCH(CITY_OWNER, ARG:0, 1, CITY_NUM + 1)
+
+;-------------------------------------------------
+;ARG:0番の勢力について、士官数を返す関数
+;-------------------------------------------------
+@GET_COMMANDER_NUM(ARG:0)
+#FUNCTION
+
+RETURNF CMATCH(CFLAG:1, ARG:0)
+
+;-------------------------------------------------
+;ARG:0番の勢力について、動物の数を返す関数
+;-------------------------------------------------
+@GET_ANIMAL_NUM(ARG:0)
+#FUNCTION
+LOCAL:1 = 0
+FOR LOCAL, 0, CHARANUM
+	SIF IS_ANIMAL(LOCAL:0) && CFLAG:(LOCAL:0):所属 == ARG:0
+		LOCAL:1 ++
+NEXT
+RETURNF LOCAL:1
+
+;-------------------------------------------------
+;ARG:0番の勢力について、現在の部隊の数を返す関数
+;-------------------------------------------------
+@GET_UNIT_NUM(ARG:0)
+#FUNCTION
+LOCAL:1 = 0
+IF IS_COUNTRY(ARG:0)
+	FOR LOCAL:0, 0, MAX_UNIT
+		SIF UNIT_SOLDIER:(ARG:0):(LOCAL:0) > 0
+			LOCAL:1 ++
+	NEXT
+ENDIF
+RETURNF LOCAL:1
+
+
+;-------------------------------------------------
+;ARG:1の正負に応じてGET_UNIT_COMMANDER_ALLとGET_CITY_COMMANDER_ALLを呼び出す関数
+;その辺透過的に扱えるようにするため作成
+;-------------------------------------------------
+@GET_COMMANDER_ALL(ARG:0, ARG:1)
+IF ARG:1 < 0
+	CALL GET_CITY_COMMANDER_ALL(ARG:0)
+ELSE
+	CALL GET_UNIT_COMMANDER_ALL(ARG:0, ARG:1)
+ENDIF
+RETURN RESULT:0, RESULT:1, RESULT:2
+
+;-------------------------------------------------
+;ARG:1の正負に応じてCITY_SOLDERとUNIT_SOLDIERを取得するための関数
+;CITY_SOLDIERとUNIT_SOLDIERを透過的に扱うために作成。
+;-------------------------------------------------
+@GET_SOLDIER(ARG:0, ARG:1)
+#FUNCTION
+IF ARG:1 < 0
+	RETURNF CITY_SOLDIER:(ARG:0)
+ELSE
+	RETURNF UNIT_SOLDIER:(ARG:0):(ARG:1)
+ENDIF
+RETURNF -1
+
+;-------------------------------------------------
+;ARG:1の正負に応じてCITY_SOLDERとUNIT_SOLDIERを操作するための関数
+;CITY_SOLDIERとUNIT_SOLDIERを透過的に扱うために作成。
+;-------------------------------------------------
+@MODIFY_SOLDIER(ARG:0, ARG:1, ARG:2, ARG:3 = 0)
+IF ARG:1 < 0
+	LOCAL:1 = CITY_OWNER:(ARG:0)
+	LOCAL:2 = MAX(CITY_SOLDIER:(ARG:0) + ARG:2, 0)
+	SIF ARG:3
+		PRINTFORML %@"\@ GET_COUNTRY_BOSS(LOCAL:1) >= 0 ? %SNAME(GET_COUNTRY_BOSS(LOCAL:1))% # 無所属 \@", MAX_CHARANAME_LENGTH / 2, LEFT%軍:{CITY_SOLDIER:(ARG:0), 6, RIGHT} → {LOCAL:2}
+	CITY_SOLDIER:(ARG:0) = LOCAL:2	
+ELSE
+	LOCAL:1 = ARG:0
+	LOCAL:2 = MAX(UNIT_SOLDIER:(ARG:0):(ARG:1) + ARG:2, 0)
+	SIF ARG:3
+		PRINTFORML %SNAME(GET_COUNTRY_BOSS(LOCAL:1)), MAX_CHARANAME_LENGTH / 2, LEFT%軍:{UNIT_SOLDIER:(ARG:0):(ARG:1), 6, RIGHT} → {LOCAL:2}
+	UNIT_SOLDIER:(ARG:0):(ARG:1) = LOCAL:2
+ENDIF
+
+@INCREASE_SOLDIER(ARG:0, ARG:1, ARG:2, ARG:3 = 0)
+CALL MODIFY_SOLDIER(ARG:0, ARG:1, ABS(ARG:2), ARG:3)
+
+@DECREASE_SOLDIER(ARG:0, ARG:1, ARG:2, ARG:3 = 0)
+CALL MODIFY_SOLDIER(ARG:0, ARG:1, ABS(ARG:2) * -1, ARG:3)
+
+
+;-------------------------------------------------
+;ARG:1の正負に応じてCITY_SOLDERとUNIT_SOLDIERを操作するための関数
+;加減ではなく直接値をセットするとき用
+;-------------------------------------------------
+@SET_SOLDIER(ARG:0, ARG:1, ARG:2, ARG:3 = 0)
+IF ARG:1 < 0
+	LOCAL:1 = CITY_OWNER:(ARG:0)
+	SIF ARG:3
+		PRINTFORML %@"\@ GET_COUNTRY_BOSS(LOCAL:1) >= 0 ? %SNAME(GET_COUNTRY_BOSS(LOCAL:1))% # 無所属 \@", MAX_CHARANAME_LENGTH / 2, LEFT%軍:{CITY_SOLDIER:(ARG:0), 6, RIGHT} → {ARG:2}
+	CITY_SOLDIER:(ARG:0) = ARG:2
+ELSE
+	LOCAL:1 = ARG:0
+	SIF ARG:3
+		PRINTFORML %SNAME(GET_COUNTRY_BOSS(LOCAL:1)), MAX_CHARANAME_LENGTH / 2, LEFT%軍:{UNIT_SOLDIER:(ARG:0):(ARG:1), 6, RIGHT} → {ARG:2}
+	UNIT_SOLDIER:(ARG:0):(ARG:1) = ARG:2
+ENDIF
+
+;-------------------------------------------------
+;ARG:0番の都市について、ARG:1番目の守将のキャラ番号を返す関数
+;-------------------------------------------------
+@GET_CITY_COMMANDER(ARG:0, ARG:1)
+#FUNCTION
+SIF !INRANGE_CITY(ARG:0) || !INRANGE_CITY_COMMANDER(ARG:1)
+	RETURNF -1
+
+RETURNF ID_TO_CHARA((CITY_COMMANDER:(ARG:0) >> (16 * ARG:1)) & 0xFFFF)
+
+;-------------------------------------------------
+;ARG:0番の都市について、将全員のキャラ番号をRESULTにつっこんで返す関数
+;-------------------------------------------------
+@GET_CITY_COMMANDER_ALL(ARG:0)
+FOR LOCAL, 0, MAX_CITY_COMMANDER
+	RESULT:LOCAL = GET_CITY_COMMANDER(ARG:0, LOCAL)
+NEXT
+RETURN RESULT:0, RESULT:1, -1
+
+;-------------------------------------------------
+;ARG:0番の都市について、ARG:1番目の守将をARG:2番のキャラに設定する関数
+;※ARG:3 …… 0=ARG:2をキャラ番号で設定  0以外=IDで設定
+;-------------------------------------------------
+@SET_CITY_COMMANDER(ARG:0, ARG:1, ARG:2, ARG:3 = 0)
+SIF !INRANGE_CITY(ARG:0) || !INRANGE_CITY_COMMANDER(ARG:1)
+	RETURN -1
+
+IF ARG:3 == 0
+	LOCAL:0 = GET_ID(ARG:2)
+ELSE
+	LOCAL:0 = ARG:2
+ENDIF
+CITY_COMMANDER:(ARG:0) &= ~(0xFFFF << (16 * ARG:1))
+SIF LOCAL:0 <= 0
+	RETURN 1
+
+CITY_COMMANDER:(ARG:0) |= (LOCAL:0 << (16 * ARG:1))
+RETURN 1
+
+;-------------------------------------------------
+;ARG:0番の都市について、空いてるとこの守将をARG:1番のキャラに設定する関数
+;設定できたらその位置が、できなければ-1が戻る
+;※ARG:2 …… 0=ARG:1をキャラ番号で設定  0以外=IDで設定
+;-------------------------------------------------
+@SET_CITY_COMMANDER_ANYWHERE(ARG:0, ARG:1, ARG:2 = 0)
+SIF !INRANGE_CITY(ARG:0)
+	RETURN -1
+IF GET_CITY_COMMANDER(ARG:0, 0) == -1
+	CALL SET_CITY_COMMANDER(ARG:0, 0, ARG:1)
+	RETURN 0
+ELSEIF GET_CITY_COMMANDER(ARG:0, 1) == -1
+	CALL SET_CITY_COMMANDER(ARG:0, 1, ARG:1)
+	RETURN 1
+ENDIF
+RETURN -1
+;-------------------------------------------------
+;ARG:0番の都市について、ARG:1番目の守将をクリアする関数
+;-------------------------------------------------
+@CLEAR_CITY_COMMANDER(ARG:0, ARG:1)
+#DIM REM_CITY_COMMANDER
+SIF !INRANGE_CITY(ARG:0) || !INRANGE_CITY_COMMANDER(ARG:1)
+	RETURN 0
+
+;クリア
+CALL SET_CITY_COMMANDER(ARG:0, ARG:1, -1)
+SELECTCASE ARG:1
+	CASE MAX_CITY_COMMANDER - 1
+		;もともと最後尾なので何もしなくてよし
+	CASEELSE
+		;現在の将を記憶
+		REM_CITY_COMMANDER = CITY_COMMANDER:(ARG:0)
+		;いったん全部削除してから一人ずつ突っ込み直す
+		CITY_COMMANDER:(ARG:0) = 0
+		FOR LOCAL,0, MAX_CITY_COMMANDER
+			IF LOCAL < ARG:2
+				CITY_COMMANDER:(ARG:0) |= (REM_CITY_COMMANDER & 0xFFFF << 16 * LOCAL)
+			ELSEIF LOCAL > ARG:2
+				CITY_COMMANDER:(ARG:0) |= (REM_CITY_COMMANDER & 0xFFFF << 16 * LOCAL) >> 16
+			ENDIF
+		NEXT
+ENDSELECT
+
+;-------------------------------------------------
+;ARG:0番の都市について、守将の数を返す関数
+;-------------------------------------------------
+@GET_CITY_COMMANDER_NUM(ARG:0)
+#FUNCTION
+VARSET LOCAL:1
+FOR LOCAL:0, 0, MAX_CITY_COMMANDER
+	LOCAL:1 = GET_CITY_COMMANDER(ARG:0, LOCAL:0)
+	SIF LOCAL:1 >= 0
+		LOCAL:2 ++
+NEXT
+RETURNF LOCAL:2
+
+;-------------------------------------------------
+;ARG:0番の都市について、ARG:1が守将なら外す
+;設定できたらその位置が、できなければ-1が戻る
+;※ARG:2 …… 0=ARG:1をキャラ番号で設定  0以外=IDで設定
+;-------------------------------------------------
+@CLEAR_CITY_COMMANDER_FIND(ARG:0, ARG:1, ARG:2 = 0)
+SIF !INRANGE_CITY(ARG:0)
+	RETURN -1
+IF GET_CITY_COMMANDER(ARG:0, 0) == ARG:1
+	CALL CLEAR_CITY_COMMANDER(ARG:0, 0)
+	RETURN 0
+ELSEIF GET_CITY_COMMANDER(ARG:0, 1) == ARG:1
+	CALL CLEAR_CITY_COMMANDER(ARG:0, 1)
+	RETURN 1
+ENDIF
+RETURN -1
+;-------------------------------------------------
+;ARG:0勢力のARG:1部隊について、ARG:2番目の将のキャラ番号を返す関数
+;-------------------------------------------------
+@GET_UNIT_COMMANDER(ARG:0, ARG:1, ARG:2)
+#FUNCTION
+SIF !INRANGE_COUNTRY(ARG:0) || !INRANGE_UNIT(ARG:1) || !INRANGE_UNIT_COMMANDER(ARG:2)
+	RETURNF -1
+
+RETURNF ID_TO_CHARA((UNIT_COMMANDER:(ARG:0):(ARG:1) >> (16 * ARG:2)) & 0xFFFF)
+
+;-------------------------------------------------
+;ARG:0勢力のARG:1部隊の将全員のキャラ番号をRESULTにつっこんで返す関数
+;-------------------------------------------------
+@GET_UNIT_COMMANDER_ALL(ARG:0, ARG:1)
+FOR LOCAL, 0, MAX_UNIT_COMMANDER
+	RESULT:LOCAL = GET_UNIT_COMMANDER(ARG:0, ARG:1, LOCAL)
+NEXT
+RETURN RESULT:0, RESULT:1, RESULT:2
+
+;-------------------------------------------------
+;ARG:0勢力のARG:1部隊について、ARG:2番目の将をARG:3番のキャラに設定する関数
+;※ARG:4 …… 0=ARG:3をキャラ番号で設定  0以外=IDで設定
+;-------------------------------------------------
+@SET_UNIT_COMMANDER(ARG:0, ARG:1, ARG:2, ARG:3, ARG:4 = 0)
+SIF !INRANGE_COUNTRY(ARG:0) || !INRANGE_UNIT(ARG:1) || !INRANGE_UNIT_COMMANDER(ARG:2)
+	RETURN 0
+
+IF ARG:4 == 0
+	LOCAL:0 = GET_ID(ARG:3)
+ELSE
+	LOCAL:0 = ARG:3
+ENDIF
+UNIT_COMMANDER:(ARG:0):(ARG:1) &= ~(0xFFFF << (16 * ARG:2))
+IF LOCAL:0 <= 0
+	RETURN 1
+ENDIF
+UNIT_COMMANDER:(ARG:0):(ARG:1) |= (LOCAL:0 << (16 * ARG:2))
+RETURN 1
+
+;-------------------------------------------------
+;ARG:0勢力のARG:1部隊について、ARG:2番のキャラを空いてるとこに設定する関数
+;設定できたらその位置が、できなければ-1が戻る
+;※ARG:3 …… 0=ARG:2をキャラ番号で設定  0以外=IDで設定
+;-------------------------------------------------
+@SET_UNIT_COMMANDER_ANYWHERE(ARG:0, ARG:1, ARG:2, ARG:3 = 0)
+SIF !INRANGE_COUNTRY(ARG:0) || !INRANGE_UNIT(ARG:1)
+	RETURN 0
+FOR LOCAL, 0, 3
+	IF GET_UNIT_COMMANDER(ARG:0, ARG:1, LOCAL) == -1
+		CALL SET_UNIT_COMMANDER(ARG:0, ARG:1, LOCAL, ARG:2, ARG:3)
+		RETURN LOCAL
+	ENDIF
+NEXT
+RETURN -1
+
+;-------------------------------------------------
+;ARG:0勢力のARG:1部隊について、ARG:2番目の将をクリアし、それ以降の将を念のため詰める関数
+;-------------------------------------------------
+@CLEAR_UNIT_COMMANDER(ARG:0, ARG:1, ARG:2)
+#DIM REM_UNIT_COMMANDER
+SIF !INRANGE_COUNTRY(ARG:0) || !INRANGE_UNIT(ARG:1) || !INRANGE_UNIT_COMMANDER(ARG:2)
+	RETURN 0
+
+;クリア
+CALL SET_UNIT_COMMANDER(ARG:0, ARG:1, ARG:2, -1)
+SELECTCASE ARG:2
+	CASE MAX_UNIT_COMMANDER - 1
+		;もともと最後尾なので何もしなくてよし
+	CASEELSE
+		;現在の将を記憶
+		REM_UNIT_COMMANDER = UNIT_COMMANDER:(ARG:0):(ARG:1)
+		;いったん全部削除してから一人ずつ突っ込み直す
+		UNIT_COMMANDER:(ARG:0):(ARG:1) = 0
+		FOR LOCAL,0, MAX_UNIT_COMMANDER
+			IF LOCAL < ARG:2
+				UNIT_COMMANDER:(ARG:0):(ARG:1) |= (REM_UNIT_COMMANDER & 0xFFFF << 16 * LOCAL)
+			ELSEIF LOCAL > ARG:2
+				UNIT_COMMANDER:(ARG:0):(ARG:1) |= (REM_UNIT_COMMANDER & 0xFFFF << 16 * LOCAL) >> 16
+			ENDIF
+		NEXT
+ENDSELECT
+
+;-------------------------------------------------
+;ARG:0勢力のARG:1部隊について、ARG:2のキャラがいればクリアし、それ以降の将を念のため詰める関数
+;-------------------------------------------------
+@CLEAR_UNIT_COMMANDER_FIND(ARG:0, ARG:1, ARG:2)
+#DIM REM_UNIT_COMMANDER
+SIF !INRANGE_COUNTRY(ARG:0) || !INRANGE_UNIT(ARG:1)
+	RETURN 0
+FOR LOCAL, 0, CHARANUM
+	IF GET_UNIT_COMMANDER(ARG:0, ARG:1, LOCAL) == ARG:2
+		CALL CLEAR_UNIT_COMMANDER(ARG:0, ARG:1, LOCAL)
+		RETURN LOCAL
+	ENDIF
+NEXT
+RETURN -1
+
+;-------------------------------------------------
+;ARG:0勢力のARG:1部隊を指揮する将の名前(NAME)を返す関数 ARGS:2=複数の将がいる場合に間を区切る文字
+;-------------------------------------------------
+@GET_UNIT_COMMANDER_NAME(ARG:0, ARG:1, ARGS:2 = "・")
+#FUNCTIONS
+LOCALS:0 = 
+FOR LOCAL:0, 0, MAX_UNIT_COMMANDER
+	LOCAL:1 = GET_UNIT_COMMANDER(ARG:0, ARG:1, LOCAL:0)
+	IF LOCAL:1 >= 0
+		SIF LOCAL:0 >= 1
+			LOCALS:0 += @"%ARGS:2%"
+		LOCALS:0 += @"%SNAME(LOCAL:1)%"
+		IF CFLAG:(LOCAL:1):行動不能状態 == 行動不能_臨月
+			LOCALS:0 += "(臨)"
+		ELSEIF TALENT:(LOCAL:1):妊娠
+			LOCALS:0 += "(妊)"
+		ELSEIF CFLAG:(LOCAL:1):行動不能状態 == 行動不能_育児
+			LOCALS:0 += "(育)"
+		ENDIF
+	ENDIF
+NEXT
+RETURNF LOCALS:0
+
+;-------------------------------------------------
+;ARG:0勢力のARG:1部隊を指揮する将の名前(CALLNAME)を返す関数 ARGS:2=複数の将がいる場合に間を区切る文字
+;-------------------------------------------------
+@GET_UNIT_COMMANDER_CALLNAME(ARG:0, ARG:1, ARGS:2 = "・")
+#FUNCTIONS
+LOCALS:0 = 
+FOR LOCAL:0, 0, MAX_UNIT_COMMANDER
+	LOCAL:1 = GET_UNIT_COMMANDER(ARG:0, ARG:1, LOCAL:0)
+	IF LOCAL:1 >= 0
+		SIF LOCAL:0 >= 1
+			LOCALS:0 += @"%ARGS:2%"
+		LOCALS:0 += @"%ANAME(LOCAL:1)%"
+	ENDIF
+NEXT
+RETURNF LOCALS:0
+
+;-------------------------------------------------
+;ARG:0番の勢力のARG:1番部隊について、士官数を返す関数
+;-------------------------------------------------
+@GET_UNIT_COMMANDER_NUM(ARG:0, ARG:1)
+#FUNCTION
+VARSET LOCAL
+FOR LOCAL:0, 0, MAX_UNIT_COMMANDER
+	LOCAL:1 = GET_UNIT_COMMANDER(ARG:0, ARG:1, LOCAL:0)
+	SIF LOCAL:1 >= 0
+		LOCAL:2 ++
+NEXT
+RETURNF LOCAL:2
+
+
+;-------------------------------------------------
+;ARG:0勢力のARG:1部隊の情報をPRINTする関数
+;ARG:2が真なら??を表示
+;-------------------------------------------------
+@PRINT_UNIT_INFO(ARG:0, ARG:1, ARG:2 = 0, ARG:3 = 1)
+IF ARG:2
+	CALL COLOR_PRINT(@"?? %"????軍", 10, LEFT% ★:%"??", 4, LEFT% 兵:%"????", 6, LEFT%攻:%"????", 5, LEFT%防:%"????", 5, LEFT%知:%"????", 5, LEFT%", カラー_選択不可)
+	RETURN
+ENDIF
+LOCAL:1 = GET_COUNTRY_BOSS(ARG:0)
+LOCALS:1 = %SNAME(LOCAL:1)%
+LOCALS:2 = %GET_UNIT_COMMANDER_NAME(ARG:0, ARG:1, " ")%
+;あんまり長いなら半角に
+SIF STRLENS(LOCALS:2) >= 25
+	LOCALS:2 = %TOHALF(LOCALS:2)%
+SETCOLOR COUNTRY_COLOR:(ARG:0)
+;部隊能力の用意
+CALL GET_UNIT_COMMANDER_ALL(ARG:0, ARG:1)
+CALL SET_BATTLE_MIRROR_VAL(0, RESULT, RESULT:1, RESULT:2)
+PRINTFORM %LOCALS:1, MAX_CHARANAME_LENGTH / 2, LEFT%軍:
+IF ARG:3
+	SELECTCASE CHECK_COUNTRY_RELATION_F(CFLAG:MASTER:所属, ARG:0)
+		CASE 0
+			IF IS_COUNTRY(CFLAG:MASTER:所属)
+				SETCOLOR カラー_警告
+				PRINT 敵
+			ELSE
+				PRINT   
+			ENDIF
+		CASE 1
+			SETCOLOR カラー_停戦
+			PRINT 停
+		CASE 2
+			SETCOLOR カラー_連合
+			PRINT 連
+		CASE 3
+			SETCOLOR カラー_同盟
+			PRINT 同
+		CASE 4
+			SETCOLOR カラー_永久同盟
+			PRINT 永
+		CASE 5
+			SETCOLOR カラー_シアン
+			PRINT 自
+	ENDSELECT
+	SETCOLOR COUNTRY_COLOR:(ARG:0)
+	PRINT  
+ENDIF
+PRINTFORM  %LOCALS:2, 25, LEFT%
+PRINTFORM ★:{SUM_UNIT_STARS(ARG:0, ARG:1), 4, LEFT}
+PRINTFORM 兵:{UNIT_SOLDIER:(ARG:0):(ARG:1), 6, LEFT}
+PRINTFORM 攻:
+CALL PRINT_ALPHABET_RANK(ランク_部隊, ATTACK_LEVEL(0, 0))
+SETCOLOR COUNTRY_COLOR:(ARG:0)
+PRINTFORM   防:
+CALL PRINT_ALPHABET_RANK(ランク_部隊, DEFENSE_LEVEL(0, 0))
+SETCOLOR COUNTRY_COLOR:(ARG:0)
+PRINTFORM   知:
+CALL PRINT_ALPHABET_RANK(ランク_部隊, INTELLIGENCE_LEVEL(0, 0))
+SETCOLOR COUNTRY_COLOR:(ARG:0)
+PRINTFORM   妖:
+CALL PRINT_ALPHABET_RANK(ランク_部隊, MAGIC_LEVEL(0, 0))
+SETCOLOR COUNTRY_COLOR:(ARG:0)
+PRINTFORM   疲:
+PRINTFORM {UNIT_TIRED_COUNT:(ARG:0):(ARG:1), 2, LEFT}
+RESETCOLOR
+
+;-------------------------------------------------
+;都市ARG:0の情報をPRINTする関数
+;-------------------------------------------------
+@PRINT_CITY_INFO(ARG:0, ARG:1 = 1)
+LOCAL:1 = CITY_OWNER:(ARG:0)
+LOCAL:2 = GET_COUNTRY_BOSS(LOCAL:1)
+LOCALS:1 = %(LOCAL:2 != -1 ? SNAME(LOCAL:2) # "無所属")%
+LOCALS:2 = %GET_CITY_COMMANDER_NAME(ARG:0, " ")%
+;あんまり長いなら半角に
+SIF STRLENS(LOCALS:2) >= 25
+	LOCALS:2 = %TOHALF(LOCALS:2)%
+SETCOLOR COUNTRY_COLOR:(LOCAL:1)
+
+;部隊能力の用意
+CALL GET_CITY_COMMANDER_ALL(ARG:0)
+CALL SET_BATTLE_MIRROR_VAL(0, RESULT, RESULT:1)
+PRINTFORM %LOCALS:1, MAX_CHARANAME_LENGTH / 2, LEFT%軍:
+IF ARG:1
+	SELECTCASE CHECK_COUNTRY_RELATION_F(CFLAG:MASTER:所属, LOCAL:1)
+		CASE 0
+			IF IS_COUNTRY(CFLAG:MASTER:所属)
+				SETCOLOR カラー_警告
+				PRINT 敵
+			ELSE
+				PRINT   
+			ENDIF
+		CASE 1
+			SETCOLOR カラー_停戦
+			PRINT 停
+		CASE 2
+			SETCOLOR カラー_連合
+			PRINT 連
+		CASE 3
+			SETCOLOR カラー_同盟
+			PRINT 同
+		CASE 4
+			SETCOLOR カラー_永久同盟
+			PRINT 永
+		CASE 5
+			SETCOLOR カラー_シアン
+			PRINT 自
+	ENDSELECT
+	SETCOLOR COUNTRY_COLOR:(LOCAL:1)
+	PRINT  
+ENDIF
+PRINTFORM  %LOCALS:2, 25, LEFT%
+PRINTFORM ★:{SUM_CITY_STARS(ARG:0), 4, LEFT}
+PRINTFORM 兵:{CITY_SOLDIER:(ARG:0), 6, LEFT}
+PRINTFORM 攻:
+CALL PRINT_ALPHABET_RANK(ランク_部隊, ATTACK_LEVEL(0, ARG:0))
+SETCOLOR COUNTRY_COLOR:(LOCAL:1)
+PRINTFORM   防:
+CALL PRINT_ALPHABET_RANK(ランク_部隊, DEFENSE_LEVEL(0, ARG:0))
+SETCOLOR COUNTRY_COLOR:(LOCAL:1)
+PRINTFORM   知:
+CALL PRINT_ALPHABET_RANK(ランク_部隊, INTELLIGENCE_LEVEL(0, ARG:0))
+SETCOLOR COUNTRY_COLOR:(LOCAL:1)
+PRINTFORM   妖:
+CALL PRINT_ALPHABET_RANK(ランク_部隊, MAGIC_LEVEL(0, ARG:0))
+RESETCOLOR
+
+;-------------------------------------------------
+;ARG:0勢力のARG:1部隊の星の数を返す関数
+;-------------------------------------------------
+@SUM_UNIT_STARS(ARG:0, ARG:1)
+#FUNCTION
+LOCAL:2 = 0
+FOR LOCAL:0, 0, MAX_UNIT_COMMANDER
+	LOCAL:1 =GET_UNIT_COMMANDER(ARG:0, ARG:1, LOCAL:0)
+	SIF LOCAL:1 >= 0
+		LOCAL:2 += TMP_CHARA_STARS:(LOCAL:1)
+NEXT
+RETURNF LOCAL:2
+
+;-------------------------------------------------
+;都市ARG:0の星の数を返す関数
+;-------------------------------------------------
+@SUM_CITY_STARS(ARG:0)
+#FUNCTION
+LOCAL:2 = 0
+FOR LOCAL:0, 0, MAX_CITY_COMMANDER
+	LOCAL:1 = GET_CITY_COMMANDER(ARG:0, LOCAL:0)
+	SIF LOCAL:1 >= 0
+		LOCAL:2 += TMP_CHARA_STARS:(LOCAL:1)
+NEXT
+RETURNF LOCAL:2
+
+;-------------------------------------------------
+;都市ARG:0の防衛部隊を指揮する将の名前(NAME)を返す関数 ARGS:1=複数の将がいる場合に間を区切る文字
+;-------------------------------------------------
+@GET_CITY_COMMANDER_NAME(ARG:0, ARGS:1 = "・")
+#FUNCTIONS
+LOCALS:0 = 
+FOR LOCAL:0, 0, MAX_CITY_COMMANDER
+	LOCAL:1 = GET_CITY_COMMANDER(ARG:0, LOCAL:0)
+	IF LOCAL:1 >= 0
+		SIF LOCAL:0 >= 1
+			LOCALS:0 += @"%ARGS:1%"
+		LOCALS:0 += @"%SNAME(LOCAL:1)%"
+		IF CFLAG:(LOCAL:1):行動不能状態 == 行動不能_臨月
+			LOCALS:0 += "(臨)"
+		ELSEIF TALENT:(LOCAL:1):妊娠
+			LOCALS:0 += "(妊)"
+		ELSEIF CFLAG:(LOCAL:1):行動不能状態 == 行動不能_育児
+			LOCALS:0 += "(育)"
+		ENDIF
+	ENDIF
+NEXT
+RETURNF LOCALS:0
+
+;-------------------------------------------------
+;都市ARG:0の防衛部隊を指揮する将の名前(CALLNAME)を返す関数 ARGS:1=複数の将がいる場合に間を区切る文字
+;-------------------------------------------------
+@GET_CITY_COMMANDER_CALLNAME(ARG:0, ARGS:1 = "・")
+#FUNCTIONS
+LOCALS:0 = 
+FOR LOCAL:0, 0, MAX_CITY_COMMANDER
+	LOCAL:1 = GET_CITY_COMMANDER(ARG:0, LOCAL:0)
+	IF LOCAL:1 >= 0
+		SIF LOCAL:0 >= 1
+			LOCALS:0 += @"%ARGS:1%"
+		LOCALS:0 += @"%ANAME(LOCAL:1)%"
+	ENDIF
+NEXT
+RETURNF LOCALS:0
+
+;-------------------------------------------------
+;都市ARG:0の経済値をARG:1だけ操作する　変数に格納されている生の値（表示値の100倍）を渡すこと
+;-------------------------------------------------
+@MODIFY_CITY_ECONOMY(ARG:0, ARG:1, ARG:2 = 1)
+
+IF CITY_ECONOMY:(ARG:0) + ARG:1 > CITY_ECONOMY_LIMIT:(ARG:0)
+	CITY_ECONOMY_LIMIT:(ARG:0) += (CITY_ECONOMY:(ARG:0) + ARG:1 - CITY_ECONOMY_LIMIT:(ARG:0)) / 2
+	CITY_ECONOMY:(ARG:0) = CITY_ECONOMY_LIMIT:(ARG:0)
+ELSE
+	CITY_ECONOMY:(ARG:0) = MAX(CITY_ECONOMY:(ARG:0) + ARG:1, 1)
+ENDIF
+
+IF ARG:2
+	IF ARG:1 > 0
+		CALL COLOR_PRINTL(@"%CITY_NAME:(ARG:0)%の経済規模が{ARG:1 / 100}上昇し、{CITY_ECONOMY:(ARG:0) / 100}になった", カラー_注意)
+	ELSE
+		CALL COLOR_PRINTL(@"%CITY_NAME:(ARG:0)%の経済規模が{ARG:1 * -1 / 100}減少し、{CITY_ECONOMY:(ARG:0) / 100}になった", カラー_警告)
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;空いている勢力番号の中で最も若い番号を返す関数
+;-------------------------------------------------
+@GET_NEW_COUNTRY
+#FUNCTION
+FOR LOCAL:0, 1, MAX_COUNTRY
+	SIF !IS_COUNTRY(LOCAL:0)
+		RETURNF LOCAL:0
+NEXT
+RETURNF -1
+
+;-------------------------------------------------
+;IDがARG:0の人物を君主とする勢力の番号を返す関数
+;-------------------------------------------------
+@GET_COUNTRY_FROM_BOSS_ID(ARG:0)
+#FUNCTION
+IF ARG:0 >= 1
+	FOR LOCAL:0, 1, MAX_COUNTRY
+		SIF COUNTRY_BOSS:(LOCAL:0) == ARG:0
+			RETURNF LOCAL:0
+	NEXT
+ENDIF
+RETURNF -1
+
+;-------------------------------------------------
+;NAMEがARGS:0の人物を君主とする勢力の番号を返す関数
+;-------------------------------------------------
+@GET_COUNTRY_FROM_BOSS_NAME(ARGS:0)
+#FUNCTION
+FOR LOCAL:0, 1, MAX_COUNTRY
+	IF COUNTRY_BOSS:(LOCAL:0) >= 1
+		LOCAL:1 = ID_TO_CHARA(COUNTRY_BOSS:(LOCAL:0))
+		SIF LOCAL:1 >= 0 && CSTR:(LOCAL:1):99 == ARGS:0
+			RETURNF LOCAL:0
+	ENDIF
+NEXT
+RETURNF -1
+
+;-------------------------------------------------
+;COUNTRY_EVENT_ID が ARG:0 の値を持つ勢力の番号を返す関数
+;-------------------------------------------------
+@GET_COUNTRY_FROM_ID(ARG:0)
+#FUNCTION
+IF ARG:0 != 0
+	FOR LOCAL:0, 1, MAX_COUNTRY
+		SIF COUNTRY_EVENT_ID:(LOCAL:0) == ARG:0
+			RETURNF LOCAL:0
+	NEXT
+ENDIF
+RETURNF -1
+
+;-------------------------------------------------
+;渡された勢力にAIタイプを設定する
+;-------------------------------------------------
+@SET_COUNTRY_AI_TYPE(勢力)
+#DIM 勢力
+#DIM 君主
+#DIM 能力, 4
+#DIM ソート, 4
+君主 = GET_COUNTRY_BOSS(勢力)
+
+能力:0 = ABL:君主:武闘
+能力:1 = ABL:君主:防衛
+能力:2 = ABL:君主:知略
+能力:3 = ABL:君主:政治
+
+
+;最高値を求めるだけならFINDELEMENT(MAXARRAY)で十分なんだが
+ARRAYCOPY "能力", "ソート"
+ARRAYSORT ソート, BACK
+
+;知略政治が両方60以上でワンツーフィニッシュしてるなら外交か内政
+IF GROUPMATCH(ソート:0, ABL:君主:知略, ABL:君主:政治) && GROUPMATCH(ソート:1, ABL:君主:知略, ABL:君主:政治) && ソート:1 > 60
+	IF ABL:君主:知略 > ABL:君主:政治
+		COUNTRY_AI_TYPE:勢力 = AI_外交
+	ELSE
+		COUNTRY_AI_TYPE:勢力 = AI_内政
+	ENDIF
+ELSEIF ソート:0 == ABL:君主:武闘 && ABL:君主:武闘 > ABL:君主:知略 + 30
+	COUNTRY_AI_TYPE:勢力 = AI_蛮行
+;1位と2位のあいだの差が小さければ通常
+ELSEIF ソート:0 < ソート:1 + 5
+	COUNTRY_AI_TYPE:勢力 = AI_通常
+;武闘が一番高い場合は好戦。ただし防衛が2位のとき、10以上差が無ければ防衛になる
+ELSEIF ソート:0 == ABL:君主:武闘
+	IF ソート:1 == ABL:君主:防衛 && ソート:0 < ソート:1 + 10
+		COUNTRY_AI_TYPE:勢力 = AI_防衛
+	ELSE
+		COUNTRY_AI_TYPE:勢力 = AI_好戦
+	ENDIF
+;あとは最大能力を参照
+ELSEIF ソート:0 == ABL:君主:防衛
+	COUNTRY_AI_TYPE:勢力 = AI_防衛
+ELSEIF ソート:0 == ABL:君主:知略
+	COUNTRY_AI_TYPE:勢力 = AI_外交
+ELSEIF ソート:0 == ABL:君主:政治
+	COUNTRY_AI_TYPE:勢力 = AI_内政
+ELSE 
+	COUNTRY_AI_TYPE:勢力 = AI_通常
+ENDIF
+
+;-------------------------------------------------
+;渡されたAIタイプを文字列にする
+;-------------------------------------------------
+@TOSTR_AI_TYPE(ARG:0)
+#FUNCTIONS
+SELECTCASE ARG:0
+	CASE AI_通常
+		RETURNF "通常"
+	CASE AI_好戦
+		RETURNF "好戦"
+	CASE AI_防衛
+		RETURNF "防衛"
+	CASE AI_外交
+		RETURNF "外交"
+	CASE AI_内政
+		RETURNF "内政"
+	CASE AI_蛮行
+		RETURNF "蛮行"
+	CASEELSE
+		RETURNF "不明"
+ENDSELECT
+
+RETURNF "通常"
+
+;-------------------------------------------------
+;ARG:0番の勢力の政策を文字列として返す関数
+;-------------------------------------------------
+@TOSTR_POLICY(ARG:0)
+#FUNCTIONS
+SIF !INRANGE_COUNTRY(ARG:0)
+	CALLF ERROR(@"{ARG:0}は勢力としてあり得る範囲を超えています")
+SELECTCASE COUNTRY_POLICY:(ARG:0)
+	CASE 政策_経済
+		RETURNF "経済(経済成長×1.5)"
+	CASE 政策_徴兵
+		RETURNF "徴兵(徴兵効率×1.2)"
+	CASE 政策_防衛
+		RETURNF "防衛(防衛倍率×1.2)"
+ENDSELECT
+RETURNF ""
+
+;-------------------------------------------------
+;ARG:0番のキャラが将としての仕事を行える状態なら1を、そうでないなら0を返す関数
+;条件:捕虜でない、臨月・育児中でない、部隊・都市いずれの将にも設定されていない
+;こちらに条件を追加した場合は、TMP_CREATE_IS_FREE_MAPにも追加すること
+;-------------------------------------------------
+@IS_FREE(ARG:0)
+#FUNCTION
+
+SIF COOLTIME:(ARG:0):0
+	RETURNF 0
+
+;CFLAGのチェック
+SIF CFLAG:(ARG:0):捕虜先 || CFLAG:(ARG:0):特殊状態 ||  CFLAG:(ARG:0):行動不能状態 == 行動不能_子供
+	RETURNF 0
+
+;Kの追加要素に合わせて条件を増やす
+;素質チェック
+SIF TALENT:(ARG:0):触手妊娠 || TALENT:(ARG:0):Ａ触手妊娠 || TALENT:(ARG:0):Ｕ触手妊娠 || IS_ANIMAL(ARG:0)
+	RETURNF 0
+
+LOCAL:2 = CFLAG:(ARG:0):所属
+FOR LOCAL:0, 0, MAX_CITY
+	IF CITY_OWNER:(LOCAL:0) == LOCAL:2
+		FOR LOCAL:1, 0, 2
+			SIF GET_CITY_COMMANDER(LOCAL:0, LOCAL:1) == ARG:0
+				RETURNF 0
+		NEXT
+	ENDIF
+NEXT
+FOR LOCAL:0, 0, 10
+	IF UNIT_SOLDIER:(LOCAL:2):(LOCAL:0) > 0
+		FOR LOCAL:1, 0, 3
+			SIF GET_UNIT_COMMANDER(LOCAL:2, LOCAL:0, LOCAL:1) == ARG:0
+				RETURNF 0
+		NEXT
+	ENDIF
+NEXT
+RETURNF 1
+
+;-------------------------------------------------
+;ARG:0番のキャラが部隊に入っている場合、強制的に隊から外す関数
+;解除を行った場合1が返る
+;-------------------------------------------------
+@FORCE_FREE(ARG:0)
+SIF CFLAG:(ARG:0):所属 == 0
+	RETURN 0
+
+;防衛部隊について判定
+FOR LOCAL:0, 0, MAX_CITY
+	IF CITY_COMMANDER:(LOCAL:0) != 0
+		FOR LOCAL:1, 0, MAX_CITY_COMMANDER
+			IF GET_CITY_COMMANDER(LOCAL:0, LOCAL:1) == ARG:0
+				CALL CLEAR_CITY_COMMANDER(LOCAL:0, LOCAL:1)
+				GOTO SUCCESS
+			ENDIF
+		NEXT
+	ENDIF
+NEXT
+
+;遊撃部隊について判定
+FOR LOCAL:0, 0, MAX_COUNTRY
+	IF IS_COUNTRY(LOCAL:0)
+		FOR LOCAL:1, 0, 10
+			IF UNIT_COMMANDER:(LOCAL:0):(LOCAL:1) != 0
+				FOR LOCAL:2, 0, 3
+					IF GET_UNIT_COMMANDER(LOCAL:0, LOCAL:1, LOCAL:2) == ARG:0
+						CALL CLEAR_UNIT_COMMANDER(LOCAL:0, LOCAL:1, LOCAL:2)
+						GOTO SUCCESS
+					ENDIF
+				NEXT
+			ENDIF
+		NEXT
+	ENDIF
+NEXT
+RETURN 0
+$SUCCESS
+RETURN 1
+
+;-------------------------------------------------
+;都市間を移動するルートがあるかどうかを判定する関数(引数は都市番号)
+;戻り値 0=なし 1=あり 2=あり(中継地点を経由)
+;-------------------------------------------------
+@IS_ROUTE(ARG:0, ARG:1)
+#FUNCTION
+IF ARG:0 == ARG:1 || !INRANGE(ARG:0 , 1 , MAX_CITY) || !INRANGE(ARG:1 , 1 , MAX_CITY)
+	RETURNF 0
+ENDIF
+
+;直通ルートの探索
+FOR LOCAL:0, 0, 10
+	SIF CITY_ROUTE:(ARG:0):(LOCAL:0) == ARG:1
+		RETURNF 1
+NEXT
+
+SIF GET_RELAYPOINT(ARG:0, ARG:1) >= 0
+	RETURNF 2
+
+RETURNF 0
+
+;-------------------------------------------------
+;都市間を繋ぐ中継地点があれば、その番号を返す関数(引数は都市番号)
+;中継地点がない場合-1を返す
+;-------------------------------------------------
+@GET_RELAYPOINT(ARG:0, ARG:1)
+#FUNCTION
+IF ARG:0 == ARG:1 || !INRANGE(ARG:0 , 1 , MAX_CITY) || !INRANGE(ARG:1 , 1 , MAX_CITY)
+	RETURNF -1
+ENDIF
+
+;共通する中継地点を探索する
+FOR LOCAL:0, 0, 10
+	IF CITY_TYPE:(CITY_ROUTE:(ARG:0):(LOCAL:0)) == 1
+		FOR LOCAL:1, 0, 10
+			SIF CITY_ROUTE:(ARG:1):(LOCAL:1) == CITY_ROUTE:(ARG:0):(LOCAL:0)
+				RETURNF CITY_ROUTE:(ARG:0):(LOCAL:0)
+		NEXT
+	ENDIF
+NEXT
+
+RETURNF -1
+
+
+;--------------------------------------------------------
+;ARG:0番の都市のリスクをチェック
+; 6 現在敵部隊が存在する
+; 5 隣接する中継地に敵部隊を確認
+; 4 隣国が敵対（中継地なし）
+; 3 その他
+; 2 隣国は停戦ないし同盟中だが、隣国と同盟している国が殴ってくる可能性がある
+; 1 隣国は停戦ないし同盟中だが、隣国と同盟している国が殴ってくる可能性がない
+; 0 安全
+; 
+; TODO:隣国が停戦以上の関係であるが、その同盟国が攻め込んでくる関係
+;--------------------------------------------------------
+@GET_CITY_RISK(ARG:0)
+#FUNCTION
+#DIM RET
+#DIM OWNER1
+#DIM OWNER2
+RET = 0
+
+SIF !INRANGE(ARG:0 , 1 , MAX_CITY)
+	RETURNF 0
+
+OWNER1 = CITY_OWNER:(ARG:0)
+
+;敵部隊がいるなら問答無用でリスク6
+SIF IS_STAY_ENEMY_UNIT(ARG:0, OWNER1, 1) == 1
+	RETURNF 6
+
+RET = 0
+
+; 隣接都市を走査
+FOR LOCAL:0, 0, 10
+	LOCAL:5 = CITY_ROUTE:(ARG:0):(LOCAL:0)
+
+	SIF LOCAL:5 == -1
+		BREAK
+
+	; 敵部隊がいれば危険度5
+	IF IS_STAY_ENEMY_UNIT(LOCAL:5, OWNER1, 1) == 1
+		RETURNF 5
+	ENDIF
+
+	IF CITY_TYPE:(LOCAL:5) == 0
+	; 都市の場合
+		OWNER2 = CITY_OWNER:(LOCAL:5)
+		SELECTCASE TMP_COUNTRY_RELATION:OWNER1:OWNER2
+			;隣接する都市が敵国所有である
+			CASE 0
+				SIF  IS_COUNTRY(OWNER2)
+					RETURNF 4
+			;隣接する都市が敵国所有でも自国所有でもない
+			CASE IS != 5
+				FOR LOCAL:1, 0, MAX_COUNTRY
+					;隣接都市の所有国と同盟していて、かつ自国と同盟していない国があるなら、殴ってきうるので危険度２とする
+					SIF IS_COUNTRY(LOCAL:1) && !GROUPMATCH(LOCAL:1, OWNER1, OWNER2) && GROUPMATCH(TMP_COUNTRY_RELATION:OWNER2:(LOCAL:1), 3, 4)　&& TMP_COUNTRY_RELATION:OWNER1:(LOCAL:1) == 0
+						RETURNF 2
+				NEXT
+				;(ほぼありえないが)もしなければ、危険度１とする
+				RETURNF 1
+		ENDSELECT
+	ELSE
+	; 中継地の場合
+		; そうでなければ隣の都市をチェック
+		FOR LOCAL:1, 0, 10
+			LOCAL:6 = CITY_ROUTE:(LOCAL:5):(LOCAL:1)
+
+			SIF LOCAL:6 == -1
+				BREAK
+
+			OWNER2 = CITY_OWNER:(LOCAL:6)
+
+			; 都市の場合
+			IF CITY_TYPE:(LOCAL:6) == 0
+				; 敵なら危険度3以上
+				SIF TMP_COUNTRY_RELATION:OWNER1:OWNER2 == 0 && IS_COUNTRY(OWNER2)
+					RET = MAX(RET, 3)
+				;自国なら0
+				SIF TMP_COUNTRY_RELATION:OWNER1:OWNER2 == 5
+					RET = MAX(RET, 0)
+				;その都市の所有国と同盟していて、かつ自国と同盟していない国があるなら、殴ってきうるので危険度1とする
+				SIF IS_COUNTRY(LOCAL:1) && !GROUPMATCH(LOCAL:1, OWNER1, OWNER2) && GROUPMATCH(TMP_COUNTRY_RELATION:OWNER2:(LOCAL:1), 3, 4)　&& TMP_COUNTRY_RELATION:OWNER1:(LOCAL:1) == 0
+					RET = MAX(RET, 1)
+			ENDIF
+		NEXT
+	ENDIF
+NEXT
+
+RETURNF RET
+
+;--------------------------------------------------------
+;ARG:0番の都市がARG:1の国から侵略できるかチェック
+;--------------------------------------------------------
+@IS_INVADABLE(ARG:0, ARG:1)
+#FUNCTION
+SIF !INRANGE(ARG:0 , 1 , MAX_CITY)
+	RETURNF 0
+
+; 支配国と敵対してないとだめ
+SIF !(CITY_OWNER:(ARG:0) == 0 || CHECK_COUNTRY_RELATION_F(CITY_OWNER:(ARG:0),   ARG:1) <= 0)
+	RETURNF 0
+
+; 隣接都市を走査
+FOR LOCAL:0, 0, 10
+	LOCAL:5 = CITY_ROUTE:(ARG:0):(LOCAL:0)
+
+	SIF LOCAL:5 == 0
+		BREAK
+
+	IF CITY_TYPE:(LOCAL:5) == 0
+	; 都市の場合は通行可能であれば1
+		SIF IS_PASSABLE(LOCAL:5, ARG:1)
+			RETURNF 1
+	ELSE
+	; 中継地ならもう1段掘り下げ
+		FOR LOCAL:1, 0, 10
+			LOCAL:6 = CITY_ROUTE:(LOCAL:5):(LOCAL:1)
+
+			SIF LOCAL:6 == -1
+				BREAK
+
+			; 都市かつ通行可能であれば1
+			SIF CITY_TYPE:(LOCAL:6) == 0 && IS_PASSABLE(LOCAL:6, ARG:1)
+				RETURNF 1
+		NEXT
+	ENDIF
+NEXT
+
+RETURNF 0
+
+;--------------------------------------------------------
+;ARG:1の国がARG:0番の都市を通行可能かチェック
+;--------------------------------------------------------
+@IS_PASSABLE(ARG:0, ARG:1)
+#FUNCTION
+
+; 中継地でなく、支配国との関係が2以上
+IF CITY_TYPE:(ARG:0) == 0 && CHECK_COUNTRY_RELATION_F(CITY_OWNER:(ARG:0), ARG:1) >= 2
+	RETURNF 1
+ENDIF
+
+RETURNF 0
+
+;-------------------------------------------------
+;ARG:0番の都市が他国と隣接しているかどうかを判定する関数
+;-------------------------------------------------
+@IS_NEIBORING_ENEMY(ARG:0)
+#FUNCTION
+SIF !INRANGE(ARG:0 , 1 , MAX_CITY)
+	RETURNF 0
+
+FOR LOCAL:0, 0, MAX_CITY
+	SIF CITY_TYPE:(LOCAL:0) == 0 && IS_ROUTE(ARG:0, LOCAL:0) && CITY_OWNER:(ARG:0) != CITY_OWNER:(LOCAL:0)
+		RETURNF 1
+NEXT
+RETURNF 0
+
+;-------------------------------------------------
+;ARG:0番の都市に存在する部隊を取得する関数(最大5勢力まで)
+;戻り値 0～4:勢力番号
+;-------------------------------------------------
+@GET_STAY_UNIT(ARG:0)
+SIF !INRANGE(ARG:0 , 1 , MAX_CITY)
+	RETURN -1
+
+VARSET LOCAL, -1, 10, 15
+LOCAL:2 = 10
+FOR LOCAL:0, 0, MAX_COUNTRY
+	IF IS_COUNTRY(LOCAL:0)
+		FOR LOCAL:1, 0, 10
+			IF UNIT_SOLDIER:(LOCAL:0):(LOCAL:1) > 0 && UNIT_POSITION:(LOCAL:0):(LOCAL:1) == ARG:0
+				LOCAL:(LOCAL:2) = LOCAL:0
+				LOCAL:2 ++
+				BREAK
+			ENDIF
+		NEXT
+	ENDIF
+NEXT
+RETURN LOCAL:10, LOCAL:11, LOCAL:12, LOCAL:13, LOCAL:14
+
+
+;-------------------------------------------------
+;ARG:0番の都市に存在する他勢力部隊を取得する関数(最大5勢力まで)
+;戻り値 0～4:勢力番号
+;-------------------------------------------------
+@GET_STAY_ENEMY_UNIT(ARG:0)
+SIF !INRANGE(ARG:0 , 1 , MAX_CITY)
+	RETURN -1
+
+VARSET LOCAL, -1, 10, 15
+LOCAL:2 = 10
+FOR LOCAL:0, 0, MAX_COUNTRY
+	IF IS_COUNTRY(LOCAL:0) && LOCAL:0 != CITY_OWNER:(ARG:0) && (!IS_COUNTRY(CITY_OWNER:(ARG:0)) || CHECK_COUNTRY_RELATION_F(CITY_OWNER:(ARG:0), LOCAL:0) == 0)
+		FOR LOCAL:1, 0, 10
+			IF UNIT_SOLDIER:(LOCAL:0):(LOCAL:1) > 0 && UNIT_POSITION:(LOCAL:0):(LOCAL:1) == ARG:0
+				LOCAL:(LOCAL:2) = LOCAL:0
+				LOCAL:2 ++
+				BREAK
+			ENDIF
+		NEXT
+	ENDIF
+NEXT
+RETURN LOCAL:10, LOCAL:11, LOCAL:12, LOCAL:13, LOCAL:14
+
+;-------------------------------------------------
+;ARG:0番の都市に部隊が存在するかどうかだけを単純に返す関数
+;野盗がいる場合は２を返す
+;-------------------------------------------------
+@IS_STAY_UNIT(ARG:0)
+#FUNCTION
+SIF !INRANGE(ARG:0 , 1 , MAX_CITY)
+	RETURNF 0
+
+LOCAL:2 = 0
+FOR LOCAL:0, 0, MAX_COUNTRY
+	IF IS_COUNTRY(LOCAL:0)
+		FOR LOCAL:1, 0, 10
+			IF UNIT_SOLDIER:(LOCAL:0):(LOCAL:1) > 0 && UNIT_POSITION:(LOCAL:0):(LOCAL:1) == ARG:0
+				IF LOCAL:0 == GET_COUNTRY_FROM_ID(SP_COUNTRY_ID:(特殊勢力_野盗))
+					LOCAL:2 = 2
+					BREAK
+				ELSE
+					LOCAL:2 = 1
+				ENDIF
+			ENDIF
+		NEXT
+	ENDIF
+NEXT
+RETURNF LOCAL:2
+
+;------------------------------------------------------------
+;ARG:0番の都市に敵対部隊が存在するかどうかを返す関数
+;敵対国がいれば1 → 期限付き同盟以下がいれば2 → それ以外で0
+;ARG:2=1 で都市を持たない野盗は無視する
+;高速化テーブル使用
+;------------------------------------------------------------
+@IS_STAY_ENEMY_UNIT(ARG:0, ARG:1 = 0, ARG:2 = 0)
+#FUNCTION
+#DIM RET
+RET = 0
+LOCAL:20 = GET_COUNTRY_FROM_ID(SP_COUNTRY_ID:(特殊勢力_野盗))
+
+SIF ARG:1 == 0
+	ARG:1 = CFLAG:MASTER:所属
+
+SIF !INRANGE(ARG:0 , 1 , MAX_CITY)
+	RETURNF 0
+
+FOR LOCAL, 0, 20
+	LOCAL:10 = TMP_UNIT_ONCITY_CNT:(ARG:0):(LOCAL:0)
+	SIF LOCAL:10 == 0
+		RETURNF 0
+
+	SIF GET_OWN_CITY(LOCAL:20) <= 0 && LOCAL:10 == LOCAL:20 && ARG:2
+		CONTINUE
+
+	SIF TMP_COUNTRY_RELATION:(ARG:1):(LOCAL:10) == 0
+		RETURNF 1
+
+	SIF TMP_COUNTRY_RELATION:(ARG:1):(LOCAL:10) < 4
+		RET = 2
+NEXT
+
+RETURNF RET
+
+;-------------------------------------------------
+;ARG:0番の都市に自軍の部隊が存在するかどうかだけを単純に返す関数
+;-------------------------------------------------
+@IS_STAY_MYUNIT(ARG:0)
+#FUNCTION
+SIF !INRANGE(ARG:0 , 1 , MAX_CITY)
+	RETURNF 0
+
+FOR LOCAL:0, 0, MAX_COUNTRY
+	IF IS_COUNTRY(LOCAL:0) && CFLAG:MASTER:所属 == LOCAL:0
+		FOR LOCAL:1, 0, 10
+			IF UNIT_SOLDIER:(LOCAL:0):(LOCAL:1) > 0 && UNIT_POSITION:(LOCAL:0):(LOCAL:1) == ARG:0
+				RETURNF 1
+			ENDIF
+		NEXT
+	ENDIF
+NEXT
+RETURNF 0
+
+
+;-------------------------------------------------
+;ARG:0番の都市がARG:1番の勢力と隣接しているかどうかを判定する関数
+;隣接しているなら都市番号を、隣接していなければ 「-1」 を返す
+;-------------------------------------------------
+@IS_NEIGHBORING_COUNTRY(ARG:0, ARG:1)
+#FUNCTION
+SIF !INRANGE(ARG:0, 1, MAX_CITY) || !INRANGE(ARG:1, 1, MAX_COUNTRY) || !IS_COUNTRY(ARG:1)
+	RETURNF -1
+
+FOR LOCAL:0, 0, MAX_CITY
+	SIF IS_ROUTE(ARG:0, LOCAL:0) && CITY_OWNER:(LOCAL:0) == ARG:1
+		RETURNF LOCAL:0
+NEXT
+RETURNF -1
+
+;-------------------------------------------------
+;ARG:0番の勢力とARG:1番の勢力の関係を返す関数（式中タイプ）
+;RESULT:0 …… 敵対=0 停戦=1 連合=2 期限付き同盟=3 永久同盟=4 自国=5
+;RESULT:1 …… 最も優先度の高い関係の残り期間
+;-------------------------------------------------
+@CHECK_COUNTRY_RELATION_F(ARG:0, ARG:1)
+#FUNCTION
+SIF GROUPMATCH(0, ARG:0, ARG:1)
+	RETURNF 0
+
+SIF ARG:0 == ARG:1
+	RETURNF 5
+
+;同盟の判定
+FOR LOCAL:0, 0, MAX_TREATY_A
+
+	SIF TREATY_A_TERM:(LOCAL:0) <= 0
+		CONTINUE
+
+	LOCAL:2 = 0
+	LOCAL:3 = 0
+	FOR LOCAL:1, 0, MAX_TREATY_COUNTRY
+		SIF TREATY_A_COUNTRY:(LOCAL:0):(LOCAL:1) == ARG:0
+			LOCAL:2 = 1
+		SIF TREATY_A_COUNTRY:(LOCAL:0):(LOCAL:1) == ARG:1
+			LOCAL:3 = 1
+	NEXT
+	IF LOCAL:2 && LOCAL:3
+		SIF TREATY_A_TERM:(LOCAL:0) == 9999
+			RETURNF 4
+		RETURNF 3
+	ENDIF
+NEXT
+
+;連合の判定
+FOR LOCAL:0, 0, MAX_TREATY_U
+	SIF TREATY_U_TERM:(LOCAL:0) <= 0
+		CONTINUE
+
+	LOCAL:2 = 0
+	LOCAL:3 = 0
+	FOR LOCAL:1, 0, MAX_TREATY_COUNTRY
+		SIF TREATY_U_COUNTRY:(LOCAL:0):(LOCAL:1) == ARG:0
+			LOCAL:2 = 1
+		SIF TREATY_U_COUNTRY:(LOCAL:0):(LOCAL:1) == ARG:1
+			LOCAL:3 = 1
+	NEXT
+	SIF LOCAL:2 && LOCAL:3
+		RETURNF 2
+NEXT
+
+;停戦の判定
+FOR LOCAL:0, 0, MAX_TREATY_C
+	SIF TREATY_C_TERM:(LOCAL:0) <= 0
+		CONTINUE
+
+	LOCAL:2 = 0
+	LOCAL:3 = 0
+	FOR LOCAL:1, 0, MAX_TREATY_COUNTRY
+		SIF TREATY_C_COUNTRY:(LOCAL:0):(LOCAL:1) == ARG:0
+			LOCAL:2 = 1
+		SIF TREATY_C_COUNTRY:(LOCAL:0):(LOCAL:1) == ARG:1
+			LOCAL:3 = 1
+	NEXT
+	SIF LOCAL:2 && LOCAL:3
+		RETURNF 1
+NEXT
+
+RETURNF 0
+
+;-------------------------------------------------
+;ARG:0番の勢力とARG:1番の勢力の関係を返す関数
+;RESULT:0 …… 敵対=0 停戦=1 連合=2 期限付き同盟=3 永久同盟=4 自国=5
+;RESULT:1 …… 最も優先度の高い関係の残り期間
+;-------------------------------------------------
+@CHECK_COUNTRY_RELATION(ARG:0, ARG:1)
+RESULT:1 = 0
+
+SIF GROUPMATCH(0, ARG:0, ARG:1)
+	RETURN 0
+
+SIF ARG:0 == ARG:1
+	RETURN 5
+
+;同盟の判定
+FOR LOCAL:0, 0, MAX_TREATY_A
+	SIF TREATY_A_TERM:(LOCAL:0) <= 0
+		CONTINUE
+
+	LOCAL:2 = 0
+	LOCAL:3 = 0
+	FOR LOCAL:1, 0, MAX_TREATY_COUNTRY
+		SIF TREATY_A_COUNTRY:(LOCAL:0):(LOCAL:1) == ARG:0
+			LOCAL:2 = 1
+		SIF TREATY_A_COUNTRY:(LOCAL:0):(LOCAL:1) == ARG:1
+			LOCAL:3 = 1
+	NEXT
+	IF LOCAL:2 && LOCAL:3
+		RESULT:1 = TREATY_A_TERM:(LOCAL:0)
+		IF TREATY_A_TERM:(LOCAL:0) == 9999
+			RETURN 4
+		ENDIF
+		RETURN 3
+	ENDIF
+NEXT
+
+;連合の判定
+FOR LOCAL:0, 0, MAX_TREATY_U
+	SIF TREATY_U_TERM:(LOCAL:0) <= 0
+		CONTINUE
+
+	LOCAL:2 = 0
+	LOCAL:3 = 0
+	FOR LOCAL:1, 0, MAX_TREATY_COUNTRY
+		SIF TREATY_U_COUNTRY:(LOCAL:0):(LOCAL:1) == ARG:0
+			LOCAL:2 = 1
+		SIF TREATY_U_COUNTRY:(LOCAL:0):(LOCAL:1) == ARG:1
+			LOCAL:3 = 1
+	NEXT
+	IF LOCAL:2 && LOCAL:3
+		RESULT:1 = TREATY_U_TERM:(LOCAL:0)
+		RETURN 2
+	ENDIF
+NEXT
+
+;停戦の判定
+FOR LOCAL:0, 0, MAX_TREATY_C
+	SIF TREATY_C_TERM:(LOCAL:0) <= 0
+		CONTINUE
+
+	LOCAL:2 = 0
+	LOCAL:3 = 0
+	FOR LOCAL:1, 0, MAX_TREATY_COUNTRY
+		SIF TREATY_C_COUNTRY:(LOCAL:0):(LOCAL:1) == ARG:0
+			LOCAL:2 = 1
+		SIF TREATY_C_COUNTRY:(LOCAL:0):(LOCAL:1) == ARG:1
+			LOCAL:3 = 1
+	NEXT
+	IF LOCAL:2 && LOCAL:3
+		RESULT:1 = TREATY_C_TERM:(LOCAL:0)
+		RETURN 1
+	ENDIF
+NEXT
+
+RETURN 0
+
+;-------------------------------------------------
+;ARG:0番の勢力について、所属する連合の討伐対象勢力を返す関数
+;連合に参加していないなら-1を返す
+;-------------------------------------------------
+@GET_UNION_TARGET(ARG:0)
+#FUNCTION
+FOR LOCAL:0, 0, MAX_TREATY_U
+	FOR LOCAL:1, 0, MAX_TREATY_COUNTRY
+		SIF TREATY_U_COUNTRY:(LOCAL:0):(LOCAL:1) == ARG:0
+			RETURNF TREATY_U_TARGET:(LOCAL:0)
+	NEXT
+NEXT
+RETURNF -1
+
+;-------------------------------------------------
+;CSTR:99がARGS:0のキャラからCSTR:99がARGS:1のキャラに対する好感度をARG:2、敵対値をARG:3に設定する関数
+;-------------------------------------------------
+@INIT_RELATION(ARGS:0, ARGS:1, ARG:2, ARG:3)
+LOCAL:2 = -1
+LOCAL:3 = -1
+FOR LOCAL:0, 0, CHARANUM
+	IF CSTR:(LOCAL:0):99 == ARGS:0
+		LOCAL:2 = LOCAL:0
+		BREAK
+	ENDIF
+NEXT
+FOR LOCAL:0, 0, CHARANUM
+	IF CSTR:(LOCAL:0):99 == ARGS:1
+		LOCAL:3 = LOCAL:0
+		BREAK
+	ENDIF
+NEXT
+REL_LIKE:(LOCAL:2):(LOCAL:3) = LIMIT(ARG:2, 0, 1500)
+REL_HATE:(LOCAL:2):(LOCAL:3) = LIMIT(ARG:3, 0, 1500)
+
+;-------------------------------------------------
+;キャラARG:0からARG:1に対する好感度をARG:2、敵対値をARG:3だけ加算する関数
+;相性：好感度に対してはそのままの、敵対値に対しては(300 - 相性) / 2の補正がかかる
+;-------------------------------------------------
+@CHANGE_RELATION_O_TO_O(ARG:0, ARG:1, ARG:2, ARG:3)
+LOCAL:0 = RELATION:(ARG:0):(ARG:1) ? RELATION:(ARG:0):(ARG:1) # 100
+
+REL_LIKE:(ARG:0):(ARG:1) = LIMIT(REL_LIKE:(ARG:0):(ARG:1) + ARG:2 * LOCAL:0 / 100, 0, 1500)
+REL_HATE:(ARG:0):(ARG:1) = LIMIT(REL_HATE:(ARG:0):(ARG:1) + ARG:3 * (300 - LOCAL:0) / 200, 0, 1500)
+
+;-------------------------------------------------
+;ARG:0勢力の所属人物からARG:1勢力の所属人物に対する好感度をARG:2、敵対値をARG:3だけ加算する関数(君主は影響強め)
+;-------------------------------------------------
+@CHANGE_RELATION_C_TO_C(ARG:0, ARG:1, ARG:2, ARG:3)
+
+LOCAL:6 = GET_COUNTRY_BOSS(ARG:1)
+
+SIF !IS_COUNTRY(ARG:0) || !IS_COUNTRY(ARG:1)
+	RETURN
+FOR LOCAL:0, 0, CHARANUM
+	IF CFLAG:(LOCAL:0):所属 == ARG:0
+		FOR LOCAL:1, 0, CHARANUM
+			IF CFLAG:(LOCAL:1):所属 == ARG:1
+				LOCAL:2 = ARG:2
+				LOCAL:3 = ARG:3
+				; ボス以外は半減
+				IF LOCAL:1 != LOCAL:6
+					LOCAL:2 /= 2
+					LOCAL:3 /= 2
+				ENDIF
+				REL_LIKE:(LOCAL:0):(LOCAL:1) = LIMIT(REL_LIKE:(LOCAL:0):(LOCAL:1) + LOCAL:2, 0, 1500)
+				REL_HATE:(LOCAL:0):(LOCAL:1) = LIMIT(REL_HATE:(LOCAL:0):(LOCAL:1) + LOCAL:3, 0, 1500)
+			ENDIF
+		NEXT
+	ENDIF
+NEXT
+
+;-------------------------------------------------
+;ARG:0勢力の所属人物からキャラARG:1に対する好感度をARG:2、敵対値をARG:3だけ加算する関数(君主は影響強め)
+;-------------------------------------------------
+@CHANGE_RELATION_C_TO_O(ARG:0, ARG:1, ARG:2, ARG:3)
+SIF !IS_COUNTRY(ARG:0)
+	RETURN
+FOR LOCAL:0, 0, CHARANUM
+	IF CFLAG:(LOCAL:0):所属 == ARG:0
+		LOCAL:1 = RELATION:(LOCAL:0):(ARG:1) ? RELATION:(LOCAL:0):(ARG:1) # 100
+		LOCAL:2 = ARG:2
+		LOCAL:3 = ARG:3
+		REL_LIKE:(LOCAL:0):(ARG:1) = LIMIT(REL_LIKE:(LOCAL:0):(ARG:1) + LOCAL:2 * LOCAL:1 / 100, 0, 1500)
+		REL_HATE:(LOCAL:0):(ARG:1) = LIMIT(REL_HATE:(LOCAL:0):(ARG:1) + LOCAL:3 * (300 - LOCAL:1) / 200, 0, 1500)
+	ENDIF
+NEXT
+
+;-------------------------------------------------
+;キャラARG:0からARG:1勢力の所属キャラに対する好感度をARG:2、敵対値をARG:3だけ加算する関数(君主は影響強め)
+;-------------------------------------------------
+@CHANGE_RELATION_O_TO_C(ARG:0, ARG:1, ARG:2, ARG:3)
+SIF !IS_COUNTRY(ARG:1)
+	RETURN
+LOCAL:5 = GET_COUNTRY_BOSS(ARG:1)
+FOR LOCAL:0, 0, CHARANUM
+	IF CFLAG:(LOCAL:0):所属 == ARG:1
+		LOCAL:2 = ARG:2
+		LOCAL:3 = ARG:3
+		IF LOCAL:0 != LOCAL:5
+			LOCAL:2 /= 2
+			LOCAL:3 /= 2
+		ENDIF
+		LOCAL:1 = RELATION:(ARG:0):(LOCAL:0) ? RELATION:(ARG:0):(LOCAL:0) # 100
+		REL_LIKE:(ARG:0):(LOCAL:0) = LIMIT(REL_LIKE:(ARG:0):(LOCAL:0) + LOCAL:2 * LOCAL:1 / 100, 0, 1500)
+		REL_HATE:(ARG:0):(LOCAL:0) = LIMIT(REL_HATE:(ARG:0):(LOCAL:0) + LOCAL:3 * (300 - LOCAL:1) / 200, 0, 1500)
+	ENDIF
+NEXT
+
+;-------------------------------------------------
+;ARG:0とARG:1の勢力の間にARG:2ターンの間の同盟を成立させる関数
+;成功したら1 空きがなければ0
+;-------------------------------------------------
+@INIT_ALLIANCE(ARG:0, ARG:1, ARG:2)
+#DIM CUR_RELATION
+#DIM NEW_RELATION
+NEW_RELATION = (ARG:2 == 9999) ? 4 # 3
+IF !IS_COUNTRY(ARG:0) || !IS_COUNTRY(ARG:1)
+	THROW 引数0番と1番にはそれぞれ正しい勢力番号を指定してください
+ELSEIF ARG:2 <= 0
+	THROW 引数2番には0より大きい値を指定してください
+ENDIF
+
+FOR LOCAL:0, 0, MAX_TREATY_A
+	IF (TREATY_A_COUNTRY:(LOCAL:0):0 == ARG:0 && TREATY_A_COUNTRY:(LOCAL:0):1 == ARG:1) || (TREATY_A_COUNTRY:(LOCAL:0):0 == ARG:1 && TREATY_A_COUNTRY:(LOCAL:0):1 == ARG:0)
+		TREATY_A_TERM:(LOCAL:0) = ARG:2
+		TMP_COUNTRY_RELATION_TERM:(ARG:0):(ARG:1) = ARG:2
+		TMP_COUNTRY_RELATION_TERM:(ARG:1):(ARG:0) = ARG:2
+	ELSEIF TREATY_A_TERM:(LOCAL:0) <= 0
+		; 空きがあれば成立
+		; 関係マップのカウンタを戻す
+		CUR_RELATION = TMP_COUNTRY_RELATION:(ARG:0):(ARG:1)
+		SELECTCASE CUR_RELATION
+			CASE 1
+				COUNTRY_TREATY_NO:(ARG:0):1 --
+				COUNTRY_TREATY_NO:(ARG:1):1 --
+			CASE 3, 4
+				COUNTRY_TREATY_NO:(ARG:0):0 --
+				COUNTRY_TREATY_NO:(ARG:1):0 --
+		ENDSELECT
+
+		; 締結
+		TREATY_A_TERM:(LOCAL:0) = ARG:2
+		TREATY_A_COUNTRY:(LOCAL:0):0 = ARG:0
+		TREATY_A_COUNTRY:(LOCAL:0):1 = ARG:1
+
+		; 関係マップの更新
+		IF NEW_RELATION > CUR_RELATION
+			TMP_COUNTRY_RELATION:(ARG:0):(ARG:1) = NEW_RELATION
+			TMP_COUNTRY_RELATION:(ARG:1):(ARG:0) = NEW_RELATION
+			TMP_COUNTRY_RELATION_TERM:(ARG:0):(ARG:1) = ARG:2
+			TMP_COUNTRY_RELATION_TERM:(ARG:1):(ARG:0) = ARG:2
+			CUR_RELATION = NEW_RELATION
+		ENDIF
+		SELECTCASE CUR_RELATION
+			CASE 1
+				COUNTRY_TREATY_NO:(ARG:0):1 ++
+				COUNTRY_TREATY_NO:(ARG:1):1 ++
+			CASE 3, 4
+				COUNTRY_TREATY_NO:(ARG:0):0 ++
+				COUNTRY_TREATY_NO:(ARG:1):0 ++
+		ENDSELECT
+		RETURN 1
+	ENDIF
+NEXT
+RETURN 0
+
+;-------------------------------------------------
+;ARGS:0とARGS:1をそれぞれCSTR:99にもつキャラが所属する勢力の間に、ARG:2ターンの間の同盟を成立させる関数
+;-------------------------------------------------
+@INIT_ALLIANCE_BY_NAME(ARGS:0, ARGS:1, ARG:2)
+LOCAL:1 = CFLAG:(NAME_TO_CHARA(ARGS:0)):所属
+LOCAL:2 = CFLAG:(NAME_TO_CHARA(ARGS:1)):所属
+IF LOCAL:1 == -1 || LOCAL:2 == -1
+	THROW 引数0番と1番にはそれぞれ正しいCSTR:99を指定してください
+ELSEIF ARG:2 <= 0
+	THROW 引数2番には0より大きい値を指定して下さい
+ENDIF
+
+CALL INIT_ALLIANCE(LOCAL:1, LOCAL:2, ARG:2)
+RETURN RESULT
+
+;-------------------------------------------------
+;ARG:0とARG:1の勢力の間にARG:2ターンの間の停戦を成立させる関数
+;成功したら1 空きがなければ0
+;-------------------------------------------------
+@INIT_CEASEFIRE(ARG:0, ARG:1, ARG:2)
+#DIM CUR_RELATION
+#DIM NEW_RELATION
+NEW_RELATION = 1
+IF !IS_COUNTRY(ARG:0) || !IS_COUNTRY(ARG:1)
+	THROW 引数0番と1番にはそれぞれ正しい勢力番号を指定してください
+ELSEIF ARG:2 <= 0
+	THROW 引数2番には0より大きい値を指定してください
+ENDIF
+
+FOR LOCAL:0, 0, MAX_TREATY_C
+	IF TREATY_C_TERM:(LOCAL:0) <= 0
+		; 空きがあれば成立
+
+		; 関係マップのカウンタを戻す
+		CUR_RELATION = TMP_COUNTRY_RELATION:(ARG:0):(ARG:1)
+		SELECTCASE CUR_RELATION
+			CASE 1
+				COUNTRY_TREATY_NO:(ARG:0):1 --
+				COUNTRY_TREATY_NO:(ARG:1):1 --
+			CASE 3, 4
+				COUNTRY_TREATY_NO:(ARG:0):0 --
+				COUNTRY_TREATY_NO:(ARG:1):0 --
+		ENDSELECT
+
+		; 締結
+		TREATY_C_TERM:(LOCAL:0) = ARG:2
+		TREATY_C_COUNTRY:(LOCAL:0):0 = ARG:0
+		TREATY_C_COUNTRY:(LOCAL:0):1 = ARG:1
+
+		; 関係マップの更新
+		IF NEW_RELATION > CUR_RELATION
+			TMP_COUNTRY_RELATION:(ARG:0):(ARG:1) = NEW_RELATION
+			TMP_COUNTRY_RELATION:(ARG:1):(ARG:0) = NEW_RELATION
+			TMP_COUNTRY_RELATION_TERM:(ARG:0):(ARG:1) = ARG:2
+			TMP_COUNTRY_RELATION_TERM:(ARG:1):(ARG:0) = ARG:2
+			CUR_RELATION = NEW_RELATION
+		ENDIF
+		SELECTCASE CUR_RELATION
+			CASE 1
+				COUNTRY_TREATY_NO:(ARG:0):1 ++
+				COUNTRY_TREATY_NO:(ARG:1):1 ++
+			CASE 3, 4
+				COUNTRY_TREATY_NO:(ARG:0):0 ++
+				COUNTRY_TREATY_NO:(ARG:1):0 ++
+		ENDSELECT
+		RETURN 1
+	ENDIF
+NEXT
+RETURN 0
+
+;-------------------------------------------------
+;ARGS:0とARGS:1をそれぞれCSTR:99にもつキャラが所属する勢力の間に、ARG:2ターンの間の停戦を成立させる関数
+;-------------------------------------------------
+@INIT_CEASEFIRE_BY_NAME(ARGS:0, ARGS:1, ARG:2)
+LOCAL:1 = CFLAG:(NAME_TO_CHARA(ARGS:0)):所属
+LOCAL:2 = CFLAG:(NAME_TO_CHARA(ARGS:1)):所属
+IF LOCAL:1 == -1 || LOCAL:2 == -1
+	THROW 引数0番と1番にはそれぞれ正しいCSTR:99を指定してください
+ELSEIF ARG:2 <= 0
+	THROW 引数2番には0より大きい値を指定して下さい
+ENDIF
+
+CALL INIT_CEASEFIRE(LOCAL:1, LOCAL:2, ARG:2)
+RETURN RESULT
+
+;-------------------------------------------------
+;同盟の解散処理
+;-----------------------------------------------
+@BREAK_ALLIANCE(参加勢力:0, 参加勢力:1, 条約)
+#DIM 参加勢力, 2
+#DIM 参加君主, 2
+#DIM 移動先都市, 2
+#DIM 部隊
+#DIM 条約
+#DIM 都市
+参加君主:0 = GET_COUNTRY_BOSS(参加勢力:0)
+参加君主:1 = GET_COUNTRY_BOSS(参加勢力:1)
+CALL COLOR_PRINTL(@"%ANAME(参加君主:0)%・%ANAME(参加君主:1)%同盟は解散しました", カラー_注意)
+CALL COLOR_PRINTL(@"%ANAME(参加君主:1)%の都市にいる%ANAME(参加君主:0)%の部隊、%ANAME(参加君主:0)%の都市にいる%ANAME(参加君主:1)%の部隊は移動します", カラー_注意)
+FOR 都市, 1, GET_CITY_NUM() + 1
+	SIF GROUPMATCH(CITY_OWNER:都市, 参加勢力:0, 参加勢力:1)
+		移動先都市:(CITY_OWNER:都市 == 参加勢力:0 ? 0 # 1) = 都市
+NEXT
+FOR 部隊, 0, MAX_UNIT
+	SIF CITY_OWNER:(UNIT_POSITION:(参加勢力:0):部隊) == 参加勢力:1
+		UNIT_POSITION:(参加勢力:0):部隊 = 移動先都市:0
+	SIF CITY_OWNER:(UNIT_POSITION:(参加勢力:1):部隊) == 参加勢力:0
+		UNIT_POSITION:(参加勢力:1):部隊 = 移動先都市:1
+NEXT
+RESETCOLOR
+SIF GROUPMATCH(CFLAG:MASTER:所属, 参加勢力:0, 参加勢力:1)
+	CALL GO_TO_MASTERS_COUNTRY(参加勢力:(CFLAG:MASTER:所属 == 参加勢力:0 ? 1 # 0))
+TREATY_A_COUNTRY:条約:0 = 0
+TREATY_A_COUNTRY:条約:1 = 0
+TREATY_A_TERM:条約 = 0
+
+;-------------------------------------------------
+;停戦条約の終了処理
+;-----------------------------------------------
+@BREAK_CEASEFIRE(参加勢力:0, 参加勢力:1, 条約)
+#DIM 参加勢力, 2
+#DIM 参加君主, 2
+#DIM 条約
+参加君主:0 = GET_COUNTRY_BOSS(参加勢力:0)
+参加君主:1 = GET_COUNTRY_BOSS(参加勢力:1)
+CALL COLOR_PRINTL(@"%ANAME(参加君主:0)%・%ANAME(参加君主:1)%の停戦条約は失効しました", カラー_注意)
+TREATY_C_COUNTRY:条約:0 = 0
+TREATY_C_COUNTRY:条約:1 = 0
+TREATY_C_TERM:条約 = 0
+
+;-------------------------------------------------
+;連合の終了処理
+;-----------------------------------------------
+@BREAK_UNION(条約)
+#DIM 条約
+#DIM 君主
+君主 = GET_COUNTRY_BOSS(TREATY_U_TARGET:条約)
+CALL COLOR_PRINTL(@"%ANAME(君主)%討伐条約は失効しました", カラー_注意)
+TREATY_U_TARGET:条約 = 0
+TREATY_U_TERM:条約 = 0
+
+FOR LOCAL, 0, MAX_TREATY_COUNTRY
+	IF TREATY_U_COUNTRY:条約:LOCAL == CFLAG:MASTER:所属
+		FOR LOCAL:1, 0, MAX_TREATY_COUNTRY
+			SIF IS_COUNTRY(TREATY_U_COUNTRY:条約:(LOCAL:1))
+				CALL GO_TO_MASTERS_COUNTRY(TREATY_U_COUNTRY:条約:(LOCAL:1))
+		NEXT
+	ENDIF
+NEXT
+
+FOR LOCAL, 0, MAX_TREATY_COUNTRY
+	TREATY_U_COUNTRY:条約:LOCAL = 0
+NEXT
+
+;-------------------------------------------------
+;ARG:0番の勢力カラーを変更する関数
+;ARG:1に1を設定すると「変更せずに戻る」が禁止される
+;-------------------------------------------------
+@CHANGE_COUNTRY_COLOR(ARG:0, ARG:1 = 0)
+#DIM FILTER
+#DIM COUNTRY_H, 100
+#DIM COUNTRY_S, 100
+#DIM COUNTRY_V, 100
+#DIM COUNTRY_S2, 100
+#DIM COUNTRY_V2, 100
+#DIM FIRST_LINE
+FILTER = 0
+
+LOCAL:9 = 0
+FOR LOCAL:0, 1, MAX_COUNTRY
+	IF IS_COUNTRY(LOCAL:0) && LOCAL:0 != ARG:0
+		COUNTRY_H:(LOCAL:9) = RGB_TO_H(COUNTRY_COLOR:(LOCAL:0))
+		COUNTRY_S:(LOCAL:9) = RGB_TO_S(COUNTRY_COLOR:(LOCAL:0))
+		COUNTRY_V:(LOCAL:9) = RGB_TO_V(COUNTRY_COLOR:(LOCAL:0))
+		COUNTRY_S2:(LOCAL:9) = POWER(COUNTRY_S:(LOCAL:9), 2)
+		COUNTRY_V2:(LOCAL:9) = POWER(COUNTRY_V:(LOCAL:9), 2)
+		LOCAL:9 ++
+	ENDIF
+NEXT
+
+REDRAW 0
+FIRST_LINE = LINECOUNT
+$SHOW_LOOP
+
+FOR LOCAL:0, 0, 4
+	FOR LOCAL:1, 0, 4
+		LOCAL:3 = 24
+		FOR LOCAL:2, 0, LOCAL:3 + 1
+			IF LOCAL:2 == LOCAL:3
+				LOCAL:5 = 0
+				LOCAL:6 = 0
+				LOCAL:7 = 100 - (LOCAL:0 * 24 + LOCAL:1 * 6)
+			ELSE
+				LOCAL:5 = LOCAL:2 * 360 / LOCAL:3
+				LOCAL:6 = 90 - LOCAL:1 * 20
+				LOCAL:7 = 100 - LOCAL:0 * 20
+			ENDIF
+
+			LOCAL:13 = 0
+			IF FILTER >= 1
+				FOR LOCAL:4, 0, LOCAL:9
+					LOCAL:10 = COS_LIST:(ABS(LOCAL:5 - COUNTRY_H:(LOCAL:4)))
+					LOCAL:20 = POWER(LOCAL:6, 2)
+					LOCAL:21 = POWER(LOCAL:7, 2)
+					LOCAL:22 = COUNTRY_S2:(LOCAL:4)
+					LOCAL:23 = COUNTRY_V2:(LOCAL:4)
+					LOCAL:14 = (LOCAL:20 + 10000) * LOCAL:21
+					LOCAL:15 = (LOCAL:22 + 10000) * LOCAL:23
+					LOCAL:16 = 2 * LOCAL:7 * COUNTRY_V:(LOCAL:4) * (LOCAL:10 * LOCAL:6 * COUNTRY_S:(LOCAL:4) / 1000 + 10000)
+					IF LOCAL:14 + LOCAL:15 - LOCAL:16 < 10000000 * FILTER
+						LOCAL:13 = 1
+						BREAK
+					ENDIF
+				NEXT
+			ENDIF
+
+			IF LOCAL:13
+				SETCOLOR HSV_TO_RGB(LOCAL:5, LOCAL:6, LOCAL:7)
+				PRINTPLAIN □
+			ELSE
+				SETCOLOR HSV_TO_RGB(LOCAL:5, LOCAL:6, LOCAL:7)
+				PRINTBUTTON "■", 0x1000000 + (LOCAL:5 << 14) + (LOCAL:6 << 7) + LOCAL:7
+			ENDIF
+			PRINTPLAIN  
+		NEXT
+		PRINTL 
+	NEXT
+NEXT
+RESETCOLOR
+CALL SINGLE_DRAWLINE
+PRINTPLAIN 既存勢力の色に近い色を除く 
+PRINTBUTTON "[無]", 100
+PRINTBUTTON "[弱]", 101
+PRINTBUTTON "[強]", 102
+PRINTL 
+
+PRINTBUTTON "[カラーピッカー]", 201
+PRINTL
+
+IF GET_COUNTRY_BOSS(ARG:0) != -1
+	PRINTBUTTON @"[%ANAME(GET_COUNTRY_BOSS(ARG:0))%の髪色からとる]", 200
+	PRINTL
+ENDIF
+
+IF ARG:1 == 0
+	CALL SINGLE_DRAWLINE
+	PRINTL [0] 変更しない
+ENDIF
+
+$INPUT_LOOP
+INPUT
+
+IF RESULT == 0 && ARG:1 == 0
+	REDRAW 1
+	RETURN
+ELSEIF RESULT == 100 && FILTER != 0
+	FILTER = 0
+	CLEARLINE LINECOUNT - FIRST_LINE
+	GOTO SHOW_LOOP
+ELSEIF RESULT == 101 && FILTER != 1
+	FILTER = 1
+	CLEARLINE LINECOUNT - FIRST_LINE
+	GOTO SHOW_LOOP
+ELSEIF RESULT == 102 && FILTER != 2
+	FILTER = 2
+	CLEARLINE LINECOUNT - FIRST_LINE
+	GOTO SHOW_LOOP
+ELSEIF RESULT == 200
+	COUNTRY_COLOR:(ARG:0) = CHARA_COUNTRY_COLOR(GET_COUNTRY_BOSS(ARG:0))
+	CLEARLINE 1
+	REDRAW 1
+	RETURN
+ELSEIF RESULT == 201
+	CALL COLOR_PICKER(COUNTRY_COLOR:(ARG:0))
+	COUNTRY_COLOR:(ARG:0) = RESULT
+	CLEARLINE 1
+	REDRAW 1
+	RETURN
+ELSEIF RESULT >= 0x1000000 && RESULT < 0x2000000
+	LOCAL:40 = (RESULT >> 14) & 0x1FF
+	LOCAL:41 = (RESULT >> 7) & 0x7F
+	LOCAL:42 = RESULT & 0x7F
+	IF LOCAL:40 >= 0 && LOCAL:40 <= 359 && LOCAL:41 >= 0 && LOCAL:41 <= 100 && LOCAL:42 >= 0 && LOCAL:42 <= 100
+		LOCAL:0 = HSV_TO_RGB(LOCAL:40, LOCAL:41, LOCAL:42)
+		;★
+		;PRINTFORMW 勢力色 = {LOCAL:0}
+		COUNTRY_COLOR:(ARG:0) = LOCAL:0
+		CLEARLINE 1
+		REDRAW 1
+		RETURN
+	ENDIF
+ENDIF
+CLEARLINE 1
+GOTO INPUT_LOOP
+
+;-------------------------------------------------
+;能力値ARGS:0が現在値のときの実際の影響力を返す関数  対象は対象のキャラ番号
+;-------------------------------------------------
+@ABL_POWER(現在値, 対象 = -1)
+#FUNCTION
+#DIM 現在値
+#DIM 対象
+#DIM ランク補正外値
+#DIM ランクC補正対象値
+#DIM ランクB補正対象値
+#DIM ランクA補正対象値
+#DIM ランクS補正対象値
+#DIM 好感度補正利用値
+#DIM 基礎値
+#DIM 補正値
+#DIM 補正上限
+#DIM 返却値
+
+ランクS補正対象値 = MAX(現在値 - ランク閾値:ランク_ＳＬＧ:ランク_S + 1, 0)
+ランクA補正対象値 = MAX(MIN(現在値, ランク閾値:ランク_ＳＬＧ:ランク_S - 1) - ランク閾値:ランク_ＳＬＧ:ランク_A + 1, 0)
+ランクB補正対象値 = MAX(MIN(現在値, ランク閾値:ランク_ＳＬＧ:ランク_A - 1) - ランク閾値:ランク_ＳＬＧ:ランク_B + 1, 0)
+ランクC補正対象値 = MAX(MIN(現在値, ランク閾値:ランク_ＳＬＧ:ランク_B - 1) - ランク閾値:ランク_ＳＬＧ:ランク_C + 1, 0)
+ランク補正外値    = MIN(現在値, ランク閾値:ランク_ＳＬＧ:ランク_C - 1)
+
+
+{
+	基礎値 = (ランク補正外値 + ランクS補正対象値) * 250 +
+		ランクC補正対象値 * 450 +
+		ランクB補正対象値 * 750 + 
+		ランクA補正対象値 * 1250 +
+		500
+}
+;DEBUGPRINTFORML 現在値: {現在値} 基礎値:{基礎値}
+;妊娠・臨月・育児まわりの補正
+IF 対象 >= 0
+	IF CFLAG:(対象):行動不能状態 == 行動不能_臨月
+		TIMES 基礎値, 0.5
+	ELSEIF TALENT:(対象):妊娠
+		TIMES 基礎値, 0.75
+	ELSEIF CFLAG:(対象):行動不能状態 == 行動不能_育児
+		TIMES 基礎値, 0.9
+	ENDIF
+	IF TALENT:(対象):崩壊
+		TIMES 基礎値, 0.5
+	ELSEIF TALENT:(対象):虚ろ
+		TIMES 基礎値, 0.8
+	ENDIF
+ENDIF
+
+;補正値　万分率
+;主人公の場合
+IF 対象 == MASTER
+	;陥落ひとりあたま2% ただし補正上限は200% つまり100人まで
+	補正値 = 10000 + MIN(FLAG:陥落人数 * 200, 20000)
+;キャラ指定がなければ100%
+ELSEIF 対象 < 0
+	補正値 = 10000
+;違う勢力 CONFIG:314の難易度補正が乗る
+ELSEIF CFLAG:MASTER:所属 != CFLAG:(対象):所属
+	補正値 = 10000 * GET_DIFFICULTY_CORRECTION() / 100
+;同一勢力でも主人子が捕虜の間はダメ
+ELSEIF (CFLAG:MASTER:捕虜先 != 0 && CFLAG:MASTER:所属 == CFLAG:(対象):所属)
+	補正値 = 10000
+;主人公勢力
+ELSE
+	補正値 = 10000
+	補正上限 = 2000
+	;好感度、従属度、依存度の中から一番高いやつを利用する
+	;依存度が先行することはそんなないやろ………………
+	好感度補正利用値 = MAX(CFLAG:(対象):好感度, CFLAG:(対象):従属度, CFLAG:(対象):支配度)
+
+	;正妻なら倍まで伸びる
+	IF TALENT:(対象):正妻
+		補正上限 = 10000
+	;妾なら+50%
+	ELSEIF TALENT:(対象):妾
+		補正上限 = 5000
+	ELSE
+		;陥落系素質はボーナスをかける
+		SIF TALENT:(対象):親愛
+			補正上限 += 1000
+		SIF TALENT:(対象):恋慕 || TALENT:(対象):親友
+			補正上限 += 500
+		SIF TALENT:(対象):恋人
+			補正上限 += 500
+		SIF TALENT:(対象):隷属
+			補正上限 += 1000
+		SIF TALENT:(対象):服従
+			補正上限 += 500
+		SIF TALENT:(対象):烙印
+			補正上限 += 300
+		SIF TALENT:(対象):主人
+			補正上限 += 500
+		SIF TALENT:(対象):所有者
+			補正上限 += 1000
+	ENDIF
+
+	;お気に入りでもボーナスを得る
+	SIF ID_TO_CHARA(FLAG:お気に入り指定キャラ) == 対象
+		補正上限 += 5000
+
+	;値5ごとにパワーに0.01%の補正を得る。ただし補正上限（デフォ20%。素質による補正上限引き上げを無視すれば10000で到達）を超えない
+	補正値 = 10000 + MIN(好感度補正利用値 / 5, 補正上限)
+ENDIF
+
+RETURNF MAX(基礎値 * 補正値 / 10000, 1)
+
+
+;-------------------------------------------------
+;兵力の初期配置を行う関数
+;-------------------------------------------------
+@INIT_ARMY()
+
+FOR LOCAL:0, 0, MAX_COUNTRY
+	SIF IS_COUNTRY(LOCAL:0)
+		CALL COUNTRY_INIT_ARMY(LOCAL:0)
+NEXT
+
+@COUNTRY_INIT_ARMY(勢力)
+#DIM 勢力
+#DIM 都市
+#DIM 経済規模
+#DIM 前線防衛兵数
+#DIM 後方防衛兵数
+
+;経済規模に対する最大兵数の半分を得る
+経済規模 = GET_SUM_ECONOMY(勢力) / 20
+
+COUNTRY_SOLDIER:(勢力) = 経済規模
+
+前線防衛兵数 = 経済規模 / (MAX(1, GET_OWN_CITY(勢力)) * 3 / 2) / 500 * 500
+後方防衛兵数 = (前線防衛兵数 / 500 + 1) / 2 * 500
+
+;防衛兵力の割り振り
+FOR 都市, 0, MAX_CITY
+	IF COUNTRY_SOLDIER:勢力 >= 1000
+		IF CITY_OWNER:都市 == 勢力
+			IF IS_NEIBORING_ENEMY(都市)
+				CITY_SOLDIER:都市 = 前線防衛兵数
+				COUNTRY_SOLDIER:勢力 -= 前線防衛兵数
+			ELSE
+				CITY_SOLDIER:都市 = 後方防衛兵数
+				COUNTRY_SOLDIER:勢力 -= 後方防衛兵数
+			ENDIF
+		ENDIF
+	ENDIF
+NEXT
+
+
+
+
+;-------------------------------------------------
+;部隊を移動させる関数
+;TMP_UNIT_MAPを操作する。その必要がない場面ではUNIT_POSITIONを直接書き換えてよい
+;-------------------------------------------------
+@MOVE_UNIT(勢力, 部隊, 移動先, TARGET削除 = 0)
+#DIM 勢力
+#DIM 部隊
+#DIM 移動先
+#DIM TARGET削除
+CALL TMP_MODIFY_UNIT_MAP(勢力, 部隊, UNIT_POSITION:勢力:部隊, 移動先)
+UNIT_POSITION:勢力:部隊 = 移動先
+
+SIF TARGET削除
+	UNIT_TARGET:勢力:部隊 = 0
+
+
+;-------------------------------------------------
+;ARG:0勢力のARG:1部隊を解散させる関数
+;ARG:2クールタイムつけないフラグ
+;-------------------------------------------------
+@CLEAR_UNIT(ARG:0, ARG:1, ARG:2 = 0)
+LOCAL:1 = GET_UNIT_COMMANDER(ARG:0, ARG:1, 0)
+LOCAL:2 = GET_UNIT_COMMANDER(ARG:0, ARG:1, 1)
+LOCAL:3 = GET_UNIT_COMMANDER(ARG:0, ARG:1, 2)
+;クールダウンの設定、負傷などして既に2ターン以上設定されていればそちらを残す
+IF !ARG:2
+	FOR LOCAL:0, 1, 1 + MAX_UNIT_COMMANDER
+		SIF LOCAL:(LOCAL:0) >= 0
+			COOLTIME:(LOCAL:(LOCAL:0)):0 = MAX(COOLTIME:(LOCAL:(LOCAL:0)):0 , 1)
+	NEXT
+ENDIF
+
+;部隊マップを更新
+CALL TMP_MODIFY_UNIT_MAP(ARG:0, ARG:1, UNIT_POSITION:(ARG:0):(ARG:1))
+
+COUNTRY_SOLDIER:(ARG:0) += UNIT_SOLDIER:(ARG:0):(ARG:1)
+UNIT_SOLDIER:(ARG:0):(ARG:1) = 0
+UNIT_POSITION:(ARG:0):(ARG:1) = 0
+UNIT_TARGET:(ARG:0):(ARG:1) = 0
+UNIT_COMMANDER:(ARG:0):(ARG:1) = 0
+UNIT_TIRED_COUNT:(ARG:0):(ARG:1) = 0
+UNIT_CAPTURE_CITY:(ARG:0):(ARG:1) = 0
+UNIT_FBATTLE:(ARG:0):(ARG:1) = 0
+
+;-------------------------------------------------
+;ARG:0番の勢力の全部隊を解散させる関数
+;ARG:1クールタイムつけないフラグ
+;-------------------------------------------------
+@CLEAR_ALL_UNIT(ARG:0, ARG:1 = 0)
+FOR LOCAL:0, 0, MAX_UNIT
+	CALL CLEAR_UNIT(ARG:0, LOCAL:0, ARG:1)
+NEXT
+
+;-------------------------------------------------
+; ARG:0の勢力のARG:1番部隊がARG:2のクールタイム
+;-------------------------------------------------
+@SET_COMMANDER_COOLTIME(ARG:0, ARG:1, ARG:2=1)
+FOR LOCAL:0, 0, 3
+	SIF GET_UNIT_COMMANDER(ARG:0, ARG:1, LOCAL:0) >= 0
+		COOLTIME:(GET_UNIT_COMMANDER(ARG:0, ARG:1, LOCAL:0)):0 = ARG:2
+NEXT
+
+;----------------------------------------------
+;勢力に技術ツリーを設定
+;君主が設定されている必要あり
+;----------------------------------------------
+@COUNTRY_SET_TECHNOLOGY(勢力)
+#DIM 勢力
+#DIM 君主
+
+君主 = GET_COUNTRY_BOSS(勢力)
+
+FOR LOCAL, 0, TECHNOLOGY_MAX_GENRE
+	TECHNOLOGY_STATUS:勢力:LOCAL = TECHNOLOGY_STATUS_CHARA:君主:LOCAL
+NEXT
+
+;-------------------------------------------------
+;ARG:0番の勢力を滅亡させる関数
+;この関数を呼び出すと、対象勢力の将が強制的に無所属になるため、事前に将の分配を行なっておくこと
+;所属都市の解除は行わないため、必要に応じて別途処理すること
+;-------------------------------------------------
+@DESTROY_COUNTRY(ARG:0)
+LOCAL:3 = GET_COUNTRY_BOSS(ARG:0)
+
+;調教要求をされていたorしていた勢力滅亡時に変数をリセット
+IF ARG:0 == CFLAG:MASTER:所属 || LOCAL:3 == DIPLOMACY_TRAINING_CHARA
+	DIPLOMACY_TRAINING_CHARA = 0
+	DIPLOMACY_TRAINED_DAY = 0
+ENDIF
+
+FOR LOCAL:0, 0, MAX_TREATY_A
+	FOR LOCAL:1, 0, MAX_TREATY_COUNTRY
+		;同盟に参加していた場合
+		IF TREATY_A_COUNTRY:(LOCAL:0):(LOCAL:1) == ARG:0
+			TREATY_A_COUNTRY:(LOCAL:0):(LOCAL:1) = 0
+			LOCAL:4 = 0
+			FOR LOCAL:2, 0, MAX_TREATY_COUNTRY
+				SIF TREATY_A_COUNTRY:(LOCAL:0):(LOCAL:2) > 0
+					LOCAL:4 ++
+			NEXT
+			;既に参加勢力が一つしかないなら解散
+			IF LOCAL:4 <= 1
+				FOR LOCAL:2, 0, MAX_TREATY_COUNTRY
+					TREATY_A_COUNTRY:(LOCAL:0):(LOCAL:2) = 0
+				NEXT
+				TREATY_A_TERM:(LOCAL:0) = 0
+			ENDIF
+		ENDIF
+	NEXT
+NEXT
+
+FOR LOCAL:0, 0, MAX_TREATY_C
+	FOR LOCAL:1, 0, MAX_TREATY_COUNTRY
+		;停戦条約を結んでいた場合
+		IF TREATY_C_COUNTRY:(LOCAL:0):(LOCAL:1) == ARG:0
+			TREATY_C_COUNTRY:(LOCAL:0):(LOCAL:1) = 0
+			LOCAL:4 = 0
+			FOR LOCAL:2, 0, MAX_TREATY_COUNTRY
+				SIF TREATY_C_COUNTRY:(LOCAL:0):(LOCAL:2) > 0
+					LOCAL:4 ++
+			NEXT
+			;既に参加勢力が一つしかないなら解散
+			IF LOCAL:4 <= 1
+				FOR LOCAL:2, 0, MAX_TREATY_COUNTRY
+					TREATY_C_COUNTRY:(LOCAL:0):(LOCAL:2) = 0
+				NEXT
+				TREATY_C_TERM:(LOCAL:0) = 0
+			ENDIF
+		ENDIF
+	NEXT
+NEXT
+
+LOCAL = FINDELEMENT(TREATY_U_TARGET,ARG:0)
+
+SIF LOCAL != -1
+	CALL BREAK_UNION(LOCAL)
+
+FOR LOCAL:0, 0, MAX_TREATY_U
+	FOR LOCAL:1, 0, MAX_TREATY_COUNTRY
+		SIF TREATY_U_COUNTRY:LOCAL:(LOCAL:1) == ARG:0
+			TREATY_U_COUNTRY:LOCAL:(LOCAL:1) = 0
+	NEXT
+NEXT
+
+;調教状態をリセット
+CFLAG:(LOCAL:3):外交調教中 = 0
+CFLAG:(LOCAL:3):外交要求成功フラグ = 0
+
+
+
+;士官を無所属にする
+;その勢力が保持していた捕虜は帰す
+FOR LOCAL:0, 0, CHARANUM
+	SIF CFLAG:(LOCAL:0):所属 == ARG:0
+		CALL CHANGE_COUNTRY(LOCAL:0, 0)
+	IF CFLAG:(LOCAL:0):捕虜先 == ARG:0
+		IF IS_COUNTRY(CFLAG:(LOCAL:0):所属)
+			PRINTFORML %ANAME(LOCAL:3)%の滅亡により、%ANAME(LOCAL)%は%ANAME(GET_COUNTRY_BOSS(CFLAG:(LOCAL):所属))%に帰っていきました
+		ELSE
+			PRINTFORML %ANAME(LOCAL:3)%の滅亡により、%ANAME(LOCAL)%は放浪しました
+		ENDIF
+		CALL CAPTURE(LOCAL:0, 0)
+	ENDIF
+NEXT
+
+;イベントキャラを削除
+;たいていの場合、この関数に至るまでの処理でARG:0勢力の士官はいなくなっている
+;セーフティくらいの意味しかない
+LOCAL:2 = CHARANUM
+FOR LOCAL:0, 0, LOCAL:2
+	LOCAL:1 = LOCAL:2 - LOCAL:0 - 1
+	IF CFLAG:(LOCAL:1):所属 == ARG:0 && IS_SP_CHARA(LOCAL:1) && LOCAL:1 != MASTER
+		CALL DELETE_CHARA(LOCAL:1)
+	ENDIF
+NEXT
+
+;特殊勢力の場合、メッセージを表示して該当キャラを削除する
+IF IS_SP_COUNTRY(ARG:0)
+	TRYCCALLFORM %SP_COUNTRY_NAME_ENG:SP_COUNTRY_TO_CONST(ARG:0)%_DESTROY_MSG
+	;該当勢力のキャラを削除する
+		LOCAL:1 = CHARANUM
+		FOR LOCAL:0, 0, LOCAL:1
+			LOCAL:2 = LOCAL:1 - LOCAL:0 - 1
+			IF TALENT:(LOCAL:2):特殊勢力素質 == SP_COUNTRY_TO_CONST(ARG:0) && IS_SP_CHARA(LOCAL:2) && LOCAL:2 != MASTER
+				CALL DELETE_CHARA(LOCAL:2)
+			ENDIF
+		NEXT
+		SP_COUNTRY_APPEARED:SP_COUNTRY_TO_CONST(ARG:0) = 2
+	CATCH
+	ENDCATCH
+ENDIF
+
+;勢力に関わる変数のリセット
+COUNTRY_BOSS:(ARG:0) = 0
+COUNTRY_COLOR:(ARG:0) = 0
+COUNTRY_POLICY:(ARG:0) = 0
+COUNTRY_SOLDIER:(ARG:0) = 0
+COUNTRY_AI_TYPE:(ARG:0) = 0
+COUNTRY_NOTARGET_TERM:(ARG:0) = 0
+COUNTRY_IS_CLOSED:(ARG:0) = 0
+COUNTRY_EVENT_ID:(ARG:0) = 0
+DIPLOMACY_HATE:(ARG:0) = 0
+AUTO_INVEST_PRICE:(ARG:0) = 0
+FOR LOCAL:0, 0, 10
+	UNIT_SOLDIER:(ARG:0):(LOCAL:0) = 0
+	UNIT_POSITION:(ARG:0):(LOCAL:0) = 0
+	UNIT_TARGET:(ARG:0):(LOCAL:0) = 0
+	UNIT_COMMANDER:(ARG:0):(LOCAL:0) = 0
+NEXT
+AI_DIPLOMACY_TERM:(ARG:0) = 0
+FOR LOCAL:0, 0, VARSIZE("AI_DIPLOMACY_TARGET", 1)
+	AI_DIPLOMACY_TARGET:(ARG:0):(LOCAL:0) = 0
+	AI_DIPLOMACY_PLAN:(ARG:0):(LOCAL:0) = -1
+NEXT
+
+FOR LOCAL, 0, TECHNOLOGY_MAX_GENRE
+	TECHNOLOGY_STATUS:(ARG:0):LOCAL = 0
+NEXT
+TECHNOLOGY_RESEARCH_TARGET:(ARG:0) = -1
+TECHNOLOGY_RESEARCH_PROGRESS:(ARG:0) = 0
+
+
+FOR LOCAL, 0, MAX_CITY
+	IF CITY_OWNER:LOCAL == (ARG:0)
+		CITY_OWNER:LOCAL = 0
+		CITY_SOLDIER:(LOCAL:0) = CITY_ECONOMY:(LOCAL:0) * 75 / 1000
+	ENDIF
+NEXT
+
+@INRANGE_CITY(ARG)
+#FUNCTION
+RETURNF INRANGE(ARG, 0, MAX_CITY - 1)
+
+@INRANGE_CITY_COMMANDER(ARG)
+#FUNCTION
+RETURNF INRANGE(ARG, 0, MAX_CITY_COMMANDER - 1)
+
+@INRANGE_COUNTRY(ARG)
+#FUNCTION
+RETURNF INRANGE(ARG,0, MAX_COUNTRY-1)
+
+@INRANGE_UNIT(ARG)
+#FUNCTION
+RETURNF INRANGE(ARG,0, MAX_UNIT-1)
+
+@INRANGE_UNIT_COMMANDER(ARG)
+#FUNCTION
+RETURNF INRANGE(ARG,0, MAX_UNIT_COMMANDER-1)
+
+;ARGS:0勢力が都市ARGS:1を接収する
+@TAKEOVER_CITY_FROM_NAME(ARGS:0, ARGS:1)
+SIF GET_CITYNUMBER(ARGS:1) == -1
+	THROW @TAKEOVER_CITY_FROM_NAMEに渡された引数%ARGS:1%の都市は存在しません
+CALL TAKEOVER_CITY_FROM_NO(GET_COUNTRY_FROM_BOSS_NAME(ARGS:0), GET_CITYNUMBER(ARGS:1))
+
+;ARG:0勢力が都市ARG:1を接収する
+@TAKEOVER_CITY_FROM_NO(ARG:0, ARG:1)
+#DIM INVADER,5
+#DIM LCOUNTRY
+#DIM LUNIT
+#DIM CITY_OWNER_ORI
+#DIM STEAL
+
+;残り都市数1のとこから奪おうとしたら戻る
+SIF IS_COUNTRY(CITY_OWNER:(ARG:1)) && GET_OWN_CITY(CITY_OWNER:(ARG:1)) == 1
+	RETURN
+
+CITY_OWNER_ORI = CITY_OWNER:(ARG:1)
+;その都市にいる部隊は防御側だろうが攻撃側だろうが解体する
+FOR LCOUNTRY, 0, MAX_COUNTRY
+	;すべての勢力を調べる
+	IF IS_COUNTRY(LCOUNTRY)
+		FOR LUNIT, 0, MAX_UNIT
+			;部隊が存在し現在この都市の上にある
+			IF UNIT_SOLDIER:LCOUNTRY:LUNIT > 0 && UNIT_POSITION:LCOUNTRY:LUNIT == ARG:1
+				CALL CLEAR_UNIT(LCOUNTRY, LUNIT, 1)
+			ENDIF
+		NEXT
+	ENDIF
+NEXT
+;その都市の守将と兵士は解散する
+SIF GET_CITY_COMMANDER(ARG:1, 0) >= 0
+	COOLTIME:GET_CITY_COMMANDER(ARG:1, 0):0 = 1
+SIF GET_CITY_COMMANDER(ARG:1, 1) >= 0
+	COOLTIME:GET_CITY_COMMANDER(ARG:1, 1):0 = 1
+CITY_COMMANDER:(ARG:1) = 0
+SIF IS_COUNTRY(CITY_OWNER:(ARG:1)) 
+	COUNTRY_SOLDIER:(CITY_OWNER:(ARG:1)) += MAX(CITY_SOLDIER:(ARG:1) - 500, 500)
+CITY_SOLDIER:(ARG:1) = MIN(CITY_SOLDIER:(ARG:1), 500)
+
+;都市占領による略奪
+;LOCAL 10:その都市に備蓄されていた財産
+;無所属の都市は経済規模の30%を備蓄しているとみなす
+IF CITY_OWNER_ORI > 0
+	STEAL = MONEY:(CITY_OWNER_ORI) * CITY_ECONOMY:(ARG:1) / GET_SUM_ECONOMY(CITY_OWNER_ORI)
+	MONEY:(CITY_OWNER_ORI) -= STEAL
+	MONEY:(ARG:0) += STEAL
+ELSE
+	STEAL = CITY_ECONOMY:(ARG:1) * 30 / (100 * 10)
+	MONEY:(ARG:0) += STEAL
+ENDIF
+
+
+;統治権を委譲する
+CITY_OWNER:(ARG:1) = ARG:0
+
+;-------------------------------------------------
+;部隊能力に対する評価
+;-------------------------------------------------
+@TOSTR_UNIT_POWER(ARG:0)
+#FUNCTIONS
+IF ARG:0 <= ABL_POWER(50, -1)
+	RETURNF "最低"
+ELSEIF ARG:0 < 6400
+	RETURNF "烏合の衆"
+ELSEIF ARG:0 < 12800
+	RETURNF "弱兵"
+ELSEIF ARG:0 < 25600
+	RETURNF "正規兵"
+ELSEIF ARG:0 < 51200
+	RETURNF "強兵"
+ELSEIF ARG:0 < 102400
+	RETURNF "精鋭"
+ELSEIF ARG:0 < 204800
+	RETURNF "超一流"
+ELSEIF ARG:0 < 819200
+	RETURNF "天下無双"
+ENDIF
+RETURNF "神の領域"
+
+@TOSTR_UNIT_POWER_SHORT(ARG:0)
+#FUNCTIONS
+SELECTCASE TOSTR_UNIT_POWER(ARG:0)
+	CASE "最低"
+		RETURNF "最低"
+	CASE "烏合の衆"
+		RETURNF "烏合"
+	CASE "弱兵"
+		RETURNF "弱兵"
+	CASE "正規兵"
+		RETURNF "正規"
+	CASE "強兵"
+		RETURNF "強兵"
+	CASE "精鋭"
+		RETURNF "精鋭"
+	CASE "超一流"
+		RETURNF "一流"
+	CASE "天下無双"
+		RETURNF "無双"
+	CASEELSE
+		RETURNF "神域"
+ENDSELECT
+RETURNF "不明"
+
+;-------------------------------------------------
+;ARG:0のキャラにクールタイムARG:1を設定する
+;-------------------------------------------------
+@SET_COOLTIME(ARG:0, ARG:1, ARG:2 = 1)
+
+IF ARG:2
+	CALL COLOR_PRINTL(@"%ANAME(ARG:0)%のクールタイムが{ARG:1}ターンになった", カラー_注意)
+	SIF ARG:0 == MASTER && ITEM:身代わり人形 > 0 && COOLTIME:MASTER:0 < ARG:1
+		CALL COLOR_PRINTL(@"……と思ったが、身代わり人形が身代わりになってくれた(残り:{ITEM:身代わり人形 - 1}個)", カラー_注意)
+	IF TALENT:(ARG:0):強運 && RAND:2
+		CALL COLOR_PRINTL("……と思ったが、運良く回避できたようだ", カラー_注意)
+		RETURN
+	ENDIF
+ENDIF
+
+IF ARG:0 == MASTER && ITEM:身代わり人形 > 0 && COOLTIME:MASTER:0 < ARG:1
+	ITEM:身代わり人形 --
+ELSE
+	COOLTIME:(ARG:0):0 = ARG:1
+	CALL FORCE_FREE(ARG:0)
+ENDIF
+
+;-------------------------------------------------
+;ARG:0のキャラにクールタイムARG:1を加算する
+;-------------------------------------------------
+@ADD_COOLTIME(ARG:0, ARG:1, ARG:2 = 1, ARG:3 = 1)
+
+IF ARG:2
+	CALL COLOR_PRINTL(@"%ANAME(ARG:0)%に{ARG:1}ターンのクールタイムが加算された", カラー_注意)
+	SIF ARG:0 == MASTER && ITEM:身代わり人形 > 0
+		CALL COLOR_PRINTL(@"……と思ったが、身代わり人形が身代わりになってくれた(残り:{ITEM:身代わり人形 - 1}個)", カラー_注意)
+	IF TALENT:(ARG:0):強運 && RAND:2
+		CALL COLOR_PRINTL("……と思ったが、運良く回避できたようだ", カラー_注意)
+		RETURN
+	ENDIF
+ENDIF
+
+IF ARG:0 == MASTER && ITEM:身代わり人形 > 0
+	ITEM:身代わり人形 --
+ELSE
+	COOLTIME:(ARG:0):0 += ARG:1
+	SIF ARG:3
+		CALL FORCE_FREE(ARG:0)
+ENDIF
+
+;-------------------------------------------------
+;ARG:0番の都市について駐留部隊を含めた防衛兵力を返す関数
+;数しか見てないが敵の同盟軍も含めて評価を行う
+;-------------------------------------------------
+@GET_CITY_GUARD(ARG:0)
+#FUNCTION
+#DIM GUARD
+GUARD = CITY_SOLDIER:(ARG:0)
+SIF CITY_OWNER:(ARG:0) < 1
+	RETURNF GUARD
+
+FOR LOCAL, 1, MAX_COUNTRY
+	SIF CHECK_COUNTRY_RELATION_F(CITY_OWNER:(ARG:0), LOCAL) <= 1
+		CONTINUE
+	FOR LOCAL:1, 0, 10
+		SIF UNIT_SOLDIER:(LOCAL:0):(LOCAL:1) < 1
+			CONTINUE
+		SIF UNIT_POSITION:(LOCAL:0):(LOCAL:1) != ARG:0
+			CONTINUE
+		GUARD += UNIT_SOLDIER:(LOCAL:0):(LOCAL:1)
+	NEXT
+NEXT
+RETURNF GUARD
+
+
+;-------------------------------------------------
+;勢力ARG:0の部隊ARG:1の現在位置を決定する関数
+;最重要都市を探してそこに作る（評価法は守備部隊の配分と同一）
+;-------------------------------------------------
+@SET_NEW_UNIT_POSITION(ARG:0, ARG:1)
+#DIM CITY_COUNT               ;自勢力に所属する都市の総数
+#DIM CITY_ID, MAX_CITY        ;自勢力都市のIDの一時記録
+#DIM CITY_PHEROMONE, MAX_CITY ;自勢力都市のフェロモンの一時記録
+
+SIF GET_OWN_CITY(ARG:0) < 1
+	RETURN
+
+;野盗は特殊処理が必要か？
+;IF COUNTRY_EVENT_ID:(LOCAL:0) == COUNTRY_BANDIT && GET_OWN_CITY(LOCAL:0) == 0
+;ENDIF
+
+VARSET CITY_COUNT
+VARSET CITY_ID
+VARSET CITY_PHEROMONE
+
+;自勢力圏都市IDとフェロモン濃度の取得
+FOR LOCAL, 0, MAX_CITY
+	IF CITY_OWNER:(LOCAL:0) == ARG:0
+		CITY_PHEROMONE:LOCAL = PHEROMONE:(ARG:0):LOCAL
+		CITY_ID:CITY_COUNT = LOCAL:0
+		CITY_COUNT ++
+		SIF CITY_COUNT >= GET_OWN_CITY(ARG:0)
+			BREAK
+	ENDIF
+NEXT
+
+;ノームソートなるものをウィキペで見つけて試す
+FOR LOCAL, 1, CITY_COUNT
+	IF CITY_PHEROMONE:(CITY_ID:(LOCAL - 1)) < CITY_PHEROMONE:(CITY_ID:LOCAL)
+		SWAP CITY_ID:(LOCAL - 1), CITY_ID:LOCAL
+		LOCAL = MAX(LOCAL - 2, 0)
+	ENDIF
+NEXT
+
+UNIT_POSITION:(ARG:0):(ARG:1) = CITY_ID:0
+
+IF !(CITY_ID:0)
+	PRINTFORML 場所決定の異常
+	FOR LOCAL, 1, CITY_COUNT
+		PRINTFORML {CITY_ID:(LOCAL:1), 3}%CITY_NAME_SHORT:(CITY_ID:(LOCAL:1)), 8%：{CITY_PHEROMONE:(LOCAL:1)}
+	NEXT
+	WAIT
+ENDIF
+
+;-------------------------------------------------
+;対象は捕縛可能なキャラか
+;君主でない、特殊キャラでない、死んでいない、CONFIG:300が3でない（100%逃亡する設定でない）が条件。
+;-------------------------------------------------
+@CAN_CAPTURE(対象)
+#FUNCTION
+#DIM 対象
+SIF !INRANGE(対象, 0, CHARANUM)
+	RETURNF 0
+
+RETURNF 対象 != GET_COUNTRY_BOSS(CFLAG:対象:所属) && !IS_SP_CHARA(対象) && CFLAG:対象:特殊状態 != 特殊状態_死亡 && !(対象 == MASTER && FLAG:戦死エンドフラグ)

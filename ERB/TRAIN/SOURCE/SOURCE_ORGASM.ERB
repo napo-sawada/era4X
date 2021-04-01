@@ -1,0 +1,1153 @@
+﻿;SOURCE_CHECKで使用する関数(射精・絶頂・噴乳など)
+
+;-------------------------------------------------
+;絶頂に関する処理
+;-------------------------------------------------
+@SOURCE_ORGASM(ARG:0)
+VARSET LOCAL, 0
+
+;表示用
+LOCALS:0 = Ｃ
+LOCALS:1 = Ｖ
+LOCALS:2 = Ａ
+LOCALS:3 = Ｂ
+LOCALS:4 = Ｍ
+LOCALS:5 = Ｕ	
+;射精箇所表示用	;射精箇所表示用
+LOCALS:6 =
+;●絶頂の判定と表示
+LOCAL:5 = 0
+LOCAL:6 = 0
+LOCAL:10 = 0
+;射精関連の処理
+LOCAL:15 = 0
+FOR LOCAL:0, 0, 6
+	LOCAL:2 = PALAM:(ARG:0):(LOCAL:0) + CUP:(ARG:0):(LOCAL:0)
+
+	;絶頂した場合
+	IF LOCAL:2 >= 10000
+		IF LOCAL:10
+			PRINT /
+		ELSE
+			IF !TFLAG:3
+				TFLAG:3 = 1
+				PRINTL 
+			ENDIF
+			PRINTFORM %ANAME(ARG:0), MAX_CHARANAME_LENGTH, RIGHT%:
+		ENDIF
+		LOCAL:10 = 1
+
+		;絶頂箇所の数を加算
+		LOCAL:5 ++
+
+		;絶頂強度に応じてNOWEXをセットし、メッセージの表示を行う
+		IF LOCAL:2 >= 150000
+			IF ARG:0 == MASTER
+				SETCOLOR 0x800080
+			ELSE
+				SETCOLOR 0xFF4000
+			ENDIF
+			NOWEX:(ARG:0):(LOCAL:0) = 9
+			PRINT 最強
+			;最強絶頂箇所の数を加算
+			LOCAL:6 ++
+		ELSEIF LOCAL:2 >= 80000
+			IF ARG:0 == MASTER
+				SETCOLOR 0x6000FF
+			ELSE
+				SETCOLOR カラー_オレンジ
+			ENDIF
+			NOWEX:(ARG:0):(LOCAL:0) = 4
+			PRINT 超強
+		ELSEIF LOCAL:2 >= 30000
+			IF ARG:0 == MASTER
+				SETCOLOR 0x0080FF
+			ELSE
+				SETCOLOR 0xFFC000
+			ENDIF
+			NOWEX:(ARG:0):(LOCAL:0) = 2
+			PRINT 強
+		ELSE
+			IF ARG:0 == MASTER
+				SETCOLOR カラー_シアン
+			ELSE
+				SETCOLOR カラー_注意
+			ENDIF
+			NOWEX:(ARG:0):(LOCAL:0) = 1
+		ENDIF
+		PRINTFORM 絶頂%LOCALS:(LOCAL:0)%
+
+		;絶頂経験を増やす
+		EXP:(ARG:0):絶頂経験 += NOWEX:(ARG:0):(LOCAL:0)
+		SIF TCVAR:(ARG:0):催眠中 > 0
+			EXP:(ARG:0):催眠絶頂経験 += NOWEX:(ARG:0):(LOCAL:0)
+	ENDIF
+NEXT
+RESETCOLOR
+
+;●噴乳の判定と表示
+LOCAL:2 = PALAM:(ARG:0):噴乳 + CUP:(ARG:0):噴乳
+
+;噴乳した場合
+IF LOCAL:2 >= 10000 && SOURCE:(ARG:0):快Ｂ + SOURCE:(ARG:0):快Ｖ + SOURCE:(ARG:0):快Ａ > 0
+	IF LOCAL:10
+		PRINT /
+	ELSE
+		IF !TFLAG:3
+			TFLAG:3 = 1
+			PRINTL 
+		ENDIF
+		PRINTFORM %ANAME(ARG:0), MAX_CHARANAME_LENGTH, RIGHT%:
+	ENDIF
+	LOCAL:10 = 1
+
+	;絶頂強度に応じてNOWEXをセットし、メッセージの表示を行う
+	IF LOCAL:2 >= 300000
+		IF ARG:0 == MASTER
+			SETCOLOR 0x800080
+		ELSE
+			SETCOLOR 0xFF4000
+		ENDIF
+		NOWEX:(ARG:0):噴乳 = 9
+		PRINT 超々大量
+	ELSEIF LOCAL:2 >= 150000
+		IF ARG:0 == MASTER
+			SETCOLOR 0x6000FF
+		ELSE
+			SETCOLOR カラー_オレンジ
+		ENDIF
+		NOWEX:(ARG:0):噴乳 = 4
+		PRINT 超大量
+	ELSEIF LOCAL:2 >= 50000
+		IF ARG:0 == MASTER
+			SETCOLOR 0x0080FF
+		ELSE
+			SETCOLOR 0xFFC000
+		ENDIF
+		NOWEX:(ARG:0):噴乳 = 2
+		PRINT 大量
+	ELSE
+		IF ARG:0 == MASTER
+			SETCOLOR カラー_シアン
+		ELSE
+			SETCOLOR カラー_注意
+		ENDIF
+		NOWEX:(ARG:0):噴乳 = 1
+	ENDIF
+	PRINTFORM 噴乳
+	RESETCOLOR
+
+	EXP:(ARG:0):噴乳経験値 += NOWEX:(ARG:0):噴乳
+
+	;触手搾乳中なら相手の妖術経験値をプラス
+	IF SELECTCOM == 207 && IS_MTAR(ARG:0)
+		FOR LOCAL:0, 0, MPLY_NUM
+			EXP:(MPLY:(LOCAL:0)):妖術経験値 += NOWEX:(ARG:0):噴乳 * 2
+		NEXT
+	ELSEIF IS_EQUIP_TARGET(ARG:0, 207)
+		LOCAL:1 = SEARCH_EQUIP(207, -1, ARG:0)
+		IF LOCAL:1 >= 0
+			FOR LOCAL:0, 0, MEQUIP_PLAYER_NUM:(LOCAL:1)
+				EXP:(MEQUIP_PLAYER:(LOCAL:1):(LOCAL:0)):妖術経験値 += NOWEX:(ARG:0):噴乳 * 2
+			NEXT
+		ENDIF
+	ENDIF
+ENDIF
+
+;●潮吹きの判定と表示
+LOCAL:11 = 0
+IF CONFIG:9 == 1 && NOWEX:(ARG:0):射精 == 0
+	IF (NOWEX:(ARG:0):Ｃ絶頂 >= 2 || NOWEX:(ARG:0):Ｖ絶頂 >= 2) && PALAM:(ARG:0):潮吹き + CUP:(ARG:0):潮吹き >= 10000
+		LOCAL:11 = 1
+	ELSEIF (NOWEX:(ARG:0):Ｃ絶頂 >= 1 || NOWEX:(ARG:0):Ｖ絶頂 >= 1) && PALAM:(ARG:0):潮吹き + CUP:(ARG:0):潮吹き >= 20000
+		LOCAL:11 = 1
+	ENDIF
+ENDIF
+
+IF LOCAL:11
+	IF LOCAL:10
+		PRINT /
+	ELSE
+		IF !TFLAG:3
+			TFLAG:3 = 1
+			PRINTL 
+		ENDIF
+		PRINTFORM %ANAME(ARG:0), MAX_CHARANAME_LENGTH, RIGHT%:
+	ENDIF
+	LOCAL:10 = 1
+
+	IF ARG:0 == MASTER
+		SETCOLOR 0x0080FF
+	ELSE
+		SETCOLOR 0xFFC000
+	ENDIF
+	PRINT 潮吹き
+	RESETCOLOR
+
+	NOWEX:(ARG:0):潮吹き = 1
+
+	SOURCE:(ARG:0):露出 += 100
+	IF !HAS_VAGINA(ARG:0)
+		SOURCE:(ARG:0):屈従 += 300
+	ELSE
+		SOURCE:(ARG:0):屈従 += 50
+	ENDIF
+ENDIF
+
+;●おもらしの判定と表示
+;絶頂・尿意限界によるおもらしの設定が有効の場合
+IF CONFIG:90 == 1
+	;尿意がある状態で絶頂強度の合計が4以上によるおもらし
+	IF TCVAR:(ARG:0):54 >= 1500 && SUM_NOWEX(ARG:0, 1, 0) >= 4
+		TCVAR:(ARG:0):0 = 1
+	;尿意が高い状態で絶頂することによるおもらし
+	ELSEIF TCVAR:(ARG:0):54 >= 3000 && SUM_NOWEX(ARG:0, 1, 0) >= 1
+		TCVAR:(ARG:0):0 = 2
+	;尿意の限界によるおもらし
+	ELSEIF TCVAR:(ARG:0):54 >= 4000
+		TCVAR:(ARG:0):0 = 3
+	ENDIF
+ENDIF
+
+IF TCVAR:(ARG:0):0
+	IF LOCAL:10
+		PRINT /
+	ELSE
+		IF !TFLAG:3
+			TFLAG:3 = 1
+			PRINTL 
+		ENDIF
+		PRINTFORM %ANAME(ARG:0), MAX_CHARANAME_LENGTH, RIGHT%:
+	ENDIF
+	LOCAL:10 = 1
+
+	IF ARG:0 == MASTER
+		SETCOLOR カラー_シアン
+	ELSE
+		SETCOLOR カラー_注意
+	ENDIF
+	IF TCVAR:(ARG:0):54 >= 3000
+		PRINT 大量おもらし
+		TCVAR:(ARG:0):1 = 2
+	ELSE
+		PRINT おもらし
+		TCVAR:(ARG:0):1 = 1
+	ENDIF
+	RESETCOLOR
+
+	;尿残量を0にする
+	TCVAR:(ARG:0):54 = 0
+
+	;おもらしによる経験・ソースの追加
+	EXP:(ARG:0):排泄経験値 += 1
+	EXP:(ARG:0):おもらし経験 += TCVAR:(ARG:0):1
+
+	LOCAL:3 = 400
+
+	SELECTCASE ABL:(ARG:0):排泄
+		CASE 0
+			TIMES LOCAL:3, 0.00
+		CASE 1
+			TIMES LOCAL:3, 0.10
+		CASE 2
+			TIMES LOCAL:3, 0.20
+		CASE 3
+			TIMES LOCAL:3, 0.40
+		CASE 4
+			TIMES LOCAL:3, 0.70
+		CASEELSE
+			LOCAL:3 = LOCAL:3 * (100 + (ABL:(ARG:0):排泄 - 5) * 2) / 100
+	ENDSELECT
+
+	SOURCE:(ARG:0):露出 += 300
+	SOURCE:(ARG:0):逸脱 += 80
+	SOURCE:(ARG:0):中毒充足 += LOCAL:3
+
+	;主導権に応じた優越・屈従のソース追加
+	CALL ADD_SOURCE_INITIATIVE_U(ARG:0, 20, 80)
+ENDIF
+
+
+;●射精の判定と表示
+LOCAL:2 = PALAM:(ARG:0):射精 + CUP:(ARG:0):射精
+
+;射精した場合
+IF LOCAL:2 >= 10000 && SOURCE:(ARG:0):快Ｐ + NOWEX:(ARG:0):Ｖ絶頂 + NOWEX:(ARG:0):Ａ絶頂 > 0
+	CALL PROCESS_EJACULATION(ARG:0, LOCAL:2, LOCAL:10)
+	LOCAL:10 = 1
+ENDIF
+
+
+;●ソースの追加・気力の消耗
+LOCAL:30 = 0
+LOCAL:31 = 0
+FOR LOCAL:0, 0, 8
+	LOCAL:2 = 0
+	LOCAL:3 = 0
+	IF NOWEX:(ARG:0):(LOCAL:0) > 0
+		;ソースの追加
+		CALL ADD_SOURCE_ORGASM(ARG:0, LOCAL:0)
+
+		;絶頂箇所に応じた基本消耗度の設定
+		SELECTCASE LOCAL:0
+			;Ｃ絶頂
+			CASE 0
+				LOCAL:2 = 15000
+				LOCAL:3 = 8000
+			;Ｖ絶頂
+			CASE 1
+				LOCAL:2 = 15000
+				LOCAL:3 = 10000
+			;Ａ絶頂
+			CASE 2
+				LOCAL:2 = 25000
+				LOCAL:3 = 17000
+			;Ｂ絶頂
+			CASE 3
+				LOCAL:2 = 10000
+				LOCAL:3 = 8000
+			;Ｍ絶頂
+			CASE 4
+				LOCAL:2 = 15000
+				LOCAL:3 = 7000
+			;Ｕ絶頂
+			CASE 5
+				LOCAL:2 = 15000
+				LOCAL:3 = 8000
+			;射精
+			CASE 6
+				LOCAL:2 = 15000
+				LOCAL:3 = 10000
+			;噴乳
+			CASE 7
+				LOCAL:2 = 20000
+				LOCAL:3 = 10000
+			;潮吹き
+			CASE 8
+				LOCAL:2 = 6000
+				LOCAL:3 = 6000
+		ENDSELECT
+
+		;絶頂強度に基づく補正
+		LOCAL:2 *= MAX(NOWEX:(ARG:0):(LOCAL:0) / 3, 1)
+		LOCAL:3 *= MAX(NOWEX:(ARG:0):(LOCAL:0) / 3, 1)
+
+		IF LOCAL == 5
+			;射精による体力・気力の消耗を計算
+			;射精Lvによる補正
+			SELECTCASE ABL:(ARG:0):射精
+				CASE 0
+					TIMES LOCAL:2, 1.00
+					TIMES LOCAL:3, 1.00
+				CASE 1
+					TIMES LOCAL:2, 0.80
+					TIMES LOCAL:3, 0.60
+				CASE 2
+					TIMES LOCAL:2, 0.60
+					TIMES LOCAL:3, 0.40
+				CASE 3
+					TIMES LOCAL:2, 0.45
+					TIMES LOCAL:3, 0.25
+				CASE 4
+					TIMES LOCAL:2, 0.30
+					TIMES LOCAL:3, 0.15
+				CASEELSE
+					LOCAL:2 = LOCAL:2 / (MIN(ABL:(ARG:0):射精 - 5, 55) + 5)
+					LOCAL:3 = LOCAL:3 / (MIN(ABL:(ARG:0):射精 - 5, 55) * 2 + 10)
+			ENDSELECT
+		ELSEIF LOCAL == 6
+			;噴乳による体力・気力の消耗を計算
+			;噴乳Lvによる補正
+			SELECTCASE ABL:(ARG:0):噴乳
+				CASE 0
+					TIMES LOCAL:2, 1.00
+					TIMES LOCAL:3, 1.00
+				CASE 1
+					TIMES LOCAL:2, 0.80
+					TIMES LOCAL:3, 0.60
+				CASE 2
+					TIMES LOCAL:2, 0.60
+					TIMES LOCAL:3, 0.40
+				CASE 3
+					TIMES LOCAL:2, 0.45
+					TIMES LOCAL:3, 0.25
+				CASE 4
+					TIMES LOCAL:2, 0.30
+					TIMES LOCAL:3, 0.15
+				CASEELSE
+					LOCAL:2 = LOCAL:2 / (MIN(ABL:(ARG:0):噴乳 - 5, 55) + 5)
+					LOCAL:3 = LOCAL:3 / (MIN(ABL:(ARG:0):噴乳 - 5, 55) * 2 + 10)
+			ENDSELECT
+			IF GETBIT(TALENT:(ARG:0):淫乱系, 素質_淫乱_雌牛)
+				TIMES LOCAL:2, 0.5
+				TIMES LOCAL:3, 0.25
+			ENDIF
+		ENDIF
+		;欲望Lvによる補正
+		IF ABL:(ARG:0):欲望 < 5
+			LOCAL:2 = LOCAL:2 * (30 - ABL:(ARG:0):欲望) / 30
+			LOCAL:3 = LOCAL:3 * (15 - ABL:(ARG:0):欲望) / 15
+		ELSE
+			LOCAL:2 = LOCAL:2 * (130 - MIN(ABL:(ARG:0):欲望, 30)) / 150
+			LOCAL:3 = LOCAL:3 * (45 - MIN(ABL:(ARG:0):欲望, 30)) / 60
+		ENDIF
+		LOCAL:30 += LOCAL:2
+		LOCAL:31 += LOCAL:3
+	ENDIF
+NEXT
+
+;●同時絶頂ボーナスの設定
+LOCAL:7 = 1
+IF LOCAL:5 == 6
+	LOCAL:7 = 16
+ELSEIF LOCAL:5 == 5
+	LOCAL:7 = 12
+ELSEIF LOCAL:5 == 4
+	LOCAL:7 = 8
+ELSEIF LOCAL:5 >= 2
+	IF LOCAL:5 == 3
+		LOCAL:7 = 4
+	ELSE
+		LOCAL:7 = 2
+	ENDIF
+ENDIF
+
+FOR LOCAL:0, 0, 100
+	;同時絶頂によるボーナスを掛ける(廃止)
+	;NOWEX:(ARG:0):(LOCAL:0) *= LOCAL:7
+
+	;絶頂回数を加算
+	EX:(ARG:0):(LOCAL:0) += NOWEX:(ARG:0):(LOCAL:0) * LOCAL:7
+NEXT
+
+IF LOCAL:5 == 6
+	;六重絶頂
+	IF LOCAL:6 == 6
+		SETCOLOR カラー_警告
+		PRINT  <最 強 六 重 絶 頂>
+	ELSE
+		SETCOLOR 0xFF4000
+		PRINT  <六 重 絶 頂>
+	ENDIF
+ELSEIF LOCAL:5 == 5
+	;五重絶頂
+	IF LOCAL:6 == 5
+		SETCOLOR カラー_警告
+		PRINT  <最 強 五 重 絶 頂>
+	ELSE
+		SETCOLOR 0xFF4000
+		PRINT  <五 重 絶 頂>
+	ENDIF
+ELSEIF LOCAL:5 == 4
+	;四重絶頂
+	IF LOCAL:6 == 4
+		SETCOLOR カラー_オレンジ
+		PRINT  <最 強 四 重 絶 頂>
+	ELSE
+		SETCOLOR 0xFFC000
+		PRINT  <四 重 絶 頂>
+	ENDIF
+ENDIF
+RESETCOLOR
+
+IF LOCAL:10
+	;絶頂による体力・気力の消耗
+	LOCAL:8 = LOCAL:30 / 200
+	LOCAL:9 = LOCAL:31 / 200
+	DOWNBASE:(ARG:0):体力 += LOCAL:8
+	DOWNBASE:(ARG:0):気力 += LOCAL:9
+;	PRINTFORM  体力-{LOCAL:8} 気力-{LOCAL:9}
+ENDIF
+
+SIF BASE:(ARG:0):精神力 > 0 && CFLAG:(ARG:0):崩壊
+	CFLAG:(ARG:0):崩壊 = MAX(CFLAG:(ARG:0):崩壊 - SUM_NOWEX(ARG:0) * 5, 0)
+
+IF LOCAL:10
+	PRINTL 
+ENDIF
+
+;-------------------------------------------------
+;射精の内部処理
+;-------------------------------------------------
+@PROCESS_EJACULATION(対象, 強度, スラッシュ)
+#DIM 対象
+#DIM 射精相手
+#DIM 射精先
+#DIM 強度
+#DIM 射精量
+#DIM 補正後射精量
+#DIM スラッシュ
+#DIMS 出力文字列
+#DIMS あふれ文字列
+#DIMS 射精先文字列
+#DIM 愛情倍率
+#DIM 屈従倍率
+#DIM 恐怖倍率
+
+VARSET LOCAL
+
+IF スラッシュ
+	PRINT /
+ELSE
+	IF !TFLAG:3
+		TFLAG:3 = 1
+		PRINTL 
+	ENDIF
+	PRINTFORM %ANAME(対象), MAX_CHARANAME_LENGTH, RIGHT%:
+ENDIF
+出力文字列 =
+
+IF IS_EQUIP_TARGET(対象, 78) && TCVAR:対象:77 == 0
+	SETCOLOR カラー_ピンク
+	PRINTFORM 射精止め
+	RESETCOLOR
+	TCVAR:(対象):76 += 強度
+	RETURN 0
+ENDIF
+
+;絶頂強度に応じてNOWEXをセットし、メッセージの表示を行う
+IF 強度 >= 200000 || ((TALENT:(対象):絶倫 || TCVAR:(対象):66) && 強度 >= 80000)
+	IF 対象 == MASTER
+		SETCOLOR 0x800080
+	ELSE
+		SETCOLOR 0xFF4000
+	ENDIF
+	IF !TALENT:対象:絶倫 && !TCVAR:対象:66
+		射精量 = 20 + (強度 - 150000) / 20000
+	ELSE
+		射精量 = 20 + (強度 - 60000) / 10000
+	ENDIF
+	出力文字列 =  超々大量
+ELSEIF 強度 >= 80000 || ((TALENT:(対象):絶倫 || TCVAR:(対象):66) && 強度 >= 40000)
+	IF 対象 == MASTER
+		SETCOLOR 0x6000FF
+	ELSE
+		SETCOLOR カラー_オレンジ
+	ENDIF
+	射精量 = RAND(10, 21)
+	出力文字列 = 超大量
+ELSEIF 強度 >= 40000 || TALENT:(対象):絶倫 || TCVAR:(対象):66
+	IF 対象 == MASTER
+		SETCOLOR 0x0080FF
+	ELSE
+		SETCOLOR 0xFFC000
+	ENDIF
+	射精量 = RAND(5, 16)
+	出力文字列 = 大量
+ELSE
+	IF 対象 == MASTER
+		SETCOLOR カラー_シアン
+	ELSE
+		SETCOLOR カラー_注意
+	ENDIF
+	射精量 = RAND(3, 9)
+ENDIF
+
+SIF IS_EQUIP_TARGET(対象, GETNUM(TRAINNAME, "玉揉み"))
+	射精量 = 射精量 * 3 / 2
+
+IF SOURCE:(対象):快Ｐ == 0 && NOWEX:対象:Ｖ絶頂 + NOWEX:対象:Ａ絶頂 > 0
+	出力文字列 = %出力文字列%ところてん
+ENDIF
+PRINTFORM %出力文字列%射精
+RESETCOLOR
+
+NOWEX:対象:射精 = 射精量
+EXP:(対象):射精経験値 += 射精量 / 3
+EXP:(対象):絶頂経験 += 射精量 / 3
+
+射精先文字列 =
+あふれ文字列 =
+FOR LOCAL:0, 0, STACK_SPERM_CHARA_NUM:対象:0
+
+	射精相手 = STACK_SPERM_CHARA_MAP:対象:LOCAL
+	射精先 = STACK_SPERM_TO_MAP:対象:LOCAL
+
+	;射精場所に応じた補正を掛けて精愛経験値を加算
+	;射精場所に応じたソースを追加(LOCAL:13=愛情倍率、屈従倍率=屈従倍率、恐怖倍率=恐怖倍率)
+	愛情倍率 = 20
+	屈従倍率 = 20
+	恐怖倍率 = 20
+
+	IF !GROUPMATCH(射精先, 射精部位_無駄, 射精部位_触手)
+		SELECTCASE ABL:(射精相手):精愛
+			CASE 0
+				LOCAL:12 = 0
+			CASE 1
+				LOCAL:12 = 20
+			CASE 2
+				LOCAL:12 = 50
+			CASE 3
+				LOCAL:12 = 80
+			CASE 4
+				LOCAL:12 = 120
+			CASEELSE
+				LOCAL:12 = MIN(ABL:(射精相手):精愛 * 3 + 150, 2000)
+		ENDSELECT
+	ENDIF
+	SELECTCASE 射精先
+		;膣内
+		CASE 1
+			愛情倍率 = 80
+			屈従倍率 = 60
+			恐怖倍率 = 200
+			IF IS_OVULATION(射精相手)
+				TIMES 愛情倍率, 1.5
+				TIMES 屈従倍率, 1.5
+				TIMES 恐怖倍率, 1.5
+				TIMES LOCAL:12, 1.5
+			ENDIF
+			EXP:射精相手:膣内射精経験 ++
+		;アナル
+		CASE 2
+			愛情倍率 = 40
+			屈従倍率 = 120
+			恐怖倍率 = 40
+			EXP:射精相手:腸内射精経験 ++
+		CASE 3
+		;口
+		CASE 4
+			愛情倍率 = 50
+			屈従倍率 = 40
+			恐怖倍率 = 40
+			EXP:射精相手:口内射精経験 ++
+		;胸
+		CASE 5
+			愛情倍率 = 40
+			屈従倍率 = 30
+			恐怖倍率 = 30
+		CASE 6
+		CASE 7
+		;顔
+		CASE 8
+			愛情倍率 = 30
+			屈従倍率 = 30
+			恐怖倍率 = 30
+		;髪
+		CASE 9
+		CASE 10
+		CASE 11
+		;オナホ
+		CASE 12
+		;触手
+		CASE 13
+		;ゴム
+		CASE 14
+		;その他
+		CASEELSE
+	ENDSELECT
+
+	IF !GROUPMATCH(射精先, 射精部位_無駄, 射精部位_触手)
+		;射精量による補正
+		SELECTCASE NOWEX:(対象):射精
+			CASE 1 TO 3
+				TIMES 愛情倍率, 1.00
+				TIMES 屈従倍率, 1.00
+				TIMES 恐怖倍率, 1.00
+			CASE 4 TO 6
+				TIMES 愛情倍率, 1.50
+				TIMES 屈従倍率, 1.50
+				TIMES 恐怖倍率, 1.50
+			CASE 7 TO 10
+				TIMES 愛情倍率, 2.00
+				TIMES 屈従倍率, 2.00
+				TIMES 恐怖倍率, 2.00
+			CASE IS > 10
+				TIMES 愛情倍率, 2.50
+				TIMES 屈従倍率, 2.50
+				TIMES 恐怖倍率, 2.50
+		ENDSELECT
+		SIF !GROUPMATCH(射精先, 射精部位_ゴム)
+			EXP:(射精相手):精愛経験値 += 射精量
+	ENDIF
+
+	IF !GROUPMATCH(射精先, 射精部位_無駄, 射精部位_触手)
+		;愛情ソースの追加
+		CALL ADD_SOURCE_AIZYOU(射精相手, 愛情倍率)
+	ENDIF
+
+	;屈従ソースの追加
+	CALL ADD_SOURCE_INITIATIVE_U(対象, 0, 屈従倍率)
+
+	補正後射精量 = CUM_AMOUNT_CORRECTION(GET_ID(対象), 射精相手, 射精先, 射精量)
+
+	IF !GROUPMATCH(射精先, 射精部位_無駄, 射精部位_触手)
+		IF !IS_INITIATIVE(射精相手)
+			LOCAL:16 = 100
+			IF TALENT:(射精相手):恋慕 || TALENT:(射精相手):服従
+				LOCAL:16 = 0
+			ELSEIF CFLAG:(射精相手):2 >= 1500
+				LOCAL:16 = 30
+			ELSEIF CFLAG:(射精相手):2 >= 800
+				LOCAL:16 = 60
+			ENDIF
+			SOURCE:(射精相手):恐怖 += 射精量 * 恐怖倍率 * LOCAL:16 / 100
+		ENDIF
+
+		SOURCE:(射精相手):中毒充足 += 射精量 * LOCAL:12
+
+	;射精箇所が触手なら相手の妖術経験値をプラス
+		IF 射精先 == 射精部位_触手
+			EXP:(射精相手):妖術経験値 += 射精量 * 2
+		ENDIF
+
+		IF 補正後射精量 != CORRECT_CUM_OVERFLOW(射精相手, 射精先, 補正後射精量)
+			あふれ文字列=%あふれ文字列%%TOSTR_SPACE(MAX_CHARANAME_LENGTH + 1)%すでにいっぱいの%ANAME(射精相手)%の%CUM_SLOT_NAME:射精先%から、{補正後射精量 - CORRECT_CUM_OVERFLOW(射精相手, 射精先, 補正後射精量)}mlの精液が溢れた……\n
+			補正後射精量 = CORRECT_CUM_OVERFLOW(射精相手, 射精先, 補正後射精量)
+		ENDIF
+	ENDIF
+
+;体内に対する射精か見る。コンドームの場合INJECTIONさせない
+	IF !IS_EQUIP_PLAYER(対象, 75)
+		CALL RECORD_CREAMPIE(射精相手, GET_ID(対象), 補正後射精量, 射精先)
+	ENDIF
+
+	CUM_TO_COUNT:(対象):(射精先) ++
+	CUM_TO_AMOUNT:(対象):(射精先) += 補正後射精量
+
+	射精先文字列=%射精先文字列%(%CUM_SLOT_NAME:射精先%
+
+	CUM_GET_AMOUNT:(射精相手):(射精先) += 補正後射精量
+	CUM_GET_COUNT:(射精相手):射精先 ++
+	CUM_CUR_AMOUNT:(射精相手):(射精先) += 補正後射精量
+	射精先文字列=%射精先文字列%:{補正後射精量}ml
+	IF !GROUPMATCH(射精先, 射精部位_無駄, 射精部位_ゴム, 射精部位_触手)
+		射精先文字列=%射精先文字列%:%ANAME(射精相手)%
+	ENDIF
+	射精先文字列=%射精先文字列%)
+NEXT
+SIF 射精先文字列 != ""
+	PRINTFORM %射精先文字列%
+IF あふれ文字列 != ""
+	PRINTL
+	PRINTFORM %SUBSTRING(あふれ文字列, 0, STRLENS(あふれ文字列) - 1)%
+ENDIF
+
+;-------------------------------------------------
+;DESC  :口内射精、膣内射精等であふれる場合、入るだけの量に補正する
+;-------------------------------------------------
+@CORRECT_CUM_OVERFLOW(対象, 射精先, 射精量)
+#FUNCTION
+#DIM 対象
+#DIM 射精先
+#DIM 射精量
+#DIM 精液量
+
+SIF !GROUPMATCH(射精先, 射精部位_口, 射精部位_アナル, 射精部位_膣内)
+	RETURNF 射精量
+
+精液量 = 0
+SELECTCASE 射精先
+	CASE 射精部位_膣内
+		精液量 = SUM_WOMB_SPERM_AMOUNT(対象)
+		IF 精液量 >= CALC_WOMB_SIZE(対象)
+			RETURNF 0
+		ELSEIF 精液量 + 射精量 >= CALC_WOMB_SIZE(対象)
+			RETURNF CALC_WOMB_SIZE(対象) - 精液量
+		ELSE
+			RETURNF 射精量
+		ENDIF
+	CASE 射精部位_口
+		精液量 = SUM_STOMACH_SPERM_AMOUNT(対象)
+		IF 精液量 >= CALC_STOMACH_SIZE(対象)
+			RETURNF 0
+		ELSEIF 精液量 + 射精量 >= CALC_STOMACH_SIZE(対象)
+			RETURNF CALC_STOMACH_SIZE(対象) - 精液量
+		ELSE
+			RETURNF 射精量
+		ENDIF
+	CASE 射精部位_アナル
+		精液量 = SUM_ANUS_SPERM_AMOUNT(対象)
+		IF 精液量 >= CALC_ANUS_SIZE(対象)
+			RETURNF 0
+		ELSEIF 精液量 + 射精量 >= CALC_ANUS_SIZE(対象)
+			RETURNF CALC_ANUS_SIZE(対象) - 精液量
+		ELSE
+			RETURNF 射精量
+		ENDIF
+ENDSELECT
+
+RETURNF 射精量
+
+;-------------------------------------------------
+;DESC  :射精量の補正
+;-------------------------------------------------
+@CUM_AMOUNT_CORRECTION(精液ID, 射精相手, 射精先, 射精量)
+#FUNCTION
+#DIM 精液ID
+#DIM 射精者
+#DIM 射精相手
+#DIM 射精先
+#DIM 射精量
+
+射精者 = ID_TO_CHARA(精液ID)
+
+IF 射精者 >= 0
+	SIF GETBIT(TALENT:射精者:淫乱系, 素質_淫乱_射精狂い)
+		射精量 += RAND(5, 16)
+
+	SIF GETBIT(TALENT:射精者:淫乱系, 素質_淫乱_濃厚精液)
+		射精量 += RAND(5, 16)
+ENDIF
+
+;危険日なら倍
+SIF 射精相手 >= 0 && IS_OVULATION(射精相手) && 射精先 == 射精部位_膣内
+	射精量 *= 2
+
+SIF 射精者 >= 0
+	精液ID = TO_MOB_SPERM_ID(射精者)
+
+;対象が動物の場合、IDを変換
+IF 射精者 >= 0 && IS_ANIMAL(射精者)
+	SELECTCASE TALENT:射精者:動物
+		CASE 動物_犬
+			精液ID = GET_SPERM_ID("犬")
+		CASE 動物_豚
+			精液ID = GET_SPERM_ID("豚")
+		CASE 動物_馬
+			精液ID = GET_SPERM_ID("馬")
+		CASE 動物_猿
+			精液ID = GET_SPERM_ID("猿")
+	ENDSELECT
+ENDIF
+
+;対象の精液が触手、動物の場合、クソ多くする
+SIF IS_ANIMAL_SPERM(精液ID) || 精液ID == GET_SPERM_ID("触手")
+	射精量 += RAND(500, 1501)
+
+RETURNF 射精量
+
+
+;-------------------------------------------------
+;中出し量の記録(妊娠判定用) ※引数に注意
+;ARG:0=中出しされたキャラの「キャラ番号」
+;ARG:1=中出ししたキャラの「ID」
+;ARG:2=精液量
+;ARG:3=射精部位
+;-------------------------------------------------
+@RECORD_CREAMPIE(ARG:0, ARG:1, ARG:2, ARG:3=射精部位_膣内)
+
+SIF !GROUPMATCH(ARG:3, 射精部位_膣内, 射精部位_アナル, 射精部位_口) 
+	RETURN 0
+
+ARG:2 = CORRECT_CUM_OVERFLOW(ARG:0, ARG:3, ARG:2)
+
+SIF ARG:2 == 0
+	RETURN 0
+
+LOCAL:1 = ID_TO_CHARA(ARG:1)
+
+
+;対象が動物の場合、IDを変換
+IF LOCAL:1 >= 0 && IS_ANIMAL(LOCAL:1)
+	SELECTCASE TALENT:(LOCAL:1):動物
+		CASE 動物_犬
+			ARG:1 = GET_SPERM_ID("犬")
+		CASE 動物_豚
+			ARG:1 = GET_SPERM_ID("豚")
+		CASE 動物_馬
+			ARG:1 = GET_SPERM_ID("馬")
+		CASE 動物_猿
+			ARG:1 = GET_SPERM_ID("猿")
+	ENDSELECT
+ENDIF
+
+;モブの場合、精液IDを変換
+SIF LOCAL:1 >= 0
+	ARG:1 = TO_MOB_SPERM_ID(LOCAL:1)
+
+;性的嗜好経験値を加算
+;危険日なら倍
+SIF ARG:3 == 射精部位_膣内
+	SEXUAL_PREFERENCE_EXP:(ARG:0):性的嗜好_妊娠したい += IS_OVULATION(ARG:0) + 1
+
+SELECTCASE ARG:3
+	CASE 射精部位_膣内
+		;既にキャラがリストに存在すれば精液量を追加
+		FOR LOCAL:0, 0, WOMB_RECORD_MAX
+			IF WOMB_SPERM_ID:(ARG:0):(LOCAL:0) == ARG:1
+				WOMB_SPERM_AMOUNT:(ARG:0):(LOCAL:0) += ARG:2
+				WOMB_SPERM_COUNT:(ARG:0):(LOCAL:0) ++
+				WOMB_SPERM_TIME:(ARG:0):(LOCAL:0) = 0
+				WOMB_TOTAL_CREAMPIED_AMOUNT:(ARG:0):0 += ARG:2
+				RETURN ARG:2
+			ENDIF
+		NEXT
+		;キャラがリストに載っていなければ新たに追加
+		FOR LOCAL:0, 0, WOMB_RECORD_MAX
+			IF WOMB_SPERM_ID:(ARG:0):(LOCAL:0) == 0
+				;中出ししたキャラのIDと精液量を記録
+				WOMB_SPERM_ID:(ARG:0):(LOCAL:0) = ARG:1
+				WOMB_SPERM_AMOUNT:(ARG:0):(LOCAL:0) = ARG:2
+				WOMB_SPERM_COUNT:(ARG:0):(LOCAL:0) ++
+				WOMB_SPERM_TIME:(ARG:0):(LOCAL:0) = 0
+				WOMB_TOTAL_CREAMPIED_AMOUNT:(ARG:0):0 += ARG:2
+				RETURN ARG:2
+			ENDIF
+		NEXT
+	CASE 射精部位_口
+		;既にキャラがリストに存在すれば精液量を追加
+		FOR LOCAL:0, 0, WOMB_RECORD_MAX
+			IF STOMACH_SPERM_ID:(ARG:0):(LOCAL:0) == ARG:1
+				STOMACH_SPERM_AMOUNT:(ARG:0):(LOCAL:0) += ARG:2
+				STOMACH_SPERM_COUNT:(ARG:0):(LOCAL:0) ++
+				STOMACH_SPERM_TIME:(ARG:0):(LOCAL:0) = 0
+				STOMACH_TOTAL_CREAMPIED_AMOUNT:(ARG:0):0 += ARG:2
+				RETURN ARG:2
+			ENDIF
+		NEXT
+		;キャラがリストに載っていなければ新たに追加
+		FOR LOCAL:0, 0, WOMB_RECORD_MAX
+			IF STOMACH_SPERM_ID:(ARG:0):(LOCAL:0) == 0
+				;中出ししたキャラのIDと精液量を記録
+				STOMACH_SPERM_ID:(ARG:0):(LOCAL:0) = ARG:1
+				STOMACH_SPERM_AMOUNT:(ARG:0):(LOCAL:0) = ARG:2
+				STOMACH_SPERM_COUNT:(ARG:0):(LOCAL:0) ++
+				STOMACH_SPERM_TIME:(ARG:0):(LOCAL:0) = 0
+				STOMACH_TOTAL_CREAMPIED_AMOUNT:(ARG:0):0 += ARG:2
+				RETURN ARG:2
+			ENDIF
+		NEXT
+	CASE 射精部位_アナル
+		;既にキャラがリストに存在すれば精液量を追加
+		FOR LOCAL:0, 0, WOMB_RECORD_MAX
+			IF ANUS_SPERM_ID:(ARG:0):(LOCAL:0) == ARG:1
+				ANUS_SPERM_AMOUNT:(ARG:0):(LOCAL:0) += ARG:2
+				ANUS_SPERM_COUNT:(ARG:0):(LOCAL:0) ++
+				ANUS_SPERM_TIME:(ARG:0):(LOCAL:0) = 0
+				ANUS_TOTAL_CREAMPIED_AMOUNT:(ARG:0):0 += ARG:2
+				RETURN ARG:2
+			ENDIF
+		NEXT
+		;キャラがリストに載っていなければ新たに追加
+		FOR LOCAL:0, 0, WOMB_RECORD_MAX
+			IF ANUS_SPERM_ID:(ARG:0):(LOCAL:0) == 0
+				;中出ししたキャラのIDと精液量を記録
+				ANUS_SPERM_ID:(ARG:0):(LOCAL:0) = ARG:1
+				ANUS_SPERM_AMOUNT:(ARG:0):(LOCAL:0) = ARG:2
+				ANUS_SPERM_COUNT:(ARG:0):(LOCAL:0) ++
+				ANUS_SPERM_TIME:(ARG:0):(LOCAL:0) = 0
+				ANUS_TOTAL_CREAMPIED_AMOUNT:(ARG:0):0 += ARG:2
+				RETURN ARG:2
+			ENDIF
+		NEXT
+ENDSELECT
+
+RETURN 1
+
+;-------------------------------------------------
+;絶頂した／させたときのソースの追加処理  ARG:0=絶頂したキャラの番号、ARG:1=絶頂箇所
+;-------------------------------------------------
+@ADD_SOURCE_ORGASM(ARG:0, ARG:1)
+VARSET LOCAL, 0
+
+SELECTCASE NOWEX:(ARG:0):(ARG:1)
+	CASE 1
+		LOCAL:2 = 100
+	CASE 2
+		LOCAL:2 = 150
+	CASE 4
+		LOCAL:2 = 200
+	CASE 9
+		LOCAL:2 = 250
+ENDSELECT
+
+;●絶頂したキャラへのソースの追加
+SELECTCASE ARG:1
+	;Ｃ絶頂
+	CASE 0
+		SOURCE:(ARG:0):露出 += LOCAL:2 * 200 / 100
+		SOURCE:(ARG:0):屈従 += LOCAL:2 * 50 / 100
+		LOCAL:3 = LOCAL:2 * 100 / 100 + 100
+		LOCAL:4 = LOCAL:2 * 60 / 100
+		IF GETBIT(TALENT:(ARG:0):淫乱系, 素質_淫乱_淫核)
+			SOURCE:(ARG:0):中毒充足 += LOCAL:2 * 1000 / 100
+		ENDIF
+	;Ｖ絶頂
+	CASE 1
+		SOURCE:(ARG:0):愛情 += LOCAL:2 * 100 / 100
+		SOURCE:(ARG:0):露出 += LOCAL:2 * 300 / 100
+		SOURCE:(ARG:0):屈従 += LOCAL:2 * 150 / 100
+		SOURCE:(ARG:0):欲情追加 += LOCAL:2 * 1000 / 100
+		LOCAL:3 = LOCAL:2 * 100 / 100 + 100
+		LOCAL:4 = LOCAL:2 * 100 / 100
+		IF GETBIT(TALENT:(ARG:0):淫乱系, 素質_淫乱_淫壷)
+			SOURCE:(ARG:0):中毒充足 += LOCAL:2 * 1000 / 100
+		ENDIF
+	;Ａ絶頂
+	CASE 2
+		SOURCE:(ARG:0):露出 += LOCAL:2 * 500 / 100
+		SOURCE:(ARG:0):欲情追加 += LOCAL:2 * 1000 / 100
+		LOCAL:3 = LOCAL:2 * 100 / 100 + 100
+		LOCAL:4 = LOCAL:2 * 160 / 100
+		IF GETBIT(TALENT:(ARG:0):淫乱系, 素質_淫乱_尻穴狂い)
+			SOURCE:(ARG:0):中毒充足 += LOCAL:2 * 1000 / 100
+		ENDIF
+	;Ｂ絶頂
+	CASE 3
+		SOURCE:(ARG:0):露出 += LOCAL:2 * 200 / 100
+		SOURCE:(ARG:0):屈従 += LOCAL:2 * 80 / 100
+		LOCAL:3 = LOCAL:2 * 100 / 100 + 100
+		LOCAL:4 = LOCAL:2 * 60 / 100
+		IF GETBIT(TALENT:(ARG:0):淫乱系, 素質_淫乱_淫乳)
+			SOURCE:(ARG:0):中毒充足 += LOCAL:2 * 1000 / 100
+		ENDIF
+	;Ｍ絶頂
+	CASE 4
+		SOURCE:(ARG:0):愛情 += LOCAL:2 * 100 / 100
+		SOURCE:(ARG:0):屈従 += LOCAL:2 * 50 / 100
+		LOCAL:3 = LOCAL:2 * 100 / 100 + 100
+		LOCAL:4 = LOCAL:2 * 60 / 100
+		IF GETBIT(TALENT:(ARG:0):淫乱系, 素質_淫乱_蕩唇)
+			SOURCE:(ARG:0):中毒充足 += LOCAL:2 * 1000 / 100
+		ENDIF
+	;Ｕ絶頂
+	CASE 5
+		SOURCE:(ARG:0):露出 += LOCAL:2 * 500 / 100
+		SOURCE:(ARG:0):欲情追加 += LOCAL:2 * 1000 / 100
+		LOCAL:3 = LOCAL:2 * 100 / 100 + 100
+		LOCAL:4 = LOCAL:2 * 160 / 100
+		IF GETBIT(TALENT:(ARG:0):淫乱系, 素質_淫乱_尿道狂い)
+			SOURCE:(ARG:0):中毒充足 += LOCAL:2 * 1000 / 100
+		ENDIF
+	;射精
+	CASE 6
+		SOURCE:(ARG:0):露出 += LOCAL:2 * 400 / 100
+		LOCAL:3 = LOCAL:2 * 200 / 100 + 200
+		LOCAL:4 = LOCAL:2 * 80 / 100
+		IF GETBIT(TALENT:(ARG:0):淫乱系, 素質_淫乱_射精狂い)
+			SOURCE:(ARG:0):中毒充足 += LOCAL:2 * 1000 / 100
+		ENDIF
+
+		FOR LOCAL:0, 0, STACK_SPERM_CHARA_NUM:(ARG:0):0
+			;膣内射精の場合(コンドームつけてたらだめ）
+			LOCAL:6 = STACK_SPERM_CHARA_MAP:(ARG:0):LOCAL
+			IF LOCAL:6 >= 0 && STACK_SPERM_TO_MAP:(ARG:0):LOCAL == 射精部位_膣内 && !IS_EQUIP_PLAYER(LOCAL:6, 75)
+				;獣変化中
+				IF TALENT:(ARG:0):動物耳 || TALENT:(ARG:0):しっぽ
+					SOURCE:(ARG:0):歓喜 += 3000
+					;地の文表示用のフラグを立てる
+					TCVAR:(ARG:0):57 = 1
+				ENDIF
+				;媚薬
+				IF TCVAR:(LOCAL:6):60 == 1
+					SOURCE:(LOCAL:6):歓喜 += 700
+				ENDIF
+				;麻薬
+				IF TCVAR:(LOCAL:6):67 == 1
+					SOURCE:(LOCAL:6):歓喜 += 1000
+				ENDIF
+				;受精中毒
+				IF GETBIT(TALENT:(LOCAL:6):淫乱系, 素質_淫乱_孕みたがり)
+					SOURCE:(LOCAL:6):歓喜 += 1000
+				ENDIF
+				;良質母胎
+				IF GETBIT(TALENT:(LOCAL:6):淫乱系, 素質_淫乱_良質母胎)
+					SOURCE:(LOCAL:6):歓喜 += 1000
+				ENDIF
+				;桃源香
+				IF TFLAG:69 == 1
+					SOURCE:(LOCAL:6):歓喜 += 300
+				ENDIF
+				;中出しした相手が獣変化中
+				IF TALENT:(LOCAL:6):動物耳 || TALENT:(LOCAL:6):しっぽ
+					SOURCE:(LOCAL:6):歓喜 += 3000
+					;地の文表示用のフラグを立てる
+					TCVAR:(ARG:0):56 = 1
+				ENDIF
+			ENDIF
+			BREAK
+		NEXT
+	;噴乳
+	CASE 7
+		SOURCE:(ARG:0):露出 += LOCAL:2 * 300 / 100
+		LOCAL:3 = LOCAL:2 * 50 / 100 + 50
+		LOCAL:4 = LOCAL:2 * 80 / 100
+ENDSELECT
+
+;主導権に応じて優越・屈従のソースを追加
+CALL ADD_SOURCE_INITIATIVE_U(ARG:0, LOCAL:3, LOCAL:4)
+
+;●絶頂させたキャラへのソースの追加
+IF IS_MTAR(ARG:0)
+	LOCAL:10 = 0
+ELSEIF IS_MPLY(ARG:0)
+	LOCAL:10 = 1
+ELSE
+	;プレイヤーでもターゲットでもないなら戻る(絶頂させた相手がいない)
+	RETURN
+ENDIF
+
+FOR LOCAL:0, 0, CHARANUM
+	IF IS_PARTICIPATE_TRAIN(LOCAL:0) && LOCAL:0 != ARG:0 && ((LOCAL:10 == 0 && IS_MPLY(LOCAL:0)) || (LOCAL:10 == 1 && IS_MTAR(LOCAL:0)))
+		SELECTCASE ARG:1
+			;Ｃ絶頂
+			CASE 0
+				LOCAL:3 = LOCAL:2 * 120 / 100
+				LOCAL:4 = LOCAL:2 * 30 / 100 + 30
+			;Ｖ絶頂
+			CASE 1
+				LOCAL:3 = LOCAL:2 * 200 / 100
+				LOCAL:4 = LOCAL:2 * 30 / 100 + 30
+			;Ａ絶頂
+			CASE 2
+				LOCAL:3 = LOCAL:2 * 320 / 100
+				LOCAL:4 = LOCAL:2 * 30 / 100 + 30
+			;Ｂ絶頂
+			CASE 3
+				LOCAL:3 = LOCAL:2 * 120 / 100
+				LOCAL:4 = LOCAL:2 * 30 / 100 + 30
+			;Ｍ絶頂
+			CASE 4
+				LOCAL:3 = LOCAL:2 * 120 / 100
+				LOCAL:4 = LOCAL:2 * 30 / 100 + 30
+			;Ｕ絶頂
+			CASE 5
+				LOCAL:3 = LOCAL:2 * 120 / 100
+				LOCAL:4 = LOCAL:2 * 30 / 100 + 30
+			;射精
+			CASE 6
+				LOCAL:3 = LOCAL:2 * 160 / 100
+				LOCAL:4 = LOCAL:2 * 30 / 100 + 30
+			;噴乳
+			CASE 7
+				LOCAL:3 = LOCAL:2 * 160 / 100
+				LOCAL:4 = LOCAL:2 * 15 / 100 + 15
+			;潮吹き
+			CASE 8
+				LOCAL:3 = LOCAL:2 * 350 / 100
+				LOCAL:4 = LOCAL:2 * 15 / 100 + 15
+		ENDSELECT
+
+		SELECTCASE ABL:(LOCAL:0):奉仕
+			CASE 0
+				TIMES LOCAL:3, 0.50
+			CASE 1
+				SOURCE:(LOCAL:0):中毒充足 += LOCAL:2 * 40 / 100
+				TIMES LOCAL:3, 0.80
+			CASE 2
+				SOURCE:(LOCAL:0):中毒充足 += LOCAL:2 * 80 / 100
+				TIMES LOCAL:3, 1.00
+			CASE 3
+				SOURCE:(LOCAL:0):中毒充足 += LOCAL:2 * 120 / 100
+				TIMES LOCAL:3, 1.10
+			CASE 4
+				SOURCE:(LOCAL:0):中毒充足 += LOCAL:2 * 160 / 100
+				TIMES LOCAL:3, 1.20
+			CASEELSE
+				SOURCE:(LOCAL:0):中毒充足 += LOCAL:2 * MIN(ABL:(LOCAL:0):奉仕 * 2 + 200, 2000) / 100
+				LOCAL:3 = LOCAL:3 * MIN(ABL:(LOCAL:0):奉仕 + 120, 500) / 100
+		ENDSELECT
+
+		;主導権に応じて優越・屈従のソースを追加
+		CALL ADD_SOURCE_INITIATIVE_U(ARG:0, LOCAL:3, LOCAL:4)
+
+		IF ARG:0 == MASTER
+			;主人公を絶頂させた場合、愛情のソースを追加
+			CALL ADD_SOURCE_AIZYOU(LOCAL:0, LOCAL:2 * 80 / 100)
+		ENDIF
+
+		;絶頂強度に応じて欲望経験値を加算
+		EXP:(LOCAL:0):欲望経験値 += NOWEX:(ARG:0):(ARG:1)
+	ENDIF
+NEXT

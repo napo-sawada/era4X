@@ -1,7 +1,0 @@
-; 調教ルート
-#DIM CONST 恋慕 = 0
-#DIM CONST 淫乱 = 1
-#DIM CONST 隷属 = 2
-
-; CFLAGのリネーム
-#DIM CONST ルート = 1000

@@ -1,0 +1,82 @@
+﻿;-------------------------------------------------
+;「訓練する」の名称
+;-------------------------------------------------
+@SHOP_SLG_NAME78
+RESULTS:0 '= "訓練する"
+
+;-------------------------------------------------
+;「訓練する」の選択可否
+;-------------------------------------------------
+@SHOP_SLG_CHECK78
+SIF FLAG:観戦モード
+	RETURN 0
+SIF CFLAG:MASTER:所属 != 0
+	RETURN 0
+RETURN 1
+
+;-------------------------------------------------
+;「訓練する」の左カラムメニューの入力処理
+;-------------------------------------------------
+@SHOP_SLG_EVENTBUY78
+CALL SLG_TRAIN
+RETURN 1
+
+;-------------------------------------------------
+;「訓練する」本体
+;-------------------------------------------------
+@SLG_TRAIN
+#DIM 対象項目
+#DIM 取得経験値
+CALL SINGLE_DRAWLINE
+PRINTFORML 余暇を利用し、能力を鍛えます
+PRINTFORML 何を伸ばしますか？
+CALL SINGLE_DRAWLINE
+PRINTFORM [{GETNUM(ABL, "武闘")}] 武闘 
+CALL PRINT_ALPHABET_RANK(ランク_ＳＬＧ, ABL:MASTER:武闘)
+PRINTFORML {ABL:MASTER:武闘, 3, RIGHT}
+PRINTFORM [{GETNUM(ABL, "防衛")}] 防衛 
+CALL PRINT_ALPHABET_RANK(ランク_ＳＬＧ, ABL:MASTER:防衛)
+PRINTFORML {ABL:MASTER:防衛, 3, RIGHT}
+PRINTFORM [{GETNUM(ABL, "知略")}] 知略 
+CALL PRINT_ALPHABET_RANK(ランク_ＳＬＧ, ABL:MASTER:知略)
+PRINTFORML {ABL:MASTER:知略, 3, RIGHT}
+PRINTFORM [{GETNUM(ABL, "政治")}] 政治 
+CALL PRINT_ALPHABET_RANK(ランク_ＳＬＧ, ABL:MASTER:政治)
+PRINTFORML {ABL:MASTER:政治, 3, RIGHT}
+IF TALENT:MASTER:妖術知識
+	PRINTFORM [{GETNUM(ABL, "妖術")}] 妖術 
+	CALL PRINT_ALPHABET_RANK(ランク_ＳＬＧ, ABL:MASTER:妖術)
+	PRINTFORML {ABL:MASTER:妖術, 3, RIGHT}
+ENDIF
+PRINTFORM [{GETNUM(ABL, "歌唱")}] 歌唱 
+CALL PRINT_ALPHABET_RANK(ランク_ＳＬＧ, ABL:MASTER:歌唱)
+PRINTFORML {ABL:MASTER:歌唱, 3, RIGHT}
+PRINTFORM [{GETNUM(ABL, "料理")}] 料理 
+CALL PRINT_ALPHABET_RANK(ランク_ＳＬＧ, ABL:MASTER:料理)
+PRINTFORML {ABL:MASTER:料理, 3, RIGHT}
+PRINTL 
+CALL SINGLE_DRAWLINE
+PRINTFORML [0] 戻る
+PRINTL 
+
+$INPUT_LOOP
+INPUT
+IF RESULT == 0
+	RETURN 0
+ELSEIF !GROUPMATCH(RESULT, GETNUM(ABL, "武闘"), GETNUM(ABL, "防衛"), GETNUM(ABL, "知略"), GETNUM(ABL, "政治"), GETNUM(ABL, "料理"), GETNUM(ABL, "歌唱"), GETNUM(ABL, "妖術"))
+	GOTO INPUT_LOOP
+ELSEIF RESULT == GETNUM(ABL, "妖術") && !TALENT:MASTER:妖術知識
+	GOTO INPUT_LOOP
+ENDIF
+
+対象項目 = RESULT
+取得経験値 = SPECIAL_TRAIN_CALC_EFFECT(MASTER, 対象項目) / 2
+
+PRINTFORML 訓練を行った！
+
+CALL PRINT_ADD_EXP(MASTER, EXPNAME:GET_EXP(対象項目), 取得経験値, 1)
+CALL TRAIN_AUTO_ABLUP(MASTER)
+PRINTFORMW いい汗をかいた……
+RESULT = 1
+BEGIN TURNEND
+

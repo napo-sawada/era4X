@@ -1,0 +1,105 @@
+﻿;---------------------
+;基本的な発生確率(1000分率 100で10%)
+;これにコンフィグ項目の発生頻度がかけられるので、必ずしもこの通りにはならない
+;---------------------
+@EVENT_DAILY_BANDIT_ARREST_RATE()
+RETURN 50
+
+;---------------------
+;確率以外の発生判定
+;〇期以降になると発生するとか、デイリー側で利用している変数が-1だったら起こさない　みたいなはじき方をするときに使う
+;---------------------
+@EVENT_DAILY_BANDIT_ARREST_DECISION()
+#DIM 野盗
+野盗 = GET_COUNTRY_FROM_ID(SP_COUNTRY_ID:(特殊勢力_野盗))
+SIF 野盗 == -1
+	RETURN 0
+
+RETURN 1
+
+
+@EVENT_DAILY_BANDIT_ARREST_SETTARGET()
+
+;放浪中キャラからターゲットをランダム選出
+FOR LOCAL, 0, CHARANUM
+	;女で、捕虜でなく死亡もしておらず、何処にも所属していない(あなたは放浪判定じゃなくて未登場判定になってるから追加でこうする)
+	IF IS_FEMALE(LOCAL) && CFLAG:LOCAL:捕虜先 == 0 && !IS_COUNTRY(CFLAG:LOCAL:所属) && (CFLAG:LOCAL:特殊状態 == 特殊状態_放浪 || LOCAL == MASTER)
+		DAILY_TARGET:DAILY_TARGET_NUM = LOCAL
+		DAILY_TARGET_NUM ++
+	ENDIF
+NEXT
+
+;候補がいなければ戻す
+SIF DAILY_TARGET_NUM < 1
+	RETURN 0
+
+RETURN 1
+
+;---------------------
+;ジャンル
+;コンフィグ設定で使用
+;---------------------
+@EVENT_DAILY_BANDIT_ARREST_GENRE()
+RETURN デイリー_ジャンル_特殊勢力
+
+;---------------------
+;本体
+;イベントが発生した場合は1、発生しなかった場合は0を返す
+;発生しなかったというのは例えば、特定条件を満たすキャラからランダムに一人選ぶデイリーで、そもそもその条件を満たすキャラが一人もいないみたいなとき
+;旧仕様で作ったことある人向けにいうと「旧仕様のデイリー本体冒頭で-1を返すような状況」
+;---------------------
+@EVENT_DAILY_BANDIT_ARREST
+#DIM 対象
+#DIM 野盗
+
+野盗 = GET_COUNTRY_FROM_ID(SP_COUNTRY_ID:(特殊勢力_野盗))
+対象 = DAILY_TARGET:(RAND:DAILY_TARGET_NUM)
+
+PRINTFORMW %ANAME(対象)%は放浪中、突然怪しい男たちに捕まってしまった
+PRINTFORML 
+SELECTCASE RAND:7
+	CASE 0
+		PRINTFORMW %ANAME(対象)%は男たちに路地裏に連れ込まれ、裸に剥かれて犯されている
+		PRINTFORMW 突然の凌辱に歯を食いしばり必死で抵抗する%ANAME(対象)%だが
+		PRINTFORMW 幾度も子宮を小突かれ続ける内に、その意思に反して身体の奥深くがうずきだし、息を荒げてしまっている
+		PRINTFORMW やがて幾度目かの射精を子宮に受けると、遂にあられもない声を上げながら絶頂してしまった
+	CASE 1
+		PRINTFORMW %ANAME(対象)%は男たちに小舟に乗せられ、いずこかへと運ばれている
+		PRINTFORMW 上玉を前にして男たちは我慢できず、暴れる%ANAME(対象)%を押さえつけて犯し始めた
+		PRINTFORMW 上と下の口を肉棒で乱暴に塞がれたまま身体を前後に揺すられ、%ANAME(対象)%は痛みと苦しさで泣きながら呻く
+		PRINTFORMW 目的地に着く頃には、%ANAME(対象)%の体の中は彼らの精液で汚されつくしていた
+	CASE 2
+		PRINTFORMW %ANAME(対象)%は男たちによって身ぐるみを剥され、薄暗い小屋に押しこめられた
+		PRINTFORMW 怯えている%ANAME(対象)%に男たちが群がり、獣の様に襲いかかった
+		PRINTFORMW 両穴にペニスをねじ込まれながら、激しく腰を打ち付けられ、%ANAME(対象)%はその衝撃でビクンビクンと痙攣する
+		PRINTFORMW 男たちが満足してペニスを抜き取る頃には、その両穴は無残に開き切ってしまっていた
+	CASE 3
+		PRINTFORMW %ANAME(対象)%は怪しい薬をうたれ、ぼんやりとしている
+		PRINTFORMW 男たちに性器を弄られても嫌がりもせず、刺激に合わせて身体を震わせ喘ぎ声を出す
+		PRINTFORMW 乱暴にペニスをねじ込まれている膣からも、痛みどころか焦がされる様な熱を感じ、自ら腰をくねらせる
+		PRINTFORMW 男たちに散々汚された後、%ANAME(対象)%は彼らのアジトへと運ばれていった
+		CFLAG:対象:薬物依存 += 100
+	CASE 4
+		PRINTFORMW %ANAME(対象)%は男たちに羽交い絞めにされ、人目につかない茂みに連れ込まれ犯されてる
+		PRINTFORMW 猿轡をされて、男の一人に覆い被さられ、肉棒を深々とハメられ激しいピストンをされている
+		PRINTFORMW 男が中に出すぞと告げると、必死で首を振って逃れようとしたが、結局%ANAME(対象)%の奥深くで射精されてしまった
+		PRINTFORMW 呆然とする%ANAME(対象)%だが、凌辱はそれでは終わらず、その後も代わる代わる男たちに犯されてしまった
+	CASE 5
+		PRINTFORMW %ANAME(対象)%は手頃な洞窟に運び込まれ、男たちに犯されている
+		PRINTFORMW 彼らの中でも特に巨大なペニスを持つ男に、ペニスを子宮口までねじ込まれて%ANAME(対象)%は目を白黒させる
+		PRINTFORMW 女の急所に絶え間なく与えられる凶悪な刺激に対し、%ANAME(対象)%はリズミカルに喘ぐ
+		PRINTFORMW やがて男に射精されると、%ANAME(対象)%の頭の中は逃げることも忘れてしまう程に快感で埋め尽くされてしまった
+	CASE 6
+		PRINTFORMW %ANAME(対象)%は目隠しをされ、両手を背後に縛られた格好で男たちに連れられている
+		PRINTFORMW その足元には時折白濁液が垂れ落ちている、捕まった際に散々男たちに犯された跡だ
+		PRINTFORMW 涙を流しながらも必死で耐えようとしている%ANAME(対象)%だが、時折男たちが不意打ちの様にその身体を弄ると
+		PRINTFORMW その度に体を震わせ、望まない喘ぎ声を出させられてしまった
+ENDSELECT
+CALL FUCK_GANGBANG(対象, GET_SPERM_ID("野盗"), @"野盗の\@ RAND:2 ? ペニス # 唇\@", "野盗")
+PRINTFORML
+PRINTFORM
+CALL COLOR_PRINT(@"%ANAME(対象)%は野盗の性奴隷として捕らえられました", カラー_警告)
+PRINTFORMW
+CALL CAPTURE(対象, 野盗)
+RETURN 1
+

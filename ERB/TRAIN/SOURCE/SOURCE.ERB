@@ -1,0 +1,762 @@
+﻿;-------------------------------------------------
+;ソースの処理など
+;-------------------------------------------------
+@SOURCE_CHECK
+#DIM Ignore
+CALL COLOR_LINE
+
+;そのコマンドに対応する継続状態の処理を中断
+FOR LOCAL:0, 0, MPLY_NUM
+	FOR LOCAL:1, 0, MTAR_NUM
+		;prevents chosen continuous action from stacking on an identical existing one
+        ;PRINTFORML CUTTING {SELECTCOM} WITH PLY {MPLY:0} AND TAR {MTAR:0}
+		CALL RELEASE_EQUIP_EX(SELECTCOM, MPLY:(LOCAL:0), MTAR:(LOCAL:1))
+	NEXT
+NEXT
+
+;コマンド実行時の地の文
+CALL COM_TEXT_BEFORE
+
+;コマンドを実行するにあたって干渉するコマンドを外す
+IF COM_CONFLICT_FLAG:(SELECTCOM)
+	RESULT = 0
+	TRYCALLFORM COM_IS_EQUIP{SELECTCOM}
+	IF RESULT
+		CALL SET_EQUIP(SELECTCOM)
+		CALL RELEASE_EQUIP(RESULT, 1, 0)
+	ELSE
+		CALL RELEASE_CONFLICT_COM(SELECTCOM)
+	ENDIF
+ENDIF
+
+Ignore = -1
+
+;コマンドを実行した結果
+CALL SET_EQUIP(SELECTCOM)
+;Single action selected in cancel mode 
+;We had to put it in MEQUIP:0 to see what it conflicted with, but now we delete it
+IF (RESULT == 0) && TFLAG:1
+	CALL RELEASE_EQUIP(0, 1, 0)
+;continuing action in either mode
+ELSE
+	;record the action we just called COM_TEXT_BEFORE and SET_EQUIP on, and ignore it for the rest of this turn
+	Ignore = RESULT
+ENDIF
+
+;装着系アイテムや継続状態の処理
+FOR LOCAL:0, 0, MAX_MEQUIP
+	SIF (LOCAL == Ignore)
+		CONTINUE
+	IF MEQUIP:(LOCAL:0) >= 0
+		TRYCALLFORM COM_EQUIP{MEQUIP:(LOCAL:0)}(LOCAL:0)
+	ENDIF
+NEXT
+
+;同性の場合のソース補正
+FOR LOCAL:0, 0, CHARANUM
+	IF IS_PARTICIPATE_TRAIN(LOCAL:0)
+		CALL SOURCE_SEX_CHECK(LOCAL:0)
+	ENDIF
+NEXT
+
+;EQUIPに対応する地の文
+FOR LOCAL:0, 0, MAX_MEQUIP
+	IF (LOCAL == Ignore)
+		CONTINUE
+	ENDIF
+	;地の文カットフラグが立っているなら表示しない
+	IF MEQUIP:(LOCAL:0) >= 0 && !MEQUIP_CUT:(LOCAL:0)
+		TRYCALLFORM COM_TEXT_BEFORE_EQUIP{MEQUIP:(LOCAL:0)}(LOCAL:0)
+	ELSE
+	ENDIF
+NEXT
+
+;コマンド実行時の口上
+CALL KOJO_COM
+
+;★コマンドによる体力の消費を0にする暫定措置
+;CVARSET DOWNBASE, 0, 0
+
+;●露出ソースの保存
+FOR LOCAL:0, 0, CHARANUM
+	IF IS_PARTICIPATE_TRAIN(LOCAL:0)
+		SOURCE:(LOCAL:0):露出保存 = SOURCE:(LOCAL:0):露出
+	ENDIF
+NEXT
+
+;●ペニバン装着時の快Ｐソースを快Ｃソースに変換
+FOR LOCAL:0, 0, CHARANUM
+	IF IS_PARTICIPATE_TRAIN(LOCAL:0) && !HAS_PENIS(LOCAL:0)
+		SOURCE:(LOCAL:0):快Ｃ += SOURCE:(LOCAL:0):快Ｐ / 6
+		SOURCE:(LOCAL:0):快Ｐ = 0
+	ENDIF
+NEXT
+
+
+CALL CREATE_STACK_SPERM_MAP()
+
+;●主人のソース処理
+;CALL SOURCE_CHECK_MASTER
+IF IS_PARTICIPATE_TRAIN(MASTER)
+	CALL SOURCE_CHECK_1(MASTER)
+	CALL SOURCE_CHECK_2(MASTER)
+ENDIF
+
+;以下、MASTERは処理済みのため弾く
+
+;●ターゲットのソース処理
+;快楽系ソースと絶頂の処理
+FOR LOCAL:0, 0, MTAR_NUM
+	SIF MTAR:(LOCAL:0) != MASTER
+		CALL SOURCE_CHECK_1(MTAR:(LOCAL:0))
+NEXT
+
+;快楽系以外のソースの処理
+FOR LOCAL:0, 0, MTAR_NUM
+	SIF MTAR:(LOCAL:0) != MASTER
+		CALL SOURCE_CHECK_2(MTAR:(LOCAL:0))
+NEXT
+
+;●ターゲット以外のソース処理
+FOR LOCAL:0, 0, CHARANUM
+	IF LOCAL != MASTER && IS_PARTICIPATE_TRAIN(LOCAL:0) && !IS_MTAR(LOCAL:0)
+		;快楽系ソースと絶頂の処理
+		CALL SOURCE_CHECK_1(LOCAL:0)
+	ENDIF
+NEXT
+
+FOR LOCAL:0, 0, CHARANUM
+	IF LOCAL != MASTER && IS_PARTICIPATE_TRAIN(LOCAL:0) && !IS_MTAR(LOCAL:0)
+		;快楽系以外のソースの処理
+		CALL SOURCE_CHECK_2(LOCAL:0)
+	ENDIF
+NEXT
+
+;ここまでMASTERを弾く
+
+;絶頂表示を行った場合は改行
+IF TFLAG:3
+	PRINTL 
+ENDIF
+
+FOR LOCAL:0, 0, CHARANUM
+	IF IS_PARTICIPATE_TRAIN(LOCAL:0)
+		;ソース以外の変動処理
+		CALL SOURCE_CHANGE_OTHER_STATUS(LOCAL:0)
+	ENDIF
+NEXT
+
+LOCAL:10 = 0
+;メッセージ表示
+CALL COM_TEXT_AFTER
+
+LOCAL:10 |= RESULT
+
+;パラメータ変動後の口上
+CALL KOJO_COM_AFTER
+
+LOCAL:10 |= RESULT
+
+IF LOCAL:10
+	PRINTL 
+ENDIF
+
+;各種経験の取得
+FOR LOCAL:0, 0, CHARANUM
+	IF IS_PARTICIPATE_TRAIN(LOCAL:0)
+		CALL EXP_GOT_CHECK(LOCAL:0)
+	ENDIF
+NEXT
+
+;テキストの表示
+CALL COM_TEXT_LAST
+
+CALL COLOR_LINE
+
+;好感度・依存度・従属度の変動処理とその表示
+SETCOLOR COLOR("シルバー")
+FOR LOCAL:0, 0, CHARANUM
+	IF IS_PARTICIPATE_TRAIN(LOCAL:0) && LOCAL != MASTER
+		CALL LOVE_UP_CHECK(LOCAL:0)
+	ENDIF
+NEXT
+PRINTL 
+
+SIF FLAG:調教中表示簡略化
+	SKIPDISP 1
+
+FOR LOCAL:0, 0, CHARANUM
+	IF IS_PARTICIPATE_TRAIN(LOCAL:0)
+		CALL PRINT_BASE_LOSE(LOCAL:0)
+	ENDIF
+NEXT
+PRINTL
+
+FOR LOCAL:0, 0, CHARANUM
+	IF IS_PARTICIPATE_TRAIN(LOCAL:0)
+		CALL PRINT_EXP_UP(LOCAL:0)
+	ENDIF
+NEXT
+
+;調教ソースの表示
+FOR LOCAL:0, 0, CHARANUM
+	IF IS_PARTICIPATE_TRAIN(LOCAL:0)
+		CALL SHOW_SOURCE(LOCAL:0)
+	ENDIF
+NEXT
+SIF FLAG:調教中表示簡略化
+	SKIPDISP 0
+
+FOR LOCAL:0, 0, CHARANUM
+	IF IS_PARTICIPATE_TRAIN(LOCAL:0)
+		CALL TRAIN_AUTO_ABLUP(LOCAL:0)
+		CALL TALENT_CHECK(LOCAL:0)
+		CALL CHECK_SEXUAL_PREFERENCE(LOCAL:0)
+	ENDIF
+NEXT
+PRINTL 
+
+
+RESETCOLOR
+
+
+
+
+;逆調教中なら機嫌を常にリセット
+IF FLAG:調教モード == 4
+	FOR LOCAL:0, 0, CHARANUM
+		IF IS_PARTICIPATE_TRAIN(LOCAL:0)
+			FOR LOCAL:1, 10, 16
+				PALAM:(LOCAL:0):(LOCAL:1) = 0
+			NEXT
+		ENDIF
+	NEXT
+ENDIF
+
+;MASTERは機嫌を0に
+FOR LOCAL:0, 10, 16
+	PALAM:MASTER:LOCAL = 0
+NEXT
+
+;疲労回復判定
+FOR LOCAL:0, 0, CHARANUM
+	IF IS_PARTICIPATE_TRAIN(LOCAL:0) && TCVAR:(LOCAL:0):51
+		;毎ターンの自然回復
+		TCVAR:(LOCAL:0):26 -= 100 + TALENT:(LOCAL:0):回復早い * 50 - TALENT:(LOCAL:0):回復遅い * 50
+
+		;疲労回復のソースによる回復
+		TCVAR:(LOCAL:0):26 -= SOURCE:(LOCAL:0):疲労回復
+
+		;疲労深度が0以下なら復帰
+		IF TCVAR:(LOCAL:0):26 <= 0
+			TCVAR:(LOCAL:0):51 = 0
+			BASE:(LOCAL:0):体力 = MIN(MAX(BASE:(LOCAL:0):体力, 100) + MAX(MAXBASE:(LOCAL:0):体力 * MAX(RAND:10 + 25 - TCVAR:(LOCAL:0):21 * 2, 5) / 100, 100), MAXBASE:(LOCAL:0):体力)
+			CALL KOJO_EVENT(LOCAL:0, 19)
+			SETCOLOR カラー_注意
+			PRINTFORML %ANAME(LOCAL:0)%の疲労状態は落ち着いた！
+			RESETCOLOR
+			;1-1の捕虜調教中に主人公の体力が枯渇し、かつ逆調教が始まった場合、
+			;ここでMPLYを再指定しなおさないと詰む
+			SIF LOCAL:0 == MASTER && FLAG:調教モード == 調教_捕虜調教 && TRAIN_GET_PARTICIPANT_COUNT() == 2
+				MPLY:0 = MASTER
+		ENDIF
+	ENDIF
+NEXT
+
+
+
+
+;気絶回復判定
+FOR LOCAL:0, 0, CHARANUM
+	IF IS_PARTICIPATE_TRAIN(LOCAL:0) && TCVAR:(LOCAL:0):52
+		;毎ターンの自然回復
+		TCVAR:(LOCAL:0):23 -= 100 + TALENT:(LOCAL:0):回復早い * 50 - TALENT:(LOCAL:0):回復遅い * 50
+
+		;絶頂による回復
+		TCVAR:(LOCAL:0):23 -= SUM_NOWEX(LOCAL:0) * 50
+
+		;苦痛のソースによる回復
+		TCVAR:(LOCAL:0):23 -= SOURCE:(LOCAL:0):苦痛 / 2
+
+		;気絶回復のソースによる回復
+		TCVAR:(LOCAL:0):23 -= SOURCE:(LOCAL:0):気絶回復
+
+		;気絶深度が0以下なら復帰
+		IF TCVAR:(LOCAL:0):23 <= 0
+			TCVAR:(LOCAL:0):52 = 0
+			BASE:(LOCAL:0):気力 = MIN(MAX(BASE:(LOCAL:0):気力, 100) + MAX(MAXBASE:(LOCAL:0):気力 * MAX(RAND:10 + 25 - TCVAR:(LOCAL:0):22 * 2, 5) / 100, 100), MAXBASE:(LOCAL:0):気力)
+			CALL KOJO_EVENT(LOCAL:0, 19)
+			SETCOLOR カラー_注意
+			IF SUM_NOWEX(LOCAL:0) >= 1
+				IF SOURCE:(LOCAL:0):苦痛 >= 50
+					PRINTFORML %ANAME(LOCAL:0)%は痛みと快感で無理やり意識を引き戻された！
+				ELSE
+					PRINTFORML %ANAME(LOCAL:0)%は激しい快感で意識を引き戻された！
+				ENDIF
+			ELSEIF SOURCE:(LOCAL:0):苦痛 >= 50
+				PRINTFORML %ANAME(LOCAL:0)%は苦痛のあまり意識を引き戻された！
+			ELSEIF SOURCE:(LOCAL:0):気絶回復 >= 50
+				PRINTFORML %ANAME(LOCAL:0)%は無理やり意識を引き戻された！
+			ELSE
+				PRINTFORML %ANAME(LOCAL:0)%は意識を取り戻した！
+			ENDIF
+			RESETCOLOR
+		ENDIF
+	ENDIF
+NEXT
+
+;体力切れによる行動不能判定
+FOR LOCAL:0, 0, CHARANUM
+	IF IS_PARTICIPATE_TRAIN(LOCAL:0) && !TCVAR:(LOCAL:0):51 && !TCVAR:(LOCAL:0):53 && BASE:(LOCAL:0):体力 <= 0
+		WAIT
+		PRINTL 
+		;捕虜調教かつターゲット場合
+		IF FLAG:調教モード == 2 && LOCAL:0 != MASTER
+			CALL KOJO_EVENT(LOCAL:0, 17)
+			PRINTFORML %ANAME(LOCAL:0)%は疲れ果ててぐったりしている…
+			;体力0による行動不能
+			TCVAR:(LOCAL:0):51 = 1
+		;逆調教で主人公の場合
+		ELSEIF FLAG:調教モード == 4 && LOCAL:0 == MASTER
+			PRINTFORML %ANAME(LOCAL:0)%は既に体力の限界だ…
+			;体力0による行動不能
+			TCVAR:(LOCAL:0):51 = 1
+		;捕虜調教でない、あるいは捕虜調教でターゲットでない場合
+		ELSE
+			IF FLAG:調教モード == 2
+				PRINTFORML %ANAME(LOCAL:0)%は疲れてしまい、これ以上調教を続けられそうにない…
+				;体力0による行動不能
+				TCVAR:(LOCAL:0):51 = 1
+			ELSE
+				CALL KOJO_EVENT(LOCAL:0, 11)
+				PRINTFORML %ANAME(LOCAL:0)%は疲れ果ててぐったりしている…
+				;体力0による行動不能
+				TCVAR:(LOCAL:0):51 = 1
+			ENDIF
+		ENDIF
+		;行動不能回数を加算
+		TCVAR:(LOCAL:0):21 ++
+		;行動不能深度
+		TCVAR:(LOCAL:0):26 = RAND:301 + 150 + TCVAR:(LOCAL:0):21 * 100
+		;行動不能になった時のEQUIP解除
+		CALL DOWN_RELEASE_EQUIP(LOCAL:0)
+	ENDIF
+NEXT
+
+;気力切れによる失神判定
+FOR LOCAL:0, 0, CHARANUM
+	IF IS_PARTICIPATE_TRAIN(LOCAL:0) && !TCVAR:(LOCAL:0):52 && !TCVAR:(LOCAL:0):53 && BASE:(LOCAL:0):気力 <= 0
+		WAIT
+		PRINTL 
+		;捕虜調教かつターゲット場合
+		IF FLAG:調教モード == 2 && LOCAL:0 != MASTER
+			CALL KOJO_EVENT(LOCAL:0, 18)
+			PRINTFORML %ANAME(LOCAL:0)%は快感のあまり気を失ってしまった…
+		;逆調教で主人公の場合
+		ELSEIF FLAG:調教モード == 4 && LOCAL:0 == MASTER
+			PRINTFORML %ANAME(LOCAL:0)%は快感のあまり気を失ってしまった…
+		;捕虜調教でない、あるいは捕虜調教でターゲットでない場合
+		ELSE
+			CALL KOJO_EVENT(LOCAL:0, 12)
+			PRINTFORML %ANAME(LOCAL:0)%は快感のあまり気を失ってしまった…
+			;調教参加キャラが１人の場合
+			IF TFLAG:44 == 1
+				;行動不能になったのがプレイヤーなら行動側反転
+				IF IS_MPLY(LOCAL:0)
+					LOCAL:5 = MPLY:0
+					LOCAL:6 = MTAR:0
+					CALL CLEAR_MPLY
+					CALL CLEAR_MTAR
+					CALL ADD_MPLY(LOCAL:6)
+					CALL ADD_MTAR(LOCAL:5)
+				ENDIF
+			;調教参加キャラが複数の場合
+			ELSE
+				;行動不能になったキャラをプレイヤーから外す
+				CALL DEL_MPLY(LOCAL:0)
+			ENDIF
+		ENDIF
+		;気力0による失神
+		TCVAR:(LOCAL:0):52 = 1
+		;気絶深度
+		TCVAR:(LOCAL:0):23 = RAND:301 + 150 + TCVAR:(LOCAL:0):22 * 100
+		;気絶回数を加算
+		TCVAR:(LOCAL:0):22 ++
+		;行動不能になった時のEQUIP解除
+		CALL DOWN_RELEASE_EQUIP(LOCAL:0)
+	ENDIF
+NEXT
+
+;催眠の場合の催眠解除判定
+FOR LOCAL:0, 0, CHARANUM
+	SIF !IS_PARTICIPATE_TRAIN(LOCAL) || TCVAR:LOCAL:催眠中 <= 0
+		CONTINUE
+	IF RAND:100 >= (TCVAR:LOCAL:催眠中 * 3) - MAX(ABL:MASTER:催眠 * 5 + ABL:LOCAL:催眠 * 5 + SQRT(EXP:LOCAL:被催眠経験)) + (SUM_NOWEX(LOCAL) / 5) - GETBIT(TALENT:LOCAL:淫乱系, 素質_淫乱_傀儡) * 30
+		TCVAR:LOCAL:催眠中 ++
+	ELSE
+		CALL COLOR_PRINTL(@"%ANAME(LOCAL)%の催眠が解けてしまった！", カラー_注意)
+		LOCAL:1 = MAX(TCVAR:LOCAL:催眠中 * 50 - MAX(ABL:MASTER:催眠 + ABL:LOCAL:催眠 / 2, 0) * 10, 0)
+		CFLAG:LOCAL:好感度 -= LOCAL:1
+		CFLAG:LOCAL:従属度 -= LOCAL:1
+		CFLAG:LOCAL:依存度 -= LOCAL:1
+		CFLAG:LOCAL:支配度 -= LOCAL:1
+		TCVAR:LOCAL:催眠中 = -1
+	ENDIF
+NEXT
+
+
+;離脱判定
+FOR LOCAL:0, 0, CHARANUM
+	;疲労中、気絶中は判定しない
+	IF IS_PARTICIPATE_TRAIN(LOCAL:0) && !TCVAR:(LOCAL:0):51 && !TCVAR:(LOCAL:0):52 && !TCVAR:(LOCAL:0):53 && !IS_ANIMAL(LOCAL:0)
+		LOCALS:0 = %TOSTR_EMOTION(LOCAL:0)%
+
+		;酔い限界
+		IF PALAM:(LOCAL:0):酔い >= 10000 + MAX((ABL:(LOCAL:0):肝臓 - 5) * 1000, 0)
+			WAIT
+			PRINTL 
+			CALL KOJO_EVENT(LOCAL:0, 32)
+			TCVAR:(LOCAL:0):53 = 1
+
+		;感情が「怒」「恨」で主人公に対して怒りを感じた場合(会いに行く・閨に呼ぶ・捕虜会話のとき、または捕虜調教でメインターゲットでない（助手である）とき)
+		ELSEIF (LOCALS:0 == "怒" || LOCALS:0 == "恨") && CUP:(LOCAL:0):怒主 > 0 && (GROUPMATCH(FLAG:調教モード, 0, 1, 6) || (FLAG:調教モード == 2 && FINDELEMENT(PRISONER_TARGET, LOCAL:0) == -1))
+			SIF CFLAG:(LOCAL:0):調教中帰らない
+				CONTINUE
+			SIF TALENT:(LOCAL:0):特殊勢力素質
+				CONTINUE
+			SIF IS_SP_COUNTRY(CFLAG:MASTER:所属) && CFLAG:(LOCAL:0):所属 == CFLAG:MASTER:所属 && GETBIT(TALENT:(LOCAL:0):特殊勢力陥落系, SP_COUNTRY_TO_CONST(CFLAG:MASTER:所属))
+				CONTINUE
+			IF IS_BIND(LOCAL:0)
+				WAIT
+				PRINTL
+				;とりあえず50以上の武闘でランダムで抜け出されることにしたが、もうすこしランダムの比重を減らしたい（さらに体力と気力も加えて計算するか）
+				;縄を使用してた場合アイテムとしての縄が消滅するペナルティがあっても良いかもしれない
+				IF ABL:(LOCAL:0):武闘 > RAND(50, 200)
+					SETCOLOR カラー_警告
+					PRINTFORML %ANAME(LOCAL:0)%は拘束を引き裂いた
+					RESETCOLOR
+				;縄抜け判定失敗につき、離脱キャンセル
+				ELSE
+					SETCOLOR カラー_注意
+					PRINTFORML %ANAME(LOCAL:0)%は拘束を解こうともがいている
+					RESETCOLOR
+					CONTINUE
+				ENDIF
+			ENDIF
+			WAIT
+			PRINTL 
+			PRINTFORMW %ANAME(LOCAL:0)%の怒りが限界に達したようだ
+			IF FLAG:調教モード == 1 || TFLAG:54 > 0
+				CALL KOJO_EVENT(LOCAL:0, 15)
+				TCVAR:(LOCAL:0):53 = 5
+			ELSE
+				CALL KOJO_EVENT(LOCAL:0, 13)
+				TCVAR:(LOCAL:0):53 = 3
+			ENDIF
+			CALL DEL_MPLY(LOCAL:0)
+			CALL DEL_MTAR(LOCAL:0)
+			;EQUIP解除
+			CALL RELEASE_ALL_EQUIP(LOCAL:0)
+
+		;感情が「悲」「鬱」で主人公に対して哀しみを感じた場合(会いに行く・閨に呼ぶ・捕虜会話のとき、または捕虜調教でメインターゲットでない（助手である）とき)
+		ELSEIF (LOCALS:0 == "悲" || LOCALS:0 == "鬱") && CUP:(LOCAL:0):哀主 > 0 && (GROUPMATCH(FLAG:調教モード, 0, 1, 6) || (FLAG:調教モード == 2 && FINDELEMENT(PRISONER_TARGET, LOCAL:0) == -1))
+			SIF CFLAG:(LOCAL:0):調教中帰らない
+				CONTINUE
+			SIF TALENT:(LOCAL:0):特殊勢力素質
+				CONTINUE
+			SIF IS_SP_COUNTRY(CFLAG:MASTER:所属) && CFLAG:(LOCAL:0):所属 == CFLAG:MASTER:所属 && GETBIT(TALENT:(LOCAL:0):特殊勢力陥落系, SP_COUNTRY_TO_CONST(CFLAG:MASTER:所属))
+				CONTINUE
+			SIF IS_BIND(LOCAL:0)
+				CONTINUE
+			WAIT
+			PRINTL 
+			PRINTFORMW %ANAME(LOCAL:0)%の哀しみが限界に達したようだ
+			IF FLAG:調教モード == 1 || TFLAG:54 > 0
+				CALL KOJO_EVENT(LOCAL:0, 16)
+				TCVAR:(LOCAL:0):53 = 6
+			ELSE
+				CALL KOJO_EVENT(LOCAL:0, 14)
+				TCVAR:(LOCAL:0):53 = 4
+			ENDIF
+			CALL DEL_MPLY(LOCAL:0)
+			CALL DEL_MTAR(LOCAL:0)
+			;EQUIP解除
+			CALL RELEASE_ALL_EQUIP(LOCAL:0)
+		ENDIF
+	ENDIF
+NEXT
+
+
+;-------------------------------------------------
+;主人公の快楽系ソースと射精・絶頂の処理を行う
+;-------------------------------------------------
+@SOURCE_CHECK_MASTER
+;●ソースが上限値を超えた場合、上限値に修正
+FOR LOCAL:0, 0, 100
+	SOURCE:MASTER:(LOCAL:0) = LIMIT(SOURCE:MASTER:(LOCAL:0), 0, 100000000)
+NEXT
+
+;●ソースの計算(MASTER専用)
+FOR LOCAL:0, 0, 100
+	TRYCALLFORM CALC_SOURCE_MASTER{LOCAL:0}(MASTER)
+NEXT
+
+;●絶頂の処理
+CALL SOURCE_ORGASM(MASTER)
+
+;●PALAMにCUPの値を加える
+;CUPCHECKだと表示面で不都合があるため、独自に処理
+FOR LOCAL:0, 0, 100
+	IF GROUPMATCH(LOCAL:0, 40)
+		;潤滑はLv9まで
+		LOCAL:1 = PALAMLV:9
+	ENDIF
+
+	;快感パラメータは独自処理(絶頂により低下)
+	IF LOCAL:0 >= 0 && LOCAL:0 <= 9
+		LOCAL:2 = PALAM:MASTER:(LOCAL:0)
+		PALAM:MASTER:(LOCAL:0) = LIMIT(PALAM:MASTER:(LOCAL:0) + CUP:MASTER:(LOCAL:0) - 10000 * NOWEX:MASTER:(LOCAL:0), 0, 9999)
+
+		IF LOCAL:0 <= 5
+			;快感系の経験取得
+			CALL ADD_EXP_SENSE(MASTER, LOCAL:0, LOCAL:2)
+		ENDIF
+	;パラメータ上昇量にキャップを掛ける
+	ELSEIF PALAM:MASTER:(LOCAL:0) + CUP:MASTER:(LOCAL:0) > LOCAL:1
+		PALAM:MASTER:(LOCAL:0) = LOCAL:1
+	ELSE
+		PALAM:MASTER:(LOCAL:0) += CUP:MASTER:(LOCAL:0)
+	ENDIF
+NEXT
+
+IF NOWEX:MASTER:射精 >= 1
+	;射精した場合潮吹きのPALAMを0に
+	PALAM:MASTER:潮吹き = 0
+ENDIF
+
+;-------------------------------------------------
+;ARG:0番のキャラについて、快楽系ソースと絶頂の処理を行う
+;-------------------------------------------------
+@SOURCE_CHECK_1(ARG:0)
+;●ソースが上限値を超えた場合、上限値に修正
+FOR LOCAL:0, 0, 100
+	SOURCE:(ARG:0):(LOCAL:0) = LIMIT(SOURCE:(ARG:0):(LOCAL:0), 0, 100000000)
+NEXT
+
+;●快楽系ソースの計算
+;快楽系(0～9)のみを計算
+FOR LOCAL:0, 0, 10
+	TRYCALLFORM CALC_SOURCE{LOCAL:0}(ARG:0)
+NEXT
+
+;●状況に応じたパラメータ上昇の補正
+;FOR LOCAL:0, 0, 5
+;	;異常経験による効果増加(異常経験1000で約1.5倍、10000で約6倍)
+;	IF EXP:(ARG:0):50 >= 1000000
+;		CUP:(ARG:0):(LOCAL:0) = CUP:(ARG:0):(LOCAL:0) * (12 + (EXP:(ARG:0):50 / 1000000 * 5 + 95) / 100)
+;	ELSEIF EXP:(ARG:0):50 >= 10000
+;		CUP:(ARG:0):(LOCAL:0) = CUP:(ARG:0):(LOCAL:0) * (6 + (EXP:(ARG:0):50 / 10000 * 5 + 95) / 100)
+;	ELSEIF EXP:(ARG:0):50 >= 100
+;		CUP:(ARG:0):(LOCAL:0) = CUP:(ARG:0):(LOCAL:0) * (EXP:(ARG:0):50 / 100 * 5 + 95) / 100
+;	ENDIF
+;NEXT
+
+;●素質などによるパラメータ上昇の補正(快感系)
+CALL UP_TALENT_CHECK1(ARG:0)
+
+;●デート場所によるパラメータ上昇の補正(快感系)
+CALL UP_DATE_CHECK1(ARG:0)
+
+;●絶頂の処理
+CALL SOURCE_ORGASM(ARG:0)
+
+;●ターゲット以外のキャラに感応のソースを追加する
+;プレイヤーまたはターゲットなら欲情上昇量を記録
+IF IS_MPLY(ARG:0) || IS_MTAR(ARG:0)
+	TFLAG:52 += CUP:(ARG:0):欲情
+	TFLAG:58 = MAX(SOURCE:(ARG:0):逸脱, TFLAG:58)
+
+	;ターゲットが絶頂していた場合
+	FOR LOCAL:0, 0, 6
+		IF NOWEX:(ARG:0):(LOCAL:0) > 0
+			TFLAG:53 += NOWEX:(ARG:0):(LOCAL:0)
+		ENDIF
+	NEXT
+
+;プレイヤー・ターゲットでないなら記録した欲情上昇量に応じて感応・逸脱のソースを追加する(行動不能なら除く)
+ELSEIF !(TCVAR:(ARG:0):51 || TCVAR:(ARG:0):52 || TCVAR:(ARG:0):53)
+	IF TFLAG:52 >= 30000
+		SOURCE:(ARG:0):感応 += 3000
+	ELSEIF TFLAG:52 >= 10000
+		SOURCE:(ARG:0):感応 += 1500
+	ELSEIF TFLAG:52 >= 3000
+		SOURCE:(ARG:0):感応 += 500
+	ELSEIF TFLAG:52 >= 500
+		SOURCE:(ARG:0):感応 += 150
+	ELSEIF TFLAG:52 >= 100
+		SOURCE:(ARG:0):感応 += 50
+	ENDIF
+
+	SOURCE:(ARG:0):感応 += TFLAG:53 * 100
+	SOURCE:(ARG:0):逸脱 += TFLAG:58 / 3
+ENDIF
+
+;麻薬つかってたら歓喜が入る
+SIF TCVAR:(ARG:0):麻薬
+	SOURCE:(ARG:0):歓喜 += 500
+
+
+;-------------------------------------------------
+;ARG:0番のキャラについて、快楽系以外のソースの処理を行う
+;-------------------------------------------------
+@SOURCE_CHECK_2(ARG:0)
+;気絶・睡眠中・催眠中は感情に関わるソースを全てゼロにする
+IF TCVAR:(ARG:0):52 || TCVAR:(ARG:0):53 == 1 || TCVAR:(ARG:0):催眠中 > 0
+	FOR LOCAL:0, 10, 40
+		IF SOURCENAME:(LOCAL:0) != "苦痛"
+			SOURCE:(ARG:0):(LOCAL:0) = 0
+		ENDIF
+	NEXT
+	SOURCE:(ARG:0):欲情追加 = 0
+ENDIF
+
+;各ソースによるパラメータの変動量を計算(快楽系(0～9)は飛ばす)
+FOR LOCAL:0, 10, 100
+	TRYCALLFORM CALC_SOURCE{LOCAL:0}(ARG:0)
+NEXT
+
+;●性癖設定に応じたソースの追加
+CALL ADD_SOURCE_TENDENCY(ARG:0)
+
+;●素質などによるパラメータ上昇の補正(快感系以外)
+CALL UP_TALENT_CHECK2(ARG:0)
+
+;●デート場所によるパラメータ上昇の補正(快感系以外)
+CALL UP_DATE_CHECK2(ARG:0)
+
+;●欲望経験値の取得
+;今回の欲情パラメータの増加量と絶頂回数が影響する
+LOCAL:0 = MIN(CUP:(ARG:0):欲情 / ((ABL:(ARG:0):欲望 + 1) * (ABL:(ARG:0):欲望 + 1) * 100), 30)
+EXP:(ARG:0):欲望経験値 += LOCAL:0
+
+;●潤滑増加の処理
+IF !IS_MALE(ARG:0)
+	;快感による潤滑増加
+	LOCAL:0 = (CUP:(ARG:0):0 + CUP:(ARG:0):1 + CUP:(ARG:0):2 + CUP:(ARG:0):3 + CUP:(ARG:0):4) / 5
+	;快感パラメータの上昇が合計100以下なら潤滑は増加しない
+	IF LOCAL:0 < 20
+		LOCAL:0 = 0
+	ENDIF
+
+	;欲情上昇による潤滑の増加
+	IF FLAG:ウフフフラグ
+		;ウフフ中
+		LOCAL:0 += CUP:(ARG:0):欲情 / 2
+	ELSE
+		;非ウフフ
+		LOCAL:0 += CUP:(ARG:0):欲情 / 10
+	ENDIF
+
+	IF TALENT:(ARG:0):濡れやすい
+		TIMES LOCAL:0, 2.50
+	ENDIF
+	IF TALENT:(ARG:0):濡れにくい
+		TIMES LOCAL:0, 0.40
+	ENDIF
+	;男性・男の娘は少し濡れづらい
+	IF GROUPMATCH(TALENT:(ARG:0):性別, 0, 4)
+		TIMES LOCAL:0, 0.60
+	ENDIF
+
+	CUP:(ARG:0):潤滑 += LOCAL:0
+ENDIF
+
+;●失神or睡眠状態なら機嫌の変動量をゼロにする
+IF TCVAR:(ARG:0):52 || TCVAR:(ARG:0):53 == 1
+	FOR LOCAL:0, 10, 16
+		CUP:(ARG:0):(LOCAL:0) = 0
+	NEXT
+ENDIF
+
+;●PALAMにCUPの値を加える
+;CUPCHECKだと表示面で不都合があるため、独自に処理
+FOR LOCAL:0, 0, 100
+	IF GROUPMATCH(LOCAL:0, 40)
+		;潤滑はLv9まで
+		LOCAL:1 = PALAMLV:9
+	ELSEIF GROUPMATCH(LOCAL:0, 10, 11, 12, 13, 14, 15)
+		;機嫌は1000000まで
+		LOCAL:1 = 1000000
+	ELSE
+		;それ以外はLv25まで
+		LOCAL:1 = PALAMLV:25
+	ENDIF
+
+	;強制友好化ありなら補正
+	IF CFLAG:(ARG:0):強制友好化 && GROUPMATCH(LOCAL, GETNUM(CUP, "怒主"), GETNUM(CUP, "哀主"), GETNUM(CUP, "怖主"), GETNUM(CUP, "怒外"), GETNUM(CUP, "哀外"), GETNUM(CUP, "怖外"))
+		IF CUP:(ARG:0):(LOCAL:0) > 0
+			CUP:(ARG:0):(LOCAL:0) = 0
+		ELSEIF CUP:(ARG:0):(LOCAL:0) > -100
+			CUP:(ARG:0):(LOCAL:0) += RAND(-20, 0)
+		ENDIF
+	ENDIF
+
+	;強制友好化ありなら補正
+;	SIF GROUPMATCH(LOCAL, GETNUM(CUP, "怒主"), GETNUM(CUP, "哀主"), GETNUM(CUP, "怖主"), GETNUM(CUP, "怒外"), GETNUM(CUP, "哀外"), GETNUM(CUP, "怖外"))
+;		PRINTFORML PALAM %PALAMNAME:(LOCAL)% : {CUP:(ARG:0):LOCAL}
+
+	;快感パラメータは独自処理(絶頂により低下)
+	IF LOCAL:0 >= 0 && LOCAL:0 <= 9
+		LOCAL:2 = PALAM:(ARG:0):(LOCAL:0)
+		PALAM:(ARG:0):(LOCAL:0) = LIMIT(PALAM:(ARG:0):(LOCAL:0) + CUP:(ARG:0):(LOCAL:0) - 10000 * NOWEX:(ARG:0):(LOCAL:0), 0, 9999)
+
+		IF LOCAL:0 <= 5
+			;快感系の経験取得
+			CALL ADD_EXP_SENSE(ARG:0, LOCAL:0, LOCAL:2)
+		ENDIF
+	;パラメータ上昇量にキャップを掛ける
+	ELSEIF PALAM:(ARG:0):(LOCAL:0) + CUP:(ARG:0):(LOCAL:0) > LOCAL:1
+		PALAM:(ARG:0):(LOCAL:0) = LOCAL:1
+	ELSE
+		PALAM:(ARG:0):(LOCAL:0) += CUP:(ARG:0):(LOCAL:0)
+	ENDIF
+NEXT
+
+IF NOWEX:(ARG:0):射精 >= 1
+	;射精した場合潮吹きのPALAMを0に
+	PALAM:(ARG:0):潮吹き = 0
+ENDIF
+
+
+;-------------------------------------------------
+;調教ソースの表示
+;-------------------------------------------------
+@SHOW_SOURCE(ARG:0)
+LOCAL:2 = 0
+LOCAL:4 = 0
+SETCOLOR COLOR("シルバー")
+FOR LOCAL:0, 0, 100
+	;SOURCEの並び設定を取得
+	LOCAL:1 = GET_SORTED_SOURCE(LOCAL:0)
+	IF LOCAL:1 >= 0 && SOURCE:(ARG:0):(LOCAL:1) > 0
+		;Local:2 is flipped to 1 on the first nonzero source
+		IF !LOCAL:2
+			LOCAL:2 = 1
+			PRINTFORM %ANAME(ARG:0), 10%:
+			LOCAL:4 = 10
+		ENDIF
+
+		LOCALS:0 = %SOURCENAME:(LOCAL:1)%({SOURCE:(ARG:0):(LOCAL:1)})
+		LOCAL:4 += STRLENS(LOCALS:0) + 1
+		PRINTFORM %LOCALS:0%
+		IF LOCAL:4 >= 100
+			PRINTL
+			PRINT            
+			LOCAL:4 = 12
+		ENDIF
+	ENDIF
+NEXT
+IF LOCAL:2
+	PRINTL 
+ENDIF
+RESETCOLOR

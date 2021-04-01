@@ -1,0 +1,99 @@
+﻿;---------------------
+;対応するデイリーのDISABLEを返す。設定しない場合、イベントは発生しない。
+;---------------------
+@EVENT_DAILY_DERIVATION_AFTER_KILL_BANDIT_DISABLE()
+RETURN DAILY_GET_DISABLE_CONFIG("REQUEST_CHARA")
+
+
+;---------------------
+;発生判定
+;〇期以降になると発生するとか、デイリー側で利用している変数が-1だったら起こさない　みたいなはじき方をするときに使う
+;対応するデイリーのDISABLEチェックを規約として必須とする
+;---------------------
+@EVENT_DAILY_DERIVATION_AFTER_KILL_BANDIT_DECISION()
+SIF ID_TO_CHARA(DVAR:士官要求_野盗斬り捨てフラグ) != -1
+	RETURN 1
+RETURN 0
+
+;---------------------
+;本体
+;---------------------
+@EVENT_DAILY_DERIVATION_AFTER_KILL_BANDIT()
+#DIM 対象
+対象 = ID_TO_CHARA(DVAR:士官要求_野盗斬り捨てフラグ)
+CALL SINGLE_DRAWLINE
+PRINTFORMW 衛兵の目を盗み、複数の男が宮廷に忍び込んだ……
+PRINTFORMW 廊下を歩いていた%ANAME(対象)%に背後から忍び寄り、薬をしみこませた布を頭から被せる
+PRINTFORMW ぐったりとした%ANAME(対象)%を麻袋に詰め込むと、男達は宮廷から逃げ出した……
+PRINTFORML
+PRINTFORML
+PRINTFORML
+PRINTFORMW 男達の正体は野盗だった
+PRINTFORMW %ANAME(MASTER)%が使いの者を斬ったので、報復ついでに%ANAME(対象)%を拉致したのだ
+PRINTFORMW アジトに戻った彼らは、眠りこける%ANAME(対象)%の服を剥ぎ取ると、早速その身体を「使い」はじめた……
+FLAG:ターンエンド調教 = 3
+FLAG:慰安場所 = 慰安_行き先_野盗のアジト
+CVARSET CFLAG, GETNUM(CFLAG, "慰安参加者") , 0
+CVARSET CFLAG, GETNUM(CFLAG, "調教参加フラグ") , 0
+CFLAG:対象:調教参加フラグ = 1
+FOR LOCAL, 0, 5
+	CALL CREATE_IAN_MOB(慰安_行き先_野盗のアジト, LOCAL + 1)
+NEXT
+CALL ADD_EVENTTRAIN_CALLEE("AFTER_KILL_BANDIT_BEFORE_TRAIN")
+CALL ADD_EVENTEND_CALLEE("AFTER_KILL_BANDIT_AFTER_TRAIN_A")
+DAILY_CANCEL = 1
+
+RETURN 1
+
+
+@EVENTTRAIN_AFTER_KILL_BANDIT_BEFORE_TRAIN
+TFLAG:56 = 30
+
+@EVENTEND_AFTER_KILL_BANDIT_AFTER_TRAIN_A
+#DIM 対象
+対象 = ID_TO_CHARA(DVAR:士官要求_野盗斬り捨てフラグ)
+
+PRINTFORMW %ANAME(対象)%が目を覚ますと、そこは見覚えのない部屋だった
+PRINTFORMW 一糸まとわぬ自らの身体は縄で縛られ、見知らぬ男達に群がられている
+PRINTFORMW 白濁にまみれた肌は、自分がこの男達に何度も陵辱されたことを示している……
+PRINTFORMW %ANAME(対象)%はなんとか逃げだそうとするが、縛られており、さらに男達に押さえつけられてはどうしようもなかった
+PRINTFORMW 男達はへらへらと笑いながら、躾のなっていない雌犬を屈服させようと、再び彼女を犯し始める……
+FLAG:ターンエンド調教 = 3
+FLAG:慰安場所 = 慰安_行き先_野盗のアジト
+CVARSET CFLAG, GETNUM(CFLAG, "慰安参加者") , 0
+CVARSET CFLAG, GETNUM(CFLAG, "調教参加フラグ") , 0
+CFLAG:対象:調教参加フラグ = 1
+FOR LOCAL, 0, 5
+	CALL CREATE_IAN_MOB(慰安_行き先_野盗のアジト, LOCAL + 1)
+NEXT
+CALL ADD_EVENTTRAIN_CALLEE("AFTER_KILL_BANDIT_BEFORE_TRAIN")
+CALL ADD_EVENTEND_CALLEE("AFTER_KILL_BANDIT_AFTER_TRAIN_B")
+DAILY_CANCEL = 1
+
+RETURN 1
+
+
+
+
+@EVENTEND_AFTER_KILL_BANDIT_AFTER_TRAIN_B
+#DIM 対象
+対象 = ID_TO_CHARA(DVAR:士官要求_野盗斬り捨てフラグ)
+
+PRINTFORMW ……調教はようやく終わったようだ
+PRINTFORMW 激しい陵辱に精根尽き果てた%ANAME(対象)%は、その両穴から白濁をぼたぼたと垂れ流しながら、ときおり痙攣するばかりになっている
+PRINTFORML だが、野盗どもがこれで満足するはずもなかった
+PRINTFORML 彼らは%ANAME(対象)%に高濃度の薬を打つ。すると、彼女の疲労はあっさり吹き飛び、身体はこれ以上なく昂ぶり始めた
+PRINTFORMW 見られているのも忘れたように、雌穴を指でぐちゅぐちゅと掻き回しはじめた%ANAME(対象)%を、男達はげらげらと笑い捨てる
+PRINTFORML 俺たちの奴隷として過ごすなら、チンポくらいいくらでもくれてやるぜ？
+PRINTFORML そのように言われ、%ANAME(対象)%は一も二にもなく同意してしまった
+PRINTFORMW その答えに満足したように、男達は%ANAME(対象)%に首輪を嵌めた……
+PRINTFORML
+SETCOLOR カラー_警告
+PRINTFORMW %ANAME(対象)%が野盗の性奴隷になりました
+RESETCOLOR
+CALL SINGLE_DRAWLINE
+CALL CHANGE_COUNTRY(対象, GET_COUNTRY_FROM_ID(SP_COUNTRY_ID:(特殊勢力_野盗)))
+EXP:対象:輪姦経験 += RAND(25, 50)
+DVAR:士官要求_野盗斬り捨てフラグ = 0
+
+RETURN 1

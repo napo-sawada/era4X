@@ -1,0 +1,761 @@
+﻿;調教終了時の処理／イベント
+
+;-------------------------------------------------
+;調教終了
+;-------------------------------------------------
+@EVENTEND
+#LATER
+;体力気力を0～最大値の範囲に収める
+CALL LIFE_LIMIT
+
+TRAIN_PLACE = 
+
+FLAG:夜這い = 0
+
+IF FLAG:調教モード == 調教_慰安
+	SELECTCASE FLAG:慰安モード
+		CASE 1
+			CALL EVENTEND_IAN
+		CASE 2
+			CALL EVENTEND_ATEGAU
+	ENDSELECT
+	FLAG:慰安モード = 0
+ENDIF
+
+SIF FLAG:調教モード == 調教_逆調教特殊 && IS_SP_COUNTRY(CFLAG:MASTER:捕虜先)
+	CALL EVENTEND_SP_COUNTRY()
+
+
+CUSTOMDRAWLINE ─
+CALL TITLE_CATEGORY_GENERAL("今回の調教")
+PRINTL 
+CALL COLOR_LINE
+FOR LOCAL:0, 0, CHARANUM
+	SIF !IS_PARTICIPATE_TRAIN(LOCAL)
+		CONTINUE
+	PRINTFORML ■%ANAME(LOCAL)%:
+	CALL NEW_PRINT_ORGASM(LOCAL)
+	CALL COLOR_LINE
+NEXT
+WAIT
+
+;慰安用のモブはここで削除する
+LOCAL:2 = CHARANUM
+FOR LOCAL:0, 0, LOCAL:2
+	LOCAL:1 = LOCAL:2 - LOCAL:0 - 1
+	IF CFLAG:(LOCAL:1):慰安モブ
+		CALL DELETE_CHARA(LOCAL:1)
+	ENDIF
+NEXT
+
+
+;カメラ撮影していた場合
+SIF TFLAG:70
+	CALL EVENTEND_VIDEO()
+
+
+;体力気力の成長
+FOR LOCAL, 0, CHARANUM
+	SIF !IS_PARTICIPATE_TRAIN(LOCAL) || IS_SP_CHARA(LOCAL)
+		CONTINUE
+
+	LOCAL:1 = MIN(SUM_EX(LOCAL) / 5, 20)
+	LOCAL:1 += RAND:MAX(TCVAR:LOCAL:21, 1)
+	SELECTCASE MAXBASE:LOCAL:体力
+		CASE IS > 5000
+			LOCAL:1 /= 10
+		CASE IS > 3000
+			LOCAL:1 /= 4
+	ENDSELECT
+
+	SIF LOCAL:1 <= 0
+		GOTO STR_GROW_END
+
+	PRINTFORML %ANAME(LOCAL)%の体力 + {LOCAL:1}
+	MAXBASE:LOCAL:体力 += LOCAL:1
+
+	$STR_GROW_END
+
+	LOCAL:1 = MIN(SUM_EX(LOCAL) / 5, 10)
+	LOCAL:1 += RAND:MAX(TCVAR:LOCAL:22, 1)
+
+	SELECTCASE MAXBASE:LOCAL:気力
+		CASE IS > 5000
+			LOCAL:1 /= 10
+		CASE IS > 3000
+			LOCAL:1 /= 4
+	ENDSELECT
+
+	SIF LOCAL:1 <= 0
+		GOTO WILL_GROW_END
+
+	MAXBASE:LOCAL:気力 += LOCAL:1
+	PRINTFORML %ANAME(LOCAL)%の気力 + {LOCAL:1}
+
+	$WILL_GROW_END
+NEXT
+
+
+;初対面のキャラの対面済みフラグをＯＮ
+FOR LOCAL:0, 0, CHARANUM
+	SIF LOCAL != MASTER && IS_PARTICIPATE_TRAIN(LOCAL) && !CFLAG:(LOCAL:0):面識
+		CFLAG:(LOCAL:0):面識 = 1
+NEXT
+
+;調教参加者同士の印象値が改善される
+FOR LOCAL:0, 0, CHARANUM
+	SIF !IS_PARTICIPATE_TRAIN(LOCAL)
+		CONTINUE
+	FOR LOCAL:1, 0, CHARANUM
+		SIF LOCAL:1 == LOCAL || !IS_PARTICIPATE_TRAIN(LOCAL:1)
+			CONTINUE
+		CALL TRAIN_CHANGE_RELATION(LOCAL:0, LOCAL:1)
+	NEXT
+NEXT
+
+;現在の酔いを酔い合計値に加算
+FOR LOCAL:0, 0, CHARANUM
+	SIF IS_PARTICIPATE_TRAIN(LOCAL) && !IS_SP_CHARA(LOCAL)
+		CFLAG:(LOCAL:0):酔い累積値 += PALAM:(LOCAL:0):酔い
+NEXT
+
+
+FOR LOCAL:0, 0, CHARANUM
+	SIF CFLAG:LOCAL:強制友好化
+		CFLAG:LOCAL:強制友好化 = 0
+	SIF CFLAG:LOCAL:調教中BASE減らない
+		CFLAG:LOCAL:調教中BASE減らない = 0
+NEXT
+
+;非ウフフ限定
+IF !FLAG:ウフフフラグ
+	FOR LOCAL:0, 0, CHARANUM
+		IF IS_PARTICIPATE_TRAIN(LOCAL) && !IS_SP_CHARA(LOCAL) && LOCAL != MASTER
+			;調教後自慰のチェック
+			CALL AFTER_SELF_CHECK(LOCAL:0)
+		ENDIF
+	NEXT
+ENDIF
+
+;性知識アップ
+FOR LOCAL:0, 0, CHARANUM
+	IF IS_PARTICIPATE_TRAIN(LOCAL) && ABL:(LOCAL:0):性知識 < 4
+		LOCAL:1 = MIN(SUM_EX(LOCAL:0) / MAX(ABL:(LOCAL:0):性知識 * 2, 1), 100)
+		CALL PRINT_ADD_EXP(LOCAL:0, "性知識経験値", LOCAL:1, 1)
+		CALL TRAIN_AUTO_ABLUP(LOCAL:0)
+	ENDIF
+NEXT
+
+
+FOR LOCAL:0, 0, CHARANUM
+	IF IS_PARTICIPATE_TRAIN(LOCAL) && !IS_SP_CHARA(LOCAL:0)
+		;素質変化に関する処理(恋慕の取得など)
+		CALL TALENT_CHECK(LOCAL:0)
+	ENDIF
+NEXT
+
+FOR LOCAL:0, 0, CHARANUM
+	IF IS_PARTICIPATE_TRAIN(LOCAL)
+		;性的嗜好の変化
+		;あてがった場合はロックフラグを立てる
+		CALL CHECK_SEXUAL_PREFERENCE(LOCAL:0)
+	ENDIF
+NEXT
+
+
+FOR LOCAL:0, 0, CUM_SLOT_NUM
+	CVARSET CUM_TO_COUNT, LOCAL
+	CVARSET CUM_TO_AMOUNT, LOCAL
+	CVARSET CUM_GET_AMOUNT, LOCAL
+	CVARSET CUM_GET_COUNT, LOCAL
+	;mod array
+	CVARSET CUM_CUR_AMOUNT, LOCAL
+NEXT
+
+FOR LOCAL:0, 0, CHARANUM
+	IF TALENT:(LOCAL:0):触手妊娠 || TALENT:(LOCAL:0):Ａ触手妊娠 || TALENT:(LOCAL:0):Ｕ触手妊娠
+		;部隊の所属を解除
+		CALL FORCE_FREE(LOCAL:0)
+
+		IF RESULT && IS_PREGNANT_MSG(LOCAL:0)
+			SETCOLOR カラー_注意
+			PRINTFORMW 触手の子を宿した%ANAME(LOCAL:0)%は部隊から外れました
+			RESETCOLOR
+		ENDIF
+	ENDIF
+NEXT
+IF CONFIG:42
+	FOR LOCAL:0, 0, CHARANUM
+		CALL 性癖一括変更(LOCAL,10000)
+		CALL 性癖一括変更(LOCAL,12000)
+		CALL 性癖一括変更(LOCAL,14000)
+	NEXT
+ENDIF
+;追加アイテムの削除
+FOR LOCAL:0, 500, 999
+	ITEM:(LOCAL:0) = 0
+NEXT
+
+;助手記録を削除
+FOR LOCAL:0, 0, CHARANUM
+	SIF CFLAG:LOCAL:捕虜調教の助手
+		CFLAG:LOCAL:捕虜調教の助手 = 0
+	SIF CFLAG:LOCAL:夜這いの助手
+		CFLAG:LOCAL:夜這いの助手 = 0
+	SIF CFLAG:LOCAL:調教中帰らない
+		CFLAG:LOCAL:調教中帰らない = 0
+NEXT
+
+FOR LOCAL, 0, CHARANUM
+	SIF CFLAG:LOCAL:能力固定フラグ
+		CFLAG:LOCAL:能力固定フラグ = 0
+NEXT
+
+;催眠フラグだけは折る(VIRGIN_COMMONなどにおけるTCVAR:催眠中での強制上書きが、他のところに影響しないよう)
+FOR LOCAL:0, 0, CHARANUM
+	TCVAR:LOCAL:催眠中 = 0
+NEXT
+
+
+;閨逆調教フラグを折る
+FLAG:閨逆調教 = 0
+
+;プレイヤーとターゲットをクリア
+CALL CLEAR_MPLY
+CALL CLEAR_MTAR
+
+;捕虜調教のターゲットをクリア
+VARSET PRISONER_TARGET, -1
+
+SIF EVENTEND_CALLEE_NUM > 0
+	CALL TRAIN_CALL(1)
+
+
+BEGIN TURNEND
+
+
+;-------------------------------------------------
+;慰安の処理
+;-------------------------------------------------
+@EVENTEND_IAN()
+#DIM 絶頂回数合計
+#DIM 減少量
+#DIM 報酬
+#DIM 対象
+#DIM 経済追加
+#DIM 兵数追加
+#DIM 最低保証
+#DIM 参加者
+
+参加者 = 0
+絶頂回数合計 = 0
+
+;慰安参加者を削除
+FOR 対象, 0, CHARANUM
+	;参加者の場合、減少
+	IF IS_PARTICIPATE_TRAIN(対象) && 対象 != MASTER && !CFLAG:対象:慰安参加者
+		IF SUM_EX(対象) > 50
+			絶頂回数合計 += 50 + (SUM_EX(対象) - 50) / 5
+		ELSE
+			絶頂回数合計 += SUM_EX(対象)
+		ENDIF
+
+		最低保証 = -1000
+		減少量 = LIMIT(300 + SUM_EX(対象) * 20, 0, MAX(CFLAG:対象:好感度, 0) / 10) + GETBIT(TALENT:対象:淫乱系, 素質_淫乱_浮気癖) * 500
+		SIF CFLAG:対象:好感度 - 減少量 < 最低保証
+			減少量 = MAX(CFLAG:対象:好感度 - 最低保証, 0)
+		CFLAG:対象:好感度 = MAX(CFLAG:対象:好感度 - 減少量, 最低保証)
+		PRINTFORML %ANAME(対象)%の好感度 -{減少量} (現在:{CFLAG:対象:好感度})
+
+		最低保証 = -1000
+		減少量 = LIMIT(300 + SUM_EX(対象) * 20, 0, MAX(CFLAG:対象:依存度, 0) / 10) + GETBIT(TALENT:対象:淫乱系, 素質_淫乱_浮気癖) * 500
+		SIF CFLAG:対象:依存度 - 減少量 < 最低保証
+			減少量 = MAX(CFLAG:対象:依存度 - 最低保証, 0)
+		CFLAG:対象:依存度 = MAX(CFLAG:対象:依存度 - 減少量, 最低保証)
+		PRINTFORML %ANAME(対象)%の依存度 -{減少量} (現在:{CFLAG:対象:依存度})
+
+		最低保証 = -1000
+		減少量 = LIMIT(300 + SUM_EX(対象) * 20, 0, MAX(CFLAG:対象:従属度, 0) / 10) + GETBIT(TALENT:対象:淫乱系, 素質_淫乱_浮気癖) * 500
+		SIF CFLAG:対象:従属度 - 減少量 < 最低保証
+			減少量 = MAX(CFLAG:対象:従属度 - 最低保証, 0)
+		CFLAG:対象:従属度 = MAX(CFLAG:対象:従属度 - 減少量, 最低保証)
+		PRINTFORML %ANAME(対象)%の従属度 -{減少量} (現在:{CFLAG:対象:従属度})
+
+		最低保証 = -1000
+		減少量 = LIMIT(300 + SUM_EX(対象) * 20, 0, MAX(CFLAG:対象:支配度, 0) / 10) + GETBIT(TALENT:対象:淫乱系, 素質_淫乱_浮気癖) * 500
+		SIF CFLAG:対象:支配度 - 減少量 < 最低保証
+			減少量 = MAX(CFLAG:対象:支配度 - 最低保証, 0)
+		CFLAG:対象:支配度 = MAX(CFLAG:対象:支配度 - 減少量, 最低保証)
+		PRINTFORML %ANAME(対象)%の支配度 -{減少量} (現在:{CFLAG:対象:支配度})
+
+		CALL CHECK_LOSE_RELATION_TALENT(対象)
+
+		参加者 ++
+	ELSEIF IS_PARTICIPATE_TRAIN(対象) && CFLAG:対象:慰安参加者
+		絶頂回数合計 += SUM_EX(対象)
+		CFLAG:対象:慰安参加者 = 0
+	ENDIF
+NEXT
+SIF FLAG:慰安避妊薬
+	TIMES 絶頂回数合計, 0.7
+
+報酬 = RAND(1000, 2000) * 参加者 + 絶頂回数合計 * RAND(40, 60) * MAX(参加者, 1)
+
+MONEY += 報酬
+CALL ICPRINT(@"慰安により、金<{報酬}>を得ました", "W", カラー_注意)
+
+
+
+;-------------------------------------------------
+;あてがうの処理
+;-------------------------------------------------
+@EVENTEND_ATEGAU()
+#DIM 絶頂回数合計
+#DIM 減少量
+#DIM 増加量
+#DIM 対象
+
+絶頂回数合計 = 0
+;好感度関連の処理
+FOR 対象, 0, CHARANUM
+	;参加者の場合、減少
+	IF IS_PARTICIPATE_TRAIN(対象) && 対象 != MASTER && !CFLAG:対象:慰安参加者
+		IF SUM_EX(対象) > 50
+			絶頂回数合計 += 50 + (SUM_EX(対象) - 50) / 5
+		ELSE
+			絶頂回数合計 += SUM_EX(対象)
+		ENDIF
+		減少量 = MIN(300 + SUM_EX(対象) * 20, CFLAG:対象:好感度 / 3)
+		CFLAG:対象:好感度 = MAX(CFLAG:対象:好感度 - 減少量, -1000)
+
+		減少量 = MIN(300 + SUM_EX(対象) * 20, CFLAG:対象:従属度 / 3)
+		CFLAG:対象:従属度 = MAX(CFLAG:対象:従属度 - 減少量, -1000)
+
+		減少量 = MIN(300 + SUM_EX(対象) * 20, CFLAG:対象:依存度 / 3)
+		CFLAG:対象:依存度 = MAX(CFLAG:対象:依存度 - 減少量, -1000)
+	ENDIF
+NEXT
+
+FOR 対象, 0, CHARANUM
+	IF CFLAG:対象:調教参加フラグ && CFLAG:対象:慰安参加者
+		IF SUM_EX(対象) > 50
+			絶頂回数合計 += 50 + (SUM_EX(対象) - 50) / 5
+		ELSE
+			絶頂回数合計 += SUM_EX(対象)
+		ENDIF
+	ENDIF
+NEXT
+
+FOR 対象, 0, CHARANUM
+	SIF !CFLAG:対象:調教参加フラグ || !CFLAG:対象:慰安参加者
+		CONTINUE
+	増加量 = LIMIT(100 + 絶頂回数合計, 0, 1000)
+	CFLAG:対象:好感度 += 増加量
+	CFLAG:対象:従属度 += 増加量
+	CFLAG:対象:依存度 += 増加量
+	CFLAG:対象:慰安参加者 = 0
+	CALL ICPRINT(@"閨の楽しみを提供したことで、%ANAME(対象)%の好感を得ました", "W", カラー_注意)
+NEXT
+
+
+;-------------------------------------------------
+;ビデオ撮影してたときの処理
+;-------------------------------------------------
+@EVENTEND_VIDEO()
+#DIM 絶頂回数合計
+#DIM ビデオレター可能
+#DIM 上映可能
+#DIM 女優
+
+
+女優 = -1
+絶頂回数合計 = 0
+FOR LOCAL, 0, CHARANUM
+	SIF !IS_PARTICIPATE_TRAIN(LOCAL)
+		CONTINUE
+	絶頂回数合計 += SUM_EX(LOCAL)
+	SIF IS_FEMALE(LOCAL) && GETBIT(TALENT:LOCAL:淫乱系, 素質_淫乱_ＡＶ女優)
+		女優 = LOCAL
+NEXT
+
+;撮影開始時からの差分を求める
+絶頂回数合計 -= TFLAG:71
+
+
+ビデオレター可能 = 0
+上映可能 = 0
+
+IF FLAG:調教モード == 調教_捕虜調教
+	;自勢力以外のどっかの勢力の捕虜で、君主以外ならビデオレターできる
+	FOR LOCAL, 0, VARSIZE("PRISONER_TARGET")
+		SIF PRISONER_TARGET:LOCAL == -1
+			CONTINUE
+		LOCAL:1 = PRISONER_TARGET:LOCAL
+		SIF !IS_COUNTRY(CFLAG:(LOCAL:1):所属) || CFLAG:(LOCAL:1):所属 == CFLAG:MASTER:所属 || GET_COUNTRY_BOSS(CFLAG:(LOCAL:1):所属) == LOCAL:1
+			CONTINUE
+		ビデオレター可能 = 1
+	NEXT
+	;自勢力以外のどっかの勢力の捕虜なら上映できる
+	FOR LOCAL, 0, VARSIZE("PRISONER_TARGET")
+		SIF PRISONER_TARGET:LOCAL == -1
+			CONTINUE
+		LOCAL:1 = PRISONER_TARGET:LOCAL
+		SIF !IS_COUNTRY(CFLAG:(LOCAL:1):所属) || CFLAG:(LOCAL:1):所属 == CFLAG:MASTER:所属
+			CONTINUE
+		上映可能 = 1
+	NEXT
+ENDIF
+
+
+
+CALL COLOR_LINE
+PRINTFORML 今回撮影したビデオを、どのように使おうか……
+CALL ASK_MULTI_JUDGE("保存", 1, "裏ルートに流す", 1, "軍事キャンペーンに使用", 1, "ビデオレターを送る", ビデオレター可能, "所属勢力で上映する", 上映可能)
+
+SELECTCASE RESULT
+	CASE 0
+		PRINTFORML 個人用に保存しておくことにした……
+	CASE 1
+		PRINTFORML 裏のルートに流すことにした……
+		IF 女優 >= 0
+			PRINTFORML ＡＶ女優として有名な%ANAME(女優)%の出演作ということで、人気を博したようだ……
+			TIMES 絶頂回数合計, 1.25
+		ENDIF
+		CALL ICPRINT(@"金<{SQRT(絶頂回数合計) * 250}>を得た", "W", カラー_注意)
+		MONEY += SQRT(絶頂回数合計) * 250
+	CASE 2
+		PRINTFORML 軍の兵士募集キャンペーンに利用することにした……
+		IF 女優 >= 0
+			PRINTFORML ＡＶ女優として有名な%ANAME(女優)%の出演作ということで、人気を博したようだ……
+			TIMES 絶頂回数合計, 1.25
+		ENDIF
+		CALL ICPRINT(@"兵<{SQRT(絶頂回数合計) * 150}>が集まった", "W", カラー_注意)
+		COUNTRY_SOLDIER:(CFLAG:MASTER:所属) += SQRT(絶頂回数合計) * 150
+	CASE 3
+		PRINTFORML 捕虜が元気にしている旨を知らせてやるべく、ビデオレターを送った……
+		FOR LOCAL, 0, VARSIZE("PRISONER_TARGET")
+			SIF PRISONER_TARGET:LOCAL == -1
+				CONTINUE
+			LOCAL:1 = PRISONER_TARGET:LOCAL
+			SIF !IS_COUNTRY(CFLAG:(LOCAL:1):所属) || CFLAG:(LOCAL:1):所属 == CFLAG:MASTER:所属 || GET_COUNTRY_BOSS(CFLAG:(LOCAL:1):所属) == LOCAL:1
+				CONTINUE
+			LOCAL:2 = GET_COUNTRY_BOSS(CFLAG:(LOCAL:1):所属)
+			IF IS_SLAVE(LOCAL:2)
+				CALL COLOR_PRINTW(@"%ANAME(LOCAL:2)%は自分も%ANAME(LOCAL:1)%のようにしてほしいと思ったようだ……", カラー_注意)
+				CALL CHANGE_RELATION_C_TO_C(CFLAG:(LOCAL:1):所属, CFLAG:MASTER:所属, SQRT(絶頂回数合計) * 2, SQRT(絶頂回数合計) * -2)
+			ELSEIF IS_LOVER(LOCAL:2)
+				CALL COLOR_PRINTW(@"%ANAME(LOCAL:2)%はそんなものを送りつけてきた%ANAME(MASTER)%に呆れているようだ……", カラー_注意)
+			ELSE
+				CALL COLOR_PRINTW(@"%ANAME(LOCAL:2)%はそんなものを送りつけてきた%ANAME(MASTER)%に激怒したようだ……", カラー_注意)
+				CALL CHANGE_RELATION_C_TO_C(CFLAG:(LOCAL:1):所属, CFLAG:MASTER:所属, SQRT(絶頂回数合計) * -2, SQRT(絶頂回数合計) * 2)
+			ENDIF
+		NEXT
+	CASE 4
+		PRINTFORML 所属勢力にて、痴態を大々的に上映してやることにした……
+		FOR LOCAL, 0, VARSIZE("PRISONER_TARGET")
+			SIF PRISONER_TARGET:LOCAL == -1
+				CONTINUE
+			LOCAL:1 = PRISONER_TARGET:LOCAL
+			SIF !IS_COUNTRY(CFLAG:(LOCAL:1):所属) || GET_COUNTRY_BOSS(CFLAG:(LOCAL:1):所属) == CFLAG:MASTER:所属
+				CONTINUE
+			IF GET_COUNTRY_BOSS(CFLAG:(LOCAL:1):所属) == LOCAL:1
+				PRINTFORMW 君主である%ANAME(LOCAL:1)%の淫らな行為についての噂は、あっという間に広まったようだ……
+				PRINTFORMW %ANAME(LOCAL:1)%への部下からの人望が損なわれた……
+				CALL CHANGE_RELATION_C_TO_O(CFLAG:(LOCAL:1):所属, LOCAL:1, SQRT(絶頂回数合計) * -2, SQRT(絶頂回数合計) * 2)
+			ELSE
+				PRINTFORMW 武将である%ANAME(LOCAL:1)%の淫らな行為についての噂は、あっという間に広まったようだ……
+				PRINTFORMW 民は少なからず動揺し、反対に「いいもの」を見せてくれた%ANAME(MASTER)%に感謝しているようだ……
+				PRINTFORMW 経済を{SQRT(絶頂回数合計) * 10}吸収した
+				CALL SHIFT_ECONOMY(CFLAG:(LOCAL:1):所属, CFLAG:MASTER:所属, SQRT(絶頂回数合計) * 1000)
+			ENDIF
+		NEXT
+ENDSELECT
+
+TFLAG:70 = 0
+
+;-------------------------------------------------
+;調教後自慰のチェック
+;-------------------------------------------------
+@AFTER_SELF_CHECK(ARG:0)
+;カットフラグが立っていたらリターン
+;SIF CFLAG:98 & 2
+;	RETURN 0
+
+;特殊状態が立っていれば戻る
+SIF CFLAG:(ARG:0):行動不能状態
+	RETURN 0
+
+;虚ろ・崩壊なら戻る
+SIF TALENT:(ARG:0):虚ろ || TALENT:(ARG:0):崩壊
+	RETURN 0
+
+;自慰または触手オナニーの知識が必要
+LOCAL:0 = 0
+CALL CHECK_COM_KNOWLEDGE(ARG:0, 100)
+LOCAL:0 += RESULT
+CALL CHECK_COM_KNOWLEDGE(ARG:0, 211)
+LOCAL:0 += RESULT
+SIF !LOCAL:0
+	RETURN 0
+
+;おねだりフラグが立っていれば100%(条件判定をスルー)
+IF !TCVAR:(ARG:0):27
+	;最低でも欲情が3以上必要
+	SIF PALAM:(ARG:0):欲情 < PALAMLV:3
+		RETURN 0
+
+	;機嫌がある程度良いとき限定
+	LOCALS:0 = %TOSTR_EMOTION(ARG:0)%
+	SIF !GROUPMATCH(LOCALS:0, "幸", "悦", "良", "平")
+		RETURN 0
+
+	;体力・気力がゼロ、もしくは少ないなら行わない
+	SIF BASE:(ARG:0):体力 <= 500 || BASE:(ARG:0):気力 <= 500
+		RETURN 0
+ENDIF
+
+;●自慰するかどうかの判定＆回数の計算
+CALL CALC_SELF_PARAMETER(ARG:0, 1)
+LOCAL:2 = RESULT:0
+LOCAL:3 = RESULT:1
+LOCAL:4 = RESULT:2
+
+;自慰の実行判定を満たさなければ戻る
+SIF !LOCAL:2
+	RETURN 0
+
+;メッセージの共通部分
+CALL COLOR_LINE
+PRINTFORM %ANAME(MASTER)%と別れた後、
+
+SIF TCVAR:(ARG:0):27
+	PRINTFORM おあずけを食らった
+
+PRINTFORM %ANAME(ARG:0)%は劣情を抑えきれず、
+
+;ＣＢオナニー
+IF LOCAL:3 == 0
+	IF HAS_PENIS(ARG:0)
+		PRINTFORML 自らの指で反り立った肉棒を慰めた…
+	ELSE
+		PRINTFORML 自らの指で火照った体を慰めた…
+	ENDIF
+
+	;口上の表示
+	CALL KOJO_EVENT(ARG:0, 100)
+	SETCOLOR カラー_シルバー
+	;経験の加算と表示
+	IF IS_MALE(ARG:0)
+		CALL FUCK(ARG:0, "Ｃ, 自慰, 欲望, 射精")
+	ELSE
+		CALL FUCK(ARG:0, "Ｃ, Ｂ, 自慰, 欲望, 射精")
+	ENDIF
+	RESETCOLOR
+;アナニー
+ELSE
+	PRINTFORML 自らの尻穴に指を挿れて快感を貪った…
+
+	;口上の表示
+	CALL KOJO_EVENT(ARG:0, 101)
+	SETCOLOR カラー_シルバー
+	;経験の加算と表示
+	CALL FUCK(ARG:0, "Ａ, 自慰, 欲望, 射精")
+ENDIF
+RESETCOLOR
+
+;能力上昇判定
+CALL TRAIN_AUTO_ABLUP(ARG:0)
+WAIT
+
+;-------------------------------------------------
+;自慰の判定(RESULT:0)、種類(RESULT:1)、回数(RESULT:2)を返す関数
+;自慰の種類は  0:ＣＢオナニー  1:アナニー
+;ARG:1が1だとPALAMなどの調教時の一時変数を考慮する
+;-------------------------------------------------
+@CALC_SELF_PARAMETER(ARG:0, ARG:1)
+#DIM 自慰実行度 ;(LOCAL:2)
+#DIM ＣＢ傾向 ;(LOCAL:3)
+#DIM Ａ傾向 ;(LOCAL:4)
+
+自慰実行度 = ABL:(ARG:0):自慰 * 7 + ABL:(ARG:0):欲望 * 4
+IF ARG:1
+	;ムード(TFLAG:37)を影響させる　※暫定的にムード20以下～70以上で0％～100％倍率
+	自慰実行度 = 自慰実行度 * LIMIT(TFLAG:37 - 20 ,0 ,50) / 50
+	;でもムラっとしたら関係ないよね　てことで欲情ゲージには倍率されない
+	自慰実行度 += GET_PALAMLV(PALAM:(ARG:0):欲情) * 4
+ELSE
+	自慰実行度 += 20
+ENDIF
+
+ＣＢ傾向 = ABL:(ARG:0):Ｃ感 * 2 + ABL:(ARG:0):Ｂ感
+Ａ傾向 = ABL:(ARG:0):Ａ感 * 3
+
+SIF TALENT:(ARG:0):自慰しやすい
+	自慰実行度 += 11
+
+SIF TALENT:(ARG:0):快感に素直
+	自慰実行度 += 5
+
+SIF TALENT:(ARG:0):快感の否定
+	自慰実行度 -= 14
+
+;服従じゃ増えない　隷属で恋慕と同じレベル
+SIF TALENT:(ARG:0):恋慕 || TALENT:(ARG:0):隷属
+	自慰実行度 += 5
+
+;満たされてるので自慰の傾向が減るイメージ
+SIF TALENT:(ARG:0):親愛
+	自慰実行度 -= 7
+
+SIF GETBIT(TALENT:(ARG:0):淫乱系, 素質_淫乱_淫乱)
+	自慰実行度 += 7
+
+SIF  GETBIT(TALENT:(ARG:0):淫乱系, 素質_淫乱_淫核)
+	ＣＢ傾向 += 6
+
+SIF  GETBIT(TALENT:(ARG:0):淫乱系, 素質_淫乱_淫乳)
+	ＣＢ傾向 += 4
+
+SIF  GETBIT(TALENT:(ARG:0):淫乱系, 素質_淫乱_尻穴狂い)
+	Ａ傾向 += 8
+
+LOCAL:5 = (自慰実行度 + MAX(ＣＢ傾向, Ａ傾向)) * 10
+
+IF LOCAL:5 > 0
+	IF ARG:1
+		;これどうせ自慰発生する非ウフフだと体力気力減ることほぼ無いんだし意味なくない？
+		LOCAL:5 = LOCAL:5 * BASE:(ARG:0):体力 * BASE:(ARG:0):気力 / (MAXBASE:(ARG:0):体力 * MAXBASE:(ARG:0):気力)
+	ELSE
+		TIMES LOCAL:5, 0.75
+	ENDIF
+ENDIF
+
+;おねだりフラグが立っていれば強制的に判定値をクリアするように補正
+IF TCVAR:(ARG:0):27
+	;ここでMAXする意味がいまいちわからない（一応ハードルの底上げと合わせて最低値を+50の250とする）
+	LOCAL:5 = MAX(LOCAL:5 + 100, 250)
+ENDIF
+
+;実行値不足なら判定OFF
+;恋慕・隷属の加算を増やした分、ハードルも底上げしました（250 + 5 * 10 → 300）
+IF LOCAL:5 < 300
+	RESULT:0 = 0
+ELSE
+	RESULT:0 = 1
+ENDIF
+
+;種類の判定
+RESULT:1 = (ＣＢ傾向 < Ａ傾向)
+
+;回数の計算(上限は30回)
+LOCAL:6 = MIN(SQRT(MAX(LOCAL:5 - 240, 0) / 10), 30)
+RESULT:2 = MAX(LOCAL:6 - RAND:(LOCAL:6 / 5 + 2), 1)
+
+RETURN RESULT:0
+
+;-------------------------------------------------
+;調教後のキャラ間印象値改善処理
+;-------------------------------------------------
+;(ARG:0)の(ARG:1)に対する印象を調教内容次第で改善する
+;※MASTERに対する好感度・従属度や第三者への親密度とは違う
+;機嫌が良いほど好印象値が上昇、欲情・酔いが高いほど悪印象値が減少
+;主に閨の乱交が効果的
+;誰が誰にどうしたなどはめんどくさすぎて考慮してない
+;なお今のとこ悪化するようなことはない（やってもいいけどバランスが難しいと思われ）
+@TRAIN_CHANGE_RELATION(ARG:0, ARG:1)
+#DIM 好印象増加値
+#DIM 悪印象減少値
+
+;好印象増加値：機嫌からざっくり代入します
+SELECTCASE TOSTR_EMOTION(ARG:0)
+	CASE "幸"
+		好印象増加値 = 16
+	CASE "悦"
+		好印象増加値 = 8
+	CASE "良"
+		好印象増加値 = 4
+	CASE "平"
+		好印象増加値 = 2
+ENDSELECT
+
+;悪印象減少値：そのまま欲情Lvと酔いLvを足す（計0～19ぐらい？）
+悪印象減少値 = GET_PALAMLV(PALAM:(ARG:0):欲情) + GET_PALAMLV(PALAM:(ARG:0):酔い)
+
+;主人公自身の変動はとりあえずどっちも10
+IF ARG:0 == MASTER
+	好印象増加値 = 10
+	悪印象減少値 = 10
+ENDIF
+
+;相手の素質で変動
+;※操作キャラによってはめっちゃ楽になるので無くてもいいかも
+IF TALENT:(ARG:1):天の御遣い
+	好印象増加値 += 2
+	悪印象減少値 += 2
+ENDIF
+IF TALENT:(ARG:1):君主の器
+	好印象増加値 += 2
+	悪印象減少値 += 2
+ENDIF
+IF TALENT:(ARG:1):求心力
+	好印象増加値 += 2
+	悪印象減少値 += 2
+ENDIF
+IF TALENT:(ARG:1):魅惑
+	好印象増加値 += 1
+ENDIF
+IF TALENT:(ARG:1):謎の魅力
+	好印象増加値 += 1
+	悪印象減少値 += 1
+ENDIF
+IF TALENT:(ARG:1):人気
+	好印象増加値 += 1
+	悪印象減少値 += 1
+ENDIF
+IF TALENT:(ARG:1):小悪魔
+	好印象増加値 += 1
+ENDIF
+
+;閨・子育てなら効果は（とりあえず）4倍
+IF FLAG:調教モード == 1 || FLAG:調教モード == 3
+	好印象増加値 = 好印象増加値 * 4
+	悪印象減少値 = 悪印象減少値 * 4
+ENDIF
+
+CALL CHANGE_RELATION_O_TO_O(ARG:0, ARG:1, 好印象増加値, -(悪印象減少値))
+
+;-------------------------------------------------
+;DESC  :特殊勢力
+;ARG   ::
+;-------------------------------------------------
+@EVENTEND_SP_COUNTRY()
+#DIMS 勢力名,2
+#DIM 勢力定数
+
+勢力定数 = SP_COUNTRY_TO_CONST(CFLAG:MASTER:捕虜先)
+勢力名 = %SP_COUNTRY_NAME:勢力定数%
+勢力名:1 = %SP_COUNTRY_NAME_ENG:勢力定数%
+
+SELECTCASE SP_TRAIN_COUNT:MASTER:勢力定数
+	CASE IS < TRAIN_FALLEN_TERM:1
+		PRINTFORML %勢力名%たちは%ANAME(MASTER)%を置いて、牢獄を後にした
+		PRINTFORMW まだまだ%ANAME(MASTER)%の意思はくじけていない……
+	CASE IS < TRAIN_FALLEN_TERM:2
+		PRINTFORML %勢力名%たちは%ANAME(MASTER)%を置いて、牢獄を後にした
+		CALL COLOR_PRINTW(@"%ANAME(MASTER)%の意思は綻びはじめている……", カラー_注意)
+	CASE IS < TRAIN_FALLEN_TERM:3 - 1
+		PRINTFORML %勢力名%たちは%ANAME(MASTER)%を置いて、牢獄を後にした
+		CALL COLOR_PRINTW(@"%ANAME(MASTER)%はほとんど快楽に屈しかけている……", カラー_警告)
+	CASEELSE
+		PRINTFORML ・
+		PRINTFORML ・
+		PRINTFORML ・
+		CALLFORM %勢力名:1%_FALLEN_MSG(MASTER)
+		CALL CHANGE_COUNTRY(MASTER, CFLAG:MASTER:捕虜先, 1)
+
+		CALL PLAYER_FALLEN_TO_SP_COUNTRY(CFLAG:MASTER:所属)
+		CALLFORM %勢力名:1%_FALLEN_LEAVE_MARK(MASTER)
+		SETBIT TALENT:MASTER:特殊勢力陥落系, 勢力定数
+		CALL PLAYER_FALLEN_TO_SP_COUNTRY(CFLAG:MASTER:所属)
+ENDSELECT
+

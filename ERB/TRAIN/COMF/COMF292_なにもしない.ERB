@@ -1,0 +1,88 @@
+﻿;なにもしない
+
+;-------------------------------------------------
+;コマンド名称
+;-------------------------------------------------
+@COM_NAME292
+RESULTS:0 = なにもしない
+
+;-------------------------------------------------
+;選択可否判定
+;-------------------------------------------------
+@COM_ABLE292
+;共通部分
+CALL COM_ABLE_COMMON(292)
+SIF RESULT == 0
+	RETURN 0
+;プレイヤーは1人以上
+SIF MPLY_NUM <= 0
+	RETURN 0
+;主人公がプレイヤーのとき限定
+SIF FINDELEMENT(MPLY, MASTER) == -1
+	RETURN 0
+RETURN 1
+
+;-------------------------------------------------
+;メイン処理
+;-------------------------------------------------
+@COM292
+#DIM コマンド参加数
+#DIM 基本割合
+PRINTFORML %ANAME(MPLY:0)%はなにもしなかった……
+
+;体力と気力を回復
+FOR LOCAL, 0, CHARANUM
+	SIF !IS_PARTICIPATE_TRAIN(LOCAL)
+		CONTINUE
+
+	;基本的な回復割合は5~10%
+	基本割合 = RAND(5, 10) + TALENT:LOCAL:回復早い * 5 - TALENT:LOCAL:回復遅い * 5
+	コマンド参加数 = 0
+	;コマンドに参加しているほど、回復しにくくなる
+	FOR LOCAL:1, 0, MEQUIP_NUM
+		FOR LOCAL:2, 0, MEQUIP_PLAYER_NUM:(LOCAL:1)
+			IF MEQUIP_PLAYER:(LOCAL:1):(LOCAL:2) == LOCAL
+				コマンド参加数 ++
+				GOTO FOUND
+			ENDIF
+		NEXT
+		FOR LOCAL:2, 0, MEQUIP_TARGET_NUM:(LOCAL:1)
+			IF MEQUIP_TARGET:(LOCAL:1):(LOCAL:2) == LOCAL
+				コマンド参加数 ++
+				GOTO FOUND
+			ENDIF
+		NEXT
+		$FOUND
+	NEXT
+
+	IF FLAG:調教モード == 調教_捕虜調教 && FINDELEMENT(PRISONER_TARGET, LOCAL) != -1
+		BASE:LOCAL:精神力 = MIN(MAXBASE:LOCAL:精神力, BASE:LOCAL:精神力 + MAXBASE:LOCAL:精神力 * 基本割合 / 100)
+		SIF BASE:LOCAL:精神力 > 0 && CFLAG:LOCAL:崩壊
+			CFLAG:LOCAL:崩壊 = MAX(CFLAG:LOCAL:崩壊 - BASE:LOCAL:精神力 / 5, 0)
+	ENDIF
+
+	基本割合 = MAX(基本割合 - コマンド参加数, 0)
+
+	IF TCVAR:(LOCAL:0):51
+		SOURCE:(LOCAL:0):疲労回復 = RAND(100, 300) + TALENT:LOCAL:回復早い * 50 - TALENT:LOCAL:回復遅い * 50
+	ELSE
+		BASE:LOCAL:体力 = MIN(MAXBASE:LOCAL:体力, BASE:LOCAL:体力 + MAXBASE:LOCAL:体力 * 基本割合 / 100)
+	ENDIF
+
+	IF TCVAR:(LOCAL:0):52
+		SOURCE:(LOCAL:0):気絶回復 = RAND(100, 300) + TALENT:LOCAL:回復早い * 50 - TALENT:LOCAL:回復遅い * 50
+	ELSE
+		BASE:LOCAL:気力 = MIN(MAXBASE:LOCAL:体力, BASE:LOCAL:気力 + MAXBASE:LOCAL:気力 * 基本割合 / 100)
+	ENDIF
+
+NEXT
+
+RETURN 1
+
+;-------------------------------------------------
+
+;コマンド区分
+;-------------------------------------------------
+
+@COM_AVAILABLE_WHEN292
+RETURN コマンド_共通

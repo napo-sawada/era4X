@@ -1,0 +1,773 @@
+﻿;-------------------------------------------------
+;シナリオ5
+;群雄割拠
+;-------------------------------------------------
+@SCENARIO_NAME_5
+RESULTS = 群雄割拠
+RETURN
+
+@SCENARIO_INTRO_5
+PRINTFORML
+PRINTFORMW 群雄割拠という名のぐちゃぐちゃ系シナリオ
+PRINTFORMW とりあえず細かく分けてみましたっていうだけのもの。
+PRINTFORMW 
+PRINTL
+
+;ランダムキャラは選択に委ねる
+FLAG:OPランダムキャラ使用 = 0
+
+@SCENARIO_PLACEMENT_5
+
+;勢力設定
+COUNTRY_BOSS:0 = 0
+COUNTRY_COLOR:0 = GETDEFCOLOR()
+
+;;--------チーム博麗の巫女;--------
+COUNTRY_BOSS:1 = GET_ID(NAME_TO_CHARA("霊夢"))
+COUNTRY_COLOR:1 = 0x757575
+COUNTRY_AI_TYPE:1 = AI_外交
+
+CITY_OWNER:GET_CITYNUMBER("博麗神社") = 1
+CITY_OWNER:GET_CITYNUMBER("裏手の池") = 1
+CITY_OWNER:GET_CITYNUMBER("博麗神社") = 1
+
+CFLAG:(NAME_TO_CHARA("霊夢")):1 = 1
+CFLAG:(NAME_TO_CHARA("華扇")):1 = 1
+CFLAG:(NAME_TO_CHARA("萃香")):1 = 1
+;あたしゃここにいるよ
+CFLAG:(NAME_TO_CHARA("魅魔")):1 = 1
+
+;;--------チーム紅魔館;--------
+COUNTRY_BOSS:2 = GET_ID(NAME_TO_CHARA("レミリア"))
+COUNTRY_COLOR:2 = 0xFF0000
+COUNTRY_AI_TYPE:2 = AI_好戦
+
+CITY_OWNER:GET_CITYNUMBER("紅魔館") = 2
+CITY_OWNER:GET_CITYNUMBER("地下図書館") = 2
+CFLAG:(NAME_TO_CHARA("レミリア")):1 = 2
+CFLAG:(NAME_TO_CHARA("美鈴")):1 = 2
+CFLAG:(NAME_TO_CHARA("咲夜")):1 = 2
+CFLAG:(NAME_TO_CHARA("フランドール")):1 = 2
+
+;;--------チーム地下図書館;--------
+COUNTRY_BOSS:3 = GET_ID(NAME_TO_CHARA("魔理沙"))
+COUNTRY_COLOR:3 = 0xE1D200
+CITY_OWNER:GET_CITYNUMBER("霧雨魔法店") = 3
+CITY_OWNER:GET_CITYNUMBER("マーガトロイド邸") = 3
+
+CFLAG:(NAME_TO_CHARA("魔理沙")):1 = 3
+CFLAG:(NAME_TO_CHARA("アリス")):1 = 3
+CFLAG:(NAME_TO_CHARA("パチュリー")):1 = 3
+CFLAG:(NAME_TO_CHARA("小悪魔")):1 = 3
+
+;--------チーム白玉楼;--------
+COUNTRY_BOSS:4 = GET_ID(NAME_TO_CHARA("幽々子"))
+COUNTRY_COLOR:4 = 0xF5A9F2
+COUNTRY_AI_TYPE:4 = AI_内政
+
+CITY_OWNER:GET_CITYNUMBER("白玉楼") = 4
+CITY_OWNER:GET_CITYNUMBER("七千階段") = 4
+CITY_OWNER:GET_CITYNUMBER("西行妖") = 4
+
+CFLAG:(NAME_TO_CHARA("幽々子")):1 = 4
+CFLAG:(NAME_TO_CHARA("妖夢")):1 = 4
+CFLAG:(NAME_TO_CHARA("半霊")):1 = 4
+CFLAG:(NAME_TO_CHARA("妖忌")):1 = 4
+
+
+;--------チーム幽霊楽団;--------
+COUNTRY_BOSS:5= GET_ID(NAME_TO_CHARA("ルナサ"))
+COUNTRY_COLOR:5 = 0xADFF2F
+CITY_OWNER:GET_CITYNUMBER("廃洋館") = 5
+
+CFLAG:(NAME_TO_CHARA("リリカ")):1 = 5
+CFLAG:(NAME_TO_CHARA("メルラン")):1 = 5
+CFLAG:(NAME_TO_CHARA("ルナサ")):1 = 5
+
+;--------チームマヨヒガ;--------
+COUNTRY_BOSS:6 = GET_ID(NAME_TO_CHARA("紫"))
+COUNTRY_COLOR:6 = 0x792B90
+COUNTRY_AI_TYPE:6 = AI_外交
+
+CITY_OWNER:GET_CITYNUMBER("マヨヒガ") = 6
+CITY_OWNER:GET_CITYNUMBER("八雲屋敷") = 6
+
+CFLAG:(NAME_TO_CHARA("紫")):1 = 6
+CFLAG:(NAME_TO_CHARA("藍")):1 = 6
+CFLAG:(NAME_TO_CHARA("橙")):1 = 6
+
+;--------チーム永遠亭--------
+COUNTRY_BOSS:7 = GET_ID(NAME_TO_CHARA("輝夜"))
+COUNTRY_COLOR:7 = 0x778CFF
+COUNTRY_AI_TYPE:7 = AI_内政
+
+CITY_OWNER:GET_CITYNUMBER("永遠亭") = 7
+CITY_OWNER:GET_CITYNUMBER("迷いの竹林西部") = 7
+CITY_OWNER:GET_CITYNUMBER("迷いの竹林東部") = 7
+
+CFLAG:(NAME_TO_CHARA("輝夜")):1 = 7
+CFLAG:(NAME_TO_CHARA("永琳")):1 = 7
+CFLAG:(NAME_TO_CHARA("てゐ")):1 = 7
+CFLAG:(NAME_TO_CHARA("鈴仙")):1 = 7
+
+;--------チーム是非曲直庁--------
+COUNTRY_BOSS:8 = GET_ID(NAME_TO_CHARA("四季映姫"))
+COUNTRY_COLOR:8 = 0x088A08
+COUNTRY_AI_TYPE:8 = AI_内政
+
+CITY_OWNER:GET_CITYNUMBER("是非曲直庁") = 8
+CITY_OWNER:GET_CITYNUMBER("彼岸") = 8
+
+CFLAG:(NAME_TO_CHARA("四季映姫")):1 = 8
+CFLAG:(NAME_TO_CHARA("小町")):1 = 8
+CFLAG:(NAME_TO_CHARA("リリーブラック")):1 = 8
+
+;--------チーム守矢神社--------
+COUNTRY_BOSS:9 = GET_ID(NAME_TO_CHARA("神奈子"))
+COUNTRY_COLOR:9 = 0x79FF4B
+COUNTRY_AI_TYPE:9 = AI_好戦
+
+CITY_OWNER:GET_CITYNUMBER("守矢神社") = 9
+CITY_OWNER:GET_CITYNUMBER("風神の湖") = 9
+
+CFLAG:(NAME_TO_CHARA("神奈子")):1 = 9
+CFLAG:(NAME_TO_CHARA("諏訪子")):1 = 9
+CFLAG:(NAME_TO_CHARA("早苗")):1 = 9
+
+;--------チーム野良神様--------
+COUNTRY_BOSS:10 = GET_ID(NAME_TO_CHARA("雛"))
+COUNTRY_COLOR:10 = 0xCD853F
+COUNTRY_AI_TYPE:10 = AI_防衛
+
+CITY_OWNER:GET_CITYNUMBER("妖怪の山麓") = 10
+CITY_OWNER:GET_CITYNUMBER("妖怪の山樹海") = 10
+CITY_OWNER:GET_CITYNUMBER("玄武の沢") = 10
+
+CFLAG:(NAME_TO_CHARA("雛")):1 = 10
+CFLAG:(NAME_TO_CHARA("静葉")):1 = 10
+CFLAG:(NAME_TO_CHARA("穣子")):1 = 10
+
+;--------チーム妖怪の山--------
+COUNTRY_BOSS:11 = GET_ID(NAME_TO_CHARA("文"))
+COUNTRY_COLOR:11 = 0x87CEFA
+COUNTRY_AI_TYPE:11 = AI_防衛
+
+CITY_OWNER:GET_CITYNUMBER("九天の滝") = 11
+CITY_OWNER:GET_CITYNUMBER("大蝦蟇の池") = 11
+CITY_OWNER:GET_CITYNUMBER("未踏の渓谷") = 11
+CFLAG:(NAME_TO_CHARA("文")):1 = 11
+CFLAG:(NAME_TO_CHARA("にとり")):1 = 11
+CFLAG:(NAME_TO_CHARA("椛")):1 = 11
+CFLAG:(NAME_TO_CHARA("はたて")):1 = 11
+
+;--------チーム天界--------
+COUNTRY_BOSS:12 = GET_ID(NAME_TO_CHARA("天子"))
+COUNTRY_COLOR:12 = 0x002FFF
+CITY_OWNER:GET_CITYNUMBER("桃園") = 12
+CITY_OWNER:GET_CITYNUMBER("天人の都") = 12
+CITY_OWNER:GET_CITYNUMBER("有頂天") = 12
+CITY_OWNER:GET_CITYNUMBER("竜宮の遣い専用宿舎") = 12
+CITY_OWNER:GET_CITYNUMBER("比那名居家屋敷") = 12
+
+CFLAG:(NAME_TO_CHARA("天子")):1 = 12
+CFLAG:(NAME_TO_CHARA("衣玖")):1 = 12
+
+;--------チーム地霊殿--------
+COUNTRY_BOSS:13 = GET_ID(NAME_TO_CHARA("さとり"))
+COUNTRY_COLOR:13 = 0xFA5882
+COUNTRY_AI_TYPE:13 = AI_内政
+
+CITY_OWNER:GET_CITYNUMBER("地霊殿") = 13
+
+CFLAG:(NAME_TO_CHARA("さとり")):1 = 13
+CFLAG:(NAME_TO_CHARA("燐")):1 = 13
+CFLAG:(NAME_TO_CHARA("空")):1 = 13
+CFLAG:(NAME_TO_CHARA("こいし")):1 = 13
+
+;--------チーム命蓮寺--------
+COUNTRY_BOSS:14 = GET_ID(NAME_TO_CHARA("白蓮"))
+COUNTRY_COLOR:14 = 0xDF01D7
+COUNTRY_AI_TYPE:14 = AI_外交
+
+CITY_OWNER:GET_CITYNUMBER("命蓮寺") = 14
+
+CFLAG:(NAME_TO_CHARA("白蓮")):1 = 14
+CFLAG:(NAME_TO_CHARA("一輪")):1 = 14
+CFLAG:(NAME_TO_CHARA("雲山")):1 = 14
+CFLAG:(NAME_TO_CHARA("水蜜")):1 = 14
+
+;--------チーム寅丸命蓮寺--------
+COUNTRY_BOSS:15 = GET_ID(NAME_TO_CHARA("星"))
+COUNTRY_COLOR:15 = 0xFFFF00
+COUNTRY_AI_TYPE:15 = AI_外交
+
+CITY_OWNER:GET_CITYNUMBER("無縁塚") = 15
+
+CFLAG:(NAME_TO_CHARA("星")):1 = 15
+CFLAG:(NAME_TO_CHARA("ナズーリン")):1 = 15
+CFLAG:(NAME_TO_CHARA("響子")):1 = 15
+CFLAG:(NAME_TO_CHARA("ミスティア")):1 = 15
+
+;--------チームぬえ--------
+COUNTRY_BOSS:16 = GET_ID(NAME_TO_CHARA("ぬえ"))
+COUNTRY_COLOR:16 = 0x4B0082
+COUNTRY_AI_TYPE:16 = AI_好戦
+
+CITY_OWNER:GET_CITYNUMBER("魔法の森北部") = 16
+
+CFLAG:(NAME_TO_CHARA("ぬえ")):1 = 16
+CFLAG:(NAME_TO_CHARA("マミゾウ")):1 = 16
+CFLAG:(NAME_TO_CHARA("こころ")):1 = 1
+CFLAG:(NAME_TO_CHARA("小傘")):1 = 16
+
+;--------チーム神霊廟--------
+COUNTRY_BOSS:17 = GET_ID(NAME_TO_CHARA("神子"))
+COUNTRY_COLOR:17 = 0xFF8000
+COUNTRY_AI_TYPE:17 = AI_外交
+
+CITY_OWNER:GET_CITYNUMBER("神霊廟") = 17
+CITY_OWNER:GET_CITYNUMBER("夢殿大祀廟") = 17
+
+CFLAG:(NAME_TO_CHARA("神子")):1 = 17
+CFLAG:(NAME_TO_CHARA("芳香")):1 = 17
+CFLAG:(NAME_TO_CHARA("青娥")):1 = 17
+CFLAG:(NAME_TO_CHARA("布都")):1 = 17
+CFLAG:(NAME_TO_CHARA("屠自古")):1 = 17
+
+;--------チーム輝針城--------
+COUNTRY_BOSS:18 = GET_ID(NAME_TO_CHARA("針妙丸"))
+COUNTRY_COLOR:18 = 0x00BFFF
+CITY_OWNER:GET_CITYNUMBER("輝針城") = 18
+
+CFLAG:(NAME_TO_CHARA("針妙丸")):1 = 18
+CFLAG:(NAME_TO_CHARA("正邪")):1 = 18
+
+;--------チーム草の根ネットワーク--------
+COUNTRY_BOSS:19 = GET_ID(NAME_TO_CHARA("影狼"))
+COUNTRY_COLOR:19 = 0x00FFf00
+CITY_OWNER:GET_CITYNUMBER("忘れ去られた道") = 19
+
+CFLAG:(NAME_TO_CHARA("影狼")):1 = 19
+CFLAG:(NAME_TO_CHARA("わかさぎ姫")):1 = 19
+CFLAG:(NAME_TO_CHARA("ルーミア")):1 = 19
+CFLAG:(NAME_TO_CHARA("朱鷺子")):1 = 19
+
+;--------チーム竹林--------
+COUNTRY_BOSS:20 = GET_ID(NAME_TO_CHARA("慧音"))
+COUNTRY_COLOR:20 = 0x974E00
+COUNTRY_AI_TYPE:20 = AI_防衛
+
+CITY_OWNER:GET_CITYNUMBER("妹紅宅") = 20
+CITY_OWNER:GET_CITYNUMBER("寺子屋") = 20
+
+CFLAG:(NAME_TO_CHARA("慧音")):1 = 20
+CFLAG:(NAME_TO_CHARA("妹紅")):1 = 20
+
+;--------チーム人里--------
+COUNTRY_BOSS:21 = GET_ID(NAME_TO_CHARA("阿求"))
+COUNTRY_COLOR:21 = 0xF0E68C
+COUNTRY_AI_TYPE:21 = AI_防衛
+
+CITY_OWNER:GET_CITYNUMBER("阿求屋敷") = 21
+CITY_OWNER:GET_CITYNUMBER("鈴奈庵") = 21
+CITY_OWNER:GET_CITYNUMBER("人里住宅街") = 21
+CITY_OWNER:GET_CITYNUMBER("霧雨店") = 21
+CFLAG:(NAME_TO_CHARA("阿求")):1 = 21
+CFLAG:(NAME_TO_CHARA("小鈴")):1 = 21
+CFLAG:(NAME_TO_CHARA("赤蛮奇")):1 = 21
+CFLAG:(NAME_TO_CHARA("霖之助")):1 = 21
+;--------チーム九十九神--------
+COUNTRY_BOSS:22 = GET_ID(NAME_TO_CHARA("雷鼓"))
+COUNTRY_COLOR:22 = 0xFF4500
+CITY_OWNER:GET_CITYNUMBER("迷いの竹林南部") = 22
+
+CFLAG:(NAME_TO_CHARA("雷鼓")):1 = 22
+CFLAG:(NAME_TO_CHARA("弁々")):1 = 22
+CFLAG:(NAME_TO_CHARA("八橋")):1 = 22
+
+;--------チーム月の都--------
+COUNTRY_BOSS:23 = GET_ID(NAME_TO_CHARA("依姫"))
+COUNTRY_COLOR:23 = 0xFFF999
+COUNTRY_AI_TYPE:23 = AI_好戦
+
+CITY_OWNER:GET_CITYNUMBER("月の都") = 23
+CITY_OWNER:GET_CITYNUMBER("月兎街") = 23
+CITY_OWNER:GET_CITYNUMBER("綿月亭") = 23
+CITY_OWNER:GET_CITYNUMBER("薬搗場") = 23
+CFLAG:(NAME_TO_CHARA("依姫")):1 = 23
+CFLAG:(NAME_TO_CHARA("豊姫")):1 = 23
+CFLAG:(NAME_TO_CHARA("レイセン")):1 = 23
+CFLAG:(NAME_TO_CHARA("サグメ")):1 = 23
+
+;--------チーム氷精--------
+COUNTRY_BOSS:24 = GET_ID(NAME_TO_CHARA("チルノ"))
+COUNTRY_COLOR:24 = 0xB0C4DE
+CITY_OWNER:GET_CITYNUMBER("霧の湖の畔") = 24
+
+CFLAG:(NAME_TO_CHARA("大妖精")):1 = 24
+CFLAG:(NAME_TO_CHARA("チルノ")):1 = 24
+CFLAG:(NAME_TO_CHARA("リリーホワイト")):1 = 24
+
+;--------チーム旧地獄街--------
+COUNTRY_BOSS:25 = GET_ID(NAME_TO_CHARA("勇儀"))
+COUNTRY_COLOR:25 = 0x800000
+COUNTRY_AI_TYPE:25 = AI_好戦
+
+CITY_OWNER:GET_CITYNUMBER("旧都歓楽街") = 25
+CITY_OWNER:GET_CITYNUMBER("旧地獄街道") = 25
+CITY_OWNER:GET_CITYNUMBER("渡る者の途絶えた橋") = 25
+
+CFLAG:(NAME_TO_CHARA("キスメ")):1 = 25
+CFLAG:(NAME_TO_CHARA("ヤマメ")):1 = 25
+CFLAG:(NAME_TO_CHARA("パルスィ")):1 = 25
+CFLAG:(NAME_TO_CHARA("勇儀")):1 = 25
+
+;;--------チーム三妖精--------
+COUNTRY_BOSS:26 = GET_ID(NAME_TO_CHARA("サニーミルク"))
+COUNTRY_COLOR:26 = 0XFFD700
+CITY_OWNER:GET_CITYNUMBER("ミズナラの木") = 26
+CITY_OWNER:GET_CITYNUMBER("裏山の湖") = 26
+
+CFLAG:(NAME_TO_CHARA("サニーミルク")):1 = 26
+CFLAG:(NAME_TO_CHARA("ルナチャイルド")):1 = 26
+CFLAG:(NAME_TO_CHARA("スターサファイア")):1 = 26
+
+;--------チーム人形--------
+COUNTRY_BOSS:27 = GET_ID(NAME_TO_CHARA("メディスン"))
+COUNTRY_COLOR:27 = 0XC71585
+CITY_OWNER:GET_CITYNUMBER("無名の丘") = 27
+
+CFLAG:(NAME_TO_CHARA("メディスン")):1 = 27
+CFLAG:(NAME_TO_CHARA("上海人形")):1 = 27
+CFLAG:(NAME_TO_CHARA("蓬莱人形")):1 = 27
+CFLAG:(NAME_TO_CHARA("大江戸人形")):1 = 27
+CFLAG:(NAME_TO_CHARA("ゴリアテ人形")):1 = 27
+
+
+
+;--------チーム太陽の畑--------
+COUNTRY_BOSS:28 = GET_ID(NAME_TO_CHARA("幽香"))
+COUNTRY_COLOR:28 = 0XFF7F50
+COUNTRY_AI_TYPE:28 = AI_好戦
+
+CITY_OWNER:GET_CITYNUMBER("太陽の畑") = 28
+
+CFLAG:(NAME_TO_CHARA("幽香")):1 = 28
+CFLAG:(NAME_TO_CHARA("リグル")):1 = 28
+
+
+;--------夢美教授--------
+COUNTRY_BOSS:29 = GET_ID(NAME_TO_CHARA("夢美"))
+COUNTRY_COLOR:29 = 0XB5495B
+CITY_OWNER:GET_CITYNUMBER("夢幻遺跡") = 29
+CITY_OWNER:GET_CITYNUMBER("岡崎研究室") = 29
+;チート教授とその助手と神社から返品されたメイドロボ
+CFLAG:(NAME_TO_CHARA("ちゆり")):1 = 29
+CFLAG:(NAME_TO_CHARA("夢美")):1 = 29
+CFLAG:(NAME_TO_CHARA("る～こと")):1 = 29
+
+;--------ちんき様--------
+COUNTRY_BOSS:30 = GET_ID(NAME_TO_CHARA("神綺"))
+COUNTRY_COLOR:30 = 0XA6D6DB
+CITY_OWNER:GET_CITYNUMBER("最果て") = 30
+CITY_OWNER:GET_CITYNUMBER("魔界庁") = 30
+CITY_OWNER:GET_CITYNUMBER("魔界大都会") = 30
+CITY_OWNER:GET_CITYNUMBER("魔界旅行会社") = 30
+;怪綺談－アリス
+CFLAG:(NAME_TO_CHARA("サラ")):1 = 30
+CFLAG:(NAME_TO_CHARA("ルイズ")):1 = 30
+CFLAG:(NAME_TO_CHARA("ユキ")):1 = 30
+CFLAG:(NAME_TO_CHARA("マイ")):1 = 30
+CFLAG:(NAME_TO_CHARA("夢子")):1 = 30
+CFLAG:(NAME_TO_CHARA("神綺")):1 = 30
+
+;--------幻月--------
+COUNTRY_BOSS:31 = GET_ID(NAME_TO_CHARA("幻月"))
+COUNTRY_COLOR:31 = 0XB8D200
+CITY_OWNER:GET_CITYNUMBER("夢幻館") = 31
+CITY_OWNER:GET_CITYNUMBER("夢幻門") = 31
+CITY_OWNER:GET_CITYNUMBER("夢幻界") = 31
+;むげんげつ
+CFLAG:(NAME_TO_CHARA("夢月")):1 = 31
+CFLAG:(NAME_TO_CHARA("幻月")):1 = 31
+
+;おい・・・
+;おい！！！！！！！１！！！１！！１１
+;おい嫦娥！！！！１１！１１１フグ田移転の敵！１１
+;嫦娥みてるか！！！！！１１！！１１！１
+;月の民の弄した愚策を！！１１１欲に溺れ生死を貪る穢れた人間の姿を！！！！！１１
+COUNTRY_BOSS:32 = GET_ID(NAME_TO_CHARA("純狐"))
+COUNTRY_COLOR:32 = 0XB40404
+COUNTRY_AI_TYPE:32 = AI_好戦
+
+CITY_OWNER:GET_CITYNUMBER("静かな海") = 32
+CITY_OWNER:GET_CITYNUMBER("表の月面") = 32
+;むげんげつ
+CFLAG:(NAME_TO_CHARA("純狐")):1 = 32
+CFLAG:(NAME_TO_CHARA("ヘカーティア")):1 = 32
+CFLAG:(NAME_TO_CHARA("クラウンピース")):1 = 32
+
+;指定されなかったキャラは放浪 「あなた」は除外（MASTER入れ替えたときに放浪するのを防ぐ）。
+FOR LOCAL:0, 1, CHARANUM
+	SIF CFLAG:(LOCAL:0):1 == 0  && CSTR:(LOCAL:0):99 != "あなた"
+		CFLAG:(LOCAL:0):特殊状態 = 特殊状態_放浪
+NEXT
+
+;兵力の初期配置
+CALL INIT_ARMY
+
+;純狐勢力にゲタ
+COUNTRY_SOLDIER:32 = 10000
+
+;無所属都市の兵数は経済の7.5%
+FOR LOCAL:0, 0, MAX_CITY
+	SIF CITY_OWNER:(LOCAL:0) == 0
+		CITY_SOLDIER:(LOCAL:0) = CITY_ECONOMY:(LOCAL:0) * 75 / 1000
+NEXT
+
+;■関係設定
+CALL SHARED_SETTING_RELATION
+
+;暫定　とりあえず君主だけ設定
+CALL INIT_RELATION("霊夢", "魔理沙", 400, 0)
+CALL INIT_RELATION("霊夢", "紫", 300, 0)
+CALL INIT_RELATION("霊夢", "神奈子", 0, 300)
+CALL INIT_RELATION("霊夢", "文", 300, 300)
+CALL INIT_RELATION("霊夢", "天子", 300, 300)
+CALL INIT_RELATION("霊夢", "白蓮", 300, 300)
+CALL INIT_RELATION("霊夢", "神子", 0, 500)
+CALL INIT_RELATION("霊夢", "針妙丸", 300, 0)
+CALL INIT_RELATION("霊夢", "阿求", 300, 0)
+CALL INIT_RELATION("霊夢", "サニーミルク", 300, 0)
+CALL INIT_RELATION("霊夢", "幽香", , 500)
+CALL INIT_RELATION("霊夢", "依姫", 0, 300)
+CALL INIT_RELATION("霊夢", "夢美", 300, 300)
+
+CALL INIT_RELATION("レミリア", "霊夢", 400, 0)
+CALL INIT_RELATION("レミリア", "幽々子", 0, 300)
+CALL INIT_RELATION("レミリア", "紫", 0, 300)
+CALL INIT_RELATION("レミリア", "輝夜", 0, 300)
+CALL INIT_RELATION("レミリア", "四季映姫", 0, 300)
+CALL INIT_RELATION("レミリア", "依姫", 0, 800)
+CALL INIT_RELATION("レミリア", "チルノ", 300, 0)
+CALL INIT_RELATION("レミリア", "夢美", 300, 0)
+
+CALL INIT_RELATION("魔理沙", "霊夢", 500, 0)
+CALL INIT_RELATION("魔理沙", "阿求", 300, 0)
+CALL INIT_RELATION("魔理沙", "チルノ", 300, 0)
+CALL INIT_RELATION("魔理沙", "メディスン", 300, 0)
+CALL INIT_RELATION("魔理沙", "依姫", 0, 300)
+
+CALL INIT_RELATION("ルナサ", "幽々子", 1000, 0)
+CALL INIT_RELATION("ルナサ", "雷鼓", 500, 0)
+
+CALL INIT_RELATION("幽々子", "ルナサ", 300, 0)
+CALL INIT_RELATION("幽々子", "紫", 500, 0)
+CALL INIT_RELATION("幽々子", "輝夜", 0, 1000)
+CALL INIT_RELATION("幽々子", "四季映姫", 300, 0)
+CALL INIT_RELATION("幽々子", "さとり", 0, 500)
+CALL INIT_RELATION("幽々子", "依姫", 0, 1000)
+
+CALL INIT_RELATION("紫", "霊夢", 1000, 0)
+CALL INIT_RELATION("紫", "幽々子", 500, 0)
+CALL INIT_RELATION("紫", "四季映姫", 0, 1000)
+CALL INIT_RELATION("紫", "天子", 0, 1500)
+CALL INIT_RELATION("紫", "さとり", 0, 500)
+CALL INIT_RELATION("紫", "針妙丸", 0, 1000)
+CALL INIT_RELATION("紫", "阿求", 500, 0)
+CALL INIT_RELATION("紫", "依姫", 0, 1500)
+CALL INIT_RELATION("紫", "夢美", 0, 700)
+
+CALL INIT_RELATION("輝夜", "レミリア", 0, 400)
+CALL INIT_RELATION("輝夜", "幽々子", 0, 1000)
+CALL INIT_RELATION("輝夜", "紫", 0, 1000)
+CALL INIT_RELATION("輝夜", "四季映姫", 0, 1000)
+CALL INIT_RELATION("輝夜", "慧音", 300, 800)
+CALL INIT_RELATION("輝夜", "依姫", 200, 0)
+CALL INIT_RELATION("輝夜", "メディスン", 300, 0)
+
+CALL INIT_RELATION("四季映姫", "幽々子", 300, 0)
+CALL INIT_RELATION("四季映姫", "紫", 0, 1000)
+CALL INIT_RELATION("四季映姫", "輝夜", 0, 1500)
+CALL INIT_RELATION("四季映姫", "天子", 0, 500)
+CALL INIT_RELATION("四季映姫", "さとり", 300, 500)
+
+
+CALL INIT_RELATION("神奈子", "霊夢", 500, 300)
+CALL INIT_RELATION("神奈子", "紫", 0, 400)
+CALL INIT_RELATION("神奈子", "阿求", 300, 0)
+CALL INIT_RELATION("神奈子", "白蓮", 0, 300)
+CALL INIT_RELATION("神奈子", "神子", 0, 300)
+CALL INIT_RELATION("神奈子", "さとり", 300, 0)
+CALL INIT_RELATION("神奈子", "文", 300, 300)
+
+CALL INIT_RELATION("雛", "霊夢", 300, 0)
+CALL INIT_RELATION("雛", "神奈子", 300, 0)
+CALL INIT_RELATION("雛", "文", 300, 0)
+
+CALL INIT_RELATION("文", "霊夢", 300, 0)
+CALL INIT_RELATION("文", "魔理沙", 300, 0)
+CALL INIT_RELATION("文", "レミリア", 300, 0)
+CALL INIT_RELATION("文", "ルナサ", 300, 0)
+CALL INIT_RELATION("文", "神奈子", 300, 300)
+CALL INIT_RELATION("文", "雛", 300, 0)
+CALL INIT_RELATION("文", "阿求", 300, 0)
+CALL INIT_RELATION("文", "四季映姫", 300, 0)
+CALL INIT_RELATION("文", "幽香", 300, 0)
+
+CALL INIT_RELATION("天子", "霊夢", 300, 0)
+CALL INIT_RELATION("天子", "紫", 0, 1500)
+
+CALL INIT_RELATION("さとり", "紫", 0, 400)
+CALL INIT_RELATION("さとり", "四季映姫", 300, 300)
+CALL INIT_RELATION("さとり", "勇儀", 300, 300)
+CALL INIT_RELATION("さとり", "白蓮", 300, 300)
+CALL INIT_RELATION("さとり", "夢美", 0, 500)
+
+CALL INIT_RELATION("白蓮", "霊夢", 300, 0)
+CALL INIT_RELATION("白蓮", "神奈子", 300, 300)
+CALL INIT_RELATION("白蓮", "さとり", 300, 300)
+CALL INIT_RELATION("白蓮", "神子", 500, 1500)
+CALL INIT_RELATION("白蓮", "阿求", 300, 0)
+CALL INIT_RELATION("白蓮", "星", 1500, 0)
+CALL INIT_RELATION("白蓮", "ぬえ", 1500, 0)
+CALL INIT_RELATION("白蓮", "神綺", 300, 0)
+
+CALL INIT_RELATION("星", "さとり", 300, 300)
+CALL INIT_RELATION("星", "白蓮", 1500, 0)
+CALL INIT_RELATION("星", "ぬえ", 1500, 0)
+CALL INIT_RELATION("星", "神子", 0, 1500)
+
+CALL INIT_RELATION("ぬえ", "さとり", 300, 300)
+CALL INIT_RELATION("ぬえ", "白蓮", 1500, 0)
+CALL INIT_RELATION("ぬえ", "星", 1500, 0)
+CALL INIT_RELATION("ぬえ", "神子", 0, 1500)
+
+CALL INIT_RELATION("神子", "霊夢", 300, 0)
+CALL INIT_RELATION("神子", "白蓮", 500, 1500)
+CALL INIT_RELATION("神子", "星", 500, 1500)
+CALL INIT_RELATION("神子", "ぬえ", 500, 1500)
+CALL INIT_RELATION("神子", "阿求", 300, 0)
+
+;霊夢以外の強そうな連中にけんかを売っていくスタイル
+CALL INIT_RELATION("針妙丸", "霊夢", 500, 0)
+CALL INIT_RELATION("針妙丸", "魔理沙", 0, 500)
+CALL INIT_RELATION("針妙丸", "レミリア", 0, 500)
+CALL INIT_RELATION("針妙丸", "幽々子", 0, 500)
+CALL INIT_RELATION("針妙丸", "紫", 0, 500)
+CALL INIT_RELATION("針妙丸", "ルナサ", 0, 500)
+CALL INIT_RELATION("針妙丸", "輝夜", 0, 500)
+CALL INIT_RELATION("針妙丸", "四季映姫", 0, 500)
+CALL INIT_RELATION("針妙丸", "神奈子", 0, 500)
+CALL INIT_RELATION("針妙丸", "文", 0, 500)
+CALL INIT_RELATION("針妙丸", "雛", 0, 500)
+CALL INIT_RELATION("針妙丸", "天子", 0, 500)
+CALL INIT_RELATION("針妙丸", "さとり", 0, 500)
+CALL INIT_RELATION("針妙丸", "白蓮", 0, 500)
+CALL INIT_RELATION("針妙丸", "星", 0, 500)
+CALL INIT_RELATION("針妙丸", "ぬえ", 0, 500)
+CALL INIT_RELATION("針妙丸", "神子", 0, 500)
+CALL INIT_RELATION("針妙丸", "影狼", 300, 0)
+CALL INIT_RELATION("針妙丸", "慧音", 0, 500)
+CALL INIT_RELATION("針妙丸", "阿求", 0, 500)
+CALL INIT_RELATION("針妙丸", "雷鼓", 300, 0)
+CALL INIT_RELATION("針妙丸", "依姫", 0, 500)
+CALL INIT_RELATION("針妙丸", "チルノ", 300, 0)
+CALL INIT_RELATION("針妙丸", "勇儀", 0, 500)
+CALL INIT_RELATION("針妙丸", "サニーミルク", 300, 0)
+CALL INIT_RELATION("針妙丸", "勇儀", 0, 500)
+CALL INIT_RELATION("針妙丸", "幽香", 0, 500)
+CALL INIT_RELATION("針妙丸", "夢美", 0, 500)
+CALL INIT_RELATION("針妙丸", "神綺", 0, 500)
+CALL INIT_RELATION("針妙丸", "幻月", 0, 500)
+
+CALL INIT_RELATION("影狼", "霊夢", 0, 300)
+CALL INIT_RELATION("影狼", "魔理沙", 0, 300)
+CALL INIT_RELATION("影狼", "針妙丸", 500, 0)
+CALL INIT_RELATION("影狼", "雷鼓", 300, 0)
+
+CALL INIT_RELATION("慧音", "霊夢", 300, 0)
+CALL INIT_RELATION("慧音", "魔理沙", 300, 0)
+CALL INIT_RELATION("慧音", "阿求", 1500, 0)
+CALL INIT_RELATION("慧音", "紫", 300, 300)
+CALL INIT_RELATION("慧音", "輝夜", 500, 300)
+CALL INIT_RELATION("慧音", "さとり", 0, 300)
+CALL INIT_RELATION("慧音", "白蓮", 300, 300)
+CALL INIT_RELATION("慧音", "神子", 300, 300)
+CALL INIT_RELATION("慧音", "チルノ", 0, 300)
+CALL INIT_RELATION("慧音", "針妙丸", 0, 300)
+CALL INIT_RELATION("慧音", "影狼", 0, 300)
+CALL INIT_RELATION("慧音", "幽香", 0, 300)
+CALL INIT_RELATION("慧音", "サニーミルク", 0, 300)
+
+CALL INIT_RELATION("阿求", "霊夢", 300, 0)
+CALL INIT_RELATION("阿求", "レミリア", 300, 300)
+CALL INIT_RELATION("阿求", "魔理沙", 300, 0)
+CALL INIT_RELATION("阿求", "幽々子", 300, 300)
+CALL INIT_RELATION("阿求", "ルナサ", 300, 300)
+CALL INIT_RELATION("阿求", "紫", 300, 300)
+CALL INIT_RELATION("阿求", "輝夜", 300, 300)
+CALL INIT_RELATION("阿求", "四季映姫", 300, 300)
+CALL INIT_RELATION("阿求", "神奈子", 300, 300)
+CALL INIT_RELATION("阿求", "雛", 300, 300)
+CALL INIT_RELATION("阿求", "文", 300, 300)
+CALL INIT_RELATION("阿求", "天子", 300, 300)
+CALL INIT_RELATION("阿求", "さとり", 300, 300)
+CALL INIT_RELATION("阿求", "白蓮", 300, 300)
+CALL INIT_RELATION("阿求", "星", 300, 300)
+CALL INIT_RELATION("阿求", "ぬえ", 300, 300)
+CALL INIT_RELATION("阿求", "神子", 300, 300)
+CALL INIT_RELATION("阿求", "針妙丸", 300, 300)
+CALL INIT_RELATION("阿求", "影狼", 300, 300)
+CALL INIT_RELATION("阿求", "慧音", 300, 0)
+CALL INIT_RELATION("阿求", "雷鼓", 300, 300)
+CALL INIT_RELATION("阿求", "チルノ", 300, 300)
+CALL INIT_RELATION("阿求", "勇儀", 300, 300)
+CALL INIT_RELATION("阿求", "サニーミルク", 300, 300)
+CALL INIT_RELATION("阿求", "メディスン", 300, 300)
+CALL INIT_RELATION("阿求", "幽香", 300, 300)
+CALL INIT_RELATION("阿求", "夢美", 300, 300)
+CALL INIT_RELATION("阿求", "神綺", 300, 300)
+CALL INIT_RELATION("阿求", "幻月", 300, 300)
+
+CALL INIT_RELATION("雷鼓", "ルナサ", 500, 0)
+CALL INIT_RELATION("雷鼓", "針妙丸", 500, 0)
+CALL INIT_RELATION("雷鼓", "影狼", 300, 0)
+
+CALL INIT_RELATION("依姫", "霊夢", 0, 1500)
+CALL INIT_RELATION("依姫", "魔理沙", 0, 1500)
+CALL INIT_RELATION("依姫", "レミリア", 0, 1500)
+CALL INIT_RELATION("依姫", "ルナサ", 0, 1500)
+CALL INIT_RELATION("依姫", "紫", 0, 1500)
+CALL INIT_RELATION("依姫", "幽々子", 0, 1500)
+CALL INIT_RELATION("依姫", "輝夜", 1500, 0)
+CALL INIT_RELATION("依姫", "四季映姫", 0, 1500)
+CALL INIT_RELATION("依姫", "神奈子", 0, 1500)
+CALL INIT_RELATION("依姫", "文", 0, 1500)
+CALL INIT_RELATION("依姫", "雛", 0, 1500)
+CALL INIT_RELATION("依姫", "星", 0, 1500)
+CALL INIT_RELATION("依姫", "ぬえ", 0, 1500)
+CALL INIT_RELATION("依姫", "天子", 0, 1500)
+CALL INIT_RELATION("依姫", "さとり", 0, 1500)
+CALL INIT_RELATION("依姫", "白蓮", 0, 1500)
+CALL INIT_RELATION("依姫", "神子", 0, 1500)
+CALL INIT_RELATION("依姫", "針妙丸", 0, 1500)
+CALL INIT_RELATION("依姫", "影狼", 0, 1500)
+CALL INIT_RELATION("依姫", "阿求", 0, 1500)
+CALL INIT_RELATION("依姫", "雷鼓", 0, 1500)
+CALL INIT_RELATION("依姫", "サニーミルク", 0, 1500)
+CALL INIT_RELATION("依姫", "メディスン", 0, 1500)
+CALL INIT_RELATION("依姫", "チルノ", 0, 1500)
+CALL INIT_RELATION("依姫", "慧音", 0, 1500)
+CALL INIT_RELATION("依姫", "勇儀", 0, 1500)
+CALL INIT_RELATION("依姫", "幽香", 0, 1500)
+CALL INIT_RELATION("依姫", "夢美", 0, 1500)
+CALL INIT_RELATION("依姫", "神綺", 0, 1500)
+CALL INIT_RELATION("依姫", "幻月", 0, 1500)
+
+
+CALL INIT_RELATION("チルノ", "霊夢", 300, 300)
+CALL INIT_RELATION("チルノ", "魔理沙", 300, 300)
+CALL INIT_RELATION("チルノ", "レミリア", 300, 300)
+CALL INIT_RELATION("チルノ", "紫", 300, 0)
+CALL INIT_RELATION("チルノ", "四季映姫", 0, 300)
+CALL INIT_RELATION("チルノ", "針妙丸", 0, 500)
+CALL INIT_RELATION("チルノ", "幽香", 300, 0)
+CALL INIT_RELATION("チルノ", "文", 300, 0)
+CALL INIT_RELATION("チルノ", "サニーミルク", 300, 300)
+
+CALL INIT_RELATION("勇儀", "霊夢", 200, 0)
+CALL INIT_RELATION("勇儀", "魔理沙", 200, 0)
+CALL INIT_RELATION("勇儀", "さとり", 300, 500)
+
+CALL INIT_RELATION("サニーミルク", "霊夢", 500, 0)
+CALL INIT_RELATION("サニーミルク", "チルノ", 300, 300)
+
+CALL INIT_RELATION("メディスン", "輝夜", 300, 0)
+CALL INIT_RELATION("メディスン", "幽香", 800, 0)
+CALL INIT_RELATION("メディスン", "魔理沙", 0, 300)
+
+CALL INIT_RELATION("幽香", "霊夢", 500, 0)
+CALL INIT_RELATION("幽香", "魔理沙", 300, 0)
+CALL INIT_RELATION("幽香", "チルノ", 300, 0)
+CALL INIT_RELATION("幽香", "メディスン", 800, 0)
+CALL INIT_RELATION("幽香", "文", 300, 0)
+CALL INIT_RELATION("幽香", "幻月", 300, 0)
+
+;教授から見れば幻想郷の住民はみんな素敵だよ
+CALL INIT_RELATION("夢美", "霊夢", 300, 0)
+CALL INIT_RELATION("夢美", "レミリア", 300, 0)
+CALL INIT_RELATION("夢美", "魔理沙", 300, 0)
+CALL INIT_RELATION("夢美", "幽々子", 300, 0)
+CALL INIT_RELATION("夢美", "ルナサ", 300, 0)
+CALL INIT_RELATION("夢美", "紫", 300, 0)
+CALL INIT_RELATION("夢美", "輝夜", 300, 0)
+CALL INIT_RELATION("夢美", "四季映姫", 300, 0)
+CALL INIT_RELATION("夢美", "神奈子", 300, 0)
+CALL INIT_RELATION("夢美", "雛", 300, 0)
+CALL INIT_RELATION("夢美", "文", 300, 0)
+CALL INIT_RELATION("夢美", "天子", 300, 0)
+CALL INIT_RELATION("夢美", "さとり", 300, 0)
+CALL INIT_RELATION("夢美", "白蓮", 300, 0)
+CALL INIT_RELATION("夢美", "星", 300, 0)
+CALL INIT_RELATION("夢美", "ぬえ", 300, 0)
+CALL INIT_RELATION("夢美", "神子", 300, 0)
+CALL INIT_RELATION("夢美", "針妙丸", 300, 0)
+CALL INIT_RELATION("夢美", "影狼", 300, 0)
+CALL INIT_RELATION("夢美", "慧音", 300, 0)
+CALL INIT_RELATION("夢美", "阿求", 300, 0)
+CALL INIT_RELATION("夢美", "雷鼓", 300, 0)
+CALL INIT_RELATION("夢美", "チルノ", 300, 0)
+CALL INIT_RELATION("夢美", "勇儀", 300, 0)
+CALL INIT_RELATION("夢美", "サニーミルク", 300, 0)
+CALL INIT_RELATION("夢美", "メディスン", 300, 0)
+CALL INIT_RELATION("夢美", "幽香", 300, 0)
+;ただしよっちゃんテメーはだめだ
+CALL INIT_RELATION("夢美", "神綺", 300, 0)
+CALL INIT_RELATION("夢美", "幻月", 300, 0)
+
+CALL INIT_RELATION("神綺", "霊夢", 300, 300)
+;魔理沙んちにアリスがいるから優しいよ
+CALL INIT_RELATION("神綺", "魔理沙", 300, 0)
+CALL INIT_RELATION("神綺", "白蓮", 300, 0)
+
+CALL INIT_RELATION("幻月", "神綺", 300, 0)
+
+;おい・・・
+;おい！！！！！！！１！！！１！！１１
+;おい嫦娥！！！！１１！１１１フグ田移転の敵！１１
+;嫦娥みてるか！！！！！１１！！１１！１
+;月の民の弄した愚策を！！１１１欲に溺れ生死を貪る穢れた人間の姿を！！！！！１１
+CALL INIT_RELATION("純狐", "依姫", 0, 1500)
+
+CALL INIT_ALLIANCE_BY_NAME("霊夢", "魔理沙", 20)
+CALL INIT_ALLIANCE_BY_NAME("霊夢", "紫", 15)
+CALL INIT_ALLIANCE_BY_NAME("霊夢", "針妙丸", 25)
+CALL INIT_ALLIANCE_BY_NAME("ルナサ", "幽々子", 30)
+CALL INIT_ALLIANCE_BY_NAME("ルナサ", "雷鼓", 20)
+CALL INIT_ALLIANCE_BY_NAME("幽々子", "紫", 25)
+CALL INIT_ALLIANCE_BY_NAME("幽々子", "四季映姫", 25)
+CALL INIT_ALLIANCE_BY_NAME("紫", "魔理沙", 25)
+CALL INIT_ALLIANCE_BY_NAME("輝夜", "依姫", 30)
+CALL INIT_ALLIANCE_BY_NAME("四季映姫", "さとり", 20)
+CALL INIT_ALLIANCE_BY_NAME("神奈子", "さとり", 20)
+CALL INIT_ALLIANCE_BY_NAME("雛", "文", 35)
+CALL INIT_ALLIANCE_BY_NAME("白蓮", "ぬえ", 20)
+CALL INIT_ALLIANCE_BY_NAME("白蓮", "神綺", 25)
+CALL INIT_ALLIANCE_BY_NAME("針妙丸", "影狼", 20)
+CALL INIT_ALLIANCE_BY_NAME("慧音", "阿求", 50)
+CALL INIT_ALLIANCE_BY_NAME("チルノ", "幽香", 20)
+CALL INIT_ALLIANCE_BY_NAME("チルノ", "幻月", 20)
+CALL INIT_ALLIANCE_BY_NAME("メディスン", "幽香", 20)
+
+
+;-------------------------------------------------
+;定例イベント
+;ターンエンド時に呼び出される
+;SCVAR:0 外来人侵攻済みフラグ
+;SCVAR:1 封獣ぬえ離反済みフラグ
+;SCVAR:2 謎の薬売り前回どれだったフラグ
+;-------------------------------------------------
+@SCENARIO_EVENT_5
+
+CALL SCENARIO_EVENT_1_INDEPENDENCE

@@ -1,0 +1,829 @@
+﻿;捕虜の扱い関係
+
+;-------------------------------------------------
+;捕虜の扱いを設定する
+;-------------------------------------------------
+@SETSTATE_PRISONER
+#DIM FIRST_LINE
+;1ページ22人までのコマンドが表示される
+;LOCAL	
+	;0:ループ用
+	;5:捕虜の人数/選んだボタンの対象キャラ
+	;6:選んだボタンの捕虜の扱い
+	;7:表示した行数をカウントする
+	;8:ループ内で捕虜の人数をカウントするためにある
+	;10:最大ページ
+	;11:現在のページ
+	;15:表示位置調整用
+	;20:触手調教可能
+
+;●捕虜の人数をカウント
+LOCAL:5 = 0
+FOR LOCAL:0, 0, CHARANUM
+	IF LOCAL:0 != MASTER && CFLAG:(LOCAL:0):捕虜先 != 0 && CFLAG:(LOCAL:0):捕虜先 == CFLAG:MASTER:所属 && CFLAG:(LOCAL:0):軟禁中 == 0
+		LOCAL:5 ++
+	ENDIF
+NEXT
+
+;捕虜が一人もいなければ戻る
+IF LOCAL:5 == 0
+	RETURN
+ENDIF
+
+;●表示部分
+LOCAL:10 = (LOCAL:5 - 1) / 22 + 1
+LOCAL:11 = 1
+
+;触手調教が可能かどうかを判定
+LOCAL:20 = ITEM:触手部屋 && ID_TO_CHARA(FLAG:触手部屋管理者) >= 0 && IS_SYOKUSYU_MANAGE(ID_TO_CHARA(FLAG:触手部屋管理者))
+FIRST_LINE = LINECOUNT
+$SHOW_LOOP
+
+CALL SINGLE_DRAWLINE
+PRINTFORML 各捕虜の扱いを設定して下さい
+CALL SINGLE_DRAWLINE
+
+PRINTFORM %TOSTR_SPACE(40)%
+PRINTFORM <一括> 
+PRINTBUTTON "{拘留}",10
+PRINTBUTTON "{拷問}",12
+PRINTBUTTON "{身体開発}",13
+PRINTBUTTON "{説得}",14
+PRINTBUTTON "{性処理}",15
+IF LOCAL:20
+	PRINTBUTTON "{触手調教}",16
+ENDIF
+PRINTBUTTON "{娼館}",17
+PRINTBUTTON "{搾乳}",18
+PRINTL
+
+LOCAL:7 = 0
+LOCAL:8 = 0
+LOCAL:12 = (LOCAL:11 - 1) * 22
+LOCAL:13 = LOCAL:11 * 22
+FOR LOCAL:0, 0, CHARANUM
+	IF LOCAL:0 != MASTER && CFLAG:(LOCAL:0):捕虜先 == CFLAG:MASTER:所属 && CFLAG:(LOCAL:0):軟禁中 == 0
+		IF LOCAL:8 >= LOCAL:12 && LOCAL:8 < LOCAL:13
+			PRINTBUTTON @"{NO:(LOCAL:0)+100, 4}[%SNAME(LOCAL:0), MAX_CHARANAME_LENGTH / 2, LEFT%]", NO:(LOCAL:0)+100
+			PRINT  
+			CALL PRINT_SEX(LOCAL:0, 1)
+			IF TALENT:(LOCAL:0):崩壊
+				CALL COLOR_PRINT("崩", 0xFF0000)
+			ELSEIF TALENT:(LOCAL:0):虚ろ
+				CALL COLOR_PRINT("虚", 0xEE7800)
+			ELSE
+				PRINT   
+			ENDIF
+			IF CFLAG:(LOCAL:0):所属
+				PRINTFORM 所属:%SNAME(GET_COUNTRY_BOSS(CFLAG:LOCAL:所属)), MAX_CHARANAME_LENGTH / 2, LEFT%
+			ELSE
+				PRINTFORM 所属:%@"----", MAX_CHARANAME_LENGTH / 2, LEFT%
+			ENDIF
+			SETCOLOR カラー_注釈
+			PRINTFORM 精神:
+			RESETCOLOR
+			CALL PRINT_GRADATIONBAR(BASE:(LOCAL):精神力, MAXBASE:(LOCAL):精神力, 10, 0x5E9AFF)
+			CALL SETSTATE_PRISONER_BUTTON(LOCAL:0, 0, "拘留")
+			CALL SETSTATE_PRISONER_BUTTON(LOCAL:0, 2, "拷問")
+			CALL SETSTATE_PRISONER_BUTTON(LOCAL:0, 3, "身体開発")
+			CALL SETSTATE_PRISONER_BUTTON(LOCAL:0, 4, "説得")
+			CALL SETSTATE_PRISONER_BUTTON(LOCAL:0, 5, "性処理")
+			IF LOCAL:20
+				CALL SETSTATE_PRISONER_BUTTON(LOCAL:0, 6, "触手調教")
+			ENDIF
+			CALL SETSTATE_PRISONER_BUTTON(LOCAL:0, 7, "娼館")
+			CALL SETSTATE_PRISONER_BUTTON(LOCAL:0, 8, "搾乳")
+			PRINTL
+			LOCAL:7 ++
+		ENDIF
+		LOCAL:8 ++
+	ENDIF
+NEXT
+CALL SINGLE_DRAWLINE
+
+IF LOCAL:10 >= 2
+	LOCAL:7 += 2
+
+	LOCAL:15 = 25
+	IF LOCAL:11 >= 2
+		PRINTBUTTON "[8] 前のページ", 8
+		LOCAL:15 -= 12
+	ENDIF
+	PRINTFORM %TOSTR_SPACE(LOCAL:15)%
+
+	LOCALS:0 = page{LOCAL:11}/{LOCAL:10}
+	PRINTPLAINFORM %LOCALS:0, 25, LEFT%
+
+	IF LOCAL:11 < LOCAL:10
+		PRINTBUTTON "[9] 次のページ", 9
+	ENDIF
+	PRINTL 
+	CALL SINGLE_DRAWLINE
+ENDIF
+PRINTBUTTON "[0] 決  定", 0
+
+REDRAW 0
+
+$INPUT_LOOP
+INPUT
+
+IF RESULT == 0
+	REDRAW 1
+	RETURN
+ELSEIF RESULT == 8 && LOCAL:11 >= 2
+	LOCAL:11 --
+ELSEIF RESULT == 9 && LOCAL:11 < LOCAL:10
+	LOCAL:11 ++
+ELSEIF RESULT == 10 || (RESULT >= 12 && RESULT <= 15) || (RESULT == 16 && LOCAL:20) || RESULT == 17 || RESULT == 18
+	CALL SETSTATE_PRISONER_SETALL(RESULT - 10)
+ELSEIF INRANGE(RESULT, 100, 999) && NO_TO_CHARA(RESULT - 100) != -1
+	LOCAL:2 = NO_TO_CHARA(RESULT - 100)
+	VARSET SHOP_CHARA_LIST, -1
+	LOCAL:1 = 0
+	FOR LOCAL:0, 0, CHARANUM
+		IF CFLAG:(LOCAL:0):捕虜先 == CFLAG:MASTER:所属
+			SHOP_CHARA_LIST:(LOCAL:1) = LOCAL:0
+			LOCAL:1 ++
+		ENDIF
+	NEXT
+	CALL SHOW_INFO_WITH_UI(LOCAL:2, 1)
+ELSEIF RESULT >= 1000
+	LOCAL:5 = RESULT / 1000 - 1
+	LOCAL:6 = RESULT % 1000
+	IF LOCAL:5 < CHARANUM && LOCAL:5 != MASTER && CFLAG:(LOCAL:5):捕虜先 == CFLAG:MASTER:所属 && CFLAG:(LOCAL:5):軟禁中 == 0
+		IF CFLAG:(LOCAL:5):捕虜の扱い != LOCAL:6 && (LOCAL:6 == 0 || (LOCAL:6 >= 2 && LOCAL:6 <= 5) || (LOCAL:6 == 6 && LOCAL:20)) || LOCAL:6 == 7 || LOCAL:6 == 8
+			CFLAG:(LOCAL:5):捕虜の扱い = LOCAL:6
+		ENDIF
+	ENDIF
+ELSE
+	CLEARLINE 1
+	GOTO INPUT_LOOP
+ENDIF
+CLEARLINE LINECOUNT - FIRST_LINE
+GOTO SHOW_LOOP
+
+;-------------------------------------------------
+;SETSTATE_PRISONERで使用するボタン表示関数
+;引数  0:捕虜のキャラ番号 1:扱いの種別番号 2:ボタンに表示される文字列
+;-------------------------------------------------
+@SETSTATE_PRISONER_BUTTON(ARG:0, ARG:1, ARGS:2)
+IF CFLAG:(ARG:0):捕虜の扱い == ARG:1
+	SETCOLOR カラー_選択中
+	PRINTPLAINFORM \{%ARGS:2%\}
+	RESETCOLOR
+ELSE
+	PRINTBUTTON @"\{%ARGS:2%\}", ARG:0 * 1000 + ARG:1 + 1000
+ENDIF
+
+;-------------------------------------------------
+;捕虜の扱いを一括で(ARG:0)にする
+;-------------------------------------------------
+@SETSTATE_PRISONER_SETALL(ARG:0)
+FOR LOCAL:0, 0, CHARANUM
+	IF LOCAL:0 != MASTER && CFLAG:(LOCAL:0):捕虜先 != 0 && CFLAG:(LOCAL:0):捕虜先 == CFLAG:MASTER:所属 && CFLAG:(LOCAL:0):軟禁中 == 0
+		CFLAG:(LOCAL:0):捕虜の扱い = ARG:0
+	ENDIF
+NEXT
+
+;-------------------------------------------------
+;捕虜の扱いに対応したイベント
+;-------------------------------------------------
+@EVENT_PRISONER
+;LOCAL
+	;2:一つ前に出力されたのが拘留状況描写である
+	;20:触手部屋使用可能
+	;21:触手調教の予定だった奴隷がいたか
+;触手部屋が使用可能かどうかを判定
+LOCAL:20 = 0
+IF ITEM:触手部屋 && ID_TO_CHARA(FLAG:触手部屋管理者) >= 0 && IS_SYOKUSYU_MANAGE(ID_TO_CHARA(FLAG:触手部屋管理者))
+	LOCAL:20 = 1
+ENDIF
+
+IF !LOCAL:20
+	LOCAL:21 = 0
+	FOR LOCAL:0, 0, CHARANUM
+		IF CFLAG:(LOCAL:0):捕虜の扱い == 6
+			CFLAG:(LOCAL:0):捕虜の扱い = 0
+			LOCAL:21 = 1
+		ENDIF
+	NEXT
+	IF LOCAL:21
+		SETCOLOR カラー_注意
+		PRINTFORMW ※触手部屋が使用できないため、一部の捕虜の扱いを「触手調教」から「拘留」に変更しました
+		RESETCOLOR
+	ENDIF
+ENDIF
+
+LOCAL:2 = 0
+FOR LOCAL:0, 0, CHARANUM
+	;LOCAL:0が捕虜であることを意味するお決まり表現
+	IF LOCAL:0 != MASTER && CFLAG:(LOCAL:0):捕虜先 != 0 && CFLAG:(LOCAL:0):捕虜先 == CFLAG:MASTER:所属 && CFLAG:(LOCAL:0):軟禁中 == 0
+		;捕虜の扱いが拘留の場合は扱いの描写が一行で終わるので前後に特別改行を入れずに連続で結果を出す
+		;捕虜の扱いがそれ以外の場合は扱いの描写が複数行にわたるので分かりやすいように前後に改行が一行ずつはいるように調整する
+		;イメージ
+			;キャラ1拘留テキスト
+			;キャラ2拘留テキスト
+			;キャラ3拘留テキスト
+			;
+			;キャラ4拘留以外テキスト
+			;キャラ4拘留以外テキスト続き
+			;(wait)
+			;キャラ5拘留以外テキスト
+			;キャラ5拘留以外テキスト続き
+			;(wait)
+			;キャラ6拘留テキスト
+			;キャラ7拘留テキスト
+		IF CFLAG:(LOCAL:0):捕虜の扱い != 0 && LOCAL:2
+			PRINTL 
+		ENDIF
+		CALLFORM EVENT_PRISONER{CFLAG:(LOCAL:0):捕虜の扱い}(LOCAL:0)
+		IF CFLAG:(LOCAL:0):捕虜の扱い != 0
+			WAIT
+			CALL TALENT_CHECK(LOCAL:0)
+			PRINTL 
+			LOCAL:2 = 0
+		ELSE
+			LOCAL:2 = 1
+		ENDIF
+	ENDIF
+NEXT
+
+;■拘留
+@EVENT_PRISONER0(ARG:0)
+CALL EVENT_PRISONER_TEXT0(ARG:0)
+
+;■拷問
+@EVENT_PRISONER2(ARG:0)
+CALL EVENT_PRISONER_TEXT2(ARG:0)
+IF TALENT:(ARG:0):崩壊 || TALENT:(ARG:0):虚ろ
+
+ELSE
+	IF ABL:(ARG:0):武闘 >= 70 || TALENT:(ARG:0):痛みに強い
+		PRINTFORML %ANAME(ARG:0)%は歯を食いしばって必死に痛みと屈辱に耐えている…
+		IF TALENT:(ARG:0):痛みに強い
+			CFLAG:(ARG:0):捕虜怖 = 2500
+		ELSE
+			CFLAG:(ARG:0):捕虜怖 = 3300
+		ENDIF
+	ELSEIF TALENT:(ARG:0):痛みに弱い || TALENT:(ARG:0):幼稚
+		PRINTFORML %ANAME(ARG:0)%は痛みのあまり泣き叫びながら許しを請うている…
+		CFLAG:(ARG:0):捕虜怖 = 4100
+	ELSE
+		PRINTFORML %ANAME(ARG:0)%は鞭で打たれるたびに悲鳴を上げている…
+		CFLAG:(ARG:0):捕虜怖 = 3500
+	ENDIF
+	CFLAG:(ARG:0):捕虜怖 = CFLAG:(ARG:0):捕虜怖 * (200 - ABL:(ARG:0):武闘 / 2) / 200
+	CFLAG:(ARG:0):捕虜怒 = 2000
+	CFLAG:(ARG:0):捕虜哀 = 2000
+ENDIF
+
+CALL FUCK(ARG:0, "苦痛快楽, マゾ, 緊縛")
+
+CFLAG:(ARG:0):精神力回復量補正 = 50
+
+;■身体開発
+@EVENT_PRISONER3(ARG:0)
+CALL EVENT_PRISONER_TEXT3(ARG:0)
+SELECTCASE RAND:4
+	CASE 0
+		CALL FUCK(ARG:0, "欲望, Ｃ, Ｃ")
+	CASE 1
+		CALL FUCK(ARG:0, "欲望, Ｂ, Ｂ")
+	CASE 2
+		CALL FUCK(ARG:0, "欲望, Ｖ, Ｖ")
+	CASE 3
+		CALL FUCK(ARG:0, "欲望, Ａ, Ａ")
+ENDSELECT
+
+CALL TRAIN_AUTO_ABLUP(ARG:0)
+CFLAG:(ARG:0):捕虜怒 = 800
+CFLAG:(ARG:0):捕虜哀 = 800
+CFLAG:(ARG:0):捕虜怖 = 250
+
+;■説得
+@EVENT_PRISONER4(ARG:0)
+CALL EVENT_PRISONER_TEXT4(ARG:0)
+CALL TRAIN_AUTO_ABLUP(ARG:0)
+CFLAG:(ARG:0):捕虜怒 = 0
+CFLAG:(ARG:0):捕虜哀 = 0
+CFLAG:(ARG:0):捕虜怖 = 100
+
+
+;■性処理
+@EVENT_PRISONER5(ARG:0)
+CALL EVENT_PRISONER_TEXT5(ARG:0)
+
+LOCAL:0 = 2000
+
+IF TALENT:(ARG:0):処女 && HAS_VAGINA(ARG:0)
+	IF TALENT:(ARG:0):処女 == 1
+		LOCAL:0 += 3000
+	ELSE
+		LOCAL:0 += 1500
+	ENDIF
+ENDIF
+
+IF TALENT:(ARG:0):キス未経験
+	LOCAL:0 += 1000
+ENDIF
+
+SELECTCASE ABL:(ARG:0):欲望
+	CASE 0
+		TIMES LOCAL:0, 1.00
+	CASE 1
+		TIMES LOCAL:0, 0.70
+	CASE 2
+		TIMES LOCAL:0, 0.50
+	CASE 3
+		TIMES LOCAL:0, 0.35
+	CASE 4
+		TIMES LOCAL:0, 0.20
+	CASEELSE
+		LOCAL:0 = LOCAL:0 / (ABL:(ARG:0):欲望 + 1)
+ENDSELECT
+
+;絶頂経験による補正
+LOCAL:0 = CALC_LOSEBASE_EXP_CORRECTION(ARG:0, LOCAL:0)
+
+CFLAG:(ARG:0):捕虜怒 = LOCAL:0
+CFLAG:(ARG:0):捕虜哀 = LOCAL:0
+CFLAG:(ARG:0):捕虜怖 = LOCAL:0
+
+CALL FUCK(ARG:0, "欲望, 性技, 精愛, 性交, 射精, Ｃ, Ｖ, Ｂ, Ｍ, Ａ, 苦痛快楽, 緊縛, マゾ, ＢＬ, 輪姦, 口淫, Ｖ性交, Ａ性交", "処女喪失, Ａ処女喪失, 膣内射精, キス喪失, 腸内射精, 口内射精", GET_SPERM_ID("兵士"), "兵士のペニス", "兵士", "", "輪姦")
+
+;徴兵効率の増加
+LOCAL:1 = 0
+LOCAL:1 += MAX(ABL:(ARG:0):Ｃ感 - 1, 0)
+LOCAL:1 += MAX(ABL:(ARG:0):Ｖ感 - 1, 0) * 3
+LOCAL:1 += MAX(ABL:(ARG:0):Ａ感 - 1, 0) * 3
+LOCAL:1 += MAX(ABL:(ARG:0):Ｂ感 - 1, 0)
+LOCAL:1 += MAX(ABL:(ARG:0):Ｍ感 - 1, 0) / 2
+LOCAL:1 = LOCAL:1 * (ABL:(ARG:0):欲望 + 2) / 2
+LOCAL:2 = MIN(LOCAL:1 * 10 + 100, 800)
+
+IF TALENT:(ARG:0):崩壊
+	TIMES LOCAL:2, 0.40
+ELSEIF TALENT:(ARG:0):虚ろ
+	TIMES LOCAL:2, 0.80
+ENDIF
+
+SELECTCASE FLAG:兵数増加追加値
+	CASE IS > 3000
+		TIMES LOCAL:1, 0.10
+	CASE IS > 2000
+		TIMES LOCAL:1, 0.25
+	CASE IS > 1000
+		TIMES LOCAL:1, 0.5
+ENDSELECT
+
+FLAG:兵数増加追加値 += LOCAL:2
+
+;■触手調教
+@EVENT_PRISONER6(ARG:0)
+CALL EVENT_PRISONER_TEXT6(ARG:0)
+
+LOCAL:0 = 3000
+
+IF TALENT:(ARG:0):処女 && HAS_VAGINA(ARG:0)
+	IF TALENT:(ARG:0):処女 == 1
+		LOCAL:0 += 4000
+	ELSE
+		LOCAL:0 += 2000
+	ENDIF
+ENDIF
+
+SELECTCASE ABL:(ARG:0):欲望
+	CASE 0
+		TIMES LOCAL:0, 1.00
+	CASE 1
+		TIMES LOCAL:0, 0.95
+	CASE 2
+		TIMES LOCAL:0, 0.90
+	CASE 3
+		TIMES LOCAL:0, 0.85
+	CASE 4
+		TIMES LOCAL:0, 0.80
+	CASEELSE
+		LOCAL:0 = LOCAL:0 * 7 / (ABL:(ARG:0):欲望 + 5)
+ENDSELECT
+
+SELECTCASE ABL:(ARG:0):触手
+	CASE 0
+		TIMES LOCAL:0, 1.00
+	CASE 1
+		TIMES LOCAL:0, 0.70
+	CASE 2
+		TIMES LOCAL:0, 0.40
+	CASE 3
+		TIMES LOCAL:0, 0.25
+	CASE 4
+		TIMES LOCAL:0, 0.12
+	CASEELSE
+		LOCAL:0 = LOCAL:0 / (ABL:(ARG:0):触手 * 3)
+ENDSELECT
+
+;絶頂経験による補正
+LOCAL:0 = CALC_LOSEBASE_EXP_CORRECTION(ARG:0, LOCAL:0)
+
+CFLAG:(ARG:0):捕虜怒 = LOCAL:0
+CFLAG:(ARG:0):捕虜哀 = LOCAL:0
+CFLAG:(ARG:0):捕虜怖 = LOCAL:0
+
+CALL FUCK(ARG:0, "欲望, 性技, 精愛, 性交, 射精, Ｃ, Ｖ, Ｂ, Ｍ, Ａ, 苦痛快楽, 緊縛, マゾ, 輪姦, 口淫, 触手, Ｖ性交, Ａ性交", "処女喪失, Ａ処女喪失, 膣内射精, キス喪失, 腸内射精, 口内射精", GET_SPERM_ID("触手"), "触手", "触手", "", "輪姦")
+
+;絶頂回数の計算
+LOCAL:1 = 0
+LOCAL:1 += MAX(ABL:(ARG:0):Ｃ感 - 1, 0) * 2
+LOCAL:1 += MAX(ABL:(ARG:0):Ｖ感 - 1, 0) * 3
+LOCAL:1 += MAX(ABL:(ARG:0):Ａ感 - 1, 0) * 3
+LOCAL:1 += MAX(ABL:(ARG:0):Ｂ感 - 1, 0) * 2
+LOCAL:1 += MAX(ABL:(ARG:0):Ｍ感 - 1, 0)
+LOCAL:1 = LOCAL:1 * (ABL:(ARG:0):欲望 + 2) / 2
+
+;触手部屋の管理者に妖術経験値と触手経験値を与える
+LOCAL:2 = SQRT(LOCAL:1 * 100) / 4 + 5
+LOCAL:2 = LOCAL:2 * MAX(100 - ABL:(ID_TO_CHARA(FLAG:触手部屋管理者)):妖術, 20) / 100
+IF TALENT:(ARG:0):虚ろ
+	TIMES LOCAL:2, 0.50
+ELSEIF TALENT:(ARG:0):崩壊
+	TIMES LOCAL:2, 0.20
+ENDIF
+
+PRINTFORML <%ANAME(ID_TO_CHARA(FLAG:触手部屋管理者))%>
+CALL PRINT_ADD_EXP(ID_TO_CHARA(FLAG:触手部屋管理者), "触手経験値", 10)
+CALL PRINT_ADD_EXP(ID_TO_CHARA(FLAG:触手部屋管理者), "妖術経験値", LOCAL:2)
+CALL TRAIN_AUTO_ABLUP(ID_TO_CHARA(FLAG:触手部屋管理者))
+PRINTL
+
+CFLAG:(ARG:0):精神力回復量補正 = 80
+
+;■娼館
+@EVENT_PRISONER7(ARG:0)
+CALL EVENT_PRISONER_TEXT7(ARG:0)
+LOCAL:0 = 2000
+
+IF TALENT:(ARG:0):処女 && HAS_VAGINA(ARG:0)
+	IF TALENT:(ARG:0):処女 == 1
+		LOCAL:0 += 3000
+	ELSE
+		LOCAL:0 += 1500
+	ENDIF
+ENDIF
+
+IF TALENT:(ARG:0):キス未経験
+	LOCAL:0 += 1000
+ENDIF
+
+SELECTCASE ABL:(ARG:0):欲望
+	CASE 0
+		TIMES LOCAL:0, 1.00
+	CASE 1
+		TIMES LOCAL:0, 0.70
+	CASE 2
+		TIMES LOCAL:0, 0.50
+	CASE 3
+		TIMES LOCAL:0, 0.35
+	CASE 4
+		TIMES LOCAL:0, 0.20
+	CASEELSE
+		LOCAL:0 = LOCAL:0 / (ABL:(ARG:0):欲望 + 1)
+ENDSELECT
+
+;絶頂経験による補正(20で1/2、100で1/10、2000で1/20、50000で1/60)
+LOCAL:0 = CALC_LOSEBASE_EXP_CORRECTION(ARG:0, LOCAL:0)
+
+CFLAG:(ARG:0):捕虜怒 = LOCAL:0
+CFLAG:(ARG:0):捕虜哀 = LOCAL:0
+CFLAG:(ARG:0):捕虜怖 = LOCAL:0
+
+CALL FUCK(ARG:0, "欲望, 性技, 精愛, 性交, 射精, Ｃ, Ｖ, Ｂ, Ｍ, Ａ, 口淫, Ｖ性交, Ａ性交", "処女喪失, Ａ処女喪失, 膣内射精, キス喪失, 腸内射精, 口内射精", GET_SPERM_ID("娼館の客"), "娼館の客", "娼館の客", "", "売春")
+
+;もらえる額の計算
+LOCAL:1 = ABL:(ARG:0):欲望 + ABL:(ARG:0):奉仕 + ABL:(ARG:0):性技 + ABL:(ARG:0):性交 + ABL:(ARG:0):Ｃ感 + ABL:(ARG:0):Ｖ感 + ABL:(ARG:0):Ａ感 + ABL:(ARG:0):Ｂ感
+LOCAL:1 = LIMIT(RAND(LOCAL:1 / 10, LOCAL:1 / 10 + 10) * 100, 100, 3000)
+
+PRINTFORML %ANAME(ARG:0)%は金{LOCAL:1}を稼いだようだ
+MONEY += LOCAL:1
+
+;■搾乳
+@EVENT_PRISONER8(ARG:0)
+#DIM MILK_AMOUNT
+#DIM VALUE
+#DIM SPOUT_MILK
+CALL EVENT_PRISONER_TEXT8(ARG:0)
+;母乳が出ないキャラは搾乳されると母乳が出る体質になっていく 先に処理
+IF !TALENT:(ARG:0):母乳体質 && IS_FEMALE(ARG:0)
+	EXP:(ARG:0):搾乳経験値 += (1 + RAND:3)
+	SIF TALENT:(ARG:0):Ｂ敏感
+		EXP:(ARG:0):搾乳経験値 += 1
+	SIF TALENT:(ARG:0):Ｂ鈍感
+		EXP:(ARG:0):搾乳経験値 += -1
+	SIF GETBIT(TALENT:(ARG:0):淫乱系, 素質_淫乱_淫乳)
+		EXP:(ARG:0):搾乳経験値 += 2
+	SIF GETBIT(TALENT:(ARG:0):淫乱系, 素質_淫乱_雌牛)
+		EXP:(ARG:0):搾乳経験値 += 2
+	SIF ABL:(ARG:0):Ｂ感 >= ランク閾値:ランク_その他:ランク_D
+		EXP:(ARG:0):搾乳経験値 += 2
+	IF EXP:(ARG:0):搾乳経験値 >= 40
+		IF TALENT:(ARG:0):母乳体質
+			PRINTFORML 度重なる強引な搾乳に%ANAME(ARG:0)%は乳腺が壊れてしまったのを感じた
+		ELSE
+			PRINTFORML 度重なる強引な搾乳についに%ANAME(ARG:0)%の胸から母乳が漏れ始めた
+		ENDIF
+		TALENT:(ARG:0):母乳体質 = 1
+		CFLAG:(ARG:0):一時的母乳体質 = 0
+		PRINTFORML %ANAME(ARG:0)%は体が変えられてしまったことに衝撃を受け複雑な感情を強く感じている
+		CFLAG:(ARG:0):捕虜怒 += 2000
+		CFLAG:(ARG:0):捕虜哀 += 2000
+		CFLAG:(ARG:0):捕虜怖 += 2000
+	ENDIF
+ENDIF
+IF TALENT:(ARG:0):母乳体質
+	SPOUT_MILK = ABL:(ARG:0):噴乳 * 2 + ABL:(ARG:0):Ｂ感 * 2 + 3
+	SIF TALENT:(ARG:0):Ｂ敏感
+		SPOUT_MILK *= 3 / 2
+	SIF TALENT:(ARG:0):Ｂ鈍感
+		SPOUT_MILK *= 3 / 4
+	SIF GETBIT(TALENT:(ARG:0):淫乱系, 素質_淫乱_淫乳)
+		SPOUT_MILK *= 3 / 2
+	SIF GETBIT(TALENT:(ARG:0):淫乱系, 素質_淫乱_雌牛)
+		SPOUT_MILK *= 2
+	SPOUT_MILK = MAX(SPOUT_MILK, 1)
+	;調教時より時間が長いから一回100ccと適当に見積もる
+	MILK_AMOUNT = SPOUT_MILK * 100
+	VALUE = SQRT(MILK_AMOUNT) * (19 + TALENT:(ARG:0):人気 * 10 + VIRGIN(ARG:0) * 20)
+	MONEY += VALUE
+	CALL FUCK(ARG:0, "Ｂ感, 噴乳, 苦痛快楽, マゾ")
+	PRINTFORML %ANAME(ARG:0)%から{MILK_AMOUNT}ccの母乳を搾り出し、{VALUE}の買値がついた
+ELSEIF IS_MALE(ARG:0) && !TALENT:(ARG:0):母乳体質
+	SPOUT_MILK = 0
+	CALL FUCK(ARG:0, "Ｂ感")
+	PRINTFORML 男である%ANAME(ARG:0)%からは母乳を絞りようもなかった…
+ELSE
+	SPOUT_MILK = 0
+	CALL FUCK(ARG:0, "Ｂ感, 苦痛快楽, マゾ")
+	SELECTCASE RAND:2
+		CASE 0
+			PRINTFORML だが、%ANAME(ARG:0)%から母乳を絞ることはできなかった
+		CASE 1
+			PRINTFORML %ANAME(ARG:0)%はむず痒さに顔を歪めたが結局母乳は出なかった
+	ENDSELECT
+ENDIF
+;処理内容を基に能力が上がるかチェックする 経験が入らないことが明らかである場合必要ない
+CALL TRAIN_AUTO_ABLUP(ARG:0)
+
+CFLAG:(ARG:0):捕虜怒 += 1000
+CFLAG:(ARG:0):捕虜哀 += 1500
+CFLAG:(ARG:0):捕虜怖 += 1500
+
+CFLAG:(ARG:0):精神力回復量補正 = 80
+
+;-------------------------------------------------
+;捕虜の扱いに応じたターン終了時の機嫌・共感値・評価値変化
+;-------------------------------------------------
+@PRISONER_CHANGE_EMOTION(ARG:0)
+;監禁中
+IF CFLAG:(ARG:0):軟禁中 == 0
+	SELECTCASE CFLAG:(ARG:0):捕虜の扱い
+		;拘留
+		CASE 0
+			TIMES PALAM:(ARG:0):怒外, 0.70
+			TIMES PALAM:(ARG:0):哀外, 0.70
+			TIMES PALAM:(ARG:0):怖外, 0.70
+			TIMES PALAM:(ARG:0):怒主, 0.60
+			TIMES PALAM:(ARG:0):哀主, 0.60
+			TIMES PALAM:(ARG:0):怖主, 0.30
+			BASE:(ARG:0):精神力 = MIN(BASE:(ARG:0):精神力 + MAX(MAXBASE:(ARG:0):精神力 / 10, 300), MAXBASE:(ARG:0):精神力)
+		;拷問
+		CASE 2
+			CUP:(ARG:0):怒主 = CFLAG:(ARG:0):捕虜怒
+			CUP:(ARG:0):哀主 = CFLAG:(ARG:0):捕虜哀
+			CUP:(ARG:0):怖主 = CFLAG:(ARG:0):捕虜怖
+			;ソース処理の関数を流用
+			CALL UP_TALENT_CHECK3(ARG:0)
+
+			PALAM:(ARG:0):怒外 += CUP:(ARG:0):怒主
+			PALAM:(ARG:0):哀外 += CUP:(ARG:0):哀主
+			PALAM:(ARG:0):怖外 += CUP:(ARG:0):怖主
+			TIMES PALAM:(ARG:0):怒主, 0.25
+			TIMES PALAM:(ARG:0):哀主, 0.25
+			TIMES PALAM:(ARG:0):怖主, 0.70
+
+			BASE:(ARG:0):精神力 = MAX(BASE:(ARG:0):精神力 - MIN(CUP:(ARG:0):怖主 / 2, MAXBASE:(ARG:0):精神力 / 10), -500)
+			IF BASE:(ARG:0):精神力 < 0
+				CFLAG:(ARG:0):崩壊 += 800 - BASE:(ARG:0):精神力 * 2
+			ENDIF
+
+		;身体開発
+		CASE 3
+			CUP:(ARG:0):怒主 = CFLAG:(ARG:0):捕虜怒
+			CUP:(ARG:0):哀主 = CFLAG:(ARG:0):捕虜哀
+			CUP:(ARG:0):怖主 = CFLAG:(ARG:0):捕虜怖
+			;ソース処理の関数を流用
+			CALL UP_TALENT_CHECK3(ARG:0)
+
+			PALAM:(ARG:0):怒外 += CUP:(ARG:0):怒主
+			PALAM:(ARG:0):哀外 += CUP:(ARG:0):哀主
+			PALAM:(ARG:0):怖外 += CUP:(ARG:0):怖主
+			TIMES PALAM:(ARG:0):怒主, 0.30
+			TIMES PALAM:(ARG:0):哀主, 0.30
+			TIMES PALAM:(ARG:0):怖主, 0.40
+
+			BASE:(ARG:0):精神力 = MAX(BASE:(ARG:0):精神力 - CUP:(ARG:0):怖主 / 2, -500)
+			IF BASE:(ARG:0):精神力 < 0
+				CFLAG:(ARG:0):崩壊 += 400 - BASE:(ARG:0):精神力
+			ENDIF
+		;説得
+		CASE 4
+			TIMES PALAM:(ARG:0):怒主, 0.30
+			TIMES PALAM:(ARG:0):哀主, 0.30
+			TIMES PALAM:(ARG:0):怖主, 0.40
+			BASE:(ARG:0):精神力 = MIN(BASE:(ARG:0):精神力 + MAX(MAXBASE:(ARG:0):精神力 / 15, 300), MAXBASE:(ARG:0):精神力)
+		;性処理
+		CASE 5
+			CUP:(ARG:0):怒主 = CFLAG:(ARG:0):捕虜怒
+			CUP:(ARG:0):哀主 = CFLAG:(ARG:0):捕虜哀
+			CUP:(ARG:0):怖主 = CFLAG:(ARG:0):捕虜怖
+			;ソース処理の関数を流用
+			CALL UP_TALENT_CHECK3(ARG:0)
+
+			PALAM:(ARG:0):怒外 += CUP:(ARG:0):怒主
+			PALAM:(ARG:0):哀外 += CUP:(ARG:0):哀主
+			PALAM:(ARG:0):怖外 += CUP:(ARG:0):怖主
+			TIMES PALAM:(ARG:0):怒主, 0.30
+			TIMES PALAM:(ARG:0):哀主, 0.30
+			TIMES PALAM:(ARG:0):怖主, 0.50
+
+			BASE:(ARG:0):精神力 = MAX(BASE:(ARG:0):精神力 - CUP:(ARG:0):怖主, -500)
+			IF BASE:(ARG:0):精神力 < 0
+				CFLAG:(ARG:0):崩壊 += 800 - BASE:(ARG:0):精神力 * 2
+			ENDIF
+
+		;触手調教
+		CASE 6
+			CUP:(ARG:0):怒主 = CFLAG:(ARG:0):捕虜怒
+			CUP:(ARG:0):哀主 = CFLAG:(ARG:0):捕虜哀
+			CUP:(ARG:0):怖主 = CFLAG:(ARG:0):捕虜怖
+			;ソース処理の関数を流用
+			CALL UP_TALENT_CHECK3(ARG:0)
+
+			PALAM:(ARG:0):怒外 += CUP:(ARG:0):怒主
+			PALAM:(ARG:0):哀外 += CUP:(ARG:0):哀主
+			PALAM:(ARG:0):怖外 += CUP:(ARG:0):怖主
+			TIMES PALAM:(ARG:0):怒主, 0.30
+			TIMES PALAM:(ARG:0):哀主, 0.30
+			TIMES PALAM:(ARG:0):怖主, 0.50
+
+			BASE:(ARG:0):精神力 = MAX(BASE:(ARG:0):精神力 - CUP:(ARG:0):怖主, -500)
+			IF BASE:(ARG:0):精神力 < 0
+				CFLAG:(ARG:0):崩壊 += 800 - BASE:(ARG:0):精神力 * 2
+			ENDIF
+
+		;娼館
+		CASE 7
+			CUP:(ARG:0):怒主 = CFLAG:(ARG:0):捕虜怒
+			CUP:(ARG:0):哀主 = CFLAG:(ARG:0):捕虜哀
+			CUP:(ARG:0):怖主 = CFLAG:(ARG:0):捕虜怖
+			;ソース処理の関数を流用
+			CALL UP_TALENT_CHECK3(ARG:0)
+
+			PALAM:(ARG:0):怒外 += CUP:(ARG:0):怒主
+			PALAM:(ARG:0):哀外 += CUP:(ARG:0):哀主
+			PALAM:(ARG:0):怖外 += CUP:(ARG:0):怖主
+			TIMES PALAM:(ARG:0):怒主, 0.30
+			TIMES PALAM:(ARG:0):哀主, 0.30
+			TIMES PALAM:(ARG:0):怖主, 0.40
+
+			BASE:(ARG:0):精神力 = MAX(BASE:(ARG:0):精神力 - CUP:(ARG:0):怖主, -500)
+			IF BASE:(ARG:0):精神力 < 0
+				CFLAG:(ARG:0):崩壊 += 300 - BASE:(ARG:0):精神力 * 2
+			ENDIF
+
+		;搾乳
+		CASE 8
+			;捕虜の扱いに関わる機嫌の変動処理
+			;捕虜の扱いによって生まれた感情を一端CUPに収めてSOURCE処理と同じ関数を通して素質に応じた倍率をかける
+			CUP:(ARG:0):怒主 = CFLAG:(ARG:0):捕虜怒
+			CUP:(ARG:0):哀主 = CFLAG:(ARG:0):捕虜哀
+			CUP:(ARG:0):怖主 = CFLAG:(ARG:0):捕虜怖
+			;ソース処理の関数を流用
+			CALL UP_TALENT_CHECK3(ARG:0)
+
+			;捕虜の扱いによって生まれた感情は周りへの反感、もしくはストレスとして処理される
+			PALAM:(ARG:0):怒外 += CUP:(ARG:0):怒主
+			PALAM:(ARG:0):哀外 += CUP:(ARG:0):哀主
+			PALAM:(ARG:0):怖外 += CUP:(ARG:0):怖主
+
+			;主人公への反感が薄れる　数字が大きいほど薄れにくい
+			;反発が強いコマンドだから乳が出るようになると減りにくくなる
+			IF TALENT:(ARG:0):母乳体質
+				TIMES PALAM:(ARG:0):怒主, 0.30
+				TIMES PALAM:(ARG:0):哀主, 0.20
+				TIMES PALAM:(ARG:0):怖主, 0.40
+			ELSE
+				TIMES PALAM:(ARG:0):怒主, 0.20
+				TIMES PALAM:(ARG:0):哀主, 0.20
+				TIMES PALAM:(ARG:0):怖主, 0.30
+			ENDIF
+
+			;精神力を計算してそれが少なかったら崩壊する
+			;拷問と同程度に精神ショックが大きい　身体改造されるわけだからね
+			BASE:(ARG:0):精神力 = MAX(BASE:(ARG:0):精神力 - CUP:(ARG:0):怖主 / 2, -500)
+			IF BASE:(ARG:0):精神力 < 0
+				CFLAG:(ARG:0):崩壊 += 800 - BASE:(ARG:0):精神力
+			ENDIF
+
+	ENDSELECT
+
+;軟禁中
+ELSE
+	TIMES PALAM:(ARG:0):怒外, 0.30
+	TIMES PALAM:(ARG:0):哀外, 0.30
+	TIMES PALAM:(ARG:0):怖外, 0.30
+	TIMES PALAM:(ARG:0):怒主, 0.05
+	TIMES PALAM:(ARG:0):哀主, 0.05
+	TIMES PALAM:(ARG:0):怖主, 0.05
+ENDIF
+
+;-------------------------------------------------
+;捕虜の収監による国家感情の変動（捕虜一人当たり／ターン)
+;;;;;ARG:0 捕虜となっている個人
+;-------------------------------------------------
+@PRISONER_CHANGE_RELATION(ARG:0)
+#DIM LIKE
+#DIM HATE
+
+LIKE = 0
+HATE = 0
+
+SIF CFLAG:(ARG:0):捕虜先 == 0
+	RETURN
+SIF CFLAG:(ARG:0):解放カウンタ == 0
+	RETURN
+
+;MASTER所属国でない勢力に捕虜にされている
+SIF CFLAG:(ARG:0):捕虜先 != CFLAG:(MASTER):所属
+	RETURN
+
+;MASTERが待遇決める＆投獄
+IF CFLAG:(ARG:0):軟禁中 == 0
+	SELECTCASE CFLAG:(ARG:0):捕虜の扱い
+		;拘留
+		CASE 0
+			LIKE = 0
+			HATE = 1
+		;拷問
+		CASE 2
+			LIKE = -4
+			HATE = 4
+		;身体開発
+		CASE 3
+			LIKE = -3
+			HATE = 4
+		;説得
+		CASE 4
+			LIKE = 0
+			HATE = 0
+			CALL CHANGE_RELATION_O_TO_C(ARG:0, CFLAG:MASTER:所属, 30, -10)
+			SIF CFLAG:(ARG:0):所属
+				CALL CHANGE_RELATION_O_TO_C(ARG:0, CFLAG:(ARG:0):所属, -10, 15)
+		;性処理
+		CASE 5
+			LIKE = -5
+			HATE = 10
+		;触手調教
+		CASE 6
+			LIKE = -10
+			HATE = 15
+		;娼館
+		CASE 7
+			LIKE = -10
+			HATE = 15
+		;さく乳
+		CASE 8
+			LIKE = -5
+			HATE = 10
+	ENDSELECT
+;MASTERが待遇決める＆軟禁
+ELSE
+	LIKE = 5
+	HATE = -5
+ENDIF
+
+
+IF CFLAG:(ARG:0):所属 != 0
+	LOCAL:0 = GET_COUNTRY_BOSS(CFLAG:(ARG:0):捕虜先)
+	LOCAL:1 = GET_COUNTRY_BOSS(CFLAG:(ARG:0):所属)
+
+	SIF REL_LIKE:(LOCAL:1):(LOCAL:0) > 300 && LIKE > 0
+		LIKE = 0
+	SIF REL_HATE:(LOCAL:1):(LOCAL:0) < 300 && HATE < 0
+		HATE = 0
+
+	CALL CHANGE_RELATION_C_TO_C(CFLAG:(ARG:0):所属, CFLAG:(ARG:0):捕虜先, LIKE, HATE)
+ELSE
+	CALL CHANGE_RELATION_O_TO_C(ARG:0, CFLAG:(ARG:0):捕虜先, LIKE, HATE)
+ENDIF
+
+
+;PRINTFORML 後　%ANAME(ARG:0)% → %ANAME(MASTER)% L{REL_LIKE:(ARG:0):(MASTER)}  H{REL_HATE:(ARG:0):(MASTER)}
