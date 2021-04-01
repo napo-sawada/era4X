@@ -3,7 +3,7 @@
 ;これにコンフィグ項目の発生頻度がかけられるので、必ずしもこの通りにはならない
 ;---------------------
 @EVENT_DAILY_COMFORT_RATE()
-RETURN 30
+RETURN 0
 
 
 ;---------------------
@@ -11,6 +11,7 @@ RETURN 30
 ;〇期以降になると発生するとか、デイリー側で利用している変数が-1だったら起こさない　みたいなはじき方をするときに使う
 ;---------------------
 @EVENT_DAILY_COMFORT_DECISION()
+RETURN 0
 SIF !IS_COUNTRY(CFLAG:MASTER:所属) || CFLAG:MASTER:捕虜先
 	RETURN 0
 SIF IS_SP_COUNTRY(CFLAG:MASTER:所属)

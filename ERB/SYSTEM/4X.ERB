@@ -1,0 +1,19 @@
+;=============================================================================
+; ìãèÊâ¬î\Ç»ìzóÍÇÃàÍóóï\é¶
+;=============================================================================
+@SHOW_BOARDING_SLAVE_LIST
+#DIM ITER
+FOR ITER, 0, CHARANUM
+	SIF STRLENS(NAME:ITER) == 0
+		CONTINUE
+	SIF IS_FALL(ITER) == 0 && CFLAG:ITER:1015 == 0 && ITER != 0
+		CONTINUE
+	IF BOARDING_SHIP_ID:ITER == -1
+		PRINTBUTTON @"[{ITER, 2, RIGHT}] %CALLNAME:ITER, 30, LEFT%", ITER
+	ELSEIF RIDING_WITH:ITER != -1
+		PRINTBUTTON @"[{ITER, 2, RIGHT}] %CALLNAME:ITER, 30, LEFT% %SHIP_NAME:(RIDING_WITH:ITER)%ìãèÊíÜ", ITER
+	ELSE
+		PRINTBUTTON @"[{ITER, 2, RIGHT}] %CALLNAME:ITER, 30, LEFT% %SHIP_NAME:(BOARDING_SHIP_ID:ITER)%ÇÃäÕí∑", ITER
+	ENDIF
+PRINTL
+NEXT
