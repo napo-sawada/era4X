@@ -133,13 +133,16 @@ SIF GROUPMATCH(MASTER, 上昇:0, 上昇:1)
 	RETURN 1
 PRINTFORML %種族間抗争_種類:対象%の娘との情事が同種族の耳に入ったらしい
 
-SETCOLOR カラー_シアン
-PRINTFORM %ANAME(上昇:0)%
-SIF 上昇:1 != -1
-	PRINTFORM と%ANAME(上昇:1)%
-PRINTFORMW の関心をひいた
-RESETCOLOR
+IF 上昇:0 > 0
+	SETCOLOR カラー_シアン
+	PRINTFORM %ANAME(上昇:0)%
+	SIF 上昇:1 != -1
+		PRINTFORM と%ANAME(上昇:1)%
+	PRINTFORMW の関心をひいた
+	RESETCOLOR
+ENDIF
 
-CFLAG:(上昇:0):好感度 += 200
+SIF 上昇:0 != -1
+	CFLAG:(上昇:0):好感度 += 200
 SIF 上昇:1 != -1
-CFLAG:(上昇:1):好感度 += 200
+	CFLAG:(上昇:1):好感度 += 200
