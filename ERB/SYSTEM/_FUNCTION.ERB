@@ -2218,12 +2218,16 @@ RETURNF ARG:(RAND:(LOCAL:1))
 
 ;-------------------------
 ;選択式のボタンを描画する関数
-;ARGS:0=表示する文字列、ARG:1=ボタンの番号、ARG:2=選択されているか否か
+;ARGS:0=表示する文字列、ARG:1=ボタンの番号、ARG:2=選択されているか否か, ARG:3=選択中でも選択可能か(TOGGLE可能か)
 ;-------------------------
-@PRINT_SELECT_BUTTON(ARGS:0, ARG:1, ARG:2)
-IF ARG:2
+@PRINT_SELECT_BUTTON(ARGS:0, ARG:1, ARG:2, ARG:3 = 0)
+IF ARG:2 && ARG:3 == 0
 	SETCOLOR カラー_選択中
 	PRINTPLAINFORM %ARGS:0%
+	RESETCOLOR
+ELSEIF ARG:2
+	SETCOLOR カラー_選択中
+	PRINTBUTTON ARGS:0, ARG:1
 	RESETCOLOR
 ELSE
 	PRINTBUTTON ARGS:0, ARG:1

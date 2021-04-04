@@ -1805,7 +1805,7 @@ IF LOCAL:2 < 0
 ;成功
 ELSE
 	CALL SINGLE_DRAWLINE
-	PRINTFORML %ANAME(LOCAL:2)%が仕官を求めてきました
+	PRINTFORML 「この奴隷などいかがでしょう？」
 
 	$INPUT_LOOP_SELECT
 
@@ -1817,9 +1817,9 @@ ELSE
 	CALL SHOW_INFO(LOCAL:2)
 	CALL SINGLE_DRAWLINE
 
-	PRINTBUTTON "0[このキャラを登用]", 0
+	PRINTBUTTON "0[この奴隷を買う]", 0
 	PRINT    
-	PRINTBUTTON "1[別のキャラを探す]", 1
+	PRINTBUTTON "1[別の奴隷を探す]", 1
 	PRINT    
 	IF hold == -1
 	ELSEIF showingHold
