@@ -107,7 +107,7 @@ CALL COLUMN_RIGHT_TITLE("労働者選択", TOSTR(選択人数), TOSTR(MAX_WORKER
 CALL COLUMN_RIGHT_PRINTL
 ;標準的なキャラリストとページ移動 １列1ボタン,1ボタン3行
 ;ボタンにラインを含むため開始前にラインをひかない
-CALL COLUMN_RIGHT_CHARALIST(1, 4)
+CALL COLUMN_RIGHT_CHARALIST(1, 4, 1)
 RETURN 0
 
 ;-------------------------------------------------
@@ -218,11 +218,11 @@ FOR LOCAL, 0, CHARANUM
 	報酬 = 1000
 	SELECTCASE CFLAG:LOCAL:労働内容
 		CASE 労働_キャバクラ
-;			報酬 +=WORK_KYABAKURA(ID)
+			CALL WORK_KYABAKURA(LOCAL)
+			報酬 += RESULT
 		CASE 労働_Vアイドル
-			報酬 += RAND(MAX(ABL:LOCAL:操艦 * 3, 0), MAX(ABL:LOCAL:操艦 * 5, 1))
-			PRINTFORML %ANAME(LOCAL)%は領内の巡回を行った……
-			CALL PRINT_ADD_EXP(LOCAL, "操艦経験値", RAND(6, 12))
+			CALL WORK_VIDOL(LOCAL)
+			報酬 += RESULT
 		CASE 労働_広報
 			報酬 += RAND(MAX(ABL:LOCAL:知略 * 3, 0), MAX(ABL:LOCAL:知略 * 5, 1))
 			PRINTFORML %ANAME(LOCAL)%は広報活動を行った……
