@@ -11,6 +11,8 @@ RETURN 20
 ;〇期以降になると発生するとか、デイリー側で利用している変数が-1だったら起こさない　みたいなはじき方をするときに使う
 ;---------------------
 @EVENT_DAILY_BOUNCER_DECISION()
+SIF !MOORING(MASTER)
+	RETURN 0
 RETURN DAY >= 10
 
 ;---------------------
@@ -47,8 +49,8 @@ ABL:対象:料理 = 60 - ABL:対象:歌唱
 
 料金 = RAND(20000, 30000)
 
-PRINTFORML %ANAME(MASTER)%が仕事をしていると、従者が来客を告げた
-PRINTFORMW なんでも、腕に自信のある者が士官したいと言ってきたらしい
+PRINTFORML %ANAME(MASTER)%が仕事をしていると、知り合いの奴隷商から連絡が入った
+PRINTFORMW なんでも、腕の立つ奴隷が手に入ったので紹介したいそうだ
 PRINTFORML 優秀な人材なら大歓迎だ……それが本当に優秀ならの話だが
 PRINTFORMW ともかく、%ANAME(MASTER)%は会ってみることにしてみた……
 PRINTFORML

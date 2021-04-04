@@ -26,26 +26,24 @@ RETURN デイリー_ジャンル_エロ
 @EVENT_DAILY_ASSASSIN_GIRL
 #DIM 対象
 
-PRINTFORMW 諜報員から暗殺者があなたを狙っているとの情報を聞かされた
+PRINTFORMW 知り合いの諜報員から暗殺者があなたを狙っているとの情報を聞かされた
 PRINTFORML どうしよう？
-CALL ASK_MULTI("罠を張る" ,"兵で固める" ,"身を隠す")
+CALL ASK_MULTI("罠を張る" ,"護衛を頼む" ,"身を隠す")
 IF RESULT == 2
 	PRINTFORMW しばらく身を隠した
 	PRINTFORMW …被害は受けなかったが、その間は動けなかった
 	CALL ADD_COOLTIME(MASTER, 1)
 ELSEIF RESULT == 1
-	PRINTFORMW しばらく周りを兵で固めた
-	PRINTFORMW …被害は受けなかったが、臆病者と噂されてしまった
-	FOR LOCAL, 1, MAX_COUNTRY
-		CALL CHANGE_RELATION_C_TO_C(LOCAL, CFLAG:MASTER:所属, -50, 50)
-	NEXT
-	CALL COLOR_PRINTW("臆病者の将がいるとされ他国の評判が下がった…", カラー_注意)
+	PRINTFORMW しばらく護衛を雇うことにした
+	PRINTFORMW …被害は受けなかったが、出費が痛かった
+	MONEY -= 10000
+	CALL COLOR_PRINTW("所持金 -10000", カラー_注意)
 ELSEIF RESULT == 0
 	PRINTFORMW 罠を張ることにした
 	PRINTFORML ・
 	PRINTFORML ・
 	PRINTFORMW ・
-	LOCAL = ((ABL:MASTER:操艦 + ABL:MASTER:知略) / 10 * (RAND:6 + 1)) - (5 * (RAND:10 + 1))
+	LOCAL = ((ABL:MASTER:白兵 + ABL:MASTER:知略) / 5 * (RAND:6 + 1)) - (5 * (RAND:10 + 1))
 	IF LOCAL <= 0
 		PRINTFORMW 失敗してしまった…
 		PRINTFORMW すんでのところで助かったが大けがを負ってしまった
@@ -64,20 +62,15 @@ ELSEIF RESULT == 0
 		PRINTFORML なんと暗殺者は可憐な少女だった
 		PRINTFORMW 鎖で繋げられたまま彼女はあなたを睨みつけている
 		PRINTFORML どうしよう？
-		CALL ASK_MULTI_JUDGE("処刑", 1,"兵に与える", 1,"犯す", HAS_PENIS(MASTER))
+		CALL ASK_MULTI_JUDGE("処刑", 1,"売る", 1,"犯す", HAS_PENIS(MASTER))
 		IF RESULT == 0
 			PRINTFORMW 放置はできない
 			PRINTFORMW あなたは彼女を処刑した
-			FOR LOCAL, 1, MAX_COUNTRY
-				CALL CHANGE_RELATION_C_TO_C(LOCAL, CFLAG:MASTER:所属, 50, -50)
-			NEXT
-			CALL COLOR_PRINTW("見事暗殺者を返り討ちにしたあなたの武功により他国の評判が上がった", カラー_注意)
 		ELSEIF RESULT == 1
-			PRINTFORMW 兵に与えてやった
-			PRINTFORMW 新鮮な肉便器を与えられ兵士たちは歓喜した
-			COUNTRY_SOLDIER:(CFLAG:MASTER:所属) += 3000
-			CALL COLOR_PRINTW("彼女は評判となり志願兵が3000人増えた", カラー_注意)
-			PRINTFORMW
+			PRINTFORMW 知り合いの奴隷商に売り払うことにした
+			PRINTFORMW 奴隷商は喜んで買い取ってくれた
+			MONEY += 10000
+			CALL COLOR_PRINTW("所持金 +10000", カラー_注意)
 		ELSEIF RESULT == 2
 			PRINTFORMW あなたは報復として彼女を犯した
 			PRINTFORML 訓練された暗殺者らしく、犯されている間も口をぎゅっと結んでじっと耐えていた

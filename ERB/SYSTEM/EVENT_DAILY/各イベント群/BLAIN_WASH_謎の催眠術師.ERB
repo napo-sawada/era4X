@@ -13,6 +13,9 @@ RETURN 30
 SIF DVAR:催眠_発生フラグ == -1
 	RETURN 0
 
+SIF !MOORING(MASTER)
+	RETURN 0
+
 RETURN DAY >= 10
 
 ;---------------------
@@ -74,7 +77,7 @@ ELSE
 		PRINTFORML 男は悲鳴を上げる間もなくその場に崩れ落ちた
 		PRINTFORML 亡骸を調べるとなんとそれは巨大な瞳の妖怪であった！
 		PRINTFORML 何を企んでいたのかはわからないが、恐らく良からぬことだったのだろう
-		PRINTFORMW %ANAME(対象)%は妖怪の亡骸を近くの詰め所に運び込むと宮殿へと帰還した
+		PRINTFORMW %ANAME(対象)%は妖怪の亡骸を近くの詰め所に運び込むと拠点へと帰還した
 		PRINTFORML ・
 		PRINTFORML ・
 		PRINTFORMW ・
@@ -214,7 +217,7 @@ ELSE
 				PRINTFORMW 濃厚なキスをしながら男に全身をまさぐられ、ビクビクと震える
 				PRINTFORML 唇を離すとトロンとした表情で男を見上げ、男と腕を組むとそのまま歓楽街へと歩き出した
 				PRINTFORMW …すっかり任務を忘れ、%ANAME(対象)%は男と共に夜の歓楽街でのデートを思い切り楽しんだ
-				PRINTFORML そろそろ宮殿に帰らなければと惜しむ%ANAME(対象)%の腰に手を回すと、男は近くのホテルへと誘う
+				PRINTFORML そろそろ拠点に帰らなければと惜しむ%ANAME(対象)%の腰に手を回すと、男は近くのホテルへと誘う
 				PRINTFORMW %ANAME(対象)%は頬を赤らめ口では断りながらも、その足は男の望むままにホテルへと向かっていく
 				PRINTFORML 頭を溶かすような芳香の漂う部屋に入ると、早速男は%ANAME(対象)%の服の中に手を入れ身体をまさぐりだした
 				PRINTFORML 男に体を触れられるとそれだけで幸福感に包まれていき、%ANAME(対象)%は蕩けたような表情を見せる
@@ -982,9 +985,9 @@ ELSE
 		PRINTFORML ・
 		PRINTFORML ・
 		PRINTFORML ・
-		PRINTFORMW 気が付くと、%ANAME(対象)%は宮殿の前に立っていた
+		PRINTFORMW 気が付くと、%ANAME(対象)%は拠点の前に立っていた
 		PRINTFORML はていつの間に戻ってきたのだろうか？
-		PRINTFORMW %ANAME(対象)%は疑問に思いながらも、夜回りが不発に終わったことを悔しみ宮殿へと戻っていった
+		PRINTFORMW %ANAME(対象)%は疑問に思いながらも、夜回りが不発に終わったことを悔しみ拠点へと戻っていった
 		PRINTFORMW %ANAME(対象)%の足元には股間から伝い落ちた白濁の液体が道標のように残っていた……
 		CALL FUCK_RAPE(対象, GET_SPERM_ID("催眠術師"), @"催眠術師の\@ RAND:2 ? ペニス # 唇\@", "催眠術師")
 		CALL FUCK_RAPE(対象, GET_SPERM_ID("催眠術師"), @"催眠術師の\@ RAND:2 ? ペニス # 唇\@", "催眠術師")

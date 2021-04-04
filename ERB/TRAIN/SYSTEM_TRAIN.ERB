@@ -216,7 +216,7 @@ IF TRAIN_PLACE == ""
 	ELSEIF GROUPMATCH(FLAG:調教モード, 2, 4, 5)
 		TRAIN_PLACE = 牢屋
 	ELSEIF CFLAG:MASTER:所属
-		TRAIN_PLACE = 宮殿内
+		TRAIN_PLACE = 拠点内
 	ELSE
 		TRAIN_PLACE = 仮拠点
 	ENDIF
@@ -666,7 +666,7 @@ IF LOCAL:2 && !TFLAG:8
 							IF ABL:(MASTER):白兵 >= 60
 								PRINTFORMW %ANAME(MASTER)%は%ANAME(LOCAL:0)%を担ぎ上げると、%ANAME(LOCAL:0)%を背負ったまま帰路についた…
 							ELSE
-								PRINTFORMW %ANAME(MASTER)%は%ANAME(LOCAL:0)%を引きずるようにしながら、どうにか宮殿まで辿り着いた…
+								PRINTFORMW %ANAME(MASTER)%は%ANAME(LOCAL:0)%を引きずるようにしながら、どうにか拠点まで辿り着いた…
 							ENDIF
 						ELSE
 							PRINTFORMW %ANAME(MASTER)%は%ANAME(LOCAL:0)%を寝台に寝かせ、部屋を後にした…

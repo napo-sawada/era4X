@@ -11,6 +11,8 @@ RETURN 30
 ;〇期以降になると発生するとか、デイリー側で利用している変数が-1だったら起こさない　みたいなはじき方をするときに使う
 ;---------------------
 @EVENT_DAILY_BATH_PLAY_DECISION()
+SIF !MOORING(MASTER)
+	RETURN 0
 RETURN DAY >= 10
 
 ;---------------------
@@ -40,6 +42,10 @@ RETURN 1
 #DIM 対象
 ;あなたが男
 SIF 対象 == MASTER
+	RETURN 0
+SIF !MOORING(MASTER)
+	RETURN 0
+SIF CHARACTER_POSITION:対象 != CHARACTER_POSITION
 	RETURN 0
 IF IS_MALE(MASTER)
 	;女キャラ、かつ自国所属かつ捕虜でない、かつ「服従」or「恋慕＆貞操無頓着or解放or合意」or「恋人」or「性知識0」持ち、かつ動物でない

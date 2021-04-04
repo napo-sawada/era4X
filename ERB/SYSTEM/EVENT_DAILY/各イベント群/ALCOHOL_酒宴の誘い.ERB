@@ -11,6 +11,8 @@ RETURN 30
 ;〇期以降になると発生するとか、デイリー側で利用している変数が-1だったら起こさない　みたいなはじき方をするときに使う
 ;---------------------
 @EVENT_DAILY_ALCOHOL_DECISION()
+SIF !MOORING(MASTER)
+	RETURN 0
 RETURN 1
 
 ;---------------------
@@ -31,47 +33,9 @@ RETURN デイリー_ジャンル_エロ
 
 PRINTFORML 少し暇ができた
 PRINTFORMW 手元にはお酒があるのだが…どうしよう？
-CALL ASK_MULTI("部下と飲む" ,"兵士達と宴を開く" ,"仲間を誘う" ,"一人でのんびり飲む")
-IF RESULT == 3
+CALL ASK_MULTI("仲間を誘う" ,"一人でのんびり飲む")
+IF RESULT == 1
 	PRINTFORMW 一人でのんびりと飲むことにした
-ELSEIF RESULT == 1
-	PRINTFORMW 兵士達の日頃の労をねぎらう為に宴を開いた
-	PRINTFORMW …宴は大いに盛り上がり、彼らも喜んでくれたようだ
-	IF MASTER != GET_COUNTRY_BOSS(CFLAG:MASTER:所属)
-		PRINTFORMW 宴について君主の耳に入り、評価を上げた
-		CFLAG:GET_COUNTRY_BOSS(CFLAG:MASTER:所属):好感度 += 100 + RAND:100
-	ENDIF
-ELSEIF RESULT == 0
-	PRINTFORMW 部下と飲み交わすことにした
-	PRINTFORMW …お酒のおかげか、腹を割って話し合えた
-	SELECTCASE RAND:4
-		CASE 0
-			CALL PRINT_ADD_EXP(MASTER, "白兵経験値", RAND(5, 10), 1)
-		CASE 1
-			CALL PRINT_ADD_EXP(MASTER, "操艦経験値", RAND(5, 10), 1)
-		CASE 2
-			CALL PRINT_ADD_EXP(MASTER, "知略経験値", RAND(5, 10), 1)
-		CASE 3
-			CALL PRINT_ADD_EXP(MASTER, "政治経験値", RAND(5, 10), 1)
-	ENDSELECT
-	PRINTFORMW 
-	IF IS_FEMALE(MASTER)
-		PRINTFORMW 
-		PRINTFORML 程よく酔って来た頃、彼がさりげなく身体に触れてきた
-		PRINTFORMW 彼を見上げると、顔を寄せて見つめ返してきた
-		CALL ASK_YN("抵抗する", "抵抗しない")
-		IF RESULT == 0
-			PRINTFORMW 諫める為に軽くデコピンをすると彼は残念そうに肩をすくめた
-		ELSE
-			PRINTFORML 程よい気分の%ANAME(MASTER)%は抵抗せずに彼に寄りかかった
-			PRINTFORMW 彼は%ANAME(MASTER)%の肩を抱いて唇を塞ぎ、ゆっくりと押し倒してきた
-			PRINTFORML ・
-			PRINTFORML ・
-			PRINTFORMW ・
-			PRINTFORMW 一晩中、彼の情熱的なセックスでたっぷりと可愛がられた
-			CALL FUCK(MASTER, "欲望, 奉仕, 性交, 性技, 情愛, Ｖ, Ｂ, Ｃ, Ｍ, キス, 口淫, Ｖ性交", "キス喪失, 処女喪失, 膣内射精, 口内射精", GET_SPERM_ID("兵士"), @"部下の唇", @"部下", "", "和姦")
-		ENDIF
-	ENDIF
 ELSE
 	PRINTFORML 仲間と親睦を深めることにした
 	PRINTFORMW 誰を誘おう？

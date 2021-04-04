@@ -11,6 +11,9 @@ RETURN 25
 ;---------------------
 @EVENT_DAILY_SABORI_TRAINER_DECISION()
 ;RETURN DAY >= 15
+
+SIF !MOORING(MASTER)
+	RETURN 0
 FOR LOCAL, 0, CHARANUM
 	SIF CFLAG:MASTER:所属 == CFLAG:LOCAL:所属 && TALENT:LOCAL:サボり魔
 		RETURN 1
@@ -40,9 +43,9 @@ RETURN デイリー_ジャンル_トレーナー
 代金 = 20000
 
 IF DVAR:素質トレーナー_発生フラグ == 0
-	PRINTFORML %ANAME(MASTER)%が仕事をしていると、侍従が来客を告げた
-	PRINTFORML なんでも「やけにうるさい男が来た」のだそうだ
-	PRINTFORMW どれくらいうるさいのかと思った%ANAME(MASTER)%は、会うことにしてみた
+	PRINTFORML %ANAME(MASTER)%が仕事をしていると、来客を告げるチャイムが鳴った
+	PRINTFORML 執務室からでも聞こえる大きな声で、「ごめんくだされ！」と叫んでいる
+	PRINTFORMW このまま放置しておいても近所迷惑なので、%ANAME(MASTER)%は渋々会うことにした
 	PRINTFORML ・
 	PRINTFORML ・
 	PRINTFORML ・

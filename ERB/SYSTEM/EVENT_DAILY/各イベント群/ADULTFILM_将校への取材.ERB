@@ -11,7 +11,8 @@ RETURN (DVAR:AV撮影_進行度 > 0 ? 330 # 30)
 #DIM 対象
 
 対象 = 0
-
+SIF !MOORING(MASTER)
+	RETURN 0
 SIF DAY < 10
 	RETURN 0
 SIF DVAR:AV撮影_進行度 == 10

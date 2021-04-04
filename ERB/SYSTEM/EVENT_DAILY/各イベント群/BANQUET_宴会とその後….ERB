@@ -8,6 +8,9 @@ RETURN 30
 ;確率以外の発生判定
 ;---------------------
 @EVENT_DAILY_BANQUET_DECISION()
+SIF !MOORING(MASTER)
+	RETURN 0
+
 SIF DAY < 15
 	RETURN 0
 
@@ -28,7 +31,7 @@ RETURN デイリー_ジャンル_エロ
 @EVENT_DAILY_BANQUET()
 #DIM 対象
 
-PRINTFORML 慰労の為に宴会を開くらしい
+PRINTFORML 知り合いの開く酒宴に誘われた
 PRINTFORMW %ANAME(MASTER)%はどうする？
 CALL ASK_MULTI("一人で参加する" ,"誰かを誘う" ,"参加しない")
 IF RESULT == 2

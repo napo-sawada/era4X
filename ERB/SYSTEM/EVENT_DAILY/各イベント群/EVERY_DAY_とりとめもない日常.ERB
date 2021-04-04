@@ -62,7 +62,7 @@ ENDIF
 SELECTCASE RAND:20
 	;髪型
 	CASE 0
-		PRINTFORMW 宮殿を歩いていると%ANAME(対象)%を見かけた
+		PRINTFORMW 拠点を歩いていると%ANAME(対象)%を見かけた
 		PRINTFORML しかし何やらいつもと印象が違う…
 		PRINTFORMW そうだ、いつもと髪型が変わっている
 		PRINTFORML %ANAME(MASTER)%の視線に気づいたのか、彼女もこちらを振り向くと近寄って来た
@@ -256,7 +256,7 @@ SELECTCASE RAND:20
 	;探し物
 	CASE 6
 		PRINTFORML 失くし物をしてしまった
-		PRINTFORMW どこに置いたか首をひねりながら宮殿内を歩き回っていると%ANAME(対象)%に出会った
+		PRINTFORMW どこに置いたか首をひねりながら拠点内を歩き回っていると%ANAME(対象)%に出会った
 		LOCAL = RAND:400
 		IF (CFLAG:対象:好感度 + LOCAL >= 800) || (CFLAG:対象:従属度 + LOCAL >= 800)
 			PRINTFORML 彼女に失くし物について尋ねると、%ANAME(MASTER)%がどこかで使っていたのを覚えていてくれた
@@ -281,7 +281,7 @@ SELECTCASE RAND:20
 			ENDIf
 	;雨の中
 		CASE 7
-			PRINTFORML 雨で出かけられず、宮殿内でぶらぶらしていた
+			PRINTFORML 雨で出かけられず、拠点内でぶらぶらしていた
 			PRINTFORMW ある部屋で%ANAME(対象)%が一人、雨の打ち付ける窓から外を眺めているのを見かけた
 			PRINTFORML どうしよう？
 			CALL ASK_MULTI("一緒に眺める" ,"遊びに誘う" ,"そっとしておく")
@@ -436,7 +436,7 @@ SELECTCASE RAND:20
 			ELSE
 				PRINTFORMW 捨て兎でも迷子兎でも下手に拾ってくるのはいけない
 				PRINTFORML 元の場所に戻す様に彼女を諭そうとしたが、兎のつぶらな瞳に見つめられ何も言えなくなってしまった
-				PRINTFORMW 結局彼女に懇願され、宮殿で世話を見てやることにした
+				PRINTFORMW 結局彼女に懇願され、拠点で世話を見てやることにした
 				PRINTFORML 
 				PRINTFORMW 兎はその愛くるしい容姿から%ANAME(MASTER)%や彼女だけでは無く兵の間でも人気者となった
 				IF CFLAG:対象:好感度 >= CFLAG:対象:従属度

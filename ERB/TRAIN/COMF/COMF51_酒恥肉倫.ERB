@@ -17,7 +17,7 @@ RESULTS:5 = %LOCALS:0%
 ;-------------------------------------------------
 @COM_ABLE51
 #DIM COUNTER
-
+COUNTER = 0
 ;共通部分
 CALL COM_ABLE_COMMON(51)
 SIF RESULT == 0
@@ -28,10 +28,6 @@ SIF MPLY:0 != MASTER || MPLY_NUM != 1
 
 ;プレイヤーが行動不能なら不可
 SIF !IS_PLAYABLE(MPLY:0)
-	RETURN 0
-
-;4人以上いないと不可
-SIF MPLY_NUM < 4
 	RETURN 0
 
 ;全てのプレイヤーについて判定
@@ -51,7 +47,13 @@ FOR LOCAL:0, 0, CHARANUM
 		SETBIT LOCAL:1, 1
 	SIF IS_PARTICIPATE_TRAIN(LOCAL) && HAS_PENIS(LOCAL)
 		SETBIT LOCAL:1, 2
+	SIF IS_PARTICIPATE_TRAIN(LOCAL)
+		COUNTER ++
 NEXT
+
+;4人以上いないと不可
+SIF COUNTER < 4
+	RETURN 0
 
 RETURN GETBIT(LOCAL:1, 1) && GETBIT(LOCAL:1, 2)
 
@@ -64,7 +66,7 @@ CALL COM_ORDER_COMMON
 SIF RESULT == 0
 	RETURN 0
 
-PRINTFORML %ANAME(MPLY:0)%は、露出プレイに参加してきた連中を交えて乱交を行うことにした……
+PRINTFORML %ANAME(MPLY:0)%は、集まったメンバーで乱交を行うことにした……
 PRINTFORMW 誰も彼もが好き放題に交わっては相手を変え、乱痴気騒ぎが始まった……
 PRINTFORMW ・
 PRINTFORMW ・

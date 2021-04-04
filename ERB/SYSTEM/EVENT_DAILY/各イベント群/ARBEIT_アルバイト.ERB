@@ -10,6 +10,10 @@ RETURN (DVAR:アルバイト_発生フラグ > 0 ? 500 # 50)
 @EVENT_DAILY_ARBEIT_DECISION()
 SIF !IS_FEMALE(MASTER)
 	RETURN 0
+
+SIF !MOORING(MASTER)
+	RETURN 0
+
 SIF CFLAG:MASTER:捕虜先 != 0
 	RETURN 0
 
@@ -28,13 +32,7 @@ RETURN デイリー_ジャンル_エロ
 
 IF DVAR:アルバイト_発生フラグ == 0
 	PRINTFORML ある日、寄った酒場でアルバイトをしないかと誘われた
-	IF CFLAG:MASTER:所属 == 0
-		PRINTFORML 今の%ANAME(MASTER)%はフリーで収入の当てもない
-		PRINTFORMW 路銀を稼ぐのに丁度いいかもしれない
-	ELSE
-		PRINTFORML %ANAME(MASTER)%がこの国の将校だと知らないらしい
-		PRINTFORMW だが副収入としていいかもしれない
-	ENDIF
+	PRINTFORMW 副収入としていいかもしれない
 	PRINTFORML どうしよう？
 	CALL ASK_YN("やってみる", "やめておく")
 	IF RESULT == 1
