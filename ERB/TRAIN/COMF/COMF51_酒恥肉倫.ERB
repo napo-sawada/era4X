@@ -16,6 +16,8 @@ RESULTS:5 = %LOCALS:0%
 ;選択可否判定
 ;-------------------------------------------------
 @COM_ABLE51
+#DIM COUNTER
+
 ;共通部分
 CALL COM_ABLE_COMMON(51)
 SIF RESULT == 0
@@ -28,12 +30,8 @@ SIF MPLY:0 != MASTER || MPLY_NUM != 1
 SIF !IS_PLAYABLE(MPLY:0)
 	RETURN 0
 
-;露出プレイ中でないと駄目
-SIF TFLAG:54 !=  8
-	RETURN 0
-
-;モブがある程度いないと駄目
-SIF TFLAG:104 < 2
+;4人以上いないと不可
+SIF MPLY_NUM < 4
 	RETURN 0
 
 ;全てのプレイヤーについて判定
