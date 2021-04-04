@@ -68,11 +68,11 @@ RETURN 1
 #DIM 対象勢力
 #DIM 対象部隊
 対象側 = !発動側
-PRINTFORML %ANAME(発動者)%は舌なめずりしている！　武闘が増加した！
+PRINTFORML %ANAME(発動者)%は舌なめずりしている！　白兵が増加した！
 TIMES BATTLE_武闘パワー:発動側:COMBAT_SKILL_TARGET, 1.20
 
 @SKILL_34_PERSONAL_0_EXPLANATION
-RESULTS = 敵全員の武闘がそれぞれ自身以下であるとき、自身の武闘を増加させる。
+RESULTS = 敵全員の白兵がそれぞれ自身以下であるとき、自身の白兵を増加させる。
 
 @SKILL_34_PERSONAL_0_CANT_TELL
 

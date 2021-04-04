@@ -178,7 +178,7 @@ ELSE
 		PRINTFORMW ・
 		SIF DVAR:屋形船_発生フラグ == 2
 			LOCAL:2 = 20
-		IF ABL:対象:武闘 * (RAND:5 + 1) > 30 * (RAND:9 + 1) + LOCAL:2
+		IF ABL:対象:白兵 * (RAND:5 + 1) > 30 * (RAND:9 + 1) + LOCAL:2
 			PRINTFORMW 勝った！
 			PRINTFORML 血濡れで倒れ伏す彼の姿にすっきりした%ANAME(対象)%だったが、娘たちの事を思い出し我に返った
 			PRINTFORMW その後慌てて彼女たちを捜索したが、ついに見つけることはできなかった

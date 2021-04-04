@@ -10,7 +10,7 @@ SIF !GROUPMATCH(SIDE, 0, 1)
 FOR LOCAL, 0, VARSIZE("BATTLE_COMMANDER", 1)
 	BATTLE_COMMANDER:SIDE:LOCAL = -1
 	BATTLE_武闘:SIDE:LOCAL = 0
-	BATTLE_防衛:SIDE:LOCAL = 0
+	BATTLE_操艦:SIDE:LOCAL = 0
 	BATTLE_知略:SIDE:LOCAL = 0
 	BATTLE_政治:SIDE:LOCAL = 0
 	BATTLE_歌唱:SIDE:LOCAL = 0
@@ -32,15 +32,15 @@ FOR LOCAL:0, 0, VARSIZE("CHARA")
 		BREAK
 	BATTLE_COMMANDER_NUM:SIDE ++
 	BATTLE_COMMANDER:SIDE:LOCAL = CHARA:LOCAL
-	BATTLE_武闘:SIDE:LOCAL = ABL:(CHARA:LOCAL):武闘
-	BATTLE_防衛:SIDE:LOCAL = ABL:(CHARA:LOCAL):防衛
+	BATTLE_武闘:SIDE:LOCAL = ABL:(CHARA:LOCAL):白兵
+	BATTLE_操艦:SIDE:LOCAL = ABL:(CHARA:LOCAL):操艦
 	BATTLE_知略:SIDE:LOCAL = ABL:(CHARA:LOCAL):知略
 	BATTLE_政治:SIDE:LOCAL = ABL:(CHARA:LOCAL):政治
 	BATTLE_歌唱:SIDE:LOCAL = ABL:(CHARA:LOCAL):歌唱
 	BATTLE_料理:SIDE:LOCAL = ABL:(CHARA:LOCAL):料理
-	BATTLE_妖術:SIDE:LOCAL = ABL:(CHARA:LOCAL):妖術
+	BATTLE_妖術:SIDE:LOCAL = ABL:(CHARA:LOCAL):超能力
 	BATTLE_武闘パワー:SIDE:LOCAL = ABL_POWER(BATTLE_武闘:SIDE:LOCAL, CHARA:LOCAL)
-	BATTLE_防衛パワー:SIDE:LOCAL = ABL_POWER(BATTLE_防衛:SIDE:LOCAL, CHARA:LOCAL)
+	BATTLE_防衛パワー:SIDE:LOCAL = ABL_POWER(BATTLE_操艦:SIDE:LOCAL, CHARA:LOCAL)
 	BATTLE_知略パワー:SIDE:LOCAL = ABL_POWER(BATTLE_知略:SIDE:LOCAL, CHARA:LOCAL)
 	SIF BATTLE_妖術:SIDE:LOCAL
 		BATTLE_妖術パワー:SIDE:LOCAL = ABL_POWER(BATTLE_妖術:SIDE:LOCAL, CHARA:LOCAL)
@@ -60,7 +60,7 @@ NEXT
 ;最後尾を指定した場合はゼロフィル(シフトすると配列外参照で死にかねない)
 IF COM_IDX == BATTLE_COMMANDER_NUM:SIDE - 1
 	BATTLE_武闘:SIDE:COM_IDX = 0
-	BATTLE_防衛:SIDE:COM_IDX = 0
+	BATTLE_操艦:SIDE:COM_IDX = 0
 	BATTLE_知略:SIDE:COM_IDX = 0
 	BATTLE_政治:SIDE:COM_IDX = 0
 	BATTLE_妖術:SIDE:COM_IDX = 0
@@ -79,7 +79,7 @@ IF COM_IDX == BATTLE_COMMANDER_NUM:SIDE - 1
 ELSE
 	FOR LOCAL, COM_IDX, BATTLE_COMMANDER_NUM:SIDE - 1
 		BATTLE_武闘:SIDE:LOCAL = BATTLE_武闘:SIDE:(LOCAL + 1)
-		BATTLE_防衛:SIDE:LOCAL = BATTLE_防衛:SIDE:(LOCAL + 1)
+		BATTLE_操艦:SIDE:LOCAL = BATTLE_操艦:SIDE:(LOCAL + 1)
 		BATTLE_知略:SIDE:LOCAL = BATTLE_知略:SIDE:(LOCAL + 1)
 		BATTLE_政治:SIDE:LOCAL = BATTLE_政治:SIDE:(LOCAL + 1)
 		BATTLE_妖術:SIDE:LOCAL = BATTLE_妖術:SIDE:(LOCAL + 1)
@@ -105,7 +105,7 @@ BATTLE_COMMANDER_NUM:SIDE -= 1
 #DIM 対象側
 #DIM 対象番号
 BATTLE_武闘:対象側:対象番号 = 0
-BATTLE_防衛:対象側:対象番号 = 0
+BATTLE_操艦:対象側:対象番号 = 0
 BATTLE_知略:対象側:対象番号 = 0
 BATTLE_政治:対象側:対象番号 = 0
 BATTLE_妖術:対象側:対象番号 = 0
@@ -124,7 +124,7 @@ BATTLE_SKILL_SEALED:対象側:対象番号 = 1
 
 ;-------------------------------------------------
 ;BATTLE:SIDE側の攻撃能力を決定する。
-;CITY_NOが1以上で、対応するCITY_TYPEが0なら、防衛部隊とみなす。
+;CITY_NOが1以上で、対応するCITY_TYPEが0なら、操艦部隊とみなす。
 ;-------------------------------------------------
 @ATTACK_LEVEL(SIDE, CITY_NO = 0)
 #FUNCTION
@@ -140,7 +140,7 @@ IF BATTLE_COMMANDER_NUM:SIDE == 0
 	GOTO BASE_CALCED
 ENDIF
 
-;誰かいる場合、対応能力と妖術から算出する。
+;誰かいる場合、対応能力と超能力から算出する。
 FOR LOCAL:0, 0, BATTLE_COMMANDER_NUM:SIDE
 	CURRENT_CHARA = BATTLE_COMMANDER:SIDE:(LOCAL:0)
 	SIF CURRENT_CHARA < 0
@@ -153,7 +153,7 @@ $BASE_CALCED
 
 ATTACK = ATTACK * SUPPORT_LEVEL(SIDE, CITY_NO) / 1000
 
-;防衛部隊用の計算式
+;操艦部隊用の計算式
 IF CITY_NO && CITY_TYPE:CITY_NO == 0
 	RETURNF ATTACK / 2 * MAX(CITY_GUARD_RATE(CITY_NO) - 100, 100) / 100
 ENDIF
@@ -162,7 +162,7 @@ RETURNF MAX(ATTACK / 3, 1)
 
 ;-------------------------------------------------
 ;BATTLE:SIDE側の防御能力を決定する。
-;CITY_NOが1以上で、対応するCITY_TYPEが0なら、防衛部隊とみなす。
+;CITY_NOが1以上で、対応するCITY_TYPEが0なら、操艦部隊とみなす。
 ;-------------------------------------------------
 @DEFENSE_LEVEL(SIDE, CITY_NO = 0)
 #FUNCTION
@@ -178,7 +178,7 @@ IF BATTLE_COMMANDER_NUM:SIDE == 0
 	GOTO BASE_CALCED
 ENDIF
 
-;誰かいる場合、対応能力と妖術から算出する。
+;誰かいる場合、対応能力と超能力から算出する。
 FOR LOCAL:0, 0, BATTLE_COMMANDER_NUM:SIDE
 	CURRENT_CHARA = BATTLE_COMMANDER:SIDE:(LOCAL:0)
 	SIF CURRENT_CHARA < 0
@@ -191,8 +191,8 @@ $BASE_CALCED
 
 DEFENSE = DEFENSE * SUPPORT_LEVEL(SIDE, CITY_NO) / 1000
 
-;防衛部隊用の計算式
-;無所属都市は防衛倍率を勘案しない
+;操艦部隊用の計算式
+;無所属都市は操艦倍率を勘案しない
 IF CITY_NO && CITY_TYPE:CITY_NO == 0
 	IF IS_COUNTRY(CITY_OWNER:CITY_NO)
 		DEFENSE = DEFENSE * CITY_GUARD_RATE(CITY_NO) / 100
@@ -204,7 +204,7 @@ RETURNF MAX(DEFENSE / 3, 1)
 
 ;-------------------------------------------------
 ;BATTLE:SIDE側の知略能力を決定する。
-;CITY_NOが1以上で、対応するCITY_TYPEが0なら、防衛部隊とみなす。
+;CITY_NOが1以上で、対応するCITY_TYPEが0なら、操艦部隊とみなす。
 ;-------------------------------------------------
 @INTELLIGENCE_LEVEL(SIDE, CITY_NO = 0)
 #FUNCTION
@@ -235,8 +235,8 @@ RETURNF MAX(INTELLIGENCE / 3, 1)
 
 
 ;-------------------------------------------------
-;BATTLE:SIDE側の妖術能力を決定する。
-;CITY_NOが1以上で、対応するCITY_TYPEが0なら、防衛部隊とみなす。
+;BATTLE:SIDE側の超能力能力を決定する。
+;CITY_NOが1以上で、対応するCITY_TYPEが0なら、操艦部隊とみなす。
 ;-------------------------------------------------
 @MAGIC_LEVEL(SIDE, CITY_NO = 0)
 #FUNCTION
@@ -255,8 +255,8 @@ NEXT
 RETURNF MAGIC
 
 ;-------------------------------------------------
-;BATTLE:SIDE側の妖術能力を決定する。
-;CITY_NOが1以上で、対応するCITY_TYPEが0なら、防衛部隊とみなす。
+;BATTLE:SIDE側の超能力能力を決定する。
+;CITY_NOが1以上で、対応するCITY_TYPEが0なら、操艦部隊とみなす。
 ;-------------------------------------------------
 @SUPPORT_LEVEL(SIDE, CITY_NO = 0)
 #FUNCTION

@@ -65,27 +65,27 @@ IF RAND:2 == 0
 		PRINTFORML ・
 		PRINTFORML ・
 		PRINTFORMW ・
-		LOCAL = (ABL:MASTER:武闘 + ABL:MASTER:防衛) * (RAND:5 + 1) - (ABL:対象:武闘 + ABL:対象:防衛) * (RAND:4 + 1)
+		LOCAL = (ABL:MASTER:白兵 + ABL:MASTER:操艦) * (RAND:5 + 1) - (ABL:対象:白兵 + ABL:対象:操艦) * (RAND:4 + 1)
 		IF LOCAL >= 100
 			PRINTFORMW 訓練は非常に捗った
 			PRINTFORML お礼にと食事に誘われ、喜んで同伴した
 			PRINTFORMW 食事は美味しく会話も弾み盛り上がり、午後も二人で楽しく過ごした
-			CALL PRINT_ADD_EXP(対象, "武闘経験値", RAND:10 + 6, 1)
-			CALL PRINT_ADD_EXP(対象, "防衛経験値", RAND:10 + 6, 1)
+			CALL PRINT_ADD_EXP(対象, "白兵経験値", RAND:10 + 6, 1)
+			CALL PRINT_ADD_EXP(対象, "操艦経験値", RAND:10 + 6, 1)
 			CALL TRAIN_AUTO_ABLUP(対象)
 			CFLAG:対象:好感度 += RAND:300 + 500
 		ELSEIF LOCAL >= 0
 			PRINTFORMW 充実した訓練になった
 			PRINTFORMW 良い汗をかけたとタオルでぬぐいながら礼を言う彼女の笑顔がまぶしかった
-			CALL PRINT_ADD_EXP(対象, "武闘経験値", RAND:5 + 3, 1)
-			CALL PRINT_ADD_EXP(対象, "防衛経験値", RAND:5 + 3, 1)
+			CALL PRINT_ADD_EXP(対象, "白兵経験値", RAND:5 + 3, 1)
+			CALL PRINT_ADD_EXP(対象, "操艦経験値", RAND:5 + 3, 1)
 			CALL TRAIN_AUTO_ABLUP(対象)
 			CFLAG:対象:好感度 += RAND:100 + 300
 		ELSE
 			PRINTFORMW 訓練は特に滞りなく終わった
 			PRINTFORMW 礼を告げる彼女と別れた
-			CALL PRINT_ADD_EXP(対象, "武闘経験値", RAND:3 + 1, 1)
-			CALL PRINT_ADD_EXP(対象, "防衛経験値", RAND:3 + 1, 1)
+			CALL PRINT_ADD_EXP(対象, "白兵経験値", RAND:3 + 1, 1)
+			CALL PRINT_ADD_EXP(対象, "操艦経験値", RAND:3 + 1, 1)
 			CALL TRAIN_AUTO_ABLUP(対象)
 			CFLAG:対象:好感度 += 100
 		ENDIF

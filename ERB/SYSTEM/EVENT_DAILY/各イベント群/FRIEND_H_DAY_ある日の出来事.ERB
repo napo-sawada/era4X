@@ -114,7 +114,7 @@ SELECTCASE RAND:8
 					兵数 = 1000
 				COUNTRY_SOLDIER:(CFLAG:MASTER:所属) += 兵数
 				CALL COLOR_PRINTW(@"完成したポスターは好評で入隊希望者が{兵数}人増えた", カラー_注意)
-			ELSEIF (ABL:MASTER:武闘 / 10) * (RAND:10 + 1) > (ABL:対象:武闘 / 10) * (RAND:10 + 1)
+			ELSEIF (ABL:MASTER:白兵 / 10) * (RAND:10 + 1) > (ABL:対象:白兵 / 10) * (RAND:10 + 1)
 				PRINTFORML %ANAME(対象)%は%ANAME(MASTER)%の表情に悲鳴を上げ抵抗してきた
 				PRINTFORMW しかしそれを無理矢理押さえつけた%ANAME(MASTER)%は彼女の唇を塞ぐ
 				PRINTFORML 呻き声を漏らし必死で逃れようとする彼女の唇を強く吸うとビクンと震えた
@@ -205,9 +205,9 @@ SELECTCASE RAND:8
 			PRINTFORMW 彼女はこちらを見かけると頬を染めて足早に去って行ってしまった
 			CFLAG:対象:好感度 += 500
 		ENDIF
-	;武闘訓練…
+	;白兵訓練…
 	CASE 2
-		PRINTFORMW %ANAME(対象)%から武闘訓練に誘われた
+		PRINTFORMW %ANAME(対象)%から白兵訓練に誘われた
 		PRINTFORML どうしよう？
 		CALL ASK_YN("付き合う" ,"断る")
 		IF RESULT == 1
@@ -218,10 +218,10 @@ SELECTCASE RAND:8
 			PRINTFORML ・
 			PRINTFORML ・
 			PRINTFORMW ・
-			IF ((ABL:MASTER:武闘 / 10) + (ABL:MASTER:防衛 / 20)) * (RAND:8 + 1) <= ((ABL:対象:武闘 / 10) + (ABL:対象:防衛 / 20)) * (RAND:8 + 1)
+			IF ((ABL:MASTER:白兵 / 10) + (ABL:MASTER:操艦 / 20)) * (RAND:8 + 1) <= ((ABL:対象:白兵 / 10) + (ABL:対象:操艦 / 20)) * (RAND:8 + 1)
 				PRINTFORMW やられてしまった…
 				PRINTFORMW 少女にやられたのは屈辱だったが、良い経験になった
-				CALL PRINT_ADD_EXP(対象, "武闘経験値", RAND:10 + 1, 1)
+				CALL PRINT_ADD_EXP(対象, "白兵経験値", RAND:10 + 1, 1)
 				CALL TRAIN_AUTO_ABLUP
 			ELSE
 				PRINTFORMW %ANAME(MASTER)%は見事彼女を倒した！
@@ -233,7 +233,7 @@ SELECTCASE RAND:8
 					PRINTFORMW 手を差し伸べた
 					PRINTFORML 彼女はやや複雑そうな顔で%ANAME(MASTER)%の手を取った
 					PRINTFORMW その後は%ANAME(対象)%と二人で訓練について意見を交わした
-					CALL PRINT_ADD_EXP(対象, "武闘経験値", RAND:20 + 2, 1)
+					CALL PRINT_ADD_EXP(対象, "白兵経験値", RAND:20 + 2, 1)
 					CALL TRAIN_AUTO_ABLUP
 				ELSEIF RESULT == 0
 					PRINTFORMW %ANAME(MASTER)%は我慢できずに%ANAME(対象)%に襲い掛かった
@@ -291,7 +291,7 @@ SELECTCASE RAND:8
 						PRINTFORMW …当然彼女には嫌われ避けられるようになってしまった
 						CFLAG:対象:好感度 -= 300
 					ENDIF
-					CALL PRINT_ADD_EXP(対象, "武闘経験値", RAND:20 + 2, 1)
+					CALL PRINT_ADD_EXP(対象, "白兵経験値", RAND:20 + 2, 1)
 					CALL TRAIN_AUTO_ABLUP
 				ENDIF
 			ENDIF

@@ -51,7 +51,7 @@ SIF RESULT == 0
 
 ;●プレイヤーについて処理
 EXP:(MPLY:0):性技経験値 += 1
-EXP:(MPLY:0):妖術経験値 += 1
+EXP:(MPLY:0):超能力経験値 += 1
 EXP:(MPLY:0):触手経験値 += 1
 
 SOURCE:(MPLY:0):奉仕 = SERVE_HOUSHI(MPLY:0, 150)
@@ -72,7 +72,7 @@ FOR LOCAL:0, 0, MTAR_NUM
 
 	EXP:(LOCAL:2):触手経験値 += 1
 	EXP:(LOCAL:2):Ｕ開発経験 += 1
-	SOURCE:(LOCAL:2):快Ｕ = SENSE_HOUSHI(MPLY:0, LOCAL:2, 800 + ABL:(MPLY:0):妖術 * 8) + (GETBIT(TALENT:(LOCAL:2):淫乱系, 素質_淫乱_苗床) * 500)
+	SOURCE:(LOCAL:2):快Ｕ = SENSE_HOUSHI(MPLY:0, LOCAL:2, 800 + ABL:(MPLY:0):超能力 * 8) + (GETBIT(TALENT:(LOCAL:2):淫乱系, 素質_淫乱_苗床) * 500)
 	SOURCE:(LOCAL:2):逸脱 = 500 - (GETBIT(TALENT:(LOCAL:2):淫乱系, 素質_淫乱_苗床) * 200)
 	SOURCE:(LOCAL:2):触手 = 600 + (GETBIT(TALENT:(LOCAL:2):淫乱系, 素質_淫乱_苗床) * 300)
 	SOURCE:(LOCAL:2):性行動 = 300 + (GETBIT(TALENT:(LOCAL:2):淫乱系, 素質_淫乱_苗床) * 150)
@@ -119,7 +119,7 @@ FOR LOCAL:0, 0, MEQUIP_TARGET_NUM:(ARG:0)
 
 	EXP:(LOCAL:3):触手経験値 += 1
 
-	SOURCE:(LOCAL:3):快Ｕ += SENSE_HOUSHI(LOCAL:2, LOCAL:3, 600 + ABL:(LOCAL:2):妖術 * 6) + (GETBIT(TALENT:(LOCAL:3):淫乱系, 素質_淫乱_苗床) * 400)
+	SOURCE:(LOCAL:3):快Ｕ += SENSE_HOUSHI(LOCAL:2, LOCAL:3, 600 + ABL:(LOCAL:2):超能力 * 6) + (GETBIT(TALENT:(LOCAL:3):淫乱系, 素質_淫乱_苗床) * 400)
 	SOURCE:(LOCAL:3):逸脱 += 200 - (GETBIT(TALENT:(LOCAL:3):淫乱系, 素質_淫乱_苗床) * 50)
 	SOURCE:(LOCAL:3):触手 += 300 + (GETBIT(TALENT:(LOCAL:3):淫乱系, 素質_淫乱_苗床) * 150)
 	SOURCE:(LOCAL:3):性行動 += 100 + (GETBIT(TALENT:(LOCAL:3):淫乱系, 素質_淫乱_苗床) * 50)

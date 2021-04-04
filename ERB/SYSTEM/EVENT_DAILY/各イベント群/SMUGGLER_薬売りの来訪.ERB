@@ -98,7 +98,7 @@ ELSEIF RESULT == 2
 		CASE 2
 			PRINTFORMW %ANAME(MASTER)%は男を触手部屋に放り込んだ
 			PRINTFORMW かわいい触手たちが腹を下さないか少し心配だったが杞憂だったようだ。
-			CALL PRINT_ADD_EXP(ID_TO_CHARA(FLAG:触手部屋管理者), "妖術経験値", 料金 / 1000)
+			CALL PRINT_ADD_EXP(ID_TO_CHARA(FLAG:触手部屋管理者), "超能力経験値", 料金 / 1000)
 			CALL TRAIN_AUTO_ABLUP(ID_TO_CHARA(FLAG:触手部屋管理者))
 	ENDSELECT
 	DVAR:薬売り_発生フラグ = -1
@@ -138,7 +138,7 @@ MONEY -= 料金
 
 ;効果選択
 ;------------成功率・変化量算出----------------
-能力計 = ABL:対象:武闘 + ABL:対象:知略 + ABL:対象:政治 + ABL:対象:防衛
+能力計 = ABL:対象:白兵 + ABL:対象:知略 + ABL:対象:政治 + ABL:対象:操艦
 ;失敗率は3能力の1/5
 失敗率 = 能力計 / 5
 ;能力計に応じ、失敗率に補正
@@ -149,11 +149,11 @@ SELECTCASE 能力計
 		失敗率 += 5
 ENDSELECT
 ;80以上ある能力を保存
-IF ABL:(対象):武闘 >= 80
+IF ABL:(対象):白兵 >= 80
 	SETBIT 高能力フラグ, 0
 	失敗率 += 5
 ENDIF
-IF ABL:対象:防衛 >= 80
+IF ABL:対象:操艦 >= 80
 	SETBIT 高能力フラグ , 1
 	失敗率 += 5
 ENDIF

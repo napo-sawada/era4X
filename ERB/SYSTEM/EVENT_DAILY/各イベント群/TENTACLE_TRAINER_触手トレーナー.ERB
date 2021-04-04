@@ -36,7 +36,7 @@ RETURN デイリー_ジャンル_トレーナー
 
 ;5回以上利用すると苗床を付けられるようになる
 IF DVAR:触手トレーナー_発生フラグ == 5
-	PRINTFORMW あの妖術師が再び訪れた
+	PRINTFORMW あの超能力師が再び訪れた
 	PRINTFORML 「お久しぶりです…また“実験素材”と“資金”の提供をお願いしに来ました…」
 	PRINTFORML 「そして、日頃からご利用していただいているお礼として…更に新しい“トレーニング”をご用意しました…」
 	PRINTFORMW 新しいトレーニングとは、相手を触手づけにして【苗床】にしてしまうものらしい
@@ -53,28 +53,28 @@ ELSEIF DVAR:触手トレーナー_発生フラグ == 0
 	PRINTFORMW 「%ANAME(MASTER)%様ですね、初めまして。お目にかかれて光栄です」
 	PRINTFORML 目深にフードをかぶり顔を隠した男が恭しく頭を下げる
 	PRINTFORMW 成程、確かにいかにも怪しげな雰囲気だ
-	PRINTFORML 「私は、妖術家業をしておりまして…%ANAME(MASTER)%様ならばどういう事かお分かりになるでしょう？」
+	PRINTFORML 「私は、超能力家業をしておりまして…%ANAME(MASTER)%様ならばどういう事かお分かりになるでしょう？」
 	PRINTFORMW 相手の言葉を聞いてその雰囲気にも合点が言った
-	PRINTFORML 「妖術を極める為に様々な研究をしているのですが…いかんせん“実験素材”と“資金”の調達が難しく…」
-	PRINTFORML 「そこで同じ妖術使いの%ANAME(MASTER)%様ならば、私のスポンサーになってくださるのではないかと…お伺いした次第でございます」
-	PRINTFORMW 「無論、タダで、とは言いません。私は妖術知識を他者に伝え、またその能力を伸ばすことを得意としております」
-	PRINTFORML 男の言葉を纏めると、金を払えば仲間に妖術知識を授けてくれるようだ
+	PRINTFORML 「超能力を極める為に様々な研究をしているのですが…いかんせん“実験素材”と“資金”の調達が難しく…」
+	PRINTFORML 「そこで同じ超能力使いの%ANAME(MASTER)%様ならば、私のスポンサーになってくださるのではないかと…お伺いした次第でございます」
+	PRINTFORMW 「無論、タダで、とは言いません。私は超能力知識を他者に伝え、またその能力を伸ばすことを得意としております」
+	PRINTFORML 男の言葉を纏めると、金を払えば仲間に超能力知識を授けてくれるようだ
 	PRINTFORMW 無論その為にどの様な行為が必要なのかも%ANAME(MASTER)%にはわかる、実験素材とはそういう事だろう
 	PRINTFORML 費用は一回50000、高いと言えば高いが安いと言えば安いか？
 	PRINTFORMW 妖しげではあるが、男が出鱈目を言っているのではない事はその知識を聞けば分かった
 	PRINTFORMW さて、どうしようか……
 ;2回目以降
 ELSE
-	PRINTFORMW あの妖術師が再び訪れた
+	PRINTFORMW あの超能力師が再び訪れた
 	PRINTFORMW 「お久しぶりです…また“実験素材”と“資金”の提供をお願いしに来ました…」
 	PRINTFORMW さて、どうしようか……
 ENDIF
 
 CALL SINGLE_DRAWLINE
 IF DVAR:触手トレーナー_発生フラグ >= 5
-	PRINTFORML 現在の資金:{MONEY} 妖術知識費用:50000 苗床費用:70000
+	PRINTFORML 現在の資金:{MONEY} 超能力知識費用:50000 苗床費用:70000
 ELSE
-	PRINTFORML 現在の資金:{MONEY} 妖術知識費用:50000
+	PRINTFORML 現在の資金:{MONEY} 超能力知識費用:50000
 ENDIF
 CALL ASK_MULTI_JUDGE("素材と資金を提供する", MONEY >= 50000, "やめておく", 1, "斬り捨てる", 1)
 IF RESULT == 2
@@ -86,7 +86,7 @@ IF RESULT == 2
 ELSEIF RESULT == 1
 	PRINTFORML 悪いが今はそれは必要としていない
 	PRINTFORML 「そうですか…それではまたお伺いしましょう」
-	PRINTFORMW 妖術師は音も立てずに去って行った
+	PRINTFORMW 超能力師は音も立てずに去って行った
 	DVAR:触手トレーナー_発生フラグ += 1
 	RETURN 1
 ELSE
@@ -97,7 +97,7 @@ ELSE
 	IF 対象 == -1
 		PRINTFORML やはりやめておこう
 		PRINTFORML 「そうですか…それではまたお伺いしましょう」
-		PRINTFORMW 妖術師は音も立てずに去って行った
+		PRINTFORMW 超能力師は音も立てずに去って行った
 		RETURN 1
 	ELSE
 		IF 対象 == MASTER
@@ -111,9 +111,9 @@ ELSE
 			IF RESULT == 1
 				PRINTFORMW 「では、こちらへどうぞ…」
 				IF ABL:対象:触手 <= 4 && 対象 != PLAYER
-					PRINTFORMW 妖術師は嫌がる%ANAME(対象)%をローブの下から伸ばした無数の触手で束縛して連れて行った
+					PRINTFORMW 超能力師は嫌がる%ANAME(対象)%をローブの下から伸ばした無数の触手で束縛して連れて行った
 				ELSE
-					PRINTFORMW %ANAME(対象)%はもじもじしながらも大人しく妖術師に連れて行かれた
+					PRINTFORMW %ANAME(対象)%はもじもじしながらも大人しく超能力師に連れて行かれた
 				ENDIF
 				PRINTFORML ・
 				PRINTFORML ・
@@ -166,7 +166,7 @@ ELSE
 				MONEY -= 70000
 				DVAR:触手トレーナー_発生フラグ += 1
 				PRINTFORML 「ご協力ありがとうございました…それでは私はこれで…」
-				PRINTFORMW 妖術師は音も立てずに去って行った
+				PRINTFORMW 超能力師は音も立てずに去って行った
 				RETURN 1
 			ELSE
 				PRINTFORMW 「では、こちらへどうぞ…」
@@ -174,13 +174,13 @@ ELSE
 		ELSE
 			PRINTFORMW 「では、こちらへどうぞ…」
 		ENDIF
-		IF TALENT:対象:妖術知識 == 0
+		IF TALENT:対象:超能力者 == 0
 			IF ABL:対象:触手 <= 4 && 対象 != PLAYER
-				PRINTFORMW 妖術師は嫌がる%ANAME(対象)%をローブの下から伸ばした無数の触手で束縛して連れて行った
+				PRINTFORMW 超能力師は嫌がる%ANAME(対象)%をローブの下から伸ばした無数の触手で束縛して連れて行った
 			ELSEIF GETBIT(TALENT:対象:淫乱系, 素質_淫乱_苗床) == 1
-				PRINTFORMW すっかり触手の魅力に溺れた%ANAME(対象)%は期待に頬を赤らめながら妖術師について行った
+				PRINTFORMW すっかり触手の魅力に溺れた%ANAME(対象)%は期待に頬を赤らめながら超能力師について行った
 			ELSE
-				PRINTFORMW %ANAME(対象)%はもじもじしながらも大人しく妖術師に連れて行かれた
+				PRINTFORMW %ANAME(対象)%はもじもじしながらも大人しく超能力師に連れて行かれた
 			ENDIF
 			PRINTFORML ・
 			PRINTFORML ・
@@ -195,9 +195,9 @@ ELSE
 			PRINTFORML ・
 			PRINTFORML ・
 			PRINTFORML ・
-			TALENT:対象:妖術知識 = 1
-			ABL:対象:妖術 += 10
-			CALL COLOR_PRINT(@"%ANAME(対象)%は妖術知識を身につけた", カラー_注意)
+			TALENT:対象:超能力者 = 1
+			ABL:対象:超能力 += 10
+			CALL COLOR_PRINT(@"%ANAME(対象)%は超能力知識を身につけた", カラー_注意)
 			PRINTFORMW 
 			CALL FUCK(対象, "欲望, Ｃ, Ｖ, Ａ, Ｂ, Ｍ, 奉仕, 精愛, 口淫, 性交, 触手, Ｖ性交, Ａ性交", "キス喪失, 処女喪失, Ａ処女喪失, 膣内射精, 腸内射精, 口内射精, CFLAG減少", GET_SPERM_ID("触手"), "触手", "触手", "", "調教")
 			EXP:対象:触手出産経験 += 6 + RAND:10
@@ -205,11 +205,11 @@ ELSE
 			DVAR:触手トレーナー_発生フラグ += 1
 		ELSE
 			IF ABL:対象:触手 <= 4 && 対象 != PLAYER
-				PRINTFORMW 妖術師は嫌がる%ANAME(対象)%をローブの下から伸ばした無数の触手で束縛して連れて行った
+				PRINTFORMW 超能力師は嫌がる%ANAME(対象)%をローブの下から伸ばした無数の触手で束縛して連れて行った
 			ELSEIF GETBIT(TALENT:対象:淫乱系, 素質_淫乱_苗床) == 1
-				PRINTFORMW すっかり触手の魅力に溺れた%ANAME(対象)%は期待に頬を赤らめながら妖術師について行った
+				PRINTFORMW すっかり触手の魅力に溺れた%ANAME(対象)%は期待に頬を赤らめながら超能力師について行った
 			ELSE
-				PRINTFORMW %ANAME(対象)%はもじもじしながらも大人しく妖術師に連れて行かれた
+				PRINTFORMW %ANAME(対象)%はもじもじしながらも大人しく超能力師に連れて行かれた
 			ENDIF
 			PRINTFORML ・
 			PRINTFORML ・
@@ -369,7 +369,7 @@ ELSE
 			PRINTFORML ・
 			PRINTFORML ・
 			PRINTFORML ・
-			CALL COLOR_PRINT(@"%ANAME(対象)%の妖術能力が上がった", カラー_注意)
+			CALL COLOR_PRINT(@"%ANAME(対象)%の超能力能力が上がった", カラー_注意)
 			PRINTFORMW 
 			CALL FUCK(対象, "欲望, Ｃ, Ｖ, Ａ, Ｂ, Ｍ, 奉仕, 精愛, 口淫, 性交, 触手, Ｖ性交, Ａ性交", "キス喪失, 処女喪失, Ａ処女喪失, 膣内射精, 腸内射精, 口内射精, CFLAG減少", GET_SPERM_ID("触手"), "触手", "触手", "", "調教")
 			EXP:対象:触手出産経験 += 6 + RAND:10
@@ -381,7 +381,7 @@ ELSE
 			DVAR:触手トレーナー_発生フラグ += 1
 		ENDIF
 		PRINTFORML 「ご協力ありがとうございました…それでは私はこれで…」
-		PRINTFORMW 妖術師は音も立てずに去って行った
+		PRINTFORMW 超能力師は音も立てずに去って行った
 	ENDIF
 ENDIF
 RETURN 1

@@ -7,8 +7,8 @@
 #DIM SORT_VALUE,MAX_CHARA_NUM
 {
 	#DIM HEAD_SLG =
-		GETNUM(ABL, "武闘"), GETNUM(ABL, "防衛"), GETNUM(ABL, "知略"), GETNUM(ABL, "政治"),
-		GETNUM(ABL, "妖術"), GETNUM(ABL, "歌唱"), GETNUM(ABL, "料理"), GETNUM(ABL, "野心")
+		GETNUM(ABL, "白兵"), GETNUM(ABL, "操艦"), GETNUM(ABL, "超能力"), GETNUM(ABL, "歌唱"),
+		GETNUM(ABL, "料理"), GETNUM(ABL, "話術"), GETNUM(ABL, "社交")
 }
 
 {
@@ -221,11 +221,11 @@ SELECTCASE 項目
 				NEXT
 			CASE 31
 				FOR LOCAL, 0, CHARANUM
-					SORT_VALUE:(LOCAL:0) = ABL:(LOCAL:0):武闘 + ABL:(LOCAL:0):防衛 + ABL:(LOCAL:0):政治 + ABL:(LOCAL:0):知略
+					SORT_VALUE:(LOCAL:0) = ABL:(LOCAL:0):白兵 + ABL:(LOCAL:0):操艦 + ABL:(LOCAL:0):政治 + ABL:(LOCAL:0):知略
 				NEXT
 			CASE 32
 				FOR LOCAL, 0, CHARANUM
-					SORT_VALUE:(LOCAL:0) = ABL:(LOCAL:0):武闘 + ABL:(LOCAL:0):防衛 + ABL:(LOCAL:0):政治 + ABL:(LOCAL:0):知略 + ABL:(LOCAL):妖術 + ABL:LOCAL:歌唱 + ABL:LOCAL:料理
+					SORT_VALUE:(LOCAL:0) = ABL:(LOCAL:0):白兵 + ABL:(LOCAL:0):操艦 + ABL:(LOCAL:0):政治 + ABL:(LOCAL:0):知略 + ABL:(LOCAL):超能力 + ABL:LOCAL:歌唱 + ABL:LOCAL:料理
 				NEXT
 			CASE 50
 				FOR LOCAL, 0, CHARANUM
@@ -299,8 +299,8 @@ GOTO INPUT_LOOP
 @PRINT_PARTNER_DATA_TABLE(ARG:0, ARG:1 = 0, ARG:2 = 100)
 {
 	#DIM HEAD_SLG =
-		GETNUM(ABL, "武闘"), GETNUM(ABL, "防衛"), GETNUM(ABL, "知略"), GETNUM(ABL, "政治"),
-		GETNUM(ABL, "妖術"), GETNUM(ABL, "歌唱"), GETNUM(ABL, "料理"), GETNUM(ABL, "野心")
+		GETNUM(ABL, "白兵"), GETNUM(ABL, "操艦"), GETNUM(ABL, "超能力"), GETNUM(ABL, "歌唱"),
+		GETNUM(ABL, "料理"), GETNUM(ABL, "話術"), GETNUM(ABL, "社交")
 }
 
 {
@@ -328,8 +328,8 @@ SELECTCASE ARG:1
 	CASE 1
 		CALL TMP_PRINT_CHARA_STARS_NUM(ARG:0)
 		PRINT |
-		PRINTFORM {ABL:(ARG:0):武闘 + ABL:(ARG:0):防衛 + ABL:(ARG:0):知略 + ABL:(ARG:0):政治,5}|
-		PRINTFORM {ABL:(ARG:0):武闘 + ABL:(ARG:0):防衛 + ABL:(ARG:0):知略 + ABL:(ARG:0):政治 + ABL:(ARG:0):妖術 + ABL:(ARG:0):歌唱+ABL:(ARG:0):料理,5}
+		PRINTFORM {ABL:(ARG:0):白兵 + ABL:(ARG:0):操艦 + ABL:(ARG:0):知略 + ABL:(ARG:0):政治,5}|
+		PRINTFORM {ABL:(ARG:0):白兵 + ABL:(ARG:0):操艦 + ABL:(ARG:0):知略 + ABL:(ARG:0):政治 + ABL:(ARG:0):超能力 + ABL:(ARG:0):歌唱+ABL:(ARG:0):料理,5}
 		FOR LOCAL, 0, VARSIZE("HEAD_SLG")
 			PRINT |
 			CALL PRINT_ALPHABET_RANK(ランク_ＳＬＧ, ABL:(ARG:0):(HEAD_SLG:LOCAL))

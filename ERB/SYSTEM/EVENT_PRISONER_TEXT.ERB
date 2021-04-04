@@ -9,7 +9,7 @@ ELSE
 	IF RAND:4
 		IF ABL:(ARG:0):知略 >= 70
 			PRINTFORML %ANAME(ARG:0)%は牢の中で大人しくしている…
-		ELSEIF ABL:(ARG:0):武闘 >= 70
+		ELSEIF ABL:(ARG:0):白兵 >= 70
 			PRINTFORML %ANAME(ARG:0)%は牢の中で暴れているようだ…
 		ELSEIF ABL:(ARG:0):政治 >= 70
 			PRINTFORML %ANAME(ARG:0)%は牢の外にいる看守と話し込んでいる…
@@ -627,7 +627,7 @@ SELECTCASE RAND:51
 		IF TALENT:(ARG:0):回復遅い
 			PRINTFORML しかし無尽蔵な相手を捌き続けるには限界があり、簡単に%ANAME(ARG:0)%の足は捕らえられてしまった！
 			PRINTFORML 無茶をする%ANAME(ARG:0)%を気に入った触手は、%ANAME(ARG:0)%の体をじっくりと愛した……
-		ELSEIF ABL:(ARG:0):武闘 >= 90
+		ELSEIF ABL:(ARG:0):白兵 >= 90
 			;鬼とかあの辺想定
 			PRINTFORML %ANAME(ARG:0)%は長い事抗い続けたが、一瞬の隙を突かれて足を捕らえられてしまった！
 			PRINTFORML 実に健康的な肉体を気に入った触手は、子孫を残すため念入りに%ANAME(ARG:0)%の体を愛し始めた……

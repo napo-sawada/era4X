@@ -21,7 +21,7 @@ RETURN 1
 PRINTFORML この辺りで山賊が現れて困っているらしい
 PRINTFORML 何とかしてくれと頼まれた
 PRINTL
-CALL PRINT_ABILITY(対象, GETNUM(ABL, "武闘"))
+CALL PRINT_ABILITY(対象, GETNUM(ABL, "白兵"))
 
 CALL ASK_YN("討伐を試みる", "やめておく")
 
@@ -37,11 +37,11 @@ PRINTFORML ・
 PRINTFORML ・
 PRINTFORMW ・
 
-IF LIMIT(ABL:対象:武闘, 30, 80) > RAND:100
+IF LIMIT(ABL:対象:白兵, 30, 80) > RAND:100
 	PRINTFORML やった！
 	PRINTFORML %ANAME(対象)%は見事山賊を討伐することに成功した
 	PRINTFORMW 領民に感謝されて拠点へ戻った
-	CALL PRINT_ADD_EXP(対象, "武闘経験値", RAND:15 + 1, 1)
+	CALL PRINT_ADD_EXP(対象, "白兵経験値", RAND:15 + 1, 1)
 	RETURN 1
 ENDIF
 

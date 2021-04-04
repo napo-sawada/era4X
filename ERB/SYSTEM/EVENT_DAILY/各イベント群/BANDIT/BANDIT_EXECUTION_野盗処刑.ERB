@@ -56,7 +56,7 @@ ELSE
 	PRINTFORML ・
 	PRINTFORML ・
 	PRINTFORMW ・
-	IF ((ABL:対象:武闘 + ABL:対象:防衛) / 2) * (RAND:8 + 1) < (40 + (DAY / 2)) * (RAND:7 + 1)
+	IF ((ABL:対象:白兵 + ABL:対象:操艦) / 2) * (RAND:8 + 1) < (40 + (DAY / 2)) * (RAND:7 + 1)
 		PRINTFORML しかし待ち伏せされていた！
 		PRINTFORMW 部隊は返り討ちにされてしまった…
 		PRINTFORMW %ANAME(対象)%はボロボロになりながらも何とか逃げ帰った
@@ -183,8 +183,8 @@ ELSE
 				ELSE
 					$CREATE_MISS
 					PRINTFORMW 彼女が熱心に働いてくれたおかげで、%ANAME(対象)%の力になった
-					CALL PRINT_ADD_EXP(対象, "武闘経験値", RAND:10 + 6, 1)
-					CALL PRINT_ADD_EXP(対象, "防衛経験値", RAND:10 + 6, 1)
+					CALL PRINT_ADD_EXP(対象, "白兵経験値", RAND:10 + 6, 1)
+					CALL PRINT_ADD_EXP(対象, "操艦経験値", RAND:10 + 6, 1)
 					CALL TRAIN_AUTO_ABLUP(対象)
 					PRINTFORMW 
 				ENDIF

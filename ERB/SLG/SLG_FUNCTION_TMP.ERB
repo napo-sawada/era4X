@@ -208,7 +208,7 @@ NEXT
 RETURNF 0
 
 ;-------------------------------------------------
-;士官の部隊所属マップを作成する関数(0=フリー、1=遊撃、2=防衛、-1=その他特殊状態)
+;士官の部隊所属マップを作成する関数(0=フリー、1=遊撃、2=操艦、-1=その他特殊状態)
 ;こちらに条件を追加した場合は、@IS_FREEにも追加すること
 ;-------------------------------------------------
 @TMP_CREATE_IS_FREE_MAP
@@ -507,14 +507,14 @@ RETURNF LOCAL:10
 #DIM 都市数, MAX_COUNTRY
 #DIM 能力値, MAX_COUNTRY
 #DIM 経済値, MAX_COUNTRY
-#DIM 防衛値, MAX_COUNTRY
+#DIM 操艦値, MAX_COUNTRY
 #DIM 合計ポイント, MAX_COUNTRY
 #DIM 勢力数
 VARSET 士官数, __INT_MIN__
 VARSET 都市数, __INT_MIN__
 VARSET 能力値, __INT_MIN__
 VARSET 経済値, __INT_MIN__
-VARSET 防衛値, __INT_MIN__
+VARSET 操艦値, __INT_MIN__
 VARSET 合計ポイント, __INT_MAX__
 VARSET 勢力数, 0
 VARSET TMP_COUNTRY_STARS, 0
@@ -525,7 +525,7 @@ FOR LOCAL, 0, MAX_COUNTRY
 		士官数:LOCAL = GET_COMMANDER_NUM(LOCAL)
 		都市数:LOCAL = GET_OWN_CITY(LOCAL)
 		経済値:LOCAL = GET_SUM_ECONOMY(LOCAL)
-		防衛値:LOCAL = GET_SUM_GUARD(LOCAL)
+		操艦値:LOCAL = GET_SUM_GUARD(LOCAL)
 		勢力数 ++
 		能力値:LOCAL = 0
 		合計ポイント:LOCAL = 0
@@ -555,8 +555,8 @@ FOR LOCAL, 0, 勢力数
 	経済値:(LOCAL:1) = __INT_MIN__
 	合計ポイント:(LOCAL:1) += LOCAL * 2
 
-	LOCAL:1 = FINDELEMENT(防衛値, MAXARRAY(防衛値))
-	防衛値:(LOCAL:1) = __INT_MIN__
+	LOCAL:1 = FINDELEMENT(操艦値, MAXARRAY(操艦値))
+	操艦値:(LOCAL:1) = __INT_MIN__
 	合計ポイント:(LOCAL:1) += LOCAL / 4
 NEXT
 
@@ -621,7 +621,7 @@ NEXT
 @TMP_PREPARE_CHARA_STARS()
 #DIM 合計ポイント, MAX_CHARA_NUM
 #DIM キャラ数
-#DIM 能力 = GETNUM(ABL, "武闘"), GETNUM(ABL, "防衛"), GETNUM(ABL, "知略"), GETNUM(ABL, "政治"), GETNUM(ABL, "妖術"), GETNUM(ABL, "料理"), GETNUM(ABL, "歌唱")
+#DIM 能力 = GETNUM(ABL, "白兵"), GETNUM(ABL, "操艦"), GETNUM(ABL, "超能力"), GETNUM(ABL, "料理"), GETNUM(ABL, "歌唱"), GETNUM(ABL, "話術"), GETNUM(ABL, "社交")
 VARSET 合計ポイント, __INT_MAX__
 
 ;値合計用意
@@ -629,16 +629,16 @@ FOR LOCAL, 0, CHARANUM
 	合計ポイント:LOCAL = 0
 	SIF CFLAG:LOCAL:特殊状態 == 特殊状態_死亡
 		CONTINUE
-	合計ポイント:LOCAL += ABL:LOCAL:武闘
-	合計ポイント:LOCAL += ABL:LOCAL:防衛
+	合計ポイント:LOCAL += ABL:LOCAL:白兵
+	合計ポイント:LOCAL += ABL:LOCAL:操艦
 	合計ポイント:LOCAL += ABL:LOCAL:知略
 	合計ポイント:LOCAL += ABL:LOCAL:政治
-	合計ポイント:LOCAL += ABL:LOCAL:妖術 * 3 / 2
+	合計ポイント:LOCAL += ABL:LOCAL:超能力 * 3 / 2
 	合計ポイント:LOCAL += MAX(ABL:LOCAL:料理 - 50, 0)
 	合計ポイント:LOCAL += MAX(ABL:LOCAL:歌唱 - 50, 0)
 	FOR LOCAL:1, 0, VARSIZE("能力")
 		SELECTCASE 能力:(LOCAL:1)
-			CASE GETNUM(ABL, "武闘"), GETNUM(ABL, "防衛"), GETNUM(ABL, "知略"), GETNUM(ABL, "政治")
+			CASE GETNUM(ABL, "白兵"), GETNUM(ABL, "操艦"), GETNUM(ABL, "知略"), GETNUM(ABL, "政治")
 				SELECTCASE ALPHABET_RANK(ABL:LOCAL:(能力:(LOCAL:1)), 0)
 					CASE "S"
 						合計ポイント:LOCAL += 15
@@ -647,7 +647,7 @@ FOR LOCAL, 0, CHARANUM
 					CASE "B"
 						合計ポイント:LOCAL += 5
 				ENDSELECT
-			CASE GETNUM(ABL, "妖術")
+			CASE GETNUM(ABL, "超能力")
 				SELECTCASE ALPHABET_RANK(ABL:LOCAL:(能力:(LOCAL:1)), 1)
 					CASE "S"
 						合計ポイント:LOCAL += 30

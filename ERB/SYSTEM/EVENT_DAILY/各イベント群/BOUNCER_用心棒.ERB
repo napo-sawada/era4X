@@ -38,10 +38,10 @@ CALL CREATE_RANDOM_CHARA()
 SIF RESULT == -1
 	RETURN 0
 
-ABL:対象:武闘 = RAND(60, 85)
-ABL:対象:防衛 = RAND(60, 85)
+ABL:対象:白兵 = RAND(60, 85)
+ABL:対象:操艦 = RAND(60, 85)
 ABL:対象:知略 = RAND(60, 80)
-ABL:対象:政治 = 280 - (ABL:対象:武闘 + ABL:対象:知略 + ABL:対象:防衛)
+ABL:対象:政治 = 280 - (ABL:対象:白兵 + ABL:対象:知略 + ABL:対象:操艦)
 ABL:対象:歌唱 = RAND(20, 40)
 ABL:対象:料理 = 60 - ABL:対象:歌唱
 

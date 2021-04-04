@@ -66,7 +66,7 @@ NEXT
 ;◇経済規模の設定
 ;CALL SHARED_SETTING_ECONOMY
 
-;◇防衛倍率の設定
+;◇操艦倍率の設定
 ;CALL SHARED_SETTING_GUARD
 
 ;◇兵力の初期配置
@@ -602,8 +602,8 @@ IF DAY % 3 == 0 && SCVAR:2 == 2 && CFLAG:MASTER:所属 && CFLAG:MASTER:捕虜先
 			SETCOLOR カラー_黄
 			PRINTFORMW %ANAME(対象士官番号)%が地方へ派遣されて放浪した
 			RESETCOLOR
-			;兵数の増加量(武闘・知略・歌唱)
-			LOCAL:2 = (ABL:対象士官番号:武闘 + ABL:対象士官番号:知略 + ABL:対象士官番号:歌唱) * 15 + 300
+			;兵数の増加量(白兵・知略・歌唱)
+			LOCAL:2 = (ABL:対象士官番号:白兵 + ABL:対象士官番号:知略 + ABL:対象士官番号:歌唱) * 15 + 300
 			;兵数の増加(一時的に兵数の限界を超えられる)
 			COUNTRY_SOLDIER:(CFLAG:MASTER:所属) += LOCAL:2
 			PRINTFORM 我が陣の兵数が

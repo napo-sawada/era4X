@@ -87,7 +87,7 @@ ELSE
 	;好感度上昇値・敵対値下降値の計算
 	;主に能力により決定。相手君主がそのキャラに良い印象を抱いていればボーナス
 	LOCAL:25 = 0
-	LOCAL:25 += ABL_POWER(ABL:(対象):武闘, -1) + ABL_POWER(ABL:(対象):防衛, -1) + ABL_POWER(ABL:(対象):知略, -1) + ABL_POWER(ABL:(対象):政治, -1)
+	LOCAL:25 += ABL_POWER(ABL:(対象):白兵, -1) + ABL_POWER(ABL:(対象):操艦, -1) + ABL_POWER(ABL:(対象):知略, -1) + ABL_POWER(ABL:(対象):政治, -1)
 	LOCAL:25 += ABL_POWER(ABL:(対象):歌唱, -1) + ABL_POWER(ABL:(対象):料理, -1)
 	LOCAL:25 /= 500
 

@@ -407,12 +407,12 @@ CALL CHANGE_COUNTRY(ARG:0, 0, 1, 1)
 SIF FINDELEMENT(PRISONER_TARGET, ARG:0) != -1
 	PRISONER_TARGET:(FINDELEMENT(PRISONER_TARGET, ARG:0)) = -1
 
-;手に入る妖術経験値を計算して取得＆表示
+;手に入る超能力経験値を計算して取得＆表示
 PRINTFORML <%ANAME(管理人)%>
 
 効果量= 30 + BASE:(ARG:0):精神力 / 20 + ABL:(ARG:0):触手 * 10
 
-CALL PRINT_ADD_EXP(管理人, "妖術経験値", 効果量)
+CALL PRINT_ADD_EXP(管理人, "超能力経験値", 効果量)
 CALL TRAIN_AUTO_ABLUP(管理人)
 WAIT
 
@@ -532,12 +532,12 @@ IF RESULT == 0
 		PRISONER_TARGET:(FINDELEMENT(PRISONER_TARGET, ARG:0)) = -1
 
 
-	;手に入る妖術経験値を計算して取得＆表示
+	;手に入る超能力経験値を計算して取得＆表示
 	PRINTFORML <%ANAME(管理人)%>
 
 	効果量= 30 + BASE:(ARG:0):精神力 / 20 + ABL:(ARG:0):触手 * 10
 
-	CALL PRINT_ADD_EXP(管理人, "妖術経験値", 効果量)
+	CALL PRINT_ADD_EXP(管理人, "超能力経験値", 効果量)
 	CALL TRAIN_AUTO_ABLUP(管理人)
 	WAIT
 	IF CALC_SHOP_TIME() == SHOP_TIME

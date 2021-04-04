@@ -113,10 +113,10 @@ ELSE
 			PRINTFORML 「確かに贄をいただいた、これで契約は成立した」
 			PRINTFORMW 戸惑う%ANAME(MASTER)%に向けて悪魔が掌をかざすと、%ANAME(MASTER)%の身体に力がみなぎってきた！
 		ENDIF
-		LOCAL = (100 - ABL:MASTER:武闘) / 6
+		LOCAL = (100 - ABL:MASTER:白兵) / 6
 		SIF LOCAL <= 0
 			LOCAL = 2
-		ABL:MASTER:武闘 += LOCAL
+		ABL:MASTER:白兵 += LOCAL
 		LOCAL:1 = (100 - ABL:MASTER:知略) / 6
 		SIF LOCAL:1 <= 0
 			LOCAL:1 = 2
@@ -125,13 +125,13 @@ ELSE
 		SIF LOCAL:2 <= 0
 			LOCAL:2 = 2
 		ABL:MASTER:政治 += LOCAL:2
-		LOCAL:3 = (100 - ABL:MASTER:防衛) / 6
+		LOCAL:3 = (100 - ABL:MASTER:操艦) / 6
 		SIF LOCAL:3 <= 0
 			LOCAL:3 = 2
-		ABL:MASTER:防衛 += LOCAL:3
-		CALL COLOR_PRINT(@"%ANAME(MASTER)%の武闘値が{LOCAL}上昇した！", カラー_オレンジ)
+		ABL:MASTER:操艦 += LOCAL:3
+		CALL COLOR_PRINT(@"%ANAME(MASTER)%の白兵値が{LOCAL}上昇した！", カラー_オレンジ)
 		PRINTFORML 
-		CALL COLOR_PRINT(@"%ANAME(MASTER)%の防衛値が{LOCAL:3}上昇した！", カラー_オレンジ)
+		CALL COLOR_PRINT(@"%ANAME(MASTER)%の操艦値が{LOCAL:3}上昇した！", カラー_オレンジ)
 		PRINTFORML 
 		CALL COLOR_PRINT(@"%ANAME(MASTER)%の知略値が{LOCAL:1}上昇した！", カラー_オレンジ)
 		PRINTFORML 

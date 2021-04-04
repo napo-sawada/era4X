@@ -139,16 +139,16 @@ IF LOCAL:2 >= 10000 && SOURCE:(ARG:0):快Ｂ + SOURCE:(ARG:0):快Ｖ + SOURCE:(A
 
 	EXP:(ARG:0):噴乳経験値 += NOWEX:(ARG:0):噴乳
 
-	;触手搾乳中なら相手の妖術経験値をプラス
+	;触手搾乳中なら相手の超能力経験値をプラス
 	IF SELECTCOM == 207 && IS_MTAR(ARG:0)
 		FOR LOCAL:0, 0, MPLY_NUM
-			EXP:(MPLY:(LOCAL:0)):妖術経験値 += NOWEX:(ARG:0):噴乳 * 2
+			EXP:(MPLY:(LOCAL:0)):超能力経験値 += NOWEX:(ARG:0):噴乳 * 2
 		NEXT
 	ELSEIF IS_EQUIP_TARGET(ARG:0, 207)
 		LOCAL:1 = SEARCH_EQUIP(207, -1, ARG:0)
 		IF LOCAL:1 >= 0
 			FOR LOCAL:0, 0, MEQUIP_PLAYER_NUM:(LOCAL:1)
-				EXP:(MEQUIP_PLAYER:(LOCAL:1):(LOCAL:0)):妖術経験値 += NOWEX:(ARG:0):噴乳 * 2
+				EXP:(MEQUIP_PLAYER:(LOCAL:1):(LOCAL:0)):超能力経験値 += NOWEX:(ARG:0):噴乳 * 2
 			NEXT
 		ENDIF
 	ENDIF
@@ -686,9 +686,9 @@ FOR LOCAL:0, 0, STACK_SPERM_CHARA_NUM:対象:0
 
 		SOURCE:(射精相手):中毒充足 += 射精量 * LOCAL:12
 
-	;射精箇所が触手なら相手の妖術経験値をプラス
+	;射精箇所が触手なら相手の超能力経験値をプラス
 		IF 射精先 == 射精部位_触手
-			EXP:(射精相手):妖術経験値 += 射精量 * 2
+			EXP:(射精相手):超能力経験値 += 射精量 * 2
 		ENDIF
 
 		IF 補正後射精量 != CORRECT_CUM_OVERFLOW(射精相手, 射精先, 補正後射精量)

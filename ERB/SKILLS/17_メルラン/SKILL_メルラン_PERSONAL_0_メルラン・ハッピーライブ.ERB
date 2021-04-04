@@ -56,7 +56,7 @@ RETURN 1
 #DIM 対象勢力
 #DIM 対象部隊
 対象側 = !発動側
-PRINTFORML 躁の音を聞いた自分以外の味方の武闘が増加した！
+PRINTFORML 躁の音を聞いた自分以外の味方の白兵が増加した！
 
 FOR LOCAL, 0, BATTLE_COMMANDER_NUM:対象側
 	SIF LOCAL == 発動番号
@@ -68,7 +68,7 @@ RETURN 1
 
 ;
 @SKILL_17_PERSONAL_0_EXPLANATION
-RESULTS = 自身以外の味方全員の武闘を増加させる。
+RESULTS = 自身以外の味方全員の白兵を増加させる。
 
 
 

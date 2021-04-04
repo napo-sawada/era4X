@@ -56,7 +56,7 @@ RETURN 1
 #DIM 対象勢力
 #DIM 対象部隊
 対象側 = !発動側
-PRINTFORML 鬱の音を聞いた敵部隊全員の武闘が低下した！
+PRINTFORML 鬱の音を聞いた敵部隊全員の白兵が低下した！
 
 FOR LOCAL, 0, BATTLE_COMMANDER_NUM:対象側
 	TIMES BATTLE_武闘パワー:対象側:LOCAL, 0.93
@@ -67,7 +67,7 @@ RETURN 1
 
 ;
 @SKILL_18_PERSONAL_0_EXPLANATION
-RESULTS = 敵全員の武闘を低下させる。
+RESULTS = 敵全員の白兵を低下させる。
 
 
 

@@ -22,7 +22,7 @@ RETURN 1
 PRINTFORML 路地裏を近道していると、背中から刃物を突きつけられた
 PRINTFORML 金目のものを出せ、と脅してきたが……
 PRINTL
-CALL PRINT_ABILITY(対象, GETNUM(ABL, "武闘"))
+CALL PRINT_ABILITY(対象, GETNUM(ABL, "白兵"))
 CALL PRINT_ABILITY(対象, GETNUM(ABL, "知略"))
 
 CALL ASK_MULTI_JUDGE("金を支払う", 1, "抵抗する", 1, "説得する", 1, "身体を差し出す", IS_FEMALE(対象), "逃げる", 1)
@@ -36,9 +36,9 @@ SELECTCASE RESULT
 		MONEY -= LOCAL
 	CASE 1
 		PRINTFORML %ANAME(対象)%は抵抗した！
-		IF LIMIT(ABL:対象:武闘, 30, 100) >= RAND:100
+		IF LIMIT(ABL:対象:白兵, 30, 100) >= RAND:100
 			PRINTFORML まずいと判断したのか、強盗は逃げ出していった……
-			CALL PRINT_ADD_EXP(対象, "武闘経験値", RAND:10 + 5)
+			CALL PRINT_ADD_EXP(対象, "白兵経験値", RAND:10 + 5)
 		ELSE
 			PRINTFORML ……が、強盗に返り討ちにされてしまった！
 			IF IS_FEMALE(対象)

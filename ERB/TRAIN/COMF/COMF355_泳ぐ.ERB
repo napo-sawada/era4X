@@ -38,11 +38,11 @@ CALL COM_ORDER_COMMON
 SIF RESULT == 0
 	RETURN 0
 
-;成否の判定は武闘と適性のみで行う
+;成否の判定は白兵と適性のみで行う
 ;LOCAL:1,3は成功率、LOCAL:2,4が大成功率
 ;１人でも溺れると失敗、２人とも上手く泳げると大成功
-LOCAL:5 = ABL:(MPLY:0):武闘 + (GROWTYPE_RATE(MPLY:0, "武闘") - 100) / 4
-LOCAL:6 = ABL:(MTAR:0):武闘 + (GROWTYPE_RATE(MTAR:0, "武闘") - 100) / 4
+LOCAL:5 = ABL:(MPLY:0):白兵 + (GROWTYPE_RATE(MPLY:0, "白兵") - 100) / 4
+LOCAL:6 = ABL:(MTAR:0):白兵 + (GROWTYPE_RATE(MTAR:0, "白兵") - 100) / 4
 
 SELECTCASE LOCAL:5
 CASE IS < 30
@@ -122,7 +122,7 @@ IF TALENT:(MPLY:0):恥じらい
 	TIMES SOURCE:(MPLY:0):歓楽, 0.90
 ENDIF
 
-EXP:(MPLY:0):武闘経験値 += (ABL:(MPLY:0):武闘 < 30 ? 2 # 1) + TFLAG:18
+EXP:(MPLY:0):白兵経験値 += (ABL:(MPLY:0):白兵 < 30 ? 2 # 1) + TFLAG:18
 
 ;主導権に応じたソースの追加
 CALL ADD_SOURCE_INITIATIVE_N(MPLY:0, 100, 100)
@@ -145,7 +145,7 @@ IF TALENT:(MTAR:0):恥じらい
 	TIMES SOURCE:(MTAR:0):歓楽, 0.90
 ENDIF
 
-EXP:(MTAR:0):武闘経験値 += (ABL:(MTAR:0):武闘 < 30 ? 2 # 1) + TFLAG:18
+EXP:(MTAR:0):白兵経験値 += (ABL:(MTAR:0):白兵 < 30 ? 2 # 1) + TFLAG:18
 
 ;同性
 IF IS_SAMESEX(MPLY:0, MTAR:0)

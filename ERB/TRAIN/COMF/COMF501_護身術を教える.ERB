@@ -7,7 +7,7 @@
 IF LOCAL:0 >= 0 && CFLAG:(MTAR:0):子の成長度 <= 2
 	RESULTS = 身を守る教育
 ELSE
-	RESULTS = 護身術を教える
+	RESULTS = 操艦訓練を教える
 ENDIF
 
 ;-------------------------------------------------
@@ -28,7 +28,7 @@ RETURN 1
 ;-------------------------------------------------
 @COM501
 ;外で遊ぶ
-CALL COM_SLG_TRAIN_MAIN_PROCESS(GETNUM(ABL, "防衛"), 1)
+CALL COM_SLG_TRAIN_MAIN_PROCESS(GETNUM(ABL, "操艦"), 1)
 
 RETURN 1
 
@@ -42,7 +42,7 @@ IF LOCAL:0 >= 0 && CFLAG:(MTAR:0):子の成長度 <= 2
 
 ;武術を教える
 ELSE
-	PRINTFORMW %ANAME(MPLY:0)%は%ANAME(MTAR:0)%に護身術を叩き込んだ
+	PRINTFORMW %ANAME(MPLY:0)%は%ANAME(MTAR:0)%に操艦訓練を叩き込んだ
 ENDIF
 
 ;--------------------------------------------------------

@@ -723,10 +723,10 @@ CALL ASK_MULTI("戦争の話", "数学の話", "政治の話")
 IF RESULT == 0
 	PRINTFORMW 戦争の話をした
 	PRINTFORMW ………
-	IF ABL:(ARG:0):武闘 * (RAND:5 + 1) >= 20 * (RAND:5 + 1)
+	IF ABL:(ARG:0):白兵 * (RAND:5 + 1) >= 20 * (RAND:5 + 1)
 		PRINTFORMW 「面白い話でしたわ、先生。」
 		PRINTFORMW どうやら話を気に入ってもらえたようだ
-		CALL PRINT_ADD_EXP(ARG:0, "武闘経験値", RAND:7 + 1, 1)
+		CALL PRINT_ADD_EXP(ARG:0, "白兵経験値", RAND:7 + 1, 1)
 		SIF DVAR:家庭教師_お気に入りID == 0 && HAS_PENIS(ARG:0)
 			DVAR:家庭教師_お気に入りID = GET_ID(ARG:0)
 	ELSE

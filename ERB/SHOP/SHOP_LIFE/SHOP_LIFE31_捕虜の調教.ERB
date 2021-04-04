@@ -302,7 +302,7 @@ FOR LOCAL, 0, SELECTED_CHARA_NUM
 		CASE 6
 			CALL CHANGE_COUNTRY(対象, 0, 1, 1)
 			;Values based on @PRISONER_TRAIT_EXECUTE_TENTACLE
-			CALL PRINT_ADD_EXP(触手管理人, "妖術経験値", (30 + BASE:対象:精神力 / 20 + ABL:対象:触手 * 10))
+			CALL PRINT_ADD_EXP(触手管理人, "超能力経験値", (30 + BASE:対象:精神力 / 20 + ABL:対象:触手 * 10))
 			CALL TRAIN_AUTO_ABLUP(触手管理人)
 	ENDSELECT
 NEXT

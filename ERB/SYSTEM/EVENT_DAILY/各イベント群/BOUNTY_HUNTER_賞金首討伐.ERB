@@ -118,8 +118,8 @@ ELSE
 	PRINTFORML ・・
 	PRINTFORMW ・
 	;判定処理、
-	;武闘の基準値、10%単位で最大4倍。
-	LOCAL:3 = ABL:対象:武闘 * (RAND:31 + 10) / 10
+	;白兵の基準値、10%単位で最大4倍。
+	LOCAL:3 = ABL:対象:白兵 * (RAND:31 + 10) / 10
 	;知略の基準値、10%単位で最大3倍。
 	LOCAL:4 = ABL:対象:知略 * (RAND:21 + 10) / 10
 	IF LOCAL:3 + LOCAL:4 > LOCAL:1 / 100

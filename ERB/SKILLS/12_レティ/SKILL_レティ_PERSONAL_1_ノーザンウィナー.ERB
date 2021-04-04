@@ -66,11 +66,11 @@ RETURN 1
 #DIM 対象勢力
 #DIM 対象部隊
 対象側 = !発動側
-PRINTFORML %ANAME(BATTLE_COMMANDER:対象側:COMBAT_SKILL_TARGET)%は寒さに凍えて防衛が低下！
+PRINTFORML %ANAME(BATTLE_COMMANDER:対象側:COMBAT_SKILL_TARGET)%は寒さに凍えて操艦が低下！
 TIMES BATTLE_防衛パワー:対象側:COMBAT_SKILL_TARGET, 0.90
 
 @SKILL_12_PERSONAL_1_EXPLANATION
-RESULTS = 敵一人の防衛を低下させる。
+RESULTS = 敵一人の操艦を低下させる。
 
 @SKILL_12_PERSONAL_1_RATE(発動者, 発動番号, 発動側, 発動勢力, 発動部隊, 対象勢力, 対象部隊)
 #DIM 発動者

@@ -62,7 +62,7 @@ NEXT
 FOR 対象, 0, CHARANUM
 	IF CFLAG:対象:所属 != 勢力 && CFLAG:対象:捕虜先 == 勢力
 		捕虜リスト:捕虜数 = 対象
-		能力値リスト:捕虜数 = ABL:対象:武闘 + ABL:対象:知略 + ABL:対象:防衛 + ABL:対象:妖術 + ABL:対象:料理 + ABL:対象:歌唱 + ABL:対象:政治
+		能力値リスト:捕虜数 = ABL:対象:白兵 + ABL:対象:知略 + ABL:対象:操艦 + ABL:対象:超能力 + ABL:対象:料理 + ABL:対象:歌唱 + ABL:対象:政治
 		好感度リスト:捕虜数 = REL_LIKE:対象:勢力君主
 		不満度リスト:捕虜数 = IS_COUNTRY(CFLAG:対象:所属) ? REL_HATE:LOCAL:GET_COUNTRY_BOSS(CFLAG:対象:所属) # 1500
 		捕虜数 ++

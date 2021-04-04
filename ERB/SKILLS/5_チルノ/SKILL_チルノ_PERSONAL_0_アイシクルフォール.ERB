@@ -100,7 +100,7 @@ RESULTS = 敵部隊にダメージ。
 チルノ = NAME_TO_CHARA("チルノ")
 SIF チルノ == -1
 	RETURNF 0
-SELECTCASE ABL:チルノ:武闘 + ABL:チルノ:知略 + ABL:チルノ:政治 + ABL:チルノ:防衛
+SELECTCASE ABL:チルノ:白兵 + ABL:チルノ:知略 + ABL:チルノ:政治 + ABL:チルノ:操艦
 	CASE IS < 150
 		RETURNF 1
 	CASE IS < 250

@@ -28,7 +28,7 @@ RETURNF COUNTRY_BOSS:(ARG:0) >= 1
 RETURNF ID_TO_CHARA(COUNTRY_BOSS:(ARG:0))
 
 ;-------------------------------------------------
-;ARG:0番の勢力について、防衛兵力の合計値を返す関数
+;ARG:0番の勢力について、操艦兵力の合計値を返す関数
 ;-------------------------------------------------
 @GET_SUM_ARMY_DF(ARG:0)
 #FUNCTION
@@ -96,7 +96,7 @@ NEXT
 RETURNF LOCAL:1
 
 ;-------------------------------------------------
-;ARG:0番の勢力について、都市防衛力の合計値を返す関数
+;ARG:0番の勢力について、都市操艦力の合計値を返す関数
 ;-------------------------------------------------
 @GET_SUM_GUARD(ARG:0)
 #FUNCTION
@@ -635,7 +635,7 @@ NEXT
 RETURNF LOCAL:2
 
 ;-------------------------------------------------
-;都市ARG:0の防衛部隊を指揮する将の名前(NAME)を返す関数 ARGS:1=複数の将がいる場合に間を区切る文字
+;都市ARG:0の操艦部隊を指揮する将の名前(NAME)を返す関数 ARGS:1=複数の将がいる場合に間を区切る文字
 ;-------------------------------------------------
 @GET_CITY_COMMANDER_NAME(ARG:0, ARGS:1 = "・")
 #FUNCTIONS
@@ -658,7 +658,7 @@ NEXT
 RETURNF LOCALS:0
 
 ;-------------------------------------------------
-;都市ARG:0の防衛部隊を指揮する将の名前(CALLNAME)を返す関数 ARGS:1=複数の将がいる場合に間を区切る文字
+;都市ARG:0の操艦部隊を指揮する将の名前(CALLNAME)を返す関数 ARGS:1=複数の将がいる場合に間を区切る文字
 ;-------------------------------------------------
 @GET_CITY_COMMANDER_CALLNAME(ARG:0, ARGS:1 = "・")
 #FUNCTIONS
@@ -754,8 +754,8 @@ RETURNF -1
 #DIM ソート, 4
 君主 = GET_COUNTRY_BOSS(勢力)
 
-能力:0 = ABL:君主:武闘
-能力:1 = ABL:君主:防衛
+能力:0 = ABL:君主:白兵
+能力:1 = ABL:君主:操艦
 能力:2 = ABL:君主:知略
 能力:3 = ABL:君主:政治
 
@@ -771,20 +771,20 @@ IF GROUPMATCH(ソート:0, ABL:君主:知略, ABL:君主:政治) && GROUPMATCH(�
 	ELSE
 		COUNTRY_AI_TYPE:勢力 = AI_内政
 	ENDIF
-ELSEIF ソート:0 == ABL:君主:武闘 && ABL:君主:武闘 > ABL:君主:知略 + 30
+ELSEIF ソート:0 == ABL:君主:白兵 && ABL:君主:白兵 > ABL:君主:知略 + 30
 	COUNTRY_AI_TYPE:勢力 = AI_蛮行
 ;1位と2位のあいだの差が小さければ通常
 ELSEIF ソート:0 < ソート:1 + 5
 	COUNTRY_AI_TYPE:勢力 = AI_通常
-;武闘が一番高い場合は好戦。ただし防衛が2位のとき、10以上差が無ければ防衛になる
-ELSEIF ソート:0 == ABL:君主:武闘
-	IF ソート:1 == ABL:君主:防衛 && ソート:0 < ソート:1 + 10
+;白兵が一番高い場合は好戦。ただし操艦が2位のとき、10以上差が無ければ操艦になる
+ELSEIF ソート:0 == ABL:君主:白兵
+	IF ソート:1 == ABL:君主:操艦 && ソート:0 < ソート:1 + 10
 		COUNTRY_AI_TYPE:勢力 = AI_防衛
 	ELSE
 		COUNTRY_AI_TYPE:勢力 = AI_好戦
 	ENDIF
 ;あとは最大能力を参照
-ELSEIF ソート:0 == ABL:君主:防衛
+ELSEIF ソート:0 == ABL:君主:操艦
 	COUNTRY_AI_TYPE:勢力 = AI_防衛
 ELSEIF ソート:0 == ABL:君主:知略
 	COUNTRY_AI_TYPE:勢力 = AI_外交
@@ -805,7 +805,7 @@ SELECTCASE ARG:0
 	CASE AI_好戦
 		RETURNF "好戦"
 	CASE AI_防衛
-		RETURNF "防衛"
+		RETURNF "操艦"
 	CASE AI_外交
 		RETURNF "外交"
 	CASE AI_内政
@@ -831,7 +831,7 @@ SELECTCASE COUNTRY_POLICY:(ARG:0)
 	CASE 政策_徴兵
 		RETURNF "徴兵(徴兵効率×1.2)"
 	CASE 政策_防衛
-		RETURNF "防衛(防衛倍率×1.2)"
+		RETURNF "操艦(操艦倍率×1.2)"
 ENDSELECT
 RETURNF ""
 
@@ -882,7 +882,7 @@ RETURNF 1
 SIF CFLAG:(ARG:0):所属 == 0
 	RETURN 0
 
-;防衛部隊について判定
+;操艦部隊について判定
 FOR LOCAL:0, 0, MAX_CITY
 	IF CITY_COMMANDER:(LOCAL:0) != 0
 		FOR LOCAL:1, 0, MAX_CITY_COMMANDER
@@ -1986,27 +1986,27 @@ NEXT
 #DIM 勢力
 #DIM 都市
 #DIM 経済規模
-#DIM 前線防衛兵数
-#DIM 後方防衛兵数
+#DIM 前線操艦兵数
+#DIM 後方操艦兵数
 
 ;経済規模に対する最大兵数の半分を得る
 経済規模 = GET_SUM_ECONOMY(勢力) / 20
 
 COUNTRY_SOLDIER:(勢力) = 経済規模
 
-前線防衛兵数 = 経済規模 / (MAX(1, GET_OWN_CITY(勢力)) * 3 / 2) / 500 * 500
-後方防衛兵数 = (前線防衛兵数 / 500 + 1) / 2 * 500
+前線操艦兵数 = 経済規模 / (MAX(1, GET_OWN_CITY(勢力)) * 3 / 2) / 500 * 500
+後方操艦兵数 = (前線操艦兵数 / 500 + 1) / 2 * 500
 
-;防衛兵力の割り振り
+;操艦兵力の割り振り
 FOR 都市, 0, MAX_CITY
 	IF COUNTRY_SOLDIER:勢力 >= 1000
 		IF CITY_OWNER:都市 == 勢力
 			IF IS_NEIBORING_ENEMY(都市)
-				CITY_SOLDIER:都市 = 前線防衛兵数
-				COUNTRY_SOLDIER:勢力 -= 前線防衛兵数
+				CITY_SOLDIER:都市 = 前線操艦兵数
+				COUNTRY_SOLDIER:勢力 -= 前線操艦兵数
 			ELSE
-				CITY_SOLDIER:都市 = 後方防衛兵数
-				COUNTRY_SOLDIER:勢力 -= 後方防衛兵数
+				CITY_SOLDIER:都市 = 後方操艦兵数
+				COUNTRY_SOLDIER:勢力 -= 後方操艦兵数
 			ENDIF
 		ENDIF
 	ENDIF
@@ -2415,7 +2415,7 @@ ELSE
 ENDIF
 
 ;-------------------------------------------------
-;ARG:0番の都市について駐留部隊を含めた防衛兵力を返す関数
+;ARG:0番の都市について駐留部隊を含めた操艦兵力を返す関数
 ;数しか見てないが敵の同盟軍も含めて評価を行う
 ;-------------------------------------------------
 @GET_CITY_GUARD(ARG:0)

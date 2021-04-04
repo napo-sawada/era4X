@@ -31,7 +31,7 @@ SELECTCASE RESULT
 		PRINTFORML 身の安全には代えられない
 		PRINTFORMW 支払うことにした
 		CALL ICPRINT("金<5000>を支払った", "L", カラー_注意)
-		CALL PRINT_ADD_EXP(対象, "防衛経験値", 10 + RAND:5)
+		CALL PRINT_ADD_EXP(対象, "操艦経験値", 10 + RAND:5)
 	CASE 1
 		PRINTFORML 流石に値が張りすぎる
 		PRINTFORML やめておくことにした
@@ -55,7 +55,7 @@ SELECTCASE RESULT
 			IF ABL:対象:性技 + ABL:対象:奉仕 > RAND:8
 				PRINTFORML %ANAME(対象)%の奉仕は店主を満足させた
 				PRINTFORMW ただで武器を譲ってくれた
-				CALL PRINT_ADD_EXP(対象, "防衛経験値", 15)
+				CALL PRINT_ADD_EXP(対象, "操艦経験値", 15)
 			ELSE
 				PRINTFORML %ANAME(対象)%の奉仕では店主を満足させられなかった
 				PRINTFORMW 追い返されてしまった……
@@ -94,7 +94,7 @@ SELECTCASE RESULT
 		PRINTFORML 
 		PRINTFORMW 店主は%ANAME(対象)%の身体に大変満足したようだ
 		PRINTFORMW 武器をただでゆずってくれた
-		CALL PRINT_ADD_EXP(対象, "防衛経験値", 15)        
+		CALL PRINT_ADD_EXP(対象, "操艦経験値", 15)        
 ENDSELECT
 
 RETURN 1

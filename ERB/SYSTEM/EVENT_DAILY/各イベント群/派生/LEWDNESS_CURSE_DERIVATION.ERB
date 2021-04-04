@@ -823,10 +823,10 @@ ELSEIF あなたへの想い >= 10000 && DVAR:淫紋_浸食値 >= 16 && DVAR:淫
 	PRINTFORMW 次の日の夜、契約を交わした悪魔が再び%ANAME(MASTER)%の前に現れた
 	PRINTFORML 「契約不履行だ。女の魂は我が手に堕ちなかった。渡した力は返してもらう」
 	PRINTFORMW 悪魔は不満そうな顔で告げると%ANAME(MASTER)%に向けて掌をかざし、かつて%ANAME(MASTER)%に与えた力を消し去った
-	LOCAL = (100 - ABL:MASTER:武闘) / 6
+	LOCAL = (100 - ABL:MASTER:白兵) / 6
 	SIF LOCAL <= 0
 		LOCAL = 2
-	ABL:MASTER:武闘 -= LOCAL
+	ABL:MASTER:白兵 -= LOCAL
 	LOCAL:1 = (100 - ABL:MASTER:知略) / 6
 	SIF LOCAL:1 <= 0
 		LOCAL:1 = 2
@@ -835,13 +835,13 @@ ELSEIF あなたへの想い >= 10000 && DVAR:淫紋_浸食値 >= 16 && DVAR:淫
 	SIF LOCAL:2 <= 0
 		LOCAL:2 = 2
 	ABL:MASTER:政治 -= LOCAL:2
-	LOCAL:3 = (100 - ABL:MASTER:防衛) / 6
+	LOCAL:3 = (100 - ABL:MASTER:操艦) / 6
 	SIF LOCAL:3 <= 0
 		LOCAL:3 = 2
-	ABL:MASTER:防衛 -= LOCAL:3
-	CALL COLOR_PRINT(@"%ANAME(MASTER)%の武闘値が{LOCAL}減少した…", カラー_オレンジ)
+	ABL:MASTER:操艦 -= LOCAL:3
+	CALL COLOR_PRINT(@"%ANAME(MASTER)%の白兵値が{LOCAL}減少した…", カラー_オレンジ)
 	PRINTFORML 
-	CALL COLOR_PRINT(@"%ANAME(MASTER)%の防衛値が{LOCAL:3}減少した…", カラー_オレンジ)
+	CALL COLOR_PRINT(@"%ANAME(MASTER)%の操艦値が{LOCAL:3}減少した…", カラー_オレンジ)
 	PRINTFORML 
 	CALL COLOR_PRINT(@"%ANAME(MASTER)%の知略値が{LOCAL:1}減少した…", カラー_オレンジ)
 	PRINTFORML 

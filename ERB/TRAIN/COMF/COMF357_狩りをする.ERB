@@ -36,8 +36,8 @@ RETURN 1
 ;コマンドの成否をTFLAG:18にセット
 CALL JUDGE_COM_RESULT(MTAR:0, 5, 5)
 
-;武闘の合計値に応じた確率で成功・失敗が切り替わる
-LOCAL:0 = ABL:(MPLY:0):武闘 + ABL:(MTAR:0):武闘
+;白兵の合計値に応じた確率で成功・失敗が切り替わる
+LOCAL:0 = ABL:(MPLY:0):白兵 + ABL:(MTAR:0):白兵
 IF TFLAG:18 == -1 && RAND:160 < LOCAL:0
 	TFLAG:18 = 0
 ELSEIF TFLAG:18 == 0 && RAND:1000 >= LOCAL:0 * 2 + 800
@@ -45,7 +45,7 @@ ELSEIF TFLAG:18 == 0 && RAND:1000 >= LOCAL:0 * 2 + 800
 ENDIF
 
 ;成長型による倍率を取得
-LOCAL:0 = GROWTYPE_RATE(MTAR:0, "武闘")
+LOCAL:0 = GROWTYPE_RATE(MTAR:0, "白兵")
 LOCAL:1 = 120 + (LOCAL:0 - 100) * 5 / 2
 LOCAL:2 = 120 + (LOCAL:0 - 100) * 3 / 2
 
@@ -113,7 +113,7 @@ ENDIF
 IF TFLAG:18 == 1
 	PRINTFORML 大きな獲物を捕えて%ANAME(MTAR:0)%は誇らしげにしている…
 ELSEIF TFLAG:18 == -1
-	IF RAND:2 == 0 && ABL:(MPLY:0):武闘 < 50 && ABL:(MTAR:0):武闘 < 50
+	IF RAND:2 == 0 && ABL:(MPLY:0):白兵 < 50 && ABL:(MTAR:0):白兵 < 50
 		PRINTFORML ……逆に獣に追われて散々な目に合ってしまった
 	ELSE
 		PRINTFORML ……さっぱり獲物が取れなかった

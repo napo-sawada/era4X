@@ -72,22 +72,22 @@ ELSE
 	CALL SINGLE_DRAWLINE
 	PRINTFORML %ANAME(対象)%のどの能力を訓練しますか？
 	CALL SINGLE_DRAWLINE
-	PRINTFORM [{GETNUM(ABL, "武闘")}] 武闘 
-	CALL PRINT_ALPHABET_RANK(ランク_ＳＬＧ, ABL:(対象):武闘)
-	PRINTFORML {ABL:(対象):武闘, 3, RIGHT}
-	PRINTFORM [{GETNUM(ABL, "防衛")}] 防衛 
-	CALL PRINT_ALPHABET_RANK(ランク_ＳＬＧ, ABL:(対象):防衛)
-	PRINTFORML {ABL:(対象):防衛, 3, RIGHT}
+	PRINTFORM [{GETNUM(ABL, "白兵")}] 白兵 
+	CALL PRINT_ALPHABET_RANK(ランク_ＳＬＧ, ABL:(対象):白兵)
+	PRINTFORML {ABL:(対象):白兵, 3, RIGHT}
+	PRINTFORM [{GETNUM(ABL, "操艦")}] 操艦 
+	CALL PRINT_ALPHABET_RANK(ランク_ＳＬＧ, ABL:(対象):操艦)
+	PRINTFORML {ABL:(対象):操艦, 3, RIGHT}
 	PRINTFORM [{GETNUM(ABL, "知略")}] 知略 
 	CALL PRINT_ALPHABET_RANK(ランク_ＳＬＧ, ABL:(対象):知略)
 	PRINTFORML {ABL:(対象):知略, 3, RIGHT}
 	PRINTFORM [{GETNUM(ABL, "政治")}] 政治 
 	CALL PRINT_ALPHABET_RANK(ランク_ＳＬＧ, ABL:(対象):政治)
 	PRINTFORML {ABL:(対象):政治, 3, RIGHT}
-	IF TALENT:対象:妖術知識
-		PRINTFORM [{GETNUM(ABL, "妖術")}] 妖術 
-		CALL PRINT_ALPHABET_RANK(ランク_ＳＬＧ, ABL:(対象):妖術)
-		PRINTFORML {ABL:(対象):妖術, 3, RIGHT}
+	IF TALENT:対象:超能力者
+		PRINTFORM [{GETNUM(ABL, "超能力")}] 超能力 
+		CALL PRINT_ALPHABET_RANK(ランク_ＳＬＧ, ABL:(対象):超能力)
+		PRINTFORML {ABL:(対象):超能力, 3, RIGHT}
 	ENDIF
 	PRINTFORM [{GETNUM(ABL, "歌唱")}] 歌唱 
 	CALL PRINT_ALPHABET_RANK(ランク_ＳＬＧ, ABL:(対象):歌唱)
@@ -103,9 +103,9 @@ ELSE
 	INPUT
 	IF RESULT == 0
 		GOTO SHOW_LOOP
-	ELSEIF !GROUPMATCH(RESULT, GETNUM(ABL, "武闘"), GETNUM(ABL, "防衛"), GETNUM(ABL, "知略"), GETNUM(ABL, "政治"), GETNUM(ABL, "料理"), GETNUM(ABL, "歌唱"), GETNUM(ABL, "妖術"))
+	ELSEIF !GROUPMATCH(RESULT, GETNUM(ABL, "白兵"), GETNUM(ABL, "操艦"), GETNUM(ABL, "知略"), GETNUM(ABL, "政治"), GETNUM(ABL, "料理"), GETNUM(ABL, "歌唱"), GETNUM(ABL, "超能力"))
 		GOTO INPUT_LOOP2
-	ELSEIF RESULT == GETNUM(ABL, "妖術") && !TALENT:(対象):妖術知識
+	ELSEIF RESULT == GETNUM(ABL, "超能力") && !TALENT:(対象):超能力者
 		GOTO INPUT_LOOP2
 	ELSE
 		対象項目 = RESULT
@@ -200,10 +200,10 @@ RETURNF (SPECIAL_TRAIN_COUNT == 0 || (DAY % 5 == 0 && SPECIAL_TRAIN_COUNT_THIS_T
 #DIM 返却値
 対象能力値 = ABL:対象:対象項目
 成長必要値 = ABLUP_NEED_EXP_SLG(対象能力値) / 100
-能力合計 = ABL:対象:武闘 + ABL:対象:知略 + ABL:対象:政治 + ABL:対象:防衛 + ABL:対象:歌唱 + ABL:対象:料理
+能力合計 = ABL:対象:白兵 + ABL:対象:知略 + ABL:対象:政治 + ABL:対象:操艦 + ABL:対象:歌唱 + ABL:対象:料理
 取得経験基礎値 = (600 - 能力合計)
 
-SIF 対象項目 != GETNUM(ABL, "妖術")
+SIF 対象項目 != GETNUM(ABL, "超能力")
 	取得経験基礎値 /= 6
 ;歌唱と料理はさらに半分
 SIF GROUPMATCH(対象項目, GETNUM(ABL, "歌唱"), GETNUM(ABL, "料理"))

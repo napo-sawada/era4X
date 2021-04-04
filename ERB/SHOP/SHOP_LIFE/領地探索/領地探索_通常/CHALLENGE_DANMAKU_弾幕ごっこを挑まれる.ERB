@@ -21,7 +21,7 @@ RETURN 1
 PRINTFORML 道を歩いていると、野良妖怪に弾幕ごっこを挑まれた
 PRINTFORML 勝てば金をくれるというが……
 PRINTL
-CALL PRINT_ABILITY(対象, GETNUM(ABL, "武闘"))
+CALL PRINT_ABILITY(対象, GETNUM(ABL, "白兵"))
 CALL PRINT_ABILITY(対象, GETNUM(ABL, "知略"))
 CALL ASK_YN("受けて立つ", "断る")
 IF RESULT == 1
@@ -33,11 +33,11 @@ ENDIF
 PRINTFORML ・
 PRINTFORML ・
 PRINTFORMW ・
-IF LIMIT(ABL:対象:武闘 + ABL:対象:知略, 75, 150) > RAND:150
+IF LIMIT(ABL:対象:白兵 + ABL:対象:知略, 75, 150) > RAND:150
 	PRINTFORML 見事勝利した！
 	PRINTFORML 良い勝負で自信がついた
 	CALL ICPRINT("賞金として金<5000>を手に入れた", "L", カラー_注意)
-	CALL PRINT_ADD_EXP(対象, "武闘経験値", RAND:8 + 6, 1)
+	CALL PRINT_ADD_EXP(対象, "白兵経験値", RAND:8 + 6, 1)
 	CALL PRINT_ADD_EXP(対象, "知略経験値", RAND:8 + 6, 1)
 	MONEY += 5000
 	RETURN 1

@@ -110,7 +110,7 @@ CALL FORCE_FREE(君主)
 
 IF 国譲りフラグ
 	CALL COLOR_PRINTW(@"%ANAME(MASTER)%の説得で、%ANAME(君主)%は代替わりに同意した……", カラー_注意)
-ELSEIF MIN(MAX(ABL:君主:武闘, ABL:君主:防衛, ABL:君主:知略, ABL:君主:政治), 80) < RAND:100
+ELSEIF MIN(MAX(ABL:君主:白兵, ABL:君主:操艦, ABL:君主:知略, ABL:君主:政治), 80) < RAND:100
 	CALL COLOR_PRINTW(@"現君主である%ANAME(君主)%の身柄を確保した！", カラー_注意)
 	PRINTFORML 
 	CALL CHANGE_COUNTRY(君主, 0, 1)

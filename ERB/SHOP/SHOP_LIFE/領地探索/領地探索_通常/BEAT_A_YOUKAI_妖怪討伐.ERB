@@ -20,7 +20,7 @@ RETURN 1
 PRINTFORML この辺りで妖怪が暴れているらしい
 PRINTFORML 何とかしてくれと頼まれた
 PRINTL
-CALL PRINT_ABILITY(対象, GETNUM(ABL, "武闘"))
+CALL PRINT_ABILITY(対象, GETNUM(ABL, "白兵"))
 CALL ASK_YN("討伐を試みる", "やめておく")
 
 IF RESULT == 1
@@ -35,11 +35,11 @@ PRINTFORML ・
 PRINTFORML ・
 PRINTFORMW ・
 
-IF LIMIT(ABL:対象:武闘, 50, 100) > RAND:100
+IF LIMIT(ABL:対象:白兵, 50, 100) > RAND:100
 	PRINTFORML やった！
 	PRINTFORML %ANAME(対象)%は見事妖怪を討伐することに成功した
 	CALL ICPRINT("報酬として金<3000>を手に入れた", "L", カラー_注意)
-	CALL PRINT_ADD_EXP(対象, "武闘経験値", RAND:8 + 1, 1)
+	CALL PRINT_ADD_EXP(対象, "白兵経験値", RAND:8 + 1, 1)
 	MONEY += 3000
 	RETURN 1
 ENDIF

@@ -55,14 +55,14 @@ RETURN 1
 #DIM 対象勢力
 #DIM 対象部隊
 対象側 = !発動側
-PRINTFORML テンションの上がった%ANAME(発動者)%の武闘と知略が増加！
+PRINTFORML テンションの上がった%ANAME(発動者)%の白兵と知略が増加！
 TIMES BATTLE_武闘パワー:発動側:COMBAT_SKILL_TARGET, 1.2
 TIMES BATTLE_知略パワー:発動側:COMBAT_SKILL_TARGET, 1.2
 RETURN 1
 
 ;
 @SKILL_100_PERSONAL_0_EXPLANATION
-RESULTS = 自身の武闘・知略を増加させる。
+RESULTS = 自身の白兵・知略を増加させる。
 
 
 

@@ -126,7 +126,7 @@ ELSE
 		PRINTFORMW すると彼は勿論、他のゴブリン達も震えあがって仕事を一層頑張った
 		LOCAL:1 = 3 + 3 * RAND:5
 		CITY_GUARD:紅魔館 = MAX(CITY_GUARD:紅魔館 + LOCAL:1, 1)
-		CALL COLOR_PRINTW(@"%CITY_NAME:紅魔館%の防衛率が{LOCAL:1}上昇した", カラー_注意)
+		CALL COLOR_PRINTW(@"%CITY_NAME:紅魔館%の操艦率が{LOCAL:1}上昇した", カラー_注意)
 	ELSEIF RESULT == 2
 		PRINTFORML 望むものを聞いた%ANAME(MASTER)%に対し彼はニヤリと笑った
 		PRINTFORMW %ANAME(MASTER)%は訝しんだが彼は口が上手く、紅魔館の隅にある一室に連れ込まれた

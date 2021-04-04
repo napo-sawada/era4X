@@ -388,7 +388,7 @@ ELSE
 	PRINTL
 	;所属キャラ一覧表示
 	CALL SINGLE_DRAWLINE
-	PRINTFORML 都市数: {GET_OWN_CITY(選択勢力), 3, LEFT} 経済力: {GET_SUM_ECONOMY(選択勢力) / 100, 7, LEFT} 防衛力: {GET_SUM_GUARD(選択勢力), 7, LEFT}
+	PRINTFORML 都市数: {GET_OWN_CITY(選択勢力), 3, LEFT} 経済力: {GET_SUM_ECONOMY(選択勢力) / 100, 7, LEFT} 操艦力: {GET_SUM_GUARD(選択勢力), 7, LEFT}
 	PRINTFORM 所属キャラ:
 
 	;ボスだけ特殊表示
@@ -925,7 +925,7 @@ PRINTFORML 「あなた」を新規に作成して主人公にしたので、ボ
 PRINTFORML どれにしますか？(どれも後から手に入ります)
 {
 	CALL ASK_MULTI(
-		"素質【酒豪】",                 "素質【天の御遣い】",           "素質【君主の器】", "素質【求心力】", "素質【妖術知識】と妖術ステータス10",
+		"素質【酒豪】",                 "素質【天の御遣い】",           "素質【君主の器】", "素質【求心力】", "素質【超能力知識】と超能力ステータス10",
 		"素質【技師】",                 "スキル【超成長力】【努力家】", "素質【絶倫】",     "金5万",       "アイテム【催眠術】",
 		"【チョロイン】【合意】3人分", "お手軽調教セット",             "いらない")
 }
@@ -944,8 +944,8 @@ SELECTCASE 選択ボーナス
 		PRINTFORML 依存度を得やすくなる素質「求心力」にしますか？
 		PRINTFORML (恋慕・従属どちらのルートでも必要な値なので便利です)
 	CASE 4
-		PRINTFORML 触手が扱えるようになる素質「妖術知識」と、ＳＬＧステータス「妖術」10のセットにしますか？
-		PRINTFORML (妖術はとても鍛えにくいので10でも貴重です）
+		PRINTFORML 触手が扱えるようになる素質「超能力知識」と、ＳＬＧステータス「超能力」10のセットにしますか？
+		PRINTFORML (超能力はとても鍛えにくいので10でも貴重です）
 	CASE 5
 		PRINTFORML アイテム開発が早くなり、効果が高まる素質「技師」にしますか？
 		PRINTFORML (多くのアイテムは開発→購入というプロセスを経るので、持っておくと地味に便利です)
@@ -996,8 +996,8 @@ SELECTCASE 選択ボーナス
 	CASE 3
 		TALENT:MASTER:求心力 = 1
 	CASE 4
-		TALENT:MASTER:妖術知識 = 1
-		ABL:MASTER:妖術 = 10
+		TALENT:MASTER:超能力者 = 1
+		ABL:MASTER:超能力 = 10
 	CASE 5
 		TALENT:MASTER:技師 = 1
 	CASE 6
@@ -1274,3 +1274,16 @@ ENDIF
 
 CLEARLINE LINECOUNT - FIRST_LINE
 GOTO SHOW_LOOP
+
+;-------------------------------------------------
+;ユーザー選択による最初のゲーム設定
+;-------------------------------------------------
+@GAME_INIT
+PRINTL オープニングを見ますか?
+CALL ASK_YN
+SIF RESULT == 0
+	CALL OPENING_4X
+PRINTL チュートリアルを見ますか?
+CALL ASK_YN
+SIF RESULT == 0
+	CALL TUTORIAL

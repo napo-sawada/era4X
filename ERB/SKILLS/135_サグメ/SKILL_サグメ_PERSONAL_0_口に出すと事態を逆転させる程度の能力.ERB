@@ -64,7 +64,7 @@ RETURN 1
 #DIM 対象勢力
 #DIM 対象部隊
 対象側 = !発動側
-PRINTFORML 全員の武闘と知略が入れ替わる！
+PRINTFORML 全員の白兵と知略が入れ替わる！
 FOR LOCAL, 0, BATTLE_COMMANDER_NUM:発動側
 	SIF BATTLE_COMMANDER:発動側:LOCAL != 発動者
 		SWAP BATTLE_武闘パワー:発動側:LOCAL, BATTLE_知略パワー:発動側:LOCAL
@@ -74,7 +74,7 @@ FOR LOCAL, 0, BATTLE_COMMANDER_NUM:対象側
 NEXT
 
 @SKILL_135_PERSONAL_0_EXPLANATION
-RESULTS = 自身以外の武闘・知略を入れ替える。
+RESULTS = 自身以外の白兵・知略を入れ替える。
 
 
 

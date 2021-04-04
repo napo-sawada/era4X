@@ -22,7 +22,7 @@ RETURN IS_COUNTRY(CFLAG:対象:所属)
 PRINTFORML 領内で人だかりをみかけた
 PRINTFORML 力自慢の男が腕相撲の挑戦者を募っているようだ
 PRINTL
-CALL PRINT_ABILITY(対象, GETNUM(ABL, "武闘"))
+CALL PRINT_ABILITY(対象, GETNUM(ABL, "白兵"))
 CALL ASK_YN("挑戦する", "やめておく")
 
 IF RESULT == 1
@@ -38,7 +38,7 @@ PRINTFORML ・
 PRINTFORML ・
 PRINTFORMW ・
 
-IF LIMIT(ABL:対象:武闘, 30, 100) > RAND:100
+IF LIMIT(ABL:対象:白兵, 30, 100) > RAND:100
 	PRINTFORML %ANAME(対象)%は見事男に勝利した！
 	PRINTFORMW 彼は潔く負けを認め、ぜひ仲間にしてほしいと言ってきた
 	COUNTRY_SOLDIER:(CFLAG:対象:所属) += 3000

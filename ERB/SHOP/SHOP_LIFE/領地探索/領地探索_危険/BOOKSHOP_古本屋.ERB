@@ -38,9 +38,9 @@ ELSEIF RESULT == 1
 ELSEIF RESULT == 2
 	PRINTFORMW 魔術書に手を伸ばした
 	PRINTFORML 
-	IF TALENT:対象:妖術知識 == 1
+	IF TALENT:対象:超能力者 == 1
 		PRINTFORMW 魔術のコツを学んだ
-		CALL PRINT_ADD_EXP(対象, "妖術経験値", RAND:8 + 6, 1)
+		CALL PRINT_ADD_EXP(対象, "超能力経験値", RAND:8 + 6, 1)
 	ELSE
 		PRINTFORMW しかし何が書いてあるかちんぷんかんぷんだった
 	ENDIF

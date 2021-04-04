@@ -23,7 +23,7 @@ PRINTFORML 妖怪退治中の巫女と遭遇した
 PRINTFORMW しかし野良妖怪は手強そうだ
 PRINTFORML どうしよう？
 PRINTFORML 
-CALL PRINT_ABILITY(対象, GETNUM(ABL, "武闘"))
+CALL PRINT_ABILITY(対象, GETNUM(ABL, "白兵"))
 CALL ASK_YN("助ける" ,"逃げる")
 IF RESULT == 1
 	PRINTFORML 巻き込まれる前に逃げた
@@ -36,9 +36,9 @@ PRINTFORMW %ANAME(対象)%は剣を抜いて二人の間に駆け寄った
 PRINTFORML ・
 PRINTFORML ・
 PRINTFORMW ・
-IF LIMIT(ABL:対象:武闘, 40, 90) > RAND:100
+IF LIMIT(ABL:対象:白兵, 40, 90) > RAND:100
 	PRINTFORML %ANAME(対象)%達の攻撃妖怪はたまらず逃げていった
-	CALL PRINT_ADD_EXP(対象, "武闘経験値", RAND:8 + 1, 1)
+	CALL PRINT_ADD_EXP(対象, "白兵経験値", RAND:8 + 1, 1)
 	PRINTFORMW 巫女は無事なようだが怪我をしている様だ
 	IF HAS_PENIS(対象)
 		PRINTFORML どうしよう？

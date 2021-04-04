@@ -486,7 +486,7 @@ FOR 部隊, 0, MAX_UNIT
 		敵の数 ++
 	NEXT
 
-;敵がいなければ、防衛部隊との戦闘に入る判定まで飛ぶ
+;敵がいなければ、操艦部隊との戦闘に入る判定まで飛ぶ
 	SIF 敵の数 == 0
 		GOTO VS_CASTLE
 
@@ -529,7 +529,7 @@ FOR 部隊, 0, MAX_UNIT
 	CALL BATTLE_UNIT_TO_UNIT(勢力, 部隊, 敵勢力リスト:攻撃対象, 敵部隊リスト:攻撃対象)
 	CALL SINGLE_EMPTY_LINE()
 
-	;敵性部隊が１部隊だった場合、その部隊を撃破すれば続けて防衛部隊との戦闘に入る
+	;敵性部隊が１部隊だった場合、その部隊を撃破すれば続けて操艦部隊との戦闘に入る
 	SIF 敵の数 != 1 || UNIT_SOLDIER:敵勢力:敵部隊 > 0
 		CONTINUE
 
@@ -670,8 +670,8 @@ RESETCOLOR
 #DIM 最大増加量
 #DIM 人気所持者数
 #DIM 難易度補正
-#DIM 防衛振り分け表示
-#DIM 防衛振り分け数
+#DIM 操艦振り分け表示
+#DIM 操艦振り分け数
 ;増加する兵数は経済規模×0.5(警邏・歌唱などによる補正あり)
 ;最大兵数は経済規模×10
 
@@ -682,7 +682,7 @@ RESETCOLOR
 歌唱パワー = 0
 FOR LOCAL:0, 0, CHARANUM
 	IF CFLAG:(LOCAL:0):所属 == ARG:0 && TMP_IS_FREE:(LOCAL:0):0 == 0
-		政治パワー += ABL_POWER((ABL:(LOCAL:0):政治 * 7 + ABL:(LOCAL:0):武闘 * 3) / 10, LOCAL:0)
+		政治パワー += ABL_POWER((ABL:(LOCAL:0):政治 * 7 + ABL:(LOCAL:0):白兵 * 3) / 10, LOCAL:0)
 		歌唱パワー += ABL_POWER(ABL:(LOCAL:0):歌唱, LOCAL:0)
 	ENDIF
 NEXT
@@ -756,22 +756,22 @@ IF ARG:0 == CFLAG:MASTER:所属
 	ENDIF
 ENDIF
 
-;防衛兵数が最低数を割っている都市があるなら自動配分
-防衛振り分け表示 = 0
+;操艦兵数が最低数を割っている都市があるなら自動配分
+操艦振り分け表示 = 0
 FOR LOCAL:0, 0, MAX_CITY
 	IF CITY_OWNER:(LOCAL:0) == ARG:0 && CITY_SOLDIER:(LOCAL:0) < 500 && COUNTRY_SOLDIER:(ARG:0) > 0
 		;敵部隊のいる都市は増減不可
 		SIF IS_STAY_ENEMY_UNIT(LOCAL:0) == 1
 			CONTINUE
-		防衛振り分け数 = MIN(500 - CITY_SOLDIER:(LOCAL:0), COUNTRY_SOLDIER:(ARG:0))
-		CITY_SOLDIER:(LOCAL:0) += 防衛振り分け数
-		COUNTRY_SOLDIER:(ARG:0) -= 防衛振り分け数
-		防衛振り分け表示 = 1
+		操艦振り分け数 = MIN(500 - CITY_SOLDIER:(LOCAL:0), COUNTRY_SOLDIER:(ARG:0))
+		CITY_SOLDIER:(LOCAL:0) += 操艦振り分け数
+		COUNTRY_SOLDIER:(ARG:0) -= 操艦振り分け数
+		操艦振り分け表示 = 1
 		SIF ARG:0 == CFLAG:MASTER:所属
-			PRINTFORML %GET_CITYNAME(LOCAL:0)%の防衛兵数を{防衛振り分け数}だけ補充しました
+			PRINTFORML %GET_CITYNAME(LOCAL:0)%の操艦兵数を{操艦振り分け数}だけ補充しました
 	ENDIF
 NEXT
-IF ARG:0 == CFLAG:MASTER:所属 && 防衛振り分け表示
+IF ARG:0 == CFLAG:MASTER:所属 && 操艦振り分け表示
 	WAIT
 ENDIF
 

@@ -41,8 +41,8 @@ RETURN 0
 @SHOP_LIFE_BUTTON_ADD44(ARG:0)
 PRINTPLAIN  
 PRINTFORM 妖:
-CALL PRINT_ALPHABET_RANK(ランク_ＳＬＧ, ABL:(ARG:0):妖術)
-PRINTFORM  {ABL:(ARG:0):妖術, 2, RIGHT} 
+CALL PRINT_ALPHABET_RANK(ランク_ＳＬＧ, ABL:(ARG:0):超能力)
+PRINTFORM  {ABL:(ARG:0):超能力, 2, RIGHT} 
 RETURN 1
 
 ;-------------------------------------------------
@@ -71,9 +71,9 @@ CALL COLUMN_RIGHT_PRINTL
 CALL COLUMN_RIGHT_LINE
 CALL COLUMN_RIGHT_PRINTL
 
-CALL COLOR_PRINT(" 触手部屋の管理を行うには <妖術知識>・性知識Lv4以上・主人公以外なら触手Lv3以上 が必要です", カラー_注釈)
+CALL COLOR_PRINT(" 触手部屋の管理を行うには <超能力知識>・性知識Lv4以上・主人公以外なら触手Lv3以上 が必要です", カラー_注釈)
 CALL COLUMN_RIGHT_PRINTL
-CALL COLOR_PRINT(" 触手部屋の管理を行うと、毎ターン若干の妖術経験値と触手経験値を得られます", カラー_注釈)
+CALL COLOR_PRINT(" 触手部屋の管理を行うと、毎ターン若干の超能力経験値と触手経験値を得られます", カラー_注釈)
 CALL COLUMN_RIGHT_PRINTL
 CALL COLOR_PRINT(" 現在の管理者は", カラー_注釈)
 IF ID_TO_CHARA(FLAG:触手部屋管理者) == -1
@@ -118,7 +118,7 @@ RETURN 1
 @IS_SYOKUSYU_MANAGE(ARG:0)
 #FUNCTION
 IF CFLAG:(ARG:0):所属 == CFLAG:MASTER:所属 && CFLAG:(ARG:0):捕虜先 == 0
-	IF TALENT:(ARG:0):妖術知識 && ABL:(ARG:0):性知識 >= 4 && (ARG:0 == MASTER || ABL:(ARG:0):触手 >= 3)
+	IF TALENT:(ARG:0):超能力者 && ABL:(ARG:0):性知識 >= 4 && (ARG:0 == MASTER || ABL:(ARG:0):触手 >= 3)
 		RETURNF 1
 	ENDIF
 ENDIF

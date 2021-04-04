@@ -62,11 +62,11 @@ RETURN 1
 #DIM 対象勢力
 #DIM 対象部隊
 対象側 = !発動側
-PRINTFORML %ANAME(発動者)%の武闘が増加した！
+PRINTFORML %ANAME(発動者)%の白兵が増加した！
 TIMES BATTLE_武闘パワー:発動側:発動番号, 1.1
 
 @SKILL_0_PERSONAL_1_EXPLANATION
-RESULTS = 自身の武闘を増加させる。
+RESULTS = 自身の白兵を増加させる。
 
 @SKILL_0_PERSONAL_1_RATE(発動者, 発動番号, 発動側, 発動勢力, 発動部隊, 対象勢力, 対象部隊)
 #DIM 発動者

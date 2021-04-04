@@ -110,7 +110,7 @@ ELSEIF ARG == 10
 ;怒りの限界で追い返される
 ;-------------------------------------------------
 ELSEIF ARG == 13
-	IF FLAG:ウフフフラグ || ABL:武闘 < 60
+	IF FLAG:ウフフフラグ || ABL:白兵 < 60
 		PRINTFORML %ANAME(TARGET)%は激しい剣幕で怒鳴りながら\@ FLAG:調教モード != 調教_捕虜調教 ? %ANAME(MASTER)%を追い返した… # 帰っていった… \@
 	ELSE
 		PRINTFORML %ANAME(TARGET)%は激高して%ANAME(MASTER)%に斬り掛かってきた…
@@ -1420,7 +1420,7 @@ ELSEIF ARG == 343
 		CASE 5
 			PRINTFORML ローブに身を纏った魔法使いが檻を回収していった
 			PRINTFORMW %ANAME(TARGET)%は魔術の媒体か、実験台か、多分その辺に使われる事になる
-			PRINTFORMW 交換で受け取った妖術書で%ANAME(LOCAL:35)%の力もまた増すだろう
+			PRINTFORMW 交換で受け取った超能力書で%ANAME(LOCAL:35)%の力もまた増すだろう
 		CASE 6
 			PRINTFORML Anazonと服に書かれた業者がそれを回収して行った。
 			PRINTFORMW %ANAME(TARGET)%はまだ見ぬ新天地へと届けられ、そこで種を反映させる事になる

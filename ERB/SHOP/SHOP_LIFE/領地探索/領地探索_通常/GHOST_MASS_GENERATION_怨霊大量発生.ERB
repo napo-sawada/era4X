@@ -27,7 +27,7 @@ PRINTFORML 害はないようだが住民たちが不安がり、一部が暴徒
 PRINTFORMW すぐに鎮圧できたものの、混乱で街に被害が出た
 LOCAL = MIN(CITY_GUARD:対象都市, 10)
 CITY_GUARD:対象都市 -= LOCAL
-CALL ICPRINT(@"%CITY_NAME:対象都市%の防衛率が<{LOCAL}>減少し、<{CITY_GUARD:対象都市}>になった", "W", カラー_注意)
+CALL ICPRINT(@"%CITY_NAME:対象都市%の操艦率が<{LOCAL}>減少し、<{CITY_GUARD:対象都市}>になった", "W", カラー_注意)
 RETURN 1
 
 

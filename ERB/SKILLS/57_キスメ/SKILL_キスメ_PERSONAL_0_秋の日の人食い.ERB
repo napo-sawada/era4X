@@ -70,11 +70,11 @@ FOR LOCAL, 0, BATTLE_COMMANDER_NUM:対象側
 	SIF HAS_TAG(BATTLE_COMMANDER:対象側:LOCAL, タグ_人間)
 		LOCAL:1 += 10
 NEXT
-PRINTFORML %ANAME(発動者)%の武闘が上昇！
+PRINTFORML %ANAME(発動者)%の白兵が上昇！
 BATTLE_武闘パワー:発動側:発動番号 = BATTLE_武闘パワー:発動側:発動番号 * LOCAL:1 / 100
 
 @SKILL_57_PERSONAL_0_EXPLANATION
-RESULTS = 敵部隊の人間の数に応じ、自身の武闘を上昇させる。
+RESULTS = 敵部隊の人間の数に応じ、自身の白兵を上昇させる。
 
 @SKILL_57_PERSONAL_0_CANT_TELL
 

@@ -1,0 +1,86 @@
+﻿@WORK_KYABAKURA(ID)
+#DIM ID
+#DIM 魅力値
+#DIM 報酬
+
+魅力値 = 0
+;ABL
+魅力値 += ABL:ID:0 * 100
+魅力値 += ABL:ID:7 * 100
+魅力値 += ABL:ID:22 * 200
+魅力値 += CFLAG:ID:1008 * 75
+
+;TALENT
+SIF TALENT:ID:11
+	魅力値 -= 100
+SIF TALENT:ID:13
+	魅力値 += 100
+SIF TALENT:ID:15
+	魅力値 -= 100
+SIF TALENT:ID:16
+	魅力値 -= 100
+SIF TALENT:ID:63
+	魅力値 += 200
+SIF TALENT:ID:82
+	魅力値 -= 200
+SIF TALENT:ID:87
+	魅力値 += 100
+SIF TALENT:ID:92
+	魅力値 += 100
+SIF TALENT:ID:93
+	魅力値 += 100
+SIF TALENT:ID:94
+	魅力値 += 100
+SIF TALENT:ID:109
+	魅力値 -= 200
+SIF TALENT:ID:110
+	魅力値 -= 100
+SIF TALENT:ID:111
+	魅力値 += 100
+SIF TALENT:ID:112
+	魅力値 += 200
+
+魅力値 = LIMIT(魅力値, 0, 9999)
+
+CFLAG:ID:キャバクラ人気 += 
+
+PRINTFORM %CALLNAME:ID%はキャバクラで
+SELECTCASE RAND:3
+	CASE 0
+		PRINTFORML 安物のスーツに身を包んだサラリーマン等の相手をした
+		; 要求の低い客
+		IF 魅力値 > 1000
+			CFLAG:ID:キャバクラ人気 += 50
+			PRINTFORML どうやらうまく接客できたようだ
+		ELSE
+			CFLAG:ID:キャバクラ人気 -= 50
+			PRINTFORML うまく接客できなかったようだ
+		ENDIF
+	CASE 1
+		; 要求の普通の客
+		PRINTFORML 小綺麗な身なりの男等を相手にした
+		IF 魅力値 > 2000
+			CFLAG:ID:キャバクラ人気 += 100
+			PRINTFORML どうやらうまく接客できたようだ
+		ELSE
+			CFLAG:ID:キャバクラ人気 -= 50
+			PRINTFORML うまく接客できなかったようだ
+		ENDIF
+	CASE 2
+		; 要求の高い客
+		PRINTFORML 高級ブランドに身を包んだ男等の相手をした
+		IF 魅力値 > 3000
+			CFLAG:ID:キャバクラ人気 += 200
+			PRINTFORML どうやらうまく接客できたようだ
+		ELSE
+			CFLAG:ID:キャバクラ人気 -= 50
+			PRINTFORML うまく接客できなかったようだ
+		ENDIF
+ENDSELECT
+
+PRINTFORML 話術経験+5
+EXP:ID:65 += 5
+
+CFLAG:ID:キャバクラ人気 = LIMIT(CFLAG:ID:キャバクラ人気, 0, 100000)
+報酬 = 魅力値 + CFLAG:ID:キャバクラ人気 - RAND:(魅力値 / 10)
+RETURN 報酬

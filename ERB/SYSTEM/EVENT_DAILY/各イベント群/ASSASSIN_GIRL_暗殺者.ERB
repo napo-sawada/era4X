@@ -45,17 +45,17 @@ ELSEIF RESULT == 0
 	PRINTFORML ・
 	PRINTFORML ・
 	PRINTFORMW ・
-	LOCAL = ((ABL:MASTER:防衛 + ABL:MASTER:知略) / 10 * (RAND:6 + 1)) - (5 * (RAND:10 + 1))
+	LOCAL = ((ABL:MASTER:操艦 + ABL:MASTER:知略) / 10 * (RAND:6 + 1)) - (5 * (RAND:10 + 1))
 	IF LOCAL <= 0
 		PRINTFORMW 失敗してしまった…
 		PRINTFORMW すんでのところで助かったが大けがを負ってしまった
 		CALL ADD_COOLTIME(MASTER, 3)
-		ABL:MASTER:武闘 = MAX(ABL:MASTER:武闘 - 2, 0)
-		CALL COLOR_PRINTW("武闘が2下がった…", カラー_警告)
+		ABL:MASTER:白兵 = MAX(ABL:MASTER:白兵 - 2, 0)
+		CALL COLOR_PRINTW("白兵が2下がった…", カラー_警告)
 	ELSEIF LOCAL < 10
 		PRINTFORMW 成功した！
 		PRINTFORMW 暗殺者は逃がしたがもう来ないだろう
-		CALL PRINT_ADD_EXP(MASTER, "防衛経験値", RAND:8 + 1, 1)
+		CALL PRINT_ADD_EXP(MASTER, "操艦経験値", RAND:8 + 1, 1)
 		CALL PRINT_ADD_EXP(MASTER, "知略経験値", RAND:8 + 1, 1)
 		CALL TRAIN_AUTO_ABLUP(MASTER)
 		DVAR:暗殺者_完了フラグ = 1
@@ -123,8 +123,8 @@ ELSEIF RESULT == 0
 					SIF RESULT == -1
 						RETURN 1
 					対象 = RESULT
-					ABL:対象:武闘 = 40 + RAND:30
-					ABL:対象:防衛 = 30 + RAND:20
+					ABL:対象:白兵 = 40 + RAND:30
+					ABL:対象:操艦 = 30 + RAND:20
 					ABL:対象:知略 = 30 + RAND:20
 					ABL:対象:政治 = 10 + RAND:10
 					ABL:対象:歌唱 = 15 + RAND:20

@@ -58,7 +58,7 @@ RETURN 1
 #DIM 対象勢力
 #DIM 対象部隊
 対象側 = !発動側
-PRINTFORML 敵全員の武闘と防衛が低下！
+PRINTFORML 敵全員の白兵と操艦が低下！
 FOR LOCAL, 0, BATTLE_COMMANDER_NUM:対象側
 	TIMES BATTLE_武闘パワー:対象側:LOCAL, 0.9
 	TIMES BATTLE_防衛パワー:対象側:LOCAL, 0.9
@@ -67,7 +67,7 @@ RETURN 1
 
 ;
 @SKILL_58_PERSONAL_0_EXPLANATION
-RESULTS = 敵全員の武闘・防衛を低下させる。
+RESULTS = 敵全員の白兵・操艦を低下させる。
 
 
 

@@ -59,7 +59,7 @@ RETURN 1
 #DIM 対象勢力
 #DIM 対象部隊
 対象側 = !発動側
-PRINTFORML 尾にはたかれぐらついた%ANAME(BATTLE_COMMANDER:対象側:COMBAT_SKILL_TARGET)%の武闘が低下した！
+PRINTFORML 尾にはたかれぐらついた%ANAME(BATTLE_COMMANDER:対象側:COMBAT_SKILL_TARGET)%の白兵が低下した！
 IF !RAND:5
 	TIMES BATTLE_武闘パワー:対象側:COMBAT_SKILL_TARGET, 0.8
 ELSE
@@ -69,7 +69,7 @@ RETURN 1
 
 ;
 @SKILL_92_PERSONAL_0_EXPLANATION
-RESULTS = 敵一人の武闘を低下させる。
+RESULTS = 敵一人の白兵を低下させる。
 
 @SKILL_92_PERSONAL_0_RATE(発動者, 発動番号, 発動側, 発動勢力, 発動部隊, 対象勢力, 対象部隊)
 #DIM 発動者

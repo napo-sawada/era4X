@@ -408,7 +408,7 @@ ELSEIF TALENT:対象:合意
 	
 ELSE
 	PRINTFORML %ANAME(対象)%は自分が何を求められているか悟ると、さっと顔を青褪めさせた
-	IF ABL:MASTER:武闘 < (ABL:対象:武闘 + 30)
+	IF ABL:MASTER:白兵 < (ABL:対象:白兵 + 30)
 		PRINTFORML %ANAME(MASTER)%は逃すまいとするが、%ANAME(対象)%は手を振り解くと、どん！と力一杯%ANAME(MASTER)%を突き飛ばして逃げ出した
 		PRINTFORMW これは嫌われてしまったかもしれない……
 		CFLAG:対象:好感度 -= 300

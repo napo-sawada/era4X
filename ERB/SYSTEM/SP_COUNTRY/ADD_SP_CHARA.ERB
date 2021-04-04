@@ -470,59 +470,59 @@ ABL:対象:肝臓 = 3
 ;ベース80, 難度依存20
 SELECTCASE 勢力定数
     CASE 特殊勢力_野盗
-        ABL:対象:武闘 = 20 + 6 * SP_COUNTRY_ABL_MODIFIER(勢力定数)
-        ABL:対象:防衛 = 20 + 6 * SP_COUNTRY_ABL_MODIFIER(勢力定数)
+        ABL:対象:白兵 = 20 + 6 * SP_COUNTRY_ABL_MODIFIER(勢力定数)
+        ABL:対象:操艦 = 20 + 6 * SP_COUNTRY_ABL_MODIFIER(勢力定数)
         ABL:対象:知略 = 20 + 4 * SP_COUNTRY_ABL_MODIFIER(勢力定数)
         ABL:対象:政治 = 20 + 4 * SP_COUNTRY_ABL_MODIFIER(勢力定数)
     CASE 特殊勢力_ホフゴブリン
-        ABL:対象:武闘 = 30 + 6 * SP_COUNTRY_ABL_MODIFIER(勢力定数)
-        ABL:対象:防衛 = 20 + 5 * SP_COUNTRY_ABL_MODIFIER(勢力定数)
+        ABL:対象:白兵 = 30 + 6 * SP_COUNTRY_ABL_MODIFIER(勢力定数)
+        ABL:対象:操艦 = 20 + 5 * SP_COUNTRY_ABL_MODIFIER(勢力定数)
         ABL:対象:知略 = 10 + 4 * SP_COUNTRY_ABL_MODIFIER(勢力定数)
         ABL:対象:政治 = 20 + 5 * SP_COUNTRY_ABL_MODIFIER(勢力定数)
     CASE 特殊勢力_外来人
-        ABL:対象:武闘 = 10 + 4 * SP_COUNTRY_ABL_MODIFIER(勢力定数)
-        ABL:対象:防衛 = 20 + 4 * SP_COUNTRY_ABL_MODIFIER(勢力定数)
+        ABL:対象:白兵 = 10 + 4 * SP_COUNTRY_ABL_MODIFIER(勢力定数)
+        ABL:対象:操艦 = 20 + 4 * SP_COUNTRY_ABL_MODIFIER(勢力定数)
         ABL:対象:知略 = 30 + 6 * SP_COUNTRY_ABL_MODIFIER(勢力定数)
         ABL:対象:政治 = 20 + 6 * SP_COUNTRY_ABL_MODIFIER(勢力定数)
     CASE 特殊勢力_触手
-        ABL:対象:武闘 = 40 + 7 * SP_COUNTRY_ABL_MODIFIER(勢力定数)
-        ABL:対象:防衛 = 15 + 4 * SP_COUNTRY_ABL_MODIFIER(勢力定数)
+        ABL:対象:白兵 = 40 + 7 * SP_COUNTRY_ABL_MODIFIER(勢力定数)
+        ABL:対象:操艦 = 15 + 4 * SP_COUNTRY_ABL_MODIFIER(勢力定数)
         ABL:対象:知略 = 10 + 3 * SP_COUNTRY_ABL_MODIFIER(勢力定数)
         ABL:対象:政治 = 10 + 4 * SP_COUNTRY_ABL_MODIFIER(勢力定数)
-        TALENT:対象:妖術知識 = 1
-        ABL:対象:妖術 = 5 + 2 * SP_COUNTRY_ABL_MODIFIER(勢力定数)
+        TALENT:対象:超能力者 = 1
+        ABL:対象:超能力 = 5 + 2 * SP_COUNTRY_ABL_MODIFIER(勢力定数)
     CASE 特殊勢力_自警団
-        ABL:対象:武闘 = 15 + 4 * SP_COUNTRY_ABL_MODIFIER(勢力定数)
-        ABL:対象:防衛 = 35 + 6 * SP_COUNTRY_ABL_MODIFIER(勢力定数)
+        ABL:対象:白兵 = 15 + 4 * SP_COUNTRY_ABL_MODIFIER(勢力定数)
+        ABL:対象:操艦 = 35 + 6 * SP_COUNTRY_ABL_MODIFIER(勢力定数)
         ABL:対象:知略 = 15 + 5 * SP_COUNTRY_ABL_MODIFIER(勢力定数)
         ABL:対象:政治 = 15 + 5 * SP_COUNTRY_ABL_MODIFIER(勢力定数)
     CASE 特殊勢力_サキュバス
-        ABL:対象:武闘 = 15 + 4 * SP_COUNTRY_ABL_MODIFIER(勢力定数)
-        ABL:対象:防衛 = 30 + 6 * SP_COUNTRY_ABL_MODIFIER(勢力定数)
+        ABL:対象:白兵 = 15 + 4 * SP_COUNTRY_ABL_MODIFIER(勢力定数)
+        ABL:対象:操艦 = 30 + 6 * SP_COUNTRY_ABL_MODIFIER(勢力定数)
         ABL:対象:知略 = 20 + 6 * SP_COUNTRY_ABL_MODIFIER(勢力定数)
         ABL:対象:政治 = 15 + 4 * SP_COUNTRY_ABL_MODIFIER(勢力定数)
     CASE 特殊勢力_狂信者
-        ABL:対象:武闘 = 15 + 4 * SP_COUNTRY_ABL_MODIFIER(勢力定数)
-        ABL:対象:防衛 = 15 + 4 * SP_COUNTRY_ABL_MODIFIER(勢力定数)
+        ABL:対象:白兵 = 15 + 4 * SP_COUNTRY_ABL_MODIFIER(勢力定数)
+        ABL:対象:操艦 = 15 + 4 * SP_COUNTRY_ABL_MODIFIER(勢力定数)
         ABL:対象:知略 = 25 + 6 * SP_COUNTRY_ABL_MODIFIER(勢力定数)
         ABL:対象:政治 = 25 + 6 * SP_COUNTRY_ABL_MODIFIER(勢力定数)
         IF SP_COUNTRY_RANK:勢力定数 > RAND:10
-            TALENT:対象:妖術知識 = 1
-            ABL:対象:妖術 = 3 + 2 * SP_COUNTRY_ABL_MODIFIER(勢力定数)
+            TALENT:対象:超能力者 = 1
+            ABL:対象:超能力 = 3 + 2 * SP_COUNTRY_ABL_MODIFIER(勢力定数)
         ENDIF
 ENDSELECT
 
 ABL:対象:歌唱 = 10 + 3 * SP_COUNTRY_ABL_MODIFIER(勢力定数)
 ABL:対象:料理 = 10 + 3 * SP_COUNTRY_ABL_MODIFIER(勢力定数)
 
-ABL:対象:武闘 += RAND:10
-ABL:対象:防衛 += RAND:10
+ABL:対象:白兵 += RAND:10
+ABL:対象:操艦 += RAND:10
 ABL:対象:知略 += RAND:10
 ABL:対象:政治 += RAND:10
 
 IF ボス
-    ABL:対象:武闘 += 10
-    ABL:対象:防衛 += 10
+    ABL:対象:白兵 += 10
+    ABL:対象:操艦 += 10
     ABL:対象:知略 += 10
     ABL:対象:政治 += 10
     ABL:対象:歌唱 += 5

@@ -63,7 +63,7 @@ RETURN 1
 #DIM 対象勢力
 #DIM 対象部隊
 対象側 = !発動側
-PRINTFORML 自らを犠牲に灼熱の炎を巻き起こす！ %ANAME(発動者)%の武闘が低下！
+PRINTFORML 自らを犠牲に灼熱の炎を巻き起こす！ %ANAME(発動者)%の白兵が低下！
 
 TIMES BATTLE_武闘パワー:発動側:発動番号, 0.70
 
@@ -72,7 +72,7 @@ CALL DECREASE_SOLDIER(対象勢力, 対象部隊, RAND(500, 1500), 1)
 
 
 @SKILL_31_PERSONAL_0_EXPLANATION
-RESULTS = 敵部隊にダメージ。自身の武闘を低下させる。
+RESULTS = 敵部隊にダメージ。自身の白兵を低下させる。
 
 @SKILL_31_PERSONAL_0_RATE(発動者, 発動番号, 発動側, 発動勢力, 発動部隊, 対象勢力, 対象部隊)
 #DIM 発動者

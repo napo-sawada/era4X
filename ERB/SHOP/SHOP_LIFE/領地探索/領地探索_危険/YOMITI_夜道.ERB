@@ -39,7 +39,7 @@ IF RESULT == 1
 			CALL ADD_COOLTIME(対象, 2)
 		CASE 2
 			PRINTFORMW 強盗に遭遇した！
-			IF LIMIT(ABL:対象:武闘, 30, 80) > RAND:100
+			IF LIMIT(ABL:対象:白兵, 30, 80) > RAND:100
 				PRINTFORML 返り討ちにした
 				PRINTFORMW 強盗は逃げていったが財布を落としていった
 				MONEY += 2000
@@ -82,7 +82,7 @@ SELECTCASE RAND:3
 		CALL ADD_COOLTIME(対象, 2)
 	CASE 2
 		PRINTFORMW 中々ご飯も美味しく、舌鼓をうった
-		IF LIMIT(ABL:対象:防衛, 30, 80) > RAND:100
+		IF LIMIT(ABL:対象:操艦, 30, 80) > RAND:100
 			PRINTFORMW しかし何か味が変だ…なんとシビレ薬が入っている！
 			PRINTFORML 店主を問い詰めたところ、旅人に薬をもって強盗していたことを認めた
 			PRINTFORMW %ANAME(対象)%は店主を捕らえると店の金を逆に奪い、官憲に突き出した

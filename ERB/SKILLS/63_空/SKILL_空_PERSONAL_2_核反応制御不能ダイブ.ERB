@@ -41,7 +41,7 @@ RETURN 1
 #DIM 対象部隊
 対象側 = !発動側
 
-RETURN BATTLE_武闘:発動側:発動番号 > ABL:発動者:武闘 || BATTLE_武闘パワー:発動側:発動番号 > ABL_POWER(ABL:発動者:武闘, 発動者)
+RETURN BATTLE_武闘:発動側:発動番号 > ABL:発動者:白兵 || BATTLE_武闘パワー:発動側:発動番号 > ABL_POWER(ABL:発動者:白兵, 発動者)
 
 
 
@@ -73,7 +73,7 @@ CALL DECREASE_SOLDIER(対象勢力, 対象部隊, RAND(1000, 1500), 1)
 
 
 @SKILL_63_PERSONAL_2_EXPLANATION
-RESULTS = 現在の自身の武闘が本来の武闘を上回る場合に発動。敵部隊にダメージ。
+RESULTS = 現在の自身の白兵が本来の白兵を上回る場合に発動。敵部隊にダメージ。
 
 
 

@@ -123,10 +123,10 @@ ELSEIF RESULT == 2
 		ELSEIF RESULT == 1
 			PRINTFORML 折角の良い天気なのだから外で遊ぼう
 			PRINTFORMW 橙と猫達を集めて庭で追いかけっこを楽しんだ
-			CALL PRINT_ADD_EXP(対象, "武闘経験値", RAND:10 + 1, 1)
-			CALL PRINT_ADD_EXP(対象, "防衛経験値", RAND:10 + 1, 1)
-			CALL PRINT_ADD_EXP(MASTER, "武闘経験値", RAND:10 + 1, 1)
-			CALL PRINT_ADD_EXP(MASTER, "防衛経験値", RAND:10 + 1, 1)
+			CALL PRINT_ADD_EXP(対象, "白兵経験値", RAND:10 + 1, 1)
+			CALL PRINT_ADD_EXP(対象, "操艦経験値", RAND:10 + 1, 1)
+			CALL PRINT_ADD_EXP(MASTER, "白兵経験値", RAND:10 + 1, 1)
+			CALL PRINT_ADD_EXP(MASTER, "操艦経験値", RAND:10 + 1, 1)
 			CALL TRAIN_AUTO_ABLUP(対象)
 			CALL TRAIN_AUTO_ABLUP(MASTER)
 			CFLAG:対象:好感度 += 50 + RAND:100
@@ -144,7 +144,7 @@ ELSEIF RESULT == 0
 	ELSEIF RESULT == 1
 		PRINTFORML ボールで遊んだ
 		PRINTFORMW …思いのほか熱中した
-		CALL PRINT_ADD_EXP(MASTER, "武闘経験値", RAND:5 + 1, 1)
+		CALL PRINT_ADD_EXP(MASTER, "白兵経験値", RAND:5 + 1, 1)
 		CALL TRAIN_AUTO_ABLUP
 	ELSEIF RESULT == 2
 		PRINTFORML マタタビを上げると猫たちは酔っぱらったようにふらつきだした

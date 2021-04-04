@@ -41,8 +41,8 @@ ABL:対象:主導度Ｕ = RAND(300, 600)
 ABL:対象:主導度Ｎ = RAND(300, 600)
 ABL:対象:倒錯度 = RAND(300, 500)
 EXP:対象:絶頂経験 = 500
-ABL:対象:武闘 = 60
-ABL:対象:防衛 = 30
+ABL:対象:白兵 = 60
+ABL:対象:操艦 = 30
 ABL:対象:知略 = 30
 ABL:対象:政治 = 30
 ABL:対象:料理 = 10
@@ -867,7 +867,7 @@ IF RESULT == -1
 ELSE
 	担当者 = RESULT
 	PRINTFORML %ANAME(担当者)%が担当することにした
-	能力合計 = ABL:担当者:武闘 + ABL:担当者:知略
+	能力合計 = ABL:担当者:白兵 + ABL:担当者:知略
 ENDIF
 PRINTFORML ・
 PRINTFORML ・

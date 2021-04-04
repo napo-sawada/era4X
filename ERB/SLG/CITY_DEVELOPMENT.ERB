@@ -127,15 +127,15 @@ SELECTCASE DEVELOPMENT_ID
     CASE 建造物_弓櫓
         RETURNF "都市からの援護射撃を強化"
     CASE 建造物_武芸塾
-        RETURNF "毎ターン守将に武闘経験値が入る"
+        RETURNF "毎ターン守将に白兵経験値が入る"
     CASE 建造物_戦略塾
-        RETURNF "毎ターン守将に防衛経験値が入る"
+        RETURNF "毎ターン守将に操艦経験値が入る"
     CASE 建造物_知略塾
         RETURNF "毎ターン守将に知略経験値が入る"
     CASE 建造物_湯治場
         RETURNF "毎ターン士官や捕虜の印象が改善"
     CASE 建造物_本拠地
-        RETURNF "全都市の防衛倍率を増加%。重複しない"
+        RETURNF "全都市の操艦倍率を増加%。重複しない"
     CASE 建造物_研究所
         RETURNF "技術研究を1期短縮。重複しない"
     CASE 建造物_忍びの里
@@ -183,9 +183,9 @@ FOR LOCAL, 0, MAX_CITY
     成長箇所 = 0
     SELECTCASE 建造物
         CASE 建造物_武芸塾
-            成長箇所 = GETNUM(ABL, "武闘")
+            成長箇所 = GETNUM(ABL, "白兵")
         CASE 建造物_戦略塾
-            成長箇所 = GETNUM(ABL, "防衛")
+            成長箇所 = GETNUM(ABL, "操艦")
         CASE 建造物_知略塾
             成長箇所 = GETNUM(ABL, "知略")
     ENDSELECT

@@ -27,18 +27,18 @@ SIF IS_FEMALE(対象)
 PRINTFORML これはもう自分のものだから、返してほしいなら金3000をよこせと要求してきた
 
 PRINTL
-CALL PRINT_ABILITY(対象, GETNUM(ABL, "武闘"))
+CALL PRINT_ABILITY(対象, GETNUM(ABL, "白兵"))
 CALL ASK_MULTI_JUDGE("力づくで奪い返す", 1, "金を払う", MONEY >= 3000, "諦める", 1, "口で奉仕する", IS_FEMALE(対象), "身体で支払う", IS_FEMALE(対象))
 
 SELECTCASE RESULT
 	CASE 0
 		PRINTFORML 元々自分のものなのに、なぜ金など払う必要があろう
 		PRINTFORML %ANAME(対象)%は男に飛びかかった！
-		IF LIMIT(ABL:対象:武闘, 30, 70) > RAND:100
+		IF LIMIT(ABL:対象:白兵, 30, 70) > RAND:100
 			PRINTFORML やった！
 			PRINTFORML 丸腰なので多少苦戦したが男から武器を奪い返すことに成功した
 			PRINTFORMW のびている男の様子をチラッと確認してからその場を後にした
-			CALL PRINT_ADD_EXP(対象, "武闘経験値", RAND:5 + 3)
+			CALL PRINT_ADD_EXP(対象, "白兵経験値", RAND:5 + 3)
 		ELSEIF IS_MALE(対象)
 			PRINTFORML しまった！
 			PRINTFORML 武器が無いのでいつものような力が出せなかった…

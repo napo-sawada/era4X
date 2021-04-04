@@ -1,18 +1,18 @@
 ﻿;経験値のみによる能力上昇(SLG能力)
 
 ;-------------------------------------------------
-;武闘
+;白兵
 ;-------------------------------------------------
 @ABLUP_EXPNAME50
-RESULTS = 武闘経験値
+RESULTS = 白兵経験値
 
 @CALC_ABLUP_EXP50(ARG:0)
 ;最大値は300
-IF ABL:(ARG:0):武闘 >= 300
+IF ABL:(ARG:0):白兵 >= 300
 	RETURN -1
 ENDIF
 
-LOCAL:0 = ABLUP_NEED_EXP_SLG(ABL:(ARG:0):武闘) / GROWTYPE_RATE(ARG:0, "武闘")
+LOCAL:0 = ABLUP_NEED_EXP_SLG(ABL:(ARG:0):白兵) / GROWTYPE_RATE(ARG:0, "白兵")
 
 SIF FIND_PASSIVE_SKILL(ARG:0, "超成長力")
 	TIMES LOCAL:0, 0.80
@@ -21,7 +21,7 @@ SIF ID_TO_CHARA(FLAG:お気に入り指定キャラ) == ARG:0
 	TIMES LOCAL:0, 0.80
 
 IF TALENT:(ARG:0):サボり魔
-	SELECTCASE ABL:(ARG:0):武闘
+	SELECTCASE ABL:(ARG:0):白兵
 		CASE IS >= 90
 			TIMES LOCAL:0, 1.50
 		CASE IS >= 80
@@ -33,18 +33,18 @@ ENDIF
 RETURN MAX(LOCAL:0, 1)
 
 ;-------------------------------------------------
-;防衛
+;操艦
 ;-------------------------------------------------
 @ABLUP_EXPNAME51
-RESULTS = 防衛経験値
+RESULTS = 操艦経験値
 
 @CALC_ABLUP_EXP51(ARG:0)
 ;最大値は300
-IF ABL:(ARG:0):防衛 >= 300
+IF ABL:(ARG:0):操艦 >= 300
 	RETURN -1
 ENDIF
 
-LOCAL:0 = ABLUP_NEED_EXP_SLG(ABL:(ARG:0):防衛) / GROWTYPE_RATE(ARG:0, "防衛")
+LOCAL:0 = ABLUP_NEED_EXP_SLG(ABL:(ARG:0):操艦) / GROWTYPE_RATE(ARG:0, "操艦")
 
 SIF FIND_PASSIVE_SKILL(ARG:0, "超成長力")
 	TIMES LOCAL:0, 0.80
@@ -53,7 +53,7 @@ SIF ID_TO_CHARA(FLAG:お気に入り指定キャラ) == ARG:0
 	TIMES LOCAL:0, 0.80
 
 IF TALENT:(ARG:0):サボり魔
-	SELECTCASE ABL:(ARG:0):防衛
+	SELECTCASE ABL:(ARG:0):操艦
 		CASE IS >= 90
 			TIMES LOCAL:0, 1.50
 		CASE IS >= 80
@@ -130,18 +130,18 @@ ENDIF
 RETURN MAX(LOCAL:0, 1)
 
 ;-------------------------------------------------
-;妖術
+;超能力
 ;-------------------------------------------------
 @ABLUP_EXPNAME54
-RESULTS = 妖術経験値
+RESULTS = 超能力経験値
 
 @CALC_ABLUP_EXP54(ARG:0)
 ;最大値は300
-IF ABL:(ARG:0):妖術 >= 300
+IF ABL:(ARG:0):超能力 >= 300
 	RETURN -1
 ENDIF
 
-LOCAL:0 = ABLUP_NEED_EXP_SLG(ABL:(ARG:0):妖術) * 5 / GROWTYPE_RATE(ARG:0, "妖術")
+LOCAL:0 = ABLUP_NEED_EXP_SLG(ABL:(ARG:0):超能力) * 5 / GROWTYPE_RATE(ARG:0, "超能力")
 
 SIF FIND_PASSIVE_SKILL(ARG:0, "超成長力")
 	TIMES LOCAL:0, 0.80
@@ -150,7 +150,7 @@ SIF ID_TO_CHARA(FLAG:お気に入り指定キャラ) == ARG:0
 	TIMES LOCAL:0, 0.80
 
 IF TALENT:(ARG:0):サボり魔
-	SELECTCASE ABL:(ARG:0):妖術
+	SELECTCASE ABL:(ARG:0):超能力
 		CASE IS >= 50
 			TIMES LOCAL:0, 1.50
 		CASE IS >= 30
@@ -216,6 +216,72 @@ SIF ID_TO_CHARA(FLAG:お気に入り指定キャラ) == ARG:0
 
 IF TALENT:(ARG:0):サボり魔
 	SELECTCASE ABL:(ARG:0):料理
+		CASE IS >= 50
+			TIMES LOCAL:0, 1.50
+		CASE IS >= 30
+			TIMES LOCAL:0, 1.25
+		CASEELSE
+			TIMES LOCAL:0, 1.1
+	ENDSELECT
+ENDIF
+
+RETURN MAX(LOCAL:0, 1)
+
+;-------------------------------------------------
+;話術
+;-------------------------------------------------
+@ABLUP_EXPNAME62
+RESULTS = 話術経験値
+
+@CALC_ABLUP_EXP62(ARG:0)
+;最大値は300
+IF ABL:(ARG:0):話術 >= 300
+	RETURN -1
+ENDIF
+
+LOCAL:0 = ABLUP_NEED_EXP_SLG(ABL:(ARG:0):話術) / GROWTYPE_RATE(ARG:0, "話術")
+
+SIF FIND_PASSIVE_SKILL(ARG:0, "超成長力")
+	TIMES LOCAL:0, 0.80
+
+SIF ID_TO_CHARA(FLAG:お気に入り指定キャラ) == ARG:0
+	TIMES LOCAL:0, 0.80
+
+IF TALENT:(ARG:0):サボり魔
+	SELECTCASE ABL:(ARG:0):話術
+		CASE IS >= 50
+			TIMES LOCAL:0, 1.50
+		CASE IS >= 30
+			TIMES LOCAL:0, 1.25
+		CASEELSE
+			TIMES LOCAL:0, 1.1
+	ENDSELECT
+ENDIF
+
+RETURN MAX(LOCAL:0, 1)
+
+;-------------------------------------------------
+;社交
+;-------------------------------------------------
+@ABLUP_EXPNAME63
+RESULTS = 社交経験値
+
+@CALC_ABLUP_EXP63(ARG:0)
+;最大値は300
+IF ABL:(ARG:0):社交 >= 300
+	RETURN -1
+ENDIF
+
+LOCAL:0 = ABLUP_NEED_EXP_SLG(ABL:(ARG:0):社交) / GROWTYPE_RATE(ARG:0, "社交")
+
+SIF FIND_PASSIVE_SKILL(ARG:0, "超成長力")
+	TIMES LOCAL:0, 0.80
+
+SIF ID_TO_CHARA(FLAG:お気に入り指定キャラ) == ARG:0
+	TIMES LOCAL:0, 0.80
+
+IF TALENT:(ARG:0):サボり魔
+	SELECTCASE ABL:(ARG:0):社交
 		CASE IS >= 50
 			TIMES LOCAL:0, 1.50
 		CASE IS >= 30

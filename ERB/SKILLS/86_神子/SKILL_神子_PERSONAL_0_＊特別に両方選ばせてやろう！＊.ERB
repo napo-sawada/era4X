@@ -58,7 +58,7 @@ RETURN 1
 #DIM 対象部隊
 対象側 = !発動側
 PRINTFORML 両方選べるなんてお得だ！
-PRINTFORML テンションのあがった敵部隊全員の武闘と知略が増加した！
+PRINTFORML テンションのあがった敵部隊全員の白兵と知略が増加した！
 FOR LOCAL, 0, BATTLE_COMMANDER_NUM:対象側
 	TIMES BATTLE_武闘パワー:対象側:LOCAL, 1.2
 	TIMES BATTLE_知略パワー:対象側:LOCAL, 1.2
@@ -67,7 +67,7 @@ RETURN 1
 
 ;
 @SKILL_86_PERSONAL_0_EXPLANATION
-RESULTS = 敵全員の武闘と知略を増加させる。
+RESULTS = 敵全員の白兵と知略を増加させる。
 
 @SKILL_86_PERSONAL_0_CANT_TELL
 

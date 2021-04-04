@@ -75,8 +75,8 @@ ELSEIF INRANGE(入力値, 0, 299) && 入力値 != GETNUM(TALENT, "性別")
 	TALENT:対象:入力値 = !TALENT:対象:入力値
 ENDIF
 
-SIF !TALENT:対象:妖術知識
-	ABL:対象:妖術 = 0
+SIF !TALENT:対象:超能力者
+	ABL:対象:超能力 = 0
 
 SIF !TALENT:対象:母乳体質
 	CFLAG:対象:一時的母乳体質 = 0

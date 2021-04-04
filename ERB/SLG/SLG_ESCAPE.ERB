@@ -167,7 +167,7 @@ SELECTCASE CONFIG:306
 ENDSELECT
 
 ;四能力が高いほど捕縛率への補正が小さくなる（逃げられやすくなる）
-捕縛率 += (6000 - (ABL:対象:武闘 * 2 + ABL:対象:防衛 * 2 + ABL:対象:知略 + ABL:対象:政治) * 10)
+捕縛率 += (6000 - (ABL:対象:白兵 * 2 + ABL:対象:操艦 * 2 + ABL:対象:知略 + ABL:対象:政治) * 10)
 
 ;部隊にいないと逃げやすい
 SIF IS_FREE(対象)
@@ -688,7 +688,7 @@ IF 申し出キャラ >= 0
 ENDIF
 
 ;3能力に応じた確率で
-IF ABL:MASTER:武闘 + ABL:MASTER:防衛 + ABL:MASTER:知略 + ABL:MASTER:政治 >= RAND:400
+IF ABL:MASTER:白兵 + ABL:MASTER:操艦 + ABL:MASTER:知略 + ABL:MASTER:政治 >= RAND:400
 	PRINTFORMW %ANAME(君主)%は、%ANAME(MASTER)%のような人材を斬るのを惜しんだようだ
 	PRINTFORMW %ANAME(君主)%は部下に対し、%ANAME(MASTER)%を投獄するように命じた
 	CALL COLOR_PRINTW(@"%ANAME(MASTER)%は%ANAME(君主)%の捕虜となりました", カラー_注意)

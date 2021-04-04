@@ -3,6 +3,7 @@
 ;-------------------------------------------------
 @SHOP_LIFE_NAME42
 RESULTS:0 '= "労働"
+;'
 
 ;-------------------------------------------------
 ;「労働」の選択可否
@@ -36,7 +37,7 @@ RETURN 0
 ;「労働」の右カラムキャラリスト１のボタン
 ;-------------------------------------------------
 @SHOP_LIFE_LIST1_BUTTON42(ARG:0, ARG:1)
-#DIM HEAD_SIX = GETNUM(ABL, "武闘"),  GETNUM(ABL, "防衛"), GETNUM(ABL, "知略"),  GETNUM(ABL, "政治"),GETNUM(ABL, "歌唱"), GETNUM(ABL, "料理"),
+#DIM HEAD_SIX = GETNUM(ABL, "白兵"),  GETNUM(ABL, "操艦"), GETNUM(ABL, "知略"),  GETNUM(ABL, "政治"),GETNUM(ABL, "歌唱"), GETNUM(ABL, "料理"),
 #DIM HEAD_LEWD = GETNUM(ABL, "欲望"), GETNUM(ABL, "性技"), GETNUM(ABL, "奉仕"), GETNUM(ABL, "性交")
 #DIM 選択人数
 VARSET 選択人数
@@ -51,10 +52,10 @@ CALL COLUMN_RIGHT_PRINTL
 
 PRINTFORM %SNAME(ARG:0), MAX_CHARANAME_LENGTH / 2, LEFT%
 CALL SHOP_LIFE_BUTTON42(ARG:0, CFLAG:(ARG:0):労働内容 == 0,             1,                 0,                                             "待機")
-CALL SHOP_LIFE_BUTTON42(ARG:0, CFLAG:(ARG:0):労働内容 == 労働_建設,     1 + 労働_建設,     CFLAG:(ARG:0):労働内容 == 0 && 選択人数 >= MAX_WORKER_NUM, "建設")
-CALL SHOP_LIFE_BUTTON42(ARG:0, CFLAG:(ARG:0):労働内容 == 労働_巡回,     1 + 労働_巡回,     CFLAG:(ARG:0):労働内容 == 0 && 選択人数 >= MAX_WORKER_NUM, "巡回")
-CALL SHOP_LIFE_BUTTON42(ARG:0, CFLAG:(ARG:0):労働内容 == 労働_広報,     1 + 労働_広報,     CFLAG:(ARG:0):労働内容 == 0 && 選択人数 >= MAX_WORKER_NUM, "広報")
-CALL SHOP_LIFE_BUTTON42(ARG:0, CFLAG:(ARG:0):労働内容 == 労働_街宣,     1 + 労働_街宣,     CFLAG:(ARG:0):労働内容 == 0 && 選択人数 >= MAX_WORKER_NUM, "街宣")
+CALL SHOP_LIFE_BUTTON42(ARG:0, CFLAG:(ARG:0):労働内容 == 労働_キャバクラ,     1 + 労働_キャバクラ,     CFLAG:(ARG:0):労働内容 == 0 && 選択人数 >= MAX_WORKER_NUM, "キャバクラ")
+CALL SHOP_LIFE_BUTTON42(ARG:0, CFLAG:(ARG:0):労働内容 == 労働_Vアイドル,     1 + 労働_Vアイドル,     CFLAG:(ARG:0):労働内容 == 0 && 選択人数 >= MAX_WORKER_NUM, "Vアイドル")
+;CALL SHOP_LIFE_BUTTON42(ARG:0, CFLAG:(ARG:0):労働内容 == 労働_広報,     1 + 労働_広報,     CFLAG:(ARG:0):労働内容 == 0 && 選択人数 >= MAX_WORKER_NUM, "広報")
+;CALL SHOP_LIFE_BUTTON42(ARG:0, CFLAG:(ARG:0):労働内容 == 労働_街宣,     1 + 労働_街宣,     CFLAG:(ARG:0):労働内容 == 0 && 選択人数 >= MAX_WORKER_NUM, "街宣")
 CALL SHOP_LIFE_BUTTON42(ARG:0, CFLAG:(ARG:0):労働内容 == 労働_炊き出し, 1 + 労働_炊き出し, CFLAG:(ARG:0):労働内容 == 0 && 選択人数 >= MAX_WORKER_NUM, "炊き出し")
 CALL SHOP_LIFE_BUTTON42(ARG:0, CFLAG:(ARG:0):労働内容 == 労働_ライブ  , 1 + 労働_ライブ  , CFLAG:(ARG:0):労働内容 == 0 && 選択人数 >= MAX_WORKER_NUM, "ライブ")
 CALL SHOP_LIFE_BUTTON42(ARG:0, CFLAG:(ARG:0):労働内容 == 労働_娼館,     1 + 労働_娼館,     (CFLAG:(ARG:0):労働内容 == 0 && 選択人数 >= MAX_WORKER_NUM) || ABL:(ARG:0):性技 < ランク閾値:ランク_その他:ランク_D || !IS_FEMALE(ARG:0), "娼館")
@@ -142,7 +143,7 @@ SIF ABL:キャラ番号:性技 < ランク閾値:ランク_その他:ランク_D
 SIF !IS_FEMALE(キャラ番号) && 項目番号 == 労働_搾乳
 	RETURN 0
 
-SIF 選択人数 >= MAX_WORKER_NUM && CFLAG:キャラ番号:労働内容 == 0 && INRANGE(項目番号, 労働_建設, 労働_搾乳)
+SIF 選択人数 >= MAX_WORKER_NUM && CFLAG:キャラ番号:労働内容 == 0 && INRANGE(項目番号, 労働_キャバクラ, 労働_搾乳)
 	RETURN 0
 
 RESULT = 0
@@ -186,13 +187,13 @@ ENDIF
 #DIM 選択人数
 ; 	報酬 = 1500
 ; 	SELECTCASE 能力
-; 		CASE GETNUM(ABL, "武闘"), GETNUM(ABL, "防衛"), GETNUM(ABL, "知略"), GETNUM(ABL, "政治")
+; 		CASE GETNUM(ABL, "白兵"), GETNUM(ABL, "操艦"), GETNUM(ABL, "知略"), GETNUM(ABL, "政治")
 ; 			報酬 += RAND:(MAX(ABL:対象:能力 * 10, 1))
 ; 		CASE GETNUM(ABL, "料理"), GETNUM(ABL, "歌唱")
 ; 			報酬 += RAND:(MAX(ABL:対象:能力 * 20, 1))
 ; 	ENDSELECT
 ; 	SELECTCASE 経験値
-; 		CASE GETNUM(EXP, "武闘経験値"), GETNUM(EXP, "知略経験値"), GETNUM(EXP, "政治経験値"), GETNUM(EXP, "防衛経験値")
+; 		CASE GETNUM(EXP, "白兵経験値"), GETNUM(EXP, "知略経験値"), GETNUM(EXP, "政治経験値"), GETNUM(EXP, "操艦経験値")
 ; 			CALL PRINT_ADD_EXP(対象, EXPNAME:(経験値), RAND(1, 5))
 ; 		CASE GETNUM(EXP, "料理経験値"), GETNUM(EXP, "歌唱経験値")
 ; 			CALL PRINT_ADD_EXP(対象, EXPNAME:(経験値), RAND(1, 3))
@@ -216,14 +217,12 @@ FOR LOCAL, 0, CHARANUM
 	ENDIF
 	報酬 = 1000
 	SELECTCASE CFLAG:LOCAL:労働内容
-		CASE 労働_建設
-			報酬 += RAND(MAX(ABL:LOCAL:武闘 * 3, 0), MAX(ABL:LOCAL:武闘 * 5, 1))
-			PRINTFORML %ANAME(LOCAL)%は領内の建設業を手伝った……
-			CALL PRINT_ADD_EXP(LOCAL, "武闘経験値", RAND(6, 12))
-		CASE 労働_巡回
-			報酬 += RAND(MAX(ABL:LOCAL:防衛 * 3, 0), MAX(ABL:LOCAL:防衛 * 5, 1))
+		CASE 労働_キャバクラ
+;			報酬 +=WORK_KYABAKURA(ID)
+		CASE 労働_Vアイドル
+			報酬 += RAND(MAX(ABL:LOCAL:操艦 * 3, 0), MAX(ABL:LOCAL:操艦 * 5, 1))
 			PRINTFORML %ANAME(LOCAL)%は領内の巡回を行った……
-			CALL PRINT_ADD_EXP(LOCAL, "防衛経験値", RAND(6, 12))
+			CALL PRINT_ADD_EXP(LOCAL, "操艦経験値", RAND(6, 12))
 		CASE 労働_広報
 			報酬 += RAND(MAX(ABL:LOCAL:知略 * 3, 0), MAX(ABL:LOCAL:知略 * 5, 1))
 			PRINTFORML %ANAME(LOCAL)%は広報活動を行った……

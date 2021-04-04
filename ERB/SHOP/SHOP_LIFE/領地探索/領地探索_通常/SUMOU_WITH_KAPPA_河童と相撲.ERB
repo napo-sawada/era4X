@@ -22,7 +22,7 @@ RETURN 1
 PRINTFORML 川沿いを歩いていると川の中から河童が現れた
 PRINTFORMW 彼は気さくに挨拶をして、相撲に誘ってきた
 PRINTL
-CALL PRINT_ABILITY(対象, GETNUM(ABL, "武闘"))
+CALL PRINT_ABILITY(対象, GETNUM(ABL, "白兵"))
 CALL ASK_YN("相手する" ,"断る")
 
 IF RESULT == 1
@@ -38,10 +38,10 @@ PRINTFORML ・
 PRINTFORML ・
 PRINTFORMW ・
 
-IF LIMIT(ABL:対象:武闘, 30, 100) >= RAND:75
+IF LIMIT(ABL:対象:白兵, 30, 100) >= RAND:75
 	PRINTFORML %ANAME(対象)%は見事勝利した！
 	PRINTFORMW 彼は参ったと頭を下げると獲れたての魚をくれた
-	CALL PRINT_ADD_EXP(対象, "武闘経験値", RAND:10 + 1, 1)
+	CALL PRINT_ADD_EXP(対象, "白兵経験値", RAND:10 + 1, 1)
 ELSE
 	PRINTFORML 河童は手強く、負けてしまった
 	PRINTFORMW 彼は嬉しそうに笑うとキュウリをくれと言ってきた

@@ -15,7 +15,7 @@
 PRINTL ※勢力図の変更を行うと、終了時に以下の変更がなされます
 PRINTL 　◎支配都市をもたない勢力が消滅し、仕えていた士官が全て放浪状態になる
 PRINTL 　◎全勢力の全ての部隊が解散され、兵数が最大数の1/2に変更される
-PRINTL 　◎全都市の守将が解除され、防衛兵数が500になる
+PRINTL 　◎全都市の守将が解除され、操艦兵数が500になる
 CALL ASK_YN("続行", "中止")
 IF RESULT == 1
 	RETURN
@@ -110,7 +110,7 @@ IF RESULT == 99
 			COUNTRY_SOLDIER:(LOCAL:0) = GET_SUM_ECONOMY(LOCAL:0) / 20
 		ENDIF
 	NEXT
-	;全都市の防衛解除
+	;全都市の操艦解除
 	FOR LOCAL:0, 1, MAX_CITY
 		IF CITY_TYPE:(LOCAL:0) == 0 && GET_CITYNAME(LOCAL:0) != "無名"
 			LOCAL:1 = CITY_OWNER:(LOCAL:0)
@@ -193,7 +193,7 @@ PRINTL
 LOCAL:8 = CITY_ECONOMY:(ARG:0) * 3 / 10000 + 100
 PRINTFORM           経済規模:{CITY_ECONOMY:(ARG:0) / 100, 4}/{CITY_ECONOMY_LIMIT:(ARG:0) / 100, 4}--
 PRINTBUTTON "10[変更]", 10
-PRINTFORM      防衛倍率:%DECIMAL_STRING(CITY_GUARD:(ARG:0), 2)%(都市)--
+PRINTFORM      操艦倍率:%DECIMAL_STRING(CITY_GUARD:(ARG:0), 2)%(都市)--
 PRINTBUTTON "11[変更]", 11
 PRINTL 
 
@@ -215,10 +215,10 @@ CITY_ECONOMY:(ARG:0) = LOCAL:0 * 100
 CITY_ECONOMY_LIMIT:(ARG:0) = LOCAL:1 * 100
 
 ;-------------------------------------------------
-;防衛倍率の設定
+;操艦倍率の設定
 ;-------------------------------------------------
 @EDIT_SET_GUARD_RATE(ARG:0)
-PRINTFORML 防衛倍率を設定して下さい(実際の100倍の値を入力  10～999)  現在:{CITY_GUARD:(ARG:0)}
+PRINTFORML 操艦倍率を設定して下さい(実際の100倍の値を入力  10～999)  現在:{CITY_GUARD:(ARG:0)}
 INPUT
 CITY_GUARD:(ARG:0) = LIMIT(RESULT, 10, 999)
-PRINTFORMW 防衛倍率を{CITY_GUARD:(ARG:0)}に設定しました
+PRINTFORMW 操艦倍率を{CITY_GUARD:(ARG:0)}に設定しました

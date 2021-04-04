@@ -33,7 +33,7 @@ ENDIF
 PRINTFORML 流石に放っておけない
 PRINTFORML 注意したが、彼らは酔っ払っているらしく聞く耳をもたない
 PRINTFORML 
-CALL PRINT_ABILITY(対象, GETNUM(ABL, "武闘"))
+CALL PRINT_ABILITY(対象, GETNUM(ABL, "白兵"))
 CALL ASK_MULTI("成敗する", "放っておく")
 
 IF RESULT == 1
@@ -47,11 +47,11 @@ PRINTFORML 連中を挑発し、店の外におびき出した
 PRINTFORML ・
 PRINTFORML ・
 PRINTFORMW ・
-IF LIMIT(ABL:対象:武闘, 30, 80) > RAND:100
+IF LIMIT(ABL:対象:白兵, 30, 80) > RAND:100
 	PRINTFORML たっぷり教育してやった
 	PRINTFORML ノビた彼らの財布から迷惑料を抜き取り、店に渡しておいた
-	CALL PRINT_ADD_EXP(対象, "武闘経験値", RAND:10 + 5)
-	CALL PRINT_ADD_EXP(対象, "防衛経験値", RAND:10 + 5)
+	CALL PRINT_ADD_EXP(対象, "白兵経験値", RAND:10 + 5)
+	CALL PRINT_ADD_EXP(対象, "操艦経験値", RAND:10 + 5)
 	RETURN 1
 ELSEIF IS_MALE(対象)
 	PRINTFORML やられてしまった

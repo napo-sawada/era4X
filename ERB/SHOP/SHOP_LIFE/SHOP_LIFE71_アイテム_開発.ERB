@@ -248,7 +248,7 @@ RETURN 0
 @ITEM_ABLE210
 ;触手部屋の管理が可能なキャラが必要
 FOR LOCAL:0, 0, CHARANUM
-	IF CFLAG:(LOCAL:0):所属 == CFLAG:MASTER:所属 && CFLAG:(LOCAL:0):捕虜先 == 0 && TALENT:(LOCAL:0):妖術知識 && (ABL:(LOCAL:0):触手 >= 3 || LOCAL:0 == MASTER)
+	IF CFLAG:(LOCAL:0):所属 == CFLAG:MASTER:所属 && CFLAG:(LOCAL:0):捕虜先 == 0 && TALENT:(LOCAL:0):超能力者 && (ABL:(LOCAL:0):触手 >= 3 || LOCAL:0 == MASTER)
 		RETURN 1
 	ENDIF
 NEXT
@@ -288,8 +288,8 @@ RETURN 0
 
 ;●催眠術
 @ITEM_ABLE217
-;淫具目録を持っており、主人公が妖術知識もち
-IF ITEM:淫具目録 && TALENT:MASTER:妖術知識
+;淫具目録を持っており、主人公が超能力知識もち
+IF ITEM:淫具目録 && TALENT:MASTER:超能力者
 	RETURN 1
 ENDIF
 RETURN 0
@@ -369,7 +369,7 @@ RETURN 0
 
 ;●懐中時計
 @ITEM_ABLE267
-;淫具目録を持っており、主人公が妖術知識もち
+;淫具目録を持っており、主人公が超能力知識もち
 IF ITEM:淫具目録
 	RETURN 1
 ENDIF

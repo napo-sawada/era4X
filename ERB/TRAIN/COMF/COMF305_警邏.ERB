@@ -49,10 +49,10 @@ SOURCE:(MTAR:0):歓楽 = 20
 CALL ADD_SOURCE_KANRAKU(MTAR:0, 160)
 
 ;このターンの経済成長パワー追加値
-LOCAL:0 = (ABL:(MPLY:0):武闘 + ABL:(MTAR:0):武闘 + ABL:(MPLY:0):政治 + ABL:(MTAR:0):政治 + 200) * 25
+LOCAL:0 = (ABL:(MPLY:0):白兵 + ABL:(MTAR:0):白兵 + ABL:(MPLY:0):政治 + ABL:(MTAR:0):政治 + 200) * 25
 
 ;このターンの兵数増強パワー追加値
-LOCAL:1 = (ABL:(MPLY:0):武闘 + ABL:(MTAR:0):武闘 + ABL:(MPLY:0):政治 + ABL:(MTAR:0):政治 + 200) * 2 / 5
+LOCAL:1 = (ABL:(MPLY:0):白兵 + ABL:(MTAR:0):白兵 + ABL:(MPLY:0):政治 + ABL:(MTAR:0):政治 + 200) * 2 / 5
 
 ;主導権に応じたソースの追加
 CALL ADD_SOURCE_INITIATIVE_N(MPLY:0, 100, 100)

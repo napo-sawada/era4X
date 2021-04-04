@@ -22,13 +22,13 @@ RETURN 1
 PRINTFORML 夜の領内を散策していると、野良妖怪と遭遇した
 PRINTFORML 向こうもこちらに気付き、じりっと身構えている
 PRINTL
-CALL PRINT_ABILITY(対象, GETNUM(ABL, "武闘"))
+CALL PRINT_ABILITY(対象, GETNUM(ABL, "白兵"))
 CALL PRINT_ABILITY(対象, GETNUM(ABL, "知略"))
 CALL ASK_MULTI("威嚇する", "友好的に接する", "逃げる")
 
 SELECTCASE RESULT
 	CASE 0
-		IF LIMIT(ABL:対象:武闘, 50, 100) > RAND:100
+		IF LIMIT(ABL:対象:白兵, 50, 100) > RAND:100
 			PRINTFORML 威嚇した
 			PRINTFORML %ANAME(対象)%の威圧感に妖怪は震えあがり、一目散に逃げ出した
 		ELSE

@@ -64,10 +64,10 @@ RETURN 1
 #DIM 対象部隊
 対象側 = !発動側
 PRINTFORML %ANAME(発動者)%の歌声が武器となる！
-PRINTFORML 歌唱が武闘・防衛・知略・料理として扱われる！
+PRINTFORML 歌唱が白兵・操艦・知略・料理として扱われる！
 BATTLE_武闘:発動側:発動番号 = BATTLE_歌唱:発動側:発動番号
 BATTLE_武闘パワー:発動側:発動番号 = BATTLE_歌唱パワー:発動側:発動番号
-BATTLE_防衛:発動側:発動番号 = BATTLE_歌唱:発動側:発動番号
+BATTLE_操艦:発動側:発動番号 = BATTLE_歌唱:発動側:発動番号
 BATTLE_防衛パワー:発動側:発動番号 = BATTLE_歌唱パワー:発動側:発動番号
 BATTLE_知略:発動側:発動番号 = BATTLE_歌唱:発動側:発動番号
 BATTLE_知略パワー:発動側:発動番号 = BATTLE_歌唱パワー:発動側:発動番号
@@ -75,7 +75,7 @@ BATTLE_料理:発動側:発動番号 = BATTLE_歌唱:発動側:発動番号
 BATTLE_料理パワー:発動側:発動番号 = BATTLE_歌唱パワー:発動側:発動番号
 
 @SKILL_25_PERSONAL_1_EXPLANATION
-RESULTS = 歌唱を武闘・防衛・知略・料理として扱う。
+RESULTS = 歌唱を白兵・操艦・知略・料理として扱う。
 
 
 

@@ -151,12 +151,12 @@ ELSEIF CFLAG:対象:好感度 < 2500
 		CASE 0
 			PRINTFORML %ANAME(MASTER)%は%ANAME(対象)%から武術の鍛錬についての質問を受けた
 			PRINTFORML 折角なので、%ANAME(MASTER)%と%ANAME(対象)%は練兵場に移動して組手を行い、充実した時間を送った…
-			CALL PRINT_ADD_EXP(対象, "武闘経験値", RAND:10 + 1, 1)
+			CALL PRINT_ADD_EXP(対象, "白兵経験値", RAND:10 + 1, 1)
 			CALL TRAIN_AUTO_ABLUP
 		CASE 1
 			PRINTFORML %ANAME(MASTER)%は%ANAME(対象)%から拠点の守り方について質問を受けた
-			PRINTFORML %ANAME(MASTER)%は%ANAME(対象)%に、模型を使いながら拠点防衛の心得を説いた…
-			CALL PRINT_ADD_EXP(対象, "防衛経験値", RAND:10 + 1, 1)
+			PRINTFORML %ANAME(MASTER)%は%ANAME(対象)%に、模型を使いながら拠点操艦の心得を説いた…
+			CALL PRINT_ADD_EXP(対象, "操艦経験値", RAND:10 + 1, 1)
 			CALL TRAIN_AUTO_ABLUP
 		CASE 2
 			PRINTFORML %ANAME(MASTER)%と%ANAME(対象)%は将棋を指すことにした
@@ -286,7 +286,7 @@ ELSEIF CFLAG:対象:従属度 < 500
 		PRINTFORML 気持ちは嬉しいが、流石にそう簡単に禁じられた関係に踏み込むことはできない
 		PRINTFORMW %ANAME(MASTER)%は%ANAME(対象)%の拘束を逃れようと身を捩った…
 		PRINTFORML 
-		IF ABL:MASTER:武闘 > (ABL:対象:武闘 + 15)
+		IF ABL:MASTER:白兵 > (ABL:対象:白兵 + 15)
 			PRINTFORML %ANAME(対象)%はあえなく振り解かれ、打って変わって泣きそうな顔で見上げてくる
 			PRINTFORML その評定に罪悪感を覚えつつも、%ANAME(MASTER)%は%ANAME(対象)%をあくまで娘として愛していることを伝え、
 			PRINTFORML ひとまず今日のところは帰り、もう一度落ち着いて考えるように諭した…

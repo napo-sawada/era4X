@@ -97,7 +97,7 @@ CALL SELECT_CHARA_RANDOM("SUCCUBUS_DRAIN")
 SIF 対象 == -1
 	RETURN 0
 
-吸収候補:0 = (RAND:(MAX(ABL:対象:武闘, 1)))
+吸収候補:0 = (RAND:(MAX(ABL:対象:白兵, 1)))
 吸収候補:1 = (RAND:(MAX(ABL:対象:知略, 1)))
 吸収候補:2 = (RAND:(MAX(ABL:対象:政治, 1)))
 吸収候補:3 = (RAND:(MAX(ABL:対象:歌唱, 1)))
@@ -106,7 +106,7 @@ SIF 対象 == -1
 吸収対象 = FINDELEMENT(吸収候補, MAXARRAY(吸収候補))
 SELECTCASE 吸収対象
 	CASE 0
-		吸収対象 = GETNUM(ABL, "武闘")
+		吸収対象 = GETNUM(ABL, "白兵")
 	CASE 1
 		吸収対象 = GETNUM(ABL, "知略")
 	CASE 2

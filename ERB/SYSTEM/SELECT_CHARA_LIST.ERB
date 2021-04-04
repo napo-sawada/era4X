@@ -126,7 +126,7 @@ FOR LOCAL:0, 0, CHARANUM
 			FOR LOCAL:2, 0, VARSIZE("表示数値")
 				IF 表示数値:(LOCAL:2) != -1
 					SELECTCASE 表示数値:(LOCAL:2)
-						CASE GETNUM(ABL, "武闘"), GETNUM(ABL, "防衛"), GETNUM(ABL, "知略"), GETNUM(ABL, "政治"), GETNUM(ABL, "妖術"), GETNUM(ABL, "料理"), GETNUM(ABL, "歌唱")
+						CASE GETNUM(ABL, "白兵"), GETNUM(ABL, "操艦"), GETNUM(ABL, "知略"), GETNUM(ABL, "政治"), GETNUM(ABL, "超能力"), GETNUM(ABL, "料理"), GETNUM(ABL, "歌唱")
 							ランク種別 = ランク_ＳＬＧ
 						CASE GETNUM(ABL, "性知識")
 							ランク種別 = ランク_性知識
@@ -147,7 +147,7 @@ FOR LOCAL:0, 0, CHARANUM
 			FOR LOCAL:2, 0, VARSIZE("表示数値")
 				IF 表示数値:(LOCAL:2) != -1
 					SELECTCASE 表示数値:(LOCAL:2)
-						CASE GETNUM(ABL, "武闘"), GETNUM(ABL, "防衛"), GETNUM(ABL, "知略"), GETNUM(ABL, "政治"), GETNUM(ABL, "妖術"), GETNUM(ABL, "料理"), GETNUM(ABL, "歌唱")
+						CASE GETNUM(ABL, "白兵"), GETNUM(ABL, "操艦"), GETNUM(ABL, "知略"), GETNUM(ABL, "政治"), GETNUM(ABL, "超能力"), GETNUM(ABL, "料理"), GETNUM(ABL, "歌唱")
 							ランク種別 = ランク_ＳＬＧ
 						CASE GETNUM(ABL, "性知識")
 							ランク種別 = ランク_性知識
@@ -427,7 +427,7 @@ FOR LOCAL:0, 0, CHARANUM
 			FOR LOCAL:2, 0, VARSIZE("表示数値")
 				IF 表示数値:(LOCAL:2) != -1
 					SELECTCASE 表示数値:(LOCAL:2)
-						CASE GETNUM(ABL, "武闘"), GETNUM(ABL, "防衛"), GETNUM(ABL, "知略"), GETNUM(ABL, "政治"), GETNUM(ABL, "妖術"), GETNUM(ABL, "料理"), GETNUM(ABL, "歌唱")
+						CASE GETNUM(ABL, "白兵"), GETNUM(ABL, "操艦"), GETNUM(ABL, "知略"), GETNUM(ABL, "政治"), GETNUM(ABL, "超能力"), GETNUM(ABL, "料理"), GETNUM(ABL, "歌唱")
 							ランク種別 = ランク_ＳＬＧ
 						CASE GETNUM(ABL, "性知識")
 							ランク種別 = ランク_性知識
@@ -448,7 +448,7 @@ FOR LOCAL:0, 0, CHARANUM
 			FOR LOCAL:2, 0, VARSIZE("表示数値")
 				IF 表示数値:(LOCAL:2) != -1
 					SELECTCASE 表示数値:(LOCAL:2)
-						CASE GETNUM(ABL, "武闘"), GETNUM(ABL, "防衛"), GETNUM(ABL, "知略"), GETNUM(ABL, "政治"), GETNUM(ABL, "妖術"), GETNUM(ABL, "料理"), GETNUM(ABL, "歌唱")
+						CASE GETNUM(ABL, "白兵"), GETNUM(ABL, "操艦"), GETNUM(ABL, "知略"), GETNUM(ABL, "政治"), GETNUM(ABL, "超能力"), GETNUM(ABL, "料理"), GETNUM(ABL, "歌唱")
 							ランク種別 = ランク_ＳＬＧ
 						CASE GETNUM(ABL, "性知識")
 							ランク種別 = ランク_性知識
@@ -691,14 +691,14 @@ RETURN GETDEFCOLOR()
 ;キャラリスト表示用の汎用関数 能力表示SLG版
 ;-------------------------------------------------
 @SELECT_CHARA_LIST_SLG()
-CALL SELECT_CHARA_LIST("DEFAULT", "DEFAULT", "DEFAULT", "武闘", "防衛", "知略", "政治", "妖術", "歌唱", "料理")
+CALL SELECT_CHARA_LIST("DEFAULT", "DEFAULT", "DEFAULT", "白兵", "操艦", "知略", "政治", "超能力", "歌唱", "料理")
 RETURN RESULT
 
 @SELECT_CHARA_LIST_ONLY_LOGIC_SLG(表示関数名, 選択関数名, 色指定関数名 = "DEFAULT")
 #DIMS 表示関数名
 #DIMS 選択関数名
 #DIMS 色指定関数名
-CALL SELECT_CHARA_LIST(表示関数名, 選択関数名, 色指定関数名, "武闘", "防衛", "知略", "政治", "妖術", "歌唱", "料理")
+CALL SELECT_CHARA_LIST(表示関数名, 選択関数名, 色指定関数名, "白兵", "操艦", "知略", "政治", "超能力", "歌唱", "料理")
 RETURN RESULT
 
 ;-------------------------------------------------
@@ -721,14 +721,14 @@ RETURN RESULT
 ;-------------------------------------------------
 @SELECT_CHARA_LIST_MULTI_SLG(人数)
 #DIM 人数
-CALL SELECT_CHARA_LIST_MULTI(人数, "DEFAULT", "DEFAULT", "DEFAULT", "武闘", "防衛", "知略", "政治", "妖術", "歌唱", "料理")
+CALL SELECT_CHARA_LIST_MULTI(人数, "DEFAULT", "DEFAULT", "DEFAULT", "白兵", "操艦", "知略", "政治", "超能力", "歌唱", "料理")
 
 @SELECT_CHARA_LIST_MULTI_ONLY_LOGIC_SLG(人数, 表示関数名, 選択関数名, 色指定関数名 = "DEFAULT")
 #DIM 人数
 #DIMS 表示関数名
 #DIMS 選択関数名
 #DIMS 色指定関数名
-CALL SELECT_CHARA_LIST_MULTI(人数, 表示関数名, 選択関数名, 色指定関数名,  "武闘", "防衛", "知略", "政治", "妖術", "歌唱", "料理")
+CALL SELECT_CHARA_LIST_MULTI(人数, 表示関数名, 選択関数名, 色指定関数名,  "白兵", "操艦", "知略", "政治", "超能力", "歌唱", "料理")
 
 ;-------------------------------------------------
 ;キャラリスト表示用の汎用関数 マルチ版すけべ

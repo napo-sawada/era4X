@@ -406,7 +406,7 @@ FOR LOCAL, 1, 8
 		BREAK
 	PRINTFORM %SUBSTRINGU(ABLNAME:(ARG:LOCAL), 0, 1)%:
 	SELECTCASE ARG:LOCAL
-		CASE GETNUM(ABL, "武闘"), GETNUM(ABL, "防衛"), GETNUM(ABL, "知略"), GETNUM(ABL, "政治"), GETNUM(ABL, "妖術"), GETNUM(ABL, "料理"), GETNUM(ABL, "歌唱")
+		CASE GETNUM(ABL, "白兵"), GETNUM(ABL, "操艦"), GETNUM(ABL, "知略"), GETNUM(ABL, "政治"), GETNUM(ABL, "超能力"), GETNUM(ABL, "料理"), GETNUM(ABL, "歌唱")
 			LOCAL:1 = ランク_ＳＬＧ
 		CASE GETNUM(ABL, "性知識")
 			LOCAL:1 = ランク_性知識

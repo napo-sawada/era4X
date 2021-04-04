@@ -146,9 +146,9 @@ IF LOCAL:1 && SCOUT_COUNT
 	FOR LOCAL:2, 0, LOCAL:1
 		SELECTCASE RAND:6
 			CASE 0
-				ABL:対象:武闘 ++
+				ABL:対象:白兵 ++
 			CASE 1
-				ABL:対象:防衛 ++
+				ABL:対象:操艦 ++
 			CASE 1
 				ABL:対象:知略 ++
 			CASE 2
@@ -206,11 +206,11 @@ RESETCOLOR
 ;星は目立つので名前が目立たなくならないよう少し下げ
 CALL TMP_PRINT_CHARA_STARS_NUM(対象)
 PRINT   武:
-CALL PRINT_ALPHABET_RANK(ランク_ＳＬＧ, ABL:対象:武闘)
-PRINTFORM {ABL:対象:武闘, 3, LEFT}
+CALL PRINT_ALPHABET_RANK(ランク_ＳＬＧ, ABL:対象:白兵)
+PRINTFORM {ABL:対象:白兵, 3, LEFT}
 PRINT  防:
-CALL PRINT_ALPHABET_RANK(ランク_ＳＬＧ, ABL:対象:防衛)
-PRINTFORM {ABL:対象:防衛, 3, LEFT}
+CALL PRINT_ALPHABET_RANK(ランク_ＳＬＧ, ABL:対象:操艦)
+PRINTFORM {ABL:対象:操艦, 3, LEFT}
 PRINT  知:
 CALL PRINT_ALPHABET_RANK(ランク_ＳＬＧ, ABL:対象:知略)
 PRINTFORM {ABL:対象:知略, 3, LEFT}
@@ -218,8 +218,8 @@ PRINT  政:
 CALL PRINT_ALPHABET_RANK(ランク_ＳＬＧ, ABL:対象:政治)
 PRINTFORM {ABL:対象:政治, 3, LEFT}
 PRINT  妖:
-CALL PRINT_ALPHABET_RANK(ランク_ＳＬＧ, ABL:対象:妖術)
-PRINTFORM {ABL:対象:妖術, 3, LEFT}
+CALL PRINT_ALPHABET_RANK(ランク_ＳＬＧ, ABL:対象:超能力)
+PRINTFORM {ABL:対象:超能力, 3, LEFT}
 PRINT  料:
 CALL PRINT_ALPHABET_RANK(ランク_ＳＬＧ, ABL:対象:料理)
 PRINTFORM {ABL:対象:料理, 3, LEFT}
@@ -294,11 +294,11 @@ RETURNF 提示額
 @SCOUT_CALC_PRICE_BASIS(対象)
 #FUNCTION
 #DIM 対象
-#DIM 四能力 = GETNUM(ABL, "武闘"), GETNUM(ABL, "防衛"), GETNUM(ABL, "知略"), GETNUM(ABL, "政治")
+#DIM 四能力 = GETNUM(ABL, "白兵"), GETNUM(ABL, "操艦"), GETNUM(ABL, "知略"), GETNUM(ABL, "政治")
 #DIM 提示額
 
 ;基本額は能力から算出
-提示額 = ABL:対象:武闘 + ABL:対象:防衛 + ABL:対象:知略 + ABL:対象:政治 + ABL:対象:料理 + ABL:対象:歌唱 + (ABL:対象:妖術 * 5)
+提示額 = ABL:対象:白兵 + ABL:対象:操艦 + ABL:対象:知略 + ABL:対象:政治 + ABL:対象:料理 + ABL:対象:歌唱 + (ABL:対象:超能力 * 5)
 提示額 *= 30
 
 FOR LOCAL, 0, VARSIZE("四能力")

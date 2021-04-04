@@ -202,7 +202,7 @@ DAY ++
 SIF FLAG:イベント発生禁止
 	GOTO SKIPPED
 
-; 防衛兵と部隊兵を保存
+; 操艦兵と部隊兵を保存
 ARRAYCOPY "CITY_SOLDIER", "CITY_SOLDIER_PREV"
 FOR LOCAL:0, 0, MAX_COUNTRY
 	FOR LOCAL:1, 0, MAX_UNIT
@@ -314,7 +314,7 @@ NEXT
 ;触手部屋の管理者に経験値を加算
 IF ITEM:触手部屋 && ID_TO_CHARA(FLAG:触手部屋管理者) >= 0 && IS_SYOKUSYU_MANAGE(ID_TO_CHARA(FLAG:触手部屋管理者))
 	EXP:(ID_TO_CHARA(FLAG:触手部屋管理者)):触手経験値 += 2
-	EXP:(ID_TO_CHARA(FLAG:触手部屋管理者)):妖術経験値 += 2
+	EXP:(ID_TO_CHARA(FLAG:触手部屋管理者)):超能力経験値 += 2
 	CALL TRAIN_AUTO_ABLUP(ID_TO_CHARA(FLAG:触手部屋管理者), 1)
 ENDIF
 
@@ -585,11 +585,11 @@ FOR LOCAL:0, 0, CHARANUM
 	;超成長力か努力家があればランダムに能力経験値獲得
 	IF FIND_PASSIVE_SKILL(LOCAL:0, "超成長力")|| FIND_PASSIVE_SKILL(LOCAL:0, "努力家")
 		LOCAL:1 = RAND(1, 4)
-		SELECTCASE IFRAND("0TO5", 1, "6", TALENT:LOCAL:妖術知識)
+		SELECTCASE IFRAND("0TO5", 1, "6", TALENT:LOCAL:超能力者)
 			CASE 0
-				LOCAL:2 = GETNUM(EXP, "武闘経験値")
+				LOCAL:2 = GETNUM(EXP, "白兵経験値")
 			CASE 1
-				LOCAL:2 = GETNUM(EXP, "防衛経験値")
+				LOCAL:2 = GETNUM(EXP, "操艦経験値")
 			CASE 2
 				LOCAL:2 = GETNUM(EXP, "知略経験値")
 			CASE 3
@@ -599,7 +599,7 @@ FOR LOCAL:0, 0, CHARANUM
 			CASE 5
 				LOCAL:2 = GETNUM(EXP, "歌唱経験値")
 			CASE 6
-				LOCAL:2 = GETNUM(EXP, "妖術経験値")
+				LOCAL:2 = GETNUM(EXP, "超能力経験値")
 				LOCAL:1 *= 20
 		ENDSELECT
 		EXP:(LOCAL:0):(LOCAL:2) += LOCAL:1

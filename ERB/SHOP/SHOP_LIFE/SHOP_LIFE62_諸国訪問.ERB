@@ -161,7 +161,7 @@ ENDIF
 #DIM 訪問先君主
 #DIM 訪問先
 #DIM 対象
-RETURN (ABL:MASTER:武闘 + ABL:MASTER:防衛 + ABL:MASTER:知略 + ABL:MASTER:政治) / 3 + MIN(CFLAG:対象:好感度 / 10, 150)
+RETURN (ABL:MASTER:白兵 + ABL:MASTER:操艦 + ABL:MASTER:知略 + ABL:MASTER:政治) / 3 + MIN(CFLAG:対象:好感度 / 10, 150)
 
 @VISIT_EVENT_1_DECISION(訪問先君主, 訪問先, 対象)
 #DIM 訪問先君主
@@ -179,7 +179,7 @@ RETURN 1
 #DIM 対象
 #DIM 支度金
 
-支度金 = (ABL:MASTER:武闘 + ABL:MASTER:知略 + ABL:MASTER:政治) * 50 * RAND(80, 120) / 100
+支度金 = (ABL:MASTER:白兵 + ABL:MASTER:知略 + ABL:MASTER:政治) * 50 * RAND(80, 120) / 100
 
 PRINTFORMW ……別れ際、%ANAME(対象)%に呼び止められた
 PRINTFORMW %ANAME(訪問先君主)%の下に来ないか、とのことだ
@@ -211,7 +211,7 @@ ENDIF
 #DIM 訪問先君主
 #DIM 訪問先
 #DIM 対象
-RETURN (ABL:MASTER:武闘 + ABL:MASTER:防衛 + ABL:MASTER:知略 + ABL:MASTER:政治) / 3 + MIN(CFLAG:対象:好感度 / 10, 150)
+RETURN (ABL:MASTER:白兵 + ABL:MASTER:操艦 + ABL:MASTER:知略 + ABL:MASTER:政治) / 3 + MIN(CFLAG:対象:好感度 / 10, 150)
 
 @VISIT_EVENT_2_DECISION(訪問先君主, 訪問先, 対象)
 #DIM 訪問先君主
@@ -227,7 +227,7 @@ RETURN 1
 #DIM 対象
 #DIM 支度金
 
-支度金 = (ABL:MASTER:武闘 + ABL:MASTER:知略 + ABL:MASTER:政治) * 50 * RAND(80, 120) / 100
+支度金 = (ABL:MASTER:白兵 + ABL:MASTER:知略 + ABL:MASTER:政治) * 50 * RAND(80, 120) / 100
 
 PRINTFORMW ……別れ際、%ANAME(対象)%に呼び止められた
 PRINTFORMW %ANAME(訪問先君主)%の下に来ないか、とのことだ

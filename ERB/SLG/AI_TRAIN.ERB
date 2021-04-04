@@ -22,7 +22,7 @@ FOR LOCAL, 0, AI_TRAIN_MAX_TARGET
 		CONTINUE
 	ENDIF
 
-	上昇能力 = IFRAND(@"{GETNUM(ABL, "武闘")}, {GETNUM(ABL, "防衛")}, {GETNUM(ABL, "知略")}, {GETNUM(ABL, "政治")}", 1, @"{GETNUM(ABL, "料理")}, {GETNUM(ABL, "歌唱")}", RAND:100 > 50, @"{GETNUM(ABL, "妖術")}", TALENT:対象:妖術知識 && RAND:100 > 30)
+	上昇能力 = IFRAND(@"{GETNUM(ABL, "白兵")}, {GETNUM(ABL, "操艦")}, {GETNUM(ABL, "知略")}, {GETNUM(ABL, "政治")}", 1, @"{GETNUM(ABL, "料理")}, {GETNUM(ABL, "歌唱")}", RAND:100 > 50, @"{GETNUM(ABL, "超能力")}", TALENT:対象:超能力者 && RAND:100 > 30)
 	上昇量 = RAND:3
 
 	SELECTCASE ABL:対象:上昇能力
@@ -38,8 +38,8 @@ FOR LOCAL, 0, AI_TRAIN_MAX_TARGET
 	SIF FIND_PASSIVE_SKILL(対象, "努力家")
 		上昇量 ++
 
-	;妖術の必要経験値高いので
-	SIF 上昇能力 == GETNUM(ABL, "妖術")
+	;超能力の必要経験値高いので
+	SIF 上昇能力 == GETNUM(ABL, "超能力")
 		上昇量 *= 10
 
 	SIF CFLAG:対象:所属 != CFLAG:MASTER:所属
@@ -75,7 +75,7 @@ NEXT
 FOR 対象, 0, CHARANUM
 	IF CFLAG:対象:所属 == 勢力 && !CFLAG:対象:捕虜先
 		士官リスト:士官数 = 対象
-		能力値リスト:士官数 = ABL:対象:武闘 + ABL:対象:知略 + ABL:対象:防衛 + ABL:対象:妖術 + ABL:対象:料理 + ABL:対象:歌唱 + ABL:対象:政治
+		能力値リスト:士官数 = ABL:対象:白兵 + ABL:対象:知略 + ABL:対象:操艦 + ABL:対象:超能力 + ABL:対象:料理 + ABL:対象:歌唱 + ABL:対象:政治
 		士官数 ++
 	ENDIF
 NEXT

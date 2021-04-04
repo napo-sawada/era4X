@@ -65,7 +65,7 @@ ELSE
 		PRINTFORML ・
 		PRINTFORML ・
 		PRINTFORMW ・
-		IF (ABL:対象:武闘 + ABL:対象:知略) / 10 > RAND:10 + 11
+		IF (ABL:対象:白兵 + ABL:対象:知略) / 10 > RAND:10 + 11
 			PRINTFORML やった！
 			PRINTFORMW 首尾よく潜入に成功した%ANAME(対象)%はその施設を破壊することに成功した
 			FOR LOCAL, 1, MAX_COUNTRY
@@ -91,7 +91,7 @@ ELSE
 			ENDIF
 			FOR LOCAL, 0, CHARANUM
 				IF CFLAG:(LOCAL):所属 == 外来人 && !IS_ANIMAL(LOCAL) && TALENT:LOCAL:特殊勢力素質 == 特殊勢力_外来人
-					ABL:LOCAL:武闘 += (RAND:3 + 1)
+					ABL:LOCAL:白兵 += (RAND:3 + 1)
 					ABL:LOCAL:知略 += (RAND:3 + 1)
 					ABL:LOCAL:政治 += (RAND:3 + 1)
 				ENDIF

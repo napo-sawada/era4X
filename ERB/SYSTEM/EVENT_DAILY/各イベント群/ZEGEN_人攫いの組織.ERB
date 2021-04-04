@@ -159,12 +159,12 @@ ELSE
 		PRINTFORML ・
 		PRINTFORML ・
 		PRINTFORMW ・
-		IF ABL:対象:武闘 * (RAND:5 + 1) > 40 * (RAND:9 + 1)
+		IF ABL:対象:白兵 * (RAND:5 + 1) > 40 * (RAND:9 + 1)
 			PRINTFORML 拠点を制圧した！
 			PRINTFORMW これで国内での連中の活動は減るだろう
 			IF 対象都市 > 0
 				CITY_GUARD:対象都市 += 20
-				CALL COLOR_PRINT(@"%CITY_NAME:対象都市%の防衛率が20上昇し、{CITY_GUARD:対象都市}になった", カラー_シアン)
+				CALL COLOR_PRINT(@"%CITY_NAME:対象都市%の操艦率が20上昇し、{CITY_GUARD:対象都市}になった", カラー_シアン)
 				PRINTFORMW 
 			ENDIF
 		ELSE
@@ -206,7 +206,7 @@ ELSE
 			PRINTFORMW その情報を手に遊郭を抜け出した%ANAME(対象)%は奴らの組織を摘発した
 			IF 対象都市 > 0
 				CITY_GUARD:対象都市 += 25
-				CALL COLOR_PRINT(@"%CITY_NAME:対象都市%の防衛率が25上昇し、{CITY_GUARD:対象都市}になった", カラー_シアン)
+				CALL COLOR_PRINT(@"%CITY_NAME:対象都市%の操艦率が25上昇し、{CITY_GUARD:対象都市}になった", カラー_シアン)
 				PRINTFORML 
 			ENDIF
 			FOR LOCAL, 1, MAX_COUNTRY

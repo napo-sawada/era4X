@@ -25,11 +25,11 @@ PRINTFORMW ……どうやら先客がいたらしい
 IF IS_FEMALE(対象)
 	PRINTFORML 事情を話すと山男はジロジロと%ANAME(対象)%を見て、泊めてほしければ金3000か、身体で払えと言ってきた
 	PRINTL
-	CALL PRINT_ABILITY(対象, GETNUM(ABL, "武闘"))
+	CALL PRINT_ABILITY(対象, GETNUM(ABL, "白兵"))
 	CALL ASK_MULTI_JUDGE("金を払う", MONEY >= 3000, "身体で払う", 1, "自力で下山する", 1)
 ELSE
 	PRINTFORML 事情を話すと管理人の女性は熱っぽい瞳で%ANAME(対象)%を見て、泊めてほしければ金3000か、一晩相手をしてほしいと言ってきた
-	CALL PRINT_ABILITY(対象, GETNUM(ABL, "武闘"))
+	CALL PRINT_ABILITY(対象, GETNUM(ABL, "白兵"))
 	CALL ASK_MULTI_JUDGE("金を払う", MONEY >= 3000, "相手をする", 1, "自力で下山する", 1)
 ENDIF
 
@@ -70,7 +70,7 @@ SELECTCASE RESULT
 		PRINTFORML ・
 		PRINTFORML ・
 		PRINTFORMW ・
-		IF INRANGE(ABL:対象:武闘 * 2, 50, 100) > RAND:100
+		IF INRANGE(ABL:対象:白兵 * 2, 50, 100) > RAND:100
 			PRINTFORMW なんとか無事に下山することが出来た！
 		ELSE
 			PRINTFORML うわぁ！

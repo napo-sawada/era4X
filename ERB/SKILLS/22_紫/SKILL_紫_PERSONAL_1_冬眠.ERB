@@ -61,13 +61,13 @@ RETURN 1
 #DIM 対象勢力
 #DIM 対象部隊
 対象側 = !発動側
-PRINTFORML %ANAME(発動者)%は寝ている！　武闘と防衛と知略が低下した！
+PRINTFORML %ANAME(発動者)%は寝ている！　白兵と操艦と知略が低下した！
 TIMES BATTLE_武闘パワー:発動側:発動番号, 0.5
 TIMES BATTLE_知略パワー:発動側:発動番号, 0.5
 TIMES BATTLE_防衛パワー:発動側:発動番号, 0.5
 
 @SKILL_22_PERSONAL_1_EXPLANATION
-RESULTS = 自身の武闘・防衛・知略を低下させる。
+RESULTS = 自身の白兵・操艦・知略を低下させる。
 
 @SKILL_22_PERSONAL_1_CANT_TELL
 

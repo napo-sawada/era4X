@@ -295,9 +295,9 @@ ELSEIF RESULT == 0 && LOCAL:40
 		ELSE
 			IF LOCAL:51 > COUNTRY_SOLDIER:(CFLAG:MASTER:所属)
 				IF LOCAL:11 > COUNTRY_SOLDIER:(CFLAG:MASTER:所属) + LOCAL:13
-					PRINTFORML ※要求兵数が現在の未割当兵数より多いため、全部隊を解散し、防衛に着いている兵も渡す必要があります
+					PRINTFORML ※要求兵数が現在の未割当兵数より多いため、全部隊を解散し、操艦に着いている兵も渡す必要があります
 				ELSE
-					PRINTFORML ※要求兵数が現在の未割当兵数より多いため、防衛に着いている兵も渡す必要があります
+					PRINTFORML ※要求兵数が現在の未割当兵数より多いため、操艦に着いている兵も渡す必要があります
 				ENDIF
 			ENDIF
 			CALL ASK_YN("決定", "キャンセル")
@@ -519,7 +519,7 @@ COUNTRY_SOLDIER:(ARG:1) += ARG:2
 @GET_PRISONER_VALUE(ARG:0)
 #FUNCTION
 LOCAL:0 = 0
-LOCAL:0 += (ABL:(ARG:0):武闘 + ABL:(ARG:0):防衛 + ABL:(ARG:0):知略 + ABL:(ARG:0):政治) / 4
+LOCAL:0 += (ABL:(ARG:0):白兵 + ABL:(ARG:0):操艦 + ABL:(ARG:0):知略 + ABL:(ARG:0):政治) / 4
 LOCAL:0 += (ABL:(ARG:0):歌唱 + ABL:(ARG:0):料理) / 2
 ;対象が特殊な勢力に捕らえられており、それが自国の捕らえている捕虜でない場合、価値は5倍に
 SIF CFLAG:MASTER:所属 != CFLAG:(ARG:0):捕虜先 && IS_SP_COUNTRY(CFLAG:(ARG:0):捕虜先)

@@ -20,7 +20,7 @@ TERRITORY_EVENT_NUM:分類 ++
 
 PRINTFORM %ANAME(対象)%の%ABLNAME:能力番号%:
 
-IF GROUPMATCH(能力番号, GETNUM(ABL, "武闘"), GETNUM(ABL, "防衛"), GETNUM(ABL, "知略"), GETNUM(ABL, "政治"), GETNUM(ABL, "妖術"), GETNUM(ABL, "料理"), GETNUM(ABL, "歌唱"))
+IF GROUPMATCH(能力番号, GETNUM(ABL, "白兵"), GETNUM(ABL, "操艦"), GETNUM(ABL, "知略"), GETNUM(ABL, "政治"), GETNUM(ABL, "超能力"), GETNUM(ABL, "料理"), GETNUM(ABL, "歌唱"))
 	LOCAL = ランク_ＳＬＧ
 ELSE
 	LOCAL = ランク_その他

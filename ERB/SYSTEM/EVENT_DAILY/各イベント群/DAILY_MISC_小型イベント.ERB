@@ -45,13 +45,13 @@ CASE 0 TO 21
 		ENDSELECT
 		SELECTCASE RAND:4
 			CASE 0
-				LOCALS = 武闘
-				ABL:対象:武闘 += LOCAL:1
-				LOCAL:2 = GETNUM(ABL, "武闘")
+				LOCALS = 白兵
+				ABL:対象:白兵 += LOCAL:1
+				LOCAL:2 = GETNUM(ABL, "白兵")
 			CASE 1
-				LOCALS = 防衛
-				ABL:対象:防衛 += LOCAL:1
-				LOCAL:2 = GETNUM(ABL, "防衛")
+				LOCALS = 操艦
+				ABL:対象:操艦 += LOCAL:1
+				LOCAL:2 = GETNUM(ABL, "操艦")
 			CASE 2
 				LOCALS = 知略
 				ABL:対象:知略 += LOCAL:1

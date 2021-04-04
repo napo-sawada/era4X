@@ -6,7 +6,7 @@ FOR LOCAL, 0, VARSIZE("ABL")
 		CONTINUE
 	PRINTBUTTON @"% "[" + ABLNAME:LOCAL + "]" , 10, LEFT%:", LOCAL
 
-	IF GROUPMATCH(LOCAL, GETNUM(ABL, "武闘"), GETNUM(ABL, "防衛"), GETNUM(ABL, "知略"), GETNUM(ABL, "政治"), GETNUM(ABL, "料理"), GETNUM(ABL, "歌唱"), GETNUM(ABL, "妖術"), GETNUM(ABL, "野心"))
+	IF GROUPMATCH(LOCAL, GETNUM(ABL, "白兵"), GETNUM(ABL, "操艦"), GETNUM(ABL, "知略"), GETNUM(ABL, "政治"), GETNUM(ABL, "料理"), GETNUM(ABL, "歌唱"), GETNUM(ABL, "超能力"), GETNUM(ABL, "野心"))
 		CALL PRINT_ALPHABET_RANK(ランク_ＳＬＧ, ABL:対象:LOCAL)
 	ELSEIF LOCAL == GETNUM(ABL, "性知識")
 		CALL PRINT_ALPHABET_RANK(ランク_性知識, ABL:対象:LOCAL)
@@ -37,5 +37,5 @@ RESULT = LIMIT(RESULT, ABL_MIN:入力値, ABL_MAX:入力値)
 
 ABL:対象:入力値 = RESULT
 
-SIF ABL:対象:妖術 > 0
-	TALENT:対象:妖術知識 = 1
+SIF ABL:対象:超能力 > 0
+	TALENT:対象:超能力者 = 1

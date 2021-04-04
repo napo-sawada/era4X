@@ -23,8 +23,8 @@ PRINTFORML 村はずれではぐれサキュバスと遭遇した
 PRINTFORMW 彼女は%ANAME(対象)%を見ると舌なめずりをして淫気を飛ばしてきた
 PRINTFORML どうしよう？
 PRINTFORML 
-CALL PRINT_ABILITY(対象, GETNUM(ABL, "武闘"))
-CALL PRINT_ABILITY(対象, GETNUM(ABL, "防衛"))
+CALL PRINT_ABILITY(対象, GETNUM(ABL, "白兵"))
+CALL PRINT_ABILITY(対象, GETNUM(ABL, "操艦"))
 CALL ASK_MULTI("剣を抜く" ,"気力で耐える" ,"身を委ねる")
 IF RESULT == 2
 	PRINTFORMW あまりの淫気に抗えず身を委ねた…
@@ -33,10 +33,10 @@ ELSEIF RESULT == 0
 	PRINTFORML ・
 	PRINTFORML ・
 	PRINTFORMW ・
-	IF LIMIT(ABL:対象:武闘, 40, 90) > RAND:100
+	IF LIMIT(ABL:対象:白兵, 40, 90) > RAND:100
 		PRINTFORML %ANAME(対象)%は見事見事サキュバスを退治した
 		PRINTFORMW サキュバスの淫気に耐えた事で性の技に精通した気がする
-		CALL PRINT_ADD_EXP(対象, "武闘経験値", RAND:8 + 1, 1)
+		CALL PRINT_ADD_EXP(対象, "白兵経験値", RAND:8 + 1, 1)
 		CALL FUCK(対象, "性技")
 		RETURN 1
 	ELSE
@@ -47,10 +47,10 @@ ELSEIF RESULT == 1
 	PRINTFORML ・
 	PRINTFORML ・
 	PRINTFORMW ・
-	IF LIMIT(ABL:対象:防衛, 40, 90) > RAND:100
+	IF LIMIT(ABL:対象:操艦, 40, 90) > RAND:100
 		PRINTFORMW %ANAME(対象)%は見事サキュバスの誘惑に耐え抜いた
 		PRINTFORMW サキュバスの淫気に耐えた事で性の技に精通した気がする
-		CALL PRINT_ADD_EXP(対象, "防衛経験値", RAND:8 + 1, 1)
+		CALL PRINT_ADD_EXP(対象, "操艦経験値", RAND:8 + 1, 1)
 		CALL FUCK(対象, "性技")
 		RETURN 1
 	ELSE

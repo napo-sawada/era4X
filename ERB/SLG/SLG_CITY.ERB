@@ -33,7 +33,7 @@ IF GET_RELAYNAME(ARG:0) == "無名"
 	RETURN
 ENDIF
 
-;防衛情報が参照可能かどうかのフラグ(自勢力の都市、または自勢力と隣接する都市のみ可能。観戦モードなら全て可)
+;操艦情報が参照可能かどうかのフラグ(自勢力の都市、または自勢力と隣接する都市のみ可能。観戦モードなら全て可)
 LOCAL:4 = CFLAG:MASTER:所属 >= 1 && (CITY_OWNER:(ARG:0) == CFLAG:MASTER:所属 || IS_NEIGHBORING_COUNTRY(ARG:0, CFLAG:MASTER:所属) >= 0)
 LOCAL:4 = LOCAL:4 || FLAG:観戦モード
 
@@ -173,7 +173,7 @@ ELSE
 	SPACE = 20
 	PRINTFORM %LOCALS:0%
 	PRINTFORM %TOSTR_SPACE(SPACE - STRLENS(LOCALS:0))%
-	PRINTFORM 防衛: %DECIMAL_STRING(CITY_GUARD:(ARG:0), 2)%(都市)
+	PRINTFORM 操艦: %DECIMAL_STRING(CITY_GUARD:(ARG:0), 2)%(都市)
 	PRINTFORM ×%DECIMAL_STRING(LOCAL:8, 2)%(経済)
 	PRINT ×
 	IF FLAG:観戦モード || LOCAL:6 == CFLAG:MASTER:所属
@@ -257,7 +257,7 @@ ELSE
 		PRINT  
 		PRINTBUTTON "[守将設定]" , ARG:0 + 400
 		PRINT  
-		PRINTBUTTON "[防衛解除]" , ARG:0 + 800
+		PRINTBUTTON "[操艦解除]" , ARG:0 + 800
 		PRINT  
 		IF CITY_INVESTED:(ARG:0)
 			PRINTPLAIN [投資済]

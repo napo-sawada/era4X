@@ -36,7 +36,7 @@ PRINTFORMW ・
 SELECTCASE RAND:3
 	CASE 0
 		PRINTFORMW 強盗の現場に遭遇した！
-		IF LIMIT(ABL:対象:武闘, 30, 80) > RAND:100
+		IF LIMIT(ABL:対象:白兵, 30, 80) > RAND:100
 			PRINTFORML %ANAME(対象)%に気づいた強盗は逃げていった
 			PRINTFORMW 住民からお礼を言われた
 		ELSE

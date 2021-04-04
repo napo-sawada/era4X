@@ -56,20 +56,20 @@ RETURN 1
 #DIM 難易度
 #DIM 金額
 
-;弾幕ごっこの該当能力決定、武闘と知略の高いに決定、同値なら武闘で
-IF ABL:MASTER:知略 > ABL:MASTER:武闘
+;弾幕ごっこの該当能力決定、白兵と知略の高いに決定、同値なら白兵で
+IF ABL:MASTER:知略 > ABL:MASTER:白兵
 	該当能力 = ABL:MASTER:知略
 ELSE
-	該当能力 = ABL:MASTER:武闘
+	該当能力 = ABL:MASTER:白兵
 ENDIF
 
 ;あなたが男の場合。もしくはふたなりの場合50%の確率で
 IF IS_MALE(MASTER) || (HAS_PENIS(MASTER) && RAND:2)
 	対象 = DAILY_TARGET:(RAND:DAILY_TARGET_NUM)
-	IF ABL:対象:知略 > ABL:対象:武闘
+	IF ABL:対象:知略 > ABL:対象:白兵
 		対象該当能力 =  ABL:対象:知略
 	ELSE
-		対象該当能力 = ABL:対象:武闘
+		対象該当能力 = ABL:対象:白兵
 	ENDIF
 	
 	PRINTFORML たまたま遭遇した%ANAME(対象)%から弾幕ごっこを挑まれた
@@ -303,7 +303,7 @@ ELSE
 	IF  該当能力 * (RAND:10 + 1) >= RAND(40 ,70) * (RAND:10 + 1) + (DAY / 2)
 		PRINTFORML 勝った！
 		PRINTFORMW 良い勝負が出来て自信がついた
-		CALL PRINT_ADD_EXP(MASTER, "武闘経験値", RAND:10 + 6, 1)
+		CALL PRINT_ADD_EXP(MASTER, "白兵経験値", RAND:10 + 6, 1)
 		CALL PRINT_ADD_EXP(MASTER, "知略経験値", RAND:10 + 6, 1)
 
 	ELSE

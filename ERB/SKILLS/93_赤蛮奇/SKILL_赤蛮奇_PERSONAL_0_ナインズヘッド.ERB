@@ -59,7 +59,7 @@ RETURN 1
 対象側 = !発動側
 PRINTFORML %ANAME(発動者)%は首を飛ばした！
 ;首だけなので料理はできない
-CALL BATTLE_ADD_MOB(発動側, 発動部隊 >= 0, "首", ABL:発動者:武闘 / 2, ABL:発動者:防衛 / 2, ABL:発動者:知略 / 2, ABL:発動者:政治 / 2, 0, 1, ABL:発動者:歌唱 / 2)
+CALL BATTLE_ADD_MOB(発動側, 発動部隊 >= 0, "首", ABL:発動者:白兵 / 2, ABL:発動者:操艦 / 2, ABL:発動者:知略 / 2, ABL:発動者:政治 / 2, 0, 1, ABL:発動者:歌唱 / 2)
 RETURN 1
 
 @SKILL_93_PERSONAL_0_EXPLANATION

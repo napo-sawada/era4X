@@ -15,7 +15,7 @@ SIF !HAS_PENIS(MASTER)
 	RETURN 0
 SIF DVAR:天狗取材_発生フラグ < 0
 	RETURN 0
-SIF (ABL:MASTER:武闘 + ABL:MASTER:防衛 + ABL:MASTER:知略 + ABL:MASTER:政治) < 250
+SIF (ABL:MASTER:白兵 + ABL:MASTER:操艦 + ABL:MASTER:知略 + ABL:MASTER:政治) < 250
 	RETURN 0
 RETURN DAY >= 15
 
@@ -550,8 +550,8 @@ ELSEIF DVAR:天狗取材_夜の取材回数 == 8
 		PRINTFORML 
 		CALL CREATE_RANDOM_CHARA(0,0,1)
 		対象 = RESULT
-		ABL:対象:武闘 = 55 + RAND:10
-		ABL:対象:防衛 = 25 + RAND:10
+		ABL:対象:白兵 = 55 + RAND:10
+		ABL:対象:操艦 = 25 + RAND:10
 		ABL:対象:知略 = 55 + RAND:10
 		ABL:対象:政治 = 15 + RAND:10
 		ABL:対象:歌唱 = 15 + RAND:10

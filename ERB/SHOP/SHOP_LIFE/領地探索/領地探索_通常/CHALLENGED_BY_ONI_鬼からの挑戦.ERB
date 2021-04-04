@@ -11,7 +11,7 @@ RETURN 1
 ;-------------------
 @TERRITORY_EVENT_CHALLENGED_BY_ONI_DECISION(対象)
 #DIM 対象
-RETURN ABL:対象:武闘 > ランク閾値:ランク_ＳＬＧ:ランク_B && IS_COUNTRY(CFLAG:対象:所属)
+RETURN ABL:対象:白兵 > ランク閾値:ランク_ＳＬＧ:ランク_B && IS_COUNTRY(CFLAG:対象:所属)
 
 ;-------------------
 ;本体
@@ -22,7 +22,7 @@ RETURN ABL:対象:武闘 > ランク閾値:ランク_ＳＬＧ:ランク_B && IS
 PRINTFORML 郊外を歩いていると、目の前に鬼が立ちはだかった
 PRINTFORML %ANAME(対象)%の噂を聞いてやって来たらしい、力試しがしたいとのことだ
 PRINTL
-CALL PRINT_ABILITY(対象, GETNUM(ABL, "武闘"))
+CALL PRINT_ABILITY(対象, GETNUM(ABL, "白兵"))
 CALL ASK_YN("力試しをする", "断る")
 
 IF RESULT == 1
@@ -36,7 +36,7 @@ PRINTFORML ・
 PRINTFORML ・
 PRINTFORMW ・
 
-IF ABL:対象:武闘 > RAND:200
+IF ABL:対象:白兵 > RAND:200
 	PRINTFORML 見事鬼を打倒した！
 	PRINTFORML 鬼は%ANAME(対象)%の力を認め、手下ともども仲間にしてほしいと言ってきた
 	PRINTFORMW 仲間が増えるのは大歓迎だ、受け入れてやることにした

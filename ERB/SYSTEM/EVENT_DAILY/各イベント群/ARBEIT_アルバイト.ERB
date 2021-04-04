@@ -60,7 +60,7 @@ IF DVAR:アルバイト_発生フラグ == 0
 		ELSEIF RESULT == 1
 			PRINTFORMW %ANAME(MASTER)%はとっさに逃げだした！
 			PRINTFORML 
-			IF ABL:MASTER:防衛 / 10 + RAND:5 > RAND:10
+			IF ABL:MASTER:操艦 / 10 + RAND:5 > RAND:10
 				PRINTFORMW …何とか逃げ切る事が出来た
 				RETURN
 			ELSE

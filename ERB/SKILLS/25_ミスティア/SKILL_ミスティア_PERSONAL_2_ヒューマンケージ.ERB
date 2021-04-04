@@ -71,11 +71,11 @@ FOR LOCAL, 0, BATTLE_COMMANDER_NUM:対象側
 		LOCAL:1 += 7
 NEXT
 PRINTFORML この歌は人間を虜にする！
-PRINTFORML %ANAME(発動者)%の武闘が上昇！
+PRINTFORML %ANAME(発動者)%の白兵が上昇！
 BATTLE_武闘パワー:発動側:発動番号 = BATTLE_武闘パワー:発動側:発動番号 * LOCAL:1 / 100
 
 @SKILL_25_PERSONAL_2_EXPLANATION
-RESULTS = 敵部隊の人間の数に応じ、自身の武闘を上昇させる。
+RESULTS = 敵部隊の人間の数に応じ、自身の白兵を上昇させる。
 
 @SKILL_25_PERSONAL_2_NO_LEARN_INIT
 @SKILL_25_PERSONAL_2_CANT_TELL

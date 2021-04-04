@@ -30,7 +30,7 @@ SELECTCASE RESULT
 	CASE 0
 		PRINTFORML 大金だったが、支払うことにした
 		MONEY -= 10000
-		CALL PRINT_ADD_EXP(対象, "武闘経験値", SPECIAL_TRAIN_CALC_EFFECT(対象, GETNUM(ABL, "武闘")) / 2)
+		CALL PRINT_ADD_EXP(対象, "白兵経験値", SPECIAL_TRAIN_CALC_EFFECT(対象, GETNUM(ABL, "白兵")) / 2)
 	CASE 1
 		PRINTFORML 金の代わりに手で奉仕すると伝えると、店主はニヤニヤとした笑みを浮かべ頷いた
 		PRINTFORML 
@@ -43,7 +43,7 @@ SELECTCASE RESULT
 		IF ABL:対象:性技 + ABL:対象:奉仕 + ABL:対象:精愛 > RAND:15
 			PRINTFORML 
 			PRINTFORML 店主は満足し、刀を譲ってくれた
-			CALL PRINT_ADD_EXP(対象, "武闘経験値", SPECIAL_TRAIN_CALC_EFFECT(対象, GETNUM(ABL, "武闘")) / 2)
+			CALL PRINT_ADD_EXP(対象, "白兵経験値", SPECIAL_TRAIN_CALC_EFFECT(対象, GETNUM(ABL, "白兵")) / 2)
 		ELSE
 			PRINTFORML 
 			PRINTFORML 店主を満足させられなかった……
@@ -60,7 +60,7 @@ SELECTCASE RESULT
 		IF ABL:対象:性技 + ABL:対象:奉仕 + ABL:対象:精愛 > RAND:8
 			PRINTFORML 
 			PRINTFORML 店主は満足し、刀を譲ってくれた
-			CALL PRINT_ADD_EXP(対象, "武闘経験値", SPECIAL_TRAIN_CALC_EFFECT(対象, GETNUM(ABL, "武闘")) / 2)
+			CALL PRINT_ADD_EXP(対象, "白兵経験値", SPECIAL_TRAIN_CALC_EFFECT(対象, GETNUM(ABL, "白兵")) / 2)
 		ELSE
 			PRINTFORML 
 			PRINTFORML 店主を満足させられなかった……
@@ -76,7 +76,7 @@ SELECTCASE RESULT
 		CALL FUCK(対象, "欲望, 奉仕, 精愛, 性技, 性交, Ｃ, Ｖ, Ｂ, Ｍ, キス, 口淫, Ｖ性交, 売春", "処女喪失, 膣内射精, キス喪失, 口内射精, CFLAG減少", GET_SPERM_ID("店主"), @"店主の\@RAND:2 ? ペニス # 唇\@", "店主", "", "売春")
 		PRINTFORML 
 		PRINTFORML 店主は満足し、刀を譲ってくれた
-		CALL PRINT_ADD_EXP(対象, "武闘経験値", SPECIAL_TRAIN_CALC_EFFECT(対象, GETNUM(ABL, "武闘")) / 2)
+		CALL PRINT_ADD_EXP(対象, "白兵経験値", SPECIAL_TRAIN_CALC_EFFECT(対象, GETNUM(ABL, "白兵")) / 2)
 ENDSELECT
 
 RETURN 1

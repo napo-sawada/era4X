@@ -90,7 +90,7 @@ IF 育児フラグ == 0
 	
 	;運動することにより、締まりが改善する！　歌唱とか下腹部に力はいるし！
 	;失敗0　成功0～1　大成功0～2
-	IF (能力 == GETNUM(ABL, "武闘")) || (能力 == GETNUM(ABL, "防衛")) || (能力 == GETNUM(ABL, "歌唱"))
+	IF (能力 == GETNUM(ABL, "白兵")) || (能力 == GETNUM(ABL, "歌唱"))
 		SIF HAS_VAGINA(MPLY:0)
 			TALENT:(MPLY:0):Ｖ締まり = LIMIT(TALENT:(MPLY:0):Ｖ締まり + RAND:(TFLAG:18 + 2), 締まり_最低値, 締まり_最高値)
 		TALENT:(MPLY:0):Ａ締まり = LIMIT(TALENT:(MPLY:0):Ａ締まり + RAND:(TFLAG:18 + 3), 締まり_最低値, 締まり_最高値)

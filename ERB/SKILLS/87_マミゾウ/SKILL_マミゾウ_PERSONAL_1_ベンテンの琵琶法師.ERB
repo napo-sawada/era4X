@@ -63,14 +63,14 @@ RETURN 1
 対象側 = !発動側
 PRINTFORML %ANAME(発動者)%は白蓮に化けた！
 LOCAL:1 = NAME_TO_CHARA("白蓮")
-BATTLE_武闘:発動側:発動番号 = ABL:(LOCAL:1):武闘
-BATTLE_防衛:発動側:発動番号 = ABL:(LOCAL:1):防衛
+BATTLE_武闘:発動側:発動番号 = ABL:(LOCAL:1):白兵
+BATTLE_操艦:発動側:発動番号 = ABL:(LOCAL:1):操艦
 BATTLE_知略:発動側:発動番号 = ABL:(LOCAL:1):知略
 BATTLE_歌唱:発動側:発動番号 = ABL:(LOCAL:1):歌唱
 BATTLE_料理:発動側:発動番号 = ABL:(LOCAL:1):料理
-BATTLE_妖術:発動側:発動番号 = ABL:(LOCAL:1):妖術
+BATTLE_妖術:発動側:発動番号 = ABL:(LOCAL:1):超能力
 BATTLE_武闘パワー:発動側:発動番号 = ABL_POWER(BATTLE_武闘:発動側:発動番号, 発動者)
-BATTLE_防衛パワー:発動側:発動番号 = ABL_POWER(BATTLE_防衛:発動側:発動番号, 発動者)
+BATTLE_防衛パワー:発動側:発動番号 = ABL_POWER(BATTLE_操艦:発動側:発動番号, 発動者)
 BATTLE_知略パワー:発動側:発動番号 = ABL_POWER(BATTLE_知略:発動側:発動番号, 発動者)
 BATTLE_歌唱パワー:発動側:発動番号 = ABL_POWER(BATTLE_歌唱:発動側:発動番号, 発動者)
 BATTLE_料理パワー:発動側:発動番号 = ABL_POWER(BATTLE_料理:発動側:発動番号, 発動者)

@@ -196,48 +196,48 @@ ENDIF
 
 SELECTCASE TALENT:成長型
 	CASE 0
-		ABL:武闘 = RAND:46 + 25
-		ABL:防衛 = RAND:46 + 25
+		ABL:白兵 = RAND:46 + 25
+		ABL:操艦 = RAND:46 + 25
 		ABL:知略 = RAND:46 + 25
 		ABL:政治 = RAND:46 + 25
 	CASE 1
-		ABL:武闘 = RAND:21 + RAND:10 + 35
-		ABL:防衛 = RAND:21 + RAND:10 + 35
+		ABL:白兵 = RAND:21 + RAND:10 + 35
+		ABL:操艦 = RAND:21 + RAND:10 + 35
 		ABL:知略 = RAND:21 + RAND:10 + 35
 		ABL:政治 = RAND:61 + 5
 	CASE 2
-		ABL:武闘 = RAND:51 + 15
-		ABL:防衛 = RAND:51 + 15
+		ABL:白兵 = RAND:51 + 15
+		ABL:操艦 = RAND:51 + 15
 		ABL:知略 = RAND:21 + RAND:11 + 40
 		ABL:政治 = RAND:21 + RAND:11 + 40
 	CASE 3
-		ABL:武闘 = RAND:21 + RAND:11 + 40
-		ABL:防衛 = RAND:21 + RAND:11 + 40
+		ABL:白兵 = RAND:21 + RAND:11 + 40
+		ABL:操艦 = RAND:21 + RAND:11 + 40
 		ABL:知略 = RAND:51 + 15
 		ABL:政治 = RAND:21 + RAND:11 + 40
 	CASE 4
-		ABL:武闘 = RAND:16 + RAND:6 + 55
-		ABL:防衛 = RAND:16 + RAND:6 + 55
+		ABL:白兵 = RAND:16 + RAND:6 + 55
+		ABL:操艦 = RAND:16 + RAND:6 + 55
 		ABL:知略 = RAND:51 + 15
 		ABL:政治 = RAND:51 + 15
 	CASE 5
-		ABL:武闘 = RAND:51 + 15
-		ABL:防衛 = RAND:51 + 15
+		ABL:白兵 = RAND:51 + 15
+		ABL:操艦 = RAND:51 + 15
 		ABL:知略 = RAND:16 + RAND:6 + 55
 		ABL:政治 = RAND:51 + 15
 	CASE 6
-		ABL:武闘 = RAND:51 + 15
-		ABL:防衛 = RAND:51 + 15
+		ABL:白兵 = RAND:51 + 15
+		ABL:操艦 = RAND:51 + 15
 		ABL:知略 = RAND:51 + 15
 		ABL:政治 = RAND:16 + RAND:6 + 55
 	CASE 7
-		ABL:武闘 = RAND:41 + 20
-		ABL:防衛 = RAND:41 + 20
+		ABL:白兵 = RAND:41 + 20
+		ABL:操艦 = RAND:41 + 20
 		ABL:知略 = RAND:41 + 20
 		ABL:政治 = RAND:41 + 20
 	CASE 8
-		ABL:武闘 = RAND:41 + 20
-		ABL:防衛 = RAND:41 + 20
+		ABL:白兵 = RAND:41 + 20
+		ABL:操艦 = RAND:41 + 20
 		ABL:知略 = RAND:41 + 20
 		ABL:政治 = RAND:41 + 20
 ENDSELECT
@@ -279,30 +279,30 @@ ENDIF
 
 ;指定多能(全てにボーナス)
 IF ARG:1 == 0
-	ABL:武闘 += RAND:4
-	ABL:防衛 += RAND:4
+	ABL:白兵 += RAND:4
+	ABL:操艦 += RAND:4
 	ABL:知略 += RAND:4
 	ABL:政治 += RAND:4
 	ABL:歌唱 += RAND:4
 	ABL:料理 += RAND:4
-;指定武官(武闘を最大に＆ボーナス)
+;指定武官(白兵を最大に＆ボーナス)
 ELSEIF ARG:1 == 1
-	SIF ABL:武闘 < ABL:政治
-		SWAP ABL:武闘, ABL:政治
-	SIF ABL:武闘 < ABL:知略
-		SWAP ABL:武闘, ABL:知略
-	ABL:武闘 += RAND:6
+	SIF ABL:白兵 < ABL:政治
+		SWAP ABL:白兵, ABL:政治
+	SIF ABL:白兵 < ABL:知略
+		SWAP ABL:白兵, ABL:知略
+	ABL:白兵 += RAND:6
 ;指定軍師(知略を最大に＆ボーナス)
 ELSEIF ARG:1 == 2
-	SIF ABL:知略 < ABL:武闘
-		SWAP ABL:知略, ABL:武闘
+	SIF ABL:知略 < ABL:白兵
+		SWAP ABL:知略, ABL:白兵
 	SIF ABL:知略 < ABL:政治
 		SWAP ABL:知略, ABL:政治
 	ABL:知略 += RAND:6
 ;指定政務官(政治を最大に＆ボーナス)
 ELSEIF ARG:1 == 3
-	SIF ABL:政治 < ABL:武闘
-		SWAP ABL:政治, ABL:武闘
+	SIF ABL:政治 < ABL:白兵
+		SWAP ABL:政治, ABL:白兵
 	SIF ABL:政治 < ABL:知略
 		SWAP ABL:政治, ABL:知略
 	ABL:政治 += RAND:6
@@ -382,8 +382,8 @@ IF !TALENT:臆病 && !TALENT:ツンデレ && !TALENT:自制心 && !TALENT:感情
 		CALL RCHARA_TALENT_SINGLE, 33, 12
 	ENDIF
 ENDIF
-;痛みに強い、痛みに弱い(武闘の初期値に応じて確率変動)
-CALL RCHARA_TALENT_OPPOSE, 41, 40, ABL:武闘 / 4 - 5, 13 - ABL:武闘 / 4
+;痛みに強い、痛みに弱い(白兵の初期値に応じて確率変動)
+CALL RCHARA_TALENT_OPPOSE, 41, 40, ABL:白兵 / 4 - 5, 13 - ABL:白兵 / 4
 ;濡れやすい、濡れにくい
 CALL RCHARA_TALENT_OPPOSE, 42, 43, 8, 5
 ;習得早い、習得遅い(知略の初期値に応じて確率変動)
@@ -426,13 +426,13 @@ ENDIF
 CALL RCHARA_TALENT_SINGLE, 87, 8
 ;謎の魅力
 CALL RCHARA_TALENT_SINGLE, 88, 2
-;回復早い、回復遅い(武闘の初期値に応じて確率変動)
-CALL RCHARA_TALENT_OPPOSE, 111, 112, ABL:武闘 / 7 + 3, 12 - ABL:武闘 / 7
+;回復早い、回復遅い(白兵の初期値に応じて確率変動)
+CALL RCHARA_TALENT_OPPOSE, 111, 112, ABL:白兵 / 7 + 3, 12 - ABL:白兵 / 7
 ;幼稚
 CALL RCHARA_TALENT_SINGLE, 132, 6
 
-;酒豪(武闘派の方が確率高め)
-CALL RCHARA_TALENT_SINGLE, 134, ABL:武闘 / 7 + 3
+;酒豪(白兵派の方が確率高め)
+CALL RCHARA_TALENT_SINGLE, 134, ABL:白兵 / 7 + 3
 
 ;下戸(知略派の方が確率高め)
 IF !TALENT:酒豪
@@ -1223,7 +1223,7 @@ ENDIF
 ;能力値に応じてキャラARG:0の最大精神力を設定する関数
 ;-------------------------
 @SET_MIND_POWER(ARG:0)
-LOCAL:0 = ABL:(ARG:0):武闘 + ABL:(ARG:0):知略 + ABL:(ARG:0):政治 + ABL:(ARG:0):歌唱 + ABL:(ARG:0):料理
+LOCAL:0 = ABL:(ARG:0):白兵 + ABL:(ARG:0):知略 + ABL:(ARG:0):政治 + ABL:(ARG:0):歌唱 + ABL:(ARG:0):料理
 MAXBASE:(ARG:0):精神力 = 500 + LOCAL:0 * 6 * (RAND:101 + 50) / 10000 * 100
 BASE:(ARG:0):精神力 = MAXBASE:(ARG:0):精神力
 

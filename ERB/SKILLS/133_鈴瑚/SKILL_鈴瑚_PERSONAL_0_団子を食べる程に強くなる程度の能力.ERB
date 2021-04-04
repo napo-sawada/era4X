@@ -62,12 +62,12 @@ RETURN 1
 #DIM 対象勢力
 #DIM 対象部隊
 対象側 = !発動側
-PRINTFORML 団子を作って食べた%ANAME(発動者)%の武闘が上昇！
+PRINTFORML 団子を作って食べた%ANAME(発動者)%の白兵が上昇！
 BATTLE_武闘:発動側:発動番号 += BATTLE_料理:発動側:発動番号
 BATTLE_武闘パワー:発動側:発動番号 = ABL_POWER(BATTLE_武闘:発動側:発動番号, 発動者)
 
 @SKILL_133_PERSONAL_0_EXPLANATION
-RESULTS = 自身の料理を武闘に加算する。
+RESULTS = 自身の料理を白兵に加算する。
 
 @SKILL_133_PERSONAL_0_CANT_TELL
 

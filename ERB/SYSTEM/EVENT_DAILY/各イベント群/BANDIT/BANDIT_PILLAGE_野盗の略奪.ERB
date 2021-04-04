@@ -68,7 +68,7 @@ ELSEIF RESULT == 2
 		DAILY_CANCEL = 1
 		RETURN 1
 	ELSE
-		お金 = ((ABL:MASTER:武闘 + ABL:MASTER:知略) * 5 * (RAND:5 + 1))
+		お金 = ((ABL:MASTER:白兵 + ABL:MASTER:知略) * 5 * (RAND:5 + 1))
 		PRINTFORMW 略奪を行った！
 		PRINTFORMW {お金}の金品を奪った！
 		MONEY += お金
@@ -207,8 +207,8 @@ ELSE
 		PRINTFORML ・
 		PRINTFORML ・
 		PRINTFORMW ・
-		;対象と主人公それぞれの武闘と知略の合計値で判定、対象は2倍から6倍、主人公は1倍から5倍の補正がつく、負けた場合処刑
-		IF ((ABL:対象:武闘 + ABL:対象:知略) * (RAND:5 + 2)) >= ((ABL:MASTER:武闘 + ABL:MASTER:知略) * (RAND:5 + 1))
+		;対象と主人公それぞれの白兵と知略の合計値で判定、対象は2倍から6倍、主人公は1倍から5倍の補正がつく、負けた場合処刑
+		IF ((ABL:対象:白兵 + ABL:対象:知略) * (RAND:5 + 2)) >= ((ABL:MASTER:白兵 + ABL:MASTER:知略) * (RAND:5 + 1))
 			PRINTFORMW %ANAME(対象)%の実力は想像以上だった
 			PRINTFORMW 敗北してしまった……
 			PRINTFORML 言い残すことはないかと、%ANAME(対象)%は訊いてきた

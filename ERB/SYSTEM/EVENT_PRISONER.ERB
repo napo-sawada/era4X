@@ -258,7 +258,7 @@ CALL EVENT_PRISONER_TEXT2(ARG:0)
 IF TALENT:(ARG:0):崩壊 || TALENT:(ARG:0):虚ろ
 
 ELSE
-	IF ABL:(ARG:0):武闘 >= 70 || TALENT:(ARG:0):痛みに強い
+	IF ABL:(ARG:0):白兵 >= 70 || TALENT:(ARG:0):痛みに強い
 		PRINTFORML %ANAME(ARG:0)%は歯を食いしばって必死に痛みと屈辱に耐えている…
 		IF TALENT:(ARG:0):痛みに強い
 			CFLAG:(ARG:0):捕虜怖 = 2500
@@ -272,7 +272,7 @@ ELSE
 		PRINTFORML %ANAME(ARG:0)%は鞭で打たれるたびに悲鳴を上げている…
 		CFLAG:(ARG:0):捕虜怖 = 3500
 	ENDIF
-	CFLAG:(ARG:0):捕虜怖 = CFLAG:(ARG:0):捕虜怖 * (200 - ABL:(ARG:0):武闘 / 2) / 200
+	CFLAG:(ARG:0):捕虜怖 = CFLAG:(ARG:0):捕虜怖 * (200 - ABL:(ARG:0):白兵 / 2) / 200
 	CFLAG:(ARG:0):捕虜怒 = 2000
 	CFLAG:(ARG:0):捕虜哀 = 2000
 ENDIF
@@ -440,9 +440,9 @@ LOCAL:1 += MAX(ABL:(ARG:0):Ｂ感 - 1, 0) * 2
 LOCAL:1 += MAX(ABL:(ARG:0):Ｍ感 - 1, 0)
 LOCAL:1 = LOCAL:1 * (ABL:(ARG:0):欲望 + 2) / 2
 
-;触手部屋の管理者に妖術経験値と触手経験値を与える
+;触手部屋の管理者に超能力経験値と触手経験値を与える
 LOCAL:2 = SQRT(LOCAL:1 * 100) / 4 + 5
-LOCAL:2 = LOCAL:2 * MAX(100 - ABL:(ID_TO_CHARA(FLAG:触手部屋管理者)):妖術, 20) / 100
+LOCAL:2 = LOCAL:2 * MAX(100 - ABL:(ID_TO_CHARA(FLAG:触手部屋管理者)):超能力, 20) / 100
 IF TALENT:(ARG:0):虚ろ
 	TIMES LOCAL:2, 0.50
 ELSEIF TALENT:(ARG:0):崩壊
@@ -451,7 +451,7 @@ ENDIF
 
 PRINTFORML <%ANAME(ID_TO_CHARA(FLAG:触手部屋管理者))%>
 CALL PRINT_ADD_EXP(ID_TO_CHARA(FLAG:触手部屋管理者), "触手経験値", 10)
-CALL PRINT_ADD_EXP(ID_TO_CHARA(FLAG:触手部屋管理者), "妖術経験値", LOCAL:2)
+CALL PRINT_ADD_EXP(ID_TO_CHARA(FLAG:触手部屋管理者), "超能力経験値", LOCAL:2)
 CALL TRAIN_AUTO_ABLUP(ID_TO_CHARA(FLAG:触手部屋管理者))
 PRINTL
 

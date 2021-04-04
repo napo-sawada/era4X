@@ -216,7 +216,7 @@ RETURN RESULT
 @ARENA_GET_POWER(対象)
 #FUNCTION
 #DIM 対象
-RETURNF MAX(ABL:対象:武闘 + ABL:対象:防衛, ABL:対象:武闘 + ABL:対象:知略, ABL:対象:防衛 + ABL:対象:知略, 1)
+RETURNF MAX(ABL:対象:白兵 + ABL:対象:操艦, ABL:対象:白兵 + ABL:対象:知略, ABL:対象:操艦 + ABL:対象:知略, 1)
 
 ;-------------------------------------------------
 ;「闘技場」賞金算出
@@ -254,9 +254,9 @@ FOR LOCAL, 0, 経験値総量
 NEXT
 
 SIF 獲得経験値:0 > 0
-	CALL PRINT_ADD_EXP(対象, "武闘経験値", 獲得経験値:0, 1)
+	CALL PRINT_ADD_EXP(対象, "白兵経験値", 獲得経験値:0, 1)
 SIF 獲得経験値:1 > 0
-	CALL PRINT_ADD_EXP(対象, "防衛経験値", 獲得経験値:1, 1)
+	CALL PRINT_ADD_EXP(対象, "操艦経験値", 獲得経験値:1, 1)
 SIF 獲得経験値:2 > 0
 	CALL PRINT_ADD_EXP(対象, "知略経験値", 獲得経験値:2, 1)
 SIF 獲得経験値:3 > 0

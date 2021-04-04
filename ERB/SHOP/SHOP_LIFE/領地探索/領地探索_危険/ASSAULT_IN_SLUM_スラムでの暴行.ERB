@@ -21,11 +21,11 @@ RETURN 1
 PRINTFORML スラムを歩いていると、いきなり路地裏から複数の手が伸びてきた
 PRINTFORML 暴漢たちは突然の事に慌てる%ANAME(対象)%を暗がりに引きずり込もうとしてくる……！
 PRINTL
-CALL PRINT_ABILITY(対象, GETNUM(ABL, "武闘"))
+CALL PRINT_ABILITY(対象, GETNUM(ABL, "白兵"))
 CALL ASK_MULTI_JUDGE("抵抗する", 1, "身を委ねる", IS_FEMALE(対象))
 
 IF RESULT    == 0
-	IF LIMIT(ABL:対象:武闘, 30, 90) > RAND:100
+	IF LIMIT(ABL:対象:白兵, 30, 90) > RAND:100
 		PRINTFORML 何とか暴漢たちの魔の手を振り切り、逃げ切ることに成功した
 		PRINTFORMW この辺りの治安をどうにかしなければと考えながら足早に立ち去った
 		RETURN 1
