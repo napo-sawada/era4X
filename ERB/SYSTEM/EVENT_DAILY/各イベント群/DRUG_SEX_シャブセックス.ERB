@@ -10,6 +10,8 @@ RETURN 50
 ;〇期以降になると発生するとか、デイリー側で利用している変数が-1だったら起こさない　みたいなはじき方をするときに使う
 ;---------------------
 @EVENT_DAILY_DRUG_SEX_DECISION()
+SIF !MOORING(MASTER)
+	RETURN
 RETURN 1
 
 ;---------------------

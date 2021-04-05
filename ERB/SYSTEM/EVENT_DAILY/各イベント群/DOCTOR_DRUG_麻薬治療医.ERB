@@ -17,6 +17,9 @@ FOR LOCAL:0, 0, CHARANUM
 	SIF (CFLAG:(LOCAL:0):所属 == CFLAG:MASTER:所属 && !CFLAG:(LOCAL:0):捕虜先) && (CFLAG:(LOCAL:0):薬物依存)
 		LOCAL:1 ++
 NEXT
+SIF !MOORING(MASTER)
+	RETURN 0
+
 SIF LOCAL:1 < 1
 	RETURN 0
 
@@ -38,7 +41,7 @@ RETURN デイリー_ジャンル_トレーナー
 @EVENT_DAILY_DOCTOR_DRUG()
 #DIM 対象
 
-CALL COLOR_PRINT("外界の医者が訪ねてきました", カラー_注意)
+CALL COLOR_PRINT("闇医者が医者が訪ねてきました", カラー_注意)
 PRINTFORML
 PRINTFORMW 「よう」
 PRINTFORMW 「クスリに手ェ出したやつがいるって聞いたから来た。俺は医者だ」
