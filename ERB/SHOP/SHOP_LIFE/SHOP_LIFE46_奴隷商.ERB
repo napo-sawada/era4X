@@ -3,7 +3,7 @@
 ;-------------------------------------------------
 @SHOP_LIFE_NAME46
 RESULTS:0 '= "奴隷商"
-
+;'
 ;-------------------------------------------------
 ;「奴隷商」の選択可否
 ;-------------------------------------------------
@@ -359,6 +359,10 @@ IF RESULT == 1
 	GOTO INPUT_LOOP1
 	CLEARLINE 2
 ENDIF
+CSTR:ID:0 = 
+CSTR:ID:1 = 
+
+CSTR:ID:98 = %RESULTS%
 NAME:ID = %RESULTS%
 
 PRINTFORML %CALLNAME:ID%の新しい呼び名を入力してください

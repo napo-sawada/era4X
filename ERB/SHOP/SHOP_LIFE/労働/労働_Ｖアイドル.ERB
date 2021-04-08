@@ -100,8 +100,8 @@ ENDSELECT
 PRINTL 撮影経験+1
 PRINTL 被写経験+1
 RESETCOLOR
-EXP:ID:62 += 1
-EXP:ID:63 += 1
+EXP:ID:撮影経験 += 1
+EXP:ID:被撮影経験 += 1
 
 ; ランダム流入(記入レベルに依存)
 ランダム流入 = RAND:(500 + CFLAG:ID:1007 * 150) + CFLAG:ID:1008 * 150 + 300
