@@ -142,6 +142,9 @@
 
 #DIM CONST AIR_SHIP_AVOID = 50
 
+; 戦闘系
+#DIM COMMANDER, 2
+
 ; 武器の種類
 #DIM CONST 実体弾 = 0
 #DIM CONST レーザー = 1

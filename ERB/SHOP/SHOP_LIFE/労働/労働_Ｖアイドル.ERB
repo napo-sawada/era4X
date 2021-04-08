@@ -98,10 +98,8 @@ SELECTCASE RAND:3
 ENDSELECT
 ; 共通経験値
 PRINTL 撮影経験+1
-PRINTL 被写経験+1
 RESETCOLOR
 EXP:ID:撮影経験 += 1
-EXP:ID:被撮影経験 += 1
 
 ; ランダム流入(記入レベルに依存)
 ランダム流入 = RAND:(500 + CFLAG:ID:1007 * 150) + CFLAG:ID:1008 * 150 + 300
