@@ -1,11 +1,11 @@
 ﻿{
     #DIMS CONST SKILL_GENRE_ENG =
-        "PERSONAL", "TROOP", "CAPTURE", "ESCAPE", "PASSIVE"
+        "PERSONAL", "TROOP", "UNIQUE"
 }
 
 {
     #DIMS CONST SKILL_GENRE = 
-        "個人", "部隊", "捕縛", "逃走", "受動"
+        "自艦", "艦隊", "ユニーク"
 }
 
 #DIM CONST SKILL_GENRE_NUM = VARSIZE("SKILL_GENRE_ENG")
