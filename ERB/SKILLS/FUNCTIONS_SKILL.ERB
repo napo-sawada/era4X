@@ -406,16 +406,12 @@ CALLFORM %アクセサ%LEVEL
 CALLFORM %アクセサ%EXPLANATION
 説明 = %RESULTS%
 
-IF ジャンル == スキル_ジャンル_PASSIVE
-	発動率 '= "  --"
-ELSE
-	TRYCCALLFORM %アクセサ%RATE_VARABLE
-		発動率 '= "可変"
-	CATCH
-		CALLFORM %アクセサ%RATE
-		発動率 = %DECIMAL_STRING(RESULT, 1)%
-	ENDCATCH
-ENDIF
+TRYCCALLFORM %アクセサ%RATE_VARABLE
+	発動率 '= "可変"
+CATCH
+	CALLFORM %アクセサ%RATE
+	発動率 = %DECIMAL_STRING(RESULT, 1)%
+ENDCATCH
 
 TRYCCALLFORM %アクセサ%CANT_TELL
 	伝達不可 '= "伝達不可"

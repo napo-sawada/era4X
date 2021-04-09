@@ -119,7 +119,9 @@
 #DIM CONST 空母 = 6
 #DIM CONST 輸送船 = 7
 #DIM CONST 作業船 = 8
-
+; スキル判定用
+#DIM CONST 艦種_ミサイル = 9
+#DIM CONST 艦種_航空機 = 10
 
 #DIM CONST SHIP_CATEGORY_COUNT = 99
 
