@@ -37,3 +37,5 @@
 #DIM CONST TYPE_シールド増加 = 4
 #DIM CONST TYPE_対空命中 = 5
 #DIM CONST TYPE_対空ダメージ = 6
+#DIM CONST TYPE_敵回避 = 7
+#DIM CONST TYPE_敵命中 = 8

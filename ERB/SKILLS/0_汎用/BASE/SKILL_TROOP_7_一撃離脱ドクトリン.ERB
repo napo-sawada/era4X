@@ -16,7 +16,7 @@ RESULTS = 艦隊の巡洋艦と戦艦の与ダメージ-10\%、艦隊のコル�
 
 
 @SKILL_0_TROOP_7_EFFECT(VALUE, TYPE, CLASS)
-#DIM REF VALUE
+#DIM VALUE
 #DIM TYPE
 #DIM CLASS
 
@@ -27,6 +27,8 @@ ELSEIF TYPE == TYPE_回避 && (CLASS == コルベット || CLASS == フリゲー
 ELSEIF TYPE == TYPE_命中 && (CLASS == コルベット || CLASS == フリゲート)
 	TIMES VALUE, 1.05
 ENDIF
+
+RETURN VALUE
 
 @SKILL_0_TROOP_7_RATE(発動者, 発動番号, 発動側, 発動勢力, 発動部隊, 対象勢力, 対象部隊)
 #DIM 発動者

@@ -15,7 +15,7 @@ RETURN 3
 RESULTS = 全艦の回避+10\% 全艦の被ダメージ+10\%
 
 @SKILL_0_TROOP_2_EFFECT(VALUE, TYPE, CLASS)
-#DIM REF VALUE
+#DIM VALUE
 #DIM TYPE
 #DIM CLASS
 
@@ -24,6 +24,8 @@ IF TYPE == TYPE_回避
 ELSEIF TYPE == TYPE_被ダメージ
 	TIMES VALUE, 1.10
 ENDIF
+
+RETURN VALUE
 
 
 @SKILL_0_TROOP_2_RATE(発動者, 発動番号, 発動側, 発動勢力, 発動部隊, 対象勢力, 対象部隊)
