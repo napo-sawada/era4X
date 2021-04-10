@@ -321,7 +321,7 @@ ELSE
 	PRINTFORMW 一瞬身をこわばらせたが、ただ撫でられているだけと分かると、おずおずと顔を上げた
 	PRINTFORML 謝ることはない、充分恩返しをしてもらったのだから
 	PRINTFORMW 頭を撫でながら彼女にそう告げると、瞳をかすかに潤ませて頬を緩ませる
-	PRINTFORML もし良ければ我が軍に来ないか？と彼女を誘う
+	PRINTFORML もし良ければ俺のものに来ないか？と彼女を誘う
 	PRINTFORMW 「えっ、その…えっと」
 	PRINTFORMW 突然の誘いに、彼女は驚き慌てていたが
 	PRINTFORMW やがて考えがまとまったのか、%ANAME(MASTER)%を見つめるとニコッと笑い答えた
@@ -337,8 +337,6 @@ ELSE
 	ABL:対象:歌唱 = 35 + RAND:10
 	ABL:対象:料理 = 45 + RAND:10
 	CALL TAG_INIT(対象,25)
-	CALL LEARN_SKILL_GENERAL_BY_NAME(対象, "努力家")
-	CALL LEARN_SKILL_GENERAL_BY_NAME(対象, "治療")
 	IF 恩返し_種類:(DVAR:恩返し_動物番号) == "鶴"
 		TALENT:対象:動物耳 = 0
 		TALENT:対象:しっぽ = 0
