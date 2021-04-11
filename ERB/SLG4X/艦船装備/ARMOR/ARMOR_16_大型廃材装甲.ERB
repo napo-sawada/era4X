@@ -1,0 +1,33 @@
+;-----------------------------------
+; アーマー
+;-----------------------------------
+@GET_ARMOR_NAME_16
+RESULTS = 大型廃材装甲
+
+@GET_ARMOR_STATUS_16(STATUS)
+#DIM REF STATUS
+
+STATUS:ARMOR = 200
+STATUS:SIZE = 3
+STATUS:PRICE = 4000
+
+;-----------------------------------
+; アーマーの説明
+;-----------------------------------
+@GET_ARMOR_DESCRIPTION_16
+#DIM STATUS, STATUS_LENGTH
+
+CALL GET_ARMOR_STATUS_16(STATUS)
+CALL GET_ARMOR_NAME_16
+PRINTFORML %RESULTS%
+PRINTFORML 廃材ででっち上げた即席の心もとない装甲。
+PRINTFORML 装甲      : {STATUS:ARMOR}
+PRINTFORML サイズ    : {STATUS:SIZE}
+
+;-----------------------------------
+; 装甲の資材
+;-----------------------------------
+@GET_ARMOR_RESOURCE_16(USE_RESOURCE)
+#DIM REF USE_RESOURCE
+
+USE_RESOURCE:装甲合金 = 0

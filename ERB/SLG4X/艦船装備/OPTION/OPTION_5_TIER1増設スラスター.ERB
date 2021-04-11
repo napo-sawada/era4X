@@ -1,0 +1,31 @@
+;-----------------------------------
+; オプション
+;-----------------------------------
+@GET_OPTION_NAME_5
+RESULTS = TIER1増設スラスター
+@GET_OPTION_STATUS_5(STATUS)
+#DIM REF STATUS
+
+STATUS:AVOID = 5
+STATUS:PRICE = 10000
+
+;-----------------------------------
+; オプションの説明
+;-----------------------------------
+@GET_OPTION_DESCRIPTION_5(STATUS)
+#DIM STATUS, STATUS_LENGTH
+CALL GET_OPTION_STATUS_5(STATUS)
+CALL GET_OPTION_NAME_5
+PRINTFORML %RESULTS%
+PRINTFORML 旋回速度の上昇など回避性能を向上させる追加装備。
+PRINTFORML 回避      : {STATUS:AVOID}
+
+;-----------------------------------
+; オプションの資材
+;-----------------------------------
+@GET_OPTION_RESOURCE_5(USE_RESOURCE)
+#DIM REF USE_RESOURCE
+
+USE_RESOURCE:耐熱合金 = 1
+USE_RESOURCE:ジェットガス = 1
+

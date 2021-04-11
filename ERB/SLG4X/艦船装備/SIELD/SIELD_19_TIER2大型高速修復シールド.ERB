@@ -1,0 +1,35 @@
+;-----------------------------------
+; シールド
+;-----------------------------------
+@GET_SIELD_NAME_19
+RESULTS = TIER2大型高速修復シールド
+
+@GET_SIELD_STATUS_19(STATUS)
+#DIM REF STATUS
+
+STATUS:SIELD = 800
+STATUS:SIELD_RECOVER = 24
+STATUS:SIZE = 3
+STATUS:PRICE = 80000
+
+;-----------------------------------
+; シールドの説明
+;-----------------------------------
+@GET_SIELD_DESCRIPTION_19
+#DIM STATUS, STATUS_LENGTH
+
+CALL GET_SIELD_STATUS_19(STATUS)
+CALL GET_SIELD_NAME_19
+PRINTFORML %RESULTS%
+PRINTFORML シールド    : {STATUS:SIELD}
+PRINTFORML シールド回復: {STATUS:SIELD_RECOVER}/ターン
+PRINTFORML サイズ      : {STATUS:SIZE}
+
+;-----------------------------------
+; シールドの資材
+;-----------------------------------
+@GET_SIELD_RESOURCE_19(USE_RESOURCE)
+#DIM REF USE_RESOURCE
+
+USE_RESOURCE:シールド発生装置 = 24
+

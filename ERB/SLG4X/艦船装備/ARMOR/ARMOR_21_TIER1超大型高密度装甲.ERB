@@ -1,0 +1,34 @@
+﻿;-----------------------------------
+; アーマー
+;-----------------------------------
+@GET_ARMOR_NAME_21
+RESULTS = TIER1超大型高密度装甲
+
+@GET_ARMOR_STATUS_21(STATUS)
+#DIM REF STATUS
+
+STATUS:ARMOR = 3000
+STATUS:AVOID = -5
+STATUS:SIZE = 4
+STATUS:PRICE = 120000
+
+;-----------------------------------
+; アーマーの説明
+;-----------------------------------
+@GET_ARMOR_DESCRIPTION_21
+#DIM STATUS, STATUS_LENGTH
+
+CALL GET_ARMOR_STATUS_21(STATUS)
+CALL GET_ARMOR_NAME_21
+PRINTFORML %RESULTS%
+PRINTFORML 装甲      : {STATUS:ARMOR}
+PRINTFORML 回避      : {STATUS:AVOID}
+PRINTFORML サイズ    : {STATUS:SIZE}
+
+;-----------------------------------
+; 装甲の資材
+;-----------------------------------
+@GET_ARMOR_RESOURCE_21(USE_RESOURCE)
+#DIM REF USE_RESOURCE
+
+USE_RESOURCE:装甲合金 = 40

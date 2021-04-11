@@ -1,0 +1,35 @@
+;-----------------------------------
+; シールド
+;-----------------------------------
+@GET_SIELD_NAME_34
+RESULTS = TIER3中型強化シールド
+
+@GET_SIELD_STATUS_34(STATUS)
+#DIM REF STATUS
+
+STATUS:SIELD = 2400
+STATUS:SIELD_RECOVER = 8
+STATUS:SIZE = 2
+STATUS:PRICE = 80000
+
+;-----------------------------------
+; シールドの説明
+;-----------------------------------
+@GET_SIELD_DESCRIPTION_34
+#DIM STATUS, STATUS_LENGTH
+
+CALL GET_SIELD_STATUS_34(STATUS)
+CALL GET_SIELD_NAME_34
+PRINTFORML %RESULTS%
+PRINTFORML シールド    : {STATUS:SIELD}
+PRINTFORML シールド回復: {STATUS:SIELD_RECOVER}/ターン
+PRINTFORML サイズ      : {STATUS:SIZE}
+
+;-----------------------------------
+; シールドの資材
+;-----------------------------------
+@GET_SIELD_RESOURCE_34(USE_RESOURCE)
+#DIM REF USE_RESOURCE
+
+USE_RESOURCE:シールド発生装置 = 24
+

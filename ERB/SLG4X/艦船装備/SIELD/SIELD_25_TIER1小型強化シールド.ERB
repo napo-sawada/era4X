@@ -1,0 +1,36 @@
+﻿;-----------------------------------
+; シールド
+;-----------------------------------
+@GET_SIELD_NAME_25
+RESULTS = TIER1小型強化シールド
+
+@GET_SIELD_STATUS_25(STATUS)
+#DIM REF STATUS
+
+STATUS:SIELD = 300
+STATUS:SIELD_RECOVER = 1
+STATUS:SIZE = 1
+STATUS:PRICE = 10000
+
+;-----------------------------------
+; シールドの説明
+;-----------------------------------
+@GET_SIELD_DESCRIPTION_25
+#DIM STATUS, STATUS_LENGTH
+
+CALL GET_SIELD_STATUS_25(STATUS)
+CALL GET_SIELD_NAME_25
+PRINTFORML %RESULTS%
+PRINTFORML 最大出力の強化を図ったシールド。その代わりに回復性能が低下している。
+PRINTFORML シールド    : {STATUS:SIELD}
+PRINTFORML シールド回復: {STATUS:SIELD_RECOVER}/ターン
+PRINTFORML サイズ      : {STATUS:SIZE}
+
+;-----------------------------------
+; シールドの資材
+;-----------------------------------
+@GET_SIELD_RESOURCE_25(USE_RESOURCE)
+#DIM REF USE_RESOURCE
+
+USE_RESOURCE:シールド発生装置 = 3
+

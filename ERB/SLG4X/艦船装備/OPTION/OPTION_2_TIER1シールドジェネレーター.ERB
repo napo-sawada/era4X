@@ -1,0 +1,31 @@
+;-----------------------------------
+; オプション
+;-----------------------------------
+@GET_OPTION_NAME_2
+RESULTS = TIER1シールドジェネレーター
+
+@GET_OPTION_STATUS_2(STATUS)
+#DIM REF STATUS
+
+STATUS:SIELD_RECOVER = 8
+STATUS:PRICE = 10000
+
+;-----------------------------------
+; オプションの説明
+;-----------------------------------
+@GET_OPTION_DESCRIPTION_2(STATUS)
+#DIM STATUS, STATUS_LENGTH
+CALL GET_OPTION_STATUS_2(STATUS)
+CALL GET_OPTION_NAME_2
+PRINTFORML %RESULTS%
+PRINTFORML シールドの再生速度を増強する追加装備。
+PRINTFORML シールド回復: {STATUS:SIELD_RECOVER}/ターン
+
+;-----------------------------------
+; オプションの資材
+;-----------------------------------
+@GET_OPTION_RESOURCE_2(USE_RESOURCE)
+#DIM REF USE_RESOURCE
+
+USE_RESOURCE:シールド発生装置 = 3
+
