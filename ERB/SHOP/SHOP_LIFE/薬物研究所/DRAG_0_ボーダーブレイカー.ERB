@@ -1,0 +1,69 @@
+;---------------------------
+; 薬物の説明
+;---------------------------
+@DRAG_DESCRIPTION_0
+PRINTL 
+PRINTL [ボーダーブレイカー]
+PRINTL 
+PRINTL 愛情と性欲の境をなくし、その総和が愛情と性欲両方に感じられる薬
+PRINTL 相手のことを愛していれば愛しているほど性欲が強くなり、性欲が強ければ強いほど相手のことを愛おしく感じられる
+PRINTL 愛情が強くなりすぎることで独占欲も強くなり、その結果犯罪に走る者がいるためどの国でも禁止されている
+PRINTL 
+
+;--------------------------
+; 本体
+;--------------------------
+@DRAG_BODY_0(対象)
+#DIM 対象
+IF TALENT:対象:恋慕
+  PRINTFORML ベッドが備えられた個室でボーダーブレイカーを経口摂取させられしばらくすると、%CALLNAME:対象%はいそいそと服を脱ぎ出した
+  PRINTFORML どうしたのか尋ねると、%CALLNAME:対象%は腰を前に突き出し、秘割を指でくぱぁと開いて見せた
+  PRINTFORML 見せつけられた膣穴からは、絞られた果実のように汁がだらだらと溢れ出ている
+  PRINTFORML 溢れ出た愛液はポタポタとこぼれ落ちリノリウム張りの白い床に水たまりを作っている
+  PRINTFORML 明らかに異常な発情ぶりが、ドラッグの効果を如実に表していた
+  PRINTL 
+  PRINTFORML 「脱水しないよう、適度に水を飲ませてあげてください」
+  PRINTL 
+  PRINTW 販売員はそれだけいうと、部屋を後にした。あとはご自由にということだろう
+  PRINTL 
+  PRINTFORML 裸になってベッドに寝そべると、%CALLNAME:対象%が軟体生物のようにねっとりと覆いかぶさり、手足を体に絡めてきた
+  PRINTFORML そのままそそりたった%CALLNAME:MASTER%のペニスを膣ににゅるりと咥え込み、床オナでもするように%CALLNAME:MASTER%の体に自分の体を擦り付けてきた
+  PRINTFORML 暑く火照った%CALLNAME:対象%の体から発せられるたっぷりの汗が潤滑液になり、ヌルヌルと気持ちいい快感が%CALLNAME:MASTER%に走る
+  PRINTFORML %CALLNAME:対象%にはそれ以上の快楽が走っているのだろう。言葉にならない叫び声をあげながらねっとりと%CALLNAME:MASTER%の上を這いまわっている
+  PRINTW
+  PRINTW ...
+  PRINTW ......
+  PRINTW .........
+  PRINTFORML 何度%CALLNAME:対象%の中に射精しただろうか。
+  PRINTFORML 時折水をとるために立ち上がったときでさえ、%CALLNAME:対象%は小猿のように%CALLNAME:MASTER%に抱きついて離れなかった
+  PRINTFORML 水を飲ますのも一苦労で、コップから水を飲もうとしないので%CALLNAME:MASTER%が口移しで飲ませてやらないとならなかった
+  PRINTFORML 手間だったが、もし水を飲ませてやらなかったら%CALLNAME:対象%は干からびてしまっていただろう
+  PRINTFORML 何せ汗と愛液を何時間もしとどに流し続け、度重なる絶頂に咽び泣き涙や鼻水、よだれ、潮まで垂れ流しているのだから
+  PRINTFORML しかし%CALLNAME:対象%の性欲は衰える気配を見せず、決して肉棒を抜こうとしなかった
+  PRINTFORML 熱い%CALLNAME:対象%の膣内でトロトロにとろけさせられたペニスは、もはや今射精しているのかもわからないほど、痛みと快楽を垂れ流している
+  PRINTW ...
+  PRINTW ......
+  PRINTW .........
+  PRINTFORML 結局薬の効果が切れるまで数時間まぐわい続けた
+  PRINTFORML 薬の効果に%CALLNAME:対象%は満足したようで、晴々とした顔をしている
+  PRINTFORML ただ、全身、特に内股がひどい筋肉痛になったようで、%CALLNAME:対象%は内股で生まれたての小鹿のようになっていた
+  LOCALS:0 = %CALLNAME:対象%の唇
+  LOCALS:1 = %CALLNAME:対象%の膣
+  CALL FUCK(MASTER, "性技, 性交, Ｃ, 射精", "童貞喪失, キス喪失", 0, LOCALS:0, "", LOCALS:1, "和姦")
+  LOCALS:0 = %CALLNAME:MASTER%の唇
+  CALL FUCK(対象, "欲望, 奉仕, 性技, 性交, Ｖ, Ｍ, Ｖ性交", "処女喪失, 膣内射精, キス喪失", 0, LOCALS:0, CALLNAME:MASTER, "", "和姦")
+  PRINTW
+ELSE
+  PRINTFORML %CALLNAME:対象%にボーダーブレイカーを飲ませてみたが、大して効果はなかった
+  PRINTFORML 案内人も苦笑いをして、
+  PRINTL
+  PRINTL 「まあ、仲の良いご夫婦で使われることの多い薬ですから」
+  PRINTL
+  PRINTL とフォローを入れる始末だった
+  PRINTW
+  PRINTL せっかくなので研究スペースを見学してから帰ることにした
+  PRINTL ただのデートになってしまった
+  LOCAL = RAND:100 + 100
+  CFLAG:対象:好感度 += LOCAL
+  PRINTFORMW 好感度 +{LOCAL}
+ENDIF

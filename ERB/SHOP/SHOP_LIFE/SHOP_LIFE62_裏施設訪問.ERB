@@ -1,0 +1,140 @@
+﻿;-------------------------------------------------
+;「裏施設訪問」の名称
+;-------------------------------------------------
+@SHOP_LIFE_NAME62
+RESULTS:0 '= "裏施設訪問"
+
+;-------------------------------------------------
+;「裏施設」の選択可否判定
+;-------------------------------------------------
+@SHOP_LIFE_CHECK62
+;裏施設訪問代不足
+SIF MONEY < 3000
+	RETURN 0
+SIF CFLAG:MASTER:捕虜先
+	RETURN 0
+SIF !CFLAG:MASTER:所属
+	RETURN 0
+RETURN 1
+
+;-------------------------------------------------
+;「裏施設訪問」の選択可能キャラ存在判定（誘えるキャラ）
+;-------------------------------------------------
+@SHOP_LIFE_CHECKCHARA62(ARG:0)
+;非主人公、同一勢力、捕虜でない、動物でない、通常状態または育児中
+RETURN ARG:0 != MASTER && CFLAG:(ARG:0):所属 == CFLAG:MASTER:所属 && CFLAG:(ARG:0):捕虜先 == 0 && !IS_ANIMAL(ARG:0) && GROUPMATCH(CFLAG:(ARG:0):行動不能状態, 0, 2)
+
+;-------------------------------------------------
+;「裏施設訪問」の左カラムメニューの入力処理
+;-------------------------------------------------
+@SHOP_LIFE_EVENTBUY62
+FLAG:拠点フェイズページ = 1
+FLAG:夜這い = 0
+RETURN 0
+
+;-------------------------------------------------
+;「裏施設訪問」の右カラム表示処理
+;-------------------------------------------------
+@SHOP_LIFE_EVENTBUY_SHOW62
+;タイトル
+CALL COLUMN_RIGHT_TITLE("対象者選択", "0", "1", "1～全", "3,000～", "自勢力のみ可")
+CALL COLUMN_RIGHT_PRINTL
+CALL COLUMN_RIGHT_LINE
+CALL COLUMN_RIGHT_PRINTL
+;右カラムの標準的なキャラリストとページ移動呼び出し
+CALL COLUMN_RIGHT_CHARALIST
+RETURN
+
+;-------------------------------------------------
+;「裏施設訪問」のリスト１入力処理
+;-------------------------------------------------
+@SHOP_LIFE_USERSHOP62(対象)
+#DIM 対象, 1
+#DIM 結果, 1
+#DIM 内容, 1
+#DIM イベント発生, 1
+#DIM CONST START_NUM = 0
+#DIM CONST END_NUM = 1
+;対象者と裏施設訪問する
+;お金消費,1回10000
+;好感度+ 200+RAND:100
+;行先は湖、森、人里etc
+
+FLAG:能力表示モード = 0
+
+イベント発生 = 0
+LOCAL:5 = 0
+CALL SINGLE_DRAWLINE
+PRINTFORML 行動回数とお金を消費し、%ANAME(対象)%と裏施設訪問します。
+PRINTFORML 1回裏施設訪問する毎に金3,000を消費します。
+PRINTFORML どこに誘いますか？
+PRINTFORML 
+PRINTFORML 残行動:{CALC_SHOP_TIME() - SHOP_TIME}
+PRINTFORML 所持金:%MONEY_FORMAT(MONEY)%
+CALL SINGLE_DRAWLINE
+PRINTBUTTON @"%"[薬物研究所]", 12, LEFT%", 1
+PRINTL 
+CALL SINGLE_DRAWLINE
+PRINTBUTTON "[0] - 戻る", 0
+$INPUT_LOOP
+INPUT 0
+
+内容 = RESULT
+;0だったら戻す
+IF 内容 == 0
+	RETURN 0
+ENDIF
+
+
+IF GROUPMATCH(内容, 1)
+	IF MONEY < 3000
+		PRINTFORMW お金が足りません。
+		GOTO INPUT_LOOP
+	ENDIF
+ELSE
+	GOTO INPUT_LOOP
+ENDIF
+
+SHOP_TIME += 1
+SHOP_WORK_COUNT += 1
+
+SELECTCASE 内容
+	CASE 1
+		$INPUT_LOOP2
+		PRINTFORML %CALLNAME:対象%と郊外にひっそりと居を構える薬物研究所を訪れた
+		PRINTFORML 薬物研究所は研究所と成果物の薬物を販売する売店の両方を備えた施設だ
+		PRINTFORML 研究所というだけあって一面が白色で統一されており、清潔感が醸し出されている
+		PRINTFORML 壁には商品の薬が展示されており、それを見定める客と、説明する研究員や接客担当の奴隷の姿がちらほらとみられた
+		PRINTL 
+		PRINTFORML 「ようこそいらっしゃいませ。本日はどのようなご用件でしょうか？」
+		PRINTL
+		PRINTFORML 入り口ゲートをくぐった%CALLNAME:MASTER%と%CALLNAME:対象%の元に、女奴隷の接客員がやってきた
+		PRINTFORML 清潔そうな白い白衣と白い味気ない下着を身につけているが、他は何も身につけていない
+		PRINTFORML また、体のあちこちに注射痕が残っていることから、デモンストレーションとして実演して見せることも多いことが伺える
+		PRINTFORML 薬を見に来た、と%CALLNAME:MASTER%が告げると、接客員は笑顔で薬の並ぶ展示店に%CALLNAME:MASTER%等を案内した
+		PRINTW
+		PRINTL 「どのお薬に興味がおありですか？」
+		PRINTL 
+		CUSTOMDRAWLINE ***
+		FOR LOCAL, START_NUM, END_NUM
+			TRYCALLFORM DRAG_DESCRIPTION_{LOCAL}
+			PRINTBUTTON @"[これにする]", LOCAL
+			PRINTL 
+			CUSTOMDRAWLINE ***
+		NEXT
+		INPUT
+		IF RESULT >= START_NUM && RESULT < END_NUM
+			TRYCALLFORM DRAG_BODY_{RESULT}(対象)
+		ELSE
+			GOTO INPUT_LOOP2
+		ENDIF
+ENDSELECT
+
+RESULT = 1
+
+LINES_SHOP = LINECOUNT
+BEGIN TURNEND
+
+RETURN 1
+
+
