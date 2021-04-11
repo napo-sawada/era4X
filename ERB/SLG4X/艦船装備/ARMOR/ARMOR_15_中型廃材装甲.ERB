@@ -1,8 +1,8 @@
-;-----------------------------------
-; �A�[�}�[
+﻿;-----------------------------------
+; アーマー
 ;-----------------------------------
 @GET_ARMOR_NAME_15
-RESULTS = ���^�p�ޑ��b
+RESULTS = 中型廃材装甲
 
 @GET_ARMOR_STATUS_15(STATUS)
 #DIM REF STATUS
@@ -12,7 +12,7 @@ STATUS:SIZE = 2
 STATUS:PRICE = 2000
 
 ;-----------------------------------
-; �A�[�}�[�̐���
+; アーマーの説明
 ;-----------------------------------
 @GET_ARMOR_DESCRIPTION_15
 #DIM STATUS, STATUS_LENGTH
@@ -20,14 +20,14 @@ STATUS:PRICE = 2000
 CALL GET_ARMOR_STATUS_15(STATUS)
 CALL GET_ARMOR_NAME_15
 PRINTFORML %RESULTS%
-PRINTFORML �p�ނłł����グ�����Ȃ̐S���ƂȂ����b�B
-PRINTFORML ���b      : {STATUS:ARMOR}
-PRINTFORML �T�C�Y    : {STATUS:SIZE}
+PRINTFORML 廃材ででっち上げた即席の心もとない装甲。
+PRINTFORML 装甲      : {STATUS:ARMOR}
+PRINTFORML サイズ    : {STATUS:SIZE}
 
 ;-----------------------------------
-; ���b�̎���
+; 装甲の資材
 ;-----------------------------------
 @GET_ARMOR_RESOURCE_15(USE_RESOURCE)
 #DIM REF USE_RESOURCE
 
-USE_RESOURCE:���b���� = 0
+USE_RESOURCE:装甲合金 = 0
