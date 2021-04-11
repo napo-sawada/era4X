@@ -1,8 +1,8 @@
-;-----------------------------------
-; ƒIƒvƒVƒ‡ƒ“
+ï»¿;-----------------------------------
+; ã‚ªãƒ—ã‚·ãƒ§ãƒ³
 ;-----------------------------------
 @GET_OPTION_NAME_4
-RESULTS = TIER3ƒV[ƒ‹ƒhƒWƒFƒlƒŒ[ƒ^[
+RESULTS = TIER3ã‚·ãƒ¼ãƒ«ãƒ‰ã‚¸ã‚§ãƒãƒ¬ãƒ¼ã‚¿ãƒ¼
 
 @GET_OPTION_STATUS_4(STATUS)
 #DIM REF STATUS
@@ -10,21 +10,21 @@ STATUS:SIELD_RECOVER = 32
 STATUS:PRICE = 40000
 
 ;-----------------------------------
-; ƒIƒvƒVƒ‡ƒ“‚Ìà–¾
+; ã‚ªãƒ—ã‚·ãƒ§ãƒ³ã®èª¬æ˜Ž
 ;-----------------------------------
 @GET_OPTION_DESCRIPTION_4(STATUS)
 #DIM STATUS, STATUS_LENGTH
 CALL GET_OPTION_STATUS_4(STATUS)
 CALL GET_OPTION_NAME_4
 PRINTFORML %RESULTS%
-PRINTFORML ƒV[ƒ‹ƒh‚ÌÄ¶‘¬“x‚ð‘‹­‚·‚é’Ç‰Á‘•”õB
-PRINTFORML ƒV[ƒ‹ƒh‰ñ•œ: {STATUS:SIELD_RECOVER}/ƒ^[ƒ“
+PRINTFORML ã‚·ãƒ¼ãƒ«ãƒ‰ã®å†ç”Ÿé€Ÿåº¦ã‚’å¢—å¼·ã™ã‚‹è¿½åŠ è£…å‚™ã€‚
+PRINTFORML ã‚·ãƒ¼ãƒ«ãƒ‰å›žå¾©: {STATUS:SIELD_RECOVER}/ã‚¿ãƒ¼ãƒ³
 
 ;-----------------------------------
-; ƒIƒvƒVƒ‡ƒ“‚ÌŽ‘Þ
+; ã‚ªãƒ—ã‚·ãƒ§ãƒ³ã®è³‡æ
 ;-----------------------------------
 @GET_OPTION_RESOURCE_4(USE_RESOURCE)
 #DIM REF USE_RESOURCE
 
-USE_RESOURCE:ƒV[ƒ‹ƒh”­¶‘•’u = 12
+USE_RESOURCE:ã‚·ãƒ¼ãƒ«ãƒ‰ç™ºç”Ÿè£…ç½® = 12
 

@@ -1,5 +1,5 @@
-;=============================================================================
-; ����\�ȓz��̈ꗗ�\��
+﻿;=============================================================================
+; 搭乗可能な奴隷の一覧表示
 ;=============================================================================
 @SHOW_BOARDING_SLAVE_LIST
 #DIM ITER
@@ -11,9 +11,9 @@ FOR ITER, 0, CHARANUM
 	IF BOARDING_SHIP_ID:ITER == -1
 		PRINTBUTTON @"[{ITER, 2, RIGHT}] %CALLNAME:ITER, 30, LEFT%", ITER
 	ELSEIF RIDING_WITH:ITER != -1
-		PRINTBUTTON @"[{ITER, 2, RIGHT}] %CALLNAME:ITER, 30, LEFT% %SHIP_NAME:(RIDING_WITH:ITER)%���撆", ITER
+		PRINTBUTTON @"[{ITER, 2, RIGHT}] %CALLNAME:ITER, 30, LEFT% %SHIP_NAME:(RIDING_WITH:ITER)%搭乗中", ITER
 	ELSE
-		PRINTBUTTON @"[{ITER, 2, RIGHT}] %CALLNAME:ITER, 30, LEFT% %SHIP_NAME:(BOARDING_SHIP_ID:ITER)%�̊͒�", ITER
+		PRINTBUTTON @"[{ITER, 2, RIGHT}] %CALLNAME:ITER, 30, LEFT% %SHIP_NAME:(BOARDING_SHIP_ID:ITER)%の艦長", ITER
 	ENDIF
 PRINTL
 NEXT
@@ -23,8 +23,8 @@ NEXT
 #DIM CHARA_ID
 #DIM ID
 
-FOR ID, 0, ���n��
-	SIF ���n���WID:ID == CHARACTER_POSITION:CHARA_ID
+FOR ID, 0, 星系数
+	SIF 星系座標ID:ID == CHARACTER_POSITION:CHARA_ID
 		RETURNF 1
 NEXT
 
@@ -35,8 +35,8 @@ NEXT
 
 RETURNF 0
 
-;���W����ǂ̐��ɂ��邩��ԋp����
+;座標からどの星にいるかを返却する
 @GET_STAR_ID_FROM_POS(POS)
 #DIM POS
-FINDELEMENT ���n���WID, POS
+FINDELEMENT 星系座標ID, POS
 RETURN RESULT

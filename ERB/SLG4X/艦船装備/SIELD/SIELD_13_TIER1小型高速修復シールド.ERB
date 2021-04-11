@@ -1,8 +1,8 @@
-;-----------------------------------
-; ƒV[ƒ‹ƒh
+ï»¿;-----------------------------------
+; ã‚·ãƒ¼ãƒ«ãƒ‰
 ;-----------------------------------
 @GET_SIELD_NAME_13
-RESULTS = TIER1¬Œ^‚‘¬C•œƒV[ƒ‹ƒh
+RESULTS = TIER1å°åž‹é«˜é€Ÿä¿®å¾©ã‚·ãƒ¼ãƒ«ãƒ‰
 
 @GET_SIELD_STATUS_13(STATUS)
 #DIM REF STATUS
@@ -13,7 +13,7 @@ STATUS:SIZE = 1
 STATUS:PRICE = 10000
 
 ;-----------------------------------
-; ƒV[ƒ‹ƒh‚Ìà–¾
+; ã‚·ãƒ¼ãƒ«ãƒ‰ã®èª¬æ˜Ž
 ;-----------------------------------
 @GET_SIELD_DESCRIPTION_13
 #DIM STATUS, STATUS_LENGTH
@@ -21,16 +21,16 @@ STATUS:PRICE = 10000
 CALL GET_SIELD_STATUS_13(STATUS)
 CALL GET_SIELD_NAME_13
 PRINTFORML %RESULTS%
-PRINTFORML Ž©“®Ä¶‹@”\‚Ì‹­‰»‚ð}‚Á‚½ƒV[ƒ‹ƒhB‚»‚Ì‘ã‚í‚è‚ÉÅ‘åo—Í‚ª’á‰º‚µ‚Ä‚¢‚éB
-PRINTFORML ƒV[ƒ‹ƒh    : {STATUS:SIELD}
-PRINTFORML ƒV[ƒ‹ƒh‰ñ•œ: {STATUS:SIELD_RECOVER}/ƒ^[ƒ“
-PRINTFORML ƒTƒCƒY      : {STATUS:SIZE}
+PRINTFORML è‡ªå‹•å†ç”Ÿæ©Ÿèƒ½ã®å¼·åŒ–ã‚’å›³ã£ãŸã‚·ãƒ¼ãƒ«ãƒ‰ã€‚ãã®ä»£ã‚ã‚Šã«æœ€å¤§å‡ºåŠ›ãŒä½Žä¸‹ã—ã¦ã„ã‚‹ã€‚
+PRINTFORML ã‚·ãƒ¼ãƒ«ãƒ‰    : {STATUS:SIELD}
+PRINTFORML ã‚·ãƒ¼ãƒ«ãƒ‰å›žå¾©: {STATUS:SIELD_RECOVER}/ã‚¿ãƒ¼ãƒ³
+PRINTFORML ã‚µã‚¤ã‚º      : {STATUS:SIZE}
 
 ;-----------------------------------
-; ƒV[ƒ‹ƒh‚ÌŽ‘Þ
+; ã‚·ãƒ¼ãƒ«ãƒ‰ã®è³‡æ
 ;-----------------------------------
 @GET_SIELD_RESOURCE_13(USE_RESOURCE)
 #DIM REF USE_RESOURCE
 
-USE_RESOURCE:ƒV[ƒ‹ƒh”­¶‘•’u = 3
+USE_RESOURCE:ã‚·ãƒ¼ãƒ«ãƒ‰ç™ºç”Ÿè£…ç½® = 3
 
