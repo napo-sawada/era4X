@@ -103,7 +103,7 @@ IF RESULT == 1
 		PRINTFORMW 「……それでは、これより引き渡しを行わせて頂きます」
 		PRINTFORMW 「どうぞ、今後とも御贔屓の程、よろしくお願いいたします」
 		PRINTW カタリナを手に入れた
-		CFLAG:NAME_TO_CHARA("カタリナ"):所属 = PLAYER_COUNTRY
+		CFLAG:NAME_TO_CHARA("カタリナ"):所属 = 国家ID_プレイヤー
 	ELSE
 		PRINTFORMW 手持ちのお金が足りないようですよ
 		GOTO INPUT_LOOP
