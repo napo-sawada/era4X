@@ -1,8 +1,8 @@
-;-----------------------------------
-; ƒV[ƒ‹ƒh
+ï»¿;-----------------------------------
+; ã‚·ãƒ¼ãƒ«ãƒ‰
 ;-----------------------------------
 @GET_SIELD_NAME_15
-RESULTS = TIER1‘åŒ^‚‘¬C•œƒV[ƒ‹ƒh
+RESULTS = TIER1å¤§åž‹é«˜é€Ÿä¿®å¾©ã‚·ãƒ¼ãƒ«ãƒ‰
 
 @GET_SIELD_STATUS_15(STATUS)
 #DIM REF STATUS
@@ -13,7 +13,7 @@ STATUS:SIZE = 3
 STATUS:PRICE = 40000
 
 ;-----------------------------------
-; ƒV[ƒ‹ƒh‚Ìà–¾
+; ã‚·ãƒ¼ãƒ«ãƒ‰ã®èª¬æ˜Ž
 ;-----------------------------------
 @GET_SIELD_DESCRIPTION_15
 #DIM STATUS, STATUS_LENGTH
@@ -21,15 +21,15 @@ STATUS:PRICE = 40000
 CALL GET_SIELD_STATUS_15(STATUS)
 CALL GET_SIELD_NAME_15
 PRINTFORML %RESULTS%
-PRINTFORML ƒV[ƒ‹ƒh    : {STATUS:SIELD}
-PRINTFORML ƒV[ƒ‹ƒh‰ñ•œ: {STATUS:SIELD_RECOVER}/ƒ^[ƒ“
-PRINTFORML ƒTƒCƒY      : {STATUS:SIZE}
+PRINTFORML ã‚·ãƒ¼ãƒ«ãƒ‰    : {STATUS:SIELD}
+PRINTFORML ã‚·ãƒ¼ãƒ«ãƒ‰å›žå¾©: {STATUS:SIELD_RECOVER}/ã‚¿ãƒ¼ãƒ³
+PRINTFORML ã‚µã‚¤ã‚º      : {STATUS:SIZE}
 
 ;-----------------------------------
-; ƒV[ƒ‹ƒh‚ÌŽ‘Þ
+; ã‚·ãƒ¼ãƒ«ãƒ‰ã®è³‡æ
 ;-----------------------------------
 @GET_SIELD_RESOURCE_15(USE_RESOURCE)
 #DIM REF USE_RESOURCE
 
-USE_RESOURCE:ƒV[ƒ‹ƒh”­¶‘•’u = 12
+USE_RESOURCE:ã‚·ãƒ¼ãƒ«ãƒ‰ç™ºç”Ÿè£…ç½® = 12
 
