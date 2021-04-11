@@ -80,9 +80,8 @@ ELSEIF 魅力値 / 3 < 2000
 	EXP:ID:話術経験値 += 5
 	EXP:ID:社交経験値 += 5
 	CFLAG:ID:キャバクラ人気 += 5
-ELSEIF 魅力値 / 3 < 3000
+ELSE
 	PRINTFORML %CALLNAME:ID%はキャバクラのメインキャストとして頑張った
-	PRINTFORML %CALLNAME:ID%はキャバクラのサブキャストとして頑張った
 	SETCOLOR カラー_注釈
 	PRINTFORML 話術経験値+15
 	PRINTFORML 社交経験値+15
