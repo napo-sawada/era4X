@@ -1,8 +1,8 @@
-;-----------------------------------
-; �I�v�V����
+﻿;-----------------------------------
+; オプション
 ;-----------------------------------
 @GET_OPTION_NAME_6
-RESULTS = TIER2���݃X���X�^�[
+RESULTS = TIER2増設スラスター
 @GET_OPTION_STATUS_6(STATUS)
 #DIM REF STATUS
 
@@ -10,22 +10,22 @@ STATUS:AVOID = 10
 STATUS:PRICE = 20000
 
 ;-----------------------------------
-; �I�v�V�����̐���
+; オプションの説明
 ;-----------------------------------
 @GET_OPTION_DESCRIPTION_6(STATUS)
 #DIM STATUS, STATUS_LENGTH
 CALL GET_OPTION_STATUS_6(STATUS)
 CALL GET_OPTION_NAME_6
 PRINTFORML %RESULTS%
-PRINTFORML ���񑬓x�̏㏸�Ȃǉ�𐫔\�����コ����ǉ������B
-PRINTFORML ���      : {STATUS:AVOID}
+PRINTFORML 旋回速度の上昇など回避性能を向上させる追加装備。
+PRINTFORML 回避      : {STATUS:AVOID}
 
 ;-----------------------------------
-; �I�v�V�����̎���
+; オプションの資材
 ;-----------------------------------
 @GET_OPTION_RESOURCE_6(USE_RESOURCE)
 #DIM REF USE_RESOURCE
 
-USE_RESOURCE:�ϔM���� = 2
-USE_RESOURCE:�W�F�b�g�K�X = 2
+USE_RESOURCE:耐熱合金 = 2
+USE_RESOURCE:ジェットガス = 2
 
