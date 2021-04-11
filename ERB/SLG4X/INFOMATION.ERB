@@ -132,7 +132,7 @@ PRINTL
 #DIM COUNTRY_ID
 
 PRINTFORML  %COUNTRY_NAME:PAGE%情報
-IF PAGE == PLAYER_COUNTRY
+IF PAGE == 国家ID_プレイヤー
     LOCALS = %TOSTR(MONEY, "$###,###,###,###")%
     SIF MONEY == 0
         LOCALS = %"$0"%
