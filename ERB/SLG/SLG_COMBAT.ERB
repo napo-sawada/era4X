@@ -802,8 +802,8 @@ ENDIF
 #DIM 操艦比, 2
 #DIM 知略比, 2
 IF BATTLE_COMMANDER_NUM:0 > 0
-	白兵最大:0 = MAX(BATTLE_武闘パワー:0:0, BATTLE_武闘パワー:0:1, BATTLE_武闘パワー:0:2, 1)
-	操艦最大:0 = MAX(BATTLE_防衛パワー:0:0, BATTLE_防衛パワー:0:1, BATTLE_防衛パワー:0:2, 1)
+	白兵最大:0 = MAX(BATTLE_白兵パワー:0:0, BATTLE_白兵パワー:0:1, BATTLE_白兵パワー:0:2, 1)
+	操艦最大:0 = MAX(BATTLE_操艦パワー:0:0, BATTLE_操艦パワー:0:1, BATTLE_操艦パワー:0:2, 1)
 	知略最大:0 = MAX(BATTLE_知略パワー:0:0, BATTLE_知略パワー:0:1, BATTLE_知略パワー:0:2, 1)
 ELSE
 	白兵最大:0 = ABL_POWER(10, -1)
@@ -812,8 +812,8 @@ ELSE
 ENDIF
 
 IF BATTLE_COMMANDER_NUM:1 > 0
-	白兵最大:1 = MAX(BATTLE_武闘パワー:1:0, BATTLE_武闘パワー:1:1, BATTLE_武闘パワー:1:2, 1)
-	操艦最大:1 = MAX(BATTLE_防衛パワー:1:0, BATTLE_防衛パワー:1:1, BATTLE_防衛パワー:1:2, 1)
+	白兵最大:1 = MAX(BATTLE_白兵パワー:1:0, BATTLE_白兵パワー:1:1, BATTLE_白兵パワー:1:2, 1)
+	操艦最大:1 = MAX(BATTLE_操艦パワー:1:0, BATTLE_操艦パワー:1:1, BATTLE_操艦パワー:1:2, 1)
 	知略最大:1 = MAX(BATTLE_知略パワー:1:0, BATTLE_知略パワー:1:1, BATTLE_知略パワー:1:2, 1)
 ELSE
 	白兵最大:1 = ABL_POWER(10, -1)
@@ -1338,14 +1338,14 @@ VARSET 能力合計, 0
 FOR LOCAL, 0, BATTLE_COMMANDER_NUM:勝利側
 	SIF BATTLE_COMMANDER:勝利側:LOCAL < 0
 		CONTINUE
-	能力合計:勝利側 += BATTLE_武闘:勝利側:LOCAL
+	能力合計:勝利側 += BATTLE_白兵:勝利側:LOCAL
 	能力合計:勝利側 += BATTLE_知略:勝利側:LOCAL
 NEXT
 
 FOR LOCAL, 0, BATTLE_COMMANDER_NUM:敗北側
 	SIF BATTLE_COMMANDER:敗北側:LOCAL < 0
 		CONTINUE
-	能力合計:敗北側 += BATTLE_武闘:敗北側:LOCAL
+	能力合計:敗北側 += BATTLE_白兵:敗北側:LOCAL
 	能力合計:敗北側 += BATTLE_知略:敗北側:LOCAL
 NEXT
 
@@ -1353,7 +1353,7 @@ FOR LOCAL:0, 0, BATTLE_COMMANDER_NUM:敗北側
 	対象 = BATTLE_COMMANDER:敗北側:LOCAL
 	SIF !CAN_CAPTURE(対象)
 		CONTINUE
-	CAPTURE_RATE:LOCAL += (300 - BATTLE_武闘:敗北側:LOCAL * 2 + BATTLE_知略:敗北側:LOCAL) * 10 / 3 / 3
+	CAPTURE_RATE:LOCAL += (300 - BATTLE_白兵:敗北側:LOCAL * 2 + BATTLE_知略:敗北側:LOCAL) * 10 / 3 / 3
 	CAPTURE_RATE:LOCAL += LIMIT(能力合計:勝利側 - 能力合計:敗北側, -200, 200)
 	CAPTURE_RATE:LOCAL += (BATTLE_COMMANDER_NUM:勝利側 - BATTLE_COMMANDER_NUM:敗北側) * 50
 	SELECTCASE CONFIG:306
