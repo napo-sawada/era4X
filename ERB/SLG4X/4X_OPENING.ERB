@@ -1,100 +1,100 @@
-@OPENING_4X
-PRINTL �F������4XXX�N
-PRINTL �F���͋��卑���番���Ɨ��������͂ɂ��퍑����Ɖ����Ă���
-PRINTL ���g�̎�`�咣�𒸂Ɍf�����q���鍑
-PRINTL ��ΓI���͎҂Ɏx�z����鍑
-PRINTW �@�B�̔��f�ɑS�Ă��ςˈ��J���Â鍑
-PRINTL �����Đl�X���܂��ω��𐋂��Ă�����
-PRINTL ���A���̈�`�q��g�ݍ��ݓƎ��̐i���𐋂�����
-PRINTL �@��𖄂ߍ��ݓ��̞̂g����O����
-PRINTW �򕨂œ��̂̌��E�𒴂����
-PRINTW �����������ꏭ�Ȃ���A�l�X�̒��Ɏx�z����҂Ǝx�z�����҂����邱�Ƃɕς��͖�������
-PRINTFORMW �z�ꏤ�A%CALLNAME:MASTER%�B
-;%�B
-PRINTW ���̓z�ꏤ�ɂ����Ȃ��l�ԁB���Ă镨�ƌ�������A��@�̋��^�A���D�̂�
-PRINTFORMW ����%CALLNAME:MASTER%�͎��R���B%CALLNAME:MASTER%�͎��g�̉\�����A�T�����A�g�����A�J�����A�����ď�Q��r�ł��邱�Ƃ��ł���
-PRINTFORMW %CALLNAME:MASTER%�̐��͂������Ȃ�i���𐋂��邩�A�����%CALLNAME:MASTER%���g�̎�ɂ������Ă���c�c
+﻿@OPENING_4X
+PRINTL 宇宙時代4XXX年
+PRINTL 宇宙は旧大国から分離独立した勢力による戦国時代と化していた
+PRINTL 自身の主義主張を頂に掲げ崇拝する国
+PRINTL 絶対的権力者に支配される国
+PRINTW 機械の判断に全てを委ね安寧を貪る国
+PRINTL そして人々もまた変化を遂げていった
+PRINTL 動植物の遺伝子を組み込み独自の進化を遂げた者
+PRINTL 機会を埋め込み肉体の枷から外れる者
+PRINTW 薬物で肉体の限界を超える者
+PRINTW しかし多かれ少なかれ、人々の中に支配する者と支配される者がいることに変わりは無かった
+PRINTFORMW 奴隷商、%CALLNAME:MASTER%。
+;%。
+PRINTW 一介の奴隷商にすぎない人間。持てる物と言ったら、一機の旧型輸送船のみ
+PRINTFORMW だが%CALLNAME:MASTER%は自由だ。%CALLNAME:MASTER%は自身の可能性を、探検し、拡張し、開発し、そして障害を殲滅することができる
+PRINTFORMW %CALLNAME:MASTER%の勢力がいかなる進化を遂げるか、それは%CALLNAME:MASTER%自身の手にかかっている……
 
 
-;�`���[�g���A��
+;チュートリアル
 @TUTORIAL
 DRAWLINE
 $INPUT_LOOP
-PRINTL ���`���[�g���A��
-PRINTFORMW �悤����era4X��
-PRINTBUTTON "[0] �y���ݕ�", 0
+PRINTL ◆チュートリアル
+PRINTFORMW ようこそera4Xへ
+PRINTBUTTON "[0] 楽しみ方", 0
 PRINTL
-PRINTBUTTON "[1] �}�b�v�̋L��", 1
+PRINTBUTTON "[1] マップの記号", 1
 PRINTL
-PRINTBUTTON "[2] �F���`�̌��ĕ�", 2
+PRINTBUTTON "[2] 宇宙港の建て方", 2
 PRINTL
 PRINTBUTTON "[3] Q&A", 3
 PRINTL
-PRINTBUTTON "[9] �߂�", 9
+PRINTBUTTON "[9] 戻る", 9
 INPUT
 IF RESULT == 0
-    PRINTL �܂���asdw�őD�𑀍삵�A�߂��̐��ɓ��`���Ă�������
-    PRINTL ���`��[f]�L�[�ł�
-    PRINTL ���̌�̗V�ѕ���2�p�^�[���ł�
-    PRINTL ��ڂ͏]����ERA�Ɠ������z��𔃂��Ē������Ėׂ���p�^�[��
-    PRINTL �ח��������z��̓L���o�N����V�A�C�h���Ƃ��ē������邱�Ƃ��ł��܂�
+    PRINTL まずはasdwで船を操作し、近くの星に入港してください
+    PRINTL 入港は[f]キーです
+    PRINTL その後の遊び方は2パターンです
+    PRINTL 一つ目は従来のERAと同じく奴隷を買って調教して儲けるパターン
+    PRINTL 陥落させた奴隷はキャバクラやVアイドルとして働かせることができます
     PRINTL 
-    PRINTL ��ڂ̓N�G�X�g���������đD����肵�A�퓬��f�Ճp�^�[��
-    PRINTL �F���`�̃N�G�X�g�ɂ͑D�����ł�����A���肷�邽�߂̏�񂪔�����N�G�X�g������܂��B
-    PRINTL �����̃N�G�X�g�őD����ɓ���A�f�Ղ�퓬�N�G�X�g���s�����Ƃŉ҂����Ƃ��ł��܂�
-    PRINTL �Ȃ��A������ł��f�Ղ͂ł��܂��B�������ꉞ���Ă��܂����A�퓬�͍s���܂���
+    PRINTL 二つ目はクエストを消化して船を入手し、戦闘や貿易パターン
+    PRINTL 宇宙港のクエストには船を入手できたり、入手するための情報が買えるクエストがあります。
+    PRINTL それらのクエストで船を手に入れ、貿易や戦闘クエストを行うことで稼ぐことができます
+    PRINTL なお、初期戦でも貿易はできます。武装も一応ついていますが、戦闘は行えません
     PRINTL 
-    PRINTL �ǂ���̃p�^�[���ɂ���A�܂��͗A���D����肷�邱�Ƃ��ŗD��ڕW�ɂ���̂������߂��܂�
-    PRINTL �A���D�Ŋe�n�̓��Y�i�𔃂��A���Y�i�̏o�鐯�Ƃ͕ʂ̐��̊e�`�ɂ��鏤�l�ɔ��邱�ƂŁA�������v�𓾂邱�Ƃ��ł��܂�
-    PRINTL ���̌�͗A���D�𔃂������Ėf�Ղ̋K�͂��g�傳����̂��悵�A���m�͂Ȃǂ̐�͂𔃂��̂��悵�A���Ȃ��̎��R�ł�
-    PRINT ������
+    PRINTL どちらのパターンにしろ、まずは輸送船を入手することを最優先目標にするのをお勧めします
+    PRINTL 輸送船で各地の特産品を買い、特産品の出る星とは別の星の各港にいる商人に売ることで、高い利益を得ることができます
+    PRINTL その後は輸送船を買い足して貿易の規模を拡大させるのもよし、巡洋艦などの戦艦を買うのもよし、あなたの自由です
+    PRINT ただし
     SETCOLOR 0XFF0000
-    PRINT ��
+    PRINT ▲
     RESETCOLOR
-    PRINTL �ɂ͒��ӂ��Ă��������B
-    PRINTW �ނ�͓G���͂ŁA�߂Â��ƍU�����Ă��܂�
-    PRINTW �����͂Ȃ�ނ�����ނ��邱�Ƃ��\�ł�
-    PRINTW �ȏ�ł��̍��ڂ̐����͏I���ł�
+    PRINTL には注意してください。
+    PRINTW 彼らは敵性艦で、近づくと攻撃してきます
+    PRINTW 武装艦なら彼らを撃退することも可能です
+    PRINTW 以上でこの項目の説明は終わりです
     GOTO INPUT_LOOP
 ELSEIF RESULT == 1
     SETCOLOR 0xAAFFAA
-    PRINT ��
+    PRINT ▲
     RESETCOLOR
-    PRINTL : ��������D�ł�
+    PRINTL : 自分操る船です
     SETCOLOR 0XFF0000
-    PRINT ��
+    PRINT 赤
     RESETCOLOR
-    PRINTL : �G�̐F�ł��B
+    PRINTL : 敵の色です。
     SETCOLOR 0X00FF00
-    PRINT ��
+    PRINT 緑
     RESETCOLOR
-    PRINTL : �����͂̐F�ł�
-    PRINTL ��: �������͂̐F�ł�
-    PRINTL ��: �͑D
-    PRINTL ��: ���ƁA����ɕt������F���`
-    PRINTL ��: ���m�F�̈�
-    PRINTL �I: �A�m�}���[
-    PRINTL ��: �̌@�|�C���g(�̌@�ɂ͓�����ɍ�ƑD�ƗA���D���K�v)
-    PRINTL �`: �F���`�B�������ł�
+    PRINTL : 自勢力の色です
+    PRINTL 白: 中立勢力の色です
+    PRINTL ▲: 艦船
+    PRINTL 星: 星と、それに付随する宇宙港
+    PRINTL ■: 未確認領域
+    PRINTL ！: アノマリー
+    PRINTL ＃: 採掘ポイント(採掘には同宙域に作業船と輸送船が必要)
+    PRINTL 港: 宇宙港。未実装です
     WAIT
     GOTO INPUT_LOOP
 ELSEIF RESULT == 2
-    PRINTL ��ƑD�ɏ��A���b������ς񂾗A���D��Ǐ]������Ɖ����Ȃ�����Ɍ����ł��܂�
-    PRINTL �������J�n����ƕK�v�ȕ�����v�������̂ŁA�v�����ꂽ�������^�����܂�
-    PRINTW �S�Ă̕������^�����I����ƁA�F���`�����������ɓ����悤�ɂȂ�܂�
-    PRINTL �F���`�ł͓Ǝ��̃��j���[�Ƃ��� [8] �F���`�X���b�g ���p�ӂ���Ă��܂�
-    PRINTL �F���`�X���b�g��20�p�ӂ���Ă���A�͑D�̌����ł��鑢�D���╨�������[�ł���R���e�i�Ȃǂ�ݒu�ł��܂�
-    PRINTW �R���e�i�ɕK�v�������W�߂đ��D���ōD���Ȋ͑D�═����I�ԂƁA�����Ō����ł��܂�
+    PRINTL 作業船に乗り、装甲合金を積んだ輸送船を追従させると何もない宙域に建造できます
+    PRINTL 建造を開始すると必要な物資を要求されるので、要求された物資を運搬します
+    PRINTW 全ての物資を運搬し終えると、宇宙港が完成し中に入れるようになります
+    PRINTL 宇宙港では独自のメニューとして [8] 宇宙港スロット が用意されています
+    PRINTL 宇宙港スロットは20個用意されており、艦船の建造できる造船所や物資を収納できるコンテナなどを設置できます
+    PRINTW コンテナに必要物資を集めて造船所で好きな艦船や武装を選ぶと、無料で建造できます
     GOTO INPUT_LOOP
 ELSEIF RESULT == 3
-    PRINTL Q: �_���[�W���󂯂��D�̉񕜂͂ǂ�����́H
-    PRINTL A: �����̂���F���`�ɓ��`����Ǝ����I�ɉ񕜂���܂��B$20,000�ȏ����邱�Ƃ��܂܂���̂ŁA�V�[���h�����̑����Ȃ玩���񕜂���܂ł�����ւ���Ԃ�Ԃ炷��̂�����ł�
+    PRINTL Q: ダメージを受けた船の回復はどうするの？
+    PRINTL A: 資源のある宇宙港に入港すると自動的に回復されます。$20,000以上取られることもままあるので、シールドだけの損傷なら自動回復するまでそこらへんをぶらぶらするのもありです
     PRINTL 
-    PRINTL Q: �D�𔃂������Ǒ���ł��Ȃ�
-    PRINTL A: �^�X�N�̊���U���C���t�H����͒������Ȃ��ɐݒ肵�Ă�����Ƒ���ł���悤�ɂȂ�܂�
+    PRINTL Q: 船を買ったけど操作できない
+    PRINTL A: タスクの割り振りやインフォから艦長をあなたに設定してあげると操作できるようになります
     PRINTL 
-    PRINTL Q: ���ɂ킩��Ȃ����Ƃ�����
-    PRINTL A: ���萔�ł���������΂�era4X�X���܂ł��A����������΁A�����������Ă��������܂�
+    PRINTL Q: 他にわからないことがある
+    PRINTL A: お手数ですがしたらばのera4Xスレまでご連絡くだされば、お答えさせていただきます
     WAIT
     GOTO INPUT_LOOP
 ELSEIF RESULT == 9
