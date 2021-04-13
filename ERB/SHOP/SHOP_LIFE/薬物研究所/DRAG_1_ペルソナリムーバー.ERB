@@ -15,3 +15,14 @@ PRINTL
 ;--------------------------
 @DRAG_BODY_1(対象)
 #DIM 対象
+
+IF TALENT:対象:恋慕
+  PRINTFORML 個室のベッドでペルソナリムーバーを投与され眠っていた%CALLNAME:対象%が目を覚ますと、辺りを見回す
+  PRINTFORML そして%CALLNAME:MASTER%を見つけるなりにっこりと無邪気に笑いかけると、起き上がって駆け寄り、ぎゅっと抱きしめてきた
+  PRINTFORML どうやら薬の効果が現れているようだ
+ELSE
+  PRINTFORML 個室のベッドでペルソナリムーバーを投与され眠っていた%CALLNAME:対象%が目を覚ますと、辺りを見回す
+  PRINTFORML しかし目当てのものは見つけられなかったようで、何事もなかったかのように宙を向いてぼけっとしている
+  PRINTFORML 多分薬の効果が現れているのだろう
+ENDIF
+PRINTFORML %CALLNAME:対象%を
