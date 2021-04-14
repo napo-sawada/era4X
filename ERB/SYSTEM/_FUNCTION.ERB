@@ -3944,3 +3944,25 @@ FOR LOCAL, 0, MAX_COUNTRY
 NEXT
 
 RETURNF LOCAL:4
+
+;-------------------------------------------------
+;CFLAGを変動させて表示する関数
+;対象: 対象となるキャラのキャラ番号
+;変動CFLAG: 変動させるCFLAGを文字列で指定
+;変動量: 変動させる量を相対的に指定
+;IS_DISPLAY: 真のときのみ表示
+;return: 変動しなかった時に0, 変動した時に1を返す
+;-------------------------------------------------
+@CHANGE_CFLAG(対象, 変動CFLAG, 変動量, IS_DISPLAY = 1)
+#DIM 対象
+#DIMS 変動CFLAG
+#DIM 変動量
+#DIM IS_DISPLAY
+
+SIF !変動量
+	RETURN 0
+
+CFLAG:対象:GETNUM(CFLAG, 変動CFLAG) = LIMIT(CFLAG:対象:GETNUM(CFLAG, 変動CFLAG) + 変動量, -1000, 999999999999)
+SIF IS_DISPLAY
+	PRINTFORM %変動CFLAG%%TOSTR_SIGN(変動量)%{ABS(変動量), 3, RIGHT}(計:{CFLAG:対象:GETNUM(CFLAG, 変動CFLAG), 5}) 
+RETURN 1
