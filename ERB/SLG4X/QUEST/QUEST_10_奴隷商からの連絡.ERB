@@ -13,6 +13,9 @@
 CALL CAN_BUY_SPECIAL_CHARACTER_1
 SIF RESULT
 	RETURN 1
+CALL CAN_BUY_SPECIAL_CHARACTER_2
+SIF RESULT
+	RETURN 1
 RETURN 0
 
 ;--------------------------
@@ -32,11 +35,23 @@ $INPUT_LOOP
 PRINTFORML 「お客様にとっておきの奴隷をご用意いたしましたので、是非ご覧になってください」
 
 CALL CAN_BUY_SPECIAL_CHARACTER_1()
-SIF RESULT
+IF RESULT
 	PRINTBUTTON @"[1] カタリナ $10,000", 1
+	PRINTL
+ENDIF
+CALL CAN_BUY_SPECIAL_CHARACTER_2()
+IF RESULT
+	PRINTBUTTON @"[2] ディアナ $10,000", 2
+	PRINTL
+ENDIF
+PRINTBUTTON @"[99] キャンセル", 99
 
 INPUT
+
 IF RESULT == 1
+	CALL CAN_BUY_SPECIAL_CHARACTER_1()
+	SIF !RESULT
+		GOTO INPUT_LOOP
 	IF MONEY >= 10000
 		MONEY -= 10000
 		PRINTL
@@ -108,6 +123,83 @@ IF RESULT == 1
 		PRINTFORMW 手持ちのお金が足りないようですよ
 		GOTO INPUT_LOOP
 	ENDIF
+ELSEIF RESULT == 2
+	CALL CAN_BUY_SPECIAL_CHARACTER_2()
+	SIF !RESULT
+		GOTO INPUT_LOOP
+	IF MONEY >= 10000
+		MONEY -= 10000
+		PRINTL
+		PRINTFORML 裏の顔……性奴隷調教師としての%CALLNAME:MASTER%へアレス宗教国家での窓口の商人から、連絡があった。
+		PRINTFORML なにやら、また特別な商品が手に入った、という事らしいのだが。
+		PRINTFORML 「これはこれは、お久しぶりです。お忙しい中お越しいただき誠に有難う御座います、英雄殿」
+		PRINTFORML 「……そう、ですね。お伝えした通り、また…取って置きの商品が入荷いたしましてな」
+		PRINTFORML 「貴方様にだけご紹介できる、本当に特別な品でございます、ええ」
+		PRINTFORML 「それでは…此方へ付いて来て頂けますかな？」
+		PRINTFORMW そう言って、%CALLNAME:MASTER%はカタリナの時とは違う場所へ案内される。
+		PRINTFORMW ………
+		PRINTFORMW ……
+		PRINTFORMW …
+		PRINTFORML 「こちらです。今回の商品は少々…気性が荒く、脱走しない様に厳重に管理しておるのです、はい」
+		PRINTFORML 「かなりクセの強い商品ですが…前回同様、貴方様の御眼鏡に適うモノであると確信しております、ええ」
+		PRINTFORMW 店の地下にある牢獄、%CALLNAME:MASTER%の目の前にある牢の中に居たのは……
+		PRINTL
+		PRINTL
+		PRINTL
+		PRINTW
+		PRINTFORMW 鉄格子の奥、金属の器具で身体を壁に貼り付けられ手足を鎖でつながれて身動きの取れない女が静かに%CALLNAME:MASTER%をじっーと見詰めていた。
+		PRINTFORMW その女の容姿は、カタリナが話していた専属護衛だった聖騎士にそっくりだった。
+		PRINTFORMW それは項部の辺りでゆるく三つ編みされた束ねられた薄い水色の長い髪。青く澄んだ海のような淡い水色の瞳と凛とした顔立ち。
+		PRINTFORMW %CALLNAME:MASTER%が女に興味を示している事にご満悦の商人は、女の素性と牢に入れられた経緯を話し始めた。
+		PRINTFORML 「…まずは、この者の素性から説明致します」
+		PRINTFORML 「名はディアナ・ロイスベル、所属はアルバカルバ主教座聖堂騎士団の聖騎士です」
+		PRINTFORML 「この者は処刑された大司教に実力を見込まれ聖女様の専属護衛に抜擢されましてね」
+		PRINTFORML 「聖女様が%CALLNAME:MASTER%に買われる以前まで、この者はずっと聖女様の護衛をしていた訳です」
+		PRINTFORML 「そして、大司教が処刑され…上層部も今回の一件に関わりのない堂聖騎士団員まで、処罰するつもりはなかった様なのですが……」
+		PRINTFORML 「据えられたお飾りの事など見過ごせばよいものを…、この者は%CALLNAME:MASTER%に買われ姿を見せなくなった聖女の捜索し始め…」
+		PRINTFORML 「それを察知した上層部に呼び出され、この者は疑う事も無く召還に応じてしまい…そのまま秘密裏に捕らえられ牢獄送りとなったのです」
+		PRINTFORML 「どうでしょうか？見た目も良いですし…何より聖堂騎士は戦闘能力が恐ろしく高いので、手籠めにして従えさせれば必ずお役に立ちますぞ」
+		PRINTFORML 説明を聞き終えた%CALLNAME:MASTER%はディアナをもっと近くで見たいと、商人に錠前を外してもらい…ディアナに近づき
+		PRINTL
+			;士官ルート
+			IF (TALENT:NAME_TO_CHARA("カタリナ"):処女 && TALENT:NAME_TO_CHARA("カタリナ"):恋慕) || TALENT:NAME_TO_CHARA("カタリナ"):親愛
+				PRINTFORML %CALLNAME:MASTER%は懐から取り出した端末からカタリナに連絡を取り、ディアナが%CALLNAME:MASTER%に従うように説得を頼んだ。
+				PRINTFORML ディアナとカタリナは端末越しに会話を始めてゆき、二人とも久しぶりの再会を喜んでいた。
+				PRINTFORML カタリナの説得が始まりディアナは毅然とした態度で、%CALLNAME:MASTER%に従う事を拒んでいたが、聖女様の巧みな話術によって即陥落。
+				PRINTFORML 説得の甲斐あって%CALLNAME:MASTER%に従う事を決めたディアナだが、どこか腑に落ちず不満げな表情で
+				PRINTFORML 「卑怯だぞ…貴様……こうすれば私が折れると絶対に分かっていたのだろう」
+				PRINTFORML 「しかし、こうなっては仕方あるまい。元より今の私に選択肢など無いに等しい」
+				PRINTFORML 「寧ろ、私からの理解を得ようと、してくれるだけマシな方だからな」
+				PRINTFORML 「だから……いいだろう、カタリナ様がここまで貴様の事を慕っているのなら、私も貴様を信頼して命令にも従ってやる」
+				PRINTFORML 「だがな…これだけは心しておけ、貴様がカタリナ様を裏切る様な事があれば、神に懺悔をする間も与えずに殺してやる…」
+				PRINTFORML なんとかディアナの勧誘に成功した%CALLNAME:MASTER%は、すぐさまディアナを買い取る交渉を始めた。
+				PRINTL
+				PRINTW ディアナが仲間になった
+				CFLAG:NAME_TO_CHARA("カタリナ"):1000 = 0
+			ELSE
+				;性奴隷ルート
+				PRINTFORMW %CALLNAME:MASTER%は悪魔の様な笑みを浮かべ…こちらを見詰めてくるディアナの耳元で
+				PRINTFORML 「お前の大事なカタリナ様と同じようにたっぷりと可愛がってやる」
+				PRINTFORMW その言葉を聞きディアナは強い殺意を露わにし、身体を縛る器具や手足に付けられている鎖を引き千切ろうと激しくもがき続け……
+				PRINTFORML 「……今、手足の一つでも自由だったのなら、目の前にいる下郎の首をへし折ってやったものを………」
+				PRINTFORMW 冷静さを取り戻したのか無駄な抵抗をやめ、静かに敵意の籠った瞳をこちらに向けてくる。
+				PRINTFORMW ディアナの反応に満足した%CALLNAME:MASTER%は商人の元へ戻った。
+				PRINTFORMW 一連の出来事を見ていた商人は冷や汗をかき、顔をハンカチで汗を拭きながら
+				PRINTFORML 「ふぃー…さすが英雄殿…何とも無いご様子で…私の方は肝が冷えましたぞ」
+				PRINTFORML 「きちんと拘束をしておりますが、もしもの事があるやもしれないで、無暗に刺激しないで頂きたい」
+				PRINTFORML 「%CALLNAME:MASTER%も聖堂騎士達の実力はご存知のはずでしょう？全く…ふぃー」
+				PRINTFORMW ﾌﾞﾂﾌﾞﾂと文句を垂れている商人に一言詫びた後、すぐさまディアナを買い取る交渉を始めた。
+				PRINTL
+				PRINTW ディアナを手に入れた
+				CFLAG:NAME_TO_CHARA("カタリナ"):1000 = 1
+			ENDIF
+			CFLAG:NAME_TO_CHARA("カタリナ"):所属 = 国家ID_プレイヤー
+	ELSE
+		PRINTFORMW 手持ちのお金が足りないようですよ
+		GOTO INPUT_LOOP
+	ENDIF
+ELSEIF RESULT == 99
+	RETURN
 ELSE
 	GOTO INPUT_LOOP
 ENDIF
