@@ -55,12 +55,15 @@ IF TALENT:対象:恋慕
   PRINTFORML 結局薬の効果が切れるまで数時間まぐわい続けた
   PRINTFORML 薬の効果に%CALLNAME:対象%は満足したようで、晴々とした顔をしている
   PRINTFORML ただ、全身、特に内股がひどい筋肉痛になったようで、%CALLNAME:対象%は内股で生まれたての小鹿のようになっていた
-  LOCALS:0 = %CALLNAME:対象%の唇
-  LOCALS:1 = %CALLNAME:対象%の膣
-  CALL FUCK(MASTER, "性技, 性交, Ｃ, 射精", "童貞喪失, キス喪失", 0, LOCALS:0, "", LOCALS:1, "和姦")
-  LOCALS:0 = %CALLNAME:MASTER%の唇
-  CALL FUCK(対象, "欲望, 奉仕, 性技, 性交, Ｖ, Ｍ, Ｖ性交", "処女喪失, 膣内射精, キス喪失", 0, LOCALS:0, CALLNAME:MASTER, "", "和姦")
-  PRINTW
+
+  SIF !ABL:対象:性知識
+  	ABL:対象:性知識 = 1
+  CALL FUCK_MAKELOVE(対象, GET_ID(MASTER), @"%ANAME(MASTER)%の唇", ANAME(MASTER))
+  CALL FUCK(MASTER, "性技, 性交, Ｃ, 射精, Ｖ挿入", "童貞喪失, キス喪失", 0, @"%ANAME(対象)%の唇", "", @"%ANAME(対象)%の膣", "和姦")
+  CALL CHANGE_CFLAG(対象, "好感度", RAND(600, 800))
+  CALL CHANGE_CFLAG(対象, "依存度", RAND(100, 150))
+  CALL CHANGE_CFLAG(対象, "従属度", RAND(100, 150))
+  TALENT:対象:合意 = 1
 ELSE
   PRINTFORML %CALLNAME:対象%にボーダーブレイカーを飲ませてみたが、大して効果はなかった
   PRINTFORML 案内人も苦笑いをして、
@@ -71,7 +74,7 @@ ELSE
   PRINTW
   PRINTL せっかくなので研究スペースを見学してから帰ることにした
   PRINTL ただのデートになってしまった
-  LOCAL = RAND:100 + 100
-  CFLAG:対象:好感度 += LOCAL
-  PRINTFORMW 好感度 +{LOCAL}
+  CALL CHANGE_CFLAG(対象, "好感度", RAND(100, 200))
 ENDIF
+
+PRINTW
