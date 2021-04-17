@@ -29,9 +29,13 @@ CALL CUT_WOMB_SPERM_AMOUNT(対象)
 #DIM 対象
 #DIM 身長基礎値
 
-MAXBASE:対象:身長 = CALC_BODYSIZE_HEIGHT(対象)
-BASE:対象:身長 = MAXBASE:対象:身長
-
+IF BASE:対象:身長
+	BASE:対象:身長 *= 10
+	MAXBASE:対象:身長 = BASE:対象:身長
+ELSE
+	MAXBASE:対象:身長 = CALC_BODYSIZE_HEIGHT(対象)
+	BASE:対象:身長 = MAXBASE:対象:身長
+ENDIF
 
 @CALC_BODYSIZE_HEIGHT(対象)
 #FUNCTION
@@ -72,8 +76,13 @@ RETURNF 基礎値
 @SET_BODYSIZE_WEIST(対象)
 #DIM 対象
 
-BASE:対象:ウェスト = CALC_BODYSIZE_WEIST(対象)
-MAXBASE:対象:ウェスト = BASE:対象:ウェスト
+IF BASE:対象:ウェスト
+	BASE:対象:ウェスト *= 10
+	MAXBASE:対象:ウェスト = BASE:対象:ウェスト
+ELSE
+	BASE:対象:ウェスト = CALC_BODYSIZE_WEIST(対象)
+	MAXBASE:対象:ウェスト = BASE:対象:ウェスト
+ENDIF
 
 @CALC_BODYSIZE_WEIST(対象)
 #FUNCTION
@@ -117,8 +126,13 @@ RETURNF 基礎値
 @SET_BODYSIZE_BUST(対象)
 #DIM 対象
 
-BASE:対象:バスト = CALC_BODYSIZE_BUST(対象)
-MAXBASE:対象:バスト = BASE:対象:バスト
+IF BASE:対象:バスト
+	BASE:対象:バスト *= 10
+	MAXBASE:対象:バスト = BASE:対象:バスト
+ELSE
+	BASE:対象:バスト = CALC_BODYSIZE_BUST(対象)
+	MAXBASE:対象:バスト = BASE:対象:バスト
+ENDIF
 
 @CALC_BODYSIZE_BUST(対象)
 #FUNCTION
@@ -215,8 +229,13 @@ RETURNF 基礎値
 @SET_BODYSIZE_HIP(対象)
 #DIM 対象
 
-BASE:対象:ヒップ = CALC_BODYSIZE_HIP(対象)
-MAXBASE:対象:ヒップ = BASE:対象:ヒップ
+IF BASE:対象:ヒップ
+	BASE:対象:ヒップ *= 10
+	MAXBASE:対象:ヒップ = BASE:対象:ヒップ
+ELSE
+	BASE:対象:ヒップ = CALC_BODYSIZE_HIP(対象)
+	MAXBASE:対象:ヒップ = BASE:対象:ヒップ
+ENDIF
 
 @CALC_BODYSIZE_HIP(対象)
 #FUNCTION
@@ -270,9 +289,13 @@ RETURNF 基礎値
 @SET_BODYSIZE_WEIGHT(対象)
 #DIM 対象
 
-BASE:対象:体重 = CALC_BODYSIZE_WEIGHT(対象)
-MAXBASE:対象:体重 = BASE:対象:体重
-
+IF BASE:対象:体重
+	BASE:対象:体重 *= 10
+	MAXBASE:対象:体重 = BASE:対象:体重
+ELSE
+	BASE:対象:体重 = CALC_BODYSIZE_WEIGHT(対象)
+	MAXBASE:対象:体重 = BASE:対象:体重
+ENDIF
 
 
 @CALC_BODYSIZE_WEIGHT(対象)
