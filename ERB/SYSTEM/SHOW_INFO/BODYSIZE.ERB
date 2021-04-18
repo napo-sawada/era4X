@@ -29,7 +29,7 @@ CALL CUT_WOMB_SPERM_AMOUNT(対象)
 #DIM 対象
 #DIM 身長基礎値
 
-IF BASE:対象:身長
+IF BASE:対象:身長 > 100 && BASE:対象:身長 < 200
 	BASE:対象:身長 *= 10
 	MAXBASE:対象:身長 = BASE:対象:身長
 ELSE
@@ -76,7 +76,7 @@ RETURNF 基礎値
 @SET_BODYSIZE_WEIST(対象)
 #DIM 対象
 
-IF BASE:対象:ウェスト
+IF BASE:対象:ウェスト > 40 && BASE:対象:ウェスト < 100
 	BASE:対象:ウェスト *= 10
 	MAXBASE:対象:ウェスト = BASE:対象:ウェスト
 ELSE
@@ -126,7 +126,7 @@ RETURNF 基礎値
 @SET_BODYSIZE_BUST(対象)
 #DIM 対象
 
-IF BASE:対象:バスト > 10
+IF BASE:対象:バスト > 40 && BASE:対象:バスト < 150
 	BASE:対象:バスト *= 10
 	MAXBASE:対象:バスト = BASE:対象:バスト
 ELSE
@@ -229,7 +229,7 @@ RETURNF 基礎値
 @SET_BODYSIZE_HIP(対象)
 #DIM 対象
 
-IF BASE:対象:ヒップ
+IF BASE:対象:ヒップ > 40 && BASE:対象:ヒップ < 150
 	BASE:対象:ヒップ *= 10
 	MAXBASE:対象:ヒップ = BASE:対象:ヒップ
 ELSE
@@ -289,7 +289,7 @@ RETURNF 基礎値
 @SET_BODYSIZE_WEIGHT(対象)
 #DIM 対象
 
-IF BASE:対象:体重
+IF BASE:対象:体重 > 20 && BASE:対象:体重 < 200
 	BASE:対象:体重 *= 10
 	MAXBASE:対象:体重 = BASE:対象:体重
 ELSE
