@@ -126,7 +126,7 @@ RETURNF 基礎値
 @SET_BODYSIZE_BUST(対象)
 #DIM 対象
 
-IF BASE:対象:バスト
+IF BASE:対象:バスト > 10
 	BASE:対象:バスト *= 10
 	MAXBASE:対象:バスト = BASE:対象:バスト
 ELSE
