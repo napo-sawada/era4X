@@ -15,7 +15,7 @@ IF STAR_OWNER:RESULT == 国家ID_アレス宗教 && REL_LIKE_COUNTRY:国家ID_�
 		RETURN 0
 	SIF !TALENT:NAME_TO_CHARA("カタリナ"):恋慕 && !TALENT:NAME_TO_CHARA("カタリナ"):服従
 		RETURN 0
-	SIF CFLAG:NAME_TO_CHARA("ディアナ"):所属 == 国家ID_プレイヤー
+	SIF CFLAG:NAME_TO_CHARA("ディアナ"):所属 == 国家ID_プレイヤー || CFLAG:NAME_TO_CHARA("ディアナ"):捕虜先 == 国家ID_プレイヤー
 		RETURN 0
 	RETURN 1
 ENDIF
