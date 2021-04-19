@@ -1279,11 +1279,60 @@ GOTO SHOW_LOOP
 ;ユーザー選択による最初のゲーム設定
 ;-------------------------------------------------
 @GAME_INIT
-PRINTL オープニングを見ますか?
-CALL ASK_YN
-SIF RESULT == 0
-	CALL OPENING_4X
+CALL SELECT_GAMEMODE
 PRINTL チュートリアルを見ますか?
 CALL ASK_YN
 SIF RESULT == 0
 	CALL TUTORIAL
+
+;-------------------------------------------------
+;ゲームモード選択
+;-------------------------------------------------
+@SELECT_GAMEMODE
+#DIM 入力値
+#DIM ページ
+#DIM CHARA_BUFFER
+
+$INPUT_LOOP
+PRINTFORML %CALLNAME:MASTER%の身分は？
+
+PRINTBUTTON "[0] 奴隷を手にした調教師", 0
+PRINTL 
+PRINTL カスタムキャラ/オリジナルキャラを一人手にした状態でゲームを始められます。所持金$10,000
+PRINTL 
+PRINTBUTTON "[1] リッチエクスプローラー", 1
+PRINTL 
+PRINTL 大金を持った状態でゲームを始められます。所持金$1,000,000
+PRINTL 
+PRINTBUTTON "[2] 脱出者", 2
+PRINTL
+PRINTL わずかな所持金のみを持った状態でゲームを開始します。所持金$1,000,000
+PRINTL 
+
+INPUT
+IF RESULT == 0
+	$INPUT_LOOP2
+	CALL LISTUP_CUSTOM_CHARACTER(0, ページ, 20)
+	INPUT
+	入力値 = RESULT
+	IF !FIND_CHARADATA(TOSTR(入力値))
+		LOCAL = RESULT
+		IF INRANGE(RESULT, 0, MAX_CUSTOM_CHARA - 1)
+			CALL INIT_CUSTOM_DATA
+			CHARA_BUFFER = RESULT
+			CALL EDIT_CUSTOM_DATA(LOCAL, CHARA_BUFFER)
+			CALL DELETE_CHARA(CHARA_BUFFER)
+		ENDIF
+		GOTO INPUT_LOOP2
+	ENDIF
+	CALL LOAD_CUSTOM_DATA(入力値)
+	TALENT:RESULT:カスタムキャラ = 2
+	CFLAG:RESULT:所属 = 国家ID_プレイヤー
+	CALL OPENING_4X_0(RESULT)
+ELSEIF RESULT == 1
+	MONEY = 1000000
+	CALL OPENING_4X_1
+ELSEIF RESULT == 2
+	MONEY = 10000
+	CALL OPENING_4X_2
+ENDIF

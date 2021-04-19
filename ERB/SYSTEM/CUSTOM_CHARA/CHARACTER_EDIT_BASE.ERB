@@ -6,22 +6,54 @@ PRINTBUTTON "[  気力]", 1
 PRINTFORML  現在:{MAXBASE:対象:気力}
 PRINTBUTTON "[精神力]", 2
 PRINTFORML  現在:{MAXBASE:対象:精神力}
+PRINTBUTTON "[性別]", 3
+PRINTFORML  現在:%TOSTR_SEX(TALENT:対象:性別)%
 
 
 @CHARACTER_EDIT_INPUT_BASE(対象, 入力値)
 #DIM 対象
 #DIM 入力値
 
-SIF !INRANGE(入力値, 0, 2)
-	RETURN 0
+IF 入力値 == 3
+	CALL CHANGE_SEX(対象)
+ELSE
+	SIF !INRANGE(入力値, 0, 2)
+		RETURN 0
 
-PRINTFORML 値を入力 現在値{MAXBASE:対象:入力値} 
-PRINTFORML %BASENAME:入力値%を編集中 0～5000)
+	PRINTFORML 値を入力 現在値{MAXBASE:対象:入力値} 
+	PRINTFORML %BASENAME:入力値%を編集中 0～5000)
+
+	INPUT
+
+	RESULT = LIMIT(RESULT, 0, 5000)
+
+	MAXBASE:対象:入力値 = RESULT
+	BASE:対象:入力値 = MAXBASE:対象:入力値
+ENDIF
+
+@CHANGE_SEX(対象)
+#DIM 対象
+#DIM 入力値
+
+$INPUT_LOOP
+PRINTL 性別を選択してください
+PRINTFORML 現在:%TOSTR_SEX(TALENT:対象:性別)%
+PRINTBUTTON "[男性]", 0
+PRINT  
+PRINTBUTTON "[女性]", 1
+PRINT  
+PRINTBUTTON "[女双]", 2
+PRINT  
+PRINTBUTTON "[男双]", 3
+PRINT  
+PRINTBUTTON "[男の娘]", 4
+PRINT  
+PRINTBUTTON "[男の娘双]", 5
+PRINT  
 
 INPUT
+入力値 = RESULT
+SIF !INRANGE(入力値, 0, 5)
+	GOTO INPUT_LOOP
 
-RESULT = LIMIT(RESULT, 0, 5000)
-
-MAXBASE:対象:入力値 = RESULT
-BASE:対象:入力値 = MAXBASE:対象:入力値
-
+TALENT:対象:性別 = 入力値
