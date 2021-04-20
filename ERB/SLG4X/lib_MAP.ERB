@@ -1,0 +1,176 @@
+﻿;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;@SELECT_POINT_byMAP(POSID, SHIP_ID, MESSAGE, ARG:0)
+;;;		引数１：POSID		メインで表示する座標の指示 -1 で船中心かMASTER中心
+;;;		引数２：SHIP_ID		左上に船名出す時は船ID。 -1でなし
+;;; 	引数３：MESSAGE		入力枠付近に出す文字列。　「星を選択」とかださせて
+;;;		引数４：キャンセルした際のリターン値 デフォ-1
+;;; マップを描画し、一点選択させるUIをだす
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+@SELECT_POINT_byMAP(POSID = -1, SHIP_ID = -1, MESSAGE, ARG:0 = -1 )
+#DIM POSID
+#DIM SHIP_ID
+#DIMS MESSAGE
+#DIM SELECTED
+#DIM SECTOR_ID
+#DIM X_POS
+#DIM Y_POS
+
+IF POSID < 0
+	IF SHIP_ID >= 0 && SHIP_ID <= MAX_SHIP
+		SELECTED = SHIP_POSITION:SHIP_ID
+	ELSE
+		SELECTED = CHARACTER_POSITION:MASTER
+	ENDIF
+ELSE
+	SELECTED = POSID
+ENDIF
+SECTOR_ID = SELECTED /10000
+
+$INPUT_LOOP
+
+DRAWLINE
+
+	CALL DRAW_WINDOW( SECTOR_ID , SELECTED , SHIP_ID, 0)
+	CALL ID2POS(SELECTED)
+		
+	PRINTFORML 　　　　%MESSAGE%
+	PRINTL
+
+	IF SELECTED>= 0
+		PRINTFORML 　　　　選択中 #{RESULT:0,2,RIGHT} X:{RESULT:1,2,RIGHT} Y:{RESULT:2,2,RIGHT}
+	ELSE
+		PRINTL
+	ENDIF
+
+	PRINTL
+	PRINT 　　　　　　　　　
+	IF SELECTED >= 0
+		PRINTBUTTON "[ 　決　定　 ]", -1
+	ELSE
+		SETCOLOR 0x666666
+		PRINT [ 　決　定　 ]
+		RESETCOLOR
+	ENDIF
+	PRINTBUTTON " 　　　　[ キャンセル ]", -10
+	PRINTL
+	PRINTL
+	DRAWLINE
+
+	INPUT
+
+	IF RESULT == -10	;;キャンセル。上位メニューへ戻る
+		RETURN ARG:0
+	ELSEIF RESULT == -1	;;選択中座標で決定
+		RETURN SELECTED
+	ELSEIF  RESULT % 10000 == 9999 	;下4ケタ9999なら表示セクターの切り替え
+		SECTOR_ID = RESULT /10000
+		SELECTED = -2
+		GOTO INPUT_LOOP
+	ELSEIF RESULT >= 0
+		CALL ID2POS(RESULT)
+		SECTOR_ID = RESULT:0
+		X_POS = RESULT:1
+		Y_POS = RESULT:2
+
+			;有効なポイント指定 POSIDに格納してマップ描画更新
+		IF ( X_POS >= 0 && X_POS < MAP_WIDTH ) && ( Y_POS >= 0 && Y_POS < MAP_HEIGHT )
+			SELECTED = SECTOR_ID * 10000 + 100 * X_POS + Y_POS
+			GOTO INPUT_LOOP
+			;無効
+		ELSE	;有効でないポイント指定は　POSID無効化して返す　(-1だと情報窓がプレイヤーを追尾）
+			POSID = -2
+			GOTO INPUT_LOOP
+		ENDIF
+	ELSE	;そのほか
+		GOTO INPUT_LOOP
+	ENDIF
+
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;@GET_PORT_NAME(POSID)
+;;;	引数１：POSID 	座標ＩＤ
+;;;	RESULT:0	0: 該当なし / 1: 惑星 / 2:宇宙港
+;;; RESULT:1	惑星もしくは宇宙港の保有者　国ID
+;;; RESULT:2	惑星もしくは宇宙港のPORT_ID		;惑星と港で意味が変わるので注意
+;;; RESULTS:0	惑星名　もしくは "宇宙港"
+;;; RESULTS:1	保有者名国名
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+@GET_PORT_NAME(POSID)
+#DIM POSID
+#DIM PORT_ID
+#DIMS PORT_NAME
+
+RESULTS:0 '=""
+SIF POSID < 0
+	RETURN 0, 0
+
+FOR PORT_ID, 0, 星系数
+	IF 星系座標ID:PORT_ID == POSID
+		RESULTS:0 = %STAR_NAME:PORT_ID%
+		RESULTS:1 = %COUNTRY_NAME:(STAR_OWNER:PORT_ID)%
+		RETURN 1, (STAR_OWNER:PORT_ID), PORT_ID
+	ENDIF
+NEXT
+
+FOR PORT_ID, 0, MAX_PORT
+	IF PORT_POSITION_ID:PORT_ID == POSID
+		RESULTS:0 '="宇宙港"
+		RESULTS:1 = %COUNTRY_NAME:(PORT_OWNER:PORT_ID)%
+		RETURN 2, (PORT_OWNER:PORT_ID), PORT_ID
+	ENDIF
+NEXT
+
+RETURN 0, 0, -1
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;@GET_PORT_fromSECTOR(SECTOR_ID)
+;;;		引数１： SECTOR_ID	調査対象セクター
+;;;  RETURN:0 ： 0= なし / 1= 惑星のみ / 2= 宇宙港のみ / 3= 惑星＋宇宙港
+;;;  RETURN:1 ： -1= なし / 星のPOSID座標
+;;;  RETURN:2 ： -1= なし / 宇宙港のPOSID座標 ※複数あっても一つだけ
+;;; 調査対象セクターに 惑星・宇宙港が存在するか返す
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+@GET_PORT_fromSECTOR(SECTOR_ID)
+#DIM SECTOR_ID
+#DIM X_POS
+#DIM Y_POS
+#DIM DYNAMIC gFLAG,3 = 0, -1, -1
+
+FOR Y_POS, 0, MAP_HEIGHT
+	FOR X_POS, 0, MAP_WIDTH
+		
+		SELECTCASE MAP:SECTOR_ID:X_POS:Y_POS 
+			CASE 星
+				SETBIT gFLAG:0, 0
+				CALL POS2ID(SECTOR_ID, X_POS, Y_POS)
+				gFLAG:1 = RESULT
+			CASE 宇宙港
+				SETBIT gFLAG:0, 1
+				CALL POS2ID(SECTOR_ID, X_POS, Y_POS)
+				gFLAG:2 = RESULT
+		ENDSELECT
+	NEXT
+NEXT
+RETURN gFLAG:0, gFLAG:1, gFLAG:2
+
+;------------------------------------------------
+; @CHECK_COUNTRY_RELATION
+;
+;------------------------------------------------
+@CHECK_COUNTRY_RELATION(COUNTRY_A, COUNTRY_B)
+#FUNCTION
+#DIM COUNTRY_A
+#DIM COUNTRY_B
+
+
+	SELECTCASE REL_LIKE:COUNTRY_A:COUNTRY_B
+		CASE IS <= -1000
+			RETURNF -1 
+		CASE IS >= 1000
+			RETURNF 1
+		CASEELSE
+			RETURNF 0
+	ENDSELECT
+
