@@ -1,17 +1,17 @@
 ﻿;-------------------------------------------------
-;「奴隷商」の名称
+;「リクルータ」の名称
 ;-------------------------------------------------
 @SHOP_LIFE_NAME46
-RESULTS:0 '= "奴隷商"
+RESULTS:0 '= "リクルータ"
 ;'
 ;-------------------------------------------------
-;「奴隷商」の選択可否
+;「リクルータ」の選択可否
 ;-------------------------------------------------
 @SHOP_LIFE_CHECK46
 RETURN 1
 
 ;-------------------------------------------------
-;「奴隷商」の左カラムメニューの入力処理
+;「リクルータ」の左カラムメニューの入力処理
 ;-------------------------------------------------
 @SHOP_LIFE_EVENTBUY46
 FLAG:拠点フェイズページ = 1
@@ -22,12 +22,12 @@ MENUVAR:3 = 0
 RETURN 0
 
 ;-------------------------------------------------
-;「奴隷商」の右カラムボタン入力値をキャラ番号に変換する処理のオフ判定
+;「リクルータ」の右カラムボタン入力値をキャラ番号に変換する処理のオフ判定
 ;-------------------------------------------------
 @SHOP_LIFE_USERSHOP_COLUMN_RIGHT_CONVERT_CHARANUM_OFF_CHECK46
 
 ;-------------------------------------------------
-;「奴隷商」の右カラム表示処理
+;「リクルータ」の右カラム表示処理
 ;-------------------------------------------------
 @SHOP_LIFE_EVENTBUY_SHOW46
 #DIM ID
@@ -38,7 +38,7 @@ CALL COLUMN_RIGHT_PRINTL
 CALL COLUMN_RIGHT_LINE
 CALL COLUMN_RIGHT_PRINTL
 
-PRINTPLAIN 奴隷商「ようこそいらっしゃいませ」
+PRINTPLAIN リクルータ「ようこそいらっしゃいませ」
 CALL COLUMN_RIGHT_PRINTL
 CALL COLUMN_RIGHT_LINE
 CALL COLUMN_RIGHT_PRINTL
@@ -84,7 +84,7 @@ CALL SELECTABLE_TALAENT_LIST
 CALL COLUMN_RIGHT_CLEAR
 
 ;-------------------------------------------------
-;「奴隷商」の右カラムボタンの入力処理補佐
+;「リクルータ」の右カラムボタンの入力処理補佐
 ;-------------------------------------------------
 @SHOP_LIFE_EVENTBUY_SUB46(ARG:0)
 #DIM INPUT_RESULT
@@ -118,7 +118,7 @@ IF LOCAL:2 < 0
 ;成功
 ELSE
 	CALL SINGLE_DRAWLINE
-	PRINTFORML 「この奴隷などいかがでしょう？」
+	PRINTFORML 「こちらの方などいかがでしょう？」
 
 	$INPUT_LOOP_SELECT
 
@@ -130,9 +130,9 @@ ELSE
 	CALL SHOW_INFO(LOCAL:2)
 	CALL SINGLE_DRAWLINE
 
-	PRINTBUTTON "[この奴隷を買う]", 0
+	PRINTBUTTON "[この仲間を雇う]", 0
 	PRINT    
-	PRINTBUTTON "[別の奴隷を探す]", 1
+	PRINTBUTTON "[別の人を探す]", 1
 	PRINT    
 	IF MENUVAR:11 == -1
 	ELSEIF MENUVAR:12
@@ -152,13 +152,13 @@ ELSE
 	
 
 	IF INPUT_RESULT == 0 && (1000 + GET_FILTER_COST()) < MONEY
-		PRINTL 奴隷の名前を変更しますか？
+		PRINTL 仲間の名前を変更しますか？
 		CALL ASK_YN
 		SIF RESULT == 0
 			CALL CHANGE_NAME(LOCAL:2)
 		
 		CALL CHANGE_COUNTRY(LOCAL:2, CFLAG:MASTER:所属)
-		PRINTFORMW %ANAME(LOCAL:2)%を購入しました
+		PRINTFORMW %ANAME(LOCAL:2)%を雇いました
 		IF MENUVAR:11 != -1
 			CALL DELETE_CHARA(MENUVAR:11)
 		ENDIF
@@ -209,7 +209,7 @@ ENDIF
 RETURN 1
 
 ;-------------------------------------------------
-;「奴隷商」のリスト１入力処理
+;「リクルータ」のリスト１入力処理
 ;　キャラ番号への変換オフのためARG:0=入力値
 ;-------------------------------------------------
 @SHOP_LIFE_USERSHOP46(ARG:0)
