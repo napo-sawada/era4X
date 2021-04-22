@@ -19,6 +19,7 @@ FLAG:夜這い = 0
 MENUVAR:1 = 0
 MENUVAR:2 = 0
 MENUVAR:3 = 0
+職業候補 = -1
 RETURN 0
 
 ;-------------------------------------------------
@@ -79,6 +80,10 @@ CALL COLUMN_RIGHT_PRINTL
 
 CALL COLOR_PRINT(" 能力:", カラー_注釈)
 CALL SELECTABLE_TALAENT_LIST
+CALL COLUMN_RIGHT_PRINTL
+
+CALL COLOR_PRINT(" 職業:", カラー_注釈)
+CALL JOB_LIST
 
 ;残りは空行
 CALL COLUMN_RIGHT_CLEAR
@@ -311,6 +316,8 @@ ELSEIF ARG:0 >= 1000 && ARG:0 <= 1300
 		ENDSELECT
 	ENDIF
 	TALENT_FILTER:(ARG:0 - 1000) = TALENT_FILTER:(ARG:0 - 1000) ? 0 # 1
+ELSEIF ARG:0 >= 1999 && ARG:0 < 2000 + VARSIZE("JOB_NAME")
+	職業候補 = ARG:0 - 2000
 ENDIF
 
 RETURN 0
@@ -338,6 +345,27 @@ FOR ID, 0, RESULT:0
 	LOCALS = %LOCALS, 16, LEFT%
 	CALL PRINT_SELECT_BUTTON(LOCALS, 1000 + ID, TALENT_FILTER:ID, 1)
 	IF COUNTER % 5 == 0
+		CALL COLUMN_RIGHT_PRINTL
+		CALL COLOR_PRINT(" 　　 ", カラー_注釈)
+	ENDIF
+NEXT
+
+;-------------------------------------------------
+;ラジオ式職業一覧
+;-------------------------------------------------
+@JOB_LIST
+#DIM ID
+#DIM COUNTER
+
+FOR ID, -1, VARSIZE("JOB_NAME")
+	IF ID == -1
+		LOCALS = [指定なし]
+	ELSE
+		LOCALS = [%JOB_NAME:ID%]
+	ENDIF
+	LOCALS = %LOCALS, 16, LEFT%
+	CALL PRINT_SELECT_BUTTON(LOCALS, 2000 + ID, 職業候補 == ID, 1)
+	IF ID % 5 == 3
 		CALL COLUMN_RIGHT_PRINTL
 		CALL COLOR_PRINT(" 　　 ", カラー_注釈)
 	ENDIF

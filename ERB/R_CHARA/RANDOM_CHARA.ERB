@@ -23,6 +23,9 @@ TARGET = CHARANUM - 1
 NO = FLAG:汎用武将カウント + MIN_NO_RANDOM_CHARA
 FLAG:汎用武将カウント ++
 
+;職業の設定
+TALENT:職業 = 職業候補 == -1 ? RAND:(VARSIZE("JOB_NAME")) # 職業候補
+
 ;素質と能力の決定
 CALL RANDOM_CHARA_SETTING(ARG:0, ARG:1, ARG:2)
 
@@ -40,6 +43,7 @@ CALL RANDOM_CHARA_CLOTH_SETTING()
 
 ;タグの設定
 CALL RANDOM_CHARA_TAG_SETTING()
+
 
 ;ターゲットの再設定
 TARGET = LOCAL:0
@@ -80,7 +84,7 @@ SELECTCASE LOCAL:0
 		;男性
 		TALENT:性別 = 0
 		;童貞かどうかをランダムに設定
-		TALENT:童貞 = (RAND:5 <= 2)
+		TALENT:童貞 = RAND:100 < JOB_VERGIN_PER:(TALENT:職業)
 		TALENT:処女 = 1
 		TALENT:アナル処女 = 1
 		;キス経験をランダムに設定
@@ -94,7 +98,7 @@ SELECTCASE LOCAL:0
 		TALENT:性別 = 1
 		;処女・キス経験をランダムに設定
 		TALENT:童貞 = 1
-		TALENT:処女 = (RAND:4 != 0)
+		TALENT:処女 = RAND:100 < JOB_VERGIN_PER:(TALENT:職業)
 		TALENT:アナル処女 = (RAND:10 != 0)
 		IF TALENT:処女
 			TALENT:キス未経験 = (RAND:4 != 0)
@@ -105,8 +109,8 @@ SELECTCASE LOCAL:0
 		;女ふた
 		TALENT:性別 = 2
 		;童貞・処女かどうかをランダムに設定
-		TALENT:童貞 = (RAND:5 <= 2)
-		TALENT:処女 = (RAND:4 != 0)
+		TALENT:童貞 = RAND:100 < JOB_VERGIN_PER:(TALENT:職業)
+		TALENT:処女 = RAND:100 < JOB_VERGIN_PER:(TALENT:職業)
 		TALENT:アナル処女 = (RAND:10 != 0)
 		IF TALENT:処女
 			TALENT:キス未経験 = (RAND:4 != 0)
@@ -117,8 +121,8 @@ SELECTCASE LOCAL:0
 		;男ふた
 		TALENT:性別 = 3
 		;童貞・処女かどうかをランダムに設定
-		TALENT:童貞 = (RAND:5 <= 2)
-		TALENT:処女 = (RAND:4 != 0)
+		TALENT:童貞 = RAND:100 < JOB_VERGIN_PER:(TALENT:職業)
+		TALENT:処女 = RAND:100 < JOB_VERGIN_PER:(TALENT:職業)
 		TALENT:アナル処女 = (RAND:10 != 0)
 		IF TALENT:処女
 			TALENT:キス未経験 = (RAND:4 != 0)
@@ -129,7 +133,7 @@ SELECTCASE LOCAL:0
 		;男の娘
 		TALENT:性別 = 4
 		;童貞かどうかをランダムに設定(男性より童貞率高め)
-		TALENT:童貞 = (RAND:8 <= 6)
+		TALENT:童貞 = RAND:100 < JOB_VERGIN_PER:(TALENT:職業)
 		TALENT:処女 = 1
 		TALENT:アナル処女 = (RAND:10 != 0)
 		;キス経験をランダムに設定
@@ -142,8 +146,8 @@ SELECTCASE LOCAL:0
 		;男の娘ふた
 		TALENT:性別 = 5
 		;童貞・処女かどうかをランダムに設定
-		TALENT:童貞 = (RAND:8 <= 6)
-		TALENT:処女 = (RAND:4 != 0)
+		TALENT:童貞 = RAND:100 < JOB_VERGIN_PER:(TALENT:職業)
+		TALENT:処女 = RAND:100 < JOB_VERGIN_PER:(TALENT:職業)
 		TALENT:アナル処女 = (RAND:10 != 0)
 		IF TALENT:処女
 			TALENT:キス未経験 = (RAND:4 != 0)
@@ -465,6 +469,9 @@ SIF IS_FEMALE(TARGET)
 
 ;■敏鈍感素質の決定
 CALL RANDOM_CHARA_SENSE
+
+;職業によるTALENTの付与と削除
+CALL UPDATE_BY_JOB
 
 CALL SET_TALENT_FILTER(TARGET)
 
@@ -1847,3 +1854,97 @@ FOR TALENT_ID, 0, 151
 		ENDSELECT
 	ENDIF
 NEXT
+
+;-------------------------
+;職業によるTALENTの変化などを付与
+;-------------------------
+@UPDATE_BY_JOB
+SELECTCASE JOB_NAME:(TALENT:職業)
+	CASE "小学生"
+		IF RAND:2
+			TALENT:体格 = 体格_小柄
+		ELSE
+			TALENT:体格 = 体格_子供
+		ENDIF
+		TALENT:幼児 = 1
+	CASE "中学生"
+		TALENT:自慰しやすい = 1
+	CASE "高校生"
+		SIF RAND:100 < 10
+			EXP:売春経験 += RAND: 90 + 10
+	CASE "大学生"
+		IF RAND:100 < 10
+			EXP:輪姦経験 += 10
+			EXP:トラウマ経験 += 10
+		ENDIF
+	CASE "未亡人"
+		SIF TALENT:処女 && RAND:100 < 50
+			EXP:出産経験 += RAND:2 + 1
+	CASE "軍人"
+		TALENT:プライド高い = 1
+		TALENT:痛みに強い = 1
+		TALENT:プライド低い = 0
+	CASE "娼婦"
+		EXP:売春経験 += RAND:300 + 100
+	CASE "聖職者"
+		TALENT:快感の否定 = 1
+		TALENT:貞操観念 = 1
+	CASE "冒険家"
+		IF RAND:100 < 10
+			IF RAND:2
+				EXP:輪姦経験 += RAND:10 + 10
+			ELSE
+				EXP:トラウマ経験 += RAND:10 + 10
+			ENDIF
+		ENDIF
+	CASE "医者"
+		SIF TALENT:幼稚
+			TALENT:幼稚 = 0
+	CASE "奴隷"
+		TALENT:献身的 = 1
+	CASE "労働党員"
+		TALENT:保守的 = 1
+	CASE "労働者"
+		TALENT:サボり魔 = 1
+	CASE "貴族"
+		TALENT:プライド高い = 1
+		TALENT:プライド低い = 0
+	CASE "学者"
+		TALENT:好奇心 = 1
+	CASE "芸能人"
+		TALENT:目立ちたがり = 1
+	CASE "教師"
+		SIF RAND:100 < 10
+			EXP:輪姦経験 += RAND:10 + 10
+	CASE "海賊"
+		TALENT:反抗的 = 1
+		TALENT:素直 = 0
+	CASE "アイドル"
+		TALENT:アイドル = 1
+	CASE "政治犯"
+		TALENT:反抗的 = 1
+		TALENT:素直 = 0
+	CASE "メイド"
+		TALENT:一線越えない = 1
+	CASE "巫女"
+		SIF RAND:100 < 10
+			ABL:超能力 = RAND:10 + 20
+		SIF RAND:100 < 5
+			EXP:売春経験 = RAND:10 + 20
+		SIF RAND:100 < 5
+			EXP:異常経験 = RAND: 10 + 1
+	CASE "AV女優"
+		TALENT:貞操無頓着 = 1
+		TALENT:貞操観念 = 0
+	CASE "プロゲーマー"
+		TALENT:習得早い = 1
+		TALENT:習得遅い = 0
+	CASE "コスプレイヤー"
+		TALENT:目立ちたがり = 1
+		TALENT:恥薄い = 1
+		TALENT:恥じらい = 0
+	CASE "グラビアアイドル"
+		TALENT:人気者 = 1
+		TALNET:恥薄い = 1
+		TALENT:恥じらい = 0
+ENDSELECT
