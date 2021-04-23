@@ -1,4 +1,5 @@
-﻿#DIM CONST 汎用調査船 = 1
+﻿#DIM CONST SHIP_CLASS_TOTAL_COUNT = 99
+#DIM CONST 汎用調査船 = 1
 #DIM CONST 汎用コルベット = 2
 #DIM CONST 汎用フリゲート = 3
 #DIM CONST 汎用駆逐艦 = 4
