@@ -1025,7 +1025,6 @@ NEXT
 #DIM 発動部隊
 #DIM 対象勢力
 #DIM 対象部隊
-#DIM 明察キャラ
 
 
 PRINTFORML %BATTLE_NAME:(発動側)%軍の計略発動！
@@ -1048,20 +1047,6 @@ IF RAND:MAX(BATTLE_ATK:(対象側), 1) + BATTLE_ATK:(対象側) >= RAND:MAX(BATT
 		CALL KOJO_EVENT(RESULT, 312)
 	ENDIF
 ELSE
-	;明察の発動判定
-	FOR LOCAL, 0, BATTLE_COMMANDER_NUM:対象側
-		明察キャラ = BATTLE_COMMANDER:対象側:LOCAL
-		SIF 明察キャラ < 0 || BATTLE_SKILL_SEALED:対象側:(LOCAL:0) || BATTLE_SUMMONED_CHARA:(発動側):(LOCAL:0)
-			CONTINUE
-		IF FIND_PASSIVE_SKILL(明察キャラ, "明察") && 30 > RAND:100
-			PRINTFORM 《明察》
-			PRINTFORML %ANAME(明察キャラ)%は敵部隊の計略を見透かした
-			BATTLE_RATE_DMG:対象側 += 10
-			BATTLE_RATE_ATC:対象側 += 25
-			BATTLE_RATE_GRD:対象側 += 20
-			RETURN
-		ENDIF
-	NEXT
 	;通ったら計略の選択
 	CALL SELECT_SCHEME(発動側, 対象側)
 	CALL WHOES_SCHEME(発動側, 発動勢力, 発動部隊, GETNUM(ABL, "知略"))
