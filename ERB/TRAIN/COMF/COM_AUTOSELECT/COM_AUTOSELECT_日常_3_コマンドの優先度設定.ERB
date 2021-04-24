@@ -122,9 +122,9 @@ COM_AUTO_COM_PRIORITY:(ADD_NUM_対象が実行 + GET_TRAINNUM("酒を飲む")) +
 COM_AUTO_COM_PRIORITY:(ADD_NUM_対象が実行 + GET_TRAINNUM("酒を飲む")) += AUTO_N_TYPE_状態異常(MAIN_PLAYER, 0)
 IF TALENT:MAIN_PLAYER:幼稚
 	COM_AUTO_COM_PRIORITY:(ADD_NUM_対象が実行 + GET_TRAINNUM("酒を飲む")) = 0
-	COM_AUTO_COM_PRIORITY:(ADD_NUM_対象が実行 + GET_TRAINNUM("酒を飲む")) += (ITEM:果実酒) * 3
+	COM_AUTO_COM_PRIORITY:(ADD_NUM_対象が実行 + GET_TRAINNUM("酒を飲む")) += (ITEM:ブランデー) * 3
 ELSE
-	COM_AUTO_COM_PRIORITY:(ADD_NUM_対象が実行 + GET_TRAINNUM("酒を飲む")) += (ITEM:醸造酒 || ITEM:日本酒 || ITEM:蒸留酒) * 5
+	COM_AUTO_COM_PRIORITY:(ADD_NUM_対象が実行 + GET_TRAINNUM("酒を飲む")) += (ITEM:ライスワイン || ITEM:ラム酒 || ITEM:ウォッカ) * 5
 ENDIF
 ;-------------------------------------------------
 ;### CATEGORY_2_LIKE_300

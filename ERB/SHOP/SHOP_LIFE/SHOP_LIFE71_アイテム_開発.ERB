@@ -97,19 +97,19 @@ RETURN RESULT
 ;-------------------------------------------------
 ;開発アイテムの購入価格
 ;-------------------------------------------------
-;●醸造酒
+;●ライスワイン
 @GET_PRICE250
 RETURN 3000
 
-;●果実酒
+;●ブランデー
 @GET_PRICE251
 RETURN 2000
 
-;●日本酒
+;●ラム酒
 @GET_PRICE252
 RETURN 4000
 
-;●蒸留酒
+;●ウォッカ
 @GET_PRICE253
 RETURN 5000
 
@@ -319,18 +319,18 @@ ENDIF
 RETURN 0
 
 
-;●果実酒
+;●ブランデー
 @ITEM_ABLE251
-;醸造酒を開発済み
-IF ITEMSALES:醸造酒
+;ラム酒を開発済み
+IF ITEMSALES:ラム酒
 	RETURN 1
 ENDIF
 RETURN 0
 
-;●蒸留酒
+;●ウォッカ
 @ITEM_ABLE253
-;醸造酒を開発済み
-IF ITEMSALES:醸造酒
+;ラム酒を開発済み
+IF ITEMSALES:ラム酒
 	RETURN 1
 ENDIF
 RETURN 0

@@ -384,7 +384,7 @@ SELECTCASE GET_COM_INITIATIVE()
 				LOCAL:3 = 7
 				PRINTFORML 猥談に興奮を抑えられなくなり、%ANAME(MTAR:0)%の
 			CASEELSE
-				IF GET_PLACENAME(TFLAG:54) == "城下町"
+				IF GET_PLACENAME(TFLAG:54) == "市街地"
 					LOCAL:3 = 6
 					PRINTFORML 人気のない路地裏へと連れ込むと、%ANAME(MTAR:0)%の
 			;温泉
@@ -395,7 +395,7 @@ SELECTCASE GET_COM_INITIATIVE()
 					ELSE
 						PRINTFORML 湯船の中で%ANAME(MTAR:0)%の
 					ENDIF
-				ELSEIF GET_PLACENAME(TFLAG:54) == "川辺"
+				ELSEIF GET_PLACENAME(TFLAG:54) == "遊泳場"
 					LOCAL:3 = 11
 					PRINTDATAL
 						DATAFORM 泳ぎ疲れ岩に腰掛ける%ANAME(MTAR:0)%の
@@ -467,7 +467,7 @@ SELECTCASE GET_COM_INITIATIVE()
 				LOCAL:3 = 7
 				PRINTFORML 猥談に興奮した様子で%ANAME(MPLY:0)%の手に自身の
 			CASEELSE
-				IF GET_PLACENAME(TFLAG:54) == "城下町"
+				IF GET_PLACENAME(TFLAG:54) == "市街地"
 					LOCAL:3 = 6
 					PRINTFORML 人気のない路地裏へと連れ込むと、%ANAME(MPLY:0)%の手に自身の
 			;温泉
@@ -478,7 +478,7 @@ SELECTCASE GET_COM_INITIATIVE()
 					ELSE
 						PRINTFORML 湯船の中で%ANAME(MPLY:0)%の手に自身の
 					ENDIF
-				ELSEIF GET_PLACENAME(TFLAG:54) == "川辺"
+				ELSEIF GET_PLACENAME(TFLAG:54) == "遊泳場"
 					LOCAL:3 = 11
 					PRINTDATAL
 						DATAFORM 泳ぎ疲れ岩に腰掛ける%ANAME(MPLY:0)%の手に自身の

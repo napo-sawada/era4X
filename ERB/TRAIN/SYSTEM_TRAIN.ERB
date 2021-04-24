@@ -851,7 +851,7 @@ ELSE
 	PRINTPLAIN   
 	PRINTBUTTON "0[このまま別れる]", 0
 	PRINTPLAIN     
-	IF GET_PLACENAME(TFLAG:54) == "城下町"
+	IF GET_PLACENAME(TFLAG:54) == "市街地"
 		IF (IS_FEMALE(MASTER) && IS_MALE(MTAR:0)) || (GROUPMATCH(TALENT:MASTER:性別, 4, 5) && GROUPMATCH(TALENT:(MTAR:0):性別, 0, 3) && TALENT:(MTAR:0):恋人)
 			PRINTBUTTON "1[宿に連れ込む(宿代は相手持ち)]", 1
 		ELSE
@@ -938,8 +938,8 @@ ELSE
 	;ウフフ突入の場合
 	IF LOCAL:1
 		IF LOCAL:1 == 3
-			IF GET_PLACENAME(TFLAG:54) == "城下町"
-				PRINTFORMW すっかりその気になった%ANAME(MTAR:0)%は、%ANAME(MASTER)%を城下町の宿へと連れ込んだ…
+			IF GET_PLACENAME(TFLAG:54) == "市街地"
+				PRINTFORMW すっかりその気になった%ANAME(MTAR:0)%は、%ANAME(MASTER)%を市街地の宿へと連れ込んだ…
 			ELSEIF GET_PLACENAME(TFLAG:54) == "温泉"
 				PRINTFORMW すっかりその気になった%ANAME(MTAR:0)%は、息を荒らげて%ANAME(MASTER)%の体に抱きついた
 			ELSEIF GETBIT(TALENT:(MTAR:0):淫乱系, 素質_淫乱_精液便女)
@@ -950,8 +950,8 @@ ELSE
 				PRINTFORMW すっかりその気になった%ANAME(MTAR:0)%は、息を荒らげて%ANAME(MASTER)%を押し倒した
 			ENDIF
 		ELSE
-			IF GET_PLACENAME(TFLAG:54) == "城下町"
-				PRINTFORMW %ANAME(MASTER)%と%ANAME(MTAR:0)%は城下町の宿へと入った…
+			IF GET_PLACENAME(TFLAG:54) == "市街地"
+				PRINTFORMW %ANAME(MASTER)%と%ANAME(MTAR:0)%は市街地の宿へと入った…
 			ELSEIF GET_PLACENAME(TFLAG:54) == "温泉"
 				PRINTFORMW %ANAME(MASTER)%は%ANAME(MTAR:0)%を抱き寄せた
 			ELSEIF GETBIT(TALENT:(MTAR:0):淫乱系, 素質_淫乱_精液便女)

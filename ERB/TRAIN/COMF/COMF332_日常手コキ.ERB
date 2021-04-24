@@ -418,7 +418,7 @@ SELECTCASE GET_COM_INITIATIVE()
 					DATAFORM 膝に乗せた%ANAME(MTAR:0)%の頭を撫でつつ、%PENIS_NAME%を
 				ENDDATA
 			CASEELSE
-				IF GET_PLACENAME(TFLAG:54) == "城下町"
+				IF GET_PLACENAME(TFLAG:54) == "市街地"
 					LOCAL:3 = 6
 					PRINTDATAL
 						DATAFORM %ANAME(MTAR:0)%に人気のない路地裏へと連れ込まれ、%PENIS_NAME%を眼前に突きつけられると
@@ -432,7 +432,7 @@ SELECTCASE GET_COM_INITIATIVE()
 						DATAFORM %ANAME(MTAR:0)%に命じられ、風呂椅子に座る%ANAME(MTAR:0)%の%PENIS_NAME%を
 						DATAFORM 手近な岩に腰掛けた%ANAME(MTAR:0)%に頼まれ、お湯の滴る%PENIS_NAME%を
 					ENDDATA
-				ELSEIF GET_PLACENAME(TFLAG:54) == "川辺"
+				ELSEIF GET_PLACENAME(TFLAG:54) == "遊泳場"
 					LOCAL:3 = 12
 					PRINTDATAL
 						DATAFORM 泳ぎ疲れ岩に腰掛ける%ANAME(MTAR:0)%に頼まれ、水の滴る%PENIS_NAME%を
@@ -512,7 +512,7 @@ SELECTCASE GET_COM_INITIATIVE()
 			;お掃除フェラ
 			CASE 310, 311
 				LOCAL:3 = 24
-				PRINTFORML わざとらしく%ANAME(MTAR:0)%の股間に\@ PREVCOM == 310 ? 酒杯 # 蜂蜜水 \@の残りをこぼすと、濡れた下着ごと%ANAME(MTAR:0)%の%PENIS_NAME%を
+				PRINTFORML わざとらしく%ANAME(MTAR:0)%の股間に\@ PREVCOM == 310 ? 酒杯 # エインズの露 \@の残りをこぼすと、濡れた下着ごと%ANAME(MTAR:0)%の%PENIS_NAME%を
 			;実地演習
 			CASE 550
 				LOCAL:3 = 25
@@ -539,7 +539,7 @@ SELECTCASE GET_COM_INITIATIVE()
 					PRINTFORML 膝に乗せた%ANAME(MTAR:0)%の頭を撫でながら%PENIS_NAME%を取り出すと
 				ENDIF
 			CASEELSE
-				IF GET_PLACENAME(TFLAG:54) == "城下町"
+				IF GET_PLACENAME(TFLAG:54) == "市街地"
 					LOCAL:3 = 26
 					PRINTFORML 人気のない路地裏へと連れ込むと、%ANAME(MTAR:0)%の下着を剥ぎ取りそのまま%PENIS_NAME%を
 			;温泉
@@ -550,7 +550,7 @@ SELECTCASE GET_COM_INITIATIVE()
 					ELSE
 						PRINTFORML %ANAME(MTAR:0)%を手近な岩に腰掛けさせると、お湯が滴る%PENIS_NAME%を
 					ENDIF
-				ELSEIF GET_PLACENAME(TFLAG:54) == "川辺"
+				ELSEIF GET_PLACENAME(TFLAG:54) == "遊泳場"
 					LOCAL:3 = 31
 					IF RAND:3 == 0
 						PRINTFORML %ANAME(MTAR:0)%の腰を浮かせて%PENIS_NAME%を水面から浮上させると

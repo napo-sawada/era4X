@@ -22,7 +22,7 @@ SIF FLAG:調教モード == 6
 SIF MPLY:0 != MASTER
 	RETURN 0
 ;デート中で場所が川辺、花畑、森林以外なら無理
-SIF TFLAG:54 && !GROUPMATCH(GET_PLACENAME(TFLAG:54), "川辺", "花畑", "森林")
+SIF TFLAG:54 && !GROUPMATCH(GET_PLACENAME(TFLAG:54), "遊泳場", "花畑", "森林")
 	RETURN 0
 ;臨月or怪我なら不可
 SIF CFLAG:(MTAR:0):行動不能状態 == 行動不能_臨月 || CFLAG:(MTAR:0):行動不能状態 == 3
