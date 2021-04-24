@@ -9,7 +9,18 @@
 ; クエスト受注可能か
 ;--------------------------
 @QUEST_ACCEPTABLE_13
-RETURN 1
+SIF QUEST_PROGRESS:13 == 1
+	RETURN 0
+SIF MONEY < 300000
+	RETURN 0
+FOR LOCAL, 0, MAX_SHIP
+	IF SHIP_COUNTRY:LOCAL == 国家ID_プレイヤー && GROUPMATCH(SHIP_CATEGORY:LOCAL, 巡洋艦, 戦艦, 空母)
+		CALL GET_STAR_ID_FROM_POS(CHARACTER_POSITION)
+		SIF STAR_OWNER:RESULT == 国家ID_企業連合
+			RETURN 1
+	ENDIF
+NEXT
+RETURN 0
 
 ;--------------------------
 ; クエストの名前を返却
@@ -22,4 +33,62 @@ RETURN
 ; クエスト本体
 ;--------------------------
 @QUEST_BODY_13
-
+PRINTFORML 企業連合の宇宙港に停めた小型船のコックピットでリーシャは、久しぶりに極上のお酒を入手する事ができて上機嫌になりいつもよりも多くの酒をあおっていた。
+PRINTFORML リーシャは今まで貯めていた貯金の殆どをつかって手に入れた極上のお酒が入っている小さい細長の木箱を眺めながら……
+PRINTL
+PRINTFORMW 「ﾋｸｯ…あぁ、やっぱり私は運がいいな…。傭兵を始めるまではどうなるかと思ったけど……今はこんなお金の使い方が出来るくらい稼げてるし」
+PRINTFORMW 「でも貯金をほとんど使っちゃったのは失敗だったかな……。しかーし。この滅多に市場に出回らないガッシュモンベルが手に入った事に比べれば些細な事だよね……」
+PRINTFORMW 「よーし、また明日から頑張ってお金を稼ぐぞー。でも今日は仕事の事は忘れて飲みまくるぞぉ！だって気分がいいからねー」
+PRINTL
+PRINTFORML リーシャは小さい細長の木箱を持ちながらウキウキとはしゃぎながら船のカーゴスペースに向かい
+PRINTFORML ガッシュモンベルを酒コレクション用のコンテナに保管して再びコックピットへと戻った。
+PRINTFORMW ………
+PRINTFORMW ……
+PRINTFORMW …
+PRINTFORML コックピットで更にお酒を飲み続け冷静な判断が出来ない程に酩酊しているリーシャはこのまま船で港を出て船を思いっきりかっ飛ばしたい衝動に駆られ
+PRINTL
+PRINTFORMW 「ﾋｸｯ…いくぞぉ…わたしは～宇宙の果てまで～いくんだぁ」
+PRINTL
+PRINTFORMW 本来ならちゃんと手続きをしてからでないと出港をしてはならないのだが、リーシャはそれを無視して船のエンジンを入れ
+PRINTL
+PRINTFORMW 「ここは大きい港だしぃ～手続きしなくてもいいよね～それにちょっとだけ…ちょっとだけ外に出るだけだからぁ」
+PRINTL
+PRINTFORMW そしてリーシャはアクセルを入れ船を前へと進めてしまう……
+PRINTFORMW ………
+PRINTFORMW ……
+PRINTFORMW …
+PRINTFORMW その頃、あなたはやっと入港できる順番が来て船を港へと進めるが……
+PRINTFORMW そこに本来ならいる筈の無いリーシャの船が突っ込んできてあなたの船の側面部に思いっきり衝突した
+PRINTL
+PRINTFORMW 追突した衝撃で壁に叩き付けられた激痛と事態の重大さにリーシャは段々と酔いがさめ始め
+PRINTL
+PRINTFORMW 「あちゃー凄く高そうな船にぶつかっちゃった…これは流石にまずいかな…いやまずいよね」
+PRINTFORMW 「このまま逃げちゃおうか…あれ？エンジンが…というかジェネレータすら壊れちゃってる…」
+PRINTFORMW 「港の何処かに隠れるか？いやでも船で私だってバレちゃうよね……」
+PRINTFORMW 「それに今はお金も無いし…どうしよう…しかも保険とかに入ってないし…」
+PRINTL
+PRINTFORMW うなだれているリーシャに船の持ち主であるあなたは声をかけ
+PRINTL
+PRINTFORMW 「あ……あのー、この船の持ち主さんですか…？」
+PRINTL
+PRINTFORMW そうだ、とあなたが応えるとリーシャは懸命に許しを乞うた
+PRINTL
+PRINTFORMW 「すいませんー！悪気があった訳じゃないんです！だから…だから…」
+PRINTL
+PRINTFORMW あなたは面倒そうに船の修理費さえ払ってくれるのなら後は何もしないと伝えるが
+PRINTL
+PRINTFORMW 「えっとぉ…そのぉ…今、お金が…ちょっと」
+PRINTFORMW 「でも！時間さえあれば必ず返せますから…」
+PRINTFORMW 「へっ？金が無いならクルーとしてあなたの元で働け…？」
+PRINTFORMW 「そ、そんないきなり言われても……え？クルーにならないなら警察と港の管理人に連絡してそれなりの対応をする…！？」
+PRINTL
+PRINTFORMW 他に選択肢が無い事に絶望したリーシャは膝から崩れ落ち
+PRINTL
+PRINTFORMW 「うぅ…そんなぁ…、今までずっと上手くいってたのに…こんなぁ…」
+PRINTFORMW 「でも自業自得ですよね…。分かりました…修理費の分だけ貴方の元でクルーとして働きます……」
+PRINTL
+PRINTW リーシャを無理矢理クルーにした
+CFLAG:NAME_TO_CHARA("リーシャ"):所属 = 国家ID_プレイヤー
+MONEY -= 300000
+CALL COLOR_PRINTW("船の修理費の為に金300000を使った", カラー_注意)
+QUEST_PROGRESS:13 = 1
