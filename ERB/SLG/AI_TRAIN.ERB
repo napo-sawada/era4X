@@ -32,12 +32,6 @@ FOR LOCAL, 0, AI_TRAIN_MAX_TARGET
 			上昇量 += RAND:2
 	ENDSELECT
 
-	SIF FIND_PASSIVE_SKILL(対象, "超成長力")
-		上昇量 ++
-
-	SIF FIND_PASSIVE_SKILL(対象, "努力家")
-		上昇量 ++
-
 	;超能力の必要経験値高いので
 	SIF 上昇能力 == GETNUM(ABL, "超能力")
 		上昇量 *= 10
