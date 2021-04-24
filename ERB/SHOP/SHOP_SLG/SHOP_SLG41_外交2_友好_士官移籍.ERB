@@ -47,7 +47,6 @@ SIF RESULT == -1
 
 IF IS_FALLEN(対象)
 	判定値 = MAX(ABL:対象:知略, ABL:MASTER:知略) + MAX(ABL:対象:政治, ABL:MASTER:政治)
-	判定値 += FIND_PASSIVE_SKILL(対象, "工作員") * 20
 	ノルマ = ABL:相手君主:知略 + ABL:相手君主:政治
 	ノルマ = ノルマ * (100 + (GET_DIFFICULTY_CORRECTION() - 100) / 2) / 100
 	IF 判定値 < ノルマ

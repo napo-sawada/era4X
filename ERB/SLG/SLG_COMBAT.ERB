@@ -864,19 +864,6 @@ BATTLE_INT:LOCAL = BATTLE_INT:LOCAL * (100 + LOCAL:1) / 100
 SIF 防御側部隊 < 0
 	TIMES 防御側知略, 1.5
 
-;工作員所持者をチェック
-FOR LOCAL, 0, BATTLE_COMMANDER_NUM:0
-	士官 = BATTLE_COMMANDER:0:LOCAL
-	SIF FIND_PASSIVE_SKILL(士官, "工作員")
-		攻撃側知略 += ABL_POWER(15, -1)
-NEXT
-FOR LOCAL, 0, BATTLE_COMMANDER_NUM:1
-	士官 = BATTLE_COMMANDER:1:LOCAL
-	SIF FIND_PASSIVE_SKILL(士官, "工作員")
-		防御側知略 += ABL_POWER(15, -1)
-NEXT
-
-
 ;基準値は能力20の武将の数から算出する 都市戦においては4人いるものとして発生しにくく
 SCHEME_BASE = ABL_POWER(20, -1) * (防御側部隊 < 0 ? 4 # 3)
 
