@@ -56,23 +56,27 @@ SELECTCASE DVAR:天狗取材_デート
 	CASE 0
 		PRINTFORML 「あ、%ANAME(MASTER)%。おはようございます！」
 		PRINTFORMW %ANAME(対象)%は%ANAME(MASTER)%の誘いで我が軍に入り、広報誌を作る仕事に従事している
+		PRINTFORML 
 		PRINTFORML …勢いで軍に誘ってしまったものの、ここでちゃんとやれているだろうか
 		PRINTFORMW 「あはは、確かに不安もありましたけど…。やってみたら案外いけるもんですね」
+		PRINTFORML 
 		PRINTFORML そう言う彼女の表情はあまり芳しくない。何かトラブルがあるのだろうか？
 		PRINTFORMW 「あ、いや、そういうわけではなくて」
 		PRINTFORMW 「広報誌の仕事は順調なんですけど、……肝心の自分の新聞用のネタが、ちょっと行き詰ってまして…」
-		IF CFLAG:文:所属 == CFLAG:MASTER:所属 &&  !(MASTER == NAME_TO_CHARA("文"))
-			PRINTFORML 「射命丸さんは、ネタ探しに足繁く飛び回っているのに……」
-			PRINTFORMW 「自分は最近、時間が取れなくて……。中々取材とかにも行けてないんです」
-		ELSEIF CFLAG:はたて:所属 == CFLAG:MASTER:所属 &&  !(MASTER == NAME_TO_CHARA("はたて"))
-			PRINTFORML 「姫海棠さんは、最近よく飛び回って念写に頼らず取材しているのに……」
-			PRINTFORMW 「自分は中々時間が取れなくて……。ネタ探しとかにも行けてないんです」
-		ELSE
+;		IF CFLAG:文:所属 == CFLAG:MASTER:所属 &&  !(MASTER == NAME_TO_CHARA("文"))
+;			PRINTFORML 「射命丸さんは、ネタ探しに足繁く飛び回っているのに……」
+;			PRINTFORMW 「自分は最近、時間が取れなくて……。中々取材とかにも行けてないんです」
+;		ELSEIF CFLAG:はたて:所属 == CFLAG:MASTER:所属 &&  !(MASTER == NAME_TO_CHARA("はたて"))
+;			PRINTFORML 「姫海棠さんは、最近よく飛び回って念写に頼らず取材しているのに……」
+;			PRINTFORMW 「自分は中々時間が取れなくて……。ネタ探しとかにも行けてないんです」
+;		ELSE
 			PRINTFORMW 「特に最近は時間が取れなくて……。中々、ネタ探しの取材とかにも行けてないんです」
-		ENDIF
+;		ENDIF
 		PRINTFORMW そう言うと%ANAME(対象)%は悩ましげに腕を組んで、どうしたものかと悩んでいる
+		PRINTFORML 
 		PRINTFORML 今日まで立派に働いてくれている彼女だ。たまにはリフレッシュのために休みを上げるのもいいだろう
 		PRINTFORMW %ANAME(MASTER)%は、今度の休日に、二人で取材に行かないか、と彼女に提案した
+		PRINTFORML 
 		PRINTFORML 「え！？　本当ですか！？　やったー！　ありがとうございます、%ANAME(MASTER)%♪」
 		PRINTFORMW その提案を聞いて、%ANAME(対象)%はパァっと表情を明るくした。%ANAME(MASTER)%と一緒に出かけられるのがとても嬉しいようだ
 		PRINTFORMW %ANAME(MASTER)%は彼女と、今度一緒に取材旅行に行くという約束を取り付けた
@@ -89,9 +93,11 @@ SELECTCASE DVAR:天狗取材_デート
 		PRINTFORML 隣に立つや否や、すぐさま腕を絡めてくる。取材というよりデートに行くような感じだ
 		PRINTFORML 「ふふふ。まあいいじゃないですか。記者特権ってヤツですよ」
 		PRINTFORMW 「それでは今日も張り切って行きましょう！」
+		PRINTFORML 
 		PRINTFORML ・
 		PRINTFORML ・
 		PRINTFORMW ・
+		PRINTFORML 
 		SELECTCASE RAND:15
 			CASE 0
 				PRINTFORML 「あっ♥　あんっ♥　もっとぉ♥　もっと奥まで突いてぇ♥」
@@ -192,6 +198,7 @@ SELECTCASE DVAR:天狗取材_デート
 		PRINTFORMW ・
 		PRINTFORML 「はぁ…今日もなんだかんだでシちゃいましたねぇ…♥」
 		PRINTFORMW 取材という体のデートを終え、二人は仲良く帰路の途中だ
+		PRINTFORML 
 		PRINTFORML 「今度も取材に付き合ってくださいね！」
 		PRINTDATAW
 			DATA 「次は近頃、話題のデートスポットについての取材予定がありまして…」

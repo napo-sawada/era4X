@@ -34,10 +34,12 @@ RETURN デイリー_ジャンル_エロ
 PRINTFORML 兵の訓練中、一人の少女兵士が目に留まった
 PRINTFORML 少女がなぜ兵士に？疑問に思った%ANAME(MASTER)%は彼女に質問してみた
 PRINTFORMW %ANAME(MASTER)%に話しかけられ、しどろもどろになる彼女を落ち着かせて話を聞く
+PRINTFORML 
 PRINTFORML 実は彼女は人間と%少女兵士_種類:対象%のハーフで、周りから疎まれ育ってきたらしい
 PRINTFORML なので戦いで活躍して人々に認められたいと思って志願した様だ
 PRINTFORML よく見ると彼女の身体からは妖怪のそれらしきモノが生えている
 PRINTFORMW また額から滴る汗の量がいかに真剣に訓練しているかを物語る
+PRINTFORML 
 PRINTFORML どうしよう？
 CALL ASK_MULTI("直々に稽古をつけた" ,"物陰に連れ込んだ" ,"激励して立ち去った")
 IF RESULT == 2
@@ -60,16 +62,20 @@ ELSE
 	PRINTFORML ちらりと彼女の身体を見る
 	PRINTFORML 汗で濡れた衣服は身体のラインを浮かび上がらせており
 	PRINTFORMW まだ幼さを残しながらも人妖故か、立派に女の色気を醸し出していた
+	PRINTFORML 
 	PRINTFORML その姿に見惚れた%ANAME(MASTER)%は直々に稽古をつけてやると彼女を物陰に誘った
 	PRINTFORMW 彼女は突然の申し出に驚きながらも喜んで%ANAME(MASTER)%についてきた
+	PRINTFORML 
 	PRINTFORML ・
 	PRINTFORML ・
 	PRINTFORMW ・
+	PRINTFORML 
 	IF ABL:MASTER:性技 + ABL:MASTER:性交 + ABL:MASTER:奉仕 < 6 + RAND:20
 		PRINTFORML %ANAME(MASTER)%は彼女を満足させられなかった
 		PRINTFORMW 彼女は心底がっかりした様子でさっさと隊列に戻って行った
 	ELSE
 		PRINTFORMW 練兵している兵たちの声が聞こえる木陰で、%ANAME(MASTER)%は彼女とまぐわっている
+		PRINTFORML 
 		SELECTCASE RAND:10
 			CASE 0
 				PRINTFORML 「あひ♥あ♥あぁ♥%ANAME(MASTER)%様♥そこ駄目です♥あぁ♥弱いのぉ♥くぅん♥」
@@ -126,6 +132,7 @@ ELSE
 		PRINTFORML 
 		PRINTFORML …人妖特有の蜜壺を満足するまでまぐわった後、%ANAME(MASTER)%は何食わぬ顔で訓練に戻った
 		PRINTFORMW 訓練終了後、無数の兵の中から彼女の熱っぽい視線を感じた
+		PRINTFORML 
 		PRINTFORML どうしよう？
 		CALL ASK_MULTI_JUDGE("彼女を直属の部下にする", CAN_ADD_RANDOM_CHARA(),"無視して立ち去る", 1)
 		IF RESULT == 1

@@ -37,11 +37,13 @@ IF DVAR:河童_発生フラグ == 0
 	PRINTFORML 「ここの前に他の国にも行ったんだけどさ、どこでも門前払いなんだもん、酷いと思わない？この前なんてさー…」
 	PRINTFORMW 現れたのは人懐っこい笑顔を見せる、河童の娘だった
 	PRINTFORMW おしゃべり好きらしく、ここに来るまでの苦労だのなんだの長話を遮って、本題を促した
+	PRINTFORML 
 	PRINTFORML 「そうそう、そうだったよ。えっとねー、私達って色々発明好きなんだけどさ」
 	PRINTFORML 「やっぱりそういうのって自分たちで使うだけじゃなくていろんな人たちに使ってほしいじゃない？」
 	PRINTFORML 「だから商いを始めようと思ってね！その許可をもらいに来たんだよー」
 	PRINTFORML 「どんな発明品かって？んふー、気になっちゃう？でもなー、まだ発売前だしなー、でも気になるって言うなら教えない事も…」
 	PRINTFORMW よほど話を聞いてもらえてうれしいのか楽しそうに言葉を続ける彼女の話を聞き流す
+	PRINTFORML 
 	PRINTFORML 要は領内で商いをしたいから許可が欲しいと言う事らしい
 	PRINTFORMW 発明品の内容も危険はなさそうだ…妖怪の言う事だから話半分の方がいいかもしれないが
 	DVAR:河童_発生フラグ = 1
@@ -61,6 +63,7 @@ ELSEIF DVAR:河童_発生フラグ == 1
 		PRINTFORMW 以前と違い口調はたどたどしく、心なしか顔が赤い
 	ENDIF
 ENDIF
+PRINTFORML 
 PRINTFORML さて、どうしようか……
 CALL SINGLE_DRAWLINE
 CALL ASK_MULTI_JUDGE("快く許可を出す", 1, "金を要求する", 1, "体を要求する", HAS_PENIS(MASTER), "やめておく", 1)
@@ -81,12 +84,15 @@ ELSEIF RESULT == 0
 		PRINTFORML 「ありがとう♥でも、それだけ…？」
 		PRINTFORML 快く許可を出してやると、彼女はもじもじと体を揺すりだした
 		PRINTFORMW その瞳には何かを期待する様な視線が混ざっていた
+		PRINTFORML 
 		PRINTFORML %ANAME(MASTER)%は苦笑すると彼女に歩み寄り、腰に手を回した
 		PRINTFORML 「あっ…」
 		PRINTFORMW 微かに喉を震わせて喘ぎ声を漏らした彼女を、寝室へと連れ込んだ
+		PRINTFORML 
 		PRINTFORML ・・・
 		PRINTFORML ・・
 		PRINTFORMW ・
+		PRINTFORML 
 		PRINTFORMW すっかり%ANAME(MASTER)%好みになった彼女の身体をたっぷりと可愛がった
 	ELSEIF DVAR:河童_抱いた回数 > 0
 		PRINTFORML 「えっ、うん…いいの？」
@@ -110,12 +116,15 @@ ELSEIF RESULT == 1
 		PRINTFORML 「えっと、欲しいのはそれだけ…？」
 		PRINTFORML お金を求めると彼女はもじもじと体を揺すりだした
 		PRINTFORMW その瞳には何かを期待する様な視線が混ざっていた
+		PRINTFORML 
 		PRINTFORML %ANAME(MASTER)%は苦笑すると彼女に歩み寄り、腰に手を回した
 		PRINTFORML 「あっ…」
 		PRINTFORMW 微かに喉を震わせて喘ぎ声を漏らした彼女を、寝室へと連れ込んだ
+		PRINTFORML 
 		PRINTFORML ・・・
 		PRINTFORML ・・
 		PRINTFORMW ・
+		PRINTFORML 
 		PRINTFORMW すっかり%ANAME(MASTER)%好みになった彼女の身体をたっぷりと可愛がった
 	ELSEIF DVAR:河童_抱いた回数 > 0
 		PRINTFORML 「えっ…それだけでいいの？」
@@ -138,27 +147,33 @@ ELSEIF RESULT == 2
 	IF DVAR:河童_抱いた回数 == 0
 		PRINTFORML 許可を出す代わりにお前を抱かせろ
 		PRINTFORMW %ANAME(MASTER)%がそう告げると、彼女は一瞬何を言われたのかわからずに硬直した
+		PRINTFORML 
 		PRINTFORML 「あっ……えっ……そ、それ……」
 		PRINTFORMW 言われたことを理解すると、彼女は顔を真っ赤にして口をパクパクしだす
 		PRINTFORML 「じょ、冗談……だよね？」
 		PRINTFORMW ようやく我に返った彼女は、恐る恐る%ANAME(MASTER)%に尋ねてきた
+		PRINTFORML 
 		PRINTFORML しかしもう一度同じことを告げる
 		PRINTFORMW 抱かせろ
 		PRINTFORML 「っ！！！」
 		PRINTFORML 「そ、そんなこと、言って！はっ恥ずかしく、ないの！？」
 		PRINTFORMW 彼女は飛び上がって怒りだす
+		PRINTFORML 
 		PRINTFORML しかし駄目ならこれで話は終わりだと%ANAME(MASTER)%が冷徹に告げると
 		PRINTFORMW 彼女は言葉に詰まり、俯いた
+		PRINTFORML 
 		PRINTFORML 「………よ」
 		PRINTFORMW しばらくの沈黙の後、彼女から絞り出すような声が漏れた
 		PRINTFORML 「…わ、わかったよ……」
 		PRINTFORML もじもじとしながらも了承の言葉を呟いた
 		PRINTFORMW %ANAME(MASTER)%は早速彼女の手を引き、寝室へと連れ込む
+		PRINTFORML 
 		PRINTFORML 「あ……で、でも……この事は……その、皆には、秘密に……して……」
 		PRINTFORMW 顔を真っ赤にしながら懇願する彼女に約束してやると、寝室のドアを閉めた
 	ELSEIF DVAR:河童_抱いた回数 > 5
 		PRINTFORML 「…えへへ、うん」
 		PRINTFORMW 身体を要求すると、彼女は何処か嬉しそうに照れ笑いをした
+		PRINTFORML 
 		PRINTFORML 彼女を抱き寄せ、身体をまさぐりながらいやらしい子だと囁く
 		PRINTFORMW 「あんっ、そんな意地悪言って…こんな体にしたのは%ANAME(MASTER)%なんだから…♥」
 		PRINTFORML 彼女は抗議しながらも嬉しそうに体をくねらせた
