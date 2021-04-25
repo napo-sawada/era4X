@@ -1,0 +1,118 @@
+﻿;---------------------
+;基本的な発生確率(1000分率 100で10%)
+;これにコンフィグ項目の発生頻度がかけられるので、必ずしもこの通りにはならない
+;---------------------
+@EVENT_DAILY_CONFESSION_RATE()
+RETURN 100
+
+
+;---------------------
+;確率以外の発生判定
+;〇期以降になると発生するとか、デイリー側で利用している変数が-1だったら起こさない　みたいなはじき方をするときに使う
+;---------------------
+@EVENT_DAILY_CONFESSION_DECISION()
+#DIM 候補人数
+#DIM 対象
+
+SIF !CONFIG:18
+  RETURN 0
+
+候補人数 = 0
+FOR LOCAL, 1, CHARANUM
+  FOR 対象, LOCAL + 1, CHARANUM
+    SIF LOCAL == 対象
+      CONTINUE
+    SIF REL_LIKE:LOCAL:対象 != 1500
+      CONTINUE
+    SIF REL_LIKE:対象:LOCAL != 1500
+      CONTINUE
+    SIF CONFIG:18 == 2 && TALENT:LOCAL:性別 == TALENT:対象:性別
+      CONTINUE
+    SIF CONFIG:18 == 3 && GROUPMATCH(TALENT:LOCAL:性別, 1, 2) && GROUPMATCH(TALENT:対象:性別, 1, 2)
+      CONTINUE
+    SIF CONFIG:18 == 4 && GROUPMATCH(TALENT:LOCAL:性別, 1, 3, 4, 5) && GROUPMATCH(TALENT:対象:性別, 1, 3, 4, 5)
+      CONTINUE
+    SIF REL_PROGRESS:LOCAL:対象 > 関係_知り合い
+      CONTINUE
+    候補人数 ++
+  NEXT
+NEXT
+RETURN 候補人数
+
+;---------------------
+;ジャンル
+;コンフィグ設定で使用
+;---------------------
+@EVENT_DAILY_CONFESSION_GENRE()
+RETURN デイリー_ジャンル_一般
+
+;---------------------
+;特定の条件を満たすキャラをランダムに選択する場合に利用
+;他の関数は必須だが、これだけはなくてもよい　というかパフォーマンスへ影響するので不要なら作ってはならない
+;対象が存在せずデイリーを開始できない場合は0を返すことでデイリーの発生をキャンセルする
+;---------------------
+@EVENT_DAILY_CONFESSION_SETTARGET()
+#DIM ペアID
+#DIM 対象
+#DIM ペア, 2, MAX_CHARA_NUM
+#DIM 今回のペア
+
+ペアID = 0
+FOR LOCAL, 1, CHARANUM
+  FOR 対象, LOCAL + 1, CHARANUM
+    SIF LOCAL == 対象
+      CONTINUE
+    SIF REL_LIKE:LOCAL:対象 != 1500
+      CONTINUE
+    SIF REL_LIKE:対象:LOCAL != 1500
+      CONTINUE
+    SIF CONFIG:18 == 2 && TALENT:LOCAL:性別 == TALENT:対象:性別
+      CONTINUE
+    SIF CONFIG:18 == 3 && GROUPMATCH(TALENT:LOCAL:性別, 1, 2) && GROUPMATCH(TALENT:対象:性別, 1, 2)
+      CONTINUE
+    SIF CONFIG:18 == 4 && GROUPMATCH(TALENT:LOCAL:性別, 1, 3, 4, 5) && GROUPMATCH(TALENT:対象:性別, 1, 3, 4, 5)
+      CONTINUE
+    ペア:0:ペアID = LOCAL
+    ペア:1:ペアID = 対象
+    ペアID ++
+  NEXT
+NEXT
+
+今回のペア = RAND:ペアID
+DAILY_TARGET:0 = ペア:0:今回のペア
+DAILY_TARGET:1 = ペア:1:今回のペア
+
+RETURN 1
+
+
+;---------------------
+;本体
+;イベントが発生した場合は1、発生しなかった場合は0を返す
+;発生しなかったというのは例えば、特定条件を満たすキャラからランダムに一人選ぶデイリーで、そもそもその条件を満たすキャラが一人もいないみたいなとき
+;旧仕様で作ったことある人向けにいうと「旧仕様のデイリー本体冒頭で-1を返すような状況」
+;---------------------
+@EVENT_DAILY_CONFESSION()
+PRINTFORML とあるVRチャットのプライベートルーム
+PRINTFORML 高級なバーの一角といった感じの、洒落た家具セットが配置されている大人びた空間だ
+PRINTFORML 大事な話をするのにはうってつけの空間と言えるだろう
+PRINTFORMW そこに二人の人物が緊張した面持ちで向かい合っていた
+PRINTL
+PRINTFORML %CALLNAME:(DAILY_TARGET:0)%と%CALLNAME:(DAILY_TARGET:1)%だ
+PRINTFORML いつもなら仲睦まじくお喋りしている二人も、今日に限っては会話も途切れ途切れでぎこちない
+PRINTFORMW 二人ともここに集まった意味を理解しているからだろう
+PRINTL
+PRINTFORML 何度目かの会話が途切れた後、ついに意を決した%CALLNAME:(DAILY_TARGET:0)%が本題を口にした
+PRINTFORML ぎこちない前口上の後、愛の告白をしたのである
+PRINTFORMW 告白を終えた%CALLNAME:(DAILY_TARGET:0)%は、じっと%CALLNAME:(DAILY_TARGET:1)%の返事を待っている
+PRINTL
+PRINTFORML しばらく間をおいて、%CALLNAME:(DAILY_TARGET:1)%は満面の笑みで答えた
+PRINTFORML 「喜んで」と
+PRINTFORML その言葉に%CALLNAME:(DAILY_TARGET:0)%は飛び上がらんばかりに喜び、満面の笑みをその顔に称えた
+PRINTFORMW こうして%CALLNAME:MASTER%の預かり知らぬところで、一つのカップルが成立したのであった
+SETCOLOR カラー_ピンク
+PRINTFORMW %CALLNAME:(DAILY_TARGET:0)%と%CALLNAME:(DAILY_TARGET:1)%が恋人になりました
+RESETCOLOR
+REL_PROGRESS:(DAILY_TARGET:0):(DAILY_TARGET:1) = 関係_恋人
+REL_PROGRESS:(DAILY_TARGET:1):(DAILY_TARGET:0) = 関係_恋人
+
+RETURN 1
