@@ -1,0 +1,73 @@
+﻿;---------------------
+;基本的な発生確率(1000分率 100で10%)
+;これにコンフィグ項目の発生頻度がかけられるので、必ずしもこの通りにはならない
+;---------------------
+@EVENT_DAILY_LOVE_CONSULTATION_RATE()
+RETURN 1000
+
+;---------------------
+;確率以外の発生判定
+;〇期以降になると発生するとか、デイリー側で利用している変数が-1だったら起こさない　みたいなはじき方をするときに使う
+;---------------------
+@EVENT_DAILY_LOVE_CONSULTATION_DECISION()
+RETURN CONFIG:18 && MONEY > 10000
+
+;---------------------
+;ジャンル
+;コンフィグ設定で使用
+;---------------------
+@EVENT_DAILY_LOVE_CONSULTATION_GENRE()
+RETURN デイリー_ジャンル_トレーナー
+
+
+
+;---------------------
+;本体
+;イベントが発生した場合は1、発生しなかった場合は0を返す
+;発生しなかったというのは例えば、特定条件を満たすキャラからランダムに一人選ぶデイリーで、そもそもその条件を満たすキャラが一人もいないみたいなとき
+;旧仕様で作ったことある人向けにいうと「旧仕様のデイリー本体冒頭で-1を返すような状況」
+;---------------------
+@EVENT_DAILY_LOVE_CONSULTATION
+PRINTFORML %CALLNAME:MASTER%の元に一人の怪しい女がやってきた
+PRINTFORML 彼女は自身のことを 恋愛相談師 と名乗っている
+PRINTL
+PRINTFORMW 「私に仲良くさせられない人間はいませんわ。それがたとえ同棲であろうと、ね」
+PRINTL 
+PRINTFORML %CALLNAME:MASTER%が拠点の玄関口で話を聞くと、彼女はそんなふうに大口を叩いて見せた
+PRINTFORML だがその表情は自信に満ち溢れており、どこか気迫さえ感じられる
+PRINTL
+PRINTFORML 「値段は$10,000。決して安い値段じゃないわ。ただし必ず仲良く、させますわよ」
+PRINTFORML 「そうね、大体熟練夫婦の仲が100だとしたら、20は上げて見せましょう」
+PRINTFORML さて、どうしたものか
+PRINTBUTTON "[0] 頼む", 0
+PRINTBUTTON "[1] 断る", 1
+$INPUT_LOOP
+INPUT
+IF RESULT == 0
+  CALL EVENT_DAILY_LOVE_CONSULTATION_ACCEPT
+ELSEIF RESULT == 1
+  PRINTFORML 「そう、それは残念だわ……でも、またくるわね」
+  PRINTFORMW 女はそういうと、静かに去っていった
+ELSE
+  CLEARLINE 1
+  GOTO INPUT_LOOP
+ENDIF
+RETURN 1
+
+@EVENT_DAILY_LOVE_CONSULTATION_ACCEPT
+PRINTFORML 「素晴らしい決断だわ。それじゃあ、早速仲良くする二人を選んで頂戴」
+CALL SELECT_MANY_CHARACTER(2)
+IF RESULT == -1
+  PRINTFORML 「そう、それは残念だわ……でも、またくるわね」
+  PRINTFORMW 女はそういうと、静かに去っていった
+  RETURN
+ENDIF
+PRINTFORML 「わかったわ、%CALLNAME:(RESULT:0)%さんと%CALLNAME:(RESULT:1)%さんを仲良くさせましょう」
+PRINTFORML 「そうそう、先にお代をいただくわよ」
+PRINTFORMW 所持金 -$10,000
+MONEY -= 10000
+PRINTFORML 「それじゃあ早速作戦会議をしましょう……」
+PRINTFORML その後、女の提案通りに動いたところ、本当に%CALLNAME:(RESULT:0)%と%CALLNAME:(RESULT:1)%は仲良くなった
+PRINTFORMW 恋愛相談師というのは伊達じゃないようだ……
+REL_LIKE:(RESULT:0):(RESULT:1) = LIMIT(REL_LIKE:(RESULT:0):(RESULT:1) + 300, 0, 1500)
+REL_LIKE:(RESULT:1):(RESULT:0) = LIMIT(REL_LIKE:(RESULT:1):(RESULT:0) + 300, 0, 1500)
