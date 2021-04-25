@@ -61,6 +61,11 @@
 #DIM SHIP_LIST, MAX_SHIP
 #DIM SHIP_LIST_LENGTH
 
+; 艦隊
+#DIM CONST MAX_FREET = 40
+#DIMS CONST 編成モード = "", "追従", "旗艦"
+
+
 ; 船装備
 #DIM CONST EQUIP_TYPE_LENGTH = 8
 #DIM CONST MAX_SLOT = 10
@@ -116,6 +121,10 @@
 #DIM CONST 空母 = 6
 #DIM CONST 輸送船 = 7
 #DIM CONST 作業船 = 8
+{
+  #DIMS CONST SHIP_CATEGORY_NAME = 
+    "調査船", "コルベット", "フリゲート","駆逐艦", "巡洋艦", "戦艦", "空母", "輸送船", "作業船"
+}
 ; スキル判定用
 #DIM CONST 艦種_ミサイル = 9
 #DIM CONST 艦種_航空機 = 10
