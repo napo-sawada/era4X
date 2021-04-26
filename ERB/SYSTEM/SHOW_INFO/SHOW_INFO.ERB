@@ -34,6 +34,7 @@ CALL PRINTBUTTON_EX(" 4[スキル]", 4, 1, FLAG:能力表示モード == 4)
 CALL PRINTBUTTON_EX(" 5[衣装]", 5, 1, FLAG:能力表示モード == 5)
 CALL PRINTBUTTON_EX(" 6[説明]", 6, 1, FLAG:能力表示モード == 6)
 CALL PRINTBUTTON_EX(" 7[デイリー]", 7, IS_TOHO_CHARA(対象), FLAG:能力表示モード == 7)
+CALL PRINTBUTTON_EX(" 11[関係]", 11, 1, FLAG:能力表示モード == 11)
 
 
 IF ページ移動
@@ -165,6 +166,9 @@ ELSEIF RESULT == 9 && ページ移動
 	CLEARLINE LINECOUNT - FIRST_LINE
 	RESTART
 ;★
+ELSEIF RESULT == 11
+	FLAG:能力表示モード = RESULT
+	RESTART
 ELSEIF RESULT == 1000
 	FLAG:能力表示モード = 10
 	RESTART
@@ -246,6 +250,8 @@ ELSEIF FLAG:能力表示モード == 7
 	PRINTL
 ELSEIF FLAG:能力表示モード == 10
 	CALL SHOW_RELATION_LIST(ARG:0)
+ELSEIF FLAG:能力表示モード == 11
+	CALL SHOW_RELATION_INFO(ARG:0)
 ELSE
 	CALL SHOW_HEADER(ARG:0)
 	IF 調教中
@@ -1451,4 +1457,28 @@ FOR LOCAL:0, 0, CHARANUM
 	PRINTFORM   {REL_LIKE:(ARG:0):(LOCAL:0), 5, RIGHT}
 	PRINTFORM   {REL_HATE:(ARG:0):(LOCAL:0), 5, RIGHT}
 	PRINTL 
+NEXT
+
+;-------------------------------------------------
+;ARG:0番の他キャラに対する好感度・敵対値を一覧表示
+;-------------------------------------------------
+@SHOW_RELATION_INFO(対象)
+#DIM 対象
+#DIM パートナー
+
+DRAWLINE
+PRINTFORML %CALLNAME:対象%の関係一覧
+DRAWLINE
+PRINTL
+FOR パートナー, 0, CHARANUM
+	SIF REL_PROGRESS:対象:パートナー == 関係_知り合い
+		CONTINUE
+	PRINTL ■ 関係
+	PRINTFORM %CALLNAME:対象% -> %CALLNAME:パートナー% [%RELATION_NAME:(REL_PROGRESS:対象:パートナー)%] 
+	CALL PRINT_GRADATIONBAR(REL_PROGRESS_VALUE:対象:パートナー, 100, 40, 0x60A74E)
+	PRINTL
+	PRINTFORM %CALLNAME:対象% <- %CALLNAME:パートナー% [%RELATION_NAME:(REL_PROGRESS:パートナー:対象)%] 
+	CALL PRINT_GRADATIONBAR(REL_PROGRESS_VALUE:パートナー:対象, 100, 40, 0x60A74E)
+	PRINTL
+	PRINTL
 NEXT

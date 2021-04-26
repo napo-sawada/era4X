@@ -327,12 +327,18 @@
 
 ;キャラ間の仲の進行度
 #DIM CHARADATA SAVEDATA REL_PROGRESS, MAX_CHARA_NUM
+#DIM CHARADATA SAVEDATA REL_PROGRESS_VALUE, MAX_CHARA_NUM
 
 #DIM CONST 関係_知り合い = 0
 #DIM CONST 関係_恋人 = 1
 #DIM CONST 関係_夫婦 = 2
 #DIM CONST 関係_主人 = 3
 #DIM CONST 関係_奴隷 = 4
+{
+	#DIMS CONST RELATION_NAME = "知り合い", "恋人", "夫婦", "ご主人様", "奴隷"
+}
+
+#DIM CONST MAX_LIKE = 100
 
 ;※REL_LIKE、REL_HATEはキャラ番号で管理するため、キャラのソートや削除に同期して変更する必要あり
 
