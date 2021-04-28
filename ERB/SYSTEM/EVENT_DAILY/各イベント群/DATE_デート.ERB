@@ -50,6 +50,9 @@ RETURN デイリー_ジャンル_エロ
 #DIM パートナー
 #DIM ペア, 2, MAX_CHARA_NUM
 #DIM ペア数
+#DIM 竿役
+#DIM 女役
+#DIMS グループ呼称
 
 ペア数 = 0
 
@@ -68,12 +71,87 @@ LOCAL = RAND:ペア数
 対象 = ペア:0:LOCAL
 パートナー = ペア:1:LOCAL
 
-PRINTFORML %CALLNAME:対象%と%CALLNAME:パートナー%は二人で遊びにきていた
+竿役 = 0
+女役 = 0
+
+IF HAS_PENIS(対象) && HAS_PENIS(パートナー)
+	IF RAND:2
+		竿役 = 対象
+		女役 = パートナー
+	ELSE
+		竿役 = パートナー
+		女役 = 対象
+	ENDIF
+ELSEIF HAS_PENIS(対象)
+	竿役 = 対象
+	女役 = パートナー
+ELSEIF HAS_PENIS(パートナー)
+	竿役 = パートナー
+	女役 = 対象
+ENDIF
+
+IF GROUPMATCH(TALENT:対象:性別, 1, 2) && GROUPMATCH(TALENT:パートナー:性別, 1, 2)
+	グループ呼称 = 女等
+ELSEIF GROUPMATCH(TALENT:対象:性別, 0, 3, 4, 5) && GROUPMATCH(TALENT:パートナー:性別, 0, 3, 4, 5)
+	グループ呼称 = 男等
+ELSE
+	グループ呼称 = 男女
+ENDIF
+
+
+SELECTCASE RAND:13
+	CASE 0
+		PRINTFORML %CALLNAME:対象%と%CALLNAME:パートナー%は二人でリゾート地に来ていた
+		PRINTFORML 都市部の開発され洗練された地区とは違い、FTL前時代を思わせる豊かな自然と原始的な建物に囲まれた長閑な場所だ
+		PRINTFORML %CALLNAME:対象%と%CALLNAME:パートナー%は果汁100\%のジュースを片手に、ほぼ手入れされていない剥き出しの自然を楽しんでいた
+		PRINTFORMW 海岸部は日光浴や海水浴を楽しめ、開けた場所ではBBQやキャンプを楽しむことができる
+		PRINTL 
+		IF RAND:2
+			PRINTFORML 今日は浜辺で日光浴を楽しみに来た二人は、日光浴用のスペースの一角を借りるとパラソルの下に並んで設置されたデッキチェアに横になる
+			PRINTFORMW 二人とも水着姿で、二人は互いの水着姿を褒め合いつつ見惚れあっていた
+			PRINTL 
+			IF REL_PROGRESS_VALUE:対象:パートナー + REL_PROGRESS_VALUE:パートナー:対象 <= 60 
+				PRINTFORML しかしまだ付き合って日の浅い二人は互いにドギマギしつつも手を出すようなことはせず、何事もなく日光浴を楽しんだのだった
+			ELSE
+				PRINTFORML 互いの水着姿にドギマギした二人は、どちらともなくボディタッチが増えていった
+				PRINTFORML そして持ってきていたジュースを飲み切る頃には、どちらともなく連れ立って、一眼のない岩陰を目指すのだった
+				PRINTW ………………
+				PRINTW …………
+				PRINTW ……
+				PRINTFORML 「「~~♡」」
+				PRINTFORML 岩場の影に%グループ呼称%の嬌声が響いていた。
+				IF 竿役 && 女役
+					PRINTFORML 岩に手をついて腰を突き出した%CALLNAME:女役%に後ろから覆いかぶさるようにして、%CALLNAME:竿役%が自身の腰を打ち付けている
+					PRINTFORML バチュンバチュンという肉を打つ音が響くたびに二人の荒い吐息と嬌声が漏れる
+					PRINTFORML 何度も静液を注がれた%CALLNAME:女役%の股からは入りきらなかった精液が垂れている
+					PRINTFORML しかしいつもとは違う開放感からか、何度いっても止まない性欲に身を任せて二人はただただ混じり合い続けた
+					PRINTL
+					PRINTFORML 結局二人は動けなくなるまで交尾に興じたのだった
+					CALL FUCK_MAKELOVE(女役, GET_ID(竿役), @"%ANAME(竿役)%の唇", ANAME(竿役))
+					IF HAS_VAGINA(女役)
+						CALL FUCK(竿役, "Ｃ, 射精, Ｖ挿入", "童貞喪失", 0, "", "", @"%ANAME(女役)%の膣")
+					ELSE
+						CALL FUCK(竿役, "Ｃ, 射精, Ａ挿入", "童貞喪失", 0, "", "", @"%ANAME(女役)%のアナル")
+					ENDIF
+				ELSE
+					PRINTFORML 砂塗れになりながら、互いの性器にむしゃぶりつく%CALLNAME:対象%と%CALLNAME:パートナー%
+					PRINTFORML 体はすっかり火照り、汗が全身から滴り落ちている
+					PRINTFORML 何度もイッて潮も吹いており、先ほど補給したジュースの水分はとうの昔に失われていた
+					PRINTFORML まるで喉の渇きを潤すかのように相手の汗や愛液をなめとり、快楽と共に互いの愛を確かめ合っている
+					PRINTFORML 二人の交わりは、本格的に喉が乾くまで続けられるのであった……
+					CALL FUCK_MAKELOVE_LES(対象, ANAME(パートナー))
+					CALL FUCK_MAKELOVE_LES(パートナー, ANAME(対象))
+				ENDIF
+			ENDIF
+		ELSE
+		ENDIF
+ENDSELECT
+PRINTFORMW 進展度 +10
+REL_PROGRESS_VALUE:対象:パートナー += 10
+REL_PROGRESS_VALUE:パートナー:対象 += 10
 
 
 
-CALL FUCK_MAKELOVE(対象, GET_ID(パートナー), @"%ANAME(パートナー)%の唇", ANAME(パートナー))
-CALL FUCK(パートナー, "Ｃ, 射精, Ｖ挿入", "童貞喪失", 0, "", "", @"%ANAME(対象)%の膣")
 
 
 @CAN_DATE(対象)
