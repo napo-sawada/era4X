@@ -188,12 +188,14 @@ ONEINPUTS
 
 strInputResult '= RESULTS
 ;;; "_"入力はwindow背景クリックした際の動作なのでほっとく
+REDRAW 0
 IF strInputResult == "_"
-	CLEARLINE 1
-	GOTO INPUT_LOOP2
+CLEARLINE 1
+GOTO INPUT_LOOP2
 ENDIF
 
 CLEARLINE 2
+REDRAW 1
 
 ;;数字解析できた場合
 ;;セクター内の特定地点をクリックした場合、もしくはセクターマップ切り替え操作した場合のどちらか
