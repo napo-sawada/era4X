@@ -1,0 +1,181 @@
+﻿;--------------------------
+; !!宇宙へと 15を好きな番号に変える！!
+; 宇宙へ
+; ここにクエストの説明
+;--------------------------
+
+
+;--------------------------
+; クエスト受注可能か
+;--------------------------
+@QUEST_ACCEPTABLE_15
+SELECTCASE QUEST_PROGRESS:15
+	CASE 0 TO 3
+		RETURN 1
+	CASEELSE
+		RETURN 0
+ENDSELECT
+
+;--------------------------
+; クエストの名前を返却
+;--------------------------
+@QUEST_NAME_15
+RESULTS = 宇宙へ
+RETURN
+
+;--------------------------
+; クエスト本体
+;--------------------------
+@QUEST_BODY_15
+#DIM 参加メンバー, MAX_CHARA_NUM
+#DIM 参加人数
+
+VARSET 参加メンバー, -1
+
+SELECTCASE QUEST_PROGRESS:15
+	CASE 0
+		CALL QUEST_15_CHOSE_MEMBER(参加メンバー, 3)
+		FINDELEMENT 参加メンバー, -1
+		参加人数 = RESULT
+
+		PRINTFORML %CALLNAME:MASTER%は仲間たちと共に大破した宇宙船の前にいた
+		PRINTFORML 全時代的な旧式の艦だが、れっきとした戦艦だ。その巨体と穴の開いた装甲の分厚さは、宇宙の旅に耐えうる強度を誇っていたことを如実に語っている
+		PRINTFORMW この艦を修復するのに、どれだけの資材と金が必要になるのか……
+		PRINTL
+		PRINTFORML とりあえず動き出さないことには何も始まらない
+		PRINTFORML %CALLNAME:MASTER%達は早速動き出すことにした
+		PRINTFORML まずは3チームに別れて行動することにした
+		PRINTFORML %CALLNAME:MASTER%と一緒に行動するのは
+		FOR LOCAL, 0, 参加人数
+			PRINTFORML %ANAME(参加メンバー:LOCAL)%
+		NEXT
+		PRINTFORMW 以上の{参加人数}名だ
+		PRINTL
+		PRINTFORML %CALLNAME:MASTER%のチームの当面の目標は、外部装甲を修理するための資金$500,000を集めることだ
+		PRINTFORMW 困っている人を助けたり、労働をしたりして地道に稼ぐことになるだろう
+		QUEST_PROGRESS:15 = 1
+	CASE 1
+		IF MONEY > 5000000
+			PRINTFORML $500,000払って外部装甲を修理しますか？
+			CALL ASK_YN
+			SIF RESULT == 1
+				RETURN
+			MONEY -= 5000000
+			
+			CALL QUEST_15_CHOSE_MEMBER(参加メンバー, 2)
+			FINDELEMENT 参加メンバー, -1
+			参加人数 = RESULT
+
+			PRINTFORML 外部装甲の修理が完了した
+			PRINTFORML ジャンクパーツのつぎはぎで直した戦艦の外観はお世辞にも綺麗と言えた物ではない
+			PRINTFORMW だが修理されたその姿に、%CALLNAME:MASTER%達は感慨深い気持ちでいた
+			PRINTL
+			PRINTFORML ひとしきり感動に浸ると、%CALLNAME:MASTER%達は次の行動に移ることにした
+			PRINTFORML 外装が直ったら次は内装だ。電気系統は完全に壊れているので、外装を直した時以上の金が必要になるだろう
+			PRINTFORML その額およそ、$1,000,000
+			PRINTFORML 輸送船が一隻買える値段だが、それ以上に戦艦を直すロマンが%CALLNAME:MASTER%達の中で勝っているのは言うまでもない
+			PRINTFORMW より人出が必要なので、別の一チームと合流することにした。
+			PRINTL
+			PRINTFORML 新たに行動を共にするのは
+			FOR LOCAL, 0, 参加人数
+				PRINTFORML %ANAME(参加メンバー:LOCAL)%
+			NEXT
+			PRINTFORMW 以上の{参加人数}名だ
+			PRINTL
+			PRINTFORML %CALLNAME:MASTER%のチームの次なる目標は、戦艦内部を修理するための資金$1,000,000を集めることだ
+			PRINTFORMW 困っている人を助けたり、労働をしたりして地道に稼ぐことになるだろう
+			QUEST_PROGRESS:15 = 2
+		ELSE
+			PRINTFORML %CALLNAME:MASTER%のチームの当面の目標は、外部装甲を修理するための資金$500,000を集めることだ
+			PRINTFORMW 困っている人を助けたり、労働をしたりして地道に稼ぐことになるだろう
+		ENDIF
+	CASE 2
+		IF MONEY > 1000000
+			PRINTFORML $1,000,000払って内部を修理しますか？
+			CALL ASK_YN
+			SIF RESULT == 1
+				RETURN
+			MONEY -= 1000000
+			
+			CALL QUEST_15_CHOSE_MEMBER(参加メンバー, 1)
+			FINDELEMENT 参加メンバー, -1
+			参加人数 = RESULT
+
+			PRINTFORML 内装の修理が完了した。
+			PRINTFORML 最新のシステムに置換された内装はすっかり綺麗になり、外装とは打って変わって清潔感すらある
+			PRINTFORMW %CALLNAME:MASTER%達は綺麗になった内装や動くようになった電気設備に歓声を上げて喜んだ
+			PRINTL
+			PRINTFORML ひとしきり感動に浸ると、%CALLNAME:MASTER%達は次の行動に移ることにした
+			PRINTFORML 残るはエンジンとAI、センサーだ。宇宙に飛び出るには、これがないと始まらない
+			PRINTFORML 総額およそ、$100,000
+			PRINTFORMW 最後局面を迎え、最後の1チームと合流することにした。
+			PRINTL 
+			PRINTFORML 新たに行動を共にするのは
+			FOR LOCAL, 0, 参加人数
+				PRINTFORML %ANAME(参加メンバー:LOCAL)%
+			NEXT
+			PRINTFORMW 以上の{参加人数}名だ
+			PRINTL
+			PRINTFORML %CALLNAME:MASTER%のチームの次なる目標は、戦艦内部を修理するための資金$1,000,000を集めることだ
+			PRINTFORMW 困っている人を助けたり、労働をしたりして地道に稼ぐことになるだろう
+			QUEST_PROGRESS:15 = 3
+		ELSE
+			PRINTFORML %CALLNAME:MASTER%のチームの次なる目標は、戦艦内部を修理するための資金$1,000,000を集めることだ
+			PRINTFORMW 困っている人を助けたり、労働をしたりして地道に稼ぐことになるだろう
+		ENDIF
+	CASE 3
+		IF MONEY > 100000
+			PRINTFORML $100,000払ってエンジン、センサー、AIを購入しますか？
+			CALL ASK_YN
+			SIF RESULT == 1
+				RETURN
+			MONEY -= 100000
+			QUEST_PROGRESS:15 = 4
+			PRINTFORML 新品のパーツが取り付けられ、ついに%CALLNAME:MASTER%達の戦艦が出来上がった
+			PRINTFORML 外見はジャンクパーツのつぎはぎだらけだが、内装やエンジンなどは新品で、海賊船を寄せ付けない武装も備わっている
+			PRINTFORML この戦艦で何をするか。%CALLNAME:MASTER%達は宇宙の旅を夢見て、大騒ぎするのだった
+			PRINTW ………………………
+			PRINTW ………………
+			PRINTW ………
+			PRINTFORMW 旧型戦艦を入手しました
+			CALL INIT_PRESET_SHIP(国家ID_プレイヤー, CHARACTER_POSITION, 汎用戦艦, "旧型戦艦", 汎用戦艦)
+			SHIP_EQUIP:装甲:0:RESULT = 17
+			SHIP_EQUIP:装甲:1:RESULT = 17
+			SHIP_EQUIP:装甲:2:RESULT = 17
+		ELSE
+			PRINTFORML %CALLNAME:MASTER%の最後の目標は、エンジン、AI、センサーを買うための資金$100,000を集めることだ
+			PRINTFORMW 困っている人を助けたり、労働をしたりして地道に稼ぐことになるだろう
+		ENDIF
+ENDSELECT
+
+
+@QUEST_15_CHOSE_MEMBER(参加メンバー, 分割分母)
+#DIM REF 参加メンバー
+#DIM 分割分母
+#DIM 参加候補, MAX_CHARA_NUM
+#DIM ITER
+#DIM 参加人数
+
+VARSET 参加候補, -1
+
+ITER = 0
+FOR LOCAL, 0, CHARANUM
+	SIF !CFLAG:LOCAL:初期キャラ || CFLAG:LOCAL:所属 == 国家ID_プレイヤー
+		CONTINUE
+	参加候補:ITER = LOCAL
+	ITER ++
+NEXT
+参加人数 = ITER / 分割分母
+SIF ITER % 分割分母
+	参加人数 ++
+ITER = 0
+
+; TODO もっと効率的に書けるはず...
+WHILE ITER < 参加人数
+	LOCAL = RAND:CHARANUM
+	IF CFLAG:LOCAL:初期キャラ && CFLAG:LOCAL:所属 != 国家ID_プレイヤー
+		CFLAG:LOCAL:所属 = 国家ID_プレイヤー
+		参加メンバー:ITER = LOCAL
+		ITER ++
+	ENDIF
+WEND

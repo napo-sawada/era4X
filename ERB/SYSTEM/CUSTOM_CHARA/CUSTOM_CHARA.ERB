@@ -76,3 +76,28 @@ PRINTBUTTON "[前のページ]", 番号 + MAX_CUSTOM_CHARA
 PRINTFORM {ページ + 1}/{MAX_CUSTOM_CHARA / 最大数 + 1}
 PRINTBUTTON "[次のページ]", 番号 + MAX_CUSTOM_CHARA + 1
 PRINTL
+
+;---------------------------------------
+;カスタムキャラのリストアップ（選択式）
+;---------------------------------------
+@LISTUP_SELECTED_CUSTOM_CHARACTER(番号 = 0, ページ = 0, 最大数 = 20, 選択済み一覧)
+#DIM 番号
+#DIM ページ
+#DIM 最大数
+#DIM REF 選択済み一覧
+FOR LOCAL, ページ * 最大数, MIN(ページ * 最大数 + 最大数, MAX_CUSTOM_CHARA)
+	IF FIND_CHARADATA(TOSTR(LOCAL))
+		CHKCHARADATA RESULTS:0
+		SIF 選択済み一覧:LOCAL
+			SETCOLOR カラー_選択中
+		PRINTBUTTON @"[%RESULTS:0%]", LOCAL + 番号
+		RESETCOLOR
+	ELSE
+		PRINTBUTTON "[新規作成]", LOCAL + 番号
+	ENDIF
+	PRINTL
+NEXT
+PRINTBUTTON "[前のページ]", 番号 + MAX_CUSTOM_CHARA
+PRINTFORM {ページ + 1}/{MAX_CUSTOM_CHARA / 最大数 + 1}
+PRINTBUTTON "[次のページ]", 番号 + MAX_CUSTOM_CHARA + 1
+PRINTL

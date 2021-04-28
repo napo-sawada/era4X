@@ -1,7 +1,9 @@
 ﻿;--------------------------
 ; SLG INIT
 ;--------------------------
-@SLG_INIT
+@SLG_INIT(ゲームモード)
+#DIM ゲームモード
+
 CALL INIT_MAP()
 VARSET BOARDING_SHIP_ID, -1
 VARSET RIDING_WITH, -1
@@ -14,6 +16,15 @@ COUNTRY_NAME:0 = ERROR
 FOR LOCAL, 0, MAX_COUNTRY
 	TRYCALLFORM INIT_COUNTRY_{LOCAL}
 NEXT
+; プレイヤーの初期艦
+IF GROUPMATCH(ゲームモード, 0, 1, 2)
+	CALL INIT_PRESET_SHIP(国家ID_プレイヤー, CHARACTER_POSITION, ヴァンガード級輸送船, , ヴァンガード級輸送船)
+	SHIP_EQUIP:センサー:0:RESULT = 3
+	SHIP_EQUIP:オプション:0:RESULT = 1
+	BOARDING_SHIP_ID = RESULT
+ENDIF
+
+
 CALL INIT_ANOMALY
 CALL INIT_MINING_POINT
 CALL INIT_ITEM_PRICE
@@ -31,7 +42,7 @@ RETURN
 #DIM X_POS
 #DIM Y_POS
 
-PORTPOSID = 星系座標ID:(RAND:星系数) + 1
+PORTPOSID = 星系座標ID:(RAND:星系数)
 CALL ID2POS(PORTPOSID)
 SECTOR_ID = RESULT:0
 X_POS = RESULT:1
@@ -46,11 +57,6 @@ COUNTRY_NAME:国家ID_プレイヤー = プレイヤー文明
 ; 艦船の配置
 VARSET BOARDING_SHIP_ID, -1
 
-; プレイヤーの初期艦
-CALL INIT_PRESET_SHIP(国家ID_プレイヤー, PORTPOSID, ヴァンガード級輸送船, , ヴァンガード級輸送船)
-SHIP_EQUIP:センサー:0:RESULT = 3
-SHIP_EQUIP:オプション:0:RESULT = 1
-BOARDING_SHIP_ID = RESULT
 
 ;--------------------------
 ; 社会主義国家初期化
