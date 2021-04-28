@@ -238,6 +238,15 @@ FOR Y_SEC, 0, MAX_SECTOR_Y
 			SETCOLOR 0xAAFFAA
 			タイル '= "▲"
 
+		;発見済みかつ星系港のあるエリア
+		ELSEIF HAS_PORT_SECTORMAP(Y_SEC * 10 + X_SEC) == 星 && (CLEARMAP: (Y_SEC * 10 + X_SEC) : 7: 7 ) != 0
+			SETCOLOR 0x33CCCC
+			タイル '= "●"
+		;発見済みかつ宇宙港のあるエリア
+		ELSEIF HAS_PORT_SECTORMAP(Y_SEC * 10 + X_SEC) == 宇宙港 && !(CLEARMAP: (Y_SEC * 10 + X_SEC) : 7: 7 ) != 0
+			SETCOLOR 0xCCCCFF
+			タイル '= "●"
+
 ;		ELSEIF MAP:(Y_SEC*10 + X_SEC): 7: 7 == 星
 ;			SETCOLOR 0x33CCCC
 ;			タイル '= "●"
@@ -659,3 +668,21 @@ INPUT
 	ENDSELECT
 
 GOTO INPUT_LOOP
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;@HAS_PORT_SECTORMAP(SECTOR_ID)
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+@HAS_PORT_SECTORMAP(SECTOR_ID)
+#FUNCTION
+#DIM SECTOR_ID
+#DIM X_POS
+#DIM Y_POS
+FOR Y_POS, 1, MAP_HEIGHT
+	FOR X_POS, 1, MAP_WIDTH
+		SIF MAP:SECTOR_ID:X_POS:Y_POS == 2
+			RETURNF 2
+		SIF MAP:SECTOR_ID:X_POS:Y_POS == 3
+			RETURNF 3
+	NEXT
+NEXT
+RETURNF 0
