@@ -3,7 +3,7 @@
 ;これにコンフィグ項目の発生頻度がかけられるので、必ずしもこの通りにはならない
 ;---------------------
 @EVENT_DAILY_DATE_RATE()
-RETURN 1000
+RETURN 100
 
 
 ;---------------------
@@ -25,7 +25,7 @@ FOR LOCAL, 0, CHARANUM
 			CONTINUE
 		SIF CONFIG:18 == 4 && (GROUPMATCH(TALENT:LOCAL:性別, 0, 3, 4, 5) || GROUPMATCH(TALENT:(LOCAL:1):性別, 0, 3, 4, 5))
 			CONTINUE
-		SIF REL_PROGRESS:LOCAL:(LOCAL:1) == 関係_恋人 || REL_PROGRESS:LOCAL:(LOCAL:1) == 関係_夫婦
+		SIF REL_PROGRESS:LOCAL:(LOCAL:1) == 関係_恋人 || REL_PROGRESS:(LOCAL:1):LOCAL == 関係_夫婦
 			RETURN 1
 	NEXT
 NEXT
@@ -98,8 +98,8 @@ ELSE
 	グループ呼称 = 男女
 ENDIF
 
-
-SELECTCASE RAND:13
+LOCAL = 0
+SELECTCASE LOCAL
 	CASE 0
 		PRINTFORML %CALLNAME:対象%と%CALLNAME:パートナー%は二人でリゾート地に来ていた
 		PRINTFORML 都市部の開発され洗練された地区とは違い、FTL前時代を思わせる豊かな自然と原始的な建物に囲まれた長閑な場所だ
@@ -123,9 +123,9 @@ SELECTCASE RAND:13
 				IF 竿役 && 女役
 					PRINTFORML 岩に手をついて腰を突き出した%CALLNAME:女役%に後ろから覆いかぶさるようにして、%CALLNAME:竿役%が自身の腰を打ち付けている
 					PRINTFORML バチュンバチュンという肉を打つ音が響くたびに二人の荒い吐息と嬌声が漏れる
-					PRINTFORML 何度も静液を注がれた%CALLNAME:女役%の股からは入りきらなかった精液が垂れている
-					PRINTFORML しかしいつもとは違う開放感からか、何度いっても止まない性欲に身を任せて二人はただただ混じり合い続けた
+					PRINTFORMW 何度も静液を注がれた%CALLNAME:女役%の股からは入りきらなかった精液が垂れている
 					PRINTL
+					PRINTFORML しかしいつもとは違う開放感からか、何度いっても止まない性欲に身を任せて二人はただただ混じり合い続けた
 					PRINTFORML 結局二人は動けなくなるまで交尾に興じたのだった
 					CALL FUCK_MAKELOVE(女役, GET_ID(竿役), @"%ANAME(竿役)%の唇", ANAME(竿役))
 					IF HAS_VAGINA(女役)
@@ -135,12 +135,13 @@ SELECTCASE RAND:13
 					ENDIF
 				ELSE
 					PRINTFORML 砂塗れになりながら、互いの性器にむしゃぶりつく%CALLNAME:対象%と%CALLNAME:パートナー%
-					PRINTFORML 体はすっかり火照り、汗が全身から滴り落ちている
+					PRINTFORMW 体はすっかり火照り、汗が全身から滴り落ちている
+					PRINTL
 					PRINTFORML 何度もイッて潮も吹いており、先ほど補給したジュースの水分はとうの昔に失われていた
 					PRINTFORML まるで喉の渇きを潤すかのように相手の汗や愛液をなめとり、快楽と共に互いの愛を確かめ合っている
 					PRINTFORML 二人の交わりは、本格的に喉が乾くまで続けられるのであった……
-					CALL FUCK_MAKELOVE_LES(対象, ANAME(パートナー))
-					CALL FUCK_MAKELOVE_LES(パートナー, ANAME(対象))
+					CALL FUCK_MAKELOVE_LES(対象, パートナー)
+					CALL FUCK_MAKELOVE_LES(パートナー, 対象)
 				ENDIF
 			ENDIF
 		ELSE
