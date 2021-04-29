@@ -3,7 +3,7 @@
 ;これにコンフィグ項目の発生頻度がかけられるので、必ずしもこの通りにはならない
 ;---------------------
 @EVENT_DAILY_DATE_RATE()
-RETURN 100
+RETURN 1000
 
 
 ;---------------------
@@ -11,7 +11,6 @@ RETURN 100
 ;〇期以降になると発生するとか、デイリー側で利用している変数が-1だったら起こさない　みたいなはじき方をするときに使う
 ;---------------------
 @EVENT_DAILY_DATE_DECISION()
-RETURN 0
 SIF !CONFIG:18
 	RETURN 0
 
@@ -98,8 +97,7 @@ ELSE
 	グループ呼称 = 男女
 ENDIF
 
-LOCAL = 0
-SELECTCASE LOCAL
+SELECTCASE RAND:7
 	CASE 0
 		PRINTFORML %CALLNAME:対象%と%CALLNAME:パートナー%は二人でリゾート地に来ていた
 		PRINTFORML 都市部の開発され洗練された地区とは違い、FTL前時代を思わせる豊かな自然と原始的な建物に囲まれた長閑な場所だ
@@ -112,6 +110,9 @@ SELECTCASE LOCAL
 			PRINTL 
 			IF REL_PROGRESS_VALUE:対象:パートナー + REL_PROGRESS_VALUE:パートナー:対象 <= 60 
 				PRINTFORML しかしまだ付き合って日の浅い二人は互いにドギマギしつつも手を出すようなことはせず、何事もなく日光浴を楽しんだのだった
+				PRINTW ………………
+				PRINTW …………
+				PRINTW ……
 			ELSE
 				PRINTFORML 互いの水着姿にドギマギした二人は、どちらともなくボディタッチが増えていった
 				PRINTFORML そして持ってきていたジュースを飲み切る頃には、どちらともなく連れ立って、一眼のない岩陰を目指すのだった
@@ -145,17 +146,175 @@ SELECTCASE LOCAL
 				ENDIF
 			ENDIF
 		ELSE
+			PRINTFORMW %CALLNAME:対象%と%CALLNAME:パートナー%はリゾートエリアから少し離れたところにあるBBQ用のエリアでBBQを楽しんでいた
+			PRINTL
+			PRINTFORML ワイワイ騒ぎながら大自然の中で食べるBBQはとても美味しく、用意された食材をペロリと食べ尽くしてしまうほどだった
+			PRINTFORMW 二人の仲も、大分深まった気がする
+			PRINTL
+			IF REL_PROGRESS_VALUE:対象:パートナー + REL_PROGRESS_VALUE:パートナー:対象 <= 60
+				PRINTFORML しかしまだ深い仲に至っていなかった二人は、そのまま後片付けをして今度は海を観に行くことにしたのだった
+				PRINTW ………………
+				PRINTW …………
+				PRINTW ……
+			ELSE
+				PRINTFORML お腹いっぱいになった二人は、どちらともなく手を握り合うと、少し離れたところにある木陰に連れ立って歩いて行った
+				PRINTW ………………
+				PRINTW …………
+				PRINTW ……
+				IF 竿役 && 女役
+					PRINTFORML 木陰から%グループ呼称%の喘ぎ声が聞こえてくる
+					PRINTFORML 木の幹に手をつき腰を突き出した%CALLNAME:女役%の腰に、%CALLNAME:竿役%がパンパンと腰を打ち付けていた
+					PRINTFORMW その度に%CALLNAME:女役%の口からはあられもない歓喜の悲鳴が漏れ、溢れ出た白く泡立った液体がポタポタと地面にこぼれ落ちる
+					PRINTL 
+					PRINTFORML 大自然の開放感のせいだろう、いつもより%CALLNAME:女役%の喘ぎ声は大きく、そんな%CALLNAME:女役%につられて%CALLNAME:竿役%の勢いも強くなっていた
+					PRINTFORML 絶対に孕ませる。そんな野性的な本能でもって%CALLNAME:竿役%が何度目かの射精をすると、種漬けされた%CALLNAME:女役%は顔をとろけさせ甘い吐息を吐いた
+					PRINTFORMW そうして二人のセックスは日が暮れるまで続けられるのであった
+					CALL FUCK_MAKELOVE(女役, GET_ID(竿役), @"%ANAME(竿役)%の唇", ANAME(竿役))
+					IF HAS_VAGINA(女役)
+						CALL FUCK(竿役, "Ｃ, 射精, Ｖ挿入", "童貞喪失", 0, "", "", @"%ANAME(女役)%の膣")
+					ELSE
+						CALL FUCK(竿役, "Ｃ, 射精, Ａ挿入", "童貞喪失", 0, "", "", @"%ANAME(女役)%のアナル")
+					ENDIF
+				ELSE
+					PRINTFORML 木陰で二人の%グループ呼称%がじゃれあっていた
+					PRINTFORML 裸で抱き合いキスをし、互いの身体を愛撫し舐め合い、愛を確かめ合っている
+					PRINTFORMW %CALLNAME:対象%が%CALLNAME:パートナー%がイくまで秘所を口で虐めると、お返しとばかりに今度は%CALLNAME:パートナー%が%CALLNAME:対象%の秘所にむしゃぶりつき虐め返す
+					PRINTL 
+					PRINTFORML 大自然の開放感のせいだろう、二人の喘ぎ声はいつもより大きく、木々に止まっていた鳥達が驚いて飛び去るほどだった
+					PRINTFORMW 淫らな笑みを浮かべた二人、いや二匹の陰獣は汗だくになりながらも、大自然の中で思うがまま絡み合い続けた
+					CALL FUCK_MAKELOVE_LES(対象, パートナー)
+					CALL FUCK_MAKELOVE_LES(パートナー, 対象)
+				ENDIF
+			ENDIF
 		ENDIF
+	CASE 1
+		PRINTFORML %CALLNAME:対象%と%CALLNAME:パートナー%は異星動物園に遊びに来ていた
+		CALL GET_STAR_ID_FROM_POS(CHARACTER_POSITION)
+		IF RESULT > 0
+			SELECTCASE STAR_OWNER:RESULT
+				CASE 国家ID_社会主義
+					PRINTFORML 社会主義国家の異星動物園は博物館も併設されていて、オリの説明以上の情報を博物館で入手できるのが特徴だ
+					PRINTFORML 知的好奇心を刺激された%CALLNAME:対象%と%CALLNAME:パートナー%は興味津々で説明書きを読んでは嘆息している
+				CASE 国家ID_企業連合
+					PRINTFORML 企業連合の異星動物園は博物館も併設されていて、オリの説明以上の情報を博物館で入手できるのが特徴だ
+					PRINTFORML 知的好奇心を刺激された%CALLNAME:対象%と%CALLNAME:パートナー%は興味津々で説明書きを読んでは嘆息している
+				CASE 国家ID_民主主義
+					PRINTFORML 民主主義国家の異星動物園はどこよりも種類が豊富なのが特徴だ
+					PRINTFORML 珍妙な生き物達のオンパレードに%CALLNAME:対象%と%CALLNAME:パートナー%は子供のように喜んでいる
+				CASE 国家ID_アレス宗教
+					PRINTFORML アレス宗教国家の異星動物園は専用のフライトマシンに乗って放飼されている動物達を見学できるのが特徴だ
+					PRINTFORML さらに国の指定保護生物である軟体生物達が多数展示されており、来園者の興味を引いている
+				CASE 国家ID_機械文明
+					PRINTFORML 機械文明の異星動物園はとにかく清潔で、テーマパークとしての機能に特化しているのが特徴だ
+					PRINTFORML 間近で感じる動物達の息遣いに、%CALLNAME:対象%と%CALLNAME:パートナー%は興奮している
+				CASE 国家ID_豊秋津皇国
+					PRINTFORML 豊秋津皇国の異星動物園は温厚な小型動物と触れ合えるのが特徴だ
+					PRINTFORML 触れ合い広場で可愛い動物達と触れ合い、%CALLNAME:対象%と%CALLNAME:パートナー%はすっかり癒されていた
+				CASE 国家ID_ハールバルズ
+					PRINTFORML ハールバルズ王国の異星動物園は車に乗って放飼されている動物達を見学できるのが特徴だ
+					PRINTFORML 間近で感じる動物達の息遣いに、%CALLNAME:対象%と%CALLNAME:パートナー%は興奮している
+			ENDSELECT
+		ENDIF
+		PRINTFORMW 普段は生で見ることのない動物達の姿に%CALLNAME:対象%と%CALLNAME:パートナー%は興味津々で、思うがままあっちこっち歩き回った
+		PRINTL
+		CALL EVENT_DATE_COMMON_MESSAGE(対象, パートナー, 竿役, 女役, グループ呼称)
+	CASE 2
+		PRINTFORML %CALLNAME:対象%と%CALLNAME:パートナー%は観光ステーションに来ていた
+		PRINTFORML 旧来のデートが楽しめるスポットで、今日は気ままにあちこち回ることにしていた
+		PRINTFORML ウィンドウショッピングや演劇場、映画館など、遊びところには事足りない
+		PRINTFORMW 二人は面白そうなところを見つけては、かたっぱしから入って行った……
+		PRINTL
+		CALL EVENT_DATE_COMMON_MESSAGE(対象, パートナー, 竿役, 女役, グループ呼称)
+	CASE 3
+		PRINTFORML %CALLNAME:対象%と%CALLNAME:パートナー%はスポーツ観戦にやってきていた
+		PRINTFORML 今日はホバークラフトのかーレースで、賭けをすることも許されている
+		PRINTFORMW 二人はわからないながらいくつかのパターンにわずかな掛け金を投入し、レース結果に一喜一憂して楽しんだ
+		PRINTL
+		CALL EVENT_DATE_COMMON_MESSAGE(対象, パートナー, 竿役, 女役, グループ呼称)
+	CASE 4
+		PRINTFORML %CALLNAME:対象%と%CALLNAME:パートナー%は博物館に来ていた
+		PRINTFORML いろいろな時代の名品珍品が展示されている、静かな場所だ
+		PRINTFORMW 二人は大人な雰囲気の博物館の中を手を繋いで周り、静かに楽しんだ
+		PRINTL
+		CALL EVENT_DATE_COMMON_MESSAGE(対象, パートナー, 竿役, 女役, グループ呼称)
+	CASE 5
+		PRINTFORML %CALLNAME:対象%と%CALLNAME:パートナー%は名物グルメ食べ歩きエリアに遊びに来ていた
+		PRINTFORML 名物、B級グルメ、ゲテモノ、いろいろなもののお店が並び、食事スペースもあるエリアだ
+		PRINTFORMW 結構な人気で混み合っており、二人は離れないように手を繋いで、食べ歩きを楽しんだ
+		PRINTL
+		CALL EVENT_DATE_COMMON_MESSAGE(対象, パートナー, 竿役, 女役, グループ呼称)
+	CASE 6
+		PRINTFORML %CALLNAME:対象%と%CALLNAME:パートナー%は美術館に来ていた
+		PRINTFORML 旧世代の絵画から最新の美術まで並ぶ美術館は、静かで知的な雰囲気を放っている
+		PRINTFORMW 二人はそんな雰囲気の中、普段堪能することのない美術を楽しみながら一日かけて館の中を回った
+		PRINTL
+		CALL EVENT_DATE_COMMON_MESSAGE(対象, パートナー, 竿役, 女役, グループ呼称)
+	CASE 7
+		PRINTFORML %CALLNAME:対象%と%CALLNAME:パートナー%はバーチャルナイトクラブに遊びに来ていた
+	CASE 8
+		PRINTFORML %CALLNAME:対象%と%CALLNAME:パートナー%は観光用小型船で半日出回る星一周の旅を楽しんでいた
+	CASE 9
+		PRINTFORML %CALLNAME:対象%と%CALLNAME:パートナー%はお祭りに遊びに来ていた
+	CASE 10
+		PRINTFORML %CALLNAME:対象%と%CALLNAME:パートナー%はデート用二人乗り脱出ポッドで遊びに来ていた
 ENDSELECT
 PRINTFORMW 進展度 +10
 REL_PROGRESS_VALUE:対象:パートナー += 10
 REL_PROGRESS_VALUE:パートナー:対象 += 10
 
 
-
-
-
 @CAN_DATE(対象)
 #FUNCTION
 #DIM 対象
 RETURNF 対象 != MASTER && CFLAG:対象:行動不能状態 != 行動不能_子供 && CFLAG:対象:所属 == CFLAG:MASTER:所属 && !IS_ANIMAL(対象) && CFLAG:対象:捕虜先 == 0
+
+@EVENT_DATE_COMMON_MESSAGE(対象, パートナー, 竿役, 女役, グループ呼称)
+#DIM 対象
+#DIM パートナー
+#DIM 竿役
+#DIM 女役
+#DIMS グループ呼称
+
+PRINTFORML 日が暮れてくると、二人は予約しておいた近くのレストランにご飯を食べに行った
+PRINTFORML これもまた絶品で、二人は食事を存分に楽しみながら、今日一日を振り返って話に花を咲かせた
+IF REL_PROGRESS_VALUE:対象:パートナー + REL_PROGRESS_VALUE:パートナー:対象 <= 60 
+	PRINTFORMW しかしそのあとは特に何するでもなく、それぞれ自室へと帰るのであった。
+	RETURN
+ENDIF
+PRINTFORML 腹が満たされ、時間もいい感じになってきた。二人はどちらともなく手をつなぎ合うと、夜の町にしけ込むことにした
+PRINTW …………………
+PRINTW …………
+PRINTW ……
+IF 竿役 && 女役
+	SELECTCASE RAND:2
+		CASE 0
+			PRINTFORML ホテルの一室に%グループ呼称%の喘ぎ声が響いている
+			PRINTFORML %CALLNAME:竿役%の全身を%CALLNAME:女役%が激しく愛撫し、イき地獄を味合わせていた
+			PRINTFORML 何度目かもわからぬ絶頂の後、%CALLNAME:女役%は嗜虐的な笑みを浮かべ、何度もイって敏感になった%CALLNAME:竿役%のペニスを自身の濡れた穴で咥えると、猛然と腰を振り出した
+			PRINTFORMW ただでさえ辛いところに快楽地獄を加えられ、%CALLNAME:竿役%は涙目で%CALLNAME:女役%に許しをこうた
+			PRINTL
+		CASE 1
+			PRINTFORML ホテルの一室。%CALLNAME:竿役%に後背位で突かれる%CALLNAME:女役%が歓喜の悲鳴を上げていた
+			PRINTFORML 結合部からは度重なる射精で溢れた静液と%CALLNAME:女役%の体液が合わさって泡立ち、トロトロとこぼれてはベッドを汚している
+			PRINTFORML 愛する%CALLNAME:竿役%との交尾にすっかり溺れ切っている%CALLNAME:女役%の顔も、股と同じくらいとろけているが、本人はそんなことを気にしている余裕などなかった
+			PRINTFORMW 腹の中に溢れる愛する者の精液に幸せを感じながら、%CALLNAME:女役%もまた何度目かもしれぬ絶頂を迎えるのであった
+			PRINTL
+	ENDSELECT
+	CALL FUCK_MAKELOVE(女役, GET_ID(竿役), @"%ANAME(竿役)%の唇", ANAME(竿役))
+	IF HAS_VAGINA(女役)
+		CALL FUCK(竿役, "Ｃ, 射精, Ｖ挿入", "童貞喪失", 0, "", "", @"%ANAME(女役)%の膣")
+	ELSE
+		CALL FUCK(竿役, "Ｃ, 射精, Ａ挿入", "童貞喪失", 0, "", "", @"%ANAME(女役)%のアナル")
+	ENDIF
+; レズせっ！
+ELSE
+	SELECTCASE RAND:1
+		CASE 0
+			PRINTFORML ホテルの一室に%グループ呼称%の喘ぎ声が響いている
+			PRINTFORML 貝合わせで互いの性器をキスさせた%CALLNAME:対象%と%CALLNAME:パートナー%の甘い喘ぎ声だ
+			PRINTFORML すっかり出来上がった二人の割れ目からは愛液がとめどなく溢れ、ベッドに大きなシミを作っていた
+			PRINTFORML 二人とも顔も秘裂もすっかりとろけさせ、快楽と愛するものと体を合わせる悦びに浸っている
+			PRINTFORMW ここに二人を止めるものはいない。すっかり世が老けるまで、二人は互いの体を貪り合うのだった
+			PRINTL
+	ENDSELECT
+ENDIF
