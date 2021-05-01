@@ -17,7 +17,7 @@ STATUS:PRICE = 300000
 ;-----------------------------------
 @GET_OPTION_EQUIP_EFFECT_8(STATUS)
 #DIM REF STATUS
-STATUS:SHIP_CAPACITY += 300
+STATUS:SHIP_CAPACITY += 200
 
 ;------------------------------------------
 ;対象のSHIP_CATEGORYが装備可能かどうか
@@ -37,7 +37,7 @@ RETURN 0
 CALL GET_OPTION_STATUS_8(STATUS)
 CALL GET_OPTION_NAME_8
 PRINTFORML %RESULTS%
-PRINTFORML 輸送船のみ装備可。積載量を300増加させる。
+PRINTFORML 輸送船のみ装備可。積載量を200増加させる。
 PRINTL
 ;フレーバーテキスト的な
 SETCOLOR カラー_選択不可
