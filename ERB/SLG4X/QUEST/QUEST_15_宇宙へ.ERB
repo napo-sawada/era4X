@@ -9,6 +9,11 @@
 ; クエスト受注可能か
 ;--------------------------
 @QUEST_ACCEPTABLE_15
+#DIM 参加メンバー, MAX_CHARA_NUM
+
+CALL QUEST_15_CHOSE_MEMBER(参加メンバー, 1, 0)
+SIF RESULT == 0
+	RETURN 0
 SELECTCASE QUEST_PROGRESS:15
 	CASE 0 TO 3
 		RETURN 1
@@ -35,7 +40,6 @@ VARSET 参加メンバー, -1
 SELECTCASE QUEST_PROGRESS:15
 	CASE 0
 		CALL QUEST_15_CHOSE_MEMBER(参加メンバー, 3)
-		FINDELEMENT 参加メンバー, -1
 		参加人数 = RESULT
 
 		PRINTFORML %CALLNAME:MASTER%は仲間たちと共に大破した宇宙船の前にいた
@@ -63,7 +67,6 @@ SELECTCASE QUEST_PROGRESS:15
 			MONEY -= 500000
 			
 			CALL QUEST_15_CHOSE_MEMBER(参加メンバー, 2)
-			FINDELEMENT 参加メンバー, -1
 			参加人数 = RESULT
 
 			PRINTFORML 外部装甲の修理が完了した
@@ -98,7 +101,6 @@ SELECTCASE QUEST_PROGRESS:15
 			MONEY -= 1000000
 			
 			CALL QUEST_15_CHOSE_MEMBER(参加メンバー, 1)
-			FINDELEMENT 参加メンバー, -1
 			参加人数 = RESULT
 
 			PRINTFORML 内装の修理が完了した。
@@ -149,12 +151,14 @@ SELECTCASE QUEST_PROGRESS:15
 ENDSELECT
 
 
-@QUEST_15_CHOSE_MEMBER(参加メンバー, 分割分母)
+@QUEST_15_CHOSE_MEMBER(参加メンバー, 分割分母, ADD = 1)
 #DIM REF 参加メンバー
 #DIM 分割分母
+#DIM ADD
 #DIM 参加候補, MAX_CHARA_NUM
 #DIM ITER
 #DIM 参加人数
+
 
 VARSET 参加候補, -1
 
@@ -174,8 +178,11 @@ ITER = 0
 WHILE ITER < 参加人数
 	LOCAL = RAND:CHARANUM
 	IF CFLAG:LOCAL:初期キャラ && CFLAG:LOCAL:所属 != 国家ID_プレイヤー
-		CFLAG:LOCAL:所属 = 国家ID_プレイヤー
+		SIF ADD
+			CFLAG:LOCAL:所属 = 国家ID_プレイヤー
 		参加メンバー:ITER = LOCAL
 		ITER ++
 	ENDIF
 WEND
+
+RETURN ITER
