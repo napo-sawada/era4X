@@ -1,0 +1,94 @@
+﻿;--------------------------
+; !!狂った戦闘と 16を好きな番号に変える！!
+; 狂った戦闘AI
+; ここにクエストの説明
+;--------------------------
+
+
+;--------------------------
+; クエスト受注可能か
+;--------------------------
+@QUEST_ACCEPTABLE_16
+RETURN 1
+
+;--------------------------
+; クエストの名前を返却
+;--------------------------
+@QUEST_NAME_16
+RESULTS = 狂った戦闘AI
+RETURN
+
+;--------------------------
+; クエスト本体
+;--------------------------
+@QUEST_BODY_16
+#DIM SECTOR_ID
+#DIM IS_COMPLETE
+#DIM SHIP_ID
+#DIM COUNTRY_ID
+#DIM POSID
+
+IF QUEST_PROGRESS:16 == 0
+	PRINTFORML 「お前、戦闘艦を持ってるか？」
+	PRINTFORML %CALLNAME:MASTER%は軍人らしき男に話しかけられた
+	$INPUT_LOOP
+	PRINTBUTTON "[0] はい", 0
+	PRINTBUTTON "[1] いいえ", 1
+	INPUT
+	IF RESULT == 0
+		PRINTFORML 「ちょうどいい。もしお前が自分の艦隊に自信があるなら、このセクターで暴れている戦艦を旗艦にした小隊を撃破して欲しい
+		PRINTFORML 訳あって詳しい話は言えないが、軍の極秘開発中だった戦闘AIが暴走して無差別に通りかかる艦を襲撃しているんだ
+		PRINTFORMW 軍内部でも揉めているようで、撃破論と遠隔制圧論で対立していて、軍が出ばるのはもう少し先になるようだ。おかげで被害が増大している
+		PRINTL
+		PRINTFORMW これ以上被害が増大するのを見過ごすわけにはいかない。少ないが謝礼もさせてもらう。さらにこの国における名誉も保証しよう
+		PRINTFORMW 頼む、狂った戦闘AI部隊を撃破してくれ」
+		PRINTFORMW %CALLNAME:MASTER%は軍人らしき男に狂った戦闘AI部隊撃破のミッションを依頼された
+		QUEST_PROGRESS:16 = 1
+		CALL ID2POS(CHARACTER_POSITION)
+		SECTOR_ID = RESULT:0
+		CALL POS2ID(SECTOR_ID, 5, 5)
+		POSID = RESULT
+		FOR SHIP_ID, 0, 9
+			CALL INIT_PRESET_SHIP(10, POSID, 汎用フリゲート, "護衛フリゲート", 汎用フリゲート)
+		NEXT
+		FOR SHIP_ID, 0, 3
+			CALL INIT_PRESET_SHIP(10, POSID, 汎用駆逐艦, "護衛駆逐艦", 汎用駆逐艦)
+		NEXT
+		CALL INIT_PRESET_SHIP(10, POSID, 汎用戦艦, "狂った戦艦", 汎用戦艦)
+		SHIP_EQUIP:主砲:0:RESULT = 43
+		SHIP_EQUIP:主砲:1:RESULT = 43
+		SHIP_EQUIP:AI:0:RESULT = 3
+	ELSEIF RESULT == 1
+		PRINTFORMW 「そうか、なら聞かなかったことにしてくれ」
+	ELSE
+		GOTO INPUT_LOOP
+	ENDIF
+ELSEIF QUEST_PROGRESS:16 == 1
+	IS_COMPLETE = 1
+	FOR SHIP_ID, 0, MAX_SHIP
+		SIF SHIP_COUNTRY:SHIP_ID != 10
+			CONTINUE
+		CALL ID2POS(CHARACTER_POSITION)
+		SECTOR_ID = RESULT:0
+		CALL ID2POS(SHIP_POSITION:SHIP_ID)
+		SIF SECTOR_ID != RESULT:0
+			CONTINUE
+			IS_COMPLETE = 0
+	NEXT
+	IF IS_COMPLETE == 0
+		PRINTFORMW 「頼んだぞ。無理なら正規軍が動くまで待っててくれ」
+	ELSE
+		PRINTFORML 「狂った戦闘AI部隊を撃破したんだな！これで被害の拡大を防げた。軍部も民間のやったことならと納得してくれるだろう。
+		PRINTFORML 少ないがこれが約束の報酬だ。君の名声はこの国に広く知れ渡るだろう」
+		PRINTFORMW 男は%CALLNAME:MASTER%に報酬の$100,000を手渡すと、恭しく敬礼して見せた
+		MONEY += 100000
+		FOR COUNTRY_ID, 0, 星系数
+			IF CHARACTER_POSITION == 星系座標ID:COUNTRY_ID
+				REL_LIKE_COUNTRY:(STAR_OWNER:COUNTRY_ID):国家ID_プレイヤー += 100
+				BREAK;
+			ENDIF
+		NEXT
+		QUEST_PROGRESS:16 = 2
+	ENDIF
+ENDIF
+
