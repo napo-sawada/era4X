@@ -41,6 +41,8 @@ RETURN cargoSum
 CALL SUM_CARGO_SIZE(TargetShip)
 totalCargoSize = RESULT 
 TRYCALLFORM GET_SHIP_STATUS_{SHIP_MODEL:TargetShip}(SHIP_STATUS)
+TRYCALLFORM GET_OPTION_EQUIP_EFFECT_{SHIP_EQUIP:オプション:0:TargetShip}(SHIP_STATUS)
+
 RETURN SHIP_STATUS:SHIP_CAPACITY - totalCargoSize
 
 ;-----------------------------------

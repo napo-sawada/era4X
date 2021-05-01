@@ -1,0 +1,55 @@
+﻿;-----------------------------------
+; オプション
+;-----------------------------------
+@GET_OPTION_NAME_8
+RESULTS = TIER1増設コンテナ
+
+@GET_OPTION_TYPE_8
+RESULTS '= "ADD_CONTAINER"
+
+@GET_OPTION_STATUS_8(STATUS)
+#DIM REF STATUS
+
+STATUS:PRICE = 300000
+
+;-----------------------------------
+;オプションの固有の効果名と効果量
+;-----------------------------------
+@GET_OPTION_EQUIP_EFFECT_8(STATUS)
+#DIM REF STATUS
+STATUS:SHIP_CAPACITY += 300
+
+;------------------------------------------
+;対象のSHIP_CATEGORYが装備可能かどうか
+;------------------------------------------
+@GET_OPTION_CAN_EQUIP_8(対象)
+#DIM 対象
+IF 対象 == 輸送船
+    RETURN 1
+ENDIF
+RETURN 0
+
+;-----------------------------------
+; オプションの説明
+;-----------------------------------
+@GET_OPTION_DESCRIPTION_8(STATUS)
+#DIM STATUS, STATUS_LENGTH
+CALL GET_OPTION_STATUS_8(STATUS)
+CALL GET_OPTION_NAME_8
+PRINTFORML %RESULTS%
+PRINTFORML 輸送船のみ装備可。積載量を300増加させる。
+PRINTL
+;フレーバーテキスト的な
+SETCOLOR カラー_選択不可
+PRINTFORML ――たかがコンテナがなぜこんなに高いのかって？
+PRINTFORML リース代に上乗せされる保険料が青天井に上がるからだよ。文句はロイズの連中に聞いてくれ。
+RESETCOLOR
+
+;-----------------------------------
+; オプションの資材
+;-----------------------------------
+@GET_OPTION_RESOURCE_8(USE_RESOURCE)
+#DIM REF USE_RESOURCE
+
+USE_RESOURCE:装甲合金 = 1
+
