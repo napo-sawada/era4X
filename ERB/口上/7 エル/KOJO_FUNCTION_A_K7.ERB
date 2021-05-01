@@ -1,0 +1,583 @@
+﻿;─────────────────────────────────────── 
+;●エル口上の使用可否・初期化
+;─────────────────────────────────────── 
+@KOJO_ASK_K7_RESET_K7
+#DIM SAVE_REDRAW
+#DIM SAVE_COLOR
+#DIM SAVE_LINE
+#DIM エル
+
+CURRENTREDRAW
+SAVE_REDRAW = RESULT
+REDRAW 0
+GETCOLOR
+SAVE_COLOR = RESULT
+RESETCOLOR
+
+エル = NAME_TO_CHARA("エル")
+
+RESETCOLOR
+PRINTL 
+
+PRINTFORML エル口上使用の設定
+CALL KOJO_ASK_K7("使用しない", "使用する")
+PRINTFORMW エル口上の使用を設定した
+
+;使用しない
+IF RESULT == 0
+	CFLAG:エル:400 = 1
+;使用する
+ELSEIF RESULT == 1
+	CFLAG:エル:400 = 2
+	PRINTL
+ENDIF
+
+PRINTL 
+
+REDRAW SAVE_REDRAW
+SETCOLOR SAVE_COLOR
+RETURN 0
+
+
+;─────────────────────────────────────── 
+;●エルの呼称（エルからエル_対象へ）
+;　使い方：%CALLNAME_K7(エル_対象)%　%CALLNAME_K7(エル_対象, "ぁ")%
+;　覚書　：第二引数に"ぁ"とつけると
+;　フリガナ（CSTR:MASTER:6やエル_主人公への呼称フリガナや君主等への特殊呼称）がある場合
+;　対応する小書き母音をつける（甘え感を出す）
+;─────────────────────────────────────── 
+@CALLNAME_K7(エル_対象, 小書き)
+#FUNCTIONS
+#DIM エル
+#DIM エル_対象
+#DIMS 小書き
+#DIMS 表示テキスト
+#DIMS 表示テキストフリガナ
+
+;リセット
+エル = NAME_TO_CHARA("エル")
+表示テキスト '= ""
+
+;慰安中モブ相手
+IF FLAG:調教モード == 調教_慰安 && CFLAG:(エル_対象):慰安モブ
+	表示テキスト '= "みんな"
+	表示テキストフリガナ '= "ミンナ"
+
+;それ以外
+ELSE
+	IF CSTR:エル_対象:99 == "あなた"
+		IF IS_MALE(エル_対象)
+			表示テキスト '= "キミ"
+			表示テキストフリガナ '= "キミ"
+		ELSE
+			表示テキスト '= "キミ"
+			表示テキストフリガナ '= "キミ"
+		ENDIF
+	ELSE
+		表示テキスト '= ANAME(エル_対象)
+		IF CSTR:エル_対象:6 != ""
+			表示テキストフリガナ '= CSTR:エル_対象:6
+		ELSE
+			表示テキストフリガナ '= ""
+		ENDIF
+	ENDIF
+ENDIF
+
+IF 小書き == "ぁ" && 表示テキストフリガナ != ""
+;	表示テキスト '= 表示テキスト + SMALLSCRIPT(表示テキストフリガナ)
+	表示テキスト '= 表示テキスト
+ENDIF
+
+RETURNF 表示テキスト
+
+;─────────────────────────────────────── 
+;●エル口上の分岐条件まとめ
+;　IF文を短縮したり見やすくするための条件まとめ
+;　よく使う条件が増えたらその都度追加
+;　条件=わかりやすそうな条件名 エル_対象=略すと主人公
+;　CHECK_K7("面識", エル_対象)……既知と扱うキャラか、面識はあるかの確認
+;　CHECK_K7("陥落", エル_対象)……エル_対象が主人公か＆恋慕系服従系の陥落があるか確認する
+;　CHECK_K7("活力")……エルの気力体力があるまたはエルに主導権がある
+;─────────────────────────────────────── 
+@CHECK_K7(条件, エル_対象)
+#FUNCTION
+#DIMS 条件
+#DIM エル_対象
+#DIM エル
+
+;エル_対象は未指定だと主人公
+IF !エル_対象
+	エル_対象 = MASTER
+ENDIF
+
+エル = NAME_TO_CHARA("エル")
+
+;〇面識
+IF 条件 == "面識"
+	;エル_対象があなたでエルと面識がある（面識を得るデイリーの発生も含む）
+	IF エル_対象 == MASTER && CFLAG:エル:面識
+		RETURNF 1
+	;それ以外
+	ELSE
+		RETURNF 0
+	ENDIF
+ENDIF
+
+;〇陥落
+IF 条件 == "陥落"
+	;エル_対象があなたで恋慕系か服従系の陥落
+	IF エル_対象 == MASTER && (IS_SLAVE(エル) || IS_LOVER(エル))
+		RETURNF 1
+	ENDIF
+ENDIF
+
+;〇活力（気力体力1/3以上または主導権持ち）
+IF 条件 == "活力"
+	IF BASE:エル:気力 > (MAXBASE:エル:気力 / 3) && BASE:エル:体力 > (MAXBASE:エル:体力 / 3)
+		RETURNF 1
+	ENDIF
+	IF IS_INITIATIVE(エル)
+		RETURNF 1
+	ENDIF
+ENDIF
+
+RETURNF 0
+
+
+;─────────────────────────────────────── 
+;●エルの文末を決める
+;　使い方：鍵括弧前は%BREAK_K7("末")%　そうでなければ%BREAK_K7("中")%
+;　覚書　：文末というか読点・感嘆符・ハート
+;　機嫌とか快楽度合いとかコマンド種を見て「。」つけるか「！」や「❤」つけるか決める
+;　鍵括弧の直前以外は！や❤の後に全角スペースを入れるため、中か末かの指定がいる
+;　促音「っ」をつけたりつけなかったりするので、元テキストの末尾につけてしまうと「っっ」になる
+;─────────────────────────────────────── 
+@BREAK_K7(位置, エル_対象)
+#FUNCTIONS
+#DIMS 位置
+#DIMS 区切り
+#DIMS 表示テキスト
+#DIM エル
+#DIM エル_対象
+#DIMS エル機嫌
+#DIM エル_最大快楽部位の値
+
+;エル_対象は未指定だと主人公
+IF !エル_対象
+	エル_対象 = MASTER
+ENDIF
+
+エル = NAME_TO_CHARA("エル")
+エル機嫌 '= TOSTR_EMOTION(エル)
+エル_最大快楽部位の値 = MAX(PALAM:エル:快Ｃ, PALAM:エル:快Ｖ, PALAM:エル:快Ａ, PALAM:エル:快Ｂ, PALAM:エル:快Ｍ)
+
+表示テキスト '= ""
+
+;▼日常コマンド失敗時
+IF TFLAG:18 == -1 || TFLAG:17 == -1
+	表示テキスト '= SPLIT_R("……：：：：：")
+	IF 位置 == "中"
+		表示テキスト '= 表示テキスト + "。"
+	ENDIF
+
+;▼不機嫌
+ELSEIF GROUPMATCH(エル機嫌,"恨","怒","憤","鬱","悲","憂","狂","恐","怯")
+	表示テキスト '= SPLIT_R("……：：：：：")
+	表示テキスト '= 表示テキスト + SPLIT_R("っ：！：：：：：")
+	IF 位置 == "中"
+		表示テキスト '= 表示テキスト + "。"
+	ENDIF
+
+;▼気力切れ/酔い限界
+ELSEIF TCVAR:エル:52 || TCVAR:エル:53 == 1
+	;エル_対象が主人公ではないか、陥落ではない、あるいは捕虜スカ触手系
+	IF !CHECK_K7("陥落", エル_対象) || ((SELECTCOM >= 80 && SELECTCOM <= 99) || (SELECTCOM >= 130 && SELECTCOM <= 159) || (SELECTCOM >= 200 && SELECTCOM <= 219))
+		表示テキスト '= SPLIT_R("……：：：：：")
+		表示テキスト '= 表示テキスト + SPLIT_R("っ：：：：：")
+		IF 位置 == "中"
+			表示テキスト '= 表示テキスト + "。"
+		ENDIF
+	;エル_対象が主人公かつ陥落、捕虜スカ触手系ではない
+	ELSE
+		表示テキスト '= SPLIT_R("……：：：：：")
+		表示テキスト '= 表示テキスト + SPLIT_R("っ：：：：：")
+		IF 位置 == "中"
+			表示テキスト '= 表示テキスト + SPLIT_R("。：❤　")
+		ELSE
+			表示テキスト '= 表示テキスト + SPLIT_R("：❤")
+		ENDIF
+	ENDIF
+
+;▼体力切れ 
+ELSEIF TCVAR:エル:51 || (BASE:エル:体力 <= (MAXBASE:エル:体力 / 3))
+	IF エル_最大快楽部位の値 >= 9000
+		表示テキスト '= SPLIT_R("……：")
+		表示テキスト '= 表示テキスト + SPLIT_R("っ：")
+		IF 位置 == "中"
+			表示テキスト '= 表示テキスト + "。"
+		ENDIF
+	ELSE
+		表示テキスト '= SPLIT_R("……：")
+		表示テキスト '= 表示テキスト + SPLIT_R("っ：：：：：")
+		IF 位置 == "中"
+			表示テキスト '= 表示テキスト + "。"
+		ENDIF
+	ENDIF
+
+;▼閨でエルが受け
+;　受けかどうかはNIGHTのカテゴリ分岐で保存される
+ELSEIF FLAG:ウフフフラグ && エル_エルが受け
+	;▽～1500　あっ……ん……
+	IF エル_最大快楽部位の値 < 1500
+		;エル_対象が主人公ではないか、陥落ではない、あるいは捕虜スカ触手系
+		IF !CHECK_K7("陥落", エル_対象) || ((SELECTCOM >= 80 && SELECTCOM <= 99) || (SELECTCOM >= 130 && SELECTCOM <= 159) || (SELECTCOM >= 200 && SELECTCOM <= 219))
+			表示テキスト '= SPLIT_R("……：")
+			表示テキスト '= 表示テキスト + SPLIT_R("っ：：：：：")
+			IF 位置 == "中"
+				表示テキスト '= 表示テキスト + "。"
+			ENDIF
+		;エル_対象が主人公かつ陥落、捕虜スカ触手系ではない
+		ELSE
+			表示テキスト '= SPLIT_R("……：")
+			表示テキスト '= 表示テキスト + SPLIT_R("っ：：：：：")
+			IF 位置 == "中"
+				表示テキスト '= 表示テキスト + SPLIT_R("。：❤　")
+			ELSE
+				表示テキスト '= 表示テキスト + SPLIT_R("：❤")
+			ENDIF
+		ENDIF
+
+	;▽1500～5000　ああっ、う、あ❤　……っ、ん
+	ELSEIF エル_最大快楽部位の値 >= 1500 && エル_最大快楽部位の値 < 5000
+		;エル_対象が主人公ではないか、陥落ではない、あるいは捕虜スカ触手系
+		IF !CHECK_K7("陥落", エル_対象) || ((SELECTCOM >= 80 && SELECTCOM <= 99) || (SELECTCOM >= 130 && SELECTCOM <= 159) || (SELECTCOM >= 200 && SELECTCOM <= 219))
+			表示テキスト '= SPLIT_R("……：：：")
+			表示テキスト '= 表示テキスト + SPLIT_R("っ：：：：")
+			IF 位置 == "中"
+				表示テキスト '= 表示テキスト + "。"
+			ENDIF
+		;エル_対象が主人公かつ陥落、捕虜スカ触手系ではない
+		ELSE
+			表示テキスト '= SPLIT_R("……：：：")
+			表示テキスト '= 表示テキスト + SPLIT_R("っ：：：：")
+			IF 位置 == "中"
+				表示テキスト '= 表示テキスト + SPLIT_R("。：❤　")
+			ELSE
+				表示テキスト '= 表示テキスト + SPLIT_R("：❤")
+			ENDIF
+		ENDIF
+
+	;▽5000～9000　あっ。だめっ！　も、もうっ。はあぁぁん❤
+	ELSEIF エル_最大快楽部位の値 >= 5000 && エル_最大快楽部位の値 < 9000
+		;エル_対象が主人公ではないか、陥落ではない、あるいは捕虜スカ触手系
+		IF !CHECK_K7("陥落", エル_対象) || ((SELECTCOM >= 80 && SELECTCOM <= 99) || (SELECTCOM >= 130 && SELECTCOM <= 159) || (SELECTCOM >= 200 && SELECTCOM <= 219))
+			表示テキスト '= SPLIT_R("っ：：：")
+			IF 位置 == "中"
+				表示テキスト '= 表示テキスト + SPLIT_R("。：。：。：！　")
+			ELSE
+				表示テキスト '= 表示テキスト + SPLIT_R("：：：！")
+			ENDIF
+		;エル_対象が主人公かつ陥落、捕虜スカ触手系ではない
+		ELSE
+			表示テキスト '= SPLIT_R("っ：")
+			IF 位置 == "中"
+				表示テキスト '= 表示テキスト + SPLIT_R("。：。：。：！　：❤　：❤　")
+			ELSE
+				表示テキスト '= 表示テキスト + SPLIT_R("：：：！：❤：❤")
+			ENDIF
+		ENDIF
+
+	;▽9000～　いくうううう❤　いっちゃうう～っ！
+	ELSE
+		;エル_対象が主人公ではないか、陥落ではない、あるいは捕虜スカ触手系
+		IF !CHECK_K7("陥落", エル_対象) || ((SELECTCOM >= 80 && SELECTCOM <= 99) || (SELECTCOM >= 130 && SELECTCOM <= 159) || (SELECTCOM >= 200 && SELECTCOM <= 219))
+			表示テキスト '= SPLIT_R("――：～：ー：……：：：：：：：：：：：：：：：")
+			表示テキスト '= 表示テキスト + SPLIT_R("っ：っ：っ：")
+			IF 位置 == "中"
+				表示テキスト '= 表示テキスト + SPLIT_R("。：！　")
+			ELSE
+				表示テキスト '= 表示テキスト + SPLIT_R("：！")
+			ENDIF
+		;エル_対象が主人公かつ陥落、捕虜スカ触手系ではない
+		ELSE
+			表示テキスト '= SPLIT_R("――：～：ー：……：：：：：：：：：：：：：：：")
+			表示テキスト '= 表示テキスト + SPLIT_R("っ：っ：っ：")
+			IF 位置 == "中"
+				表示テキスト '= 表示テキスト + SPLIT_R("。：！　：！　：❤　：❤　：❤　")
+			ELSE
+				表示テキスト '= 表示テキスト + SPLIT_R("：！：！：❤：❤：❤")
+			ENDIF
+		ENDIF
+	ENDIF
+
+;▼閨でエルが攻め
+ELSEIF FLAG:ウフフフラグ
+	;▽～5000
+	IF エル_最大快楽部位の値 < 5000
+		;エル_対象が主人公ではないか、陥落ではない、あるいは捕虜スカ触手系
+		IF !CHECK_K7("陥落", エル_対象) || ((SELECTCOM >= 80 && SELECTCOM <= 99) || (SELECTCOM >= 130 && SELECTCOM <= 159) || (SELECTCOM >= 200 && SELECTCOM <= 219))
+			表示テキスト '= SPLIT_R("……：……っ：：：：：：：")
+			IF 位置 == "中"
+				表示テキスト '= 表示テキスト + "。"
+			ENDIF
+		;エル_対象が主人公かつ陥落、捕虜スカ触手系ではない
+		ELSE
+			表示テキスト '= SPLIT_R("……：：：：：")
+			IF 位置 == "中"
+				表示テキスト '= 表示テキスト + SPLIT_R("。：❤　")
+			ELSE
+				表示テキスト '= 表示テキスト + SPLIT_R("：❤")
+			ENDIF
+		ENDIF
+
+	;▽5000～9000
+	ELSEIF エル_最大快楽部位の値 >= 5000 && エル_最大快楽部位の値 < 9000
+		;エル_対象が主人公ではないか、陥落ではない、あるいは捕虜スカ触手系
+		IF !CHECK_K7("陥落", エル_対象) || ((SELECTCOM >= 80 && SELECTCOM <= 99) || (SELECTCOM >= 130 && SELECTCOM <= 159) || (SELECTCOM >= 200 && SELECTCOM <= 219))
+			表示テキスト '= SPLIT_R("……っ：っ：：：：：：：：")
+			IF 位置 == "中"
+				表示テキスト '= "。"
+			ENDIF
+		;エル_対象が主人公かつ陥落、捕虜スカ触手系ではない
+		ELSE
+			表示テキスト '= SPLIT_R("っ：：：：：")
+			IF 位置 == "中"
+				表示テキスト '= SPLIT_R("。：❤　")
+			ELSE
+				表示テキスト '= SPLIT_R("：❤：❤❤")
+			ENDIF
+		ENDIF
+
+	;▽9000～
+	ELSE
+		;エル_対象が主人公ではないか、陥落ではない、あるいは捕虜スカ触手系
+		IF !CHECK_K7("陥落", エル_対象) || ((SELECTCOM >= 80 && SELECTCOM <= 99) || (SELECTCOM >= 130 && SELECTCOM <= 159) || (SELECTCOM >= 200 && SELECTCOM <= 219))
+			表示テキスト '= SPLIT_R("っ：：：：：")
+			IF 位置 == "中"
+				表示テキスト '= 表示テキスト + SPLIT_R("。：。：。：。：。：！")
+			ELSE
+				表示テキスト '= 表示テキスト + SPLIT_R("：：：：：！")
+			ENDIF
+		;エル_対象が主人公かつ陥落、捕虜スカ触手系ではない
+		ELSE
+			表示テキスト '= SPLIT_R("っ：：：：：")
+			IF 位置 == "中"
+				表示テキスト '= 表示テキスト + SPLIT_R("。：。：。：！：❤　：❤　：❤　")
+			ELSE
+				表示テキスト '= 表示テキスト + SPLIT_R("：：：！：❤：❤：❤：❤❤：❤❤❤")
+			ENDIF
+		ENDIF
+	ENDIF
+
+;▼日常
+ELSE
+	;エル_対象が主人公ではないか、陥落ではない
+	IF !CHECK_K7("陥落", エル_対象)
+		表示テキスト '= SPLIT_R("……：：：：：")
+		IF 位置 == "中"
+			表示テキスト '= 表示テキスト + "。"
+		ENDIF
+	;エル_対象が主人公かつ陥落
+	ELSE
+		表示テキスト '= SPLIT_R("……：：：：：")
+		IF 位置 == "中"
+			表示テキスト '= 表示テキスト + SPLIT_R("。：❤　")
+		ELSE
+			表示テキスト '= 表示テキスト + SPLIT_R("：❤")
+		ENDIF
+	ENDIF
+ENDIF
+
+RETURNF 表示テキスト
+
+;─────────────────────────────────────── 
+;●エルの淫語
+;　使い方：%CALL_DIRTY_K7("Ｐ", "ぁ")%
+;　覚書　：第二引数に"ぁ"をつけるとプレイヤーの入力した淫語に
+;　小書き母音をつけて甘えボイス感を出す
+;─────────────────────────────────────── 
+@CALL_DIRTY_K7(部位, 小書き)
+#FUNCTIONS
+#DIMS 部位
+#DIMS 小書き
+#DIMS 表示テキスト
+
+#DIM エル_淫語頻度
+#DIMS エル_淫語Ｐ
+#DIMS エル_淫語Ｖ
+#DIMS エル_淫語Ｃ
+#DIMS エル_淫語Ａ
+#DIMS エル_淫語Ｂ
+
+表示テキスト '= ""
+
+;初期化
+エル_淫語頻度 = 1
+エル_淫語Ｐ '= "ペニス"
+エル_淫語Ｖ '= "おまんこ"
+エル_淫語Ｃ '= "おまんこ"
+エル_淫語Ａ '= "アナル"
+エル_淫語Ｂ '= "おっぱい"
+
+IF 部位 == "Ｐ"
+	IF エル_淫語頻度 != 2
+		SELECTCASE RAND:4
+			CASE 1
+				表示テキスト '= エル_淫語Ｐ
+			CASE 2
+				表示テキスト '= エル_淫語Ｐ
+			CASE 3
+				表示テキスト '= "肉棒"
+			CASEELSE
+				表示テキスト '= "おちんちん"
+		ENDSELECT
+	ELSE
+		表示テキスト '= エル_淫語Ｐ
+	ENDIF
+ELSEIF 部位 == "Ｖ"
+	IF エル_淫語頻度 != 2
+		SELECTCASE RAND:3
+			CASE 2
+				表示テキスト '= エル_淫語Ｖ
+			CASE 1
+				表示テキスト '= "お腹"
+			CASEELSE
+				表示テキスト '= "なか"
+		ENDSELECT
+	ELSE
+		表示テキスト '= エル_淫語Ｖ
+	ENDIF
+ELSEIF 部位 == "Ｃ"
+	IF エル_淫語頻度 != 2
+		SELECTCASE RAND:3
+			CASE 2
+				表示テキスト '= エル_淫語Ｃ
+			CASE 1
+				表示テキスト '= "クリ"
+			CASEELSE
+				表示テキスト '= "あそこ"
+		ENDSELECT
+	ELSE
+		表示テキスト '= エル_淫語Ｃ
+	ENDIF
+ELSEIF 部位 == "Ａ"
+	IF エル_淫語頻度 != 2
+		SELECTCASE RAND:3
+			CASE 1
+				表示テキスト '= エル_淫語Ａ
+			CASEELSE
+				表示テキスト '= "お尻"
+		ENDSELECT
+	ELSE
+		表示テキスト '= エル_淫語Ａ
+	ENDIF
+ELSEIF 部位 == "Ｂ"
+	IF エル_淫語頻度 != 2
+		SELECTCASE RAND:3
+			CASE 1
+				表示テキスト '= エル_淫語Ｂ
+			CASEELSE
+				表示テキスト '= "胸"
+		ENDSELECT
+	ELSE
+		表示テキスト '= エル_淫語Ｂ
+	ENDIF
+ENDIF
+RETURNF 表示テキスト
+
+;●PRINTDATA文の中で口上カラーを無効にして出力
+@PRINT_DESC_K7(ARG1)
+#FUNCTIONS
+#DIMS ARG1
+#DIMS 表示テキスト
+表示テキスト '= ""
+
+PRINTFORMD %ARG1%
+RETURNF 表示テキスト
+
+;●対象が何回射精したか数えて数値で返す
+@SUM_CUM_TO_COUNT_K7(ARG1)
+#FUNCTION
+#DIM ARG1
+#DIM SUM 
+
+SUM = 0
+
+FOR COUNT, 0, CUM_SLOT_NUM
+	SUM = SUM + CUM_TO_COUNT:(ARG1):COUNT
+NEXT
+RETURNF SUM
+
+;●対象の衣装名を文字列で取得する
+@GET_CLOTH_NAME_K7(対象)
+#DIM 対象
+
+FOR LOCAL, 0, CLOTH_PART_NUM
+	CALL GET_CLOTH_NAME(LOCAL, CLOTH:(対象):LOCAL)
+	エル_衣装:LOCAL '= RESULTS
+NEXT
+RETURN 0
+
+
+
+;─────────────────────────────────────── 
+;●口上用の選択肢表示用関数
+;　選択肢0～5に選択肢を入力。0番～5番まで1～6個の選択肢を作れる
+;　結果は呼び出し後に分岐させて処理するためRESULTに返す
+;　選択肢のない数字を入力したら選択肢に戻される
+;─────────────────────────────────────── 
+@KOJO_ASK_K7(選択肢:0, 選択肢:1, 選択肢:2, 選択肢:3, 選択肢:4, 選択肢:5)
+#DIMS 選択肢, 6
+#DIM SAVE_REDRAW
+#DIM SAVE_COLOR
+#DIM SAVE_LINE
+
+;REDRAW状態を保存
+CURRENTREDRAW
+SAVE_REDRAW = RESULT
+REDRAW 0
+
+;現在の文字色を保存
+GETCOLOR
+SAVE_COLOR = RESULT
+RESETCOLOR
+
+;質問文の下に空行
+PRINTL 
+
+;現在行を保存（質問文の下の空行は残す）
+SAVE_LINE = LINECOUNT
+
+;選択肢表示（文字列が空でなければ）
+FOR SAVE_REDRAW, 0, 6
+	IF 選択肢:(SAVE_REDRAW) != ""
+		PRINTBUTTON @"{SAVE_REDRAW, 2, RIGHT}[%選択肢:(SAVE_REDRAW)%]", SAVE_REDRAW
+		PRINTL 
+	ENDIF
+NEXT
+
+$INPUT_LOOP
+;初期値0
+INPUT 0
+
+;指定外
+IF RESULT < 0 || RESULT > 5
+	;入力値の表示をクリア
+	CLEARLINE 1
+	GOTO INPUT_LOOP
+;指定内
+ELSE
+	;選択肢と入力値の表示をクリアして選択結果のみ表示する
+	;入力クリック直後の入力値表示代わりなのでWAITしない
+	CLEARLINE LINECOUNT - SAVE_LINE
+	SETCOLOR カラー_選択不可
+	PRINTFORML ➡%選択肢:(RESULT)%
+ENDIF
+
+PRINTL 
+
+;REDRAW状態と文字色を戻す
+REDRAW SAVE_REDRAW
+SETCOLOR SAVE_COLOR
+
+RETURN RESULT

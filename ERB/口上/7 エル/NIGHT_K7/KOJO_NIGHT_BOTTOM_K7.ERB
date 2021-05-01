@@ -1,0 +1,494 @@
+﻿;─────────────────────────────────────── 
+;■閨_受け_実行前
+;　汎用台詞「KOJO_K7_共_閨_受_汎用.ERB」を呼び出す前に
+;　特殊なコマンドを個別に表示してRETURNする
+;─────────────────────────────────────── 
+@KOJO_K7_NIGHT_BEFORE_BOTTOM(エル_対象)
+#DIM エル
+#DIM エル_対象
+#DIMS エル機嫌
+
+IF !エル_対象
+	エル_対象 = MASTER
+ENDIF
+
+エル = NAME_TO_CHARA("エル")
+エル機嫌 '= TOSTR_EMOTION(エル)
+
+;─────────────────────────────────────── 
+;◆実行が受け（主導権によるものもある）
+;─────────────────────────────────────── 
+;おねだりする・させられる
+IF SELECTCOM == 111
+	;主導権がないと渋々だが陥落してると乗り気、慰安だと何も言わない
+	IF !IS_INITIATIVE(エル) && FLAG:調教モード != 調教_慰安
+ 		IF CHECK_K7("陥落", エル_対象)
+		ENDIF
+	ENDIF
+	;対象が男性
+	IF HAS_PENIS(エル_対象)
+		IF RAND:2 == 0
+			PRINTFORM 「%ANAME(エル)%の
+			PRINTDATA
+				DATAFORM いやらしい
+				DATAFORM はしたない
+				DATAFORM みだらな
+				DATAFORM 欲しがりの
+				DATAFORM 淫乱
+				DATAFORM 感じっぱなしの
+			ENDDATA
+			IF RAND:2 == 0
+				PRINTDATA
+					DATAFORM %CALL_DIRTY_K7("Ｖ")%
+					DATAFORM %CALL_DIRTY_K7("Ａ")%
+				ENDDATA
+				PRINTDATA
+					DATAFORM を可愛がってください
+					DATAFORM をいじめてください
+					DATAFORM を気持ちよくしてください
+					DATAFORM を弄ってください
+					DATAFORM で遊んでください
+					DATAFORM を%CALL_DIRTY_K7("Ｐ")%で犯してください
+					DATAFORM に%CALL_DIRTY_K7("Ｐ")%を挿れてください
+				ENDDATA
+			ELSE
+				PRINTDATA
+					DATAFORM %CALL_DIRTY_K7("Ｂ")%
+					DATAFORM %CALL_DIRTY_K7("Ｃ")%
+				ENDDATA
+				PRINTDATA
+					DATAFORM を可愛がってください
+					DATAFORM をいじめてください
+					DATAFORM を気持ちよくしてください
+					DATAFORM を弄ってください
+					DATAFORM で遊んでください
+				ENDDATA
+			ENDIF
+		ELSE
+			PRINTDATA
+				DATAFORM 「%ANAME(エル)%に%CALL_DIRTY_K7("Ｐ")%をください
+				DATAFORM 「どうか、%ANAME(エル)%を好きにしてください
+				DATAFORM 「%ANAME(エル)%を可愛がってください
+				DATAFORM 「%ANAME(エル)%を気持ちよくしてください
+				DATAFORM 「%ANAME(エル)%に%CALL_DIRTY_K7("Ｐ", "ぁ")%を挿れてください
+				DATAFORM 「どうか、%ANAME(エル)%にいやらしいことを教えて下さい
+			ENDDATA
+		ENDIF
+		PRINTFORM %BREAK_K7("末", エル_対象)%
+		PRINTFORML 」
+	;対象が女性
+	ELSE
+		IF RAND:2 == 0
+			PRINTFORM 「%ANAME(エル)%の
+			PRINTDATA
+				DATAFORM いやらしい
+				DATAFORM はしたない
+				DATAFORM みだらな
+				DATAFORM 欲しがりの
+				DATAFORM 淫乱
+				DATAFORM 感じっぱなしの
+			ENDDATA
+			PRINTDATA
+				DATAFORM %CALL_DIRTY_K7("Ｖ")%
+				DATAFORM %CALL_DIRTY_K7("Ａ")%
+				DATAFORM %CALL_DIRTY_K7("Ｂ")%
+				DATAFORM %CALL_DIRTY_K7("Ｃ")%
+			ENDDATA
+			PRINTDATA
+				DATAFORM を可愛がってください
+				DATAFORM をいじめてください
+				DATAFORM を気持ちよくしてください
+				DATAFORM を弄ってください
+				DATAFORM をだめにしてください
+				DATAFORM で遊んでください
+			ENDDATA
+		ELSE
+			PRINTDATA
+				DATAFORM 「%CALLNAME_K7(エル_対象)%の奴隷にしてください
+				DATAFORM 「私は%CALLNAME_K7(エル_対象)%の性奴隷です
+				DATAFORM 「どうか、%ANAME(エル)%を好きにしてください
+				DATAFORM 「%ANAME(エル)%を可愛がってください
+				DATAFORM 「%ANAME(エル)%を気持ちよくしてください
+			ENDDATA
+		ENDIF
+		PRINTFORM %BREAK_K7("末", エル_対象)%
+		PRINTFORML 」
+	ENDIF
+	IF CHECK_K7("陥落", エル_対象)
+		PRINTDATAL
+			DATAFORM 「こ、こうでいいのかい？　……なんだか変な気分だ。……%CALLNAME_K7(エル_対象)%も意地が悪いよ……」
+			DATAFORM 「こんな感じでいいのかい……？　ええっと……私はなんだか、その……」
+		ENDDATA
+	ELSE
+		PRINTDATAL
+			DATAFORM 「……%CALLNAME_K7(エル_対象)%も意地が悪いな」
+			DATAFORM 「……わ、笑わないでよ」
+			DATAFORM 「……ううぅ」
+		ENDDATA
+	ENDIF
+	RETURN 0
+ENDIF
+
+;;土下座する・させられる
+;IF SELECTCOM == 110
+;	;主導権がないと渋々だが陥落してると乗り気、慰安だと何も言わない
+;	IF !IS_INITIATIVE(エル) && FLAG:調教モード != 調教_慰安
+;	ENDIF
+;	RETURN 0
+;ENDIF
+
+;顔面騎乗させられる Ａ顔面騎乗させられる（主導権がなければ実行が受け）
+IF SELECTCOM == 101 || SELECTCOM == 102
+	IF IS_MPLY(エル) && !IS_INITIATIVE(エル)
+		PRINTDATAL
+			DATAFORM 「く、苦しくないですか……？」
+		ENDDATA
+	ENDIF
+ENDIF
+
+;自慰させられる・される（主導権持ちが攻め）
+IF SELECTCOM == 100 || SELECTCOM == 211
+	IF IS_MPLY(エル) && !IS_INITIATIVE(エル)
+		IF CHECK_K7("陥落", エル_対象) && FLAG:調教モード != 調教_慰安
+			PRINTFORML 「%CALLNAME_K7(エル_対象)%が……その、見たいというなら……」
+		ENDIF
+		PRINTDATAL
+			DATAFORM 「こう……かな……？」
+		ENDDATA
+		PRINTDATA
+			DATAFORM 「あっ……あっ、は
+			DATAFORM 「あ……っふ
+			DATAFORM 「ん、くっ。ふぁ
+			DATAFORM 「あっ……気持ちい……あっ、ん
+		ENDDATA
+		PRINTFORM %BREAK_K7("中", エル_対象)%
+		IF SELECTCOM == 211
+			PRINTDATA
+				DATAFORM しょ触手なんかで……
+				DATAFORM んんっヌルヌルして
+				DATAFORM こ、擦れて
+			ENDDATA
+			PRINTFORM %BREAK_K7("中", エル_対象)%
+		ENDIF
+		IF CHECK_K7("陥落", エル_対象)
+			PRINTDATA
+				DATAFORM こんなの……　んっ
+				DATAFORM 見てるだけで……面白いのかい？　んんっ
+				DATAFORM んっ
+				DATAFORM こう……かな？　
+				DATAFORM んんっ、くぅ
+			ENDDATA
+		ELSE
+			PRINTDATA
+				DATAFORM んんっ
+				DATAFORM はぁ……
+				DATAFORM んっ
+			ENDDATA
+		ENDIF
+		PRINTFORM %BREAK_K7("末", エル_対象)%
+		PRINTFORML 」
+;	ELSEIF IS_MTAR(エル) && !IS_INITIATIVE(エル)
+;		IF CHECK_K7("陥落", エル_対象)
+;		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;排泄指示
+;IF GROUPMATCH(SELECTCOM, 130, 131, 132, 150, 151) && IS_MPLY(エル) && !IS_INITIATIVE(エル)
+;	IF CHECK_K7("陥落", エル_対象)
+;	ENDIF
+;	RETURN 0
+;ENDIF
+
+;─────────────────────────────────────── 
+;◆不機嫌
+;─────────────────────────────────────── 
+;慰安なら我慢
+;IF FLAG:調教モード != 調教_慰安
+;	エル機嫌 = %TOSTR_EMOTION(エル)%
+;	SELECTCASE エル機嫌
+;		CASE "恨", "怒", "憤"
+;			IF PALAM:エル:怒主 <= PALAM:エル:怒外
+;			ENDIF
+;
+;		CASE "鬱", "悲", "憂", "狂", "恐", "怯"
+;			IF PALAM:エル:怒主 <= PALAM:エル:怒外
+;			ENDIF
+;	ENDSELECT
+;ENDIF
+
+;─────────────────────────────────────── 
+;◆機嫌が悪くても余裕のない行為
+;─────────────────────────────────────── 
+;─────────────────────────────────────── 
+;●捕虜系
+;─────────────────────────────────────── 
+; IF SELECTCOM >= 80 && SELECTCOM <= 99
+; 	;脅す（主導権がないと選択できないコマンド）
+; 	IF SELECTCOM == 80
+; 		IF CHECK_K7("陥落", エル_対象) || FLAG:調教モード != 調教_慰安
+; 		ENDIF
+; 	;針・ピアス・タトゥー（ピアス・タトゥーは選択後に実行）
+; 	ELSEIF SELECTCOM == 83 || SELECTCOM == 91 || SELECTCOM == 92
+; 		IF SELECTCOM == 83
+; 			LOCALS:0 = 針
+; 		ELSEIF SELECTCOM == 91
+; 			LOCALS:0 = ピアス
+; 		ELSE
+; 			LOCALS:0 = タトゥー
+; 		ENDIF
+; 		IF IS_INITIATIVE(エル)
+; 			IF CHECK_K7("陥落", エル_対象) || FLAG:調教モード != 調教_慰安
+; 		ELSE
+; 			IF CHECK_K7("陥落", エル_対象) || FLAG:調教モード != 調教_慰安
+; 			ENDIF
+; 		ENDIF
+; 	;鼻フック
+; 	ELSEIF SELECTCOM == 93
+; 		IF IS_INITIATIVE(エル)
+;		ELSE
+; 		ENDIF
+; 	;目隠し
+; 	ELSEIF SELECTCOM == 84
+; 		IF IS_INITIATIVE(エル)
+;		ELSE
+; 		ENDIF
+; 	;酒池肉林
+; 	ELSEIF SELECTCOM == 51
+; 		IF CHECK_K7("陥落", エル_対象)
+;		ELSE
+; 		ENDIF
+; 	;縄
+; 	ELSEIF SELECTCOM == 85
+; 	;それ以外
+; 	ELSE
+; 	ENDIF
+; 	RETURN 0
+; ENDIF
+
+;─────────────────────────────────────── 
+;●スカ
+;─────────────────────────────────────── 
+; IF SELECTCOM >= 130 && SELECTCOM <= 159
+; 	;受け
+; 	RETURN 0
+; ENDIF
+
+;─────────────────────────────────────── 
+;●触手（自慰以外）
+;─────────────────────────────────────── 
+; IF SELECTCOM >= 200 && SELECTCOM <= 219
+; 	IF SELECTCOM == 200
+; 	ENDIF
+; 	RETURN 0
+; ENDIF
+
+;─────────────────────────────────────── 
+;◆機嫌が悪いと喋らない行為
+;─────────────────────────────────────── 
+;不機嫌な状態で話せるのはここまで
+IF GROUPMATCH(エル機嫌, "恨", "怒", "憤", "鬱", "悲", "憂", "狂", "恐", "怯")
+	RETURN 0
+ENDIF
+
+;─────────────────────────────────────── 
+;●前回と同一コマンド
+;─────────────────────────────────────── 
+IF SELECTCOM == PREVCOM && RAND:10 == 0
+	IF RAND:10 == 0 && !IS_INITIATIVE(エル) && CHECK_K7("陥落", エル_対象) && CHECK_K7("活力", エル_対象) && (( IS_MPLY(エル) && MPLY_NUM == 1 )||( IS_MTAR(エル) && MTAR_NUM == 1 ))
+		PRINTDATA
+			DATAFORM お願いだ
+			DATAFORM して
+			DATAFORM おねがい……
+		ENDDATA
+		PRINTFORM %BREAK_K7("中", エル_対象)%
+		;実行が受け
+		IF !GROUPMATCH(SELECTCOM, 111, 101, 102, 100, 211, 130, 131, 132, 150, 151)
+			PRINTDATA
+				DATAFORM %KOJO_COM_NAME_PLAYER_K7(SELECTCOM)%たいの……
+				DATAFORM %KOJO_COM_NAME_PLAYER_K7(SELECTCOM)%たいんだ……
+			ENDDATA
+		;対象が受け
+		ELSE
+			PRINTDATA
+				DATAFORM %KOJO_COM_NAME_PLAYER_K7(SELECTCOM)%たいの……
+				DATAFORM %KOJO_COM_NAME_PLAYER_K7(SELECTCOM)%たいんだ……
+			ENDDATA
+		ENDIF
+		PRINTFORM %BREAK_K7("中", エル_対象)%
+		PRINTDATA
+			DATAFORM もっと
+			DATAFORM このまま
+			DATAFORM もう少し
+			DATAFORM まだ
+		ENDDATA
+		PRINTFORML %BREAK_K7("末", エル_対象)%」
+	ENDIF
+ENDIF
+
+;─────────────────────────────────────── 
+;●ペニバン装着時
+;─────────────────────────────────────── 
+; IF SELECTCOM == 50
+; 	;汎用受けを喋らない
+; 	RETURN 0
+; ENDIF
+
+;─────────────────────────────────────── 
+;●ローション・媚薬・排卵誘発剤・絶倫丸・足舐め
+;─────────────────────────────────────── 
+IF SELECTCOM >= 70 && SELECTCOM <= 73 || SELECTCOM == 104
+	PRINTFORM 「
+	PRINTFORM %SPLIT_R("ふぁ……：んぁぅ、ん：んふ……：はあふ……：ん、ん……")%
+	PRINTFORM %SPLIT_R("ん：ひゃ：ふぁ")%
+	PRINTFORM %BREAK_K7("中", エル_対象)%
+	PRINTFORM %SPLIT_R("ぁは：う：ん")%
+	PRINTFORML %BREAK_K7("末", エル_対象)%」
+	;汎用受けを喋らない
+	RETURN 0
+ENDIF
+
+;─────────────────────────────────────── 
+;●なにもしない
+;─────────────────────────────────────── 
+IF SELECTCOM == 292
+	;汎用受けを喋らない
+	RETURN 0
+ENDIF
+
+;─────────────────────────────────────── 
+;◆汎用受け（コマンド番号に関わらずソースを見る）
+;─────────────────────────────────────── 
+CALL MOAN_K7(エル_対象)
+
+;─────────────────────────────────────── 
+;◆戻る
+;─────────────────────────────────────── 
+RETURN 0
+
+;─────────────────────────────────────── 
+;■閨_受_実行後
+;　選択肢後に実行するコマンドや失禁等に対応
+;─────────────────────────────────────── 
+@KOJO_K7_NIGHT_AFTER_BOTTOM(エル_対象)
+#DIM エル
+#DIM エル_対象
+#DIMS エル機嫌
+
+IF !エル_対象
+	エル_対象 = MASTER
+ENDIF
+
+エル = NAME_TO_CHARA("エル")
+エル機嫌 '= TOSTR_EMOTION(エル)
+
+;─────────────────────────────────────── 
+;◆機嫌が悪いと喋らない行為
+;─────────────────────────────────────── 
+;不機嫌な状態で話せるのはここまで
+IF GROUPMATCH(エル機嫌, "恨", "怒", "憤", "鬱", "悲", "憂", "狂", "恐", "怯")
+	RETURN 0
+ENDIF
+
+;─────────────────────────────────────── 
+;◆V性交系
+;─────────────────────────────────────── 
+;後背位以外
+IF GROUPMATCH(SELECTCOM, 30, 32, 33, 34, 35, 36, 37, 38, 39, 52, 160) && CHECK_K7("活力", エル_対象)
+	{
+		SELECTCASE IFRAND(
+			"1",1,
+			"D1,2",CHECK_K7("陥落", エル_対象), 
+			"D1,3",GETBIT(TALENT:エル:淫乱系, 素質_淫乱_淫乱)  || GETBIT(TALENT:エル:淫乱系, 素質_淫乱_淫壷) ,
+			)
+	}
+		CASE 1
+			PRINTDATAL
+				DATAFORM （入ってる……私……しちゃってるんだね……）
+				DATAFORM 「くうぅ、もう少し優しく……して……」
+				DATAFORM 「んんっ……お願い……優しく、して……ね」
+			ENDDATA
+		CASE 2
+			PRINTDATAL
+				DATAFORM （入ってる……%CALLNAME_K7(エル_対象)%の%CALL_DIRTY_K7("Ｐ")%が私の%CALL_DIRTY_K7("Ｖ")%に……❤） 
+ 				DATAFORM 「ん゛んっ！　ひゃんっ❤　は、激しすぎるよぉ……」
+				DATAFORM 「はぁん……❤　熱い……」
+			ENDDATA
+		CASE 3
+			PRINTDATAL
+				DATAFORM 「突いて❤　もっと、もっとぉ❤　わたしの%CALL_DIRTY_K7("Ｖ")%にあなたの%CALL_DIRTY_K7("Ｐ")%を、んっ、刻みつけてぇ！」
+				DATAFORM 「好きぃ！　じゅぼじゅぼ%CALL_DIRTY_K7("Ｐ")%で突かれるの気持ちいいよぉ！　ひゃぁぁん❤❤！」
+				DATAFORM 「教えて❤　%SPLIT_RAND("セックス/性交",1)%の快楽、私にもっと、たくさん、んんっ――――❤❤❤！」
+			ENDDATA
+		CASEELSE
+	ENDSELECT
+ENDIF
+
+;後背位
+IF GROUPMATCH(SELECTCOM, 31) && CHECK_K7("活力", エル_対象)
+	{
+		SELECTCASE IFRAND(
+			"1",1,
+			"D1,2",CHECK_K7("陥落", エル_対象), 
+			"D1,3",GETBIT(TALENT:エル:淫乱系, 素質_淫乱_淫乱)  || GETBIT(TALENT:エル:淫乱系, 素質_淫乱_淫壷) ,
+			)
+	}
+		CASE 1
+			PRINTDATAL
+				DATAFORM 「こ、こんな犬みたいな格好で……いやぁ……」
+				DATAFORM 「うしろからなんて…い゛っ！」
+				DATAFORM 「お願い……します。優しく、して……」
+			ENDDATA
+		CASE 2
+			PRINTDATAL
+				DATAFORM （入ってる……%CALLNAME_K7(エル_対象)%の%CALL_DIRTY_K7("Ｐ")%が私の%CALL_DIRTY_K7("Ｖ")%に……❤） 
+ 				DATAFORM 「ん゛んっ！　ひゃんっ❤　は、激しすぎるよぉ……」
+				DATAFORM 「はぁん……❤　熱い……」
+				DATAFORM 「%CALLNAME_K7(エル_対象)%の顔がみたいのに……うしろからなんて…んんっ！」
+				DATAFORM 「ら、乱暴だよ%CALLNAME_K7(エル_対象)%……。もう少し優しく…ん゛んっ！」
+			ENDDATA
+		CASE 3
+			PRINTDATAL
+				DATAFORM 「後ろから突かれるのすきぃ❤　もっと、もっとぉ❤　わたしの%CALL_DIRTY_K7("Ｖ")%、%CALLNAME_K7(エル_対象)%の%CALL_DIRTY_K7("Ｐ")%で、ん゛んっ、犯してくださぃ❤」
+				DATAFORM 「好きぃ！　後ろからじゅぼじゅぼ%CALL_DIRTY_K7("Ｐ")%で突かれるの気持ちいいよぉ！ ひゃぁぁん❤❤！」
+				DATAFORM 「教えて❤　%SPLIT_RAND("セックス/性交",1)%の快楽、私にもっと、たくさん、んんっ――――❤❤❤！」
+ 				DATAFORM 「い゛ぐっ❤　ん゛んっ！　%CALL_DIRTY_K7("Ｖ")%ぐちゃぐちゃになっちゃうよぉ❤❤❤」
+			ENDDATA
+		CASEELSE
+	ENDSELECT
+ENDIF
+
+;─────────────────────────────────────── 
+;●選択後に実行
+;─────────────────────────────────────── 
+;針・ピアス・タトゥー（痛みに強い素質持ち）
+; IF SELECTCOM == 83 || SELECTCOM == 91 || SELECTCOM == 92
+; ENDIF
+
+;汎用の感想口上
+CALL KOJO_K7_MESSAGE_AFTER(エル_対象)
+
+;─────────────────────────────────────── 
+;●失禁後
+;─────────────────────────────────────── 
+SELECTCASE TCVAR:0
+	;尿意がある状態で絶頂強度の合計が4以上
+	CASE 1
+		PRINTFORMW 「ひぁぁっ❤　き、気持ちぃ……あ、や、漏れ……やっ！　あ、ひぁ……❤」
+	;尿意が高い状態で絶頂
+	CASE 2
+		PRINTFORMW 「あぁぁ……っ！　う、や、イッ……漏れ……やっ！　あ、ひぁ……❤」
+	;尿意の限界
+	CASE 3
+		PRINTFORMW 「う、いやぁ！　も、我慢できな……んんっ！」
+	;恐怖による失禁
+	CASE 4
+		PRINTFORMW 「ヒッ……う、怖ぁ、うあ……ッ！？　や、漏れ……やっ！」
+ENDSELECT
+
+;─────────────────────────────────────── 
+;◆戻る
+;─────────────────────────────────────── 
+RETURN 0
+

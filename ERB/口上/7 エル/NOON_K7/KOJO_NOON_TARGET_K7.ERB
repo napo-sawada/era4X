@@ -1,0 +1,626 @@
+﻿;─────────────────────────────────────── 
+;■日常_エル_対象_実行前
+;─────────────────────────────────────── 
+@KOJO_K7_NOON_BEFORE_TARGET(エル_対象)
+#DIM エル
+#DIM エル_対象
+#DIMS エル機嫌
+
+IF !エル_対象
+	エル_対象 = MASTER
+ENDIF
+
+エル = NAME_TO_CHARA("エル")
+エル機嫌 '= TOSTR_EMOTION(エル)
+
+;─────────────────────────────────────── 
+;●機嫌が悪ければ通常のコマンド口上は喋らない
+;─────────────────────────────────────── 
+エル機嫌 = %TOSTR_EMOTION(エル)%
+SELECTCASE エル機嫌
+	CASE "恨", "怒", "憤"
+		IF PALAM:エル:怒主 <= PALAM:エル:怒外
+			PRINTDATAL
+				DATAFORM 「……何か？」
+				DATAFORM 「……何かな？」
+				DATAFORM 「理解できないな……」
+				DATAFORM 「……」
+			ENDDATA
+		ELSE
+			PRINTDATAL
+				DATAFORM 「……一人にしてくれないかな、今は腹の虫が悪くてね」
+				DATAFORM 「……何か？」
+				DATAFORM 「……何かな？」
+				DATAFORM 「理解できないな……」
+				DATAFORM 「……」
+			ENDDATA
+		ENDIF
+		RETURN 0
+
+	CASE "鬱", "悲", "憂"
+		IF PALAM:エル:哀主 <= PALAM:エル:哀外
+			PRINTDATAL
+				DATAFORM 「……何か？」
+				DATAFORM 「……しばらく一人にしてくれないかな」
+				DATAFORM 「……」
+			ENDDATA
+		ELSE
+			PRINTDATAL
+				DATAFORM 「……しばらく一人にしてくれないかな」
+				DATAFORM 「何か……？」
+				DATAFORM 「……」
+			ENDDATA
+		ENDIF
+		RETURN 0
+
+	CASE  "狂", "恐", "怯"
+		IF PALAM:エル:怖主 <= PALAM:エル:怖外
+			PRINTDATAL
+				DATAFORM 「ひっ……。今度は一体なにを……するつもり……？」
+				DATAFORM 「お願いだ……お願いします……ひどいこと……しないで」
+			ENDDATA
+		ELSE
+			PRINTDATAL
+				DATAFORM 「ひっ……。今度は一体なにを……するつもり……？」
+				DATAFORM 「お願いだ……お願いします……ひどいこと……しないで」
+			ENDDATA
+		ENDIF
+		RETURN 0
+
+	CASEELSE
+
+ENDSELECT
+
+;─────────────────────────────────────── 
+;●相槌(同一コマンド)
+;─────────────────────────────────────── 
+IF RAND:3 == 0
+	IF SELECTCOM == PREVCOM
+		;エルに主導権なし
+		IF !IS_INITIATIVE(エル)
+			PRINTDATAL
+				DATAFORM 「もうちょっと%KOJO_COM_NAME_PLAYER_K7(SELECTCOM)%たい？　いいよ」
+				DATAFORM 「もう少し%KOJO_COM_NAME_PLAYER_K7(SELECTCOM)%たい？　構わないよ」
+				DATAFORM 「まだ%KOJO_COM_NAME_TARGET_K7(SELECTCOM)%たいんだね」
+				DATAFORM 「構わないよ。このまま続けよう」
+			ENDDATA
+		;エルに主導権あり
+		ELSE
+			PRINTDATAL
+				DATAFORM 「もう少し%KOJO_COM_NAME_PLAYER_K7(SELECTCOM)%よう」
+				DATAFORM 「もうちょっと%KOJO_COM_NAME_TARGET_K7(SELECTCOM)%たいな。……構わないかな？」
+				DATAFORM 「このまま？　構わないよ」
+				DATAFORM 「もう少し%KOJO_COM_NAME_TARGET_K7(SELECTCOM)%ようよ」
+			ENDDATA
+		ENDIF
+	;─────────────────────────────────────── 
+	;●相槌(同一コマンドでない)
+	;─────────────────────────────────────── 
+	ELSE
+		;エルに主導権なし
+		IF !IS_INITIATIVE(エル)
+			PRINTDATAL
+				DATAFORM 「%KOJO_COM_NAME_PLAYER_K7(SELECTCOM)%たい？　構わないよ」
+				DATAFORM 「%KOJO_COM_NAME_PLAYER_K7(SELECTCOM)%たいんだね。いいとも」
+				DATAFORM 「%KOJO_COM_NAME_PLAYER_K7(SELECTCOM)%たい？　いいよ」
+			ENDDATA
+		;エルに主導権あり
+		ELSE
+			PRINTDATAL
+				DATAFORM 「%KOJO_COM_NAME_TARGET_K7(SELECTCOM)%ようよ」
+				DATAFORM 「%KOJO_COM_NAME_TARGET_K7(SELECTCOM)%よう」
+				DATAFORM 「%KOJO_COM_NAME_TARGET_K7(SELECTCOM)%てもいいかな？」
+				DATAFORM 「%KOJO_COM_NAME_PLAYER_K7(SELECTCOM)%ない？」
+			ENDDATA
+		ENDIF
+	ENDIF
+	PRINTL
+ENDIF
+
+;─────────────────────────────────────── 
+;●会話
+;─────────────────────────────────────── 
+IF SELECTCOM == 300
+{
+	SELECTCASE IFRAND(
+				"1TO3",1,
+				"D1,4TO6",!IS_IN_PORT_K7(),
+				"9",CHECK_K7("陥落", エル_対象),
+				"D1TO9,10",CHECK_K7("陥落", エル_対象) && PALAM:エル:欲情 >= 9000
+				)
+}
+		;エルに主導権あり（話し手）
+		CASE 1 TO 3  ;通常の会話
+			IF IS_INITIATIVE(エル)
+				PRINTDATAL
+					DATAFORM 「何事も日々の積み重ねが大事だよ」
+					DATAFORM 「よかったら今度%SPLIT_RAND("艦の動かし方/戦い方/商売のこと",1)%を教えてくれないかな？」
+					DATAFORM 「時には休憩も必要だよ。お茶を淹れてこよう」
+					DATAFORM 「がむしゃらに努力すれば良いというものでもない。さもなければ努力はあっさり裏切るからね」
+					DATAFORM 「こうしてゆっくり人とお喋りするのは久しぶりな気がするよ」
+					DATALIST
+						DATAFORM 「いくら私だって%SPLIT_RAND("ビクニーガス/エウスガス/ゼスタガス",1)%の味を確かめようとして貯蔵タンクに落ちる程愚かではないよ」
+						DATAFORM 「……なんだい、その目つきは。あれはその……、ただちょっと……臭いを確かめたかっただけだ」
+					ENDLIST
+					DATALIST
+						DATAFORM 「今、天上に広がるあの星々の光は実際のところ、いつ発せられたものなのだろう」
+						DATAFORM 「百年前？　ひょっとしたら一千年以上前かもしれないね」
+						DATAFORM
+						DATAFORM 「それに比べれば……私達の歩める時間はほんの瞬き程度でしかない」
+						DATAFORM 「さぁ行こうか。無駄にできる時間なんてほとんどないからね」
+					ENDLIST
+					DATALIST
+						DATAFORM 「遠い遠い昔の歴史家は人類の政体は循環すると言ったそうだ」
+						DATAFORM 「実際のところ今の銀河は、循環するどころかあらゆる時代を詰め合わせたような有様だね」
+						DATAFORM 
+						DATAFORM 「……さしずめ、イデオロギーの万華鏡とでも言ったところかな」
+					ENDLIST
+				ENDDATA
+			;エルに主導権なし（聞き手）
+			ELSE
+				PRINTDATAL
+					DATAFORM 「時には休憩も必要だよ。お茶を淹れてこよう」
+					DATAFORM 「がむしゃらに努力すれば良いというものでもない。さもなければ努力はあっさり裏切るからね」
+					DATAFORM 「こうしてゆっくり人とお喋りするのは久しぶりな気がするよ」
+					DATAFORM 「空いている船室をラボにさせてもらったよ♪　すまないが事後報告だ」
+					DATAFORM 「コイルガンをあれこれいじくり回すのは好きだけれど、それで何を狙うのかは正直あまり興味がないんだ。そういうのは%CALLNAME_K7(エル_対象)%に任せるね」
+					DATALIST
+						DATAFORM 「サイズなんて問題じゃない？　いや、それはまやかしだよ、%CALLNAME_K7(エル_対象)%」
+						DATAFORM 「サイズは、重要だ。いや、何が……とは言わないけど……」
+					ENDLIST
+				ENDDATA
+			ENDIF
+		CASE 4 TO 6  ;船旅中の通常会話 
+				;※単純にプレイヤー船が港にいるかどうかで判定しているので、実装次第ではエルが同乗しているかも見ないといけなくなるかも？
+			PRINTDATAL 
+				DATAFORM 「船旅はいいねぇ……」
+				DATAFORM 「いや……え、うん……？　しかしあれは……どう見てもあれはししゃもだったよ……」
+				DATAFORM 「もうちょっとあの小惑星の側に寄れないかな！？　危ない？　%CALLNAME_K7(エル_対象)%なら大丈夫さ！」
+				DATAFORM  %PRINT_DESC_K7(@"%ANAME(TARGET)%は観測に夢中で%ANAME(MASTER)%の話に曖昧に相槌を打つばかりだ")%
+			ENDDATA
+			PRINTL
+			PRINTDATADL
+				DATAFORM %ANAME(MASTER)%は艦を自動航行に任せて%ANAME(TARGET)%と会話した
+				DATAFORM %ANAME(MASTER)%は船窓から窓の外を眺めている%ANAME(TARGET)%に声をかけた
+				DATAFORM %ANAME(MASTER)%はコンソールの無数の数式と格闘している%ANAME(TARGET)%に声をかけた
+			ENDDATA
+			RETURN 1 
+		CASE 9 ;親しくなるとたまにちょっと詳しい身の上話をしてくれる予定
+			SELECTCASE IFRAND("1TO4",1)
+				CASE 1
+					PRINTFORML 「正直言うと書き置き一つで家を飛び出してきたことは結構後悔しているんだ」
+					PRINTFORML 「父さんも母さんも善良な人達だったからね」
+					PRINTFORMW 「……何一つ不自由なく育ててくれたし、私がすること為すことを怒りもせず認めてくれた」
+					PRINTL
+					PRINTFORML 「いや……一度だけこっぴどく叱られたことがあったっけ」
+					PRINTFORML 「家の裏庭で大昔の爆縮レンズを再現しようとしたんだ。セクター中に響くくらいの大声で怒鳴られてね」
+					PRINTFORMW 「でも実際に起爆させるつもりはなかったんだ」
+					PRINTL
+					PRINTFORMW 「……本当だよ？」
+				CASE 2
+					PRINTFORML 「実際に自分の目で確かめるのは大事だけれど、過信はできないね」
+					PRINTFORML 「人間の髪の毛くらいしかない細い糸が、頭上に一メガトンの鋼の塊をぶら下げているのを見た時、
+					PRINTFORML  テクノロジーに神性を見い出したとしても何も不思議ではないよ」
+					PRINTL
+					PRINTFORMW 「……宗教国家の人たちみたいね」
+					PRINTFORMW 「しかしながら……テクノロジーが宗教にハイジャックされたというのは、なんとも性質の悪い悲劇だね」
+				CASE 3
+					PRINTFORMW 「よく食べる？　……食べ過ぎ？　そうかな？」
+					PRINTFORMDW %ANAME(MASTER)%は常軌を逸した巨大さの%SPLIT_RAND("ケーキ/パフェ/プリン/スライムゼリー",1)%を頬張る%ANAME(TARGET)%をたしなめた
+					PRINTL
+					PRINTFORML 「いいかいキミ、美味しいものは食べるためにあるんだ。今じゃないにしてもいつかは誰かに食べられるだろう」
+					PRINTFORMW 「不確かな未来が、私がこうして舌鼓をうつ権利をどうして否定できるだろう？　いや、出来ないね」
+					PRINTL
+					PRINTFORMW 「私のものは私がいただこうじゃないか。お腹いっぱい食べようじゃないか」
+				CASE 4
+					PRINTFORML 「昔企業連合のある懸賞論文に応募したことがある。けれど門前払いされてしまってね」
+					PRINTFORMW 「『野心的だが実用性が皆無』だそうだ」
+					PRINTFORML 「おかしな話だね、実用性が証明できているものをあえて募集してなんになる？」
+					PRINTFORMW 「それはもう実現しているのと同義じゃないか」
+				CASEELSE
+			ENDSELECT
+		CASE 10 ;発情してるときは真面目な話はしないで
+			PRINTDATADL
+				DATAFORM %ANAME(TARGET)%の息がひどく荒い
+				DATAFORM %ANAME(TARGET)%は頬を紅潮させて%ANAME(MASTER)%を見つめる
+				DATAFORM %ANAME(TARGET)%はとろんとした目つきで%ANAME(MASTER)%の方を向く
+			ENDDATA
+				PRINTL
+			PRINTDATAL
+				DATAFORM 「はぁ…はぁ…❤　ねぇ、その……わかっているだろう？」
+				DATAFORM 「%CALLNAME_K7(エル_対象)%は……その……本当に意地が悪いね……❤」
+				DATAFORM 「……私がどうして欲しいか、分かっているくせに……❤」
+			ENDDATA
+		CASEELSE
+	ENDSELECT
+	PRINTL
+	RETURN 0
+
+;─────────────────────────────────────── 
+;●酒
+;─────────────────────────────────────── 
+ELSEIF SELECTCOM == 310
+	IF IS_INITIATIVE(エル)
+		PRINTFORML 「大丈夫、ちょっと舐めるだけだから。本当だよ」
+		PRINTFORMDL 酒瓶を片手にそう口にする%ANAME(TARGET)%の目は左右に泳いでいる。
+	ELSE
+		PRINTFORML 「本当はいけないのだろうけどね……」
+		PRINTFORML 「まぁ舐めるくらいなら構わないだろう」
+	ENDIF
+
+;─────────────────────────────────────── 
+;●蜂蜜水
+;─────────────────────────────────────── 
+ELSEIF SELECTCOM == 311
+	PRINTFORML 「甘くて美味しい！　ありがとう♪」
+
+;─────────────────────────────────────── 
+;●水浴び
+;─────────────────────────────────────── 
+ELSEIF SELECTCOM == 354
+	PRINTDATAL
+		DATAFORM 「やったね！　それっ」
+		DATAFORM 「ははっ、服がびしょびしょだ」
+		DATAFORM 「こうして水浴びするなんて、宇宙じゃ中々できない贅沢だ」
+		DATAFORM 「ふぅ……。気持ちいい」
+	ENDDATA
+
+;─────────────────────────────────────── 
+;●泳ぐ
+;─────────────────────────────────────── 
+ELSEIF SELECTCOM == 355
+	IF TFLAG:18 == 1
+		PRINTFORML 「%CALLNAME_K7(エル_対象)%は泳ぐの上手だね。私にも教えてくれないかな？」
+	ELSEIF TFLAG:18 == -1
+		IF TFLAG:17 == 1
+			PRINTFORML 「%CALLNAME_K7(エル_対象)%！？　大丈夫！？」
+		ELSEIF TFLAG:17 == 2
+			PRINTFORML 「大丈夫、大丈夫、私が簡単に溺れるわけ……わっぷ……」
+		ELSE
+			PRINTFORML 「%CALLNAME_K7(エル_対象)%！？　大丈夫！？　こっちに……お、重い……！」
+		ENDIF
+	ELSE
+		PRINTFORML 「%CALLNAME_K7(エル_対象)%、ちょっとあそこまで競争しようよ」
+	ENDIF
+
+;─────────────────────────────────────── 
+;●スキンシップ・頭を撫でる・髪を梳く・櫛で髪を梳く・背中を流す
+;─────────────────────────────────────── 
+ELSEIF GROUPMATCH(SELECTCOM, 320, 321, 322, 323, 358)
+	PRINTDATAL
+		DATAFORM 「……子どもじゃあるまいし……、頭を撫でられてもねぇ……」
+		DATAFORM 「……うん？」
+		DATAFORM 「まぁ……悪い気は……しないけれど」
+	ENDDATA
+
+;─────────────────────────────────────── 
+;●見つめる・甘い言葉
+;─────────────────────────────────────── 
+ELSEIF GROUPMATCH(SELECTCOM, 324, 325)
+	PRINTDATAL
+		DATAFORM 「%CALLNAME_K7(エル_対象)%、何かな？、そんなにじっと見つめて……」
+		DATAFORM 「……ははっ、ちょ、ちょっと気恥ずかしいな」
+		DATAFORM 「はいはい、そんなふうにおだてても何も出ないよ」
+	ENDDATA
+
+;─────────────────────────────────────── 
+;●訓練系
+;─────────────────────────────────────── 
+ELSEIF GROUPMATCH(SELECTCOM, 301, 302, 303, 304, 305, 306, 307)
+	SELECTCASE SELECTCOM
+		CASE 301
+			PRINTFORML 「確かに身を守るのは大事だね。戦うのはあまり得意ではないんだけれども……」
+			PRINTFORML 「おおっと」
+			IF CHECK_K7("陥落",エル_対象)
+				PRINTFORML 「　%CALLNAME_K7(エル_対象)%、私の動き、どうだったかな？」
+			ENDIF
+		CASE 302
+			PRINTFORML 「宇宙でやっていくからには艦くらい動かせないとね」
+			IF CHECK_K7("陥落",エル_対象)
+				PRINTFORML 「これで今までよりももっと%CALLNAME_K7(エル_対象)%の役に立てるはずだ」
+			ENDIF
+		CASE 303
+			PRINTFORML 「実践は大事だけれど……もちろん座学もおろそかにしてはいけないよ」
+			IF CHECK_K7("陥落",エル_対象)
+				PRINTFORML 「%CALLNAME_K7(エル_対象)%……起きているかい？」
+			ENDIF
+		CASE 304
+			PRINTFORML 「サボってはいけないよ、%CALLNAME_K7(エル_対象)%。まだこんなにたくさん書類が残っているんだ」
+			IF CHECK_K7("陥落",エル_対象)
+				PRINTFORML 「ふぅ……凄まじい量だね……」
+				PRINTFORML 「程よいところで休憩にしようか」
+			ENDIF
+		CASE 305
+			PRINTFORML 「さぁ行こう。警戒を怠ってはいけないよ」
+			IF CHECK_K7("陥落",エル_対象)
+				PRINTFORML 「%CALLNAME_K7(エル_対象)%と一緒に行けるのだから、ちょっとした役得……かな」
+			ENDIF
+		CASE 306
+			PRINTFORML 「歌の練習？　あまり得意ではないけれど……頑張ってみよう」
+			IF CHECK_K7("陥落",エル_対象)
+				PRINTFORML 「勿論やるからにはベストを尽くさないとね」
+			ENDIF
+		CASE 307
+			PRINTFORML 「食べるほうが好きなんだけれど……せっかくなら自分で作りたいしね」
+			IF CHECK_K7("陥落",エル_対象)
+				PRINTFORML 「どうかな？　我ながら結構自信はあるのだけれど……」
+			ENDIF
+	ENDSELECT
+
+;─────────────────────────────────────── 
+;●猥談
+;─────────────────────────────────────── 
+ELSEIF (SELECTCOM == 309) || (SELECTCOM == 292 && FLAG:ウフフフラグ == 1)
+{
+	SELECTCASE IFRAND(
+				"1TO2",1,
+				"4",CHECK_K7("陥落", エル_対象) && TALENT:エル:キス未経験 != 1,
+				"5",CHECK_K7("陥落", エル_対象) && TALENT:エル:合意 == 1 && GET_BUSTSIZE(エル) < 0,
+				"D1TO9,10",CHECK_K7("陥落", エル_対象) && PALAM:エル:欲情 >= 8000 && SUM_CUM_TO_COUNT_K7(エル_対象) > 1,
+				"D1TO9,11",SELECTCOM == 292 && FLAG:ウフフフラグ == 1
+				)
+}
+		;猥談通常
+		CASE 1 TO 2
+			PRINTFORML 「うーん……こういう手の話は疎くてね……」
+			PRINTFORML 「その、興味がないわけではないのだけれど……」
+		;キス経験済み
+		CASE 4
+			PRINTFORML 「初めて口づけしたときのこと……覚えているかな？」
+			PRINTFORMW 「……実はわたしはよく覚えていなんだ」
+			PRINTFORMDW %ANAME(エル)%は白い髪を指でくるくると弄りながら、照れくさそうに苦笑する
+			PRINTFORMW 「胸はドキドキして張り裂けそうだったし、頭は茹で上がりそうな有様でね」
+			PRINTL
+			PRINTFORMW 「だからさ……」
+			PRINTL
+			PRINTFORMDW %ANAME(エル)%がぐっと身を乗り出し、%ANAME(MASTER)%の間近に顔を寄せる
+			PRINTL
+			PRINTFORMW 「もう一度、教えてよ……？」
+			PRINTL
+		;胸が小さいのを気にしている
+		CASE 5
+			PRINTFORMW 「その……実は結構気にしてるんだ」
+			PRINTL
+			PRINTFORMDL %ANAME(エル)%が起伏感に乏しい自身の胸元をそっと手でなぞる
+			PRINTL
+			PRINTFORMW 「結構食べているつもりなんだが……ちっともここには栄養が行かない」
+			PRINTFORMW 「でも%CALLNAME_K7(エル_対象)%はその……大きいのと小さいのとでは……当然、小さい方が好きだろう？」
+			PRINTL
+			CALL KOJO_ASK_K7("うん", "はい","……うなずく","脅迫には屈しない。信念には抗えない")
+			IF RESULT != 3
+				PRINTFORMW 「大変結構♪」
+			ELSE
+				PRINTFORMW 「ほう……いい度胸だね」
+				PRINTFORMDW %ANAME(エル)%は%ANAME(MASTER)%の背中に回り込むと、わざとらしく胸を押し当てるように抱きついた
+				PRINTFORMW 「悪くないだろう……？　いずれ好きになるよ。きっとそうなる」
+			ENDIF
+			PRINTL
+		;ねちょ。閨の「なにもしない」からも呼ばれる。
+		CASE 10
+			{
+			SELECTCASE IFRAND(
+			"1",1,
+			"2",CUM_GET_COUNT:(エル):射精部位_口 > 0,
+			"3",CUM_GET_COUNT:(エル):射精部位_手 > 0,
+			"4",CUM_GET_COUNT:(エル):射精部位_顔 > 0,
+			"5",CUM_GET_COUNT:(エル):射精部位_髪 > 0
+			)
+			}
+				CASE 1
+					PRINTDATAL
+						DATALIST 
+							DATAFORM 「まったく……大したものだね」
+							DATAFORM 「もう%TOSTR(SUM_CUM_TO_COUNT_K7(エル_対象))%回も出させてあげたのに……。まだこんなに勃起させててるじゃないか」
+							DATAFORM 「このまま続けてほしいかい？」
+							DATAFORM
+							DATAFORM 「それとも……ふふっ❤」
+						ENDLIST
+						DATALIST 
+							DATAFORM 「もう%TOSTR(SUM_CUM_TO_COUNT_K7(エル_対象) )%回もイってるよ？」
+							DATAFORM 「いちいち数えるな？　いいや、駄目だね。%CALLNAME_K7(エル_対象)%がどれくらい出せるのか……覚えておきたいじゃないか」
+							DATAFORM
+							DATAFORM 「……後学のためにね……ふふっ❤」
+						ENDLIST
+					ENDDATA
+				CASE 2
+					PRINTFORMW 「好き放題してくれたね」
+					PRINTFORMW 「口の中が%CALLNAME_K7(エル_対象)%の%SPLIT_RAND("ザーメン/精液",1)%でドロドロだ❤」 
+					PRINTFORMDW %ANAME(エル)%は口を開くと、まだ精液の残る舌を見せつけるように艶かしく動かす
+					PRINTFORMW 「んぐっ……はぁ。とても美味しいとは……言い難いね❤」
+				CASE 3
+					PRINTFORMW 「まったく……」
+					PRINTFORMW 「手が%SPLIT_RAND("ザーメン/精液",1)%まみれじゃないか❤」 
+					PRINTFORMDW %ANAME(エル)%は白く細い指先で、手の平にこびりついた精液をぬちゃぬちゃと弄んで見せる
+				CASE 4
+					PRINTFORMW 「んんっ……はぁ……」
+					PRINTFORMW 「顔が%SPLIT_RAND("ザーメン/精液",1)%まみれになってしまったね❤」 
+					PRINTFORMDW %ANAME(エル)%は顔を伝う白濁液をそっと拭う
+					PRINTFORMW 「濃厚な…匂い……。頭がどうにかなってしまいそうだ❤」
+				CASE 5
+					PRINTFORMW 「髪は……結構自慢なんだけどな……」
+					PRINTFORMDW %ANAME(エル)%の雪のように白い髪の毛を%ANAME(MASTER)%の%SPLIT_RAND("ザーメン/精液/体液/白濁液",1)%が伝う
+					PRINTFORMW 「あとで洗うの…手伝ってよ？」 
+				CASEELSE
+			ENDSELECT
+			PRINTL
+		;閨の「なにもしない」から呼ばれる。ピロートーク的な扱い
+		CASE 11 
+			PRINTDATAL
+				DATAFORM 「……どうしたんだい？」
+				DATAFORM 「……少し休憩……だね」
+				DATAFORM 「こうして何もせず……一緒にいるのも悪くないね❤」
+				DATAFORM %PRINT_DESC_K7(@"%ANAME(TARGET)%はにこやかな笑みを浮かべて%ANAME(MASTER)%をじっと見ている……")%
+			ENDDATA
+			PRINTL
+		CASEELSE
+	ENDSELECT
+
+;─────────────────────────────────────── 
+;●食事
+;─────────────────────────────────────── 
+ELSEIF SELECTCOM == 351
+	PRINTFORML 「そろそろ食事にしようか」
+	;おごり発生の場合
+	IF IS_MALE(エル_対象) && IS_FEMALE(エル)
+		PRINTFORML 「%CALLNAME_K7(エル_対象)%がご馳走してくれるのかい……？」
+		PRINTFORML 「ありがとう！　……言ったからには、遠慮しないよ？」
+	ENDIF
+
+;─────────────────────────────────────── 
+;●移動
+;─────────────────────────────────────── 
+ELSEIF GROUPMATCH(SELECTCOM, 390, 391)
+	IF IS_INITIATIVE(エル)
+		IF SELECTCOM == 390
+			PRINTFORML 「それじゃあ出発しようか」
+		ELSE
+			PRINTFORML 「別のところへ行きたい？　構わないよ」
+		ENDIF
+	ELSE
+		IF SELECTCOM == 390
+			PRINTFORML 「出かけるのかい？　支度しないとね」
+		ELSE
+			PRINTFORML 「どこへ行こうか？」
+		ENDIF
+	ENDIF
+
+	;TFLAG:17は誘い方の種類。0=通常
+	IF TFLAG:17 == 0
+		IF TFLAG:18 == 1
+			PRINTFORML 「%GET_PLACENAME(TFLAG:54)%に行きたい？　いいとも」
+		ELSEIF TFLAG:18 == 0
+			PRINTFORML 「では%GET_PLACENAME(TFLAG:54)%に行こう」
+		ELSE
+			PRINTFORML 「%GET_PLACENAME(TFLAG:54)%？　いいよ、行こう」
+		ENDIF
+
+	;TFLAG:17は誘い方の種類。1=エルが勝手に決定
+	ELSEIF TFLAG:17 == 1
+		PRINTFORML 「%GET_PLACENAME(TFLAG:54)%に行こうよ」
+
+	;TFLAG:17は誘い方の種類。2=エルの行きたいデート先
+	ELSEIF TFLAG:17 == 2
+		IF TFLAG:18 == 1
+			PRINTFORML 「%GET_PLACENAME(TFLAG:54)%でいいかな？」
+			PRINTFORML 「わぁ、ありがとう。エスコートは任せたよ♪」
+		ELSE
+			PRINTFORML 「%GET_PLACENAME(TFLAG:54)%でいいかな？　それじゃあ行こうか」
+		ENDIF
+
+	;TFLAG:17は誘い方の種類。3=エルが行きたいデート先以外
+	ELSE
+		IF TFLAG:18 == 1
+			PRINTFORML 「%GET_PLACENAME(TFLAG:54)%に行きたい？」
+			PRINTFORML 「悪くないね。そうしよう」
+		ELSEIF TFLAG:18 == 0
+			PRINTFORML 「%GET_PLACENAME(TFLAG:54)%に行きたい？　いいよ、行こう」
+		ELSE
+			PRINTFORML 「%GET_PLACENAME(TFLAG:54)%だね。構わないよ」
+		ENDIF
+	ENDIF
+	RETURN 0
+
+;─────────────────────────────────────── 
+;●帰還
+;─────────────────────────────────────── 
+ELSEIF SELECTCOM == 392
+	PRINTDATAL
+		DATAFORM 「そろそろ帰る支度をしようか」
+		DATAFORM 「そうだね、帰ろうか」
+		DATAFORM 「うん、帰ろう」
+	ENDDATA
+	RETURN 0
+
+;─────────────────────────────────────── 
+;●お腹の音
+;─────────────────────────────────────── 
+ELSEIF SELECTCOM == 326
+	PRINTFORML 「えっと……何か聞こえるのかな？」
+	RETURN 0
+
+;─────────────────────────────────────── 
+;●その他
+;─────────────────────────────────────── 
+ELSE
+	PRINTDATAL
+		DATAFORM 「うーむ……」
+		DATAFORM 「これは実に興味深い……」
+		DATAFORM 「如何ともし難い……」
+		DATAFORM 「%CALLNAME_K7(エル_対象)%、何か用かな」
+		DATAFORM (ふわぁ……)
+		DATAFORM 「さぁて、もうひと頑張り」
+	ENDDATA
+	RETURN 0
+ENDIF
+
+;─────────────────────────────────────── 
+;●戻る
+;─────────────────────────────────────── 
+RETURN 0
+
+
+
+;─────────────────────────────────────── 
+;■日常_エル_対象_実行後
+;─────────────────────────────────────── 
+@KOJO_K7_NOON_AFTER_TARGET(エル_対象)
+#DIM エル
+#DIM エル_対象
+#DIMS エル機嫌
+
+IF !エル_対象
+	エル_対象 = MASTER
+ENDIF
+
+エル = NAME_TO_CHARA("エル")
+エル機嫌 '= TOSTR_EMOTION(エル)
+
+;─────────────────────────────────────── 
+;●機嫌が悪ければ通常のコマンド口上は喋らない
+;─────────────────────────────────────── 
+エル機嫌 = %TOSTR_EMOTION(エル)%
+SELECTCASE エル機嫌
+	CASE "恨", "怒", "憤"
+		RETURN 0
+
+	CASE "鬱", "悲", "憂"
+		RETURN 0
+
+	CASE  "狂", "恐", "怯"
+		RETURN 0
+
+	CASEELSE
+
+ENDSELECT
+
+;─────────────────────────────────────── 
+;●主人公のＭ絶頂
+;─────────────────────────────────────── 
+IF NOWEX:エル_対象:Ｍ絶頂 > NOWEX:エル_対象:Ｃ絶頂 && NOWEX:エル_対象:Ｍ絶頂 > NOWEX:エル_対象:Ｂ絶頂 && NOWEX:エル_対象:Ｍ絶頂 > NOWEX:エル_対象:Ａ絶頂 && NOWEX:エル_対象:Ｍ絶頂 > NOWEX:エル_対象:Ｖ絶頂 && NOWEX:エル_対象:Ｍ絶頂 > NOWEX:エル_対象:射精
+	IF NOWEX:エル_対象:Ｍ絶頂 > 0
+		PRINTFORM 「
+
+		PRINTDATA
+			DATAFORM 口で
+			DATAFORM 舌で
+			DATAFORM 喉で
+		ENDDATA
+
+		PRINTDATA
+			DATAFORM イッちゃったんだ
+			DATAFORM ふふっ、気持ちいいかい
+			DATAFORM イッちゃったんだね
+		ENDDATA
+		PRINTFORM ？　
+
+		PRINTFORM %BREAK_K7("末", エル_対象)%
+
+		PRINTFORML 」
+	ENDIF
+ENDIF
+
+;─────────────────────────────────────── 
+;●戻る
+;─────────────────────────────────────── 
+RETURN 0
+

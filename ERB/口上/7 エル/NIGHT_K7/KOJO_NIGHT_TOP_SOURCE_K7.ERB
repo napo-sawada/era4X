@@ -1,0 +1,459 @@
+﻿;─────────────────────────────────────── 
+;●閨_攻め_実行前_ソース参照　CALL TEASE_K7(エル_対象)
+;─────────────────────────────────────── 
+@TEASE_K7(エル_対象)
+#DIM エル
+#DIM エル_対象
+#DIM エル_今回部位値
+#DIM エル_最大部位値
+#DIM エル_表示フラグ
+#DIMS エル_今回部位
+#DIMS エル_最大部位
+#DIMS エル_今回部位称
+#DIMS エル_最大部位称
+
+IF !エル_対象
+	エル_対象 = MASTER
+ENDIF
+
+;初期化
+エル = NAME_TO_CHARA("エル")
+エル_今回部位値 = 0
+エル_最大部位値 = 0
+エル_表示フラグ = 0
+エル_今回部位 = ""
+エル_最大部位 = ""
+エル_今回部位称 = ""
+エル_最大部位称 = ""
+
+;─────────────────────────────────────── 
+;○エル_対象の快楽状態をチェック
+;─────────────────────────────────────── 
+
+;▼PALAM
+;　PALAMは絶頂までの蓄積＆絶頂により落ち着く（LIMIT9999）
+;　最低10ないと刺激とみなさないPALAMには快Ｐがない
+IF PALAM:エル_対象:快Ｖ >= 10 && PALAM:エル_対象:快Ｖ >= PALAM:エル_対象:快Ｃ && PALAM:エル_対象:快Ｖ >= PALAM:エル_対象:快Ａ && PALAM:エル_対象:快Ｖ >= PALAM:エル_対象:快Ｂ
+	エル_最大部位値 = PALAM:エル_対象:快Ｖ
+	エル_最大部位 '= "Ｖ"
+	エル_最大部位称 '= CALL_DIRTY_K7("Ｖ")
+ELSEIF PALAM:エル_対象:快Ａ >= 10 && PALAM:エル_対象:快Ａ >= PALAM:エル_対象:快Ｃ && PALAM:エル_対象:快Ａ >= PALAM:エル_対象:快Ｖ && PALAM:エル_対象:快Ａ >= PALAM:エル_対象:快Ｂ
+	エル_最大部位値 = PALAM:エル_対象:快Ａ
+	エル_最大部位 '= "Ａ"
+	エル_最大部位称 '= CALL_DIRTY_K7("Ａ")
+ELSEIF PALAM:エル_対象:快Ｃ >= 10 && PALAM:エル_対象:快Ｃ >= PALAM:エル_対象:快Ｖ && PALAM:エル_対象:快Ｃ >= PALAM:エル_対象:快Ａ && PALAM:エル_対象:快Ｃ >= PALAM:エル_対象:快Ｂ
+	IF HAS_PENIS(エル_対象)
+		エル_最大部位値 = PALAM:エル_対象:快Ｃ
+		エル_最大部位 '= "Ｐ"
+		エル_最大部位称 '= CALL_DIRTY_K7("Ｐ")
+	ELSE
+		エル_最大部位値 = PALAM:エル_対象:快Ｃ
+		エル_最大部位 '= "Ｃ"
+		エル_最大部位称 '= CALL_DIRTY_K7("Ｃ")
+	ENDIF
+ELSEIF PALAM:エル_対象:快Ｂ >= 10 && PALAM:エル_対象:快Ｂ >= PALAM:エル_対象:快Ｃ && PALAM:エル_対象:快Ｂ >= PALAM:エル_対象:快Ｖ && PALAM:エル_対象:快Ｂ >= PALAM:エル_対象:快Ａ
+	エル_最大部位値 = PALAM:エル_対象:快Ｂ
+	エル_最大部位 '= "Ｂ"
+	エル_最大部位称 '= CALL_DIRTY_K7("Ｂ")
+ELSE
+	エル_最大部位値 = 0
+	エル_最大部位 '= ""
+	エル_最大部位称 '= ""
+ENDIF
+
+;▼SOURCE
+;　前文の場合SOURCE・後文ならCUP・値は最大部位値との比較用なのでPALAMで保存
+;　最低1ないと刺激とみなさないPALAMには快Ｐがない
+IF SOURCE:エル_対象:快Ｖ >= 1 && SOURCE:エル_対象:快Ｖ >= SOURCE:エル_対象:快Ｐ && SOURCE:エル_対象:快Ｖ >= SOURCE:エル_対象:快Ｃ && SOURCE:エル_対象:快Ｖ >= SOURCE:エル_対象:快Ａ && SOURCE:エル_対象:快Ｖ >= SOURCE:エル_対象:快Ｂ
+	エル_今回部位値 = PALAM:エル_対象:快Ｖ
+	エル_今回部位 '= "Ｖ"
+	エル_今回部位称 '= CALL_DIRTY_K7("Ｖ")
+ELSEIF SOURCE:エル_対象:快Ａ >= 1 && SOURCE:エル_対象:快Ａ >= SOURCE:エル_対象:快Ｐ && SOURCE:エル_対象:快Ａ >= SOURCE:エル_対象:快Ｃ && SOURCE:エル_対象:快Ａ >= SOURCE:エル_対象:快Ｖ && SOURCE:エル_対象:快Ａ >= SOURCE:エル_対象:快Ｂ
+	エル_今回部位値 = PALAM:エル_対象:快Ａ
+	エル_今回部位 '= "Ａ"
+	エル_今回部位称 '= CALL_DIRTY_K7("Ａ")
+ELSEIF SOURCE:エル_対象:快Ｐ >= 1 && SOURCE:エル_対象:快Ｐ >= SOURCE:エル_対象:快Ｖ && SOURCE:エル_対象:快Ｐ >= SOURCE:エル_対象:快Ａ && SOURCE:エル_対象:快Ｐ >= SOURCE:エル_対象:快Ｃ && SOURCE:エル_対象:快Ｐ >= SOURCE:エル_対象:快Ｂ
+	エル_今回部位値 = PALAM:エル_対象:快Ｃ
+	エル_今回部位 '= "Ｐ"
+	エル_今回部位称 '= CALL_DIRTY_K7("Ｐ")
+ELSEIF SOURCE:エル_対象:快Ｃ >= 1 && SOURCE:エル_対象:快Ｃ >= SOURCE:エル_対象:快Ｐ && SOURCE:エル_対象:快Ｃ >= SOURCE:エル_対象:快Ｖ && SOURCE:エル_対象:快Ｃ >= SOURCE:エル_対象:快Ａ && SOURCE:エル_対象:快Ｃ >= SOURCE:エル_対象:快Ｂ
+	IF HAS_PENIS(エル_対象)
+		エル_今回部位値 = PALAM:エル_対象:快Ｃ
+		エル_今回部位 '= "Ｐ"
+		エル_今回部位称 '= CALL_DIRTY_K7("Ｐ")
+		IF  エル_最大部位 == "Ｃ"
+			エル_最大部位称 '= ""
+		ENDIF
+	ELSE
+		エル_今回部位値 = PALAM:エル_対象:快Ｃ
+		エル_今回部位 '= "Ｃ"
+		エル_今回部位称 '= CALL_DIRTY_K7("Ｃ")
+		IF  エル_最大部位 == "Ｖ"
+			エル_最大部位称 '= ""
+		ENDIF
+	ENDIF
+ELSEIF SOURCE:エル_対象:快Ｂ >= 1 && SOURCE:エル_対象:快Ｂ >= SOURCE:エル_対象:快Ｐ && SOURCE:エル_対象:快Ｂ >= SOURCE:エル_対象:快Ｃ && SOURCE:エル_対象:快Ｂ >= SOURCE:エル_対象:快Ｖ && SOURCE:エル_対象:快Ｂ >= SOURCE:エル_対象:快Ａ
+	エル_今回部位値 = PALAM:エル_対象:快Ｂ
+	エル_今回部位 '= "Ｂ"
+	エル_今回部位称 '= CALL_DIRTY_K7("Ｂ")
+ELSE
+	エル_今回部位値 = 0
+	エル_今回部位 '= ""
+	エル_今回部位称 '= ""
+ENDIF
+
+;─────────────────────────────────────── 
+;○台詞１_失神・疲労
+;─────────────────────────────────────── 
+;▼失神
+IF TCVAR:エル_対象:52
+	PRINTFORM 「
+	PRINTDATA
+		DATAFORM おや、%CALLNAME_K7(エル_対象)%、どうしたのかい？
+		DATAFORM ……眠ってしまったのかな
+		DATAFORM おやおや、果ててしまったのかな
+	ENDDATA
+	PRINTFORML %BREAK_K7("末", エル_対象)%」
+
+;気力が1/3以下
+ELSEIF BASE:エル_対象:気力 <= (MAXBASE:エル_対象:気力 / 3)
+	PRINTFORM 「
+	PRINTFORM %SPLIT_R("たくさん：とっても：いっぱい：すごく")%
+	PRINTFORM %SPLIT_R("気持ちよくなってくた：感じてくれた：よろこんでくれた")%
+	PRINTFORM %SPLIT_R("ようだね：みたいだね")%
+	PRINTFORM %BREAK_K7("中", エル_対象)%
+	IF IS_MALE(エル_対象)
+		PRINTDATA
+			DATAFORM 苦しそうにぜいぜいして
+			DATAFORM 汗でからだをぐっしょり濡らして
+			DATAFORM 体の筋を浮かせて
+			DATAFORM ぐったりして
+			DATAFORM ぶるぶる震わせて
+			DATAFORM かすれた声で
+			DATAFORM 汗だくで
+			DATAFORM 顔を真っ赤にして
+		ENDDATA
+	ELSE
+		PRINTDATA
+			DATAFORM 苦しそうにはぁはぁして
+			DATAFORM 胸を揺らして
+			DATAFORM 体の筋を浮かせて
+			DATAFORM ぐったりして
+			DATAFORM ぷるぷるしちゃって
+			DATAFORM ぶるぶる震わせて
+			DATAFORM 汗でからだをぐっしょり濡らして
+			DATAFORM 顔を真っ赤にして
+		ENDDATA
+	ENDIF
+	PRINTDATA
+		DATAFORM ……かわいい
+		DATAFORM 。ふふっ、いい子だ
+		DATAFORM ……いい顔だね
+	ENDDATA
+	PRINTFORM %BREAK_K7("末", エル_対象)%
+	PRINTFORML 」
+ENDIF
+
+;▼疲労
+IF TCVAR:エル_対象:51 || BASE:エル_対象:体力 <= (MAXBASE:エル_対象:体力 / 3)
+	PRINTFORM 「
+	PRINTDATA
+		DATAFORM お疲れかな？　無理しなくていいよ
+		DATAFORM 疲れちゃったかな？
+	ENDDATA
+	PRINTFORM %BREAK_K7("末", エル_対象)%
+	PRINTFORML 」
+ENDIF
+
+;─────────────────────────────────────── 
+;○台詞２_ソースに関して
+;　覚書：解消は会話のみ・感応は猥談本屋のみ
+;─────────────────────────────────────── 
+エル_表示フラグ = 0
+IF SOURCE:エル_対象:苦痛 >= 10
+	エル_表示フラグ += 1
+	IF エル_表示フラグ == 1
+		PRINTFORM 「
+	ELSEIF エル_表示フラグ > 3
+		PRINTFORML %BREAK_K7("末", エル_対象)%」
+		PRINTFORM 「
+	ELSE
+		PRINTFORM %BREAK_K7("中", エル_対象)%
+	ENDIF
+	PRINTDATA
+		DATAFORM 痛いかな？　少し我慢してよ　
+		DATAFORM ダメだったら言ってくれよ……？
+	ENDDATA
+ENDIF
+
+;とりあえずエル_対象が主人公で陥落時のみ
+IF CHECK_K7("陥落", エル_対象)
+	IF SOURCE:エル_対象:愛情 >= 10 || SOURCE:エル_対象:歓喜 >= 10
+		エル_表示フラグ += 1
+		IF エル_表示フラグ == 1
+			PRINTFORM 「
+		ELSEIF エル_表示フラグ > 3
+			PRINTFORML %BREAK_K7("末", エル_対象)%」
+			PRINTFORM 「
+		ELSE
+			PRINTFORM %BREAK_K7("中", エル_対象)%
+		ENDIF
+		PRINTDATA
+			DATAFORM %CALLNAME_K7(エル_対象)%のこと、好き
+			DATAFORM 大好き
+			DATAFORM 好き
+		ENDDATA
+		PRINTDATA
+			DATAFORM だよ
+			DATAFORM だ❤　ん、ちゅ
+			DATAFORM ❤　んん、ん
+		ENDDATA
+		PRINTFORM %BREAK_K7("中", エル_対象)%
+		PRINTDATA
+			DATAFORM もっと私の方を見てよ
+			DATAFORM %CALLNAME_K7(エル_対象)%、どうかな
+			DATAFORM もっと%CALLNAME_K7(エル_対象)%の声を聴かせてよ
+			DATAFORM もっと%CALLNAME_K7(エル_対象)%に触れさせてよ
+			DATAFORM ずっと一緒だよ、離さないでね
+			DATAFORM 私の知らないこと、教えてよ
+		ENDDATA
+	ENDIF
+ENDIF
+
+IF SOURCE:エル_対象:恐怖 >= 10 || SOURCE:エル_対象:不安 >= 10
+	エル_表示フラグ += 1
+	IF エル_表示フラグ == 1
+		PRINTFORM 「
+	ELSEIF エル_表示フラグ > 3
+		PRINTFORML %BREAK_K7("末", エル_対象)%」
+		PRINTFORM 「
+	ELSE
+		PRINTFORM %BREAK_K7("中", エル_対象)%
+	ENDIF
+	PRINTDATA
+		DATAFORM 大丈夫。怖がらなくていい
+		DATAFORM 安心してよ
+	ENDDATA
+ENDIF
+
+IF SOURCE:エル_対象:反感 >= 10
+	エル_表示フラグ += 1
+	IF エル_表示フラグ == 1
+		PRINTFORM 「
+	ELSEIF エル_表示フラグ > 3
+		PRINTFORML %BREAK_K7("末", エル_対象)%」
+		PRINTFORM 「
+	ELSE
+		PRINTFORM %BREAK_K7("中", エル_対象)%
+	ENDIF
+	PRINTDATA
+		DATAFORM 怒らせてしまったかな？　……すまない
+	ENDDATA
+ENDIF
+
+;頻度が高い気がする・状況が多そうでバリエーション不足
+IF CHECK_K7("陥落", エル_対象) 
+	IF SOURCE:エル_対象:露出 >= 10 || SOURCE:エル_対象:逸脱 >= 10
+		エル_表示フラグ += 1
+		IF エル_表示フラグ == 1
+			PRINTFORM 「
+		ELSEIF エル_表示フラグ > 3
+			PRINTFORML %BREAK_K7("末", エル_対象)%」
+			PRINTFORM 「
+		ELSE
+			PRINTFORM %BREAK_K7("中", エル_対象)%
+		ENDIF
+		PRINTDATA
+			DATAFORM 恥ずかしがらないで……ちゃんと見せてよ
+			DATAFORM もっと……%CALLNAME_K7(エル_対象)%のかわいい姿を見せてよ
+			DATAFORM えっち……だね
+		ENDDATA
+	ENDIF
+ENDIF
+
+;エル_対象の奉仕
+IF SOURCE:エル_対象:不潔 >= 10
+	エル_表示フラグ += 1
+	IF エル_表示フラグ == 1
+		PRINTFORM 「
+	ELSEIF エル_表示フラグ > 3
+		PRINTFORML %BREAK_K7("末", エル_対象)%」
+		PRINTFORM 「
+	ELSE
+		PRINTFORM %BREAK_K7("中", エル_対象)%
+	ENDIF
+	PRINTDATA
+		DATAFORM 大丈夫？　んっ、あぁ
+		DATAFORM その……%CALLNAME_K7(エル_対象)%……不潔だよ
+		DATAFORM いいよ……んんっ
+	ENDDATA
+ENDIF
+
+IF エル_表示フラグ
+	PRINTFORML %BREAK_K7("末", エル_対象)%」
+ENDIF
+
+;─────────────────────────────────────── 
+;○台詞３_エル_対象の感じ具合に関して
+;　攻め側は部位を発言することが多いので低快楽度でも分岐させる
+;─────────────────────────────────────── 
+;▽今回部位称か最大部位称がとれていないので部位表現をぼかす
+IF 	エル_今回部位称 == "" || エル_最大部位称 == ""
+	PRINTFORM 「
+	;▼～1500
+	IF エル_今回部位値 < 1500
+		PRINTDATA
+			DATAFORM やさしくしてあげよう
+			DATAFORM 気持ちいいかな
+			DATAFORM これでいいでいいのかな
+			DATAFORM うまく……できているかな
+		ENDDATA
+
+	;▼1500～5000
+	ELSEIF エル_今回部位値 >= 1500 && エル_今回部位値 < 5000
+		PRINTDATA
+			DATAFORM だんだん気持ちよくなってきたみたいだね
+			DATAFORM ふふっ、気持ちよさそうだね
+			DATAFORM %CALLNAME_K7(エル_対象)%、気持ちよさそうだね
+		ENDDATA
+
+	;▼5000～9000
+	ELSEIF エル_今回部位値 >= 5000 && エル_今回部位値 < 9000
+		PRINTDATA
+			DATAFORM その調子だよ
+			DATAFORM いい表情だ
+			DATAFORM ふふっ、気持ちよさそうだね
+		ENDDATA
+
+	;▼9000～
+	ELSE
+		PRINTDATA
+			DATAFORM 好きな時にイっていいんだよ
+			DATAFORM 限界かな？　顔がもうトロトロだよ
+			DATAFORM 我慢しないで。いっぱい気持ちよくなってよ
+			DATAFORM 気持ちよくなれたね。かわいい子だ
+		ENDDATA
+	ENDIF
+	PRINTFORML %BREAK_K7("末", エル_対象)%」
+
+;▽今回部位称と最大部位称がとれている
+ELSE
+	PRINTFORM 「
+	;▼～1500
+	IF エル_今回部位値 < 1500
+		PRINTDATA
+			DATAFORM %エル_今回部位称%、気持ちいいかい
+			DATAFORM %エル_今回部位称%、これでいいでいいのかな
+			DATAFORM うまく……できているかな
+		ENDDATA
+
+	;▼1500～5000
+	ELSEIF エル_今回部位値 >= 1500 && エル_今回部位値 < 5000
+		IF エル_最大部位 == エル_今回部位
+			PRINTDATA
+				DATAFORM だんだん%エル_今回部位称%で気持ちよくなってきたみたいだね
+				DATAFORM %エル_今回部位称%で気持ちよくなってよ
+				DATAFORM ふふっ、%エル_今回部位称%が嬉しそうにしているよ
+			ENDDATA
+		ELSE
+			PRINTDATA
+				DATAFORM %エル_最大部位称%ももっと気持ちよくして欲しい？　……もう少し、我慢してよ
+				DATAFORM %エル_最大部位称%はまだお預けだよ。ふふっ
+				DATAFORM %エル_今回部位称%で……気持ちよくなってよ
+			ENDDATA
+		ENDIF
+	;▼5000～9000
+	ELSEIF エル_今回部位値 >= 5000 && エル_今回部位値 < 9000
+		IF エル_最大部位 == エル_今回部位
+			PRINTDATA
+				DATAFORM %エル_今回部位称%、とても気持ちよさそうだね
+				DATAFORM %エル_今回部位称%でいっぱい感じてくれたかな
+				DATAFORM %エル_今回部位称%ふるふるさせて……かわいい❤
+			ENDDATA
+		ELSE
+			PRINTDATA
+				DATAFORM %エル_最大部位称%でも……いきたいのかい？　仕方がないなぁ
+				DATAFORM %エル_今回部位称%ふるふるさせて、かわいい
+				DATAFORM %エル_最大部位称%も……いっぱい感じてくれているみたいだね
+			ENDDATA
+		ENDIF
+	;▼9000～
+	ELSE
+		IF エル_最大部位 == エル_今回部位
+			PRINTDATA
+				DATAFORM いいですよ❤　%エル_今回部位称%でイってよ
+				DATAFORM %エル_今回部位称%で気持ちよくなってよ
+				DATAFORM 気持ちいいかい？　%エル_今回部位称%❤　
+			ENDDATA
+		ELSE
+			PRINTDATA
+				DATAFORM からだをこんなに振るわせて……。本当にかわいいね
+				DATAFORM %エル_最大部位称%も、とってもいやらしく震えているよ❤
+				DATAFORM 好きなだけ……気持ちよくなってよ
+				DATAFORM 我慢しなくていいんだよ❤　%エル_今回部位称%でイったらいい❤
+			ENDDATA
+		ENDIF
+	ENDIF
+	PRINTFORML %BREAK_K7("末", エル_対象)%」
+ENDIF
+
+;─────────────────────────────────────── 
+;○台詞４_同一コマンド＆陥落済み＆エル_対象が主人公＆エル_対象が絶頂寸前の場合
+;　同一コマンド＆陥落済み＆エル_対象が主人公＆エル_対象が絶頂寸前の場合
+;　たまに蛇足的に煽ったりねだったり移入してハイになってる感じを出す
+;─────────────────────────────────────── 
+IF SELECTCOM == PREVCOM && CHECK_K7("陥落", エル_対象) && RAND:10 == 0
+	IF MAX(PALAM:エル_対象:快Ｃ, PALAM:エル_対象:快Ｖ, PALAM:エル_対象:快Ａ, PALAM:エル_対象:快Ｂ) >= 9000
+		;純攻め
+		IF IS_INITIATIVE(エル)
+			PRINTFORM 「
+			IF HAS_PENIS(エル_対象)
+				PRINTDATA
+					DATAFORM 全部出していいんだよ❤　受け止めてあげるから
+					DATAFORM %SPLIT_R("ずっと：いつまででも：何度でも")%イってよ
+					DATAFORM 空っぽになるまで出してよ
+					DATAFORM ほら、いっぱい注いでください
+					DATAFORM %SPLIT_R("いっぱい：真っ白になるまで")%感じてさせてよ
+					DATAFORM %CALLNAME_K7(エル_対象)%の%SPLIT_R("精液：ザーメン")%を私に注いでよ
+				ENDDATA
+			ELSE
+				PRINTDATA
+					DATAFORM もっと感じさせてあげよう
+					DATAFORM %SPLIT_R("ずっと：いつまででも：何度でも")%イってくださいね
+					DATAFORM そうやってびくびくて震わせているところ、すごくかわいいよ
+					DATAFORM もっともっと気持ちよくさせてあげよう
+					DATAFORM %SPLIT_R("いっぱい：真っ白になるまで")%感じて……ね
+				ENDDATA
+			ENDIF
+			PRINTFORML %BREAK_K7("末", エル_対象)%」
+		;奉仕攻め
+		ELSE
+			PRINTFORM 「
+			IF HAS_PENIS(エル_対象)
+				PRINTDATA
+					DATAFORM %CALLNAME_K7(エル_対象)%が気持ちよくなるところがみたいな
+					DATAFORM %CALLNAME_K7(エル_対象)%、気持ちいいかい？
+					DATAFORM 好きなだけ出していいですよ
+					DATAFORM 我慢しないで、気持ちよくなってくださいね
+					DATAFORM 上手くできているかな？
+					DATAFORM いっぱい出していいんだよ
+				ENDDATA
+			ELSE
+				PRINTDATA
+					DATAFORM %CALLNAME_K7(エル_対象)%が気持ちよくなるところがみたいな
+					DATAFORM %CALLNAME_K7(エル_対象)%、気持ちいいですか？
+					DATAFORM 好きなだけイっていいですよ
+					DATAFORM 我慢しないで、気持ちよくなってくださいね
+					DATAFORM 上手くできているかな？
+				ENDDATA
+			ENDIF
+			PRINTFORML %BREAK_K7("末", エル_対象)%」
+		ENDIF
+	ENDIF
+ENDIF
+
+;─────────────────────────────────────── 
+;◆戻る
+;─────────────────────────────────────── 
+RETURN 0
+

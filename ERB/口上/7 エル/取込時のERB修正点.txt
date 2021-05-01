@@ -1,0 +1,37 @@
+# ERB定義の描写に関する修正（任意）
+おそらくKの小悪魔の描写なので必要に応じて修正
+
+## 種族タグの修正
+/ERB/SYSTEM/INIT_TAGS.ERB
+
+@INIT_TAG_7(ARG:0)
+CALL ADD_TAG(ARG:0, タグ_人間)
+
+## SLGパートのキャラクター解説
+/ERB/SYSTEM/SHOW_INFO/CHARA_EXPLANATION.ERB
+
+@SHOW_CHARA_EXPLANATION_7
+PRINTFORML 民主主義国出身の元学生。
+PRINTFORML 十代前半にして民主主義国の名門工科大学に入学を認められ、宇宙物理学において秀た才能を発揮する。
+PRINTFORML ところが「机の上にかじりついてばかりでは埒があかない」と出奔を決意。
+PRINTFORML 順風満帆の学生生活を放棄し身一つで宇宙を目指す。
+PRINTFORML 
+PRINTFORML 加入当初は全体的に低水準のステータスのため、天才型の特性を活かしてじっくりと育成したい。
+
+
+## 衣装設定
+※これは修正が面倒くさそうなのでとりあえず設定だけ列記
+
+;CLOTH:衣装部位_頭,髪飾り
+;CLOTH:衣装部位_首,リボン
+;CLOTH:衣装部位_上服,ブラウス
+;CLOTH:衣装部位_下服,フレアスカート
+;CLOTH:衣装部位_上下服,0
+;CLOTH:衣装部位_上着,0
+;CLOTH:衣装部位_下着上,レースブラ
+;CLOTH:衣装部位_下着下,レースパンティ
+;CLOTH:衣装部位_上下下着,0
+;CLOTH:衣装部位_腕,0
+;CLOTH:衣装部位_靴下,サイハイソックス
+;CLOTH:衣装部位_靴,パンプス
+;CLOTH:衣装部位_アクセサリ,0

@@ -1,0 +1,380 @@
+﻿;─────────────────────────────────────── 
+;■日常_実行_実行前
+;─────────────────────────────────────── 
+@KOJO_K7_NOON_BEFORE_PLAYER(エル_対象)
+#DIM エル
+#DIM エル_対象
+#DIMS エル機嫌
+
+IF !エル_対象
+	エル_対象 = MASTER
+ENDIF
+
+エル = NAME_TO_CHARA("エル")
+エル機嫌 '= TOSTR_EMOTION(エル)
+
+;─────────────────────────────────────── 
+;●機嫌が悪ければ通常のコマンド口上は喋らない
+;─────────────────────────────────────── 
+SELECTCASE エル機嫌
+	CASE "恨", "怒", "憤"
+		IF RAND:3 < 1
+			PRINTFORMDL %ANAME(エル)%は眉をひそめて様子を伺っている
+		ENDIF
+		IF PALAM:エル:怒主 <= PALAM:エル:怒外
+			PRINTDATAL
+				DATAFORM 「……本を読んでいたいのだが……」
+				DATAFORM 「今は読書の邪魔をしないでくれないかな」
+				DATAFORM 「……」
+			ENDDATA
+		ELSE
+			PRINTDATAL
+				DATAFORM 「読書の邪魔をしないでください」
+				DATAFORM 「……」
+				DATAFORM 「たった今機嫌が悪くなったから、一人にしてくれないかな」
+			ENDDATA
+		ENDIF
+		RETURN 0
+
+	CASE "鬱", "悲", "憂"
+		IF RAND:3 < 1
+			PRINTFORMDL %ANAME(エル)%は悲しげな表情で目を背けた
+		ENDIF
+		IF PALAM:エル:哀主 <= PALAM:エル:哀外
+			PRINTDATAL
+				DATAFORM 「……」
+				DATAFORM 「少し、一人にしてくれないかな……」
+			ENDDATA
+		ELSE
+			PRINTDATAL
+				DATAFORM 「…………」
+			ENDDATA
+		ENDIF
+		RETURN 0
+
+	CASE  "狂", "恐", "怯"
+		IF RAND:3 < 1
+			PRINTFORMDL %ANAME(エル)%は恐怖のあまり震えている
+		ENDIF
+		IF PALAM:エル:怖主 <= PALAM:エル:怖外
+			PRINTDATAL
+				DATAFORM 「お願いだ……ひどいこと……しないで」
+			ENDDATA
+		ELSE
+			PRINTDATAL
+				DATAFORM 「…………」
+				DATAFORM 「ひっ……」
+			ENDDATA
+		ENDIF
+		RETURN 0
+	CASEELSE
+ENDSELECT
+
+;─────────────────────────────────────── 
+;●スキンシップ・背中を洗う
+;─────────────────────────────────────── 
+IF GROUPMATCH(SELECTCOM, 320, 358)
+	;エルに主導権なし
+	IF !IS_INITIATIVE(エル)
+		PRINTDATAL
+			DATAFORM 「こう……かな？　ふふっ♪」
+			DATAFORM 「はいはい。こうでいいかい？」
+			DATAFORM 「こんな感じで……どうかな？」
+		ENDDATA
+	;エルに主導権あり
+	ELSE
+		PRINTDATAL
+			DATAFORM 「くすぐったい？　ちょっと我慢してよ」
+			DATAFORM 「こんな感じで……どうかな？」
+		ENDDATA
+	ENDIF
+	RETURN 0
+ENDIF
+
+;─────────────────────────────────────── 
+;●頭を撫でる
+;─────────────────────────────────────── 
+IF GROUPMATCH(SELECTCOM, 321)
+	;エルに主導権なし
+	IF !IS_INITIATIVE(エル)
+		PRINTDATAL
+			DATAFORM 「仕方がないなぁ……」
+			DATAFORM 「ふふっ♪　よしよし」
+		ENDDATA
+	;エルに主導権あり
+	ELSE
+		PRINTDATAL
+			DATAFORM 「頭を撫でて欲しい？　どうした、頭でもぶつけたのかい？」
+			DATAFORM 「……まぁいいよ、おいで」
+		ENDDATA
+			PRINTL
+		PRINTDATAL
+			DATAFORM 「%SPLIT_RAND("よしよし♪/いいこ、いいこ",1)%」
+			DATAFORM 「ふふっ、私がこうしてあげるのも……たまには悪くないね」
+		ENDDATA
+	ENDIF
+	RETURN 0
+ENDIF
+
+;─────────────────────────────────────── 
+;●髪を梳く・櫛で梳かす
+;─────────────────────────────────────── 
+IF GROUPMATCH(SELECTCOM, 322, 323)
+	RETURN 0
+ENDIF
+
+;─────────────────────────────────────── 
+;●見つめる・甘い言葉
+;─────────────────────────────────────── 
+IF GROUPMATCH(SELECTCOM, 324, 325)
+	PRINTDATAL
+		DATAFORM 「頑張っている%CALLNAME_K7(エル_対象)%の姿は嫌いじゃないよ」
+		DATAFORM 「…………。ふふっ」
+	ENDDATA
+	RETURN 0
+ENDIF
+
+;─────────────────────────────────────── 
+;●訓練系
+;─────────────────────────────────────── 
+IF GROUPMATCH(SELECTCOM, 301, 302, 303, 304, 305, 306, 307)
+	SELECTCASE SELECTCOM
+		CASE 301
+			PRINTFORML 「確かに身を守るのは大事だね。戦うのはあまり得意ではないんだけれども……」
+			PRINTFORML 「おおっと」
+			IF CHECK_K7("陥落",エル_対象)
+				PRINTFORML 「　%CALLNAME_K7(エル_対象)%、私の動き、どうだったかな？」
+			ENDIF
+		CASE 302
+			PRINTFORML 「宇宙でやっていくからには艦くらい動かせないとね」
+			IF CHECK_K7("陥落",エル_対象)
+				PRINTFORML 「これで今までよりももっと%CALLNAME_K7(エル_対象)%の役に立てるはずだ」
+			ENDIF
+		CASE 303
+			PRINTFORML 「実践は大事だけれど……もちろん座学もおろそかにしてはいけないよ」
+			IF CHECK_K7("陥落",エル_対象)
+				PRINTFORML 「%CALLNAME_K7(エル_対象)%……起きているかい？」
+			ENDIF
+		CASE 304
+			PRINTFORML 「サボってはいけないよ、%CALLNAME_K7(エル_対象)%。まだこんなにたくさん書類が残っているんだ」
+			IF CHECK_K7("陥落",エル_対象)
+				PRINTFORML 「ふぅ……凄まじい量だね……」
+				PRINTFORML 「程よいところで休憩にしようか」
+			ENDIF
+		CASE 305
+			PRINTFORML 「さぁ行こう。警戒を怠ってはいけないよ」
+			IF CHECK_K7("陥落",エル_対象)
+				PRINTFORML 「%CALLNAME_K7(エル_対象)%と一緒に行けるのだから、ちょっとした役得……かな」
+			ENDIF
+		CASE 306
+			PRINTFORML 「歌の練習？　あまり得意ではないけれど……頑張ってみよう」
+			IF CHECK_K7("陥落",エル_対象)
+				PRINTFORML 「勿論やるからにはベストを尽くさないとね」
+			ENDIF
+		CASE 307
+			PRINTFORML 「食べるほうが好きなんだけれど……せっかくなら自分で作りたいしね」
+			IF CHECK_K7("陥落",エル_対象)
+				PRINTFORML 「どうかな？　我ながら結構自信はあるのだけれど……」
+			ENDIF
+	ENDSELECT
+	RETURN 0
+ENDIF
+
+;─────────────────────────────────────── 
+;●お腹の音
+;─────────────────────────────────────── 
+IF SELECTCOM == 326
+	PRINTFORML 「ん？　何か……聞こえるのかな……？」
+	RETURN 0
+
+ENDIF
+
+;─────────────────────────────────────── 
+;●日常フェラ
+;─────────────────────────────────────── 
+IF SELECTCOM == 330
+{
+	SELECTCASE IFRAND(
+				"1",1,
+				"D1,2",GROUPMATCH(PREVCOM, 303, 304, 502, 503),
+				"D1,3",(TFLAG:54 == 1) || PREVCOM == 305,
+				"D1TO9,10",CUM_GET_COUNT:(エル):射精部位_口 > 1
+				)
+}
+		CASE 1 ;通常
+			IF !IS_INITIATIVE(エル)
+				PRINTDATAL
+					DATAFORM 「口でして欲しい……？　はぁ……全く」
+					DATAFORM 「何も今じゃなくてもいいだろうに……」
+					DATAFORM 「そういうのは時と場所をわきまえてくれないかな……」
+				ENDDATA
+					PRINTFORMW 「%SPLIT_RAND("本当にまったく……/仕方がないなぁ……",1)%」
+					PRINTL
+			ELSE
+				PRINTDATAL
+					DATAFORM 「こ、これは%CALLNAME_K7(エル_対象)%が集中できるようにするためでだね……、その、決して……」
+					DATAFORM 「……口でして欲しいんだろう？　……仕方がないなぁ」
+					DATAFORM 「……溜まっているんだろう？　我慢しなくていいよ」
+					DATAFORM 「口で気持ちよくしてあげよう。はぁむ」
+				ENDDATA
+					PRINTFORMW
+			ENDIF
+		CASE 2 ;机下フェラ
+			IF !IS_INITIATIVE(エル)
+				PRINTDATAL
+					DATAFORM 「口でして欲しい……？　はぁ……全く」
+					DATAFORM 「何も今じゃなくてもいいだろうに……」
+					DATAFORM 「そういうのは時と場所をわきまえてくれないかな……」
+				ENDDATA
+					PRINTFORMW 「まぁ……仕方ない」
+					PRINTL
+			ELSE
+				PRINTDATAL
+					DATAFORM 「こ、これは%CALLNAME_K7(エル_対象)%が集中できるようにするためでだね……、その、決して……」
+					DATAFORM 「……ここでかい？……全く……」
+				ENDDATA
+					PRINTFORMW
+			ENDIF
+		CASE 3 ;屋外フェラ　TFLAG:54(市街地)
+			IF !IS_INITIATIVE(エル)
+				PRINTDATAL
+					DATAFORM 「ここで口でして欲しい……？　%CALLNAME_K7(エル_対象)%、本気で言ってるのかな……？」
+					DATAFORM 「何も今じゃなくてもいいだろうに……」
+					DATAFORM 「そういうのは時と場所をわきまえてくれないかな……」
+				ENDDATA
+					PRINTFORML 「%SPLIT_RAND("本当にまったく……/仕方がないなぁ……",1)%」
+					PRINTL
+					PRINTDATAW
+						DATAFORM （流石にこんな姿……人には見せられないな）
+						DATAFORM （まさか外でこんなことするなんてね……）
+					ENDDATA
+					PRINTL
+			ELSE
+				PRINTDATAL
+					DATAFORM 「ここなら……ひと目も気にしなくていいだろう？」
+					DATAFORM 「%CALLNAME_K7(エル_対象)%がいけないのだよ……？　こんなところで発情して……」
+				ENDDATA
+					PRINTFORMW
+			ENDIF
+		CASE 10 ;
+			PRINTDATAW
+				DATAFORM 「%TOSTR(CUM_GET_COUNT:(エル):射精部位_口)%回も%SPLIT_RAND("口の中に出し/口に射精し/女の子の口を犯し/いたいけな女の子の口を精子まみれにし",1)%てもまだ満足できないんだね」
+				DATAFORM 「すごいね❤　%TOSTR(CUM_GET_COUNT:(エル):射精部位_口)%回も%SPLIT_RAND("口の中に出し/口に射精し",1)%てるのにまだまだ元気だ」
+				DATAFORM 「ふふっ❤　%TOSTR(SUM_CUM_TO_COUNT_K7(エル_対象))%回も射精したのに、まだこんなに大きいよ」
+			ENDDATA
+			PRINTFORMW 「こんな%SPLIT_RAND("ドスケベ/いやらしい/欲張り",1)%%CALL_DIRTY_K7("Ｐ")%%SPLIT_RAND("は、もっとご奉仕してあげないとね❤/は、もっと気持ち良くしてあげないと❤",1)%」
+			PRINTDATAL
+				DATAFORM 「……大いに感謝してほしいね」
+				DATAFORM 「ほら、力を抜いて……」
+				DATAFORM 「ふふっ、いただきます❤」
+				DATAFORM 「……お望みのままに搾り尽くしてあげよう❤」
+			ENDDATA
+			PRINTL
+			CASEELSE
+		ENDSELECT
+	;口塞口上につなぐ
+	CALL KOJO_K7_CANNOT_TALK(エル_対象)
+	RETURN 0
+ENDIF
+
+;─────────────────────────────────────── 
+;●その他
+;─────────────────────────────────────── 
+PRINTDATAL
+	DATAFORM 「さて、どうしたものかな……」
+ENDDATA
+RETURN 0
+
+;─────────────────────────────────────── 
+;●戻る
+;─────────────────────────────────────── 
+RETURN 0
+
+
+
+;─────────────────────────────────────── 
+;■日常_実行_実行後
+;─────────────────────────────────────── 
+@KOJO_K7_NOON_AFTER_PLAYER(エル_対象)
+#DIM エル
+#DIM エル_対象
+#DIMS エル機嫌
+
+IF !エル_対象
+	エル_対象 = MASTER
+ENDIF
+
+エル = NAME_TO_CHARA("エル")
+エル機嫌 '= TOSTR_EMOTION(エル)
+
+;─────────────────────────────────────── 
+;●機嫌が悪ければ通常のコマンド口上は喋らない
+;─────────────────────────────────────── 
+SELECTCASE エル機嫌
+	CASE "恨", "怒", "憤"
+		RETURN 0
+
+	CASE "鬱", "悲", "憂"
+		RETURN 0
+
+	CASE  "狂", "恐", "怯"
+		RETURN 0
+
+	CASEELSE
+
+ENDSELECT
+
+;─────────────────────────────────────── 
+;●髪を梳く・櫛で梳かす
+;─────────────────────────────────────── 
+IF GROUPMATCH(SELECTCOM, 322, 323)
+	;描写オフ
+	RETURN 1
+ENDIF
+
+;─────────────────────────────────────── 
+;●Ｍ絶頂
+;─────────────────────────────────────── 
+IF NOWEX:エル:Ｍ絶頂 > NOWEX:エル:Ｃ絶頂 && NOWEX:エル:Ｍ絶頂 > NOWEX:エル:Ｂ絶頂 && NOWEX:エル:Ｍ絶頂 > NOWEX:エル:Ａ絶頂 && NOWEX:エル:Ｍ絶頂 > NOWEX:エル:Ｖ絶頂 && NOWEX:エル:Ｍ絶頂 > NOWEX:エル:射精
+	IF NOWEX:エル:Ｍ絶頂 > 0
+		PRINTFORM 「
+
+		PRINTDATA
+			DATAFORM んっ
+			DATAFORM んぇれ
+			DATAFORM はぁっ
+			DATAFORM んぷっ
+			DATAFORM んえうっ
+			DATAFORM うむぁ、ぷ
+		ENDDATA
+		PRINTFORM %BREAK_K7("中", エル_対象)%
+
+		PRINTDATA
+			DATAFORM んぐ、んくぅっ
+			DATAFORM あむっ
+			DATAFORM ぷ、んっ
+			DATAFORM んうぅ～……っ
+			DATAFORM ふぢゅ
+			DATAFORM んぐっ
+		ENDDATA
+		PRINTFORM %BREAK_K7("中", エル_対象)%
+
+		PRINTDATA
+			DATAFORM んく
+			DATAFORM うふぐっ
+			DATAFORM ふっ
+			DATAFORM ぢゅっ
+			DATAFORM ううっ
+			DATAFORM んんんっ
+		ENDDATA
+		PRINTFORM %BREAK_K7("末", エル_対象)%
+
+		PRINTFORML 」
+	ENDIF
+ENDIF
+
+;─────────────────────────────────────── 
+;●戻る
+;─────────────────────────────────────── 
+RETURN 0
+

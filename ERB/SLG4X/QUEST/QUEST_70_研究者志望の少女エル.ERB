@@ -1,0 +1,132 @@
+﻿;--------------------------
+; クエスト名　少女エル
+; 奔放な研究者志望の少女、エルの加入クエスト
+;--------------------------
+@QUEST_DESCRIPTION_70
+PRINTFORML [クエスト概要]
+PRINTFORML 数多の人々が足早に行き交う宇宙港のロビーで%ANAME(MASTER)%は所在なさげに佇む一人の少女に出会い……
+PRINTL
+RETURN
+
+;--------------------------
+; クエスト受注可能か
+;--------------------------
+@QUEST_ACCEPTABLE_70
+SIF QUEST_PROGRESS:70 > 2
+	RETURN 0
+
+CALL GET_STAR_ID_FROM_POS(CHARACTER_POSITION)
+SIF STAR_OWNER:RESULT == 国家ID_民主主義 && STAR_NAME:RESULT == "アース" && CFLAG:NAME_TO_CHARA("エル"):所属 != 国家ID_プレイヤー
+	RETURN 1
+RETURN 0
+
+;--------------------------
+; クエストの名前を返却
+;--------------------------
+@QUEST_NAME_70
+RESULTS = 研究者志望の少女エル
+RETURN
+
+;--------------------------
+; クエスト本体
+;--------------------------
+@QUEST_BODY_70  
+SETCOLOR エル_口上カラー
+
+;初対面
+IF CFLAG:NAME_TO_CHARA("エル"):面識 != 1
+	PRINTFORMDL %ANAME(MASTER)%はアースの宇宙港に降り立った。
+	PRINTFORMDL 民主主義国の主星であるこの惑星の宇宙港はあまねく宇宙に人々を送り出す大動脈である。
+	PRINTFORMDW 数多の人々が商談から冒険、観光、多種多様な目的を胸に、足早に行き交う。
+	PRINTL
+	PRINTFORMDL あまりの人の多さに軽く圧倒された%ANAME(MASTER)%は、押し寄せる人の奔流を右へ左へと避ける。
+	PRINTFORMDW 半ば人の流れからはじき出される形でたどり着いたラウンジの隅には既に先客がいた。
+	PRINTL
+	PRINTFORMW 「いやぁ、ここの宇宙港は本当にすごい人の量だねぇ」
+	PRINTFORMDL 這々の体の%ANAME(MASTER)%に声をかけたのは一人の少女だった。
+	PRINTFORMDL 年齢は十代半ばといったところだろうか？　雪のように白く長い髪が真っ先に目を惹いた。
+	PRINTFORMDW %ANAME(MASTER)%は壁にもたれて少女としばしの間雑談を交わす。
+	PRINTL
+	PRINTFORMW 「名乗るのが遅れたね、私はエレオノーラ、エレオノーラ＝シュテルン。エルでいいよ」
+	PRINTFORMW 「私はもともと主星の工科大学の学生だったんだ。専門は宇宙物理学だけれど、情報工学や他にもいろいろかじっていたよ」
+	PRINTFORMW 「ただまぁ……そのなんというか……研究室にこもってばかりの日々に飽きてしまってね」
+	PRINTL
+	PRINTFORMDL 彼女が在籍していたという主星の工科大学は名門として名高い。
+	PRINTFORMDW 十代前半にして入学を認められていたという点は驚嘆に値する。
+	PRINTL
+	PRINTFORML 「ちょっと手を伸ばせばすぐに銀河の縁に手が届く時代だ。
+	PRINTFORMW なのに、来る日も来る日も地上から数値と映像だけで宇宙を望むだけなんて、あまりにも味気ないじゃないか」
+	PRINTL 
+	PRINTFORMW 「……そんなわけで勢いだけで大学を飛び出してきたまでは良かったんだけどねぇ……。
+	PRINTL
+	PRINTFORML 同乗させてもらうはずだった巡航観測船が宇宙海賊に拿捕されてしまってね、行く宛がなくなってしまった」
+	PRINTFORMW それでこうして、ここで途方にくれていたというわけだ」
+	PRINTL
+	PRINTFORMDW 大きなマリンブルーの瞳をくるりと回しておどけて見せる彼女の様子はどこか楽天的で、悲観的な様子はない。
+	PRINTL 
+	PRINTFORMDW ――彼女にはクルーとしての素質があるかもしれない。%ANAME(MASTER)%は少し思案した。
+	PRINTL 
+	PRINTFORMDW …知性は、折り紙付きだ。宇宙物理学と情報工学に秀た彼女の能力は航海に大いに役立つだろう。
+	PRINTFORMDL ………加えて胆力もある。順風満帆の学生生活を投げうち、目先の目標を失ってなお悲観する様子を見せない様は
+	PRINTFORMDW　危険を伴う航海に打ち勝つだけの精神力があるように見える。
+	PRINTL 
+	PRINTFORMDW　あとは著しい経験の少なさと、時折垣間見える尊大さをどう評価するか次第だろう。
+	PRINTFORMDW 前者に関しては、その十分すぎる伸びしろであっと今に克服してしまうに違いない。
+	PRINTFORMDW 後者は……能力と若さからくるものだろう。今後の教育次第といったところか。
+	PRINTL
+	PRINTFORMDL ――%ANAME(MASTER)%は、この若き奔放な少女エルをクルーに勧誘してもいいし、しなくてもいい
+	PRINTFORMDW エルをクルーに勧誘しますか？
+	PRINTL 	
+	CALL ASK_YN("クルーに誘う","やめておく")
+	IF RESULT == 1
+		PRINTFORMDL ――やめておこう。
+		PRINTFORMDW　あなたは考えを改めると彼女に別れを告げた。
+		PRINTFORMW 「おや、もう行くのかい？　話に付き合ってくれてありがとう。見ての通り暇を持て余していたからね」
+		PRINTFORMW 「まぁしばらくここにいるだろうから、気が向いたらまた話に付き合ってよ」 
+	ELSE
+		PRINTFORMDL ――いい考えだ。なにせ今は猫の手でも借りたい状況だ。
+		PRINTFORMDW　あなたはエルにクルーに加わらないかと打診した。
+		PRINTL
+		PRINTFORMW 「私を……クルーに？」
+		PRINTL
+		PRINTFORMDW エルは少し驚いた様子で思案する。
+		PRINTL 
+		PRINTFORMW 「なるほど、そういう選択もあるのか……」 
+		PRINTL
+		PRINTFORMW 「うん、いいね、悪くない！」
+		PRINTFORMW 「よろしく頼むよ。　しばらくの間、私達は一蓮托生だ。」 
+		PRINTL 
+		CFLAG:NAME_TO_CHARA("エル"):所属 = 国家ID_プレイヤー
+		PRINTFORMDL エルが仲間になった
+	ENDIF
+;二回目以降
+ELSE
+	PRINTFORMDL 後日、再びアースに降り立った%ANAME(MASTER)%はエルと会うことにした。
+	PRINTL 
+	PRINTFORMW 「やぁ、また会ったね」
+	PRINTFORMDL ――どうしたものだろう？　エルをクルーに勧誘するべきだろうか？
+	PRINTFORMDW エルをクルーに勧誘しますか？
+	CALL ASK_YN("クルーに誘う","やめておく")
+	IF RESULT == 1
+		PRINTFORMDL ――やめておこう。
+		PRINTFORMDW　あなたはしばしの他愛のない会話の後、彼女に別れを告げた。
+	ELSE
+		PRINTFORMDL ――いい考えだ。なにせ今は猫の手でも借りたい状況だ。
+		PRINTFORMDW　あなたはエルにクルーに加わらないかと打診した。
+		PRINTL
+		PRINTFORMW 「私を……クルーに？」
+		PRINTFORMDL エルは少し驚いた様子で思案する。
+		PRINTFORMW 「なるほど、そういう選択もあるのか……」 
+		PRINTL
+		PRINTFORMW 「うん、いいね、悪くない！」		
+		PRINTFORMW 「よろしく頼むよ。　しばらくの間、私達は一蓮托生だ。」 
+		PRINTL 
+
+		CFLAG:NAME_TO_CHARA("エル"):所属 = 国家ID_プレイヤー
+		PRINTFORMDL エルが仲間になった
+	ENDIF 
+ENDIF
+CFLAG:NAME_TO_CHARA("エル"):面識 = 1
+RESETCOLOR 
+
+QUEST_PROGRESS:70 = 1

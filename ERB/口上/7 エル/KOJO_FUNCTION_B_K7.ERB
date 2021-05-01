@@ -1,0 +1,20 @@
+﻿;─────────────────────────────────────── 
+;●今後の実装によって影響を受けそうな関数はこのファイルにまとめる
+;─────────────────────────────────────── 
+;星系港か宇宙港にいるかどうかを判定する。
+;船旅中かどうか判定するために使う
+@IS_IN_PORT_K7
+#FUNCTION
+
+FOR COUNT, 0, 星系数
+	IF 星系座標ID:COUNT == CHARACTER_POSITION
+		RETURNF 1
+	ENDIF
+NEXT
+FOR COUNT, 0, MAX_PORT
+	IF PORT_POSITION_ID:COUNT == CHARACTER_POSITION
+		RETURNF 1
+	ENDIF
+NEXT
+
+RETURNF 0
