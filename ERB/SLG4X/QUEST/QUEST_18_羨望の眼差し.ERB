@@ -11,6 +11,8 @@
 @QUEST_ACCEPTABLE_18
 SIF !QUEST_PROGRESS:8 || QUEST_PROGRESS:18
 	RETURN 0
+SIF CFLAG:NAME_TO_CHARA("なずな"):所属 == 国家ID_プレイヤー
+	RETURN 0
 RETURN 1
 
 ;--------------------------

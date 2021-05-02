@@ -1391,12 +1391,21 @@ PRINTL 国籍：企業連合
 PRINTL 所属：企業連合 傭兵ギルド
 PRINTL 性格：物静か（酒が入ると明るくなる）
 PRINTL 
+PRINTBUTTON "[8] なずな" ,8
+PRINTL
+PRINTL 性別：女 年齢：1X歳
+PRINTL 国籍：豊秋津皇国
+PRINTL 所属：なし
+PRINTL 性格：冷静
+PRINTL 
 INPUT
 SELECTCASE RESULT
 	CASE 4
 		CFLAG:NAME_TO_CHARA("ジェイン"):所属 = 国家ID_プレイヤー
 	CASE 5
 		CFLAG:NAME_TO_CHARA("リーシャ"):所属 = 国家ID_プレイヤー
+	CASE 8
+		CFLAG:NAME_TO_CHARA("なずな"):所属 = 国家ID_プレイヤー
 	CASEELSE
 		GOTO INPUT_LOOP
 ENDSELECT
