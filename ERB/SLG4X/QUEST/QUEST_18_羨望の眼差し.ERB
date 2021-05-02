@@ -1,0 +1,54 @@
+﻿;--------------------------
+; !!羨望の眼差しと 18を好きな番号に変える！!
+; 羨望の眼差し
+; ここにクエストの説明
+;--------------------------
+
+
+;--------------------------
+; クエスト受注可能か
+;--------------------------
+@QUEST_ACCEPTABLE_18
+SIF !QUEST_PROGRESS:8 || QUEST_PROGRESS:18
+	RETURN 0
+RETURN 1
+
+;--------------------------
+; クエストの名前を返却
+;--------------------------
+@QUEST_NAME_18
+RESULTS = 羨望の眼差し
+RETURN
+
+;--------------------------
+; クエスト本体
+;--------------------------
+@QUEST_BODY_18
+
+PRINTFORML 「あなた、御淑女からコルベットを譲り受けていましたね」
+PRINTFORML %CALLNAME:MASTER%が宇宙港を歩いていると、不意に一人の女性に声をかけられた
+PRINTFORMW ジト目でみた感じハイティーンの女性だ
+PRINTL
+PRINTFORML 「羨ましいです。私も宇宙船の艦長をやってみたかったです」
+PRINTFORML 「そうだ、たくさんのコルベットを一気にもらって、艦長は不足していませんか？」
+PRINTFORML 「私、艦長職を探しているんです。よかったら雇ってくれないでしょうか」
+PRINTFORMW 畳み掛けるようないきなりの申し出に、%CALLNAME:MASTER%は面食らってしまった。
+PRINTL
+PRINTFORML 「あ、挨拶が遅れました。私は なずな と申します」
+PRINTFORML 苗字を名乗らないあたり、偽名のようだ。ますます怪しい。
+PRINTFORML さて、どうしたものか
+CALL ASK_YN("雇う", "雇わない")
+IF RESULT == 1
+	PRINTFORML いきなり素性のわからない女を雇うわけにはいかない
+	PRINTFORMW %CALLNAME:MASTER%は女性を適当にあしらい、その場を後にした
+	RETURN 0
+ENDIF
+PRINTFORML 雇ってもいいが、しばらくは素性や人柄を確認する必要があるのですぐには艦に載せられない
+PRINTFORML もしかしたら他の仕事についてもらう可能性もある
+PRINTFORML %CALLNAME:MASTER%がそう告げると、なずなはぱあっと顔を輝かせた
+PRINTFORMW 「いいんですか！？ ありがとうございます！」
+PRINTL
+PRINTFORML こうして%CALLNAME:MASTER%は意図せずしてなずなを手に入れてしまった
+PRINTFORML なずなが仲間に加わりました
+CFLAG:NAME_TO_CHARA("なずな"):所属 = 国家ID_プレイヤー
+QUEST_PROGRESS:18 = 1
