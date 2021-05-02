@@ -1,0 +1,143 @@
+﻿;---------------------
+;基本的な発生確率(1000分率 100で10%)
+;これにコンフィグ項目の発生頻度がかけられるので、必ずしもこの通りにはならない
+;---------------------
+@EVENT_DAILY_PROPOSE_RATE()
+RETURN 80
+
+
+;---------------------
+;確率以外の発生判定
+;〇期以降になると発生するとか、デイリー側で利用している変数が-1だったら起こさない　みたいなはじき方をするときに使う
+;---------------------
+@EVENT_DAILY_PROPOSE_DECISION()
+#DIM 候補人数
+#DIM 対象
+
+SIF !CONFIG:18
+  RETURN 0
+
+候補人数 = 0
+FOR LOCAL, 1, CHARANUM
+  FOR 対象, LOCAL + 1, CHARANUM
+    SIF LOCAL == 対象
+      CONTINUE
+    SIF REL_LIKE:LOCAL:対象 != 1500
+      CONTINUE
+    SIF REL_LIKE:対象:LOCAL != 1500
+      CONTINUE
+    SIF CONFIG:18 == 2 && TALENT:LOCAL:性別 == TALENT:対象:性別
+      CONTINUE
+    SIF CONFIG:18 == 3 && GROUPMATCH(TALENT:LOCAL:性別, 1, 2) && GROUPMATCH(TALENT:対象:性別, 1, 2)
+      CONTINUE
+    SIF CONFIG:18 == 4 && GROUPMATCH(TALENT:LOCAL:性別, 1, 3, 4, 5) && GROUPMATCH(TALENT:対象:性別, 1, 3, 4, 5)
+      CONTINUE
+    SIF REL_PROGRESS:LOCAL:対象 != 関係_恋人
+      CONTINUE
+    SIF REL_PROGRESS_VALUE:LOCAL:対象 != MAX_LIKE || REL_PROGRESS_VALUE:対象:LOCAL != MAX_LIKE
+      CONTINUE
+    候補人数 ++
+  NEXT
+NEXT
+RETURN 候補人数
+
+;---------------------
+;ジャンル
+;コンフィグ設定で使用
+;---------------------
+@EVENT_DAILY_PROPOSE_GENRE()
+RETURN デイリー_ジャンル_その他
+
+;---------------------
+;特定の条件を満たすキャラをランダムに選択する場合に利用
+;他の関数は必須だが、これだけはなくてもよい　というかパフォーマンスへ影響するので不要なら作ってはならない
+;対象が存在せずデイリーを開始できない場合は0を返すことでデイリーの発生をキャンセルする
+;---------------------
+@EVENT_DAILY_PROPOSE_SETTARGET()
+#DIM ペアID
+#DIM 対象
+#DIM ペア, 2, MAX_CHARA_NUM
+#DIM 今回のペア
+
+ペアID = 0
+FOR LOCAL, 1, CHARANUM
+  FOR 対象, LOCAL + 1, CHARANUM
+    SIF LOCAL == 対象
+      CONTINUE
+    SIF REL_LIKE:LOCAL:対象 != 1500
+      CONTINUE
+    SIF REL_LIKE:対象:LOCAL != 1500
+      CONTINUE
+    SIF CONFIG:18 == 2 && TALENT:LOCAL:性別 == TALENT:対象:性別
+      CONTINUE
+    SIF CONFIG:18 == 3 && GROUPMATCH(TALENT:LOCAL:性別, 1, 2) && GROUPMATCH(TALENT:対象:性別, 1, 2)
+      CONTINUE
+    SIF CONFIG:18 == 4 && GROUPMATCH(TALENT:LOCAL:性別, 1, 3, 4, 5) && GROUPMATCH(TALENT:対象:性別, 1, 3, 4, 5)
+      CONTINUE
+    SIF REL_PROGRESS:LOCAL:対象 != 関係_恋人
+      CONTINUE
+    SIF REL_PROGRESS_VALUE:LOCAL:対象 != MAX_LIKE || REL_PROGRESS_VALUE:対象:LOCAL != MAX_LIKE
+      CONTINUE
+    ペア:0:ペアID = LOCAL
+    ペア:1:ペアID = 対象
+    ペアID ++
+  NEXT
+NEXT
+
+今回のペア = RAND:ペアID
+DAILY_TARGET:0 = ペア:0:今回のペア
+DAILY_TARGET:1 = ペア:1:今回のペア
+
+RETURN 1
+
+
+;---------------------
+;本体
+;イベントが発生した場合は1、発生しなかった場合は0を返す
+;発生しなかったというのは例えば、特定条件を満たすキャラからランダムに一人選ぶデイリーで、そもそもその条件を満たすキャラが一人もいないみたいなとき
+;旧仕様で作ったことある人向けにいうと「旧仕様のデイリー本体冒頭で-1を返すような状況」
+;---------------------
+@EVENT_DAILY_PROPOSE()
+
+;DAILY_TARGET:0がご主人様パターン
+IF TALENT:(DAILY_TARGET:0):Ｓ気質 && TALENT:(DAILY_TARGET:1):Ｍ気質
+  PRINTFORMW %CALLNAME:MASTER%の預かり知らぬところで、１組のご主人様と奴隷が生まれたようだ
+  PRINTFORMW %CALLNAME:(DAILY_TARGET:0)%から奴隷の証である首輪を贈られた%CALLNAME:(DAILY_TARGET:1)%は、嬉々としてそれを首に巻いて見せた
+  PRINTFORMW %CALLNAME:(DAILY_TARGET:1)%は興奮して上記した顔で自発的に奴隷宣言をすると、%CALLNAME:(DAILY_TARGET:0)%の足にキスをするのだった
+  SETCOLOR カラー_ピンク
+  PRINTFORMW %CALLNAME:(DAILY_TARGET:0)%が%CALLNAME:(DAILY_TARGET:1)%のご主人様になりました
+  PRINTFORMW %CALLNAME:(DAILY_TARGET:1)%が%CALLNAME:(DAILY_TARGET:0)%の性奴隷になりました
+  RESETCOLOR
+  TALENT:(DAILY_TARGET:0):誰かの主人 = 1
+  TALENT:(DAILY_TARGET:1):誰かの奴隷 = 1
+  REL_PROGRESS:(DAILY_TARGET:0):(DAILY_TARGET:1) = 関係_主人
+  REL_PROGRESS:(DAILY_TARGET:1):(DAILY_TARGET:0) = 関係_奴隷
+;DAILY_TARGET:1がご主人様パターン
+ELSEIF TALENT:(DAILY_TARGET:1):Ｓ気質 && TALENT:(DAILY_TARGET:0):Ｍ気質
+  PRINTFORMW %CALLNAME:MASTER%の預かり知らぬところで、１組のご主人様と奴隷が生まれたようだ
+  PRINTFORMW %CALLNAME:(DAILY_TARGET:1)%から奴隷の証である首輪を贈られた%CALLNAME:(DAILY_TARGET:0)%は、嬉々としてそれを首に巻いて見せた
+  PRINTFORMW %CALLNAME:(DAILY_TARGET:0)%は興奮して上記した顔で自発的に奴隷宣言をすると、%CALLNAME:(DAILY_TARGET:1)%の足にキスをするのだった
+  SETCOLOR カラー_ピンク
+  PRINTFORMW %CALLNAME:(DAILY_TARGET:1)%が%CALLNAME:(DAILY_TARGET:0)%のご主人様になりました
+  PRINTFORMW %CALLNAME:(DAILY_TARGET:0)%が%CALLNAME:(DAILY_TARGET:1)%の性奴隷になりました
+  RESETCOLOR
+  TALENT:(DAILY_TARGET:0):誰かの奴隷 = 1
+  TALENT:(DAILY_TARGET:1):誰かの主人 = 1
+  REL_PROGRESS:(DAILY_TARGET:0):(DAILY_TARGET:1) = 関係_奴隷
+  REL_PROGRESS:(DAILY_TARGET:1):(DAILY_TARGET:0) = 関係_主人
+;パートナーパターン
+ELSE
+  PRINTFORMW %CALLNAME:MASTER%の預かり知らぬところで、１組の夫婦が生まれたようだ
+  PRINTFORMW %CALLNAME:(DAILY_TARGET:0)%の告白を受けた%CALLNAME:(DAILY_TARGET:1)%は、笑顔でそれを受け入れた
+  PRINTFORMW 二人は長いキスをすると、結婚指輪をどうするか、新婚旅行をどうするか、明るい未来について語り合うのだった
+  SETCOLOR カラー_ピンク
+  PRINTFORMW %CALLNAME:(DAILY_TARGET:0)%が%CALLNAME:(DAILY_TARGET:1)%と結婚しました
+  RESETCOLOR
+  TALENT:(DAILY_TARGET:0):既婚者 = 1
+  TALENT:(DAILY_TARGET:1):既婚者 = 1
+  REL_PROGRESS:(DAILY_TARGET:0):(DAILY_TARGET:1) = 関係_夫婦
+  REL_PROGRESS:(DAILY_TARGET:1):(DAILY_TARGET:0) = 関係_夫婦
+ENDIF
+REL_PROGRESS_VALUE:(DAILY_TARGET:0):(DAILY_TARGET:1) = 0
+REL_PROGRESS_VALUE:(DAILY_TARGET:1):(DAILY_TARGET:0) = 0
+RETURN 1
