@@ -1,0 +1,63 @@
+﻿;--------------------------
+; 遺棄された貨物船
+;--------------------------
+@INIT_ANOMALY_3
+#DIM TASK_COMPLETE
+#DIM SECTOR_ID
+#DIM POS_X
+#DIM POS_Y
+; 救難信号
+WHILE TASK_COMPLETE == 0
+	SECTOR_ID = RAND:MAX_SECTOR
+	POS_X = RAND:(MAP_WIDTH)
+	POS_Y = RAND:(MAP_HEIGHT)
+	SIF MAP:SECTOR_ID:POS_X:POS_Y != 明瞭
+		CONTINUE
+	MAP:SECTOR_ID:POS_X:POS_Y = ANOMALY
+	ANOMALY_MAP:SECTOR_ID:POS_X:POS_Y = 救難信号
+	CALL POS2ID(SECTOR_ID, POS_X, POS_Y)
+	ANOMALY_POSITIONID:3 = RESULT
+	TASK_COMPLETE = 1
+WEND
+ANOMALY_PROGRESS:3 = 1
+
+;--------------------------
+; ANOMALY本体
+;--------------------------
+@ANOMALY_BODY_救難信号
+#DIM ITER
+#DIM SHIP_ID
+#DIM SECTOR_ID
+#DIM X_POS
+#DIM Y_POS
+
+PRINTL 宙域に救難信号を発する脱出ポッドが浮かんでいる……
+PRINTL 回収しますか？
+CALL ASK_YN
+SIF RESULT == 1
+	RETURN
+
+PRINTL 中に入っていたのはコールドスリープ状態の二人の少女だった
+PRINTL　コールドスリープを解除し、無理やり話を聞いたところ、なんとどこぞの研究施設から逃げ出してきた超能力兵だという
+PRINTFORML 彼女たちは%CALLNAME:MASTER%に保護を求めている。断れば暴れ出しそうな雰囲気だ……
+PRINTFORMW %CALLNAME:MASTER%は仕方なく彼女たちを保護することにした。
+PRINTL 
+PRINTW クエスト窓口に戻って、適当に誤魔化して報酬をもらおう。救難信号は止めたのでその権利はあるはずだ
+CALL ID2POS(ANOMALY_POSITIONID:3)
+SECTOR_ID = RESULT:0
+X_POS = RESULT:1
+Y_POS = RESULT:2
+ANOMALY_MAP:SECTOR_ID:X_POS:Y_POS = %""%
+MAP:SECTOR_ID:X_POS:Y_POS = 明瞭
+ANOMALY_PROGRESS:3 = 2
+IF QUEST_PROGRESS:20 > 0
+	QUEST_PROGRESS:20 = 2
+ELSE
+	QUEST_PROGRESS:20 = 3
+ENDIF
+CFLAG:NAME_TO_CHARA("プレア"):所属 = 国家ID_プレイヤー
+CFLAG:NAME_TO_CHARA("ウェイン"):所属 = 国家ID_プレイヤー
+
+
+
+

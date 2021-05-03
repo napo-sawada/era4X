@@ -1,0 +1,64 @@
+﻿;--------------------------
+; !!救難信号と 20を好きな番号に変える！!
+; 救難信号
+; ここにクエストの説明
+;--------------------------
+
+
+;--------------------------
+; クエスト受注可能か
+;--------------------------
+@QUEST_ACCEPTABLE_20
+SIF QUEST_PROGRESS:20 == 3
+	RETURN 0
+RETURN 1
+
+;--------------------------
+; クエストの名前を返却
+;--------------------------
+@QUEST_NAME_20
+RESULTS = 救難信号
+RETURN
+
+;--------------------------
+; クエスト本体
+;--------------------------
+@QUEST_BODY_20
+SIF QUEST_PROGRESS:20 == 3
+	RETURN 0
+
+IF QUEST_PROGRESS:20 == 0
+	QUEST_PROGRESS:20 = 1
+	SIF ANOMALY_PROGRESS:3 == 0
+		CALL INIT_ANOMALY_3
+
+	PRINTFORML %CALLNAME:MASTER%はどこぞの宙域で発生している救難信号を確認してこいとのクエストを受注した
+	PRINTFORM 救難信号を発している座標は
+
+	CALL ID2POS(ANOMALY_POSITIONID:3)
+	SETCOLOR カラー_警告
+	PRINTFORMW セクター＃{RESULT:0}のX:{RESULT:1}, Y:{RESULT:2}だ
+	RESETCOLOR
+
+	PRINTL
+	PRINTFORMW 余裕があるときに確認に向かおう
+	PRINTL
+	QUEST_PROGRESS:20 = 1
+ELSEIF QUEST_PROGRESS:20 == 1
+	PRINTFORM 救難信号を発している座標は
+
+	CALL ID2POS(ANOMALY_POSITIONID:3)
+	SETCOLOR カラー_警告
+	PRINTFORMW セクター＃{RESULT:0}のX:{RESULT:1}, Y:{RESULT:2}だ
+	RESETCOLOR
+
+	PRINTL
+	PRINTFORMW 余裕があるときに確認に向かおう
+	PRINTL
+ELSEIF QUEST_PROGRESS:20 == 2
+	PRINTFORML %CALLNAME:MASTER%はクエスト受け付けで適当な作り話をして超能力兵を匿ったことを誤魔化して報酬を受け取った
+	PRINTFORMW MONEY +$10,000
+	MONEY += 10000
+	QUEST_PROGRESS:20 = 3
+ENDIF
+RETURN 1

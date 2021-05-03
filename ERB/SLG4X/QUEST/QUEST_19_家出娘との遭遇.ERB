@@ -1,0 +1,84 @@
+﻿;--------------------------
+; !!クエスト名と 19を好きな番号に変える！!
+; クエスト名
+; ここにクエストの説明
+;--------------------------
+
+;--------------------------
+; クエストの名前を返却
+;--------------------------
+@QUEST_NAME_19
+RESULTS = 家で娘との遭遇
+RETURN
+
+;--------------------------
+; クエスト受注可能か
+;--------------------------
+@QUEST_ACCEPTABLE_19
+SIF QUEST_PROGRESS:19 == 1
+	RETURN 0
+SIF REL_LIKE_COUNTRY:国家ID_ハールバルズ:国家ID_プレイヤー < 100
+	RETURN 0
+RETURN 1
+
+;--------------------------
+; クエスト本体
+;--------------------------
+@QUEST_BODY_19
+PRINTFORML 「あーっ！あなたもしかして、キャプテン%CALLNAME:MASTER%？！」
+PRINTL
+PRINTFORML 宇宙港に入ってすぐに甲高い少女の声があなたの名を呼んだ。
+PRINTFORML まず目についたのは柔らかそうな長いハニーブロンドの髪、その頂点には美しい意匠をしたティアラが飾れている。
+PRINTFORML 大きく美しい翠緑の瞳と整った顔立ちは間違いなく美人と言っていいだろう。
+PRINTFORMW だが背は低く体形も幼くまだ子供と言える。
+PRINTFORMW その体を包むのは白色の飾り気ないものの一目で高級な物と分かるドレス。
+PRINTFORMW 貴族の令嬢で間違いなさそうだった。
+PRINTL
+PRINTFORML だが貴族の令嬢がこんなところで何故自分に声をかけて来たのだろう？ 
+PRINTFORMW そんな疑問を無視してその少女は話を続けた。
+PRINTL
+PRINTFORML 「ふふあの噂のキャプテン%CALLNAME:MASTER%に会えるなんて、やっぱり私は運がいいわ」
+PRINTFORMW 「私はクリムヒルド＝フォン＝エーインワース、お会いできて光栄ですわ、キャプテン%CALLNAME:MASTER%」
+PRINTL
+PRINTFORMW やはり貴族の令嬢のようだ、そこで何の用か聞いてみる。
+PRINTL
+PRINTFORMW 「フフ、この私の星々の漫遊にあなたを伴う事を決めたの、素晴らしいでしょ！」
+PRINTL
+PRINTFORML ……意味が分からない。
+PRINTFORMW なので詳しい話を聞いてみると……
+PRINTL
+PRINTFORMW どうやらこの少女――ヒルドは最近王国で噂になりつつある自分の活躍を聞いて、
+PRINTFORML 宇宙への憧れと閉塞的な貴族の生活に飽き飽きして、
+PRINTFORMW 無断で家から飛び出してきたようだ。
+PRINTL
+PRINTFORMW さて、どうしたものか。
+PRINTFORMW 望み通り連れ出してもいいが相手は家出娘、最悪誘拐扱いだろう。
+PRINTFORML とは言え素直に引き渡してもこちらに得があるとも言い難い。
+PRINTFORML それに貴族の令嬢など会える機会なぞそうないだろう。
+PRINTL
+CALL ASK_MULTI("家出娘と当局に引き渡す", "このまま引き取る");奴隷商に渡しても対して金にならない（ぉ
+	SELECTCASE RESULT
+	CASE 0
+		PRINTFORML 何が悲しくてワガママ娘の言う事を聞かねばならないのか。
+		PRINTFORMW 迷わず連絡したら直ぐに家臣らしき人物たちが迎えに来た。
+		PRINTL
+		PRINTFORMW 「嫌、私帰らないんだから！」
+		PRINTFORMW 相変わらずワガママを言っていたが手慣れたものであっさりと他の人間がリムジンへと押し込んでいた。
+		PRINTL
+		PRINTFORML そして代表者らしき騎士風に人物が「ご迷惑をおかけいたしました」と形ばかりの謝罪と共にその場で幾ばくかの謝礼を振り込んだ。
+		PRINTFORMW 丁度いい小遣い稼ぎになったあなたはそう思った。
+		PRINTL
+		PRINTFORMW クリムヒルド＝フォン＝エーインワースを家族の下に帰して100,000の資金を手に入れた。
+		MONEY += 100000
+	CASE 1
+		PRINTFORMW このままにして置いたら間違いなく変なのに引っかかるだろう……。
+		PRINTFORMW 仏心を起こしたあなたは、彼女をクルーに迎えることを承認した。
+		PRINTL
+		PRINTFORMW 「当然よね！じゃこれからよろしくキャプテン%CALLNAME:MASTER%！」
+		PRINTL
+		PRINTFORMW さて、クルーとなった以上この小娘に世間の厳しさを分からせてやらないな……
+		PRINTL
+		PRINTFORMW クリムヒルド＝フォン＝エーインワースをクルーに加えた。
+		CFLAG:NAME_TO_CHARA("ヒルド"):所属 = 国家ID_プレイヤー
+	ENDSELECT
+QUEST_PROGRESS:19 = 1
