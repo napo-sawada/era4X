@@ -1,0 +1,92 @@
+﻿;--------------------------
+; !!クエスト名と 30を好きな番号に変える！!
+; 海賊の討伐
+; 近場に沸いた海賊を討伐する
+;--------------------------
+
+;--------------------------
+; クエスト受注可能か
+;--------------------------
+@QUEST_ACCEPTABLE_30
+SIF REL_LIKE_COUNTRY:国家ID_豊秋津皇国:国家ID_プレイヤー < 50
+	RETURN 0
+SIF QUEST_PROGRESS:30 > 0
+	RETURN 0
+CALL GET_STAR_ID_FROM_POS(CHARACTER_POSITION)
+SIF STAR_OWNER:RESULT == 国家ID_豊秋津皇国
+	RETURN 1
+RETURN 0
+
+;--------------------------
+; クエストの名前を返却
+;--------------------------
+@QUEST_NAME_30
+RESULTS = バクシン党の討伐依頼
+RETURN
+
+;--------------------------
+; クエスト本体
+;--------------------------
+@QUEST_BODY_30
+#DIM SECTOR_ID
+#DIM IS_COMPLETE
+#DIM SHIP_ID
+#DIM POSID
+
+IF QUEST_PROGRESS:30 == 0
+	PRINTFORMW %CALLNAME:MASTER%が依頼主に指定された場所に向かうと、皇国の高級軍人らしき男が待っていた。
+	PRINTFORMW 「来たか。最近、賊の討伐で名を挙げているそうだな」
+	PRINTFORMW 「その腕を見込んで少々面倒な賊の相手を頼みたい」
+	PRINTFORMW 「バクシン党を名乗る、維新の世に馴染めず錦の御旗に手向かった旧勢力の末裔どもだ」
+	PRINTFORML 「まったくどこからかき集めたものか、内戦時代の旧式フリゲートや
+	PRINTFORMW 　博物館モノの大型機動歩兵まで使って航路を荒らしておる」
+	PRINTFORMW 「無論あの程度の賊など皇国軍の敵ではないが、こすいネズミの相手は小回りの効く傭兵が適任だろう」
+	PRINTFORMW 「この任、引き受けてくれるか？」
+	$INPUT_LOOP
+	PRINTBUTTON "[0] はい", 0
+	PRINTBUTTON "[1] いいえ", 1
+	INPUT
+	IF RESULT == 0
+		PRINTFORMW 「よろしい。現在、このセクター内に連中は屯しておる」
+		PRINTFORMW 「$100,000の報奨を用意しておこう、武運を祈る」
+		PRINTFORMW バクシン党の討伐を引き受けた。
+		QUEST_PROGRESS:30 = 1
+		CALL ID2POS(CHARACTER_POSITION)
+		SECTOR_ID = RESULT:0
+		CALL POS2ID(SECTOR_ID, 14, 13)
+		POSID = RESULT
+		FOR SHIP_ID, 0, 9
+			CALL INIT_PRESET_SHIP(10, POSID, 天狗級機動武者, "天狗級機動武者", 天狗級機動武者)
+		NEXT
+		FOR SHIP_ID, 0, 2
+			CALL INIT_PRESET_SHIP(10, POSID, 汎用フリゲート, "開陽丸級電磁甲艦", 汎用フリゲート)
+		NEXT
+		
+	ELSEIF RESULT == 1
+		PRINTFORMW 「ふむ、そうか。なら構わん、少々手間だが警備艦隊を向かわせよう」
+		PRINTFORMW 「案ずるな。あの手の連中は逃げ足ばかり達者でな、またすぐに同じ依頼を出すことになるだろうさ」
+	ELSE
+		GOTO INPUT_LOOP
+	ENDIF
+ELSE
+	IS_COMPLETE = 1
+	FOR SHIP_ID, 0, MAX_SHIP
+		SIF SHIP_COUNTRY:SHIP_ID != 10
+			CONTINUE
+		CALL ID2POS(CHARACTER_POSITION)
+		SECTOR_ID = RESULT:0
+		CALL ID2POS(SHIP_POSITION:SHIP_ID)
+		SIF SECTOR_ID != RESULT:0
+			CONTINUE
+			IS_COMPLETE = 0
+	NEXT
+	IF IS_COMPLETE == 0
+		PRINTFORMW 「賊の討伐は任せたぞ」
+	ELSE
+		PRINTFORMW 「討伐に成功したか。では報酬を送金しておくとしよう」
+		PRINTFORMW 「かくして連中も、父祖たちと同じく時の流れに飲み込まれた。敵ながら哀れなものよ」
+		PRINTFORMW バクシン党の討伐に成功したことで、報酬$100,000を手に入れた。
+		MONEY += 100000
+		QUEST_PROGRESS:30 = 2
+	ENDIF
+ENDIF
