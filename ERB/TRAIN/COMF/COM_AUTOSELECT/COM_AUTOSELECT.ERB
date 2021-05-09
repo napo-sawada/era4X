@@ -210,7 +210,8 @@ IF !RESULT
 	ELSE
 		DEBUGPRINTFORML ※10回選択したコマンドの判定に失敗したので状況を無視し、
 		DEBUGPRINTFORML 　強制的に『なにもしない』を選択します
-		CALL CLEAR_MTAR()
+		;MTAR = -1 の状態で継続中のコマンドがあると『なにもしない』時にエラーとなるのでコメントアウト
+		; CALL CLEAR_MTAR()
 		CALL CLEAR_MPLY()
 		CALL ADD_MPLY(MAIN_PLAYER)
 		FINAL_COM = GET_TRAINNUM("なにもしない")

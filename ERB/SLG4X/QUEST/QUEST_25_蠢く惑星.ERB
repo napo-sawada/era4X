@@ -1,0 +1,898 @@
+﻿;-------------------------------------------------
+; クエスト番号_25
+; クエスト名：蠢く惑星
+;
+;お使いに出したキャラがひどい目に会うやつ
+;-------------------------------------------------
+@QUEST_DESCRIPTION_25
+PRINTFORML [クエスト概要]
+PRINTFORML 新たに発見された居住可能惑星の調査に向かった異星生物学の研究チームが消息を絶った
+PRINTFORML 研究責任者はチームの消息のを血眼で探しているようだ
+PRINTL
+CALL COLOR_PRINTL("凄惨な結果を伴う可能性のあるクエストだ。仲間を大事に思うならば、行動は慎重に行うべきだろう", カラー_注意)
+PRINTL
+RETURN
+
+;--------------------------
+; クエスト受注可能か
+;--------------------------
+@QUEST_ACCEPTABLE_25()
+#DIM QUEST_ID = 25
+;;クエスト未受注かつ再受注時期未達の場合表示を消す
+CALL GET_STAR_ID_FROM_POS(CHARACTER_POSITION)
+SIF (QUEST_PROGRESS:QUEST_ID  == 0 || QUEST_PROGRESS:QUEST_ID <= 5) && STAR_OWNER:RESULT == 国家ID_社会主義
+	RETURN 1
+RETURN 0
+	
+;--------------------------
+; クエストの名前を返却
+;--------------------------
+@QUEST_NAME_25()
+RESULTS = 蠢く惑星
+RETURN
+
+;--------------------------
+; マップでの表示
+;--------------------------
+@QUEST_SET_TILE_25(ARG:0)
+#DIM QUEST_ID = 25
+;2byte分なら全角でも半角でも崩れない
+RESULTS '= "●"
+SETCOLOR 0xC75467
+RETURN 1
+
+;右下小窓に出す。隠したければ関数コメントアウトか"空白宙域"
+@QUEST_MAP_INFO_25(ARG:0)
+#DIM QUEST_ID = 25
+	IF QUEST_PROGRESS:QUEST_ID <= 5
+		RESULTS:0 '= "眼下には未知の惑星が見える"
+		RESULTS:1 '= ""
+		RESULTS:2 '= ""
+		RESULTS:3 '= ""
+		RESULTS:4 '= ""
+	ELSEIF QUEST_PROGRESS:QUEST_ID >= 7
+		RESULTS:0 '= "眼下に惑星が見える"
+		RESULTS:1 '= "大量の触手生物の巣食う惑星だ"
+		RESULTS:2 '= ""
+		RESULTS:3 '= ""
+		RESULTS:4 '= ""
+ENDIF
+RETURN 1
+
+;-----------------------
+; マップからQUEST_BODYを実行する処理
+;--------------------------
+@QUEST_SHOW_COMMAND_25()
+RESULTS '= "軌道降下"
+RETURN 1
+
+@QUEST_REACH_PLACE_25()
+#DIM QUEST_ID = 25
+;雰囲気づくりにダミーの宙域画面をだしている（操作窓のないやつ）
+;ココはターンエンドで呼び出されるので文字だけや戦闘に入るならなくていい
+;CALL DRAW_WINDOW( CHARACTER_POSITION:MASTER/10000 , -1 , BOARDING_SHIP_ID:MASTER , 0)
+SELECTCASE QUEST_PROGRESS:QUEST_ID
+CASE 4
+	DRAWLINE
+	PRINTFORML
+	PRINTFORML 新たに発見された居住可能惑星がある座標に到達した
+	PRINTFORML 
+	PRINTFORML 眼下には清涼な青い海を湛えた惑星が広がっている
+	PRINTFORML 大陸には赤みがかった色合いの森林が見て取れる。どうやら植生も豊富なようだ。
+	PRINTFORML
+	PRINTFORML 計器は理想的な居住可能惑星であることを示している。今のところ危険な兆候は見られないが……
+	PRINTFORML
+	CALL COLOR_PRINTL("[Q] 軌道降下　コマンドでクルーを惑星に送り込める", カラー_注意)
+	PRINTW
+CASE 5
+	PRINTFORML
+	PRINTFORML 未開惑星の上空にいる
+	PRINTFORML 
+	PRINTFORML あの森林の一つ、一つが飢えた触手生物の群体であり、哀れな犠牲者を待ち構えているのだろう……
+	PRINTFORML
+CASE 7
+	PRINTFORML 
+	PRINTFORML 触手生物の巣食う未開惑星の上空に侵入した
+	PRINTFORML 
+	PRINTFORML あの森林の一つ、一つが飢えた触手生物の群体であり、哀れな犠牲者を待ち構えている
+	PRINTFORML
+	CALL COLOR_PRINTL("[Q] 軌道降下　コマンドでクルーを惑星に送り込める", カラー_注意)
+ENDSELECT
+RETURN
+
+
+;--------------------------
+; クエスト本体
+;--------------------------
+@QUEST_BODY_25()
+#DIM POSID
+#DIM SECTOR_ID
+#DIM X_POS
+#DIM Y_POS
+#DIM ITER
+#DIM CONST DISTANCE_FROM_STAR = 6
+#DIM QUEST_ID = 25
+
+;あなた座標
+CALL ID2POS (CHARACTER_POSITION:MASTER)
+SECTOR_ID = RESULT:0
+X_POS = RESULT:1
+Y_POS = RESULT:2
+;マップ上のクエスト座標から呼び出される処理
+IF (QUESTMAP:(SECTOR_ID):(X_POS):(Y_POS) == QUEST_ID) && ((QUEST_PROGRESS:QUEST_ID == 4) || (QUEST_PROGRESS:QUEST_ID == 7))
+	CALL QUEST_25_SELECT_ENTRY_CHARA
+	QUEST_25_対象 = RESULT
+	IF QUEST_25_対象 == 999
+		RETURN
+	ENDIF
+	IF QUEST_PROGRESS:QUEST_ID == 4
+		CALL QUEST_25_TALE__ON_UNKNOWN_PLANET
+	ELSE
+		CALL QUEST_25_TALE__AFTER
+	ENDIF
+	RETURN 
+ELSEIF QUESTMAP:(SECTOR_ID):(X_POS):(Y_POS) == QUEST_ID && QUEST_PROGRESS:QUEST_ID == 5
+	PRINTL
+	CALL COLOR_PRINTW(@"惑星への降下は非常に危険だ。まずは依頼主に顛末を報告するべきだろう", カラー_注意)
+	RETURN
+;マップから呼び出される処理（星系港から呼び出される）
+ELSEIF QUEST_PROGRESS:QUEST_ID >= 0
+	SELECTCASE QUEST_PROGRESS:QUEST_ID
+		CASE 0 ;初回
+			CALL QUEST_25_TALE__QUEST_START_A
+		CASE 2 ;一度辞退
+			CALL QUEST_25_TALE__QUEST_START_B 
+		CASE 4 ;受諾後
+			CALL QUEST_25_TALE__QUEST_WIP
+		CASE 5 ;調査完了
+			CALL QUEST_25_TALE__QUEST_REPORT
+	ENDSELECT
+ENDIF
+
+;このセクターのランダムな場所に惑星を生成
+IF QUEST_PROGRESS:QUEST_ID == 3
+	CALL QUEST_25_SET_QUEST_POINT_ON_MAP(QUEST_ID, SECTOR_ID, DISTANCE_FROM_STAR)
+	QUEST_PROGRESS:QUEST_ID = 4
+ENDIF
+
+;調査対象の惑星を生成
+@QUEST_25_SET_QUEST_POINT_ON_MAP(QUEST_ID, SECTOR_ID, DISTANCE_FROM_STAR)
+#DIM QUEST_ID
+#DIM SECTOR_ID
+#DIM DISTANCE_FROM_STAR
+#DIM X_POS
+#DIM Y_POS
+#DIM ITER
+
+FOR ITER, 0 ,100
+	CALL QUEST_SET_RANDPOINT(QUEST_ID, SECTOR_ID, DISTANCE_FROM_STAR)
+	IF RESULT >= 0
+		X_POS = (RESULT / 100) %100
+		Y_POS = RESULT %100
+		CALL POS2ID(SECTOR_ID, X_POS, Y_POS)
+		QUEST_25_未開惑星座標 = RESULT
+		CLEARMAP:SECTOR_ID:X_POS:Y_POS = 明瞭
+		RETURN
+	ENDIF
+	IF ITER == 99
+		CALL COLOR_PRINTW(@"エラー：マップ上にクエストを生成可能な領域が存在しません", カラー_警告)
+		FORCEWAIT
+	ENDIF
+NEXT
+
+@QUEST_25_SELECT_ENTRY_CHARA
+#DIM ID
+$INPUT_LOOP
+PRINTL
+DRAWLINE
+PRINTFORMW 誰を降下させよう？
+CALL COLOR_PRINTL("対象メンバーはクルーとして同乗している必要がある", カラー_注意)
+PRINTL
+FOR ID, 1, CHARANUM
+	IF RIDING_WITH:ID == BOARDING_SHIP_ID && RIDING_WITH:ID != -1
+		PRINTBUTTON @"[{ID, 2, RIGHT}] %CALLNAME:ID%", ID
+		PRINTL
+	ENDIF
+NEXT
+PRINTL
+PRINTBUTTON "[999] 中止", 999
+
+INPUT
+SIF RESULT == 999
+	RETURN 999
+IF RESULT > 0 && RESULT < CHARANUM && RIDING_WITH:RESULT == BOARDING_SHIP_ID
+	RETURN RESULT
+ENDIF
+GOTO INPUT_LOOP
+
+
+;-------------------------------------------------
+;星系港パート クエスト開始
+;-------------------------------------------------
+@QUEST_25_TALE__QUEST_START_A
+
+#DIM QUEST_ID = 25
+QUEST_PROGRESS:QUEST_ID = 1
+PRINTFORMW %ANAME(MASTER)%は社会主義国の異星生物研究所を訪ねた
+PRINTFORMW 依頼主の研究所所長は沈鬱な表情で腰掛けている
+PRINTFORML
+PRINTFORMW 「遠路遥々お越しいただきありがとうございます。早速本題に入らせていただきましょう」
+PRINTFORML
+PRINTFORMW 「我々はこの宙域にて新たに確認された居住可能惑星の調査を進めておりました」
+PRINTFORML 「探査機の調査では大きな脅威が見られなかったこともあり
+PRINTFORMW 　研究者と学生からなる調査チームが上陸調査を実施していたのです」
+PRINTFORML
+PRINTFORMW 「……しかし標準時で１４日前を境に連絡が途絶え、以後消息が全く掴めなくなってしまったのです」
+PRINTFORMW 「当局に捜査と救助を依頼しましたが……戦時下ゆえでしょうか……酷く反応が鈍く……」
+PRINTFORML
+PRINTFORMW 「そこで貴殿にチームの捜査と救出をお願いしたいのです」
+PRINTFORML
+PRINTFORMW ……彼女の説明を聞く限り相応の危険が伴うのは間違いないだろう
+PRINTFORMW この依頼を引き受けるべきだろうか？
+PRINTFORML
+CALL ASK_YN("引き受ける","断る")
+	IF RESULT == 1
+		QUEST_PROGRESS:QUEST_ID = 2
+		PRINTFORMW %ANAME(MASTER)%の答えに研究所所長は落胆してうなだれた
+		PRINTFORMW 「そうですか……しかし、もし気が変わったどうか、どうか、どうかよろしくお願いいたします」
+		PRINTFORMW 「調査チームのメンバーはいずれも将来を嘱望された、若き優秀な者たちなのです」
+		PRINTFORMW 
+		RETURN
+	ENDIF
+PRINTFORMW 「ありがとうございます！　……どうか、どうか彼女たちをよろしく頼みます」
+PRINTFORMW 「皆いずれも将来を嘱望された、若き優秀な者たちなのです」
+PRINTFORML
+CALL COLOR_PRINTL(@"マップ上に未開惑星の座標が追加された", カラー_注意)
+CALL COLOR_PRINTW(@"惑星を調査するには艦長の他にクルーの割当が必要だ", カラー_注意)
+QUEST_PROGRESS:QUEST_ID = 3
+
+@QUEST_25_TALE__QUEST_START_B
+#DIM QUEST_ID = 25
+
+PRINTFORMW %ANAME(MASTER)%は再び社会主義国の異星生物研究所を尋ねた
+PRINTFORMW 「……どうでしょうか？　引き受けていただける気には……なりましたか？」
+PRINTFORML
+CALL ASK_YN("引き受ける","断る")
+	IF RESULT == 1
+		PRINTFORMW %ANAME(MASTER)%の答えに研究所所長は落胆してうなだれた
+		PRINTFORMW 「そうですか……しかし、もし気が変わったどうか、どうか、どうかよろしくお願いいたします」
+		PRINTFORMW 「調査チームのメンバーはいずれも将来を嘱望された、若き優秀な者たちなのです」
+		PRINTFORMW 
+		RETURN
+	ENDIF
+PRINTFORMW 「ありがとうございます！　……どうか、どうか彼女たちをよろしく頼みます」
+PRINTFORMW 「皆いずれも将来を嘱望された、若き優秀な者なのです」
+PRINTFORML
+CALL COLOR_PRINTL(@"マップ上に未開惑星の座標が追加された", カラー_注意)
+CALL COLOR_PRINTW(@"惑星探査を実行するには艦長の他にクルーの割当が必要だ", カラー_注意)
+QUEST_PROGRESS:QUEST_ID = 3
+
+@QUEST_25_TALE__QUEST_WIP
+#DIM QUEST_ID = 25
+PRINTFORMW 「その後の進捗はどうでしょうか……？」
+PRINTFORMW 「事態は一刻を争うのです……！　どうか、どうかよろしくお願いします」
+
+
+;-------------------------------------------------
+;未開惑星パート　開始
+;-------------------------------------------------
+@QUEST_25_TALE__ON_UNKNOWN_PLANET
+#DIM QUEST_ID = 25
+#DIM ITER
+
+PRINTFORMW ...
+PRINTFORMW ..
+PRINTFORMW .
+PRINTFORMW 
+PRINTFORMW %ANAME(QUEST_25_対象)%は惑星の地表に降り立った
+PRINTFORMW 着陸地点はなだらかな平野であり、赤茶けた低草で覆われた草原が地平線の先まで続いている
+PRINTFORML
+PRINTFORMW センサーが救難ビーコンの信号をキャッチした
+PRINTFORMW 信号が示す先には森林が広がっているようだ
+PRINTFORMW 
+PRINTFORML 
+PRINTFORMW %ANAME(QUEST_25_対象)%はビーコンに従い森の側までやってきた
+PRINTFORML 鬱蒼とした背の高い木々が茂り、恒星から降り注ぐ光を遮っている
+PRINTFORMW センサーによるとビーコンは森のさらに奥にあるようだ
+PRINTFORMW %ANAME(QUEST_25_対象)%は携帯武装を使用可能な状態にし、森へと足を踏み入れた……
+PRINTFORMW 
+PRINTFORMW ...
+PRINTFORMW ..
+PRINTFORMW .
+PRINTFORMW 
+PRINTFORMW 森の中は多種多様な外見をした異星植物で覆われている
+PRINTFORML そのどれもが赤みを帯びており、奇妙に捻じくれている
+PRINTFORMW ……まるで熱に浮かされた際に見る奇妙な夢のような光景だ
+PRINTFORMW 外見の異様さに反して、今のところは特に危険な徴候は見られない
+PRINTFORMW
+PRINTFORMW しかしなにか……かすかな違和感がある……
+PRINTFORMW 
+PRINTFORMW 森を奥へ奥へと進むに連れ、%ANAME(QUEST_25_対象)%は違和感の正体に気がついた
+PRINTFORML
+PRINTFORML 
+PRINTFORMW ――静かすぎるのだ
+PRINTFORML
+PRINTFORML 
+PRINTFORMW 鳥のさえずりや虫の鳴き声動物の鳴き声はおろか、木々のさざめき一つ聞こえない
+PRINTFORMW %ANAME(QUEST_25_対象)%は武装のグリップを固く握りしめ、警戒を強めた。……ビーコンの反応は間近だ
+PRINTFORML 
+PRINTFORML 
+PRINTFORMW 急に視界が開け、広場のような空間に出た
+PRINTFORMW 見上げれば澄んだ青空が広がっており、燦々たる陽の光が降り注いでいる
+PRINTFORMW しかし、他には何もない。ビーコンはおろか人影一つ…
+PRINTFORMW 
+PRINTFORMW %ANAME(QUEST_25_対象)%が広場の中央まできたその時だった
+PRINTFORMW
+PRINTFORMW 突如として亀裂が広がり、口を開けるがの如く地面に裂けた
+PRINTFORMW
+PRINTFORMW ――対応する間はなかった。脚を滑らせた%ANAME(QUEST_25_対象)%は奈落へと転がり落ちてしまう
+PRINTFORMW 
+PRINTFORMW ...
+PRINTFORMW ..
+PRINTFORMW .
+PRINTFORMW 
+PRINTFORMW ……気絶から目覚めた%ANAME(QUEST_25_対象)%は自身が崖の下にいることに気がついた
+PRINTFORMW 裂け目の向こう、はるか頭上に青空が見える
+PRINTFORMW 手にしていたはずの武装は見当たらない。滑落の衝撃で落としてしまったらしい
+PRINTFORMW 幸い身体に痛みはない。外傷はなさそうだ。%ANAME(QUEST_25_対象)%は立ち上がろうと手を地面につく
+PRINTFORMW 
+CALL COLOR_PRINTW("グジュリ……", カラー_ピンク)
+PRINTFORMW 
+PRINTFORMW 異様な感触に%ANAME(QUEST_25_対象)%は思わず手を引っ込めた。手のひらはべっとりと青臭い臭気を放つ粘液で覆われてた
+PRINTFORMW 
+ CALL COLOR_PRINTW("グジュッ……ジュチュッ……ジュルリ……", カラー_ピンク)
+PRINTFORMW 
+PRINTFORMW 次第に鮮明になる視界に映ったのは陰惨な光景だった
+PRINTFORMW 僅かに開けた空間に３名の若い女性が見える。依頼にあった研究チームのメンバーだろう
+PRINTFORMW 四肢を太いツタ状の植物によって拘束されている。衣服は酷く損壊し殆ど全裸に等しい
+PRINTFORMW 
+PRINTFORMW そして粘性を帯びた赤黒い無数の何かが、哀れな虜囚に激しい陵辱を加えている
+PRINTFORMW ……無数の触手の群体だ。むせ返るような醜悪な臭いの正体は肉塊が放つ分泌液のようだ
+PRINTFORMW 
+PRINTFORMW 「あぁ……う゛ぐぅ……んんっ……ぁぁ……」
+PRINTFORMW 
+PRINTFORMW 意味をなさないうめきが響く。激しい触手の注挿を受けている彼女らの瞳に光は見て取れない
+PRINTFORMW 
+ CALL COLOR_PRINTW("ジュブッ……グジュッ！ジュルル、……グヂュ……", カラー_ピンク)
+PRINTFORMW
+PRINTFORMW 毒々しい色合いの茎が膣に突き入れられるたびに、彼女たちの肢体が力なく上下に揺れる
+PRINTFORMW 
+PRINTFORMW 目の前で立ち竦む%ANAME(QUEST_25_対象)%の姿は一切目に入らないようだ
+PRINTFORML
+PRINTFORMW ……もはや手遅れかもしれない
+PRINTFORMW 
+PRINTFORMW 武器はなくとも救助に向かうべきだろうか……？　
+PRINTFORMW 今なら怪物がこちらに気がつく前に脱出することもできるかもしれない
+PRINTFORMW 
+CALL ASK_YN("救助を優先する","脱出を優先する")
+PRINTFORML
+IF RESULT == 1
+	PRINTFORMW あまりにも多勢に無勢だ……。このままでは救出はおろか自分自身の身さえ危うい
+	PRINTFORML
+	PRINTFORMW ――%ANAME(QUEST_25_対象)%は脱出を決意した。 
+	PRINTFORMW 
+ 	CALL COLOR_PRINTW("グジュッ……クチュ……ジュッ……ブジュッ……", カラー_ピンク)
+	PRINTFORMW 
+	PRINTFORMW 背後から肉を穿つ淫猥な水音が、まるで呪詛のように反響を続ける……
+	PRINTFORML
+	CALL COLOR_PRINTW(@"研究者チームの救出は叶わなかった……。しかし事態の顛末は依頼主に報告しなければならない", カラー_注意)
+	PRINTL
+	QUEST_PROGRESS:QUEST_ID = 5
+	RETURN
+ENDIF
+PRINTFORMW ――%ANAME(QUEST_25_対象)%は意を決して彼女らの救出を試みた
+PRINTFORML
+PRINTFORMW 粘液から立ち込めるむせかえるような熱気と臭気が、懸命に前進する%ANAME(QUEST_25_対象)%の判断力を奪う……
+PRINTFORMW 
+PRINTFORMW %ANAME(QUEST_25_対象)%は粘液中の茎に脚をとられ転倒してしまった！
+PRINTFORMW 
+PRINTFORMW 水音に反応した群体の一部が%ANAME(QUEST_25_対象)%に触手を伸ばす
+PRINTFORMW 
+CALL COLOR_PRINTL(@"%ANAME(QUEST_25_対象)%は触手に絡め取られてしまった！", カラー_注意)
+PRINTFORMW
+PRINTFORMW
+PRINTL
+
+;調教の条件を設定
+CVARSET CFLAG, GETNUM(CFLAG, "慰安参加者") , 0
+CVARSET CFLAG, GETNUM(CFLAG, "調教参加フラグ") , 0
+CFLAG:(QUEST_25_対象):調教参加フラグ  = 1
+CFLAG:QUEST_25_対象:主導除外  = 1 ;調教パートでプレイヤーを担当できなくなる
+FLAG:調教モード = 7
+FLAG:慰安モード = 3
+FLAG:ウフフフラグ = 1
+FLAG:慰安場所 = 慰安_行き先_森
+TRAIN_PLACE = 触手の巣窟
+;慰安モブを生成
+CALL QUEST_25_CREATE_TENTACLE_A
+
+;1回目の調教直前と調教直後に呼ぶ関数を指定
+;1回目の調教直前に呼び出される関数
+CALL ADD_EVENTTRAIN_CALLEE("QUEST_25_TENTACLE_PLANET_A")
+;1回目の調教直後に呼び出される関数
+CALL ADD_EVENTEND_CALLEE("QUEST_25_TENTACLE_PLANET_A")
+
+;START_TRAIN_COMMON実行時にSHOP_TIMEが加算されるのでここで相殺する
+SHOP_TIME --
+
+;COM_TENDENCYを一時的に書き換えることで対象の特定の行動を制約できる
+;実行させたくないコマンドのCOM_TENDENCYを-1にする
+;このクエストでは'CFLAG:QUEST_25_対象:主導除外  = 1'で常にTARGETに回るようにしているので無くても問題はない
+;※クエスト側で書き換える場合は必ず元に戻すこと
+
+;元のCOM_TENDENCYを退避
+FOR ITER, 0, 3000
+	SAVE_COM_TENDENCY:QUEST_25_対象:ITER = COM_TENDENCY:QUEST_25_対象:ITER
+NEXT
+
+;COM_TENDENCYに-1を入力したコマンドは「なすがまま」で実行されなくなる
+VARSET COM_TENDENCY:QUEST_25_対象:0, -1
+
+;SLG4Xパートからクエストやアノマリーで調教パートを呼出すにはSLG4Xの入力受付ループを抜ける必要があるようなので
+;SLG4X調教開始フラグを立ててSTART_TRAIN_COMMONをCALLする
+FLAG:SLG4X調教開始フラグ = 1
+CALL START_TRAIN_COMMON
+RETURN
+
+;-------------------------------------------------
+;未開惑星パート　調教1回目
+;-------------------------------------------------
+;ここで時間等を指定できる
+@EVENTTRAIN_QUEST_25_TENTACLE_PLANET_A
+TFLAG:56 = 12
+
+@EVENTEND_QUEST_25_TENTACLE_PLANET_A
+#DIM ITER
+DRAWLINE
+PRINTFORML
+PRINTFORMW 陰部への執拗なまでの責め苦からなんとか逃れた%ANAME(QUEST_25_対象)%は、ふらつく足取りで脱出を図る……
+PRINTFORMW
+PRINTFORMW もはや彼女たちを救うのは諦める他ない。このままでは救出はおろか自分自身の身さえ危うい
+PRINTFORMW 
+PRINTFORMW 逃れるべきは右か……左か……
+PRINTFORMW
+CALL ASK_YN("右から崖上を目指す","左奥から後退する")
+PRINTFORMW
+PRINTFORMW ところが天井から降り注いだ無数の肉塊が%ANAME(QUEST_25_対象)%の行く手を阻む！
+PRINTFORMW
+ CALL COLOR_PRINTW("　逃　げ　ら　れ　な　い　！", カラー_警告)
+PRINTFORMW
+PRINTFORML 触手は悲痛な悲鳴をあげる%ANAME(QUEST_25_対象)%を拘束すると
+PRINTFORMW 捕えられた研究者たちとともに、さらなる深淵へと引きずり込んだ
+PRINTL
+PRINTFORMW ...
+PRINTFORMW ..
+PRINTFORMW .
+PRINTL
+PRINTFORMW ……今や床も壁も天井も、うごめく無数の触手でびっしりと埋め尽くされている
+PRINTFORMW ……%ANAME(QUEST_25_対象)%は悟った。この空間はおろかこの森全体が無数の触手の群れなのだ
+PRINTFORML
+PRINTFORMW 彼らは森に擬態し、さらなる餌が宇宙から飛び込むのを待ち構えていたに違いない
+PRINTFORMW
+PRINTFORMW %ANAME(QUEST_25_対象)%達の肢体に触手が一斉に群がり、狂乱の宴をはじめた……
+PRINTFORMW
+
+FLAG:調教モード = 7
+FLAG:慰安モード = 3
+CFLAG:(QUEST_25_対象):調教参加フラグ  = 1
+CFLAG:QUEST_25_対象:主導除外  = 1
+FLAG:ウフフフラグ = 1
+FLAG:慰安場所 = 慰安_行き先_森
+TRAIN_PLACE = 触手の巣窟
+FOR ITER, 0, 7
+	CALL QUEST_25_CREATE_TENTACLE_B
+NEXT
+FOR ITER, 0, 3
+	CALL QUEST_25_CREATE_VICTIMS
+NEXT
+
+;連続調教フラグを立てると1回目の調教後に2回目の調教が強制的に呼ばれる
+FLAG:連続調教フラグ = 1
+
+;2回目の調教直前と調教直後に呼ぶ関数を指定
+;2回目の調教直前に呼び出される関数
+CALL ADD_EVENTTRAIN_CALLEE("QUEST_25_TENTACLE_PLANET_B")
+;2回目の調教直後に呼び出される関数
+CALL ADD_EVENTEND_CALLEE("QUEST_25_TENTACLE_PLANET_B")
+
+
+;-------------------------------------------------
+;未開惑星パート　調教2回目
+;-------------------------------------------------
+@EVENTTRAIN_QUEST_25_TENTACLE_PLANET_B
+TFLAG:56 = 40
+
+@EVENTEND_QUEST_25_TENTACLE_PLANET_B
+#DIM QUEST_ID = 25
+#DIM ITER
+
+DRAWLINE
+PRINTL
+PRINTFORMW ...
+PRINTFORMW ..
+PRINTFORMW .
+PRINTL
+PRINTFORMW 徹底的に陵辱された%ANAME(QUEST_25_対象)%の元に仲間の救援が到着したのはそれから数日後のことだった……
+PRINTL
+CALL FUCK(QUEST_25_対象, "Ｃ, Ｖ, Ａ, Ｂ, Ｍ, 欲望, 性技, 性交, 奉仕, 精愛, 緊縛, 苦痛快楽, マゾ, キス, 口淫, Ｖ性交, Ａ性交", "膣内射精, 腸内射精, 口内射精, 処女喪失, Ａ処女喪失, キス喪失, CFLAG減少",　GET_SPERM_ID("触手"), "触手", "触手", "", "陵辱")
+PRINTFORMW
+CALL COLOR_PRINTW(@"研究者チームの救出は叶わなかった……。しかし事態の顛末は依頼主に報告しなければならない", カラー_注意)
+PRINTL
+PRINTL
+
+;書き換えたCOM_TENDENCYを元に戻しておく
+FOR ITER, 0, 3000
+	COM_TENDENCY:QUEST_25_対象:ITER = SAVE_COM_TENDENCY:QUEST_25_対象:ITER
+NEXT
+;クエスト完了のタイミングで残行動回数を一回消費させる
+SHOP_TIME ++
+QUEST_PROGRESS:QUEST_ID = 5
+
+
+;-------------------------------------------------
+;星系港パート　クエスト終了報告
+;-------------------------------------------------
+@QUEST_25_TALE__QUEST_REPORT
+#DIM QUEST_ID = 25
+
+PRINTFORMW %ANAME(MASTER)%は未開惑星の出来事を報告した
+PRINTFORMW %ANAME(QUEST_25_対象)%が回収したビーコンを前にして、研究所所長は絶句してうなだれる
+PRINTFORML
+PRINTFORMW 「むごい……あまりにもむごい……」
+PRINTFORML
+PRINTFORMW そして少しの間をおいて、震える声を絞り出す
+PRINTFORML 
+PRINTFORMW 「ともあれ……ありがとうございます。約束の通り、報酬はお支払いしましょう」
+PRINTFORML
+CALL COLOR_PRINTW(@"%ANAME(MASTER)%は＄200,000が入金されたのを確認した", カラー_注意)
+MONEY += 200000
+PRINTFORML
+PRINTFORML 「……しかし、これから私は……あぁ……どうするべきなのでしょうか……」
+PRINTFORMW 「あの惑星は間違いなく……貴重なサンプルでしょう。しかし彼女らをあのままにしておくのはあまりにも……」
+PRINTFORML
+PRINTFORMW %ANAME(MASTER)%は未開惑星を……
+PRINTFORML 
+CALL ASK_YN("焼き払うべき、と主張する","貴重な異星生物のサンプルとして保存すべき、と主張する")
+PRINTFORML
+PRINTFORMW 「……貴殿の言うとおり……でしょう。当局にもそのように報告いたしましょう」
+PRINTFORML
+PRINTFORMW ...
+PRINTFORMW ..
+PRINTFORMW .
+PRINTFORML
+IF RESULT == 0
+	QUEST_PROGRESS:QUEST_ID = 6
+	PRINTFORMW 惑星上に巣食う無数の触手生物を『体制保全上看過できない脅威』と判断した社会主義国の動きは迅速だった
+	PRINTFORML
+	PRINTFORMW 数隻の戦艦を含む戦隊が惑星軌道上に集結し、苛烈な軌道爆撃を展開する
+	PRINTFORML
+	PRINTFORML 大気を突き抜けて突入した大質量の弾殻は惑星表面を容赦なく刔り、熱線と衝撃波があらゆる物を薙ぎ払う
+	PRINTFORMW 綿密なまでに徹底した破壊は、来る揚陸作戦に向けた演習を兼ねているのかもしれない……
+	PRINTFORML
+	PRINTFORMW 三日三晩に渡って続けられた爆撃は、未開惑星を焦土と荒野の広がる不毛の星へと変えた
+	PRINTFORML
+	PRINTFORMW あのおぞましい生物が人間を襲うことはもうないだろう……
+	PRINTL
+	CALL COLOR_PRINTW(@"社会主義国との関係性 + 50", カラー_注意)
+	CALL QUEST_RELEASE_POINT(QUEST_ID, QUEST_25_未開惑星座標)
+	REL_LIKE_COUNTRY:国家ID_社会主義:国家ID_プレイヤー += 50
+ELSE
+	QUEST_PROGRESS:QUEST_ID = 7
+	PRINTFORMW 惑星は異星生物研究のサンプルとして保全されることが決まった
+	PRINTFORML
+	PRINTFORML 宙域には社会主義国の哨戒艦が展開され、不注意な者の立ち入りを阻んでいる
+	PRINTFORMW これ以上哀れな被害者が増えることもないだろう
+	PRINTFORML
+	PRINTFORMW ……ただし、もし%ANAME(MASTER)%が望むならば、再び立ち入ることは不可能ではない
+	PRINTFORMW 末端の腐敗した役人を買収するのはさほど難しくはないだろう……
+	PRINTL
+ENDIF
+
+
+;-------------------------------------------------
+;未開惑星パート　クエスト完了後
+;-------------------------------------------------
+@QUEST_25_TALE__AFTER
+#DIM QUEST_ID = 25
+#DIM ITER
+PRINTFORMW %ANAME(MASTER)%は調査と偽って%ANAME(QUEST_25_対象)%を惑星地表、それも"森"の中心に降下させた
+PRINTFORML
+PRINTFORMW %ANAME(QUEST_25_対象)%を待ち受ける凄惨な運命を承知の上で…
+PRINTFORML
+PRINTFORMW ...
+PRINTFORMW ..
+PRINTFORMW .
+PRINTFORML
+CALL COLOR_PRINTW(@"地表に降り立つやいなや%ANAME(QUEST_25_対象)%に無数の触手生物が襲いかかった！", カラー_注意)
+
+;調教の条件を設定
+CVARSET CFLAG, GETNUM(CFLAG, "慰安参加者") , 0
+CVARSET CFLAG, GETNUM(CFLAG, "調教参加フラグ") , 0
+CFLAG:(QUEST_25_対象):調教参加フラグ  = 1
+CFLAG:QUEST_25_対象:主導除外  = 1 ;調教パートでプレイヤーを担当できなくなる
+FLAG:調教モード = 7
+FLAG:慰安モード = 3
+FLAG:ウフフフラグ = 1
+FLAG:慰安場所 = 慰安_行き先_森
+TRAIN_PLACE = 触手の巣窟
+;慰安モブを生成
+IF RAND:2
+	FOR ITER, 0, 4 + RAND:3
+		CALL QUEST_25_CREATE_TENTACLE_A
+	NEXT
+ELSE
+	FOR ITER, 0, 4 + RAND:3
+		CALL QUEST_25_CREATE_TENTACLE_B
+	NEXT
+ENDIF
+CALL ADD_EVENTTRAIN_CALLEE("QUEST_25_TENTACLE_PLANET_AFTER")
+CALL ADD_EVENTEND_CALLEE("QUEST_25_TENTACLE_PLANET_AFTER")
+
+;START_TRAIN_COMMON実行時にSHOP_TIMEが加算されるのでここで相殺する
+SHOP_TIME --
+FLAG:SLG4X調教開始フラグ = 1
+CALL START_TRAIN_COMMON
+RETURN
+
+;2回目の調教直前に呼び出される関数
+@EVENTTRAIN_QUEST_25_TENTACLE_PLANET_AFTER
+TFLAG:56 = 30
+
+;2回目の調教直後に呼び出される関数
+@EVENTEND_QUEST_25_TENTACLE_PLANET_AFTER
+DRAWLINE
+PRINTL
+PRINTFORMW ...
+PRINTFORMW ..
+PRINTFORMW .
+PRINTL
+PRINTFORMW 触手による徹底的な淫辱を受けた%ANAME(QUEST_25_対象)%を宇宙船で回収した……
+PRINTL
+CALL FUCK(QUEST_25_対象, "Ｃ, Ｖ, Ａ, Ｂ, Ｍ, 欲望, 性技, 性交, 奉仕, 精愛, 緊縛, 苦痛快楽, マゾ, キス, 口淫, Ｖ性交, Ａ性交", "膣内射精, 腸内射精, 口内射精, 処女喪失, Ａ処女喪失, キス喪失, CFLAG減少",　GET_SPERM_ID("触手"), "触手", "触手", "", "陵辱")
+PRINTFORMW
+SHOP_TIME ++
+PRINTL
+
+
+;-------------------------------------------------
+;慰安モブの定義　触手
+;-------------------------------------------------
+@QUEST_25_CREATE_TENTACLE_A
+#DIM 対象
+#DIMS 名前
+#DIM CONST 第三者に実行 = 2000
+名前 = ブラシ触手
+
+CALL CREATE_RANDOM_CHARA(0, -1, 0)
+FLAG:汎用武将カウント --
+対象 = RESULT
+IF LOCAL == -1
+	RETURN -1
+ENDIF
+
+NO:対象 = GET_EMPTY_NO()
+NAME:対象 = %名前%
+CALLNAME:対象 = %名前%
+CSTR:対象:0 =
+CSTR:対象:1 =
+TALENT:対象:性別 = 0
+MAXBASE:対象:体力 = 99999999
+MAXBASE:対象:気力 = 99999999
+MAXBASE:対象:精神力 = 1500
+ITEM:A_媚薬 = 99
+BASE:対象:体力 = MAXBASE:対象:体力
+BASE:対象:気力 = MAXBASE:対象:気力
+BASE:対象:精神力 = MAXBASE:対象:精神力
+ABL:対象:触手 = RAND(1, 5)
+ABL:対象:性知識 = 5
+ABL:対象:Ｃ感 = 5
+ABL:対象:欲望 = 15
+ABL:対象:性技 = 20
+ABL:対象:性知識 = 5
+ABL:対象:奉仕 = 1
+ABL:対象:性交 = 15
+ABL:対象:レズ = 0
+ABL:対象:精愛 = 3
+ABL:対象:露出 = 2
+ABL:対象:射精 = 20
+ABL:対象:排泄 = 3
+ABL:対象:サド = 5
+ABL:対象:主導度Ｕ = 99999999
+ABL:対象:主導度Ｎ = RAND(300, 600)
+ABL:対象:倒錯度 = RAND(300, 500)
+EXP:対象:絶頂経験 = 500
+
+VARSET COM_TENDENCY:対象:0, -1
+COM_TENDENCY:対象:GETNUM(TRAINNAME, "触手召喚") = 3
+COM_TENDENCY:対象:GETNUM(TRAINNAME, "媚薬") = 3
+COM_TENDENCY:対象:GETNUM(TRAINNAME, "触手緊縛") = 2
+COM_TENDENCY:対象:GETNUM(TRAINNAME, "触手クリ責め") = 3
+COM_TENDENCY:対象:GETNUM(TRAINNAME, "触手胸愛撫") = 2
+IF HAS_PENIS(QUEST_25_対象)
+	COM_TENDENCY:対象:GETNUM(TRAINNAME, "触手オナホ") = 3
+	COM_TENDENCY:対象:GETNUM(TRAINNAME, "触手コキ") = 3
+ENDIF
+
+TALENT:対象:超能力者 = 1
+TALENT:対象:絶倫 = 1
+TALENT:対象:陰毛現在値 = 陰毛_標準
+TALENT:対象:陰毛目標値 = 陰毛_標準
+TALENT:対象:Ｖ締まり = GET_DEFAULT_TIGHTNESS("普通")
+TALENT:対象:Ａ締まり = GET_DEFAULT_TIGHTNESS("普通")
+TALENT:(対象):処女 = 0
+TALENT:(対象):キス未経験 = 0
+TALENT:(対象):童貞 = 0
+TALENT:(対象):アナル処女 = 1
+SETBIT TALENT:対象:淫乱系, 素質_淫乱_サド
+TALENT:対象:貞操無頓着 = 1
+TALENT:対象:貞操観念 = 0
+TALENT:対象:特殊勢力素質 = 特殊勢力_触手
+
+SEXUAL_EXPERIENCE:(対象):初体験_処女 = 不明
+SEXUAL_LAST_EXPERIENCE:(対象):初体験_処女 = 不明
+SEXUAL_EXPERIENCE:(対象):初体験_キス = 不明
+SEXUAL_LAST_EXPERIENCE:(対象):初体験_キス = 不明
+SEXUAL_EXPERIENCE:(対象):初体験_童貞 = 不明
+SEXUAL_LAST_EXPERIENCE:(対象):初体験_童貞 = 不明
+SEXUAL_EXPERIENCE:(対象):初体験_アナル処女 = ----
+SEXUAL_LAST_EXPERIENCE:(対象):初体験_アナル処女 = ----
+CFLAG:対象:慰安参加者 = 1
+CFLAG:対象:慰安モブ = 1
+CFLAG:対象:調教参加フラグ  = 1
+CFLAG:対象:強制友好化 = 1
+
+@QUEST_25_CREATE_TENTACLE_B
+#DIM 対象
+#DIMS 名前
+#DIM CONST 第三者に実行 = 2000
+名前 = %SPLIT_RAND("蠢く触手/這う触手/触手の群/触手の群/脈打つ茎/滴る肉塊",1)%
+
+CALL CREATE_RANDOM_CHARA(0, -1, 0)
+FLAG:汎用武将カウント --
+対象 = RESULT
+IF LOCAL == -1
+	RETURN -1
+ENDIF
+
+NO:対象 = GET_EMPTY_NO()
+NAME:対象 = %名前%
+CALLNAME:対象 = %名前%
+CSTR:対象:0 =
+CSTR:対象:1 =
+TALENT:対象:性別 = 0
+MAXBASE:対象:体力 = 99999999
+MAXBASE:対象:気力 = 99999999
+MAXBASE:対象:精神力 = 1500
+ITEM:A_媚薬 = 99
+BASE:対象:体力 = MAXBASE:対象:体力
+BASE:対象:気力 = MAXBASE:対象:気力
+BASE:対象:精神力 = MAXBASE:対象:精神力
+ABL:対象:触手 = RAND(1, 5)
+ABL:対象:性知識 = 5
+ABL:対象:Ｃ感 = 5
+ABL:対象:欲望 = 15
+ABL:対象:性技 = 20
+ABL:対象:性知識 = 5
+ABL:対象:奉仕 = 1
+ABL:対象:性交 = 15
+ABL:対象:レズ = 0
+ABL:対象:精愛 = 3
+ABL:対象:露出 = 2
+ABL:対象:射精 = 20
+ABL:対象:排泄 = 3
+ABL:対象:サド = 5
+ABL:対象:主導度Ｕ = 99999999
+ABL:対象:主導度Ｎ = RAND(300, 600)
+ABL:対象:倒錯度 = RAND(300, 500)
+EXP:対象:絶頂経験 = 500
+
+VARSET COM_TENDENCY:対象:0, -1
+SELECTCASE RAND:7
+	CASE 0 TO 3
+    COM_TENDENCY:対象:GETNUM(TRAINNAME, "触手召喚") = 3
+    COM_TENDENCY:対象:GETNUM(TRAINNAME, "媚薬") = 3
+    COM_TENDENCY:対象:GETNUM(TRAINNAME, "触手緊縛") = 1
+    COM_TENDENCY:対象:GETNUM(TRAINNAME, "触手挿入") = 3
+    COM_TENDENCY:対象:GETNUM(TRAINNAME, "触手クリ責め") = 3
+    COM_TENDENCY:対象:GETNUM(TRAINNAME, "触手産卵") = 3
+	CASE 4 TO 5
+    COM_TENDENCY:対象:GETNUM(TRAINNAME, "触手召喚") = 3
+    COM_TENDENCY:対象:GETNUM(TRAINNAME, "媚薬") = 3
+    COM_TENDENCY:対象:GETNUM(TRAINNAME, "触手緊縛") = 1
+    COM_TENDENCY:対象:GETNUM(TRAINNAME, "触手挿入") = 3
+    COM_TENDENCY:対象:GETNUM(TRAINNAME, "触手Ａ挿入") = 3
+    COM_TENDENCY:対象:GETNUM(TRAINNAME, "触手Ａ産卵") = 3
+    COM_TENDENCY:対象:GETNUM(TRAINNAME, "触手尿道挿入") = 3
+    COM_TENDENCY:対象:GETNUM(TRAINNAME, "触手Ｕ産卵") = 3
+	CASEELSE
+    COM_TENDENCY:対象:GETNUM(TRAINNAME, "触手召喚") = 3
+    COM_TENDENCY:対象:GETNUM(TRAINNAME, "媚薬") = 3
+    COM_TENDENCY:対象:GETNUM(TRAINNAME, "触手緊縛") = 2
+    COM_TENDENCY:対象:GETNUM(TRAINNAME, "触手挿入") = 3
+    COM_TENDENCY:対象:GETNUM(TRAINNAME, "触手胸愛撫") = 3
+    COM_TENDENCY:対象:GETNUM(TRAINNAME, "触手搾乳") = 3
+    COM_TENDENCY:対象:GETNUM(TRAINNAME, "触手乳腺開発") = 2
+    COM_TENDENCY:対象:GETNUM(TRAINNAME, "触手口辱") = 2
+ENDSELECT
+TALENT:対象:超能力者 = 1
+TALENT:対象:絶倫 = 1
+TALENT:対象:陰毛現在値 = 陰毛_標準
+TALENT:対象:陰毛目標値 = 陰毛_標準
+TALENT:対象:Ｖ締まり = GET_DEFAULT_TIGHTNESS("普通")
+TALENT:対象:Ａ締まり = GET_DEFAULT_TIGHTNESS("普通")
+TALENT:(対象):処女 = 0
+TALENT:(対象):キス未経験 = 0
+TALENT:(対象):童貞 = 0
+TALENT:(対象):アナル処女 = 1
+SETBIT TALENT:対象:淫乱系, 素質_淫乱_サド
+TALENT:対象:貞操無頓着 = 1
+TALENT:対象:貞操観念 = 0
+TALENT:対象:特殊勢力素質 = 特殊勢力_触手
+
+SEXUAL_EXPERIENCE:(対象):初体験_処女 = 不明
+SEXUAL_LAST_EXPERIENCE:(対象):初体験_処女 = 不明
+SEXUAL_EXPERIENCE:(対象):初体験_キス = 不明
+SEXUAL_LAST_EXPERIENCE:(対象):初体験_キス = 不明
+SEXUAL_EXPERIENCE:(対象):初体験_童貞 = 不明
+SEXUAL_LAST_EXPERIENCE:(対象):初体験_童貞 = 不明
+SEXUAL_EXPERIENCE:(対象):初体験_アナル処女 = ----
+SEXUAL_LAST_EXPERIENCE:(対象):初体験_アナル処女 = ----
+CFLAG:対象:慰安参加者 = 1
+CFLAG:対象:慰安モブ = 1
+CFLAG:対象:調教参加フラグ  = 1
+CFLAG:対象:強制友好化 = 1
+
+;-------------------------------------------------
+;慰安モブの定義　苗床
+;-------------------------------------------------
+@QUEST_25_CREATE_VICTIMS
+#DIM 対象
+#DIMS 名前
+
+名前 = %SPLIT_RAND("研究者/苗床/女学生/女学生",1)%
+
+CALL CREATE_RANDOM_CHARA(0, -1, 0)
+FLAG:汎用武将カウント --
+対象 = RESULT
+IF LOCAL == -1
+	RETURN -1
+ENDIF
+
+NO:対象 = GET_EMPTY_NO()
+NAME:対象 = %名前%
+CALLNAME:対象 = %名前%
+TALENT:対象:処女 = 0
+TALENT:対象:キス未経験 = 0
+TALENT:対象:童貞 = 0
+TALENT:対象:アナル処女 = 0
+CSTR:対象:0 =
+CSTR:対象:1 =
+TALENT:対象:性別 = 1
+ABL:対象:性知識 =  3
+ABL:対象:Ｃ感 = 28
+ABL:対象:奉仕 = 1
+ABL:対象:性技 = RAND(10, 14)
+ABL:対象:欲望 = RAND(3, 7)
+ABL:対象:性交 = RAND(13, 15)
+ABL:対象:射精 = RAND(3, 5)
+ABL:対象:サド = RAND(0, 3)
+ABL:対象:主導度Ｕ = RAND(0, 500)
+ABL:対象:倒錯度 = RAND(0, 300)
+TALENT:対象:貞操無頓着 = 1
+TALENT:対象:貞操観念 = 0
+TALENT:対象:絶倫 = 1
+TALENT:対象:崩壊 = 1
+TALENT:対象:母乳体質 = 1
+SEXUAL_EXPERIENCE:(対象):初体験_処女 = 触手
+SEXUAL_LAST_EXPERIENCE:(対象):初体験_処女 = 触手
+SEXUAL_EXPERIENCE:(対象):初体験_キス = 触手
+SEXUAL_LAST_EXPERIENCE:(対象):初体験_キス = 触手
+SEXUAL_EXPERIENCE:(対象):初体験_童貞 = 触手
+SEXUAL_LAST_EXPERIENCE:(対象):初体験_童貞 = 触手
+SEXUAL_EXPERIENCE:(対象):初体験_アナル処女 = 触手
+SEXUAL_LAST_EXPERIENCE:(対象):初体験_アナル処女 = 触手
+CFLAG:対象:慰安モブ = 1
+CFLAG:対象:調教参加フラグ  = 1
+CFLAG:対象:主導除外  = 1
+VARSET COM_TENDENCY:対象:0, -1
+

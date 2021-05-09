@@ -230,6 +230,36 @@ VARSET PRISONER_TARGET, -1
 SIF EVENTEND_CALLEE_NUM > 0
 	CALL TRAIN_CALL(1)
 
+;-------------------------------------------------
+;連続で調教を行う場合の処理
+;関数経由でBEGIN TRAINしてもなぜかTRAINに遷移しない？ので
+;@START_TRAIN_COMMONと同様の処理をして直接BEGINする
+; -------------------------------------------------
+IF FLAG:連続調教フラグ == 1
+	FLAG:連続調教フラグ  = 0
+	;全ての参加キャラについて処理
+	FOR LOCAL:0, 0, CHARANUM
+		IF CFLAG:(LOCAL:0):調教参加フラグ
+			;現在の機嫌を保存
+			FOR LOCAL:1, 0, 10
+				CFLAG:(LOCAL:0):(LOCAL:1 + 190) = PALAM:(LOCAL:0):(LOCAL:1 + 10)
+			NEXT
+			;チョロインもちなら強制友好化を立てる
+			SIF TALENT:(LOCAL:0):チョロイン
+				CFLAG:(LOCAL:0):強制友好化 = 1
+			IF GROUPMATCH(FLAG:調教モード, 調教_逆調教通常, 調教_逆調教特殊) && LOCAL:0 != MASTER
+				CFLAG:(LOCAL:0):調教中BASE減らない = 1
+			ELSEIF FLAG:調教モード == 調教_慰安 && CFLAG:(LOCAL:0):慰安参加者
+				CFLAG:(LOCAL:0):調教中BASE減らない = 1
+			ENDIF
+			SIF (CFLAG:LOCAL:捕虜調教の助手 || CFLAG:LOCAL:夜這いの助手) && TALENT:LOCAL:親友
+				CFLAG:(LOCAL:0):調教中帰らない = 1
+		ENDIF
+	NEXT
+	SIF GROUPMATCH(FLAG:調教モード, 調教_閨, 調教_捕虜調教) && IS_SP_COUNTRY(CFLAG:MASTER:所属)
+		TRYCALLFORM START_TRAIN_COMMON_%SP_COUNTRY_NAME_ENG:SP_COUNTRY_TO_CONST(CFLAG:MASTER:所属)%
+	BEGIN TRAIN
+ENDIF
 
 BEGIN TURNEND
 

@@ -76,8 +76,13 @@ IF CFLAG:NAME_TO_CHARA("エル"):面識 != 1
 	PRINTL
 	PRINTFORMDL ――%ANAME(MASTER)%は、この若き奔放な少女エルをクルーに勧誘してもいいし、しなくてもいい
 	PRINTFORMDW エルをクルーに勧誘しますか？
-	PRINTL 	
-	CALL ASK_YN("クルーに誘う","やめておく")
+	PRINTL
+	; ASK_YNは実行後にSETCOLORの内容をリセットするため、保持可能なユーザー関数で代用しています
+	; 口上以外からユーザー関数をCALLする実装に問題がある場合はコメント部に差し替えて下さい
+	;RESETCOLOR
+	;CALL ASK_YN("クルーに誘う","やめておく")
+	;SETCOLOR エル_口上カラー
+	CALL KOJO_ASK_K7("クルーに誘う","やめておく")
 	IF RESULT == 1
 		PRINTFORMDL ――やめておこう。
 		PRINTFORMDW　あなたは考えを改めると彼女に別れを告げた。

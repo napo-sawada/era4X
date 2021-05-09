@@ -22,12 +22,12 @@ STATUS:SHIP_CAPACITY += 200
 ;------------------------------------------
 ;対象のSHIP_CATEGORYが装備可能かどうか
 ;------------------------------------------
-@GET_OPTION_CAN_EQUIP_8(対象)
-#DIM 対象
-IF 対象 == 輸送船
-    RETURN 1
-ENDIF
-RETURN 0
+; @GET_OPTION_CAN_EQUIP_8(対象)
+; #DIM 対象
+; IF 対象 == 輸送船
+;     RETURN 1
+; ENDIF
+; RETURN 0
 
 ;-----------------------------------
 ; オプションの説明
@@ -37,12 +37,12 @@ RETURN 0
 CALL GET_OPTION_STATUS_8(STATUS)
 CALL GET_OPTION_NAME_8
 PRINTFORML %RESULTS%
-PRINTFORML 輸送船のみ装備可。積載量を200増加させる。
+PRINTFORML 装備した艦の積載量を200増加させる。
 PRINTL
 ;フレーバーテキスト的な
 SETCOLOR カラー_選択不可
-PRINTFORML ――たかがコンテナがなぜこんなに高いのかって？
-PRINTFORML リース代に上乗せされる保険料が青天井に上がるからだよ。文句はロイズの連中に聞いてくれ。
+PRINTFORML たかがコンテナがなぜこんなに高いのかって？
+PRINTFORML リース代に上乗せされる保険料が青天井に上がるからだよ。文句はロイズの連中に言ってくれ
 RESETCOLOR
 
 ;-----------------------------------

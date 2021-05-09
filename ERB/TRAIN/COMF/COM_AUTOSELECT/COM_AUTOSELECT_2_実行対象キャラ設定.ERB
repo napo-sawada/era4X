@@ -52,7 +52,6 @@ FOR L_COUNTER, 0, CHARANUM
 
 	SIF FLAG:調教モード == 調教_逆調教特殊 && IS_FALLEN_TO_SP_COUNTRY(L_COUNTER)
 		DECIDE_REFERENCE_VALUE += 30
-
 	;---------------------------------------------
 	;### 状況の補正
 	;---------------------------------------------
@@ -63,6 +62,9 @@ FOR L_COUNTER, 0, CHARANUM
 	ELSE
 		MULTI_SITUATION_DECIDE_REFERENCE_VALUE = 50
 	ENDIF
+	;主導除外フラグが立っていたら0補正する
+	SIF CFLAG:L_COUNTER:主導除外 == 1
+		MULTI_SITUATION_DECIDE_REFERENCE_VALUE = 0
 
 	;---------------------------------------------
 	;### 重みの計算

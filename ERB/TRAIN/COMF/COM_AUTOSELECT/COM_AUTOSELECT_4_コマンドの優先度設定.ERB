@@ -779,6 +779,17 @@ FOR L_COUNTER, 0, 1000
 NEXT
 
 ;-------------------------------------------------
+;## COM_TENDENCYに-1が設定されたコマンドを除外する
+;-------------------------------------------------
+FOR L_COUNTER, 0, 1000
+	IF COM_TENDENCY:MAIN_PLAYER:L_COUNTER == -1
+		COM_AUTO_COM_PRIORITY:L_COUNTER = -1
+		COM_AUTO_COM_PRIORITY:(L_COUNTER + ADD_NUM_対象が実行) = -1
+	ENDIF
+NEXT
+
+
+;-------------------------------------------------
 ;## 選択不可能 COM_ABLE
 ;	再度優先度を0にする
 ;-------------------------------------------------
