@@ -23,22 +23,43 @@ RETURN 1
 ;「調教」でヤられる側の選択可能キャラ存在判定
 ;-------------------------------------------------
 @SHOP_LIFE_CHECKCHARA13(ARG:0)
-;主人公はダメ
-SIF ARG:0 == MASTER
-	RETURN 0
+#DIM 対象
+#DIM _MASTER, MAX_CHARA_NUM
+#DIM SLAVE, MAX_CHARA_NUM
+
 ;閨に呼ぶの選択可能キャラ存在判定
 CALL SHOP_LIFE_CHECKCHARA_NEYA(ARG:0)
-SIF RESULT && CFLAG:(ARG:0):慰安参加者
+対象 = RESULT
+SIF ARG:0 == MASTER
+	RETURN 0
+SIF 対象 && CFLAG:(ARG:0):慰安参加者
 	RETURN 2
-RETURN CHECK91(ARG:0, 2, RESULT)
+SIF !GET_TRAIN_PAIR(_MASTER, SLAVE)
+	RETURN 0
+FINDELEMENT SLAVE, ARG:0
+SIF RESULT == -1
+	RETURN 0
+RETURN CHECK91(ARG:0, 2, 対象)
 
 ;-------------------------------------------------
 ;「調教」で調教先になる可否判定
 ;　無限ループ回避のため性知識が必要
 ;-------------------------------------------------
 @SHOP_LIFE_CHECKCHARA_SUB13(ARG:0)
+#DIM _MASTER, MAX_CHARA_NUM
+#DIM SLAVE, MAX_CHARA_NUM
+
+SIF ARG:0 == MASTER
+	RETURN 0
+
 SIF CFLAG:(ARG:0):閨に呼ぶで選択中 && !CFLAG:(ARG:0):慰安参加者
 	RETURN 2
+
+SIF !GET_TRAIN_PAIR(_MASTER, SLAVE)
+	RETURN 0
+FINDELEMENT _MASTER, ARG:0
+SIF RESULT == -1
+	RETURN 0
 
 LOCAL:0 = TMP_COUNTRY_RELATION:(CFLAG:MASTER:所属):(CFLAG:(ARG:0):所属)
 ;捕虜でない、非主人公、同一勢力or共闘勢力、性知識1以上
@@ -182,7 +203,7 @@ RETURN 0
 @SHOP_LIFE_EVENTBUY_SUB13(ARG:0)
 ;このメンバーで決定
 IF ARG:0 == 1
-	CALL DECIDE_ATEGAU_MEMBER()
+	CALL DECIDE_TYOKYO_MEMBER()
 	SIF !RESULT
 		RETURN 0
 ;避妊ありなし
@@ -241,7 +262,7 @@ RETURN 0
 ;-------------------------------------------------
 ;「調教」の右カラムボタン入力処理本体
 ;-------------------------------------------------
-@DECIDE_ATEGAU_MEMBER()
+@DECIDE_TYOKYO_MEMBER()
 #DIM 調教先
 #DIM あてがわれる側
 #DIM 参加人数
@@ -271,6 +292,10 @@ IF あてがわれる側 == 0 || 調教先 == 0
 	;参加キャラがいないなら処理せず0を返す
 	RETURN 0
 ENDIF
+
+; MASTERを強制的に調教対象に
+CFLAG:MASTER:調教参加フラグ = 1
+CFLAG:MASTER:強制友好化 = 1
 
 ;START_TRAIN_COMMONでSHOP_TIMEが+1されるので、それをひいておく
 SHOP_TIME --
