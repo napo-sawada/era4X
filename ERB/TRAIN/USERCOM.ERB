@@ -1277,7 +1277,12 @@ CALL SINGLE_DRAWLINE
 FOR LOCAL, 0, VARSIZE("SELLING")
 	{
 		SIF !GROUPMATCH(LOCAL,
-			GETNUM(ITEM, "ローション"), 
+			GETNUM(ITEM, "粗製ビール"),
+			GETNUM(ITEM, "粗製ワイン"),
+			GETNUM(ITEM, "アストロ・フィズ"),
+			GETNUM(ITEM, "ピルスナー"),
+			GETNUM(ITEM, "エインズの露"),
+			GETNUM(ITEM, "ローション"),
 			GETNUM(ITEM, "利尿剤"),
 			GETNUM(ITEM, "コンドーム"),
 			GETNUM(ITEM, "ライスワイン"),
