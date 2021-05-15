@@ -220,6 +220,12 @@ NEXT
 ;閨逆調教フラグを折る
 FLAG:閨逆調教 = 0
 
+;主導除外フラグを削除 
+FOR LOCAL, 0, CHARANUM
+	SIF CFLAG:LOCAL:主導除外 
+		CFLAG:LOCAL:主導除外  = 0
+NEXT
+
 ;プレイヤーとターゲットをクリア
 CALL CLEAR_MPLY
 CALL CLEAR_MTAR
