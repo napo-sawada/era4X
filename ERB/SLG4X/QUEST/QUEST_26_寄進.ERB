@@ -1,0 +1,188 @@
+﻿;--------------------------
+; クエスト名　少女エル
+; 奔放な研究者志望の少女、エルの加入クエスト
+;--------------------------
+@QUEST_DESCRIPTION_26
+PRINTFORML [クエスト概要]
+PRINTFORML
+PRINTFORML アレス宗教国にとって信者からの寄進は極めて重要な資金源の一つだ
+PRINTFORML もし%ANAME(MASTER)%が相応の額を贈れば彼らとの関係を改善できるだろう
+PRINTFORML ……また、%ANAME(MASTER)%の献身如何では特別な関係を築くこともできるかもしれない
+PRINTL
+
+;--------------------------
+; クエスト受注可能か
+;--------------------------
+@QUEST_ACCEPTABLE_26
+SIF QUEST_PROGRESS:26 > 1
+	RETURN 0
+
+CALL GET_STAR_ID_FROM_POS(CHARACTER_POSITION)
+SIF STAR_OWNER:RESULT == 国家ID_アレス宗教
+	RETURN 1
+RETURN 0
+
+;--------------------------
+; クエストの名前を返却
+;--------------------------
+@QUEST_NAME_26
+RESULTS = 寄進
+RETURN
+
+;--------------------------
+; クエスト本体
+;--------------------------
+@QUEST_BODY_26
+IF QUEST_PROGRESS:26 == 0
+    PRINTFORMW %ANAME(MASTER)%はアレス宗教国の聖地の一つを訪れた
+    PRINTFORML
+    PRINTFORMW 宇宙港をひっきりなしに往来する船舶が、次から次へと巡礼者たちを送り出している
+    PRINTFORML 
+    PRINTFORMW 聖地のある山地に向かって延々と、巡礼者達の列が伸びているのが見える
+    PRINTFORML 
+    PRINTFORMW %ANAME(MASTER)%は巡礼者たちの一団に混じって足を進めた
+    PRINTFORMW 
+    PRINTFORMW ...
+    PRINTFORMW ..
+    PRINTFORMW .
+    PRINTFORML
+    PRINTFORML
+    PRINTFORMW しばらく歩みを進めた%ANAME(MASTER)%は雄大な山脈の麓にある大聖堂にたどり着いた
+    PRINTFORMW 華麗な彫刻の施された無数の列柱と、幾重にも重ねられたアーチで彩られた入り口が%ANAME(MASTER)%を迎える
+    PRINTFORMW 寺院の内部は山塊をくり抜いて造られているらしい
+    PRINTFORML 
+    PRINTFORML 
+    PRINTFORMW 内部には息を飲むような光景が広がっていた
+    PRINTFORMW 
+    PRINTFORMW 天蓋は霞むほどに高く、各階に渡された空中回廊が幾何学的な文様を描く
+    PRINTFORMW 山腹に設けらた採光窓から陽光が差し込み、ステンドグラスが煌めく
+    PRINTFORMW そして壁面に掲げられた無数の宗教画や彫刻の数々が広大な空間を絢爛に彩った
+    PRINTFORML
+    PRINTFORMW %ANAME(MASTER)%はこの空間に人工灯の類が殆ど存在しないことに気がついた
+    PRINTFORML 日照量からステンドグラスによる反射まで、入念に考慮された調光が
+    PRINTFORMW 自然光のみでも十分な明るさを空間内に作り出しているようだ
+    PRINTFORML
+    PRINTFORMW
+    PRINTFORMW 雄大な建築美に圧倒されつつ歩む%ANAME(MASTER)%の耳に歌が聞こえる。彼らの主を称える賛美歌のようだ
+    PRINTFORMW パイプオルガンと聖歌隊の奏でる音色が壁面を反響し、遥か天上から礼拝所に降り注ぐ
+    PRINTFORML 
+    PRINTFORMW 聖堂を訪れた巡礼者たちは皆この計算され尽くした威光に圧倒され、神体を模した像の前で敬々しく頭を垂れている
+    PRINTFORML 
+    PRINTFORMW
+    PRINTFORMW ――だが、%ANAME(MASTER)%の目的は巡礼ではない。あくまで名を売り、この強大な宗教国家で活動するための地盤を作ることにある 
+    PRINTFORML
+    PRINTFORMW %ANAME(MASTER)%は流麗な刺繍の施された祭服に身を包む恰幅の良い僧侶を、有力者と見定め声をかけた
+ELSE
+    PRINTFORMW %ANAME(MASTER)%は再びアレス宗教国の聖地である大聖堂を訪れた
+    PRINTFORMW 礼拝堂の一角で以前出会った高僧が聖典を捲っている。
+ENDIF
+PRINTFORML 
+PRINTFORMW 
+PRINTFORMW 「おや、わたくしめに何か御用ですかな？」
+PRINTFORML 
+PRINTFORMW %ANAME(MASTER)%が寄進を申し出ると高位の僧と思われる男はにこやかに微笑んだ
+PRINTFORML 
+PRINTFORMW 「実に素晴らしいお心構えです。%ANAME(MASTER)%の献身に祝福があらんことを」
+PRINTFORML 
+PRINTFORMW
+PRINTFORMW さて、どの程度の金額を差し出したものだろう？
+PRINTFORMW 男は恐らく高位の僧だ。関心を買うには相応の金額が必要だろう
+PRINTFORML
+PRINTFORML （%ANAME(MASTER)%の現在の所持金：＄{MONEY}）
+CALL ASK_MULTI("＄10,000", "＄100,000", "＄3,000,000", "やっぱり止める")
+SELECTCASE RESULT
+    CASE 0
+        SIF MONEY < 10000
+            RESULT = -1
+	CASE 1
+        SIF MONEY < 100000
+            RESULT = -1
+	CASE 2
+        SIF MONEY < 3000000
+            RESULT = -1
+    CASEELSE
+ENDSELECT
+
+IF RESULT == -1
+    PRINTFORMW 所持金が足りないようだ……
+    RESULT = 3
+ENDIF
+
+
+SELECTCASE RESULT
+CASE 0
+PRINTFORMW 「確かに受領しましたよ、敬虔な信徒よ。貴殿の旅路に主の加護があらんことを」
+PRINTFORML
+PRINTFORMW 入金額を確認した瞬間、男の柔和な笑みに一瞬影が差したのを%ANAME(MASTER)%は見逃さなかった
+PRINTFORML 
+PRINTFORMW 口にこそ出さないものの、慇懃な態度からは金額に対するいささか不満げな様子が伺える……
+PRINTFORML 
+MONEY -= 10000
+CALL COLOR_PRINTW(@"アレス宗教国との関係性 + 1", カラー_注意)
+REL_LIKE_COUNTRY:国家ID_アレス宗教:国家ID_プレイヤー += 1
+PRINTFORMW
+QUEST_PROGRESS:26 = 1
+CASE 1
+PRINTFORMW 入金額を確認した男は満足気な笑みを浮かべて頷く
+PRINTFORML
+PRINTFORMW 「実に良い心がけです。友よ、主は貴殿の献身を高く評価しますぞ」
+PRINTFORML 
+MONEY -= 100000
+CALL COLOR_PRINTW(@"アレス宗教国との関係性 + 10", カラー_注意)
+REL_LIKE_COUNTRY:国家ID_アレス宗教:国家ID_プレイヤー += 10
+QUEST_PROGRESS:26 = 1
+CASE 2
+PRINTFORMW 数隻の輸送船に匹敵する入金額を確認した瞬間、男の貼り付いたような笑みが一瞬驚きに変わった
+PRINTFORMW 男は端末の金額と%ANAME(MASTER)%の顔を交互に伺う
+PRINTFORML
+PRINTFORMW ……彼は一瞬の間に%ANAME(MASTER)%への値踏みを済ませたようだ。そして元の調子で語りかける
+PRINTFORML
+PRINTFORML 「いやはや……なんと素晴らしい……。全くもって素晴らしい！
+PRINTFORMW 貴殿のような模範的な信徒と相まみえることができた今日この日を、主に感謝せねばなりまぬ」
+PRINTFORML 
+PRINTFORMW 
+PRINTFORML 「さて、時に友よ。我々は貴殿のような模範的な信徒と末永き関係を築くことができれば……と考えております」
+PRINTFORMW 立ち話を続けるのも難ですから、あちらでもう少し詳しい話をしませんかな？」
+PRINTFORML 
+PRINTFORMW
+PRINTFORMW %ANAME(MASTER)%は男に促され、応接間に足を運んだ
+PRINTFORML 
+PRINTFORMW 「……さて友よ。宇宙とは実に冷たく暗い。かと思えば灼たる業火の如き戦火に包まれております」
+PRINTFORML 
+PRINTFORMW 男は信者に説法をするのと同じ、やや芝居掛かった調子で続ける
+PRINTFORML 
+PRINTFORMW 「それもまた主が与え給うた試練。我々は甘受し、乗り越えねばなりません」
+PRINTFORML
+PRINTFORMW
+PRINTFORMW 「……しかし一方で……我々人間は弱い。実にか弱い」
+PRINTFORML 
+PRINTFORMW 「ゆえに此岸の身に置きながらにして、救済を欲するのもまた無理からぬこと」
+PRINTFORML 
+PRINTFORMW 「もし、もしも貴殿がたゆまぬ信仰と献身の道中において、魂の救済を欲するのであれば……」
+PRINTFORML
+PRINTFORMW 「この場所を訪れると良いでしょう」
+PRINTFORML
+PRINTFORMW %ANAME(MASTER)%は自身の端末に聖堂地下区画の入り口の座標と認証キーが転送されたのを確認した
+PRINTFORML
+PRINTFORMW 「献身の徒に束の間の救済を供すること……それもまた我々の責務の一つなのですから」
+PRINTFORML 
+MONEY -= 3000000
+CALL COLOR_PRINTW(@"アレス宗教国との関係性 + 50", カラー_注意)
+REL_LIKE_COUNTRY:国家ID_アレス宗教:国家ID_プレイヤー += 50
+CALL COLOR_PRINTW(@"――　アレス宗教国の裏施設「地下聖堂」が解禁された", カラー_注意)
+PRINTFORMW 
+PRINTFORMW 「ではさらば、志を伴にする友よ。%ANAME(MASTER)%に主の無上の祝福があらんことを……」
+QUEST_PROGRESS:26 = 2
+
+CASE 3
+PRINTFORML
+PRINTFORMW 金銭的に余裕があるわけでもない、やはり今はやめておこう。
+PRINTFORML
+PRINTFORMW 「無理をすることはありませんよ、信徒よ。教義に忠実たれ。さすれば主の加護は常に%ANAME(MASTER)%と共にあります」
+PRINTFORML 
+PRINTFORMW そう言って一礼すると、男は足早に去っていった。
+PRINTFORMW
+QUEST_PROGRESS:26 = 1
+ENDSELECT
+
+

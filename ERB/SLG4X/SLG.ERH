@@ -153,6 +153,7 @@
 
 ; 戦闘系
 #DIM COMMANDER, 2
+#DIMS BATTLEFIELD_NAME
 
 ; 武器の種類
 #DIM CONST 実体弾 = 0

@@ -1,0 +1,53 @@
+﻿;;;クエストやアノマリーイベントの処理中に呼び出される汎用できそうなイベント用関数
+;LIB_QUESTにまとめるべきか悩ましい
+;-------------------------------------------------
+; 同乗しているクルーをボタン出力し選出結果を返す
+; RETURN : キャラクター固有ID / キャンセル -1
+;-------------------------------------------------
+@COMMON_CHOICE_CREW_SINGLE()
+#DIM ID 
+$INPUT_LOOP
+PRINTL
+FOR ID, 1, CHARANUM
+	IF RIDING_WITH:ID == BOARDING_SHIP_ID && RIDING_WITH:ID != -1
+		PRINTBUTTON @"[{ID, 2, RIGHT}] %ANAME:ID%", ID
+		PRINTL
+	ENDIF
+NEXT
+PRINTL
+PRINTBUTTON "[キャンセル]", -1
+INPUT
+IF RESULT == -1
+	RETURN -1
+ELSEIF RESULT > 0 && RESULT < CHARANUM && RIDING_WITH:RESULT == BOARDING_SHIP_ID
+	RETURN RESULT
+ENDIF
+
+GOTO INPUT_LOOP
+
+;-------------------------------------------------
+; キャラクターの性癖(COM_TENDENCY)を一時的に退避する
+; COM_TENDENCYをクエスト側で上書きする場合に、元の設定値を退避するために使う
+; ARG:1 キャラクター固有ID
+;------------------------------------------------- 
+@COMMON_SAVE_COM_TENDENCY(対象)
+#DIM 対象
+#DIM ITER
+#DIM CONST 性癖最大数 = VARSIZE("COM_TENDENCY")
+
+FOR ITER, 0, 性癖最大数
+	SAVE_COM_TENDENCY:対象:ITER = COM_TENDENCY:対象:ITER
+NEXT
+;-------------------------------------------------
+; 一時的に退避した性癖(COM_TENDENCY)を取り出す
+; 'COMMON_LOAD_COM_TENDENCY'と対で使用する関数
+; ARG:1 キャラクター固有ID
+;------------------------------------------------- 
+@COMMON_LOAD_COM_TENDENCY(対象)
+#DIM 対象
+#DIM ITER
+#DIM CONST 性癖最大数 = VARSIZE("COM_TENDENCY")
+
+FOR ITER, 0, 性癖最大数
+	COM_TENDENCY:対象:ITER = SAVE_COM_TENDENCY:対象:ITER
+NEXT

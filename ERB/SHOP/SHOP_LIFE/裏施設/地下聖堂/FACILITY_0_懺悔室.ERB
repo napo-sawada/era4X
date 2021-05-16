@@ -1,0 +1,573 @@
+﻿;---------------------------
+; 説明
+;---------------------------
+@FACILITY_0_DESCRIPTION
+PRINTFORML 
+PRINTFORML [地下聖堂　―懺悔室―]
+PRINTFORML
+PRINTFORML 地下に設けられた広大な聖堂に、ただ懺悔室が一つだけ備え付けられた奇妙な一室がある
+PRINTFORML
+PRINTFORML 表向きは信徒に弱みを見せることを憚る高位の僧侶が、
+PRINTFORML 内密に己の罪を吐露するための場、ということになっているが……
+PRINTL 
+
+;--------------------------
+; 本体
+;--------------------------
+@FACILITY_0_BODY(対象)
+#DIM 対象
+#DIM ITER
+
+PRINTFORML
+PRINTFORMW %ANAME(MASTER)%は大聖堂の高僧から送られた認証キーを使い、地下深くにある聖堂に足を運んだ……
+PRINTFORML
+QUEST_対象 = 対象
+
+IF QUEST_PROGRESS:26 == 2
+    CALL FACILITY_0_TALE_A
+    CALL FACILITY_0_MASTER_CONFESS
+ELSE
+    CALL FACILITY_0_TALE_B
+ENDIF
+
+;-------------------------------------------------
+;導入(二回目以降)
+;-------------------------------------------------
+@FACILITY_0_TALE_B
+PRINTFORML
+PRINTFORMW さて……どうしたものだろう……？
+PRINTFORML
+CALL ASK_MULTI("告解する", @"%ANAME(QUEST_対象)%に告解する", @"%ANAME(QUEST_対象)%に信徒の告解を請けさせる")
+SELECTCASE RESULT
+    CASE 0
+        PRINTFORMW %ANAME(MASTER)%は自らの罪を吐露する場を設けてほしいと、僧侶に頼み込んだ
+        PRINTFORML
+        PRINTFORMW 「もちろんですとも……迷える友の悩みに向き合うのが我らが務め。さぁこちらへ……」
+        PRINTFORML
+        PRINTFORMW %ANAME(MASTER)%は僧侶に促され懺悔室に足を踏み入れた
+        CALL FACILITY_0_MASTER_CONFESS
+    CASE 1
+        PRINTFORMW %ANAME(MASTER)%は自らが抱える秘密を%ANAME(QUEST_対象)%に告解する場を設けてほしいと、僧侶に頼み込んだ
+        PRINTFORML
+        PRINTFORMW 「ふむ……日常の中では互いに打ち明けらぬこともありましょう。もちろんいいですとも。さぁ、お二方ともこちらへ……」
+        PRINTFORML
+        PRINTFORMW %ANAME(MASTER)%と%ANAME(QUEST_対象)%は僧侶に促され懺悔室に足を踏み入れた
+        CALL FACILITY_0_MASTER_CONFESS_TO_PARTNER
+    CASE 2
+        PRINTFORMW %ANAME(MASTER)%は護衛として帯同させた%ANAME(QUEST_対象)%に、信徒の告解を請けさせることにした
+        PRINTFORML
+        PRINTFORMW 「素晴らしい……！　実に素晴らしい！　やはり%ANAME(MASTER)%は信徒の鏡、教義の体現者ですぞ！」
+        PRINTFORML
+        PRINTFORMW 「%ANAME(QUEST_対象)%様の御献身は、必ずや我ら信徒への大いなる救済になりましょう！」
+        PRINTFORML
+        PRINTFORMW %ANAME(QUEST_対象)%は僧侶に促されるまま懺悔室の中に消えていった……
+        CALL FACILITY_0_MOB_CONFESS_TO_PARTNER
+    CASEELSE
+        CALL FACILITY_0_MASTER_CONFESS
+ENDSELECT
+
+;-------------------------------------------------
+;導入(初回)
+;-------------------------------------------------
+@FACILITY_0_TALE_A
+PRINTFORMW 
+PRINTFORMW 「ようこそおいで下さいました。%ANAME(MASTER)%のことはお伺いしております」
+PRINTFORML
+PRINTFORMW 出迎えた僧侶が敬々しく頭を垂れる
+PRINTFORML 
+PRINTFORMW 「さて、人間とは実に罪深き生き物です」
+PRINTFORMW 「その上抱える罪も実に多様だ……。それらの全てが、必ずしも贖罪によって救済される性質のものでもありませぬ」
+PRINTFORMW 
+PRINTFORMW 「……ですからまず、一度罪を吐き出し己が内面に秘めるものと向き合う……。そうした場を我々は提供しております」
+PRINTFORML 
+PRINTFORML
+PRINTFORMW 
+PRINTFORMW %ANAME(MASTER)%が案内された部屋は実に奇妙だった
+PRINTFORML
+PRINTFORMW 飾り気のない殺風景な部屋の一角にただ一つだけ、厳しい風貌の懺悔室が置かれている
+PRINTFORMW 
+PRINTFORMW %ANAME(MASTER)%は僧侶に促されるまま、異様な存在感を放つ懺悔室に足を踏み入れる
+PRINTFORML
+PRINTFORMW 
+PRINTFORML 一見したところ、アレス教の各教会に置かれている懺悔室と構造上の違いは見られない
+PRINTFORMW 窮屈な室内には簡素な座席と仕切板が設けられており、向こう側を伺うことが出来ない作りになっている
+PRINTFORMW 
+PRINTFORMW さらに室内の様子を伺う。すると壁面に施された精緻な彫刻のに混じって奇妙なものがあるのを見つけた
+PRINTFORML
+PRINTFORMW
+PRINTFORMW ――ゴルンミストの噴霧器だ
+PRINTFORMW 
+PRINTFORMW ゴルンミストは人間の精神を発揚させる効能を持つ
+PRINTFORMW ……そして高濃度においては強烈な催淫効果を伴う
+PRINTFORMW 
+PRINTFORMW 当然本来このような場にあるべきはずのものではない
+PRINTFORMW 
+PRINTFORMW もう少し観察すると、%ANAME(MASTER)%は仕切板の腰ほどの高さの位置に、こぶし大の奇妙な穴が空いていることに気がついた
+PRINTFORML
+PRINTFORMW
+PRINTFORMW ……%ANAME(MASTER)%は虚飾の裏に隠されたこの場の真意を理解した
+PRINTFORML 
+PRINTFORMW ... 
+PRINTFORMW ..
+PRINTFORMW .
+PRINTFORML 
+PRINTFORMW 仕切板の向こうに誰かが入ってくる気配がする
+PRINTFORMW 
+PRINTFORMW 「……汝の罪を……請けに参りました……」
+PRINTFORMW 
+PRINTFORMW 姿を伺うことはできないが、消え入りそうな若い女の声が聞こえる
+PRINTFORMW 
+SETCOLOR カラー_ピンク
+PRINTFORMW ――噴霧器から漂う濃密な甘い香りが欲情を掻き立てる
+RESETCOLOR
+PRINTFORML 
+PRINTFORML 
+PRINTFORMW ……仕切板に空いた穴の向こうから女の荒い吐息が聞こえる……
+PRINTFORML 
+PRINTFORMW 
+PRINTFORMW %ANAME(MASTER)%は催淫性の霧によって励起した”罪の象徴”を、穴に押し当てた
+PRINTFORMW
+PRINTFORML
+SETCOLOR カラー_ピンク
+PRINTFORMW 先端に生暖い舌の感触が触れる……
+RESETCOLOR
+PRINTFORML
+
+;-------------------------------------------------
+;MASTERが告解
+;-------------------------------------------------
+@FACILITY_0_MASTER_CONFESS
+#DIM 対象
+;調教の条件を設定
+CVARSET CFLAG, GETNUM(CFLAG, "慰安参加者") , 0
+CVARSET CFLAG, GETNUM(CFLAG, "調教参加フラグ") , 0
+FLAG:調教モード = 5
+FLAG:閨逆調教 = 1
+FLAG:ウフフフラグ = 1
+TRAIN_PLACE = 懺悔室
+
+;あなたのCOM_TENDENCYを一時退避
+CALL COMMON_SAVE_COM_TENDENCY(MASTER)
+VARSET COM_TENDENCY:MASTER:0, -1
+COM_TENDENCY:MASTER:GETNUM(TRAINNAME, "イラマチオ") = 3
+
+;モブキャラ生成
+CALL CREATE_RANDOM_CHARA(0, -1, 0)
+FLAG:汎用武将カウント --
+対象 = RESULT
+IF LOCAL == -1
+	RETURN -1
+ENDIF
+
+;モブキャラの取扱を設定
+CFLAG:対象:慰安参加者 = 1
+CFLAG:対象:慰安モブ = 1
+CFLAG:対象:調教参加フラグ  = 1
+CFLAG:対象:強制友好化 = 1
+
+;モブキャラの性癖をセット
+VARSET COM_TENDENCY:対象:0, -1
+COM_TENDENCY:対象:GETNUM(TRAINNAME, "フェラチオ") = 3
+COM_TENDENCY:対象:GETNUM(TRAINNAME, "パイズリ") = 1
+COM_TENDENCY:対象:GETNUM(TRAINNAME, "手コキ") = 2
+COM_TENDENCY:対象:GETNUM(TRAINNAME, "亀頭責め手コキ") = 2
+COM_TENDENCY:対象:GETNUM(TRAINNAME, "亀頭責めフェラ") = 3
+COM_TENDENCY:対象:GETNUM(TRAINNAME, "イラマチオ") = 3
+IF !HAS_PENIS(MASTER)
+    COM_TENDENCY:対象:GETNUM(TRAINNAME, "クンニ") = 3
+ENDIF
+
+;モブキャラにプリセットを適用
+;初回は必ずシスター
+IF RAND:2　|| QUEST_PROGRESS:26 == 2
+    CALL FACILITY_0_MOBPRESET_SISTER(対象)
+ELSE
+    CALL FACILITY_0_MOBPRESET_CHOIR_GIRL(対象)
+ENDIF
+
+CALL ADD_EVENTTRAIN_CALLEE("FACILITY_0_MASTER_CONFESS")
+CALL ADD_EVENTEND_CALLEE("FACILITY_0_MASTER_CONFESS")
+
+SHOP_TIME -- 
+CALL START_TRAIN_COMMON
+PRINTW
+
+@EVENTTRAIN_FACILITY_0_MASTER_CONFESS
+TFLAG:56 = 20
+TFLAG:69 = 1 ;桃源香フラグ
+
+@EVENTEND_FACILITY_0_MASTER_CONFESS
+;あなたのCOM_TENDENCYを戻す
+CALL COMMON_LOAD_COM_TENDENCY(MASTER)
+IF QUEST_PROGRESS:26 == 2
+    CALL FACILITY_0_TALE_A_END
+ELSE
+    PRINTFORML
+    PRINTFORMW 汚れを知らない若い乙女を使い、"罪の告解"を済ませた%ANAME(MASTER)%は足早に地下聖堂を後にした……
+    PRINTFORMW
+ENDIF
+
+;-------------------------------------------------
+;イベント終了(初回)
+;-------------------------------------------------
+@FACILITY_0_TALE_A_END
+PRINTFORML
+PRINTFORMW 汚れを知らない若いシスターの口を、己の"罪"で散々に汚辱した%ANAME(MASTER)%は懺悔室の置かれた部屋を後にする
+PRINTFORMW
+PRINTFORMW 出口には先程の高僧がおり、笑みを浮かべている。しかしその笑みの下の本心を伺い知ることはできない
+PRINTFORMW
+PRINTFORMW 「……いかがでしたかな？　貴殿のさらなる献身次第では、我々はさらなる"救い"を提供することもできましょう……」
+PRINTFORMW
+PRINTFORMW %ANAME(MASTER)%は一先ず形式的な答えだけを返し、施設を後にした……
+PRINTFORMW
+QUEST_PROGRESS:26 = 3
+
+
+;-------------------------------------------------
+;MASTERがパートナーに告解
+;-------------------------------------------------
+@FACILITY_0_MASTER_CONFESS_TO_PARTNER
+
+;調教の条件を設定
+CVARSET CFLAG, GETNUM(CFLAG, "慰安参加者") , 0
+CVARSET CFLAG, GETNUM(CFLAG, "調教参加フラグ") , 0
+CFLAG:QUEST_対象:調教参加フラグ  = 1
+FLAG:調教モード = 5
+FLAG:閨逆調教 = 1
+FLAG:ウフフフラグ = 1
+TRAIN_PLACE = 懺悔室
+
+;あなたのCOM_TENDENCYを一時退避
+CALL COMMON_SAVE_COM_TENDENCY(MASTER)
+VARSET COM_TENDENCY:MASTER:0, -1
+COM_TENDENCY:MASTER:GETNUM(TRAINNAME, "イラマチオ") = 3
+
+;QUEST_対象のCOM_TENDENCYを一時退避
+CALL COMMON_SAVE_COM_TENDENCY(QUEST_対象)
+VARSET COM_TENDENCY:QUEST_対象:0, -1
+
+COM_TENDENCY:QUEST_対象:GETNUM(TRAINNAME, "フェラチオ") = 2
+COM_TENDENCY:QUEST_対象:GETNUM(TRAINNAME, "パイズリ") = 1
+COM_TENDENCY:QUEST_対象:GETNUM(TRAINNAME, "手コキ") = 2
+COM_TENDENCY:QUEST_対象:GETNUM(TRAINNAME, "亀頭責め手コキ") = 2
+COM_TENDENCY:QUEST_対象:GETNUM(TRAINNAME, "亀頭責めフェラ") = 2
+COM_TENDENCY:QUEST_対象:GETNUM(TRAINNAME, "イラマチオ") = 3
+IF !HAS_PENIS(MASTER)
+	COM_TENDENCY:QUEST_対象:GETNUM(TRAINNAME, "クンニ") = 3
+ENDIF
+
+CALL ADD_EVENTTRAIN_CALLEE("FACILITY_0_MASTER_CONFESS_TO_PARTNER")
+CALL ADD_EVENTEND_CALLEE("FACILITY_0_MASTER_CONFESS_TO_PARTNER")
+
+SHOP_TIME -- 
+CALL START_TRAIN_COMMON
+PRINTW
+
+@EVENTTRAIN_FACILITY_0_MASTER_CONFESS_TO_PARTNER
+TFLAG:56 = 20
+TFLAG:69 = 1 ;桃源香フラグ
+
+@EVENTEND_FACILITY_0_MASTER_CONFESS_TO_PARTNER
+#DIM ITER 
+;あなたのCOM_TENDENCYを戻す
+CALL COMMON_LOAD_COM_TENDENCY(MASTER)
+;QUEST_対象のCOM_TENDENCYをを戻す
+CALL COMMON_LOAD_COM_TENDENCY(QUEST_対象)
+
+PRINTFORML
+PRINTFORMW %ANAME(QUEST_対象)%に己の罪を吐露した%ANAME(MASTER)%は足早に地下聖堂を後にした……
+PRINTFORMW
+
+;-------------------------------------------------
+;パートナーにモブの告解を請けさせる
+;-------------------------------------------------
+@FACILITY_0_MOB_CONFESS_TO_PARTNER
+#DIM 対象
+#DIM ITER
+;調教の条件を設定
+CVARSET CFLAG, GETNUM(CFLAG, "慰安参加者") , 0
+CVARSET CFLAG, GETNUM(CFLAG, "調教参加フラグ") , 0
+CFLAG:QUEST_対象:調教参加フラグ  = 1
+FLAG:調教モード = 7
+FLAG:慰安モード = 3
+FLAG:ウフフフラグ = 1
+TRAIN_PLACE = 懺悔室
+
+;QUEST_対象のCOM_TENDENCYを一時退避
+CALL COMMON_SAVE_COM_TENDENCY(QUEST_対象)
+
+;QUEST_対象の性癖をセット
+VARSET COM_TENDENCY:QUEST_対象:0, -1
+COM_TENDENCY:QUEST_対象:GETNUM(TRAINNAME, "フェラチオ") = 2
+COM_TENDENCY:QUEST_対象:GETNUM(TRAINNAME, "パイズリ") = 1
+COM_TENDENCY:QUEST_対象:GETNUM(TRAINNAME, "手コキ") = 2
+COM_TENDENCY:QUEST_対象:GETNUM(TRAINNAME, "亀頭責め手コキ") = 2
+COM_TENDENCY:QUEST_対象:GETNUM(TRAINNAME, "亀頭責めフェラ") = 2
+COM_TENDENCY:QUEST_対象:GETNUM(TRAINNAME, "イラマチオ") = 3
+
+;モブキャラ生成
+CALL CREATE_RANDOM_CHARA(0, -1, 0)
+FLAG:汎用武将カウント --
+対象 = RESULT
+IF LOCAL == -1
+	RETURN -1
+ENDIF
+
+;モブキャラの取扱を設定
+CFLAG:対象:調教参加フラグ  = 1
+CFLAG:対象:慰安参加者 = 1
+CFLAG:対象:慰安モブ = 1
+CFLAG:対象:強制友好化 = 1
+
+;モブキャラの性癖をセット
+VARSET COM_TENDENCY:対象:0, -1
+COM_TENDENCY:対象:GETNUM(TRAINNAME, "イラマチオ") = 3
+
+;モブキャラにプリセットを適用
+IF RAND:2
+    CALL FACILITY_0_MOBPRESET_SISTER_HUTA(対象)
+ELSE
+    CALL FACILITY_0_MOBPRESET_LEWD_PRIEST(対象)
+ENDIF
+
+CALL ADD_EVENTTRAIN_CALLEE("FACILITY_0_MOB_CONFESS_TO_PARTNER")
+CALL ADD_EVENTEND_CALLEE("FACILITY_0_MOB_CONFESS_TO_PARTNER")
+
+SHOP_TIME -- 
+CALL START_TRAIN_COMMON
+PRINTW
+
+@EVENTTRAIN_FACILITY_0_MOB_CONFESS_TO_PARTNER
+TFLAG:56 = 20
+TFLAG:69 = 1 ;桃源香フラグ
+
+@EVENTEND_FACILITY_0_MOB_CONFESS_TO_PARTNER
+;QUEST_対象のCOM_TENDENCYをを戻す
+CALL COMMON_LOAD_COM_TENDENCY(QUEST_対象)
+
+PRINTFORML
+PRINTFORMW %ANAME(QUEST_対象)%の"献身"がアレス教の高僧に評価されたようだ……
+PRINTFORMW
+CALL COLOR_PRINTW(@"アレス宗教国との関係性 + 30", カラー_注意)
+REL_LIKE_COUNTRY:国家ID_アレス宗教:国家ID_プレイヤー += 30
+
+;-------------------------------------------------
+;慰安モブの定義　シスター
+;-------------------------------------------------
+@FACILITY_0_MOBPRESET_SISTER(対象)
+#DIM 対象
+#DIMS 名前
+#DIM CONST 第三者に実行 = 2000
+名前 = シスター
+
+NO:対象 = GET_EMPTY_NO()
+NAME:対象 = %名前%
+CALLNAME:対象 = %名前%
+CSTR:対象:0 =
+CSTR:対象:1 =
+TALENT:対象:性別 = 1
+MAXBASE:対象:体力 = 99999999
+MAXBASE:対象:気力 = 99999999
+MAXBASE:対象:精神力 = 1500
+
+BASE:対象:体力 = MAXBASE:対象:体力
+BASE:対象:気力 = MAXBASE:対象:気力
+BASE:対象:精神力 = MAXBASE:対象:精神力
+ABL:対象:性知識 = 5
+ABL:対象:Ａ感 = RAND(5,10)
+ABL:対象:欲望 = 5
+ABL:対象:性技 = 5
+ABL:対象:性知識 = 5
+ABL:対象:奉仕 = 6
+ABL:対象:レズ = 3
+ABL:対象:精愛 = 5
+ABL:対象:主導度Ｕ = 600
+ABL:対象:主導度Ｎ = RAND(300, 600)
+ABL:対象:倒錯度 = 700
+
+TALENT:対象:献身的 = 1
+TALENT:対象:陰毛現在値 = 陰毛_標準
+TALENT:対象:陰毛目標値 = 陰毛_標準
+TALENT:(対象):処女 = 1
+TALENT:(対象):キス未経験 = 0
+TALENT:(対象):童貞 = 1
+TALENT:(対象):アナル処女 = 0
+
+SEXUAL_EXPERIENCE:(対象):初体験_処女 = ----
+SEXUAL_LAST_EXPERIENCE:(対象):初体験_処女 = ----
+SEXUAL_EXPERIENCE:(対象):初体験_キス = 不明
+SEXUAL_LAST_EXPERIENCE:(対象):初体験_キス = 不明
+SEXUAL_EXPERIENCE:(対象):初体験_童貞 = ----
+SEXUAL_LAST_EXPERIENCE:(対象):初体験_童貞 = ----
+SEXUAL_EXPERIENCE:(対象):初体験_アナル処女 = 不明
+SEXUAL_LAST_EXPERIENCE:(対象):初体験_アナル処女 = 不明
+
+;-------------------------------------------------
+;慰安モブの定義　聖歌隊の乙女
+;-------------------------------------------------
+@FACILITY_0_MOBPRESET_CHOIR_GIRL(対象)
+#DIM 対象
+#DIMS 名前
+#DIM CONST 第三者に実行 = 2000
+名前 = 聖歌隊の乙女
+
+NO:対象 = GET_EMPTY_NO()
+NAME:対象 = %名前%
+CALLNAME:対象 = %名前%
+CSTR:対象:0 =
+CSTR:対象:1 =
+TALENT:対象:性別 = 1
+MAXBASE:対象:体力 = 99999999
+MAXBASE:対象:気力 = 99999999
+MAXBASE:対象:精神力 = 1500
+
+BASE:対象:体力 = MAXBASE:対象:体力
+BASE:対象:気力 = MAXBASE:対象:気力
+BASE:対象:精神力 = MAXBASE:対象:精神力
+ABL:対象:Ａ感 = RAND(5,10)
+ABL:対象:性知識 = 5
+ABL:対象:奉仕 = 6
+ABL:対象:欲望 = RAND:3
+ABL:対象:性技 = RAND:3
+ABL:対象:性交 = RAND:2
+ABL:対象:主導度Ｕ = 300
+ABL:対象:主導度Ｎ = RAND(300, 600)
+ABL:対象:倒錯度 = 700
+
+TALENT:対象:舌使い = 1
+TALENT:対象:献身的 = 1
+TALENT:対象:陰毛現在値 = 陰毛_つるつる
+TALENT:対象:陰毛目標値 = 陰毛_つるつる
+TALENT:(対象):処女 = 1
+TALENT:(対象):キス未経験 = 1
+TALENT:(対象):童貞 = 1
+TALENT:(対象):アナル処女 = 0
+
+SEXUAL_EXPERIENCE:(対象):初体験_処女 = ----
+SEXUAL_LAST_EXPERIENCE:(対象):初体験_処女 = ----
+SEXUAL_EXPERIENCE:(対象):初体験_キス = ----
+SEXUAL_LAST_EXPERIENCE:(対象):初体験_キス = ----
+SEXUAL_EXPERIENCE:(対象):初体験_童貞 = ----
+SEXUAL_LAST_EXPERIENCE:(対象):初体験_童貞 = ----
+SEXUAL_EXPERIENCE:(対象):初体験_アナル処女 = 不明
+SEXUAL_LAST_EXPERIENCE:(対象):初体験_アナル処女 = 不明
+
+
+;-------------------------------------------------
+;慰安モブの定義　シスター(双)
+;-------------------------------------------------
+@FACILITY_0_MOBPRESET_SISTER_HUTA(対象)
+#DIM 対象
+#DIMS 名前
+#DIM CONST 第三者に実行 = 2000
+名前 = シスター
+
+NO:対象 = GET_EMPTY_NO()
+NAME:対象 = %名前%
+CALLNAME:対象 = %名前%
+CSTR:対象:0 =
+CSTR:対象:1 =
+TALENT:対象:性別 = 2
+MAXBASE:対象:体力 = 99999999
+MAXBASE:対象:気力 = 99999999
+MAXBASE:対象:精神力 = 1500
+
+BASE:対象:体力 = MAXBASE:対象:体力
+BASE:対象:気力 = MAXBASE:対象:気力
+BASE:対象:精神力 = MAXBASE:対象:精神力
+ABL:対象:性知識 = 5
+ABL:対象:Ａ感 = RAND(5,10)
+ABL:対象:欲望 = 10
+ABL:対象:射精 = 15
+ABL:対象:性技 = 5
+ABL:対象:性知識 = 5
+ABL:対象:奉仕 = 5
+ABL:対象:レズ = 10
+ABL:対象:精愛 = 5
+ABL:対象:主導度Ｕ = 600
+ABL:対象:主導度Ｎ = RAND(300, 600)
+ABL:対象:倒錯度 = 700
+
+TALENT:対象:絶倫 = 1
+TALENT:対象:献身的 = 1
+TALENT:対象:陰毛現在値 = 陰毛_標準
+TALENT:対象:陰毛目標値 = 陰毛_標準
+TALENT:(対象):処女 = 1
+TALENT:(対象):キス未経験 = 0
+TALENT:(対象):童貞 = 1
+TALENT:(対象):アナル処女 = 0
+
+SEXUAL_EXPERIENCE:(対象):初体験_処女 = ----
+SEXUAL_LAST_EXPERIENCE:(対象):初体験_処女 = ----
+SEXUAL_EXPERIENCE:(対象):初体験_キス = 不明
+SEXUAL_LAST_EXPERIENCE:(対象):初体験_キス = 不明
+SEXUAL_EXPERIENCE:(対象):初体験_童貞 = ----
+SEXUAL_LAST_EXPERIENCE:(対象):初体験_童貞 = ----
+SEXUAL_EXPERIENCE:(対象):初体験_アナル処女 = 不明
+SEXUAL_LAST_EXPERIENCE:(対象):初体験_アナル処女 = 不明
+
+
+;-------------------------------------------------
+;慰安モブの定義　司祭
+;中身は富豪
+;-------------------------------------------------
+@FACILITY_0_MOBPRESET_LEWD_PRIEST(対象)
+#DIM 対象
+
+NO:対象 = GET_EMPTY_NO()
+NAME:対象 = 司祭
+CALLNAME:対象 = 司祭
+CSTR:対象:0 =
+CSTR:対象:1 =
+TALENT:対象:性別 = 0
+MAXBASE:対象:体力 = 99999999
+MAXBASE:対象:気力 = 99999999
+MAXBASE:対象:精神力 = 1500
+BASE:対象:体力 = MAXBASE:対象:体力
+BASE:対象:気力 = MAXBASE:対象:気力
+BASE:対象:精神力 = MAXBASE:対象:精神力
+ABL:対象:性知識 = 5
+ABL:対象:Ｃ感 = 5
+ABL:対象:Ｖ感 = 3
+ABL:対象:Ａ感 = 3
+ABL:対象:Ｂ感 = 3
+ABL:対象:Ｍ感 = 5
+ABL:対象:欲望 = 15
+ABL:対象:性技 = 20
+ABL:対象:性知識 = 5
+ABL:対象:奉仕 = 1
+ABL:対象:性交 = 15
+ABL:対象:レズ = 0
+ABL:対象:精愛 = 3
+ABL:対象:露出 = 2
+ABL:対象:射精 = 15
+ABL:対象:排泄 = 3
+ABL:対象:サド = 5
+ABL:対象:主導度Ｕ = RAND(300, 600)
+ABL:対象:主導度Ｎ = RAND(300, 600)
+ABL:対象:倒錯度 = RAND(300, 500)
+EXP:対象:絶頂経験 = 500
+ABL:対象:白兵 = 60
+ABL:対象:操艦 = 30
+ABL:対象:知略 = 30
+ABL:対象:政治 = 30
+ABL:対象:料理 = 10
+ABL:対象:肝臓 = 3
+
+TALENT:対象:絶倫 = 1
+TALENT:対象:陰毛現在値 = 陰毛_標準
+TALENT:対象:陰毛目標値 = 陰毛_標準
+TALENT:対象:Ｖ締まり = GET_DEFAULT_TIGHTNESS("普通")
+TALENT:対象:Ａ締まり = GET_DEFAULT_TIGHTNESS("普通")
+TALENT:(対象):処女 = 0
+TALENT:(対象):キス未経験 = 0
+TALENT:(対象):童貞 = 0
+TALENT:(対象):アナル処女 = 1
+SEXUAL_EXPERIENCE:(対象):初体験_処女 = 不明
+SEXUAL_LAST_EXPERIENCE:(対象):初体験_処女 = 不明
+SEXUAL_EXPERIENCE:(対象):初体験_キス = 不明
+SEXUAL_LAST_EXPERIENCE:(対象):初体験_キス = 不明
+SEXUAL_EXPERIENCE:(対象):初体験_童貞 = 不明
+SEXUAL_LAST_EXPERIENCE:(対象):初体験_童貞 = 不明
+SEXUAL_EXPERIENCE:(対象):初体験_アナル処女 = ----
+SEXUAL_LAST_EXPERIENCE:(対象):初体験_アナル処女 = ----

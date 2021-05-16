@@ -1,0 +1,211 @@
+﻿;-------------------------------------------------
+;SLG_COMBATより
+;描画関連の関数をまとめる
+;-------------------------------------------------
+;SLG_COMBAT
+;ヘッダー描画
+;-------------------------------------------------
+@DRAW_COMBAT_HEADER
+ALIGNMENT CENTER
+FONTSTYLE 2
+PRINTFORML ――　%BATTLEFIELD_NAME%　――
+FONTSTYLE 0
+ALIGNMENT LEFT
+;調整用
+;PRINTFORML １２３４５６７８９０１２３４５６７８９０１２３４５６７８９０１２３４５６７８９０１２３４５６７８９０１２３４５６
+;PRINTFORML 1---5---10----5---10----5---10----5---10----5---10----5---10----5---10----5---10----5---10----5---10----5---10--
+CUSTOMDRAWLINE ―
+;FONTBOLD
+SETCOLOR カラー_女
+PRINTFORM %"ATTACKER",104,LEFT%
+SETCOLOR カラー_男
+PRINTFORM DEFENDER
+FONTREGULAR
+SETCOLOR カラー_注釈
+PRINTFORM COMMANDER:
+
+IF COMMANDER:0 != -1 
+	PRINTBUTTON @"%NAME:(COMMANDER:0)%", COMMANDER:0 + MAX_SHIP
+ELSE
+	PRINT なし
+ENDIF
+PRINTFORM %"", 70, LEFT%
+PRINTFORM COMMANDER:
+IF COMMANDER:1 != -1 
+	PRINTFORM @"%NAME:(COMMANDER:1)%", COMMANDER:1 + MAX_SHIP
+ELSE
+	PRINT なし
+ENDIF
+RESETCOLOR
+PRINTL 
+CUSTOMDRAWLINE ―
+;-------------------------------------------------
+;インジケーター用に装甲値の百分率を取得
+;ARG:1  SHIP_ID
+;RETURN ARMOR(百分率)
+;-------------------------------------------------
+@GET_SHIP_HP_BY_PERCENT(SHIP_ID)
+#DIM SHIP_ID
+#DIM MAX_SHIP_HP
+#DIM CURRENT_SHIP_HP
+#DIM SHIP_HP_BY_PERCENT
+
+CALL GET_SHIP_TOTAL_HP(SHIP_ID)
+MAX_SHIP_HP = RESULT
+CALL GET_SHIP_HP(SHIP_ID)
+CURRENT_SHIP_HP = RESULT
+SHIP_HP_BY_PERCENT = CURRENT_SHIP_HP * 100 / (MAX_SHIP_HP)
+
+RETURN SHIP_HP_BY_PERCENT
+
+;-------------------------------------------------
+;インジケーター用にシールド値の百分率を取得
+;ARG:1  SHIP_ID
+;RETURN ARMOR(百分率)
+;-------------------------------------------------
+@GET_SHIP_SHIELD_BY_PERCENT(SHIP_ID)
+#DIM SHIP_ID
+#DIM MAX_SHIP_SHIELD
+#DIM CURRENT_SHIP_SHIELD
+#DIM SHIP_SHIELD_BY_PERCENT
+
+CALL GET_SHIP_TOTAL_SIELD(SHIP_ID)
+MAX_SHIP_SHIELD = RESULT
+CALL GET_SHIP_SIELD(SHIP_ID)
+CURRENT_SHIP_SHIELD = RESULT
+IF MAX_SHIP_SHIELD > 0
+    SHIP_SHIELD_BY_PERCENT = CURRENT_SHIP_SHIELD * 100 / MAX_SHIP_SHIELD
+ELSE
+    SHIP_SHIELD_BY_PERCENT = 0
+ENDIF
+RETURN SHIP_SHIELD_BY_PERCENT
+
+;-------------------------------------------------
+;COMBAT_UI装甲インジケーターの描画
+;ARG:1 SHIP_ID
+;-------------------------------------------------
+@PRINT_HP_INDICATOR(SHIP_ID) 
+#DIM SHIP_ID
+#DIM SAVE_COLOR
+#DIM SHIP_HP_BY_PERCENT
+
+GETCOLOR
+SAVE_COLOR = RESULT
+RESETCOLOR
+
+CALL GET_SHIP_HP_BY_PERCENT(SHIP_ID)
+SHIP_HP_BY_PERCENT = RESULT
+SETCOLOR FuncColor_FromHSB(100 - (100 - SHIP_HP_BY_PERCENT), 255, 255)
+PRINTFORM ●
+
+SETCOLOR SAVE_COLOR
+
+;-------------------------------------------------
+;COMBAT_UIシールドインジケーターの描画
+;ARG:1 SHIP_ID
+;-------------------------------------------------
+;シールドインジケータ
+@PRINT_SHIELD_INDICATOR(SHIP_ID)
+#DIM SHIP_ID
+#DIM SAVE_COLOR
+#DIM SHIP_SHIELD_BY_PERCENT
+
+GETCOLOR
+SAVE_COLOR = RESULT
+RESETCOLOR
+
+CALL GET_SHIP_SHIELD_BY_PERCENT(SHIP_ID)
+SHIP_SHIELD_BY_PERCENT = RESULT
+LIMIT  255 * SHIP_SHIELD_BY_PERCENT / 100, 45, 255
+SETCOLOR FuncColor_FromHSB(180, RESULT, RESULT)
+PRINTFORM ●
+
+SETCOLOR SAVE_COLOR
+
+;-------------------------------------------------
+;COMBAT_UI_船体分類記号の取得
+;ARG:1 SHIP_ID
+;RETURNF HULL_CODE
+;-------------------------------------------------
+@GET_HULL_CODE(SHIP_ID)
+#DIM SHIP_ID
+#FUNCTIONS
+SELECTCASE SHIP_CATEGORY:SHIP_ID
+    CASE 調査船
+        RETURNF "PB"
+    CASE コルベット
+        RETURNF "DC"
+    CASE フリゲート
+        RETURNF "FF"
+    CASE 駆逐艦
+        RETURNF "DD"
+    CASE 巡洋艦
+        RETURNF "CL"
+    CASE 戦艦
+        RETURNF "BB"
+    CASE 空母
+        RETURNF "CV"
+    CASE 輸送船
+        RETURNF "AK"
+    CASE 作業船
+        RETURNF "AR"
+    CASEELSE
+        RETURNF "??""
+ENDSELECT
+RETURNF
+
+;-------------------------------------------------
+;座標と参加艦艇数からそれらしい戦場名称を生成する
+;ARG:1 POSID
+;ARG:2 SHIP_LIST1_COUNT ;攻撃側参加艦数 
+;ARG:3 SHIP_LIST2_COUNT ;防御側参加艦数
+;RETURNS BATTLEFIELD_NAME
+;-------------------------------------------------
+@GENERATE_BATTLEFIELD_NAME(POSID, SHIP_LIST1_COUNT, SHIP_LIST2_COUNT)
+#DIM POSID
+#DIM SHIP_LIST1_COUNT
+#DIM SHIP_LIST2_COUNT
+#DIM HAS_STAR_IN_SECTOR
+BATTLEFIELD_NAME '= ""
+
+RESULTS = %REPLACE(TOSTR(POSID), "....$", "0707")%
+CALL GET_PORT_NAME(TOINT(RESULTS))
+HAS_STAR_IN_SECTOR = RESULT
+
+IF SHIP_LIST1_COUNT >= 30 && SHIP_LIST2_COUNT >= 30 
+    IF HAS_STAR_IN_SECTOR == 1
+        BATTLEFIELD_NAME '= RESULTS:0 + SPLIT_RAND("の戦い/の会戦/上空の会戦/軌道上の会戦/星域会戦/星域会戦",1)
+    ELSE
+        IF RAND:2
+            RESULTS = %REPLACE(TOSTR(POSID), "(..)(..)(..)", "$1―$2$3")%
+            BATTLEFIELD_NAME '= TOFULL(RESULTS) + SPLIT_RAND("の戦い/の会戦",1)
+        ELSE
+            RESULTS = %REPLACE(TOSTR(POSID), "....$", "")%
+            BATTLEFIELD_NAME '= "セクター" + TOFULL(RESULTS) + SPLIT_RAND("の戦い/の会戦",1)
+        ENDIF
+    ENDIF
+ELSEIF  SHIP_LIST1_COUNT >= 10 && SHIP_LIST2_COUNT >= 10
+    IF HAS_STAR_IN_SECTOR == 1
+        BATTLEFIELD_NAME '= RESULTS:0 + SPLIT_RAND("の戦い/の戦い/上空の戦い/軌道上の戦い/星域の戦い",1)
+    ELSE
+        IF RAND:2
+            RESULTS = %REPLACE(TOSTR(POSID), "(..)(..)(..)", "$1―$2$3")%
+            BATTLEFIELD_NAME '= TOFULL(RESULTS) + "宙域の戦い"
+        ELSE
+            RESULTS = %REPLACE(TOSTR(POSID), "....$", "")%
+            BATTLEFIELD_NAME '= "セクター" + TOFULL(RESULTS) + "の戦い"
+        ENDIF
+    ENDIF
+ELSE
+    IF HAS_STAR_IN_SECTOR == 1
+        BATTLEFIELD_NAME '= RESULTS:0 + SPLIT_RAND("の戦い/上空の遭遇戦/軌道上遭遇戦/星域遭遇戦",1)
+    ELSE
+        IF RAND:2
+            RESULTS = %REPLACE(TOSTR(POSID), "(..)(..)(..)", "$1―$2$3")%
+            BATTLEFIELD_NAME '= TOFULL(RESULTS) + SPLIT_RAND("宙域の戦い/宙域遭遇戦/宙域の遭遇戦",1)
+        ELSE
+            RESULTS = %REPLACE(TOSTR(POSID), "....$", "")%
+            BATTLEFIELD_NAME '= "セクター" + TOFULL(RESULTS) + SPLIT_RAND("の戦い/遭遇戦/の遭遇戦",1)
+        ENDIF
+    ENDIF
+ENDIF
