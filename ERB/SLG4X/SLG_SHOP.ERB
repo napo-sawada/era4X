@@ -1365,6 +1365,9 @@ CALL DOCK_REPAIR
 ;; クエスト地点であればイベント呼び出し
 TRYCALLFORM QUEST_REACH_PLACE_{IS_QUEST(CHARACTER_POSITION:MASTER)}
 
+SIF IS_TIME_PROGRESS
+	DAY ++
+
 CALL TURNEND_COMMON
 
 ;-------------------------------------------------
