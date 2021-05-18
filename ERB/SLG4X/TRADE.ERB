@@ -5,10 +5,18 @@
 #DIM TRADE_TO_POS
 #DIM ITEM_ID, 2
 #DIM SHIP_ID
+#DIM ITEM_RM, 2
+#DIM MEMO_POS
+#DIM HAJIMETE
 
 TRADE_TO_POS = -1
 ITEM_ID:0 = -1
 ITEM_ID:1 = -1
+IF HAJIMETE == 0
+	ITEM_RM:0 = -1
+	ITEM_RM:1 = -1
+	MEMO_POS = -1
+ENDIF
 
 IF SHIP_CATEGORY:SHIP_ID != 輸送船
 	PRINTFORML 輸送船でないとこの任務には付けません
@@ -25,57 +33,109 @@ CALL ID2POS(CHARACTER_POSITION)
 PRINTL 出発地点
 PRINTFORML 　セクター＃{RESULT:0}, X: {RESULT:1}, Y: {RESULT:2}
 PRINTL
+;--------------------------------------------------
+;買い付け（出発地点）
+;--------------------------------------------------
 PRINTL 出発地点で買い付けるアイテム
 IF ITEM_ID:0 == -1
-	PRINTFORM 　%NO_ITEM, 20, LEFT%
+	PRINTFORM 　%NO_ITEM, 30, LEFT%
 ELSE
 	CALL GET_ITEM_NAME(ITEM_ID)
-	PRINTFORM 　%RESULTS, 20, LEFT%
+	PRINTFORM 　%RESULTS, 30, LEFT%
 ENDIF
-PRINTBUTTON "[0] 変更", 0
+PRINTBUTTON "[ 0] 変更", 0
+PRINTL
+IF ITEM_RM:0 == -1
+	PRINTFORM 　%NO_ITEM, 30, LEFT%
+ELSE
+	CALL GET_ITEM_NAME(ITEM_RM)
+	PRINTFORM 　%RESULTS, 30, LEFT%
+	PRINTBUTTON "[10] 直前の品目", 10
+ENDIF
 PRINTL
 PRINTL
-PRINTL
+;--------------------------------------------------
+;位置決め
+;--------------------------------------------------
 PRINTL 目的地点
 IF TRADE_TO_POS == -1
-	PRINTFORM %"　未設定", 20, LEFT%
+	PRINTFORM 　%"未設定", 30, LEFT%
 ELSE
 	CALL ID2POS(TRADE_TO_POS)
 	PRINTFORM 　セクター＃{RESULT:0}, X: {RESULT:1}, Y: {RESULT:2} 
 ENDIF
-PRINTBUTTON "[1] 変更", 1
+PRINTBUTTON "[ 1] 変更", 1
+PRINTL
+IF MEMO_POS == -1
+	PRINTFORM 　%"未設定", 30, LEFT%
+ELSE
+	CALL ID2POS(MEMO_POS)
+	PRINTFORM 　セクター＃{RESULT:0}, X: {RESULT:1}, Y: {RESULT:2} 
+ENDIF
+PRINTBUTTON "[11] 直前の目的地", 11
 PRINTL
 PRINTL
+;--------------------------------------------------
+;買い付け（目的地）
+;--------------------------------------------------
 PRINTL 目的地点で買い付けるアイテム
 IF ITEM_ID:1 == -1
-	PRINTFORM 　%NO_ITEM, 20, LEFT%
+	PRINTFORM 　%NO_ITEM, 30, LEFT%
 ELSE
 	CALL GET_ITEM_NAME(ITEM_ID:1)
-	PRINTFORM 　%RESULTS, 20, LEFT%
+	PRINTFORM 　%RESULTS, 30, LEFT%
 ENDIF
-PRINTBUTTON "[2] 変更", 2
+PRINTBUTTON "[ 2] 変更", 2
 PRINTL
+IF ITEM_RM:1 == -1
+	PRINTFORM 　%NO_ITEM, 30, LEFT%
+ELSE
+	CALL GET_ITEM_NAME(ITEM_RM:1)
+	PRINTFORM 　%RESULTS, 30, LEFT%
+	PRINTBUTTON "[12] 直前の品目", 12
+ENDIF
 PRINTL
 PRINTL
 PRINTBUTTON "[3] 決定", 3
 PRINT  
 PRINTBUTTON "[4] 戻る", 4
 
+;--------------------------------------------------
+;選択処理開始
+;--------------------------------------------------
 INPUT
 IF RESULT == 0
 	CALL SELECT_ITEM_LIST
-	SIF RESULT != -1
+	IF RESULT != -1
 		ITEM_ID:0 = RESULT
+		ITEM_RM:0 = RESULT
+	ENDIF
 	GOTO TRADE_LOOP
 ELSEIF RESULT == 1
 	CALL SELECT_POS_FROM_MAP
-	SIF RESULT != -1
+	IF RESULT != -1
 		TRADE_TO_POS = RESULT
+		MEMO_POS = RESULT
+	ENDIF
 	GOTO TRADE_LOOP
 ELSEIF RESULT == 2
 	CALL SELECT_ITEM_LIST
-	SIF RESULT != -1
+	IF RESULT != -1
 		ITEM_ID:1 = RESULT
+		ITEM_RM:1 = RESULT
+	ENDIF
+	GOTO TRADE_LOOP
+ELSEIF RESULT == 10
+	SIF ITEM_RM:0 != -1
+		ITEM_ID:0 = ITEM_RM:0
+	GOTO TRADE_LOOP
+ELSEIF RESULT == 11
+	SIF MEMO_POS != -1
+		TRADE_TO_POS = MEMO_POS
+	GOTO TRADE_LOOP
+ELSEIF RESULT == 12
+	SIF ITEM_RM:1 != -1
+		ITEM_ID:1 = ITEM_RM:1
 	GOTO TRADE_LOOP
 ELSEIF RESULT == 3
 	IF TRADE_TO_POS == -1
@@ -88,6 +148,8 @@ ELSEIF RESULT == 3
 		PRINTW 到着地点で買い付ける品物が設定されていません
 		GOTO TRADE_LOOP
 	ENDIF
+	SIF (ITEM_RM:0 != -1 && ITEM_RM:0 != -1 && MEMO_POS != -1)
+		HAJIMETE = 1
 	SHIP_MISSION:SHIP_ID = 交易
 	FROM_POS:SHIP_ID = CHARACTER_POSITION
 	MOVING_POS:SHIP_ID = TRADE_TO_POS
@@ -99,7 +161,9 @@ ELSEIF RESULT == 4
 ENDIF
 GOTO TRADE_LOOP
 
+;--------------------------------------------------
 ; アイテムの選択
+;--------------------------------------------------
 @SELECT_ITEM_LIST
 #DIM ITEM_ID
 #DIMS ITEM_NAME
@@ -129,6 +193,9 @@ ELSE
 	GOTO INPUT_LOOP
 ENDIF
 
+;--------------------------------------------------
+;座標指定
+;--------------------------------------------------
 @SELECT_POS_FROM_MAP
 #DIM SECTOR_ID
 #DIM X_POS
@@ -154,14 +221,18 @@ IF RESULT < 0
 	GOTO MAP_LOOP
 ENDIF
 
+;--------------------------------------------------
 ; 星系港
+;--------------------------------------------------
 FOR PORT_ID, 0, 星系数
 	SIF 星系座標ID:PORT_ID != RESULT
 		CONTINUE
 	TARGET_POS = RESULT
 NEXT
 
+;--------------------------------------------------
 ; 独立港
+;--------------------------------------------------
 IF TARGET_POS != -1
 	FOR PORT_ID, 0, MAX_PORT
 		SIF PORT_POSITION_ID:PORT_ID != RESULT
