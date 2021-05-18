@@ -74,23 +74,24 @@ IF 魅力値 / 3 < 1000
 ELSEIF 魅力値 / 3 < 2000
 	PRINTFORML %CALLNAME:ID%はキャバクラのサブキャストとして頑張った
 	SETCOLOR カラー_注釈
-	PRINTFORML 話術経験値+5
-	PRINTFORML 社交経験値+5
+	PRINTFORML 話術経験値+2
+	PRINTFORML 社交経験値+2
 	RESETCOLOR
-	EXP:ID:話術経験値 += 5
-	EXP:ID:社交経験値 += 5
-	CFLAG:ID:キャバクラ人気 += 5
+	EXP:ID:話術経験値 += 2
+	EXP:ID:社交経験値 += 2
+	CFLAG:ID:キャバクラ人気 += 2
 ELSE
 	PRINTFORML %CALLNAME:ID%はキャバクラのメインキャストとして頑張った
 	SETCOLOR カラー_注釈
-	PRINTFORML 話術経験値+15
-	PRINTFORML 社交経験値+15
+	PRINTFORML 話術経験値+3
+	PRINTFORML 社交経験値+3
 	RESETCOLOR
-	EXP:ID:話術経験値 += 15
-	EXP:ID:社交経験値 += 15
-	CFLAG:ID:キャバクラ人気 += 15
+	EXP:ID:話術経験値 += 3
+	EXP:ID:社交経験値 += 3
+	CFLAG:ID:キャバクラ人気 += 3
 ENDIF
 
 CFLAG:ID:キャバクラ人気 = LIMIT(CFLAG:ID:キャバクラ人気, 0, 100000)
 報酬 = 魅力値 + CFLAG:ID:キャバクラ人気 - RAND:(魅力値 / 10)
+TIMES 報酬, 0.015
 RETURN 報酬

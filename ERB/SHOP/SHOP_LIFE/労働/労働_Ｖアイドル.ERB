@@ -74,27 +74,27 @@ SELECTCASE RAND:3
 		; 料理動画
 		PRINTL 料理放送を行ったようだ
 		魅力値 += ABL:ID:料理 * 200
-		EXP:ID:料理経験値 += 2
-		EXP:ID:話術経験値 += 3
+		EXP:ID:料理経験値 += 1
+		EXP:ID:話術経験値 += 2
 		SETCOLOR カラー_注釈
-		PRINTL 料理経験値+2
-		PRINTL 話術経験値+3
+		PRINTL 料理経験値+1
+		PRINTL 話術経験値+2
 	CASE 1
 		; 歌動画
 		PRINTL 生歌放送を行ったようだ
 		魅力値 += ABL:ID:歌唱 * 200
-		EXP:ID:歌唱経験値 += 2
-		EXP:ID:話術経験値 += 3
+		EXP:ID:歌唱経験値 += 1
+		EXP:ID:話術経験値 += 2
 		SETCOLOR カラー_注釈
-		PRINTL 歌唱経験値+2
-		PRINTL 話術経験値+3
+		PRINTL 歌唱経験値+1
+		PRINTL 話術経験値+2
 	CASE 2
 		; 雑談動画
 		PRINTL 雑談放送を行ったようだ
 		魅力値 += ABL:ID:話術 * 200
 		SETCOLOR カラー_注釈
-		PRINTL 話術経験値+5
-		EXP:ID:話術経験値 += 5
+		PRINTL 話術経験値+4
+		EXP:ID:話術経験値 += 4
 ENDSELECT
 ; 共通経験値
 PRINTL 撮影経験+1
