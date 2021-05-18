@@ -29,3 +29,5 @@
 #DIM QUEST_25_対象
 #DIM QUEST_25_未開惑星座標
 
+;22 商船護衛
+#DIM SAVEDATA RENTAL_SHIP, 3
