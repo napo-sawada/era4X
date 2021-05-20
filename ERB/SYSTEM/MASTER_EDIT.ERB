@@ -163,6 +163,7 @@ ELSEIF 番号 == 0
 		;ベースとして
 		;4能力期待値180
 		;6能力期待値220
+		;8能力期待値270
 		CASE 0
 			ABL:対象:白兵 = RAND(25, 65)
 			ABL:対象:操艦 = RAND(25, 65)
@@ -170,6 +171,8 @@ ELSEIF 番号 == 0
 			ABL:対象:政治 = RAND(25, 65)
 			ABL:対象:料理 = RAND(10, 30)
 			ABL:対象:歌唱 = RAND(10, 30)
+			ABL:対象:話術 = RAND(15, 35)
+			ABL:対象:社交 = RAND(15, 35)
 		;知将 白兵操艦知略
 		CASE 1
 			ABL:対象:白兵 = RAND(30, 70)
@@ -178,6 +181,8 @@ ELSEIF 番号 == 0
 			ABL:対象:政治 = RAND(20, 40)
 			ABL:対象:料理 = RAND(10, 30)
 			ABL:対象:歌唱 = RAND(10, 30)
+			ABL:対象:話術 = RAND(15, 35)
+			ABL:対象:社交 = RAND(15, 35)
 		;学士 知略政治
 		CASE 2
 			ABL:対象:白兵 = RAND(20, 50)
@@ -186,6 +191,8 @@ ELSEIF 番号 == 0
 			ABL:対象:政治 = RAND(40, 70)
 			ABL:対象:料理 = RAND(10, 30)
 			ABL:対象:歌唱 = RAND(10, 30)
+			ABL:対象:話術 = RAND(15, 35)
+			ABL:対象:社交 = RAND(15, 35)
 		;両道 白兵操艦政治
 		CASE 3
 			ABL:対象:白兵 = RAND(30, 70)
@@ -194,6 +201,8 @@ ELSEIF 番号 == 0
 			ABL:対象:政治 = RAND(30, 70)
 			ABL:対象:料理 = RAND(10, 30)
 			ABL:対象:歌唱 = RAND(10, 30)
+			ABL:対象:話術 = RAND(15, 35)
+			ABL:対象:社交 = RAND(15, 35)
 		;武官 白兵操艦
 		CASE 4
 			ABL:対象:白兵 = RAND(40, 70)
@@ -202,6 +211,8 @@ ELSEIF 番号 == 0
 			ABL:対象:政治 = RAND(20, 50)
 			ABL:対象:料理 = RAND(10, 30)
 			ABL:対象:歌唱 = RAND(10, 30)
+			ABL:対象:話術 = RAND(15, 35)
+			ABL:対象:社交 = RAND(15, 35)
 		;軍師 知略
 		CASE 5
 			ABL:対象:白兵 = RAND(20, 60)
@@ -210,6 +221,8 @@ ELSEIF 番号 == 0
 			ABL:対象:政治 = RAND(20, 60)
 			ABL:対象:料理 = RAND(10, 30)
 			ABL:対象:歌唱 = RAND(10, 30)
+			ABL:対象:話術 = RAND(15, 35)
+			ABL:対象:社交 = RAND(15, 35)
 		;文官　政治
 		CASE 6
 			ABL:対象:白兵 = RAND(20, 60)
@@ -218,9 +231,12 @@ ELSEIF 番号 == 0
 			ABL:対象:政治 = RAND(45, 75)
 			ABL:対象:料理 = RAND(10, 30)
 			ABL:対象:歌唱 = RAND(10, 30)
+			ABL:対象:話術 = RAND(15, 35)
+			ABL:対象:社交 = RAND(15, 35)
 		;芸能
 		;4能力160
 		;6能力220
+		;8能力270
 		CASE 7
 			ABL:対象:白兵 = RAND(20, 60)
 			ABL:対象:操艦 = RAND(20, 60)
@@ -228,6 +244,8 @@ ELSEIF 番号 == 0
 			ABL:対象:政治 = RAND(20, 60)
 			ABL:対象:料理 = RAND(10, 30)
 			ABL:対象:歌唱 = RAND(30, 50)
+			ABL:対象:話術 = RAND(15, 35)
+			ABL:対象:社交 = RAND(15, 35)
 		;料理
 		CASE 8
 			ABL:対象:白兵 = RAND(20, 60)
@@ -236,9 +254,12 @@ ELSEIF 番号 == 0
 			ABL:対象:政治 = RAND(20, 60)
 			ABL:対象:料理 = RAND(30, 50)
 			ABL:対象:歌唱 = RAND(10, 30)
+			ABL:対象:話術 = RAND(15, 35)
+			ABL:対象:社交 = RAND(15, 35)
 		;天才
 		;4能力220
 		;6能力270
+		;8能力330
 		CASE 9
 			ABL:対象:白兵 = RAND(35, 65)
 			ABL:対象:操艦 = RAND(35, 65)
@@ -246,14 +267,18 @@ ELSEIF 番号 == 0
 			ABL:対象:政治 = RAND(35, 65)
 			ABL:対象:料理 = RAND(20, 30)
 			ABL:対象:歌唱 = RAND(20, 30)
-		;無才 期待値120
+			ABL:対象:話術 = RAND(25, 45)
+			ABL:対象:社交 = RAND(25, 45)
+		;無才 期待値140
 		CASE 10
 			ABL:対象:白兵 = RAND(10, 30)
 			ABL:対象:操艦 = RAND(10, 30)
 			ABL:対象:知略 = RAND(10, 30)
 			ABL:対象:政治 = RAND(10, 30)
 			ABL:対象:料理 = RAND(1, 20)
-			ABL:対象:歌唱 = RAND(1, 20)		
+			ABL:対象:歌唱 = RAND(1, 20)	
+			ABL:対象:話術 = RAND(1, 20)
+			ABL:対象:社交 = RAND(1, 20)		
 	ENDSELECT
 ENDIF
 
@@ -419,7 +444,7 @@ PRINTL
 ;-------------------------
 @MASTER_EDIT_SLG_ABL(対象)
 #DIM 対象
-#DIM 表示能力 = GETNUM(ABL, "白兵"), GETNUM(ABL, "操艦"), GETNUM(ABL, "知略"), GETNUM(ABL, "政治"), GETNUM(ABL, "歌唱"), GETNUM(ABL, "料理")
+#DIM 表示能力 = GETNUM(ABL, "白兵"), GETNUM(ABL, "操艦"), GETNUM(ABL, "知略"), GETNUM(ABL, "政治"), GETNUM(ABL, "歌唱"), GETNUM(ABL, "料理"), GETNUM(ABL, "話術"), GETNUM(ABL, "社交")
 
 PRINTBUTTON "[変更]", 301
 PRINTFORM 成長型:%TOSTR_GROWTYPE(TALENT:対象:成長型)%(%TOSTR_GROWTYPE_B(TALENT:対象:成長型)%に適性)
@@ -520,18 +545,18 @@ PRINTL
 ;-------------------------
 @MASTER_EDIT_SLG_ABL_EDIT(対象)
 #DIM 対象
-#DIM 表示能力 = GETNUM(ABL, "白兵"), GETNUM(ABL, "操艦"), GETNUM(ABL, "知略"), GETNUM(ABL, "政治"), GETNUM(ABL, "歌唱"), GETNUM(ABL, "料理")
+#DIM 表示能力 = GETNUM(ABL, "白兵"), GETNUM(ABL, "操艦"), GETNUM(ABL, "知略"), GETNUM(ABL, "政治"), GETNUM(ABL, "歌唱"), GETNUM(ABL, "料理"), GETNUM(ABL, "話術"), GETNUM(ABL, "社交")
 #DIM ポイント
 #DIM FIRST_LINE
 
 FIRST_LINE = LINECOUNT
 
 IF TOSTR_GROWTYPE(TALENT:対象:成長型) == "天才"
-	ポイント = 200
+	ポイント = 240
 ELSEIF TOSTR_GROWTYPE(TALENT:対象:成長型) == "無能"
-	ポイント = 100
+	ポイント = 120
 ELSE
-	ポイント = 160
+	ポイント = 200
 ENDIF
 
 FOR LOCAL, 0, VARSIZE("表示能力")
