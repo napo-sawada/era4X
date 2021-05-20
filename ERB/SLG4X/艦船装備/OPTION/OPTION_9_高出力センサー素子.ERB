@@ -1,0 +1,52 @@
+﻿;-----------------------------------
+; オプション
+;-----------------------------------
+@GET_OPTION_NAME_9
+RESULTS = 高出力センサー素子
+
+@GET_OPTION_STATUS_9(STATUS)
+#DIM REF STATUS
+
+STATUS:SENSOR = 2
+STATUS:PRICE = 250000000
+
+;-----------------------------------
+; オプションの説明
+;-----------------------------------
+@GET_OPTION_DESCRIPTION_9(STATUS)
+#DIM STATUS, STATUS_LENGTH
+CALL GET_OPTION_STATUS_9(STATUS)
+CALL GET_OPTION_NAME_9
+PRINTFORML %RESULTS%
+PRINTFORML センサーの出力を2増加させる。
+PRINTL
+;フレーバーテキスト的な
+PRINTFORML 企業連合が技術の粋を集めて作ったセンサー素子
+PRINTFORML 大富豪の護衛艦に搭載することによってさらなる安全を確保するために開発された
+IF REL_LIKE_COUNTRY:国家ID_企業連合:国家ID_プレイヤー > 999
+  SETCOLOR カラー_選択不可
+  PRINTFORML ……ことになっているが、実際にはアンビシャス級試験艦を売り込むためである
+  PRINTFORML ２つ搭載することによってセクターを見通すことができるとして探検家向けに開発されたが、
+  PRINTFORML その開発コストの高さから値段が高騰、未だ回収には至っていない
+  RESETCOLOR
+ENDIF
+
+;-----------------------------------
+; オプションの資材
+;-----------------------------------
+@GET_OPTION_RESOURCE_9(USE_RESOURCE)
+#DIM REF USE_RESOURCE
+
+USE_RESOURCE:タイラーセンサー = 100
+
+
+@IS_SALE_OPTION_9
+CALL GET_STAR_ID_FROM_POS(CHARACTER_POSITION)
+
+SIF RESULT == -1
+  RETURN 0
+SIF STAR_OWNER:RESULT != 国家ID_企業連合
+  RETURN 0
+SIF REL_LIKE_COUNTRY:(STAR_OWNER:RESULT):国家ID_プレイヤー < 100
+  RETURN 0
+RETURN 1
