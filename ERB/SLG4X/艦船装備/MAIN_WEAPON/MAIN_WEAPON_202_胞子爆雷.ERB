@@ -1,0 +1,44 @@
+﻿;-----------------------------------
+; メインウェポン
+;-----------------------------------
+@GET_MAIN_WEAPON_NAME_202
+RESULTS = 胞子爆雷
+
+@GET_MAIN_WEAPON_STATUS_202(STATUS)
+#DIM REF STATUS
+
+STATUS:DAMAGE = 1200
+STATUS:FIRE_RATE = 2
+STATUS:HIT_RATE = 40
+STATUS:FIRE_RANGE = 2
+STATUS:SIZE = 1
+STATUS:WEAPON_TYPE = 魚雷
+STATUS:PRICE = 10000
+
+;-----------------------------------
+; メインウェポンの説明
+;-----------------------------------
+@GET_MAIN_WEAPON_DESCRIPTION_202
+#DIM STATUS, STATUS_LENGTH
+
+CALL GET_MAIN_WEAPON_STATUS_202(STATUS)
+CALL GET_MAIN_WEAPON_NAME_202
+PRINTFORML %RESULTS%
+PRINTFORML ダメージ  : {STATUS:DAMAGE}
+PRINTFORML 射撃レート: {STATUS:FIRE_RATE}発/ターン
+PRINTFORML 命中率    : {STATUS:HIT_RATE}
+PRINTFORML 有効距離  : {STATUS:FIRE_RANGE}
+PRINTFORML サイズ    : {STATUS:SIZE}
+
+;-----------------------------------
+; メインウェポンの資材
+;-----------------------------------
+@GET_MAIN_WEAPON_RESOURCE_202(USE_RESOURCE)
+#DIM REF USE_RESOURCE
+
+USE_RESOURCE:武装合金 = 12
+USE_RESOURCE:耐熱合金 = 12
+USE_RESOURCE:武装制御機器 = 10
+
+@IS_SALE_MAIN_WEAPON_202
+RETURN 0

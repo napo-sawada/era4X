@@ -1,0 +1,511 @@
+﻿;--------------------------
+; クエスト番号60
+; 我ラニ『母』ヲ
+; あなたは母になってくれたかもしれない少女だ！
+; ※あなたがひどいめにあいます
+; 1 == 受けなかった場合
+; 2 == 受けた
+; 3 == デブリ作る
+; 4 == 辿り着いた
+; 5 == アノニム加入
+; 6 == 研究室聞いた（未定）
+;--------------------------
+@QUEST_DESCRIPTION_60
+PRINTL 
+PRINTFORML 　近頃、『母』を求めていると言う奇妙な依頼があると噂があった。
+PRINTFORML 　興味があるなら調べても良いだろう。
+PRINTL
+CALL COLOR_PRINTL(" 　あなたが（触手で）ひどい目にあうクエストです", カラー_注意)
+PRINTL
+RETURN
+
+
+;--------------------------
+; クエスト受注可能か
+;--------------------------
+@QUEST_ACCEPTABLE_60
+SIF QUEST_PROGRESS:60 > 1
+	RETURN 0
+SIF !IS_FEMALE(MASTER)
+	RETURN 0
+RETURN 1
+;--------------------------
+; クエストの名前を返却
+;--------------------------
+@QUEST_NAME_60
+RESULTS = 我ラニ『母』ヲ
+RETURN
+
+
+;--------------------------
+; マップでの表示を設定する
+; @QUEST_SET_TILE_  : マップ上対象地点にマークを出す。
+; @QUEST_MAP_INFO_  : 右下小窓にメッセージを出す
+; 引数１： ARG:0 SSXXYY　座標データ　マップ上でクリックされた座標。表示条件分岐に。
+;--------------------------
+;;;マップ画面上での表示。 隠したかったら関数コメントアウトか RETURN 0
+;;;色を替えたかったらSETCOLORしておけば後の処理で色反映します
+@QUEST_SET_TILE_60 (ARG:0 )
+	RESULTS '= "●"
+	SETCOLOR 0x6C0C00
+RETURN 1
+
+;;;右下小窓に出す。隠したければ関数コメントアウトか RETURN 0
+@QUEST_MAP_INFO_60 (ARG:0 )
+#DIM QUEST_ID = 60
+IF QUEST_PROGRESS:QUEST_ID 　>= 5
+		RESULTS:0 '= "デブリに偽装した研究所跡"
+		RESULTS:1 '= "最早用は無い"
+		RESULTS:2 '= ""
+		RESULTS:3 '= ""
+		RESULTS:4 '= ""
+ELSE
+		RESULTS:0 '= "指定した座標にはデブリが見える"
+		RESULTS:1 '= "デブリにしては妙に大きいが……"
+		RESULTS:2 '= ""
+		RESULTS:3 '= ""
+		RESULTS:4 '= ""
+ENDIF
+RETURN 1
+
+;-----------------------
+; マップ上からQUEST_BODYを実行する処理
+; @QUEST_SHOW_COMMAND_x : ここで指定した文字列のコマンドを現地で表示する
+; 　　　　　　　　　　 ：(調査する||捜索する||採集する||待ち伏せする||挑戦する)といったフレーバー
+; @QUEST_PLACE_CHECK_x ： 設定マスを踏んだら呼び出される。不要ならば消すか無処理で返す
+;--------------------------
+@QUEST_SHOW_COMMAND_60 ()
+	RESULTS '= "進入する"
+RETURN 1
+
+@QUEST_REACH_PLACE_60 ()
+#DIM QUEST_ID = 60
+
+IF QUEST_PROGRESS:QUEST_ID == 3
+	DRAWLINE
+	PRINTFORML 　
+	PRINTFORML 　依頼人の指定した座標に到着した
+	PRINTFORML 　妙に大きなスペースデブリをスキャンしたところ、放棄された研究施設であることが分かった。
+	PRINTFORML 　あんな依頼を出すのだから後ろめたいことはあるのだろう。
+	PRINTFORML 　%ANAME(MASTER)%はスペースデブリに乗り込む準備を始めた。
+	PRINTFORML 　
+	CALL COLOR_PRINTL(" [Q] 進入する　コマンドで続きます", カラー_注意)
+	PRINTFORML
+	PRINTW
+	QUEST_PROGRESS:QUEST_ID = 4
+ENDIF
+RETURN
+
+;--------------------------------------------------
+; クエスト本体
+;蠢く惑星を流用
+;--------------------------------------------------
+@QUEST_BODY_60
+#DIM POSID
+#DIM SECTOR_ID
+#DIM X_POS
+#DIM Y_POS
+#DIM ITER
+#DIM CONST DISTANCE_FROM_STAR = 6
+#DIM QUEST_ID = 60
+
+;あなた座標
+CALL ID2POS (CHARACTER_POSITION:MASTER)
+SECTOR_ID = RESULT:0
+X_POS = RESULT:1
+Y_POS = RESULT:2
+;マップ上のクエスト座標から呼び出される処理
+IF (QUESTMAP:(SECTOR_ID):(X_POS):(Y_POS) == QUEST_ID) && (QUEST_PROGRESS:QUEST_ID == 4)
+	IF QUEST_PROGRESS:QUEST_ID == 4
+		CALL QUEST_60_SCENE_4
+	ELSE
+		PRINTFORMW 　最早用事は無い
+	ENDIF
+	RETURN 
+;マップから呼び出される処理（星系港から呼び出される）
+ELSEIF QUEST_PROGRESS:QUEST_ID >= 0
+	SELECTCASE QUEST_PROGRESS:QUEST_ID
+		CASE 0 ;初回
+			CALL QUEST_60_SCENE_0
+		CASE 1 ;考え直す
+			CALL QUEST_60_SCENE_1
+	ENDSELECT
+ENDIF
+
+;このセクターのランダムな場所に惑星を生成
+IF QUEST_PROGRESS:QUEST_ID == 2
+	CALL QUEST_60_SET_QUEST_POINT_ON_MAP(QUEST_ID, SECTOR_ID, DISTANCE_FROM_STAR)
+	QUEST_PROGRESS:QUEST_ID = 3
+ENDIF
+
+;--------------------------------------------------
+;目的地作成
+;--------------------------------------------------
+@QUEST_60_SET_QUEST_POINT_ON_MAP(QUEST_ID, SECTOR_ID, DISTANCE_FROM_STAR)
+#DIM QUEST_ID
+#DIM SECTOR_ID
+#DIM DISTANCE_FROM_STAR
+#DIM X_POS
+#DIM Y_POS
+#DIM ITER
+
+FOR ITER, 0 ,100
+	CALL QUEST_SET_RANDPOINT(QUEST_ID, SECTOR_ID, DISTANCE_FROM_STAR)
+	IF RESULT >= 0
+		X_POS = (RESULT / 100) %100
+		Y_POS = RESULT %100
+		CALL POS2ID(SECTOR_ID, X_POS, Y_POS)
+		QUEST_60_デブリ = RESULT
+		CLEARMAP:SECTOR_ID:X_POS:Y_POS = 明瞭
+		RETURN
+	ENDIF
+	IF ITER == 99
+		CALL COLOR_PRINTW(@"エラー：マップ上にクエストを生成可能な領域が存在しません", カラー_警告)
+		FORCEWAIT
+	ENDIF
+NEXT
+
+;--------------------------------------------------
+;ことのあらまし
+;--------------------------------------------------
+@QUEST_60_SCENE_0
+#DIM QUEST_ID = 60
+
+QUEST_PROGRESS:QUEST_ID = 1
+PRINTFORML 　%ANAME(MASTER)%が暇つぶしに依頼をあさっていると、
+PRINTFORML 　妙に目を引くタイトルの依頼があった。
+PRINTFORML 　――我ラニ『母』ヲ
+PRINTFORML 　そう題されたタイトルは妙に%ANAME(MASTER)%の目を引いた。
+PRINTFORML 　
+PRINTFORML 　依頼の内容はこうだ。
+PRINTFORML 　「我々はこの銀河系の外から来た知的生命体だが」
+PRINTFORML 　「長きに渡るこの銀河系のコミュニティ（聞いたこともない国だ）の虐待により」
+PRINTFORML 　「存続が危ぶまれる程に個体数を大きく減らしてしまった」
+PRINTFORML 　「その為、今のカラダを棄て、新しい姿を得る必要が出た」
+PRINTFORML 　「%ANAME(MASTER)%にはその為のモデルとなって欲しい」
+PRINTFORML 　「もし、協力してくれるなら段階を踏んで力になろう」
+PRINTFORML 　
+PRINTFORML 　……とのことだ。どうしても%ANAME(MASTER)%でなければ駄目だと言う。
+PRINTFORMW 　
+PRINTFORML 　未知のテクノロジーを手に入れることが出来れば大きな力になるだろうが、
+PRINTFORML 　一方でその知的生命体が恨み骨髄のままに振舞うことも考えられる
+PRINTFORML 　慎重に判断する必要はあるだろう。
+PRINTFORML 　なお、%ANAME(MASTER)%が断った場合は“次”を待つという。
+PRINTFORML 
+CALL ASK_YN("引き受ける","断る")
+	IF RESULT == 1
+		PRINTFORMW 　%ANAME(MASTER)%は見なかったことにした
+		PRINTFORMW 
+		RETURN
+	ENDIF
+PRINTFORMW 　%ANAME(MASTER)%が引き受ける事を伝えると、依頼人は極めて高度に暗号化された座標を送って来た。
+PRINTFORML 　
+PRINTFORML 　
+PRINTFORMW 　………………。
+PRINTFORMW 　…………。
+PRINTFORMW 　……。
+PRINTFORML 　
+PRINTFORML 　都合半日ほど格闘して暗号を解くことに成功した。
+PRINTFORML 　どうやらそこで待っているらしい。
+CALL COLOR_PRINTL(@"　マップ上に依頼人の座標が追加された", カラー_注意)
+PRINTFORML 
+PRINTFORMW 
+QUEST_PROGRESS:QUEST_ID = 2
+
+;--------------------------------------------------
+;２度目
+;--------------------------------------------------
+@QUEST_60_SCENE_1
+#DIM QUEST_ID = 60
+
+PRINTFORML 　やはり引き受けるべきだろうか？
+PRINTFORML 
+CALL ASK_YN("引き受ける","断る")
+	IF RESULT == 1
+		PRINTFORMW 　%ANAME(MASTER)%は見なかったことにした
+		PRINTFORMW 
+		RETURN
+	ENDIF
+PRINTFORMW 　%ANAME(MASTER)%が引き受ける事を伝えると、依頼人は極めて高度に暗号化された座標を送って来た。
+PRINTFORML 　
+PRINTFORML 　
+PRINTFORMW 　………………。
+PRINTFORMW 　…………。
+PRINTFORMW 　……。
+PRINTFORML 　
+PRINTFORML 　都合半日ほど格闘して暗号を解くことに成功した。
+PRINTFORML 　どうやらそこで待っているらしい。
+CALL COLOR_PRINTL(@"マップ上に依頼人の座標が追加された", カラー_注意)
+PRINTFORML 
+PRINTFORMW 
+QUEST_PROGRESS:QUEST_ID = 2
+
+;--------------------------------------------------
+;スペースデブリ
+;--------------------------------------------------
+@QUEST_60_SCENE_4
+#DIM QUEST_ID = 60
+#DIM ITER
+
+PRINTFORML 
+PRINTFORML 　スペースデブリに偽装された研究施設に辿り着いた。
+PRINTFORML 　%ANAME(MASTER)%は艦から降りて、一人僅かな照明を頼りに依頼人を探し始めた。
+PRINTFORML 　
+PRINTFORMW 　………………。
+PRINTFORMW 　…………。
+PRINTFORMW 　……。
+PRINTFORML 　
+PRINTFORML 　先程から%ANAME(MASTER)%を呼ぶような声は聞こえるが、一向に姿は現さないし、
+PRINTFORML 　妙に気分もフワフワと浮ついている。
+PRINTFORML 　酸素濃度もノーマルスーツなしでも活動できる程度にはあるようだし、
+PRINTFORMW 　%ANAME(MASTER)%はいそいそとノーマルスーツを脱ぎ始めた。正直言って暑い。
+PRINTFORML 　何か聞こえるがそんな事よりこの暑さから逃れる方が先決だ。
+PRINTFORML 　
+PRINTFORMW 　………………。
+PRINTFORMW 　…………。
+PRINTFORMW 　……。
+PRINTFORML 　
+PRINTFORML 　数分後、全裸になった%ANAME(MASTER)%は触手の群れの前に居た。
+PRINTFORML 　最早正気ではない%ANAME(MASTER)%は触手の愛撫に嬌声をあげ、
+PRINTFORMW 　太く、白濁を垂らす陰茎を模したそれを、二つの指で割れ目を広げて誘う。
+PRINTFORMW 　
+PRINTFORML 　何のために来たのだろう。
+PRINTFORMW 　そんな疑問は抱いた直後に注射で注ぎ込まれた媚薬で溶かされ、
+PRINTFORMW 　両の手で摺り上げて放出を誘い、
+PRINTFORMW 　口内に注ぎ込まれた特濃を喉を鳴らして呑み込み、
+PRINTFORMW 　劣情を誘うようにびちゃびちゃと吐き出す様に零す
+PRINTFORMW 　まだ、時間はある。%ANAME(MASTER)%は熱に浮かされた頭のままこの触手たちと戯れる事にした。
+PRINTFORML 　
+CALL FUCK(MASTER, "欲望, 奉仕, 精愛, 性技, 性交, Ｃ, Ｖ, Ｂ, Ａ, Ｍ, キス, 口淫, 出産, 触手, 緊縛, マゾ, Ｖ性交, Ａ性交", "処女喪失, Ａ処女喪失, 膣内射精, キス喪失, 腸内射精, 口内射精", GET_SPERM_ID("触手"), @"触手の\@RAND:2 ? ペニス # 唇\@", @"触手", "", "輪姦")
+
+CVARSET CFLAG, GETNUM(CFLAG, "慰安参加者") , 0
+CVARSET CFLAG, GETNUM(CFLAG, "調教参加フラグ") , 0
+CFLAG:(QUEST_60_対象):調教参加フラグ 　= 1
+CFLAG:QUEST_60_対象:主導除外 　= 1 ;調教パートでプレイヤーを担当できなくなる
+FLAG:調教モード = 7
+FLAG:慰安モード = 3
+CFLAG:(QUEST_60_対象):調教参加フラグ 　= 1
+CFLAG:QUEST_60_対象:主導除外 　= 1
+FLAG:ウフフフラグ = 1
+FLAG:慰安場所 = 慰安_行き先_森
+TRAIN_PLACE = 触手の巣窟
+FOR ITER, 0, 7
+	CALL CREATE_TENTACLE_60
+NEXT
+CALL ADD_EVENTTRAIN_CALLEE("QUEST_60_TENTACLE")
+CALL ADD_EVENTEND_CALLEE("QUEST_60_TENTACLE")
+SHOP_TIME --
+
+;元のCOM_TENDENCYを退避
+FOR ITER, 0, 3000
+	SAVE_COM_TENDENCY:QUEST_60_対象:ITER = COM_TENDENCY:QUEST_60_対象:ITER
+NEXT
+
+;COM_TENDENCYに-1を入力したコマンドは「なすがまま」で実行されなくなる
+VARSET COM_TENDENCY:QUEST_60_対象:0, -1
+
+;SLG4Xパートからクエストやアノマリーで調教パートを呼出すにはSLG4Xの入力受付ループを抜ける必要があるようなので
+;SLG4X調教開始フラグを立ててSTART_TRAIN_COMMONをCALLする
+FLAG:SLG4X調教開始フラグ = 1
+CALL START_TRAIN_COMMON
+RETURN
+
+
+;--------------------------------------------------
+;後日談
+;--------------------------------------------------
+@EVENTTRAIN_QUEST_60_TENTACLE
+TFLAG:56 = 40
+
+@EVENTEND_QUEST_60_TENTACLE
+#DIM QUEST_ID = 60
+#DIM ITER
+
+CALL FUCK(MASTER, "欲望, 奉仕, 精愛, 性技, 性交, Ｃ, Ｖ, Ｂ, Ａ, Ｍ, キス, 口淫, 出産, 触手, 緊縛, マゾ, Ｖ性交, Ａ性交", "処女喪失, Ａ処女喪失, 膣内射精, キス喪失, 腸内射精, 口内射精", GET_SPERM_ID("触手"), @"触手の\@RAND:2 ? ペニス # 唇\@", @"触手", "", "輪姦")
+EXP:MASTER:妊娠経験 ++
+EXP:MASTER:出産経験 ++
+PRINTFORML 　
+PRINTFORMW 　………………。
+PRINTFORMW 　…………。
+PRINTFORMW 　……。
+PRINTFORML 　
+PRINTFORML 　%ANAME(MASTER)%が気が付くと、清潔なベッドの上で寝かされていた。
+PRINTFORML 　「縺顔岼隕壹ａ縺�？　豈堺ｸ頑ｮｿ」
+PRINTFORML 　隣を見れば髪色以外は%ANAME(MASTER)%によく似た顔立ちのスレンダーな長身の少女が、
+PRINTFORML 　ニヤニヤとサディスティックな笑みを浮かべている。
+PRINTFORML 　人並外れた大きさに勃起した赤黒い陰茎で、%ANAME(MASTER)%の下腹部をペチペチと叩きながら少女は
+PRINTFORML 　悍ましき言葉で語り始めた。
+PRINTFORML 　
+PRINTFORM 　「遘√′隱ｰ縺�？　
+CALL COLOR_PRINT("厭だなあ、あんなに愛し合ったのに？", カラー_ピンク)
+PRINTFORML 　」
+PRINTFORML 　慌てて逃げ出そうとした%ANAME(MASTER)%は少女の腕から伸びた触手に絡めとられ、丁度屈脚位の様な形に抑え込まれてしまう。
+PRINTFORML 　
+PRINTFORMW 　「繧�繧�繧�縲∽ｸ頑焔縺丈ｼ昴ｏ縺｣縺ｦ縺翫ｉ繧薙ｈ縺��□縺ｪ？」
+PRINTFORMW 　「うむ、見ての通りだよ母上。私（ワレラ）が依頼人だよ」
+CLEARLINE 1
+PRINTFORML 　「縺�む縲∬ｦ九※縺ｮ騾壹ｊ縺�繧域ｯ堺ｸ翫�ゅΡ繝ｬ繝ｩ縺御ｾ晞�ｼ莠ｺ縺�繧�」
+PRINTFORML 　
+PRINTFORMW 　「かつての私（ワレラ）は群であったが故に失敗した」
+CLEARLINE 1
+PRINTFORML 　「縺九▽縺ｦ縺ｮ繝ｯ繝ｬ繝ｩ縺ｯ鄒､縺ｧ縺ゅ▲縺溘′謨��↓螟ｱ謨励＠縺�」
+PRINTFORML 　
+PRINTFORMW 　「今の私（ワタシ）はコ（個にして孤であり仔なる己）である」
+CLEARLINE 1
+PRINTFORML 　「莉翫��遘√��莉斐〒縺ゅｋ」
+PRINTFORML 　
+PRINTFORMW 　「母上と愛し合うのもやぶさかではないが」
+CLEARLINE 1
+PRINTFORML 　「豈堺ｸ翫→諢帙＠蜷医≧縺ｮ繧ゅｄ縺ｶ縺輔°縺ｧ縺ｯ縺ｪ縺��′」
+PRINTFORML 　
+PRINTFORMW 　「まあそれよりも先に礼をせねばなるまいて」
+PRINTFORMW 　「私（ワレラ）はアノニム」
+PRINTFORML 　
+PRINTFORML 　仰々しく振舞い、獰猛な犬歯を見せつけて嗤う姿を見て%ANAME(MASTER)%はとんでもないことをしてしまったか、
+PRINTFORML 　と冷や汗をかいていると嬉しそうな顔をしてアノニムは言った。
+PRINTFORML 　
+PRINTFORML 　「私（ワレラ）が滅ぼすべき星は滅んだ、今の星に私（ワレラ）を知る者はおるまいよ母上」
+PRINTFORMW 　「まあ母上がやると言うのであれば、私（ワレラ）もやぶさかではないが」
+PRINTFORML 　クツクツと笑うこの病的な程に色白のエイリアンは、ひとまずは%ANAME(MASTER)%に従うらしい……。
+PRINTFORML 　
+PRINTFORMW 　「ああそうだ母上、このスペースデブリは巡洋艦として使える」
+PRINTFORMW 　「母上の知るそれとは多少勝手が違うであろうが、まあ損はさせんよ。娘として、な」
+PRINTFORML 　「コンゴトモヨロシク。母上」
+PRINTFORML 　
+PRINTFORML 　ニィ、と鋭く尖った犬歯を見せつけながら、アノニムは仰々しく会釈した。
+PRINTFORML 　
+PRINTFORML 　生体巡洋艦の特徴について聞きますか？
+PRINTFORML 　
+PRINTFORML 　
+CALL ASK_YN("聞きます","聞かない")
+	IF RESULT == 0
+		PRINTFORML 　
+		PRINTFORMW 　生体巡洋艦は非常に攻撃性の高い生きた艦です。
+		PRINTFORMW 　同じクラスと比べても頭一つ以上高い攻撃力を持ちますが、搭載された武装はいずれも精度に欠けます。
+		PRINTFORML 　耐久面では高めの装甲を持ちますが、シールドの強度と低い回避率により、同格相手の長期戦は難しいでしょう。
+		PRINTFORMW 　一方で、他の追随を許さない回復量を持つシールドの存在は格下の艦を一方的に屠る事でしょう。
+		PRINTFORML 　また、装備は全て非売品であるため、取り外すと取り返しがつきません。
+		PRINTFORML 　以上のことから総じて乗り手を選ぶ艦です。
+		PRINTFORML 
+		PRINTFORML 
+		PRINTFORMW 
+	ENDIF
+
+
+CFLAG:NAME_TO_CHARA("アノニム"):所属 = 国家ID_プレイヤー
+CALL INIT_PRESET_SHIP(国家ID_プレイヤー, CHARACTER_POSITION, 生体巡洋艦, "生体巡洋艦", 生体巡洋艦)
+CFLAG:(NAME_TO_CHARA("アノニム")):母親 = GET_ID(MASTER)
+CFLAG:(NAME_TO_CHARA("アノニム")):父親 = GET_SPERM_ID("触手")
+FOR LOCAL:1, 0, MAX_TAG
+	SIF HAS_TAG(MASTER,LOCAL:1)
+		CALL ADD_TAG((NAME_TO_CHARA("アノニム")), LOCAL:1)
+NEXT
+QUEST_PROGRESS:QUEST_ID = 5
+
+
+
+
+;--------------------------------------------------
+;触手を作る関数
+;--------------------------------------------------
+@CREATE_TENTACLE_60
+#DIM 対象
+#DIMS 名前
+#DIM CONST 第三者に実行 = 2000
+名前 = %SPLIT_RAND("蠢く触手/触手の群/蠢く肉塊",1)%
+
+CALL CREATE_RANDOM_CHARA(0, -1, 0)
+FLAG:汎用武将カウント --
+対象 = RESULT
+IF LOCAL == -1
+	RETURN -1
+ENDIF
+
+NO:対象 = GET_EMPTY_NO()
+NAME:対象 = %名前%
+CALLNAME:対象 = %名前%
+CSTR:対象:0 =
+CSTR:対象:1 =
+TALENT:対象:性別 = 0
+MAXBASE:対象:体力 = 99999999
+MAXBASE:対象:気力 = 99999999
+MAXBASE:対象:精神力 = 1500
+ITEM:A_媚薬 = 99
+BASE:対象:体力 = MAXBASE:対象:体力
+BASE:対象:気力 = MAXBASE:対象:気力
+BASE:対象:精神力 = MAXBASE:対象:精神力
+ABL:対象:触手 = RAND(1, 5)
+ABL:対象:性知識 = 5
+ABL:対象:Ｃ感 = 5
+ABL:対象:欲望 = 15
+ABL:対象:性技 = 20
+ABL:対象:性知識 = 5
+ABL:対象:奉仕 = 1
+ABL:対象:性交 = 15
+ABL:対象:レズ = 0
+ABL:対象:精愛 = 3
+ABL:対象:露出 = 2
+ABL:対象:射精 = 20
+ABL:対象:排泄 = 3
+ABL:対象:サド = 5
+ABL:対象:主導度Ｕ = 99999999
+ABL:対象:主導度Ｎ = RAND(300, 600)
+ABL:対象:倒錯度 = RAND(300, 500)
+EXP:対象:絶頂経験 = 500
+
+VARSET COM_TENDENCY:対象:0, -1
+SELECTCASE RAND:7
+	CASE 0 TO 3
+		COM_TENDENCY:対象:GETNUM(TRAINNAME, "触手召喚") = 3
+		COM_TENDENCY:対象:GETNUM(TRAINNAME, "媚薬") = 3
+		COM_TENDENCY:対象:GETNUM(TRAINNAME, "触手緊縛") = 1
+		COM_TENDENCY:対象:GETNUM(TRAINNAME, "触手挿入") = 3
+		COM_TENDENCY:対象:GETNUM(TRAINNAME, "触手クリ責め") = 3
+		COM_TENDENCY:対象:GETNUM(TRAINNAME, "触手産卵") = 3
+	CASE 4 TO 5
+		COM_TENDENCY:対象:GETNUM(TRAINNAME, "触手召喚") = 3
+		COM_TENDENCY:対象:GETNUM(TRAINNAME, "媚薬") = 3
+		COM_TENDENCY:対象:GETNUM(TRAINNAME, "触手緊縛") = 1
+		COM_TENDENCY:対象:GETNUM(TRAINNAME, "触手挿入") = 3
+		COM_TENDENCY:対象:GETNUM(TRAINNAME, "触手Ａ挿入") = 3
+		COM_TENDENCY:対象:GETNUM(TRAINNAME, "触手Ａ産卵") = 3
+		COM_TENDENCY:対象:GETNUM(TRAINNAME, "触手尿道挿入") = 3
+		COM_TENDENCY:対象:GETNUM(TRAINNAME, "触手Ｕ産卵") = 3
+	CASEELSE
+		COM_TENDENCY:対象:GETNUM(TRAINNAME, "触手召喚") = 3
+		COM_TENDENCY:対象:GETNUM(TRAINNAME, "媚薬") = 3
+		COM_TENDENCY:対象:GETNUM(TRAINNAME, "触手緊縛") = 2
+		COM_TENDENCY:対象:GETNUM(TRAINNAME, "触手挿入") = 3
+		COM_TENDENCY:対象:GETNUM(TRAINNAME, "触手胸愛撫") = 3
+		COM_TENDENCY:対象:GETNUM(TRAINNAME, "触手搾乳") = 3
+		COM_TENDENCY:対象:GETNUM(TRAINNAME, "触手乳腺開発") = 2
+		COM_TENDENCY:対象:GETNUM(TRAINNAME, "触手口辱") = 2
+	ENDSELECT
+TALENT:対象:超能力者 = 1
+TALENT:対象:絶倫 = 1
+TALENT:対象:陰毛現在値 = 陰毛_標準
+TALENT:対象:陰毛目標値 = 陰毛_標準
+TALENT:対象:Ｖ締まり = GET_DEFAULT_TIGHTNESS("普通")
+TALENT:対象:Ａ締まり = GET_DEFAULT_TIGHTNESS("普通")
+TALENT:(対象):処女 = 0
+TALENT:(対象):キス未経験 = 0
+TALENT:(対象):童貞 = 0
+TALENT:(対象):アナル処女 = 1
+SETBIT TALENT:対象:淫乱系, 素質_淫乱_サド
+TALENT:対象:貞操無頓着 = 1
+TALENT:対象:貞操観念 = 0
+TALENT:対象:特殊勢力素質 = 特殊勢力_触手
+
+SEXUAL_EXPERIENCE:(対象):初体験_処女 = 不明
+SEXUAL_LAST_EXPERIENCE:(対象):初体験_処女 = 不明
+SEXUAL_EXPERIENCE:(対象):初体験_キス = 不明
+SEXUAL_LAST_EXPERIENCE:(対象):初体験_キス = 不明
+SEXUAL_EXPERIENCE:(対象):初体験_童貞 = 不明
+SEXUAL_LAST_EXPERIENCE:(対象):初体験_童貞 = 不明
+SEXUAL_EXPERIENCE:(対象):初体験_アナル処女 = ----
+SEXUAL_LAST_EXPERIENCE:(対象):初体験_アナル処女 = ----
+CFLAG:対象:慰安参加者 = 1
+CFLAG:対象:慰安モブ = 1
+CFLAG:対象:調教参加フラグ  = 1
+CFLAG:対象:強制友好化 = 1
+
