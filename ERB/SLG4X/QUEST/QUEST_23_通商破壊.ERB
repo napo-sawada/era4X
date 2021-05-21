@@ -1,0 +1,176 @@
+﻿;--------------------------
+; !!通商破壊と 23を好きな番号に変える！!
+; 通商破壊
+; ここにクエストの説明
+;--------------------------
+
+
+;--------------------------
+; クエスト受注可能か
+;--------------------------
+@QUEST_ACCEPTABLE_23
+
+CALL GET_STAR_ID_FROM_POS(CHARACTER_POSITION)
+SIF STAR_OWNER:RESULT != 国家ID_社会主義
+  RETURN 0
+SIF QUEST_COMPLETE_DATE:23 + 30 > DAY || QUEST_PROGRESS:23 == 1
+  RETURN 0
+RETURN 1
+;--------------------------
+; クエストの名前を返却
+;--------------------------
+@QUEST_NAME_23
+RESULTS = 通商破壊
+RETURN
+
+
+;--------------------------
+; マップでの表示を設定する
+; @QUEST_SET_TILE_  : マップ上対象地点にマークを出す。
+; @QUEST_MAP_INFO_  : 右下小窓にメッセージを出す
+; 引数１： ARG:0 SS23YY　座標データ　マップ上でクリックされた座標。表示条件分岐に。
+;--------------------------
+;;;マップ画面上での表示。 隠したかったら関数コメントアウトか RETURN 0
+;;;色を替えたかったらSETCOLORしておけば後の処理で色反映します
+@QUEST_SET_TILE_23 (ARG:0 )
+	RESULTS '= "×"
+	SETCOLOR 0XFF0000
+RETURN 1
+
+;;;右下小窓に出す。隠したければ関数コメントアウトか RETURN 0
+@QUEST_MAP_INFO_23 (ARG:0 )
+		RESULTS:0 '= "標的通過予定地点"
+RETURN 1
+
+;-----------------------
+; マップ上からQUEST_BODYを実行する処理
+; @QUEST_SHOW_COMMAND_x : ここで指定した文字列のコマンドを現地で表示する
+; 　　　　　　　　　　 ：(調査する||捜索する||採集する||待ち伏せする||挑戦する)といったフレーバー
+; @QUEST_PLACE_CHECK_x ： 設定マスを踏んだら呼び出される。不要ならば消すか無処理で返す
+;--------------------------
+@QUEST_SHOW_COMMAND_23 ()
+	RESULTS '= "標的を待つ"
+RETURN 1
+
+@QUEST_REACH_PLACE_23 ()
+; CALL QUEST_BODY_23
+RETURN
+
+;--------------------------
+; クエスト本体
+;--------------------------
+@QUEST_BODY_23
+#DIM CONST QUEST_ID = 23
+#DIM SECTOR_ID
+#DIM X_POS
+#DIM Y_POS
+#DIM SHIP_ID
+#DIM POSITION_ID
+#DIM 民主主義好感度
+
+CALL ID2POS(CHARACTER_POSITION)
+SECTOR_ID = RESULT:0
+X_POS = RESULT:1
+Y_POS = RESULT:2
+POSITION_ID = CHARACTER_POSITION
+
+;;宙域図から呼び出されたらこちら　クエスト進行中
+IF QUESTMAP:(RESULT:0):(RESULT:1):(RESULT:2) == QUEST_ID
+	QUEST_FLAG_SHIP_ID:QUEST_ID = -1
+	PRINTFORML しばらくすると、情報通り民主主義国家の輸送船団がやってきた
+	SELECTCASE RAND:100
+		CASE 0 TO 70
+			PRINTFORML コルベット数隻の貧弱な護衛艦隊と、少数の輸送艦からなる小型輸送部隊だ
+			FOR SHIP_ID, 0, 5
+				CALL INIT_PRESET_SHIP(国家ID_民主主義, CHARACTER_POSITION, 汎用コルベット, "護衛コルベット", 汎用コルベット)
+				SIF SHIP_ID == 0
+					QUEST_FLAG_SHIP_ID:QUEST_ID = RESULT
+				CALL INIT_PRESET_SHIP(国家ID_民主主義, CHARACTER_POSITION, 汎用輸送船, "輸送船", 汎用輸送船)
+			NEXT
+		CASE 70 TO 95
+			PRINTFORML 駆逐、フリゲートからなる分隊と、10隻ほどの輸送艦からなる小型輸送部隊だ
+			FOR SHIP_ID, 0, 3
+				CALL INIT_PRESET_SHIP(国家ID_民主主義, CHARACTER_POSITION, 汎用フリゲート, "護衛フリゲート", 汎用フリゲート)
+			NEXT
+			CALL INIT_PRESET_SHIP(国家ID_民主主義, CHARACTER_POSITION, 汎用駆逐艦, "護衛駆逐艦", 汎用駆逐艦)
+			QUEST_FLAG_SHIP_ID:QUEST_ID = RESULT
+		CASE 96 TO 99
+			PRINTFORML どうやら最悪のパターンを引いたらしい
+			PRINTFORML 敵の陣容は巡洋艦からなる一個戦闘小隊と30隻におよぶ輸送部隊からなる大船団だった
+			PRINTFORML しかし逃げようにも、敵のセンサーにすでに捕らえられているようで、主砲がこちらに向かって動きつつある
+			FOR SHIP_ID, 0, 27
+				CALL INIT_PRESET_SHIP(国家ID_民主主義, CHARACTER_POSITION, 汎用コルベット, "護衛コルベット", 汎用コルベット)
+			NEXT
+			FOR SHIP_ID, 0, 9
+				CALL INIT_PRESET_SHIP(国家ID_民主主義, CHARACTER_POSITION, 汎用フリゲート, "護衛フリゲート", 汎用フリゲート)
+			NEXT
+			FOR SHIP_ID, 0, 3
+				CALL INIT_PRESET_SHIP(国家ID_民主主義, CHARACTER_POSITION, 汎用駆逐艦, "護衛駆逐艦", 汎用駆逐艦)
+			NEXT
+			CALL INIT_PRESET_SHIP(国家ID_民主主義, CHARACTER_POSITION, 汎用巡洋艦, "護衛巡洋艦", 汎用巡洋艦)
+			QUEST_FLAG_SHIP_ID:QUEST_ID = RESULT
+			FOR SHIP_ID, 0, 30
+				CALL INIT_PRESET_SHIP(国家ID_民主主義, CHARACTER_POSITION, 汎用輸送船, "護衛輸送艦", 汎用輸送船)
+			NEXT
+	ENDSELECT
+	PRINTFORMW %CALLNAME:MASTER%の命令一下、艦隊が戦闘態勢に入った
+	民主主義好感度 = REL_LIKE_COUNTRY:国家ID_民主主義:国家ID_プレイヤー
+	REL_LIKE_COUNTRY:国家ID_民主主義:国家ID_プレイヤー = -1000
+	CALL COMBAT(CHARACTER_POSITION)
+	CALL RETIRE_BROKEN_SHIP
+	REL_LIKE_COUNTRY:国家ID_民主主義:国家ID_プレイヤー = 民主主義好感度
+	IF SHIP_COUNTRY:(QUEST_FLAG_SHIP_ID:QUEST_ID) != 国家ID_民主主義
+		;; 敵の旗艦を撃破し、自分が撃破されていない
+		IF CHARACTER_POSITION == POSITION_ID
+			QUEST_PROGRESS:QUEST_ID = 2
+			PRINTFORML 敵の旗艦をデブリと化すことができた。ミッション完了だ
+			PRINTFORMW クエスト窓口にミッション完了の報告に行こう
+		ELSE
+			QUEST_PROGRESS:QUEST_ID = 0
+		ENDIF
+		;; 引き分け。互いに旗艦が生存している状態
+	ELSEIF CHARACTER_POSITION == POSITION_ID
+		PRINTFORMW ミッション失敗だ。ただ命があることを神に感謝しよう
+		QUEST_PROGRESS:QUEST_ID = 0
+	ENDIF
+	FOR SHIP_ID, 0, MAX_SHIP
+		IF SHIP_COUNTRY:SHIP_ID == 国家ID_民主主義 && SHIP_POSITION:SHIP_ID == POSITION_ID
+			CALL GET_SHIP_TOTAL_HP(SHIP_ID)
+			SHIP_DAMAGE:SHIP_ID = RESULT
+		ENDIF
+	NEXT
+	CALL RETIRE_BROKEN_SHIP
+	CALL QUEST_RELEASE_POINT(QUEST_ID, CHARACTER_POSITION:MASTER)
+ELSEIF QUEST_PROGRESS:QUEST_ID == 2
+	PRINTFORML クエスト窓口でミッション完了の報告をした
+	PRINTFORML これにより報酬と社会主義国の評価を得ることができた
+	PRINTFORML 所持金+$250,000
+	PRINTFORMW 社会主義国の評価+10
+	MONEY += 250000
+	MONEY:国家ID_社会主義 -= 250000
+	REL_LIKE_COUNTRY:国家ID_社会主義:国家ID_プレイヤー = LIMIT(REL_LIKE_COUNTRY:国家ID_社会主義:国家ID_プレイヤー + 10, -1000, 1000)
+	QUEST_PROGRESS:QUEST_ID = 0
+	QUEST_COMPLETE_DATE:QUEST_ID = DAY
+ELSE
+	PRINTFORML 社会主義国の非正規軍として通商破壊ミッションに参加することにした%CALLNAME:MASTER%は、臨時の上官からミッション概要を聞いていた
+	PRINTFORML 「今回のミッションは敵輸送部隊及び、その護衛部隊を撃破することにある」
+	PRINTFORMW 「敵の部隊構成は不明だが、情報部が予測した情報によると輸送艦10隻前後、駆逐艦を旗艦とした1個戦闘分隊から巡洋艦を旗艦とした1個戦闘小隊が護衛についているようだ」
+	PRINTL
+	PRINTFORML 話をまとめると、社会主義国の周辺の指定座標×で、護衛艦の破壊に注力すればいいようだ
+	PRINTW ………………
+	PRINTW …………
+	PRINTW ……
+	PRINTW 指定座標に×印が付けられた。早急に向かおう。
+	LOCAL = 1
+	WHILE LOCAL
+		;; 関数つかって適当に。 指定セクター内　6:ちょっと外より を抽選
+		CALL QUEST_SET_RANDPOINT(QUEST_ID, SECTOR_ID, 6 )
+		IF RESULT >= 0
+			X_POS = (RESULT / 100) %100
+			Y_POS = RESULT %100
+			CLEARMAP:SECTOR_ID:X_POS:Y_POS = 1		;;明瞭化おまけ
+			LOCAL --
+		ENDIF
+	WEND
+	QUEST_PROGRESS:QUEST_ID = 1
+ENDIF
