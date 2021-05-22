@@ -1,0 +1,153 @@
+﻿;--------------------------
+; !!模擬戦闘と 24を好きな番号に変える！!
+; 模擬戦闘
+; ここにクエストの説明
+;--------------------------
+
+
+;--------------------------
+; クエスト受注可能か
+;--------------------------
+@QUEST_ACCEPTABLE_24
+CALL GET_STAR_ID_FROM_POS(CHARACTER_POSITION)
+SIF STAR_OWNER:RESULT != 国家ID_豊秋津皇国
+  RETURN 0
+SIF QUEST_COMPLETE_DATE:24 + 100 > DAY
+  RETURN 0
+RETURN 1
+
+;--------------------------
+; クエストの名前を返却
+;--------------------------
+@QUEST_NAME_24
+RESULTS = 模擬戦闘
+RETURN
+
+;--------------------------
+; クエスト本体
+;--------------------------
+@QUEST_BODY_24
+#DIM CONST QUEST_ID = 24
+#DIM SHIP_ID
+#DIM SECTOR_ID
+#DIM X_POS
+#DIM Y_POS
+#DIM POSITION_ID
+#DIM 模擬戦座標
+#DIM 皇国好感度
+#DIM SHIP_COUNT
+#DIM DESTROYED_COUNT
+#DIM 報酬額
+#DIM 報酬好感度
+
+
+CALL ID2POS(CHARACTER_POSITION)
+SECTOR_ID = RESULT:0
+X_POS = RESULT:1
+Y_POS = RESULT:2
+
+PRINTFORML 皇国の演習に参加することにした%CALLNAME:MASTER%はブリーフィングに参加し、詳細を聞いていた
+PRINTFORML 話をまとめると、%CALLNAME:MASTER%の用意した戦力と同等の戦力を皇国が用意し、模擬戦を行うと言うものだった
+PRINTFORMW 話は早い方がいい。早速%CALLNAME:MASTER%は模擬戦に向かうことにした
+PRINTW ………
+PRINTW ……
+PRINTW …
+POSITION_ID = CHARACTER_POSITION
+LOCAL = 1
+WHILE LOCAL
+	;; 関数つかって適当に。 指定セクター内　6:ちょっと外より を抽選
+	CALL QUEST_SET_RANDPOINT(QUEST_ID, SECTOR_ID, 6 )
+	IF RESULT >= 0
+		X_POS = (RESULT / 100) %100
+		Y_POS = RESULT %100
+		LOCAL --
+	ENDIF
+WEND
+CALL POS2ID(SECTOR_ID, X_POS, Y_POS)
+模擬戦座標 = RESULT
+皇国好感度 = REL_LIKE_COUNTRY:国家ID_豊秋津皇国:国家ID_プレイヤー
+REL_LIKE_COUNTRY:国家ID_豊秋津皇国:国家ID_プレイヤー = -1000
+
+SHIP_COUNT = 0
+DESTROYED_COUNT = 0
+
+; あなた艦隊を抽出してコピー艦隊を作成
+FOR SHIP_ID, 0, MAX_SHIP
+	SIF SHIP_COUNTRY:SHIP_ID != 国家ID_プレイヤー
+		CONTINUE
+	SIF SHIP_POSITION:SHIP_ID != CHARACTER_POSITION
+		CONTINUE
+	SIF GROUPMATCH(SHIP_CATEGORY:SHIP_ID, 輸送船, 作業船, 調査船)
+		CONTINUE
+	; コピー艦隊を作成
+	SELECTCASE SHIP_CATEGORY:SHIP_ID
+		CASE コルベット
+			CALL INIT_PRESET_SHIP(国家ID_豊秋津皇国, 模擬戦座標, 汎用コルベット, "皇国コルベット", 汎用コルベット)
+		CASE フリゲート
+			CALL INIT_PRESET_SHIP(国家ID_豊秋津皇国, 模擬戦座標, 汎用フリゲート, "皇国フリゲート", 汎用フリゲート)
+		CASE 駆逐艦
+			CALL INIT_PRESET_SHIP(国家ID_豊秋津皇国, 模擬戦座標, 汎用駆逐艦, "皇国駆逐艦", 汎用駆逐艦)
+		CASE 巡洋艦
+			CALL INIT_PRESET_SHIP(国家ID_豊秋津皇国, 模擬戦座標, 汎用巡洋艦, "皇国巡洋艦", 汎用巡洋艦)
+		CASE 戦艦
+			CALL INIT_PRESET_SHIP(国家ID_豊秋津皇国, 模擬戦座標, 汎用戦艦, "皇国戦艦", 汎用戦艦)
+		CASE 空母
+			CALL INIT_PRESET_SHIP(国家ID_豊秋津皇国, 模擬戦座標, 汎用空母, "皇国空母", 汎用空母)
+	ENDSELECT
+	SHIP_COUNT ++
+	; あなたの艦隊を指定座標に移動
+	SHIP_POSITION:SHIP_ID = 模擬戦座標
+NEXT
+
+CHARACTER_POSITION:MASTER = 模擬戦座標
+
+CALL COMBAT(CHARACTER_POSITION)
+FOR SHIP_ID, 0, MAX_SHIP
+	SIF SHIP_POSITION:SHIP_ID != 模擬戦座標
+		CONTINUE
+	; 回復処理と移動処理
+	IF SHIP_COUNTRY:SHIP_ID == 国家ID_プレイヤー
+		SHIP_DAMAGE:SHIP_ID = 0
+		SHIP_POSITION:SHIP_ID = POSITION_ID
+	; 破壊された艦艇数を数えつつ全て破壊処理
+	ELSEIF SHIP_COUNTRY:SHIP_ID == 国家ID_豊秋津皇国
+		CALL GET_SHIP_TOTAL_HP(SHIP_ID)
+		IF SHIP_DAMAGE:SHIP_ID >= RESULT
+			DESTROYED_COUNT ++
+		ELSE
+			SHIP_DAMAGE = RESULT
+		ENDIF
+	ENDIF
+NEXT
+CALL RETIRE_BROKEN_SHIP
+CHARACTER_POSITION:MASTER = POSITION_ID
+REL_LIKE_COUNTRY:国家ID_豊秋津皇国:国家ID_プレイヤー = 皇国好感度
+
+報酬額 = 100
+報酬好感度 = 0
+PRINTFORMW 戦闘後、ブリーフィングルームにて評価が行われていた
+PRINTL
+IF SHIP_COUNT == DESTROYED_COUNT
+	PRINTFORML 「全艦撃破判定か……貴殿の実力を見誤っていたのか、我が軍が予想以上に弱かったのか……」
+	PRINTFORML 「どちらにしろ、戦闘に参加した我が軍の兵士たちは今まで以上に厳しくしごきあげなくてはならないようですな」
+	PRINTFORMW 上官らしき男の言葉に、戦闘に参加していた皇国軍の兵士たちの顔が一斉に暗くなる
+	PRINTL
+	PRINTFORML 「貴殿には我が軍の問題点を大いに洗い出していただいた点を評価し、報酬には色を付けさせてもらう」
+	PRINTFORMW 「今後も定期的に演習を行う予定なので、是非参加してほしい」
+	PRINTL
+	報酬額 = SHIP_COUNT * 11000
+	報酬好感度 = SHIP_COUNT * 1
+ELSE
+	PRINTFORML 「互いにいい経験になりましたな」
+	PRINTFORML 「貴殿には我が軍の問題点を大いに洗い出していただいた点を評価し、報酬には色を付けさせてもらう」
+	PRINTFORMW 「今後も定期的に演習を行う予定なので、是非参加してほしい」
+	報酬額 = DESTROYED_COUNT * 10000
+	報酬好感度 = DESTROYED_COUNT * 1
+ENDIF
+PRINTFORML 所持金+%TOSTR(報酬額, "$###,###")%
+PRINTFORMW 皇国好感度+{報酬好感度}
+MONEY += 報酬額
+MONEY:国家ID_豊秋津皇国 -= 報酬額
+REL_LIKE_COUNTRY:国家ID_豊秋津皇国:国家ID_プレイヤー = LIMIT(REL_LIKE_COUNTRY:国家ID_豊秋津皇国:国家ID_プレイヤー + 報酬好感度, -1000, 1000)
+QUEST_COMPLETE_DATE:QUEST_ID = DAY
+
