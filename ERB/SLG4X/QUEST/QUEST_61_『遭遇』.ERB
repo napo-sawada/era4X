@@ -1,0 +1,344 @@
+﻿;--------------------------
+; 元『脱走兵を鎮圧せよ』
+; ここにクエストの説明
+;--------------------------
+@QUEST_DESCRIPTION_61
+PRINTL 
+PRINTFORML 　近頃、奇妙な新型艦かこの宙域を荒らし回っているらしい。
+PRINTFORML 　軍部はオトリ役を買って出る者を探しているらしい。
+PRINTFORML 　
+
+RETURN
+;--------------------------
+; クエスト受注可能か
+;--------------------------
+@QUEST_ACCEPTABLE_61
+SIF CFLAG:NAME_TO_CHARA("アノニム"):所属 != 国家ID_プレイヤー
+	RETURN 0
+SIF QUEST_PROGRESS:61 >= 10
+	RETURN 0
+SIF QUEST_PROGRESS:61 >= 0
+	RETURN 1
+RETURN 0
+
+;--------------------------
+; クエストの名前を返却
+;--------------------------
+@QUEST_NAME_61
+RESULTS = 『 遭遇 』― 異形の新型艦 ―
+RETURN
+
+;--------------------------
+; マップでの表示を設定する
+; @QUEST_SET_TILE_  : マップ上対象地点にマークを出す。
+; @QUEST_MAP_INFO_  : 右下小窓にメッセージを出す
+; 引数１： ARG:0 SSXXYY　座標データ　マップ上でクリックされた座標。表示条件分岐に。
+;--------------------------
+@QUEST_SET_TILE_61 (ARG:0)
+	RESULTS '= "▲"
+	SETCOLOR 0x6C0C00
+RETURN 1
+
+;;;右下小窓に出す。隠したければ関数コメントアウトか RETURN 0
+@QUEST_MAP_INFO_61 (ARG:0 )
+#DIM QUEST_ID = 61
+IF QUEST_PROGRESS:QUEST_ID 　== 2
+		RESULTS:0 '= "生体巡洋艦はこの辺りに出没するらしい"
+		RESULTS:1 '= "戦闘準備を整えなければ……"
+		RESULTS:2 '= ""
+		RESULTS:3 '= ""
+		RESULTS:4 '= ""
+ENDIF
+RETURN 1
+
+;-----------------------
+; マップからQUEST_BODYを実行する処理
+;--------------------------
+@QUEST_SHOW_COMMAND_61()
+RESULTS '= "作戦開始"
+RETURN 1
+
+;--------------------------------------------------
+;出現ポイント作成
+;--------------------------------------------------
+@QUEST_61_SET_QUEST_POINT_ON_MAP(QUEST_ID, SECTOR_ID, DISTANCE_FROM_STAR)
+#DIM QUEST_ID
+#DIM SECTOR_ID
+#DIM DISTANCE_FROM_STAR
+#DIM X_POS
+#DIM Y_POS
+#DIM ITER
+
+FOR ITER, 0 ,100
+	CALL QUEST_SET_RANDPOINT(QUEST_ID, SECTOR_ID, DISTANCE_FROM_STAR)
+	IF RESULT >= 0
+		X_POS = (RESULT / 100) %100
+		Y_POS = RESULT %100
+		CALL POS2ID(SECTOR_ID, X_POS, Y_POS)
+		QUEST_61_巡洋艦 = RESULT
+		CLEARMAP:SECTOR_ID:X_POS:Y_POS = 明瞭
+		RETURN
+	ENDIF
+	IF ITER == 99
+		CALL COLOR_PRINTW(@"エラー：マップ上にクエストを生成可能な領域が存在しません", カラー_警告)
+		FORCEWAIT
+	ENDIF
+NEXT
+
+;--------------------------
+; クエスト本体
+;--------------------------
+@QUEST_BODY_61
+#DIM SECTOR_ID
+#DIM POS_ID
+#DIM X_POS
+#DIM Y_POS
+#DIM ITER
+#DIM CONST DISTANCE_FROM_STAR = 6
+#DIM QUEST_ID = 61
+#DIM アニー
+
+アニー = NAME_TO_CHARA("アノニム")
+;あなた座標
+CALL ID2POS(CHARACTER_POSITION:MASTER)
+SECTOR_ID = RESULT:0
+QUEST_61_受注星 = RESULT:0
+X_POS = RESULT:1
+Y_POS = RESULT:2
+
+
+IF (QUESTMAP:(SECTOR_ID):(X_POS):(Y_POS) == QUEST_ID) && QUEST_PROGRESS:QUEST_ID == 2
+	PRINTFORML 　{CHARACTER_POSITION:MASTER}
+	PRINTFORML 　「さて母上、指定の座標まで来たが、別に戦う必要はない」
+	PRINTFORML 　「逃げる最中に放った牽制の一撃がウッカリ撃沈すること位たまにあるであろう」
+	PRINTFORML 　「引き渡すメリットは覚えが良くなること、デメリットは私（ワレラ）の端末が研究されることだ」
+	PRINTFORML 　「最悪、反乱やらに生体艦が使われて星１つが滅ぶことも可能性としてはなくはないだろう」
+	PRINTFORMW 　
+	PRINTFORML 　「次に、撃沈するメリットは、上の将来的に起こりうるリスクが無い。これに尽きる」
+	PRINTFORML 　「デメリットは確実に沈めるためにも連中とは直接戦う必要があることと」
+	PRINTFORML 　「そして沈める以上任務は失敗に近いから報酬は期待できんと言う事だ」
+	PRINTFORMW 　
+	PRINTFORML 　さて、どうしようか……。
+	PRINTFORML 　
+	CALL ASK_YN("軍に戦闘は任せる","沈める")
+	IF RESULT == 0
+		QUEST_PROGRESS:QUEST_ID = 4
+		PRINTFORML 
+		PRINTFORML 　戦力が分からない以上、戦うのは危険だ。
+		PRINTFORML 　%ANAME(MASTER)%は軍部に拿捕を任せ、オトリ役に徹することにした……。
+		PRINTFORML 
+		PRINTFORMW 　………………。
+		PRINTFORMW 　…………。
+		PRINTFORMW 　……。
+		PRINTFORML 
+		PRINTFORML 　流石に軍人たちの統率力は優れており、%ANAME(アニー)%曰く、
+		PRINTFORML 　「本能だけでやってるから最低限の統率力しかない」
+		PRINTFORML 　ワープアウトして来た生体艦たちをあっという間に追い詰め、拿捕する事に成功した。
+		PRINTFORML 　後は報酬を貰うだけだ……。
+		PRINTFORMW 　
+		CALL QUEST_RELEASE_POINT(QUEST_ID, QUEST_61_巡洋艦)
+	ELSE
+		QUEST_PROGRESS:QUEST_ID = 3
+		PRINTFORML 
+		PRINTFORML 　いや、自分を母と慕う？エイリアンの技術が他に渡るのは不味い。
+		PRINTFORML 　情報を得たが幸いだ、ここで沈めてしまおう。
+		PRINTFORML 　%ANAME(MASTER)%はＡＩに戦闘準備を指示し、生体艦の出現を待ち構えた……。
+		PRINTFORML 
+		PRINTFORMW 　………………。
+		PRINTFORMW 　…………。
+		PRINTFORMW 　……。
+		PRINTFORML 
+		PRINTFORML 　待ち構える事半日、ワープアウトしてきた生体艦が蠢く砲塔をこちらに向けている！
+		PRINTFORML 　軍の艦隊がこちらが逃げ出す（振りをする）のを待っているのをしり目に、
+		PRINTFORML 　%ANAME(MASTER)%は敵と相対した……。
+		PRINTFORML 
+		PRINTFORMW 　
+		CALL QUEST_BODY_61_SCENE_2
+		CALL COMBAT(CHARACTER_POSITION:MASTER)
+		CALL RETIRE_BROKEN_SHIP
+	ENDIF
+ELSEIF QUEST_PROGRESS:QUEST_ID >= 0
+	SELECTCASE QUEST_PROGRESS:QUEST_ID
+	CASE 0
+		CALL QUEST_BODY_61_SCENE_0
+	CASE 2
+		PRINTFORML 　
+		PRINTFORML 　早く行かねば逃げられてしまうだろう……。
+		PRINTFORML 　
+		PRINTFORML 　
+		PRINTFORMW 　
+	CASE 4 TO 6
+		CALL QUEST_BODY_61_SOLVE
+	ENDSELECT
+ENDIF
+
+IF QUEST_PROGRESS:QUEST_ID == 1
+	CALL QUEST_61_SET_QUEST_POINT_ON_MAP(QUEST_ID, SECTOR_ID, DISTANCE_FROM_STAR)
+	QUEST_PROGRESS:QUEST_ID = 2
+ENDIF
+
+IF QUEST_PROGRESS:QUEST_ID == 3
+	IF SHIP_COUNTRY:(QUEST_FLAG_SHIP_ID:QUEST_ID) == 国家ID_一般海賊
+	;負けた場合
+		DRAWLINE
+		PRINTFORML 　
+		PRINTFORML 　生体艦に制御された（元）海賊艦隊は想像以上の強さだ！
+		PRINTFORML 　何とか軍に助けられた%ANAME(MASTER)%達はこっぴどく叱られて港に戻った。
+		PRINTFORML 　ことの顛末を報告しよう。
+		PRINTFORMW 　
+		CHARACTER_POSITION:MASTER = (モヨリ * 10000) + 707
+		QUEST_PROGRESS:QUEST_ID = 6
+	ELSE
+	;勝った場合
+		DRAWLINE
+		PRINTFORML 　
+		PRINTFORML 　交戦の末、%ANAME(MASTER)%は海賊を乗っ取った生体艦を破った。
+		PRINTFORML 　無茶をするなと怒られたものの、生体艦が軍に渡ることは防げた。
+		PRINTFORML 　ことの顛末を報告しよう
+		PRINTFORML 　
+		QUEST_PROGRESS:QUEST_ID = 5
+	ENDIF
+	CALL QUEST_RELEASE_POINT(QUEST_ID, QUEST_61_巡洋艦)
+ENDIF
+
+RETURN
+;--------------------------
+; ことの顛末
+;--------------------------
+@QUEST_BODY_61_SOLVE
+#DIM QUEST_ID = 61
+
+PRINTFORML 
+PRINTFORML 　%ANAME(MASTER)%ははことの顛末を士官に報告した
+SELECTCASE QUEST_PROGRESS:QUEST_ID
+	CASE 4
+		PRINTFORML 　「未知のテクノロジーで建造されたらしい艦にお偉いさんは大喜びだ」
+		PRINTFORML 　「こっちとしてはそれを使われる身にも……失礼、これはこっちの事情だったね」
+		PRINTFORML 　「もし何かあったらまた君に頼むかもしれないから、その時は頼むよ」
+		PRINTFORML 　
+		PRINTFORML 　口座に＄　５００，０００　が振り込まれた！
+		PRINTFORML 　将官達は「敵国に先んじれる技術が手に入るだろう」と喜んでいるようです
+		PRINTFORMW 　
+		CALL GET_STAR_ID_FROM_POS(CHARACTER_POSITION)
+		REL_LIKE_COUNTRY:(STAR_OWNER:RESULT):国家ID_プレイヤー += 10
+		MONEY += 500000
+	CASE 5
+		PRINTFORML 　「まさか本当に沈めるとは……」
+		PRINTFORML 　「軍内でも未知の技術に迂闊に手を出すのは危険だと言う声は多くてね」
+		PRINTFORML 　「結果としてこれはこれで良かったのかも知れないな。あんなのに乗らされる士官が……ゲフンゲフン」
+		PRINTFORMW 　
+		PRINTFORML 　「まあ任務である拿捕には失敗したから報酬は余り出せないけれど」
+		PRINTFORML 　「君の評判は決して悪い物ではないだろう」
+		PRINTFORML 　「報酬は後日君の口座に振り込んでおこう、私からは以上だ」
+		PRINTFORML 　
+		PRINTFORML 　口座に＄　１００，０００　が振り込まれた！
+		PRINTFORML 　士官達から「あんなキモイのに乗らされなくて良かった」と大いに喜ばれているようです
+		PRINTFORMW 　
+		CALL GET_STAR_ID_FROM_POS(CHARACTER_POSITION)
+		REL_LIKE_COUNTRY:(STAR_OWNER:RESULT):国家ID_プレイヤー += 50
+		MONEY += 100000
+	CASE 6
+		PRINTFORML 　「無茶をしたものだね、君には悪いが艦を失ったのは君の責任だ」
+		PRINTFORML 　「とは言え任務を達成したのは事実だ」
+		PRINTFORML 　「報酬は口座に振り込んでおこう」
+		PRINTFORML 　
+		PRINTFORML 　口座に＄　６００，０００　が振り込まれた！
+		PRINTFORML 　将官達は「敵国に先んじれる技術が手に入るだろう」と喜んでいるようです
+		PRINTFORMW 　
+		CALL GET_STAR_ID_FROM_POS(CHARACTER_POSITION)
+		REL_LIKE_COUNTRY:(STAR_OWNER:RESULT):国家ID_プレイヤー += 10
+		MONEY += 600000
+ENDSELECT
+QUEST_PROGRESS:QUEST_ID += 10
+
+
+RETURN
+;--------------------------
+; 戦闘準備
+;--------------------------
+@QUEST_BODY_61_SCENE_2
+#DIM SECTOR_ID
+#DIM POS_ID
+#DIM X_POS_2
+#DIM Y_POS_2
+#DIM ITER
+#DIM QUEST_ID = 61
+
+;まずはあなたの座標獲得
+
+CALL ID2POS (CHARACTER_POSITION:MASTER)
+SECTOR_ID = RESULT:0
+X_POS_2 = RESULT:1
+Y_POS_2 = RESULT:2
+CALL POS2ID(SECTOR_ID, X_POS_2, Y_POS_2)
+POS_ID = RESULT
+
+;あなたの座標に出現
+
+CALL INIT_PRESET_SHIP(10, POS_ID, 汎用巡洋艦, "奇妙な新型艦", 汎用巡洋艦)
+QUEST_FLAG_SHIP_ID:61 = RESULT
+CALL INIT_PRESET_SHIP(10, POS_ID, 汎用コルベット, "コルベット？", 汎用コルベット)
+CALL INIT_PRESET_SHIP(10, POS_ID, 汎用コルベット, "コルベット？", 汎用コルベット)
+CALL INIT_PRESET_SHIP(10, POS_ID, 汎用コルベット, "コルベット？", 汎用コルベット)
+RETURN
+
+;--------------------------
+; ことのあらまし
+;--------------------------
+@QUEST_BODY_61_SCENE_0
+#DIM QUEST_ID = 61
+#DIM アニー
+アニー = NAME_TO_CHARA("アノニム")
+
+PRINTFORML 　
+PRINTFORML %CALLNAME:MASTER%が仕事を探していると、士官らしき男が話しかけてきた
+PRINTFORML 　「お前、仕事を探しているようだな。もし戦闘艦を持っているなら、頼みたい仕事があるんだ」
+PRINTFORML 　「近頃この近隣で暴れている海賊が、奇妙な新型艦を手に入れて勢力を強めた、と言う報告があった」
+PRINTFORMW 　
+PRINTFORML 　「これを拿捕して調査を行いたいところだが、連中は非常に勘が良くてな」
+PRINTFORML 　「軍がやろうとすると姿を見せても速攻で逃げ去ってしまうのだ」
+PRINTFORML 　「そこで民間の業者にオトリをさせ、拿捕を試みようとしているんだが……」
+PRINTFORML 　「やってくれるか？」
+PRINTFORML 　
+CALL ASK_YN
+IF RESULT == 1
+	PRINTFORML 「そうか、残念だ」
+	PRINTFORML 士官らしき男はそう言うと、さっさとその場を立ち去っていった
+	RETURN 0
+ENDIF
+QUEST_PROGRESS:QUEST_ID = 1
+PRINTFORML 　「よし、素晴らしい」
+PRINTFORML 　「直前に捕捉された座標を送った。くれぐれも気を付けてくれ」
+PRINTFORML 　「危険だと思ったら逃げても構わないし、沈めても構わない。残骸から得られるものはあるからね」
+PRINTFORML 　「沈めた場合の報酬に関しては……まあ期待しないでくれ」
+PRINTFORML 　「……っと、これがフォトデータだ。変な艦だろう？」
+PRINTFORML 　%ANAME(MASTER)%に手渡されたフォトデータは漂う肉塊としか表現できないグロテスクなものだった。
+PRINTFORML 　これを使おうと思った海賊のセンスは良く分からない……。
+PRINTFORMW 　
+PRINTFORML 　準備を整えるため、港に戻ると%ANAME(アニー)%が大道芸で小遣い稼ぎをしていた。
+PRINTFORML 　検疫は普通に突破したらしい%ANAME(アニー)%はとても良く目立つ。
+PRINTFORML 　%ANAME(MASTER)%が%ANAME(アニー)%に声を掛けると、
+PRINTFORML 　%ANAME(アニー)%は大道芸を打ち切って%ANAME(MASTER)%のもとにふよふよと近づいて来た。
+PRINTFORMW 　
+PRINTFORML 　「……これは生体巡洋艦だな、それも雑にコントロールされている」
+PRINTFORML 　「単純な生き物になってしまった以上超能力者が呼びかければ誤解もするだろうが」
+PRINTFORML 　「流石にこれは惨いと言う他ない」
+PRINTFORMW 　
+PRINTFORML 　%ANAME(MASTER)%の知る生体巡洋艦は汎用巡洋艦と余り差異がないものだが、本来は違うのかと尋ねると、
+PRINTFORML 　「未知のエイリアンが港に姿を現すのと、肉塊にしか見えん艦が姿を現すのでは警戒度も違うであろう母上」
+PRINTFORML 　「私（ワレラ）もその程度の気配りは出来るとも」
+PRINTFORML 　「誰がやったかは分からぬが、雑な制御のお蔭で殆ど暴走しておる。艦の人間は全て同化されていると見て良いぞ」
+PRINTFORML 　「根拠？　これほどの大きさの端末がいるなら私（ワレラ）にも感知できるはずだからな」
+PRINTFORML 　%ANAME(MASTER)%が%ANAME(アニー)%に、何の意図があるのか尋ねると、彼女は首を振って言った。
+PRINTFORMW 　
+PRINTFORML 　「これだけでは大方阿呆な海賊が怪しげなバイヤーから安くて強くて潰しの利く艦を買った、位しか考えられん」
+PRINTFORML 　「母上にはクライアントから言われた通り選択肢が２つある」
+PRINTFORML 　「１つはオトリ役に徹すること、もう１つは完全に消し飛ばすことだ」
+PRINTFORML 　「双方にメリットとデメリットがあろう」
+PRINTFORML 　「向こうもああ言った以上“うっかり”消し飛ばしてしまってもとやかくは言うまい」
+PRINTFORMW 　
+PRINTFORML 　%CALLNAME:MASTER%は奇妙な新型艦の拿捕作戦のオトリを請け負った
+QUEST_PROGRESS:61 = 1
+
+
+RETURN

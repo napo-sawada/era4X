@@ -1,0 +1,39 @@
+﻿;-----------------------------------
+; シールド
+;-----------------------------------
+@GET_SIELD_NAME_200
+RESULTS = 塑性シールドユニット(小)
+
+@GET_SIELD_STATUS_200(STATUS)
+#DIM REF STATUS
+
+STATUS:SIELD = 400
+STATUS:SIELD_RECOVER = 80
+STATUS:SIZE = 2
+STATUS:PRICE = 160000
+
+;-----------------------------------
+; シールドの説明
+;-----------------------------------
+@GET_SIELD_DESCRIPTION_200
+#DIM STATUS, STATUS_LENGTH
+
+CALL GET_SIELD_STATUS_200(STATUS)
+CALL GET_SIELD_NAME_200
+PRINTFORML %RESULTS%
+PRINTFORML シールド    : {STATUS:SIELD}
+PRINTFORML シールド回復: {STATUS:SIELD_RECOVER}/ターン
+PRINTFORML サイズ      : {STATUS:SIZE}
+
+;-----------------------------------
+; シールドの資材
+;-----------------------------------
+@GET_SIELD_RESOURCE_200(USE_RESOURCE)
+#DIM REF USE_RESOURCE
+
+USE_RESOURCE:シールド発生装置 = 80
+USE_RESOURCE:耐熱合金 = 50
+
+
+@IS_SALE_SIELD_200
+RETURN 0

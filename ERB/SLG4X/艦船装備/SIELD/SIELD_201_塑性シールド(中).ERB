@@ -1,10 +1,10 @@
 ﻿;-----------------------------------
 ; シールド
 ;-----------------------------------
-@GET_SIELD_NAME_202
-RESULTS = 塑性シールドユニット
+@GET_SIELD_NAME_201
+RESULTS = 塑性シールドユニット(中)
 
-@GET_SIELD_STATUS_202(STATUS)
+@GET_SIELD_STATUS_201(STATUS)
 #DIM REF STATUS
 
 STATUS:SIELD = 400
@@ -15,11 +15,11 @@ STATUS:PRICE = 140000
 ;-----------------------------------
 ; シールドの説明
 ;-----------------------------------
-@GET_SIELD_DESCRIPTION_202
+@GET_SIELD_DESCRIPTION_201
 #DIM STATUS, STATUS_LENGTH
 
-CALL GET_SIELD_STATUS_202(STATUS)
-CALL GET_SIELD_NAME_202
+CALL GET_SIELD_STATUS_201(STATUS)
+CALL GET_SIELD_NAME_201
 PRINTFORML %RESULTS%
 PRINTFORML シールド    : {STATUS:SIELD}
 PRINTFORML シールド回復: {STATUS:SIELD_RECOVER}/ターン
@@ -28,10 +28,10 @@ PRINTFORML サイズ      : {STATUS:SIZE}
 ;-----------------------------------
 ; シールドの資材
 ;-----------------------------------
-@GET_SIELD_RESOURCE_202(USE_RESOURCE)
+@GET_SIELD_RESOURCE_201(USE_RESOURCE)
 #DIM REF USE_RESOURCE
 
 USE_RESOURCE:シールド発生装置 = 60
 
-@IS_SALE_SIELD_202
+@IS_SALE_SIELD_201
 RETURN 0

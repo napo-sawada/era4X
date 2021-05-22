@@ -1,0 +1,37 @@
+﻿;-----------------------------------
+; アーマー
+;-----------------------------------
+@GET_ARMOR_NAME_201
+RESULTS = 生体高密度装甲（中）
+
+@GET_ARMOR_STATUS_201(STATUS)
+#DIM REF STATUS
+
+STATUS:ARMOR = 2000
+STATUS:AVOID = -5
+STATUS:SIZE = 2
+STATUS:PRICE = 120000
+
+;-----------------------------------
+; アーマーの説明
+;-----------------------------------
+@GET_ARMOR_DESCRIPTION_201
+#DIM STATUS, STATUS_LENGTH
+
+CALL GET_ARMOR_STATUS_202(STATUS)
+CALL GET_ARMOR_NAME_202
+PRINTFORML %RESULTS%
+PRINTFORML 装甲      : {STATUS:ARMOR}
+PRINTFORML 回避      : {STATUS:AVOID}
+PRINTFORML サイズ    : {STATUS:SIZE}
+
+;-----------------------------------
+; 装甲の資材
+;-----------------------------------
+@GET_ARMOR_RESOURCE_201(USE_RESOURCE)
+#DIM REF USE_RESOURCE
+
+USE_RESOURCE:装甲合金 = 60
+
+@IS_SALE_ARMOR_201
+RETURN 0
