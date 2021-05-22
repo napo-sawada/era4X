@@ -1,0 +1,122 @@
+﻿;--------------------------
+; !!故障船修理と 27を好きな番号に変える！!
+; 故障船修理
+; ここにクエストの説明
+;--------------------------
+
+
+;--------------------------
+; クエスト受注可能か
+;--------------------------
+@QUEST_ACCEPTABLE_27
+CALL GET_STAR_ID_FROM_POS(CHARACTER_POSITION)
+SIF STAR_OWNER:RESULT != 国家ID_機械文明
+  RETURN 0
+SIF QUEST_COMPLETE_DATE:27 + 100 > DAY || QUEST_PROGRESS:27 == 1
+  RETURN 0
+RETURN 1
+
+;--------------------------
+; クエストの名前を返却
+;--------------------------
+@QUEST_NAME_27
+RESULTS = 故障船修理
+RETURN
+
+
+;--------------------------
+; マップでの表示を設定する
+; @QUEST_SET_TILE_  : マップ上対象地点にマークを出す。
+; @QUEST_MAP_INFO_  : 右下小窓にメッセージを出す
+; 引数１： ARG:0 SS27YY　座標データ　マップ上でクリックされた座標。表示条件分岐に。
+;--------------------------
+;;;マップ画面上での表示。 隠したかったら関数コメントアウトか RETURN 0
+;;;色を替えたかったらSETCOLORしておけば後の処理で色反映します
+@QUEST_SET_TILE_27 (ARG:0 )
+	RESULTS '= "！"
+	SETCOLOR 0xFFFF00
+RETURN 1
+
+;;;右下小窓に出す。隠したければ関数コメントアウトか RETURN 0
+@QUEST_MAP_INFO_27 (ARG:0 )
+		RESULTS:0 '= "故障船"
+RETURN 1
+
+;-----------------------
+; マップ上からQUEST_BODYを実行する処理
+; @QUEST_SHOW_COMMAND_x : ここで指定した文字列のコマンドを現地で表示する
+; 　　　　　　　　　　 ：(調査する||捜索する||採集する||待ち伏せする||挑戦する)といったフレーバー
+; @QUEST_PLACE_CHECK_x ： 設定マスを踏んだら呼び出される。不要ならば消すか無処理で返す
+;--------------------------
+@QUEST_SHOW_COMMAND_27 ()
+	RESULTS '= "修理を行う"
+RETURN 1
+
+@QUEST_REACH_PLACE_27 ()
+; CALL QUEST_BODY_27
+RETURN
+
+;--------------------------
+; クエスト本体
+;--------------------------
+@QUEST_BODY_27
+#DIM CONST QUEST_ID = 27
+#DIM SECTOR_ID
+#DIM X_POS
+#DIM Y_POS
+#DIM 修理成功回数
+
+CALL ID2POS(CHARACTER_POSITION)
+SECTOR_ID = RESULT:0
+X_POS = RESULT:1
+Y_POS = RESULT:2
+
+修理成功回数 = 0
+IF QUESTMAP:SECTOR_ID:X_POS:Y_POS == QUEST_ID
+	FOR LOCAL, 0, 5
+		PRINTFORMW 修理中……
+		IF RAND:2
+			PRINTFORMW 修理成功！
+			修理成功回数 ++
+		ELSE
+			PRINTFORMW 修理失敗……
+		ENDIF
+	NEXT
+	IF 修理成功回数 > 1
+		PRINTFORML できる限り修理した
+		PRINTFORMW クエスト窓口に報告しに行こう
+	ELSE
+		PRINTFORML 修理に失敗した……
+	ENDIF
+	QUEST_PROGRESS:QUEST_ID += 修理成功回数
+	CALL QUEST_RELEASE_POINT(QUEST_ID, CHARACTER_POSITION:MASTER)
+	SIF QUEST_PROGRESS:QUEST_ID == 1
+		QUEST_PROGRESS:QUEST_ID = 0
+ELSEIF QUEST_PROGRESS:QUEST_ID > 1
+	PRINTFORML クエスト窓口で報酬を受け取った
+	PRINTFORML 所持金+%TOSTR(5000 * (QUEST_PROGRESS:QUEST_ID - 1), "$###,###")%
+	PRINTFORMW 機械文明好感度+{QUEST_PROGRESS:QUEST_ID - 1}
+	MONEY += 5000 * (QUEST_PROGRESS:QUEST_ID - 1)
+	MONEY:国家ID_機械文明 -= 5000 * (QUEST_PROGRESS:QUEST_ID - 1)
+	REL_LIKE_COUNTRY:国家ID_機械文明:国家ID_プレイヤー = LIMIT(REL_LIKE_COUNTRY:国家ID_機械文明:国家ID_プレイヤー + (QUEST_PROGRESS:QUEST_ID - 1), -1000, 1000)
+	QUEST_PROGRESS:QUEST_ID = 0
+ELSE
+	PRINTFORML 「どーも、%CALLNAME:MASTER%・サン。ウケツケ嬢 デス」
+	PRINTFORML 奥ゆかしい挨拶と共に受付カウンターにエントリーした受付嬢ロボが、クエストの説明を始めた
+	PRINTFORML 「今回のミッションはこの宙域で故障した艦船の修理任務になります。修理キットはこちらで提供いたしますので、修理をお願いいたします」
+	PRINTFORMW 「万が一修理できなかった場合は報酬はお支払いされませんのでお気をつけください」
+	PRINTL
+	PRINTFORMW 故障した艦の座標がマップに追加された
+	LOCAL = 1
+	WHILE LOCAL
+		;; 関数つかって適当に。 指定セクター内　6:ちょっと外より を抽選
+		CALL QUEST_SET_RANDPOINT(QUEST_ID, SECTOR_ID, 6 )
+		IF RESULT >= 0
+			X_POS = (RESULT / 100) %100
+			Y_POS = RESULT %100
+			CLEARMAP:SECTOR_ID:X_POS:Y_POS = 1		;;明瞭化おまけ
+			LOCAL --
+		ENDIF
+	WEND
+	QUEST_PROGRESS:QUEST_ID = 1
+ENDIF
