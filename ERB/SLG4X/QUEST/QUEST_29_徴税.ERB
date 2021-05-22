@@ -1,0 +1,137 @@
+﻿;--------------------------
+; !!徴税と 29を好きな番号に変える！!
+; 徴税
+; ここにクエストの説明
+;--------------------------
+
+
+;--------------------------
+; クエスト受注可能か
+;--------------------------
+@QUEST_ACCEPTABLE_29
+CALL GET_STAR_ID_FROM_POS(CHARACTER_POSITION)
+SIF STAR_OWNER:RESULT != 国家ID_ハールバルズ
+  RETURN 0
+SIF QUEST_COMPLETE_DATE:29 + 30 > DAY
+  RETURN 0
+RETURN 1
+
+;--------------------------
+; クエストの名前を返却
+;--------------------------
+@QUEST_NAME_29
+RESULTS = 徴税
+RETURN
+
+;--------------------------
+; クエスト本体
+;--------------------------
+@QUEST_BODY_29
+#DIM SHIP_ID
+
+PRINTFORML 困り顔の貴族の女が、今回の依頼者だった
+PRINTFORML 「最近徴税義務を拒否する困った人たちが多いのです」
+PRINTFORMW 「特にX地区と呼ばれる貧困層が集まる地区では徴税を拒む者たちが集まり、徴税官に集団で反抗するため手がつけられないのです」
+PRINTL
+PRINTFORML 「どのような手段を取っても構いません。X地区から税金を徴収してきてください」
+PRINTFORMW かくして%CALLNAME:MASTER%はX地区に徴税のため向かうことにしたのだった
+PRINTW ………
+PRINTW ……
+PRINTW …
+PRINTFORML %CALLNAME:MASTER%は足で稼いで、なんとかX地区のリーダーの男だという高齢の男に会うことができた
+PRINTFORML しかし払う金がないから税金なんて払いたくても払えないという、すげない返事しか返ってこなかった
+PRINTFORMW さて、どうするか
+PRINTL
+$INPUT_LOOP
+PRINTBUTTON "[0]口先で丸め込む - (話術に依存)", 0
+PRINTL
+PRINTBUTTON "[1]武力で脅す - (所持艦艇数に依存)", 1
+PRINTL
+SIF MONEY >= 1000000
+	PRINTBUTTON "[2]借金の肩代わりを申し入れる - ($1,000,000必要)", 2
+INPUT
+IF RESULT == 0
+	PRINTFORMW あくまで対話で話をつけることにした
+	DRAWLINE
+	PRINTFORML 対抗ロール(高い値を出した方が勝ち)
+	DRAWLINE
+	PRINTFORML %CALLNAME:MASTER%(話術:{ABL:MASTER:話術}) VS リーダーの男(話術:75)
+	PRINTFORMW %CALLNAME:MASTER%のロール
+	PRINTW ……
+	LOCAL = RAND(ABL:MASTER:話術)
+	PRINTFORMW 結果:{LOCAL}
+	PRINTFORMW リーダーの男のロール
+	PRINTW ……
+	LOCAL:1 = RAND(75)
+	PRINTFORMW 結果:{LOCAL:1}
+	IF LOCAL > LOCAL:1
+		PRINTFORMW %CALLNAME:MASTER%の勝ち
+		DRAWLINE
+		PRINTFORML 話術でリーダーの男をまるめこんだ%CALLNAME:MASTER%は、税金を徴収することに成功した
+		PRINTFORML 平和的に税金を徴収できて、クライアントである貴族の女も安心したようだ
+		PRINTFORML 報酬として$12,000を手に入れた
+		PRINTFORMW また、王国の好感度が4上がった
+		MONEY += 12000
+		MONEY:国家ID_ハールバルズ -= 12000
+		REL_LIKE_COUNTRY:国家ID_ハールバルズ:国家ID_プレイヤー = LIMIT(REL_LIKE_COUNTRY:国家ID_ハールバルズ:国家ID_プレイヤー + 4, -1000, 1000)
+	ELSE
+		PRINTFORMW リーダーの男の勝ち
+		DRAWLINE
+		PRINTFORML 逆にリーダーの男に丸め込まれてしまった
+		PRINTFORML 結局税金を徴収することができず、%CALLNAME:MASTER%はすごすごとその場を後にした……
+	ENDIF
+ELSEIF RESULT == 1
+	LOCAL = 0
+	LOCAL:1 = 0
+	FOR SHIP_ID, 0, MAX_SHIP
+		SIF SHIP_COUNTRY:SHIP_ID != 国家ID_プレイヤー || SHIP_POSITION:SHIP_ID != CHARACTER_POSITION
+			CONTINUE
+		SIF GROUPMATCH(SHIP_CATEGORY:SHIP_ID, 輸送船, 作業船, 調査船)
+			CONTINUE
+		LOCAL ++
+		SIF GROUPMATCH(SHIP_CATEGORY:SHIP_ID, 駆逐艦, 巡洋艦, 戦艦, 空母)
+			LOCAL:1 ++
+	NEXT
+	;１０隻未満で大型戦闘艦が存在しないと威にならない
+	PRINTFORML %CALLNAME:MASTER%は脅しのために配下の戦闘艦を現場に召集した
+	IF LOCAL < 10 && !LOCAL:1
+		PRINTFORML しかしどこから手に入れたのか、地対空砲で逆に追い払われてしまった……
+		PRINTFORMW %CALLNAME:MASTER%は説得を諦めその場を後にした
+	ELSEIF LOCAL > 50 && LOCAL:1 > 20
+		PRINTFORML 大量の巨大戦闘艦を含む夥しい数の戦闘艦の数に、リーダーの男は泡を食っている
+		PRINTFORML さらには警報が鳴り響き、フリゲートを旗艦とした国軍の偵察分隊がやってきて解散を命令するが、とても敵わぬ陣容に及び腰だ
+		PRINTFORMW %CALLNAME:MASTER%はリーダーの男から税金を徴収すると、悠々とその場を後にした
+		PRINTL
+		PRINTFORML 威圧で税金を徴収したことで、クライアントである貴族の女は渋そうな顔をしている
+		PRINTFORML しかし税金は確かに徴収できたので、報酬は支払われた
+		PRINTFORML 報酬として$10,000手に入れた
+		PRINTFORML また、王国の好感度が1上がった
+		MONEY += 10000
+		MONEY:国家ID_ハールバルズ -= 10000
+		REL_LIKE_COUNTRY:国家ID_ハールバルズ:国家ID_プレイヤー = LIMIT(REL_LIKE_COUNTRY:国家ID_ハールバルズ:国家ID_プレイヤー + 1, -1000, 1000)
+	ELSE
+		PRINTFORML 大規模な戦闘艦の部隊を前に、男は苦々しい顔で税金を差し出してきた
+		PRINTFORML これで万事解決だ。%CALLNAME:MASTER%は颯爽とその場を後にした
+		PRINTL
+		PRINTFORML 威圧で税金を徴収したことで、クライアントである貴族の女は渋そうな顔をしている
+		PRINTFORML しかし税金は確かに徴収できたので、報酬は支払われた
+		PRINTFORML 報酬として$10,000手に入れた
+		PRINTFORML また、王国の好感度が1上がった
+	ENDIF
+ELSEIF RESULT == 2 && MONEY > 1000000
+	PRINTFORML %CALLNAME:MASTER%が借金の肩代わりを提案すると、リーダーの男は怪訝な顔をしながらもそれを受け入れた
+	PRINTFORML %CALLNAME:MASTER%は$1,000,000をX地区の代わりに支払った
+	借金の肩代わり回数 ++
+	MONEY -= 1000000
+	MONEY:国家ID_ハールバルズ += 1000000
+	PRINTL
+	PRINTFORML 平和的に税金を徴収できて、クライアントである貴族の女も安心したようだ
+	PRINTFORML 報酬として$12,000を手に入れた
+	PRINTFORMW また、王国の好感度が4上がった
+	MONEY += 12000
+	MONEY:国家ID_ハールバルズ -= 12000
+	REL_LIKE_COUNTRY:国家ID_ハールバルズ:国家ID_プレイヤー = LIMIT(REL_LIKE_COUNTRY:国家ID_ハールバルズ:国家ID_プレイヤー + 4, -1000, 1000)
+ELSE
+	GOTO INPUT_LOOP
+ENDIF
+QUEST_COMPLETE_DATE:29 = DAY
