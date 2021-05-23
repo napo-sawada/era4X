@@ -20,6 +20,55 @@ ELSE
 	CALL TURNEND_POLITICS
 ENDIF
 
+$SKIPPED
+
+;デッドエンディングならBEGIN TITLE
+IF FLAG:強制エンドフラグ == 1
+
+	SETCOLOR カラー_注意
+	PRINTFORMW 現時点でのデータを利用し、「周回用セーブ」を作ることができます
+	PRINTFORMW 周回用セーブをロードすることで、今の武将やアイテムを引き継いで新規にシナリオを開始できます
+	RESETCOLOR
+
+	FLAG:クリア直後フラグ = 1
+
+	CALL SAVE_GAME
+
+	BEGIN TITLE
+;ターンエンド調教が立っているなら即時調教モードに入る
+ELSEIF FLAG:ターンエンド調教
+	SELECTCASE FLAG:ターンエンド調教
+		CASE 1
+			FLAG:調教モード = 1
+		CASE 2
+			FLAG:調教モード = 5
+			FLAG:ウフフフラグ = 1
+		CASE 3
+			FLAG:調教モード = 7
+			FLAG:慰安モード = 3
+	ENDSELECT
+	FLAG:ターンエンド調教 = 0
+	FLAG:ウフフフラグ = 1
+	FLAG:夜這い = 0
+	;時間の処理をしないと、「拠点フェイズの終了時にここに到達、調教→交流終了でSLGフェイズのターンエンドが呼ばれ、次期の拠点フェイズに飛ぶ」みたいな挙動になる
+	IF TIME == 0
+		IF !FLAG:クリアフラグ
+			TIME = 1
+			DAY --
+		ENDIF
+	ELSEIF TIME == 1
+		TIME = 0
+		SHOP_TIME = CALC_SHOP_TIME()
+	ENDIF
+	FLAG:イベント発生禁止 = 1
+	CALL START_TRAIN_COMMON
+ELSE
+	SIF FLAG:調教要求フラグ
+		FLAG:調教要求フラグ = 0
+	FLAG:イベント発生禁止 = 0
+	BEGIN SHOP
+ENDIF
+
 ;-------------------------------------------------
 ;拠点フェイズ終了時の処理
 ;-------------------------------------------------
