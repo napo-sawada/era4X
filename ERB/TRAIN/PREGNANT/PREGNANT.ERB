@@ -950,7 +950,7 @@ IF !TALENT:(ARG:0):妊娠 && LOCAL:5 < 0 && CFLAG:(ARG:0):妊娠時バストサ�
 		PRINTFORMW 出産により大きくなっていた%ANAME(ARG:0)%の胸は元に戻りました
 		RESETCOLOR
 	ENDIF
-	SIF INRANGE(GET_BUSTSIZE(ARG:0), -1, 2)
+	SIF INRANGE(GET_BUSTSIZE(ARG:0), -1, 2) && !CONFIG:44
 		CALL SET_BUSTSIZE(ARG:0, GET_BUSTSIZE(ARG:0) - 1)
 	CFLAG:(ARG:0):妊娠時バストサイズ増加 = 0
 ENDIF
