@@ -211,52 +211,71 @@ SELECTCASE TALENT:成長型
 		ABL:操艦 = RAND:46 + 25
 		ABL:知略 = RAND:46 + 25
 		ABL:政治 = RAND:46 + 25
+		ABL:話術 = RAND:26 + 15
+		ABL:社交 = RAND:26 + 15
 	CASE 1
 		ABL:白兵 = RAND:21 + RAND:10 + 35
 		ABL:操艦 = RAND:21 + RAND:10 + 35
 		ABL:知略 = RAND:21 + RAND:10 + 35
 		ABL:政治 = RAND:61 + 5
+		ABL:話術 = RAND:21 + RAND:10 + 15
+		ABL:社交 = RAND:31 + 5
 	CASE 2
 		ABL:白兵 = RAND:51 + 15
 		ABL:操艦 = RAND:51 + 15
 		ABL:知略 = RAND:21 + RAND:11 + 40
 		ABL:政治 = RAND:21 + RAND:11 + 40
+		ABL:話術 = RAND:21 + RAND:11 + 10
+		ABL:社交 = RAND:21 + RAND:11 + 10
 	CASE 3
 		ABL:白兵 = RAND:21 + RAND:11 + 40
 		ABL:操艦 = RAND:21 + RAND:11 + 40
 		ABL:知略 = RAND:51 + 15
 		ABL:政治 = RAND:21 + RAND:11 + 40
+		ABL:話術 = RAND:21 + 15
+		ABL:社交 = RAND:21 + RAND:11 + 10
 	CASE 4
 		ABL:白兵 = RAND:16 + RAND:6 + 55
 		ABL:操艦 = RAND:16 + RAND:6 + 55
 		ABL:知略 = RAND:51 + 15
 		ABL:政治 = RAND:51 + 15
+		ABL:話術 = RAND:31 + 5
+		ABL:社交 = RAND:31 + 5
 	CASE 5
 		ABL:白兵 = RAND:51 + 15
 		ABL:操艦 = RAND:51 + 15
 		ABL:知略 = RAND:16 + RAND:6 + 55
 		ABL:政治 = RAND:51 + 15
+		ABL:話術 = RAND:16 + RAND:6 + 35
+		ABL:社交 = RAND:31 + 5
 	CASE 6
 		ABL:白兵 = RAND:51 + 15
 		ABL:操艦 = RAND:51 + 15
 		ABL:知略 = RAND:51 + 15
 		ABL:政治 = RAND:16 + RAND:6 + 55
+		ABL:話術 = RAND:31 + 5
+		ABL:社交 = RAND:16 + RAND:6 + 35
 	CASE 7
 		ABL:白兵 = RAND:41 + 20
 		ABL:操艦 = RAND:41 + 20
 		ABL:知略 = RAND:41 + 20
 		ABL:政治 = RAND:41 + 20
+		ABL:話術 = RAND:21 + 10
+		ABL:社交 = RAND:21 + 10
 	CASE 8
 		ABL:白兵 = RAND:41 + 20
 		ABL:操艦 = RAND:41 + 20
 		ABL:知略 = RAND:41 + 20
 		ABL:政治 = RAND:41 + 20
+		ABL:話術 = RAND:21 + 10
+		ABL:社交 = RAND:21 + 10
 ENDSELECT
 
 IF TALENT:成長型 == 7 || ARG:1 == 4
 	ABL:歌唱 = RAND:41 + 25
 	IF RAND:4 == 0
 		ABL:歌唱 += RAND:11
+		ABL:話術 += RAND:6
 	ENDIF
 	IF RAND:8 == 0
 		ABL:歌唱 -= RAND:11
@@ -274,6 +293,7 @@ IF TALENT:成長型 == 8 || ARG:1 == 5
 	ABL:料理 = RAND:41 + 25
 	IF RAND:4 == 0
 		ABL:料理 += RAND:11
+		ABL:社交 += RAND:6
 	ENDIF
 	IF RAND:8 == 0
 		ABL:料理 -= RAND:11
@@ -296,6 +316,8 @@ IF ARG:1 == 0
 	ABL:政治 += RAND:4
 	ABL:歌唱 += RAND:4
 	ABL:料理 += RAND:4
+	ABL:話術 += RAND:4
+	ABL:社交 += RAND:4
 ;指定武官(白兵を最大に＆ボーナス)
 ELSEIF ARG:1 == 1
 	SIF ABL:白兵 < ABL:政治
@@ -310,6 +332,7 @@ ELSEIF ARG:1 == 2
 	SIF ABL:知略 < ABL:政治
 		SWAP ABL:知略, ABL:政治
 	ABL:知略 += RAND:6
+	ABL:話術 += RAND:6
 ;指定政務官(政治を最大に＆ボーナス)
 ELSEIF ARG:1 == 3
 	SIF ABL:政治 < ABL:白兵
@@ -317,12 +340,15 @@ ELSEIF ARG:1 == 3
 	SIF ABL:政治 < ABL:知略
 		SWAP ABL:政治, ABL:知略
 	ABL:政治 += RAND:6
+	ABL:社交 += RAND:6
 ;指定アイドル(歌唱にボーナス)
 ELSEIF ARG:1 == 4
 	ABL:歌唱 += RAND:6
+	ABL:話術 += RAND:6
 ;指定料理人
 ELSEIF ARG:1 == 5
 	ABL:料理 += RAND:6
+	ABL:社交 += RAND:6
 ENDIF
 
 ;能力値に応じて精神力を設定
@@ -1210,14 +1236,6 @@ ENDIF
 ;汎用武将の名前を決定する
 ;-------------------------
 @RANDOM_CHARA_NAMING(ARG:0)
-;動物系キャラはカタカナ名
-IF TALENT:動物耳 || TALENT:しっぽ
-	TALENT:姓名逆転 = 1
-	CALL SET_RANDOM_NAME_K(TARGET)
-	;名からNAMEとCALLNAMEを設定
-	NAME = %CSTR:1%
-	CALLNAME = %CSTR:1%
-ELSE
 	SELECTCASE ARG:0
 		CASE 0
 			CALL SET_RANDOM_NAME_J(TARGET)
@@ -1237,8 +1255,6 @@ ELSE
 			CALLNAME = %CSTR:0%%CSTR:1%
 			CSTR:3 = %CSTR:5%%CSTR:6%
 	ENDSELECT
-
-ENDIF
 
 ;-------------------------
 ;能力値に応じてキャラARG:0の最大精神力を設定する関数

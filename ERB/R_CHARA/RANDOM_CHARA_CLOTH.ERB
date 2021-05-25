@@ -5,11 +5,10 @@
 ;SET_CLOTHにするべきか？しかし視認性が悪くなる・決め打ちはよくない
 ;-------------------------
 @RANDOM_CHARA_CLOTH_SETTING()
-;0-15男女兼用+TARGETが男なら16-19男専用or女なら20-30女専用
-SELECTCASE IFRAND("0TO15", 1, "16TO19", IS_MALE(TARGET), "20TO30", IS_FEMALE(TARGET))
-	;0-15男女兼用
-	;汎用
-	CASE 0
+;職業で分岐
+SELECTCASE JOB_NAME:(TALENT:職業)
+	;私服
+	CASE "フリーター","無職","アスリート","配信者"
 		CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_頭, "帽子")
 		CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_上服, "服")
 		CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_靴下, "靴下")
@@ -22,18 +21,53 @@ SELECTCASE IFRAND("0TO15", 1, "16TO19", IS_MALE(TARGET), "20TO30", IS_FEMALE(TAR
 			CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_下着上, "ブラ")
 			CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_下着下, "パンティ")
 		ENDIF
-	;戦士
-	CASE 1
-		CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_頭, "兜")
-		CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_腕, "ガントレット")
-		CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_靴, "グリーブ")
-		IF IS_MALE(TARGET)
-			CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_上下服, "鎧")
+		;小中
+	CASE "小学生","中学生"
+		SIF RAND:100 < 31
+			CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_頭, "帽子")
+		CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_上服, "服")
+		CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_靴下, "靴下")
+		CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_靴, "靴")
+		IF RAND:100 < 31
+			CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_アクセサリ, "肩掛けカバン")
 		ELSE
-			CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_上下服, "ビキニアーマー")
+			CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_アクセサリ, "鞄")
 		ENDIF
-	;スーツ
-	CASE 2
+		IF IS_MALE(TARGET)
+			CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_下着下, "トランクス")
+			IF RAND:100 < 31
+				CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_下服, "ショートパンツ")
+			ELSE
+				CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_下服, "ズボン")
+			ENDIF
+		ELSE
+			CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_下着上, "スポーツブラ")
+			CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_下着下, "パンティ")
+			IF RAND:100 < 31
+				CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_下服, "ショートパンツ")
+			ELSE
+				CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_下服, "スカート")
+			ENDIF
+		ENDIF
+		;高大
+		CASE "高校生","大学生"
+		IF IS_MALE(TARGET)
+			CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_頭, "帽子")
+			CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_上服, "Ｔシャツ")
+			CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_下服, "ズボン")
+			CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_上着, "学ラン")
+			CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_下着下, "トランクス")
+			CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_靴, "下駄")
+		ELSE
+			CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_上服, "セーラー服")
+			CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_下服, "セーラースカート")
+			CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_下着上, "ブラ")
+			CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_下着下, "パンティ")
+			CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_靴下, "クルーソックス")
+			CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_靴, "ローファー")
+		ENDIF
+	;一般系
+	CASE "会社員","教師","受付嬢","政治犯","役人","秘書","アナウンサー","記者","貿易商","企業家","労働党員","プログラマー",
 		CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_上服, "ワイシャツ")
 		CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_上着, "スーツ")
 		IF IS_MALE(TARGET)
@@ -43,97 +77,197 @@ SELECTCASE IFRAND("0TO15", 1, "16TO19", IS_MALE(TARGET), "20TO30", IS_FEMALE(TAR
 			CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_靴下, "靴下")
 			CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_靴, "靴")
 		ELSE
-			CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_下服, "タイトスカート")
-			CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_下着上, "ブラ")
-			CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_下着下, "パンティ")
-			CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_靴下, "ストッキング")
-			CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_靴, "ハイヒール")
-			CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_アクセサリ, "眼鏡")
+			IF RAND:100 < 31
+				CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_首, "ネクタイ")
+				CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_下服, "スラックス")
+				CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_下着下, "トランクス")
+				CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_靴下, "ショートソックス")
+				CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_靴, "靴")
+			ELSE
+				CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_下服, "タイトスカート")
+				CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_下着上, "ブラ")
+				CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_下着下, "パンティ")
+				CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_靴下, "ストッキング")
+				CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_靴, "ハイヒール")
+			ENDIF
+			IF RAND:100 < 31
+				CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_アクセサリ, "眼鏡")
+			ELSE
+				CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_アクセサリ, "肩掛けカバン")
+			ENDIF
 		ENDIF
-	;空手家
-	CASE 3
-		CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_頭, "はちまき")
-		CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_上下服, "道着")
-		CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_下着下, "ふんどし")
-		SIF IS_FEMALE(TARGET)
-			CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_下着上, "さらし")
-	;忍
-	CASE 4
-		CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_上下服, "忍装束")
-		CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_下着下, "ふんどし")
-		CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_腕, "手甲")
-		CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_靴, "地下足袋")
+	;マナー系
+	CASE "未亡人","貴族"
+		SIF RAND:100 < 31
+			CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_腕, "手袋")
 		IF IS_MALE(TARGET)
-			CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_頭, "頭巾")
+			IF RAND:100 < 31
+				CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_上下服, "和服")
+				CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_靴下, "足袋")
+				CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_靴, "草履")
+				CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_上下下着, "襦袢")
+			ELSE
+				CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_首, "ネクタイ")
+				CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_上服, "ワイシャツ")
+				CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_上着, "スーツ")
+				CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_下服, "スラックス")
+				CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_下着下, "トランクス")
+				CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_靴下, "靴下")
+				CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_靴, "靴")
+			ENDIF
 		ELSE
-			CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_頭, "はちまき")
-			CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_下着上, "さらし")
+			IF RAND:100 < 31
+				CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_頭, "かんざし")
+				CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_上下服, "和服")
+				CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_靴下, "足袋")
+				CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_靴, "草履")
+				CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_上下下着, "襦袢")
+			ELSEIF RAND:100 < 31
+				CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_首, "ネクタイ")
+				CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_上服, "ワイシャツ")
+				CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_上着, "スーツ")
+				CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_下服, "スラックス")
+				CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_靴下, "ショートソックス")
+				CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_靴, "靴")
+				CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_下着上, "ブラ")
+				CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_下着下, "パンティ")
+
+			ELSE
+				CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_上下服, "ドレス")
+				CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_靴下, "ストッキング")
+				CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_靴, "パンプス")
+				CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_下着上, "ブラ")
+				CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_下着下, "パンティ")
+			ENDIF
 		ENDIF
-	;和服
-	CASE 5
-		CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_上下服, "和服")
-		CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_靴下, "足袋")
-		CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_靴, "下駄")
-	;コック
-	CASE 6
-		CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_頭, "コック帽")
-		CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_首, "スカーフ")
-		CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_上服, "服")
-		CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_上着, "エプロン")
+	;労働者
+	CASE "労働者"
+		CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_上下服, "作務衣")
 		CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_靴下, "靴下")
-		CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_靴, "靴")
+		CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_靴, "シューズ")
 		IF IS_MALE(TARGET)
-			CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_下服, "ズボン")
 			CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_下着下, "トランクス")
-		ELSE
-			CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_下服, "スカート")
-			CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_下着上, "ブラ")
-			CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_下着下, "パンティ")
-		ENDIF
-	;ライダー
-	CASE 7
-		CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_頭, "ヘルメット")
-		CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_上下服, "ライダースーツ")
-		CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_腕, "レザーグローブ")
-		CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_靴下, "ブーツソックス")
-		CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_靴, "レザーブーツ")
-		IF IS_MALE(TARGET)
-			CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_下着下, "ボーイレッグ")
 		ELSE
 			CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_下着上, "ブラ")
 			CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_下着下, "パンティ")
 		ENDIF
-	;ジャージ
-	CASE 8
-		CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_上下服, "ジャージ")
-		CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_靴, "サンダル")
-		IF IS_MALE(TARGET)
-			CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_下着下, "トランクス")
-		ELSE
-			CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_下着下, "パンティ")
+	;メカニック
+	CASE "メカニック"
+		IF RAND:100 < 31
+			CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_頭, "帽子")
+		ELSEIF RAND:100 < 31
+			CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_頭, "ヘルメット")
 		ENDIF
-	;スケーター
-	CASE 9
-		CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_頭, "ヘルメット")
-		CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_上服, "タンクトップ")
+		CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_上下服, "作務衣")
 		CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_腕, "グローブ")
 		CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_靴下, "靴下")
-		CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_靴, "ローラースケート")
-		CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_アクセサリ, "ゴーグル")
+		CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_靴, "シューズ")
 		IF IS_MALE(TARGET)
-			CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_下服, "ショートパンツ")
-			CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_下着下, "ボーイレッグ")
+			CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_下着下, "トランクス")
 		ELSE
-			CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_下服, "ミニスカート")
-			CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_下着上, "スポーツブラ")
-			CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_下着下, "スパッツ")
+			CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_下着上, "ブラ")
+			CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_下着下, "パンティ")
 		ENDIF
-	;軍服
-	CASE 10
+	;芸術家
+	CASE "芸術家"
 		CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_頭, "帽子")
-		CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_首, "ネクタイ")
+		CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_アクセサリ, "肩掛けカバン")
+		CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_上服, "ワイシャツ")
+		CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_上着, "ジャケット")
+			IF IS_MALE(TARGET)
+				CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_下着下, "トランクス")
+				CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_下服, "ズボン")
+				CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_靴下, "靴下")
+					CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_靴, "靴")
+			ELSE
+				CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_下着上, "ブラ")
+				CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_下着下, "パンティ")
+				IF RAND:100 < 31
+					CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_下服, "デニム")
+					CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_靴下, "ショートソックス")
+					IF RAND:100 < 31
+						CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_靴, "靴")
+					ELSE
+						CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_靴, "パンプス")
+					ENDIF
+				ELSE
+					CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_下服, "スカート")
+					CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_靴下, "ニーハイソックス")
+					IF RAND:100 < 31
+						CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_靴, "パンプス")
+					ELSE
+						CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_靴, "ブーツ")
+					ENDIF
+				ENDIF
+			ENDIF
+	;プロゲーマー
+	CASE "プロゲーマー"
+		SIF RAND:100 < 31
+			CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_頭, "帽子")
+		CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_上服, "Ｔシャツ")
+		CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_下服, "ズボン")
+		CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_靴, "シューズ")
+		IF IS_MALE(TARGET)
+			CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_下着下, "トランクス")
+			CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_靴下, "靴下")
+		ELSE
+			CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_下着上, "ブラ")
+			CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_下着下, "パンティ")
+			CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_靴下, "ショートソックス")
+		ENDIF
+	;警官さん
+	CASE "警官"
+		CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_上服, "ワイシャツ")
+		CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_上着, "ベスト")
+		IF IS_MALE(TARGET)
+			CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_首, "ネクタイ")
+			CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_下服, "スラックス")
+			CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_下着下, "トランクス")
+			CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_靴下, "靴下")
+			CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_靴, "靴")
+		ELSE
+			IF RAND:100 < 31
+				CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_首, "ネクタイ")
+				CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_下服, "スラックス")
+				CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_下着下, "トランクス")
+				CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_靴下, "ショートソックス")
+				CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_靴, "靴")
+			ELSE
+				CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_下服, "タイトスカート")
+				CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_下着上, "ブラ")
+				CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_下着下, "パンティ")
+				CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_靴下, "ストッキング")
+				CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_靴, "ハイヒール")
+			ENDIF
+			IF RAND:100 < 31
+				CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_アクセサリ, "眼鏡")
+			ELSE
+				CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_アクセサリ, "肩掛けカバン")
+			ENDIF
+		ENDIF
+	;パイロット
+	CASE "パイロット"
+		CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_上下服, "ライダースーツ")
+		CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_上下服, "ボディースーツ")
+	;軍人さん
+	CASE "軍人"
+		CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_頭, "帽子")
 		CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_上服, "軍服")
+		CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_下服, "ズボン")
 		CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_腕, "手袋")
+		CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_靴下, "靴下")
+		CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_靴, "ブーツ")
+		IF IS_MALE(TARGET)
+			CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_下着下, "トランクス")
+		ELSE
+			CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_下着上, "スポーツブラ")
+			CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_下着下, "ボーイレッグ")
+		ENDIF
+	;海賊
+	CASE "海賊"
+		CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_頭, "帽子")
+		CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_上服, "服")
+		CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_上着, "コート")
 		CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_靴下, "靴下")
 		CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_靴, "ブーツ")
 		IF IS_MALE(TARGET)
@@ -144,31 +278,140 @@ SELECTCASE IFRAND("0TO15", 1, "16TO19", IS_MALE(TARGET), "20TO30", IS_FEMALE(TAR
 			CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_下着上, "ブラ")
 			CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_下着下, "パンティ")
 		ENDIF
-	;囚人
-	CASE 11
-		CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_首, "管理タグ")
-		CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_上下服, "囚人服")
-		CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_腕, "手錠")
-	;研究者
-	CASE 12
+	;マフィア
+	CASE "マフィア"
+		SIF RAND:100 < 31
+			CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_アクセサリ, "眼鏡")
 		CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_上服, "ワイシャツ")
+		CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_上着, "コート")
+		IF IS_MALE(TARGET)
+			CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_首, "ネクタイ")
+			CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_下服, "ズボン")
+			CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_下着下, "トランクス")
+			CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_靴下, "靴下")
+			CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_靴, "靴")
+		ELSE
+			IF RAND:100 < 31
+				CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_首, "ネクタイ")
+				CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_下服, "ズボン")
+				CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_下着下, "トランクス")
+				CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_靴下, "ショートソックス")
+				CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_靴, "靴")
+			ELSE
+				CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_下服, "タイトスカート")
+				CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_下着上, "ブラ")
+				CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_下着下, "パンティ")
+				CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_靴下, "ストッキング")
+				CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_靴, "ハイヒール")
+			ENDIF
+		ENDIF
+	;巫女さん
+	CASE "巫女"
+		SIF IS_MALE(TARGET)
+			CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_頭, "烏帽子")
+		CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_上下服, "和服")
 		CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_上着, "白衣")
+		CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_上下下着, "襦袢")
+		CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_靴下, "足袋")
+		CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_靴, "草履")
+	;メイドさん
+	;男の場合は執事さん
+	CASE "メイド"
+		IF IS_MALE(TARGET)
+			CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_首, "ネクタイ")
+			CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_上下服, "燕尾服")
+			CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_下着下, "ローライズ")
+			CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_腕, "手袋")
+			CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_靴下, "靴下")
+			CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_靴, "靴")
+		ELSE
+			CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_頭, "ホワイトブリム")
+			CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_上下服, "メイド服")
+			CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_下着上, "ブラ")
+			CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_下着下, "パンティ")
+			CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_靴下, "ニーソックス")
+			CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_靴, "パンプス")
+			CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_アクセサリ, "ガーター")
+		ENDIF
+	;えっちなの
+	;とりあえず一くくりに
+	CASE "娼婦","AV女優"
+		IF IS_MALE(TARGET)
+			CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_上服, "ワイシャツ")
+			CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_下服, "ズボン")
+			CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_下着下, "トランクス")
+			CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_靴下, "靴下")
+			CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_靴, "靴")
+		ELSE
+			CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_上服, "ブラウス")
+			CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_下服, "スカート")
+			CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_下着上, "レースブラ")
+			CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_下着下, "紐パン")
+			IF RAND:100 < 31
+				CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_靴, "ブーツ")
+			ELSE
+				CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_靴, "ハイヒール")
+			ENDIF
+		ENDIF
+	;コスプレイヤー
+	;各自お好きなキャラや属性を追加してください
+	CASE "コスプレイヤー"
+		IF IS_MALE(TARGET)
+			IF RAND:100 < 51
+				CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_頭, "帽子")
+				CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_上下服, "ローブ")
+				CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_アクセサリ, "魔導書")
+			ELSE
+				CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_頭, "王冠")
+				CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_上下服, "法衣")
+				CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_上着, "マント")
+			ENDIF
+			CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_下着下, "トランクス")
+			CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_靴下, "靴下")
+			CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_靴, "靴")
+		ELSE
+			IF RAND:100 < 51
+				CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_上服, "セーラー服")
+				CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_下服, "セーラースカート")
+				CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_下着上, "ブラ")
+				CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_下着下, "パンティ")
+				CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_靴下, "クルーソックス")
+				CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_靴, "ローファー")
+			ELSE
+				CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_頭, "ティアラ")
+				CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_上下服, "ドレス")
+				CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_上着, "ファーコート")
+				CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_上下下着, "レオタード")
+				CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_腕, "手袋")
+				CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_靴下, "タイツ")
+				CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_靴, "ハイヒール")
+			ENDIF
+		ENDIF
+	;聖職者
+	CASE "聖職者"
+		CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_頭, "ベール")
+		CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_上下服, "修道服")
+		CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_腕, "手袋")
 		CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_靴下, "靴下")
 		CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_靴, "靴")
-		CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_アクセサリ, "眼鏡")
 		IF IS_MALE(TARGET)
-			CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_下服, "ズボン")
 			CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_下着下, "ブリーフ")
 		ELSE
-			CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_下服, "スカート")
-			CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_下着下, "パンティ")
+			CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_下着上, "シースルーブラ")
+			CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_下着下, "シースルーパンティ")
 		ENDIF
-	;寒冷地
-	CASE 13
-		CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_頭, "帽子")
+	;冒険家
+	CASE "冒険家"
+		SIF RAND:100 < 31
+			CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_頭, "帽子")
 		CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_首, "マフラー")
 		CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_上服, "セーター")
 		CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_上着, "ダウンジャケット")
+		IF RAND:100 < 51
+			CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_アクセサリ, "肩掛けカバン")
+		ELSE
+			CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_アクセサリ, "鞄")
+		ENDIF
 		CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_腕, "手袋")
 		CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_靴, "ブーツ")
 		IF IS_MALE(TARGET)
@@ -181,151 +424,118 @@ SELECTCASE IFRAND("0TO15", 1, "16TO19", IS_MALE(TARGET), "20TO30", IS_FEMALE(TAR
 			CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_下着下, "パンティ")
 			CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_靴下, "タイツ")
 		ENDIF
-	;園児
-	CASE 14
-		CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_頭, "帽子")
-		CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_上服, "スモック")
-		CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_靴下, "靴下")
-		CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_靴, "靴")
-		CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_アクセサリ, "名札")
-		IF IS_MALE(TARGET)
-			CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_下服, "ショートパンツ")
-			CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_下着下, "ブリーフ")
+	;格闘家
+	CASE "格闘家"
+		IF RAND:100 < 31
+			CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_頭, "はちまき")
+			CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_上下服, "道着")
+			CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_下着下, "ふんどし")
+			SIF IS_FEMALE(TARGET)
+				CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_下着上, "さらし")
 		ELSE
-			CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_下服, "サスペンダースカート")
-			CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_下着下, "ドロワーズ")
+			CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_上服, "タンクトップ")
+			CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_上着, "コート")
+			CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_下服, "ショートパンツ")
+			IF IS_MALE(TARGET)
+				CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_下着下, "ブリーフ")
+			ELSE
+				CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_下着上, "スポーツブラ")
+				CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_下着下, "ボクサー")
+			ENDIF
 		ENDIF
-	;魔導師
-	CASE 15
-		CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_頭, "帽子")
-		CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_上下服, "ローブ")
-		CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_靴, "靴")
-		CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_アクセサリ, "魔導書")
+	;医者
+	CASE "医者"
+		SIF RAND:100 < 31
+			CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_アクセサリ, "眼鏡")
+		SIF RAND:100 < 31
+			CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_首, "ネクタイ")
+		CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_上服, "ワイシャツ")
+		CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_上着, "白衣")
+		CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_腕, "手袋")
+		CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_靴下, "靴下")
+		CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_靴, "シューズ")
 		IF IS_MALE(TARGET)
+			CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_下服, "ズボン")
 			CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_下着下, "トランクス")
 		ELSE
+			IF RAND:100 < 31
+				CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_下服, "ズボン")
+			ELSE
+				CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_下服, "タイトスカート")
+			ENDIF
 			CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_下着上, "ブラ")
 			CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_下着下, "パンティ")
 		ENDIF
-	;16-19男専用
-	;坊主
-	CASE 16
-		CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_頭, "編み笠")
-		CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_首, "数珠")
-		CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_上下服, "法衣")
-		CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_上着, "袈裟")
-		CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_靴下, "足袋")
-		CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_靴, "草履")
-	;男礼服
-	CASE 17
-		CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_頭, "シルクハット")
-		CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_上下服, "燕尾服")
-		CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_下着下, "ローライズ")
-		CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_腕, "手袋")
-		CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_靴下, "靴下")
-		CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_靴, "靴")
-	;学ラン
-	CASE 18
-		CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_頭, "帽子")
+	;看護師
+	CASE "看護師"
+		IF IS_MALE(TARGET)
+			CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_上服, "ワイシャツ")
+			CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_下服, "ズボン")
+			CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_下着下, "トランクス")
+			CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_靴下, "靴下")
+			CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_靴, "シューズ")
+		ELSE
+			CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_上服, "ワイシャツ")
+			CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_下服, "タイトスカート")
+			CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_下着上, "ブラ")
+			CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_下着下, "パンティ")
+			CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_靴, "シューズ")
+		ENDIF
+	;奴隷
+	CASE "奴隷","性奴隷"
+		IF RAND:100 < 31
+			CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_首, "奴隷の首輪")
+		ELSE
+			CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_首, "管理タグ")
+		ENDIF
+		CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_上下服, "ぼろぼろの布切れ")
+		IF IS_MALE(TARGET)
+			CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_腕, "手枷")
+			CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_靴下, "足枷")
+		ELSE
+			CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_アクセサリ, "前垂れ")
+			IF RAND:100 < 31
+				CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_腕, "スレイブグローブ")
+				CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_靴下, "穴あきストッキング")
+			ELSE
+				CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_腕, "手枷")
+				CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_靴下, "足枷")
+			ENDIF
+		ENDIF
+	;芸能
+	CASE "芸能人","アイドル","歌手","グラビアアイドル"
 		CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_上服, "Ｔシャツ")
-		CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_下服, "ズボン")
-		CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_上着, "学ラン")
-		CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_下着下, "トランクス")
-		CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_靴, "下駄")
-	;王
-	CASE 19
-		CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_頭, "王冠")
-		CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_上下服, "法衣")
-		CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_上着, "マント")
-		CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_下着下, "トランクス")
-		CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_靴下, "靴下")
-		CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_靴, "靴")
-	;20-30女専用
-	;バニー
-	CASE 20
-		CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_頭, "付け耳")
-		CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_上下服, "バニースーツ")
-		CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_腕, "カフス")
-		CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_靴下, "網タイツ")
-		CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_靴, "ハイヒール")
-	;チャイナ
-	CASE 21
-		CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_頭, "シニョン")
-		CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_上下服, "チャイナドレス")
-		CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_下着上, "ブラ")
-		CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_下着下, "パンティ")
-		CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_靴, "パンプス")
-	;メイド
-	CASE 22
-		CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_頭, "ホワイトブリム")
-		CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_上下服, "メイド服")
-		CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_下着上, "ブラ")
-		CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_下着下, "パンティ")
-		CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_靴下, "ニーソックス")
-		CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_靴, "パンプス")
-		CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_アクセサリ, "ガーター")
-	;セーラー
-	CASE 23
-		CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_上服, "セーラー服")
-		CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_下服, "セーラースカート")
-		CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_下着上, "ブラ")
-		CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_下着下, "パンティ")
-		CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_靴下, "クルーソックス")
-		CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_靴, "ローファー")
-	;寝間着
-	CASE 24
-		CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_頭, "ナイトキャップ")
-		CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_上着, "カーディガン")
-		CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_上下下着, "ネグリジェ")
-		CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_靴, "スリッパ")
-		CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_アクセサリ, "枕")
-	;バレエ
-	CASE 25
-		CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_上下服, "チュチュ")
-		CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_下着上, "レオタード")
-		CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_下着下, "Ｔバック")
-		CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_靴下, "タイツ")
-		CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_靴, "バレエシューズ")
-	;女王
-	CASE 26
-		CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_頭, "ティアラ")
-		CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_上下服, "ドレス")
-		CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_上着, "ファーコート")
-		CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_上下下着, "レオタード")
-		CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_腕, "手袋")
-		CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_靴下, "タイツ")
-		CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_靴, "ハイヒール")
-	;修道者
-	CASE 27
-		CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_頭, "頭巾")
-		CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_上下服, "修道服")
-		CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_下着上, "シースルーブラ")
-		CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_下着下, "シースルーパンティ")
-		CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_靴下, "靴下")
-		CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_靴, "靴")
-	;女礼服
-	CASE 28
-		CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_頭, "髪飾り")
-		CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_上下服, "ナイトドレス")
-		CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_下着上, "コルセット")
-		CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_下着下, "パンティ")
-		CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_靴, "ハイヒール")
-	;ゴスロリ
-	CASE 29
-		CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_頭, "ヘッドドレス")
-		CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_上下服, "ゴシックドレス")
-		CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_下着上, "ビスチェ")
-		CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_下着下, "パンティ")
-		CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_靴下, "タイツ")
-		CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_靴, "パンプス")
-		CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_アクセサリ, "傘")
-	;フラダンサー
-	CASE 30
-		CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_頭, "花冠")
-		CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_下服, "パレオ")
-		CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_下着上, "ホルターネックブラ")
-		CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_下着下, "パンティ")
-		CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_腕, "ブレスレット")
-		CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_靴, "ビーチサンダル")
+		SIF RAND:100 < 31
+			CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_上着, "コート")
+		IF RAND:100 < 31
+			CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_アクセサリ, "眼鏡")
+		ELSE
+			CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_アクセサリ, "肩掛けカバン")
+		ENDIF
+		IF IS_MALE(TARGET)
+			CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_下着下, "トランクス")
+			CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_靴下, "靴下")
+			CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_下服, "ズボン")
+			CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_靴, "シューズ")
+		ELSE
+			CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_下着上, "ブラ")
+			CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_下着下, "パンティ")
+			IF RAND:100 < 31
+				CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_下服, "タイトスカート")
+				CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_靴下, "タイツ")
+			ELSEIF RAND:100 < 31
+				CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_下服, "ロングスカート")
+				CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_靴下, "ショートソックス")
+			ELSE
+				CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_下服, "デニム")
+			ENDIF
+			IF RAND:100 < 31
+				CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_靴, "パンプス")
+			ELSEIF RAND:100 < 31
+				CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_靴, "シューズ")
+			ELSE
+				CALL SET_CLOTH_BY_NAME(TARGET, 衣装部位_靴, "ブーツ")
+			ENDIF
+		ENDIF
 ENDSELECT
 
