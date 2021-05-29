@@ -136,13 +136,13 @@ IF SHIP_COUNT == DESTROYED_COUNT
 	PRINTFORMW 「今後も定期的に演習を行う予定なので、是非参加してほしい」
 	PRINTL
 	報酬額 = SHIP_COUNT * 11000
-	報酬好感度 = SHIP_COUNT * 1
+	報酬好感度 = SHIP_COUNT * 2
 ELSE
 	PRINTFORML 「互いにいい経験になりましたな」
 	PRINTFORML 「貴殿には我が軍の問題点を大いに洗い出していただいた点を評価し、報酬には色を付けさせてもらう」
 	PRINTFORMW 「今後も定期的に演習を行う予定なので、是非参加してほしい」
 	報酬額 = DESTROYED_COUNT * 10000
-	報酬好感度 = DESTROYED_COUNT * 1
+	報酬好感度 = DESTROYED_COUNT * 2
 ENDIF
 PRINTFORML 所持金+%TOSTR(報酬額, "$###,###")%
 PRINTFORMW 皇国好感度+{報酬好感度}

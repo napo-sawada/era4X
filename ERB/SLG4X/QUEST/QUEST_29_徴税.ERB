@@ -70,10 +70,10 @@ IF RESULT == 0
 		PRINTFORML 話術でリーダーの男をまるめこんだ%CALLNAME:MASTER%は、税金を徴収することに成功した
 		PRINTFORML 平和的に税金を徴収できて、クライアントである貴族の女も安心したようだ
 		PRINTFORML 報酬として$12,000を手に入れた
-		PRINTFORMW また、王国の好感度が4上がった
+		PRINTFORMW また、王国の好感度が10上がった
 		MONEY += 12000
 		MONEY:国家ID_ハールバルズ -= 12000
-		REL_LIKE_COUNTRY:国家ID_ハールバルズ:国家ID_プレイヤー = LIMIT(REL_LIKE_COUNTRY:国家ID_ハールバルズ:国家ID_プレイヤー + 4, -1000, 1000)
+		REL_LIKE_COUNTRY:国家ID_ハールバルズ:国家ID_プレイヤー = LIMIT(REL_LIKE_COUNTRY:国家ID_ハールバルズ:国家ID_プレイヤー + 10, -1000, 1000)
 	ELSE
 		PRINTFORMW リーダーの男の勝ち
 		DRAWLINE
@@ -105,10 +105,10 @@ ELSEIF RESULT == 1
 		PRINTFORML 威圧で税金を徴収したことで、クライアントである貴族の女は渋そうな顔をしている
 		PRINTFORML しかし税金は確かに徴収できたので、報酬は支払われた
 		PRINTFORML 報酬として$10,000手に入れた
-		PRINTFORML また、王国の好感度が1上がった
+		PRINTFORML また、王国の好感度が5上がった
 		MONEY += 10000
 		MONEY:国家ID_ハールバルズ -= 10000
-		REL_LIKE_COUNTRY:国家ID_ハールバルズ:国家ID_プレイヤー = LIMIT(REL_LIKE_COUNTRY:国家ID_ハールバルズ:国家ID_プレイヤー + 1, -1000, 1000)
+		REL_LIKE_COUNTRY:国家ID_ハールバルズ:国家ID_プレイヤー = LIMIT(REL_LIKE_COUNTRY:国家ID_ハールバルズ:国家ID_プレイヤー + 5, -1000, 1000)
 	ELSE
 		PRINTFORML 大規模な戦闘艦の部隊を前に、男は苦々しい顔で税金を差し出してきた
 		PRINTFORML これで万事解決だ。%CALLNAME:MASTER%は颯爽とその場を後にした
@@ -116,7 +116,10 @@ ELSEIF RESULT == 1
 		PRINTFORML 威圧で税金を徴収したことで、クライアントである貴族の女は渋そうな顔をしている
 		PRINTFORML しかし税金は確かに徴収できたので、報酬は支払われた
 		PRINTFORML 報酬として$10,000手に入れた
-		PRINTFORML また、王国の好感度が1上がった
+		PRINTFORML また、王国の好感度が5上がった
+		MONEY += 10000
+		MONEY:国家ID_ハールバルズ -= 10000
+		REL_LIKE_COUNTRY:国家ID_ハールバルズ:国家ID_プレイヤー = LIMIT(REL_LIKE_COUNTRY:国家ID_ハールバルズ:国家ID_プレイヤー + 5, -1000, 1000)
 	ENDIF
 ELSEIF RESULT == 2 && MONEY > 1000000
 	PRINTFORML %CALLNAME:MASTER%が借金の肩代わりを提案すると、リーダーの男は怪訝な顔をしながらもそれを受け入れた
@@ -127,10 +130,10 @@ ELSEIF RESULT == 2 && MONEY > 1000000
 	PRINTL
 	PRINTFORML 平和的に税金を徴収できて、クライアントである貴族の女も安心したようだ
 	PRINTFORML 報酬として$12,000を手に入れた
-	PRINTFORMW また、王国の好感度が4上がった
+	PRINTFORMW また、王国の好感度が10上がった
 	MONEY += 12000
 	MONEY:国家ID_ハールバルズ -= 12000
-	REL_LIKE_COUNTRY:国家ID_ハールバルズ:国家ID_プレイヤー = LIMIT(REL_LIKE_COUNTRY:国家ID_ハールバルズ:国家ID_プレイヤー + 4, -1000, 1000)
+	REL_LIKE_COUNTRY:国家ID_ハールバルズ:国家ID_プレイヤー = LIMIT(REL_LIKE_COUNTRY:国家ID_ハールバルズ:国家ID_プレイヤー + 10, -1000, 1000)
 ELSE
 	GOTO INPUT_LOOP
 ENDIF
