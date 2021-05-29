@@ -1,0 +1,216 @@
+﻿;--------------------------
+; !!債務回収と 31を好きな番号に変える！!
+; 債務回収
+; ここにクエストの説明
+;--------------------------
+
+
+;--------------------------
+; クエスト受注可能か
+;--------------------------
+@QUEST_ACCEPTABLE_31
+
+CALL GET_STAR_ID_FROM_POS(CHARACTER_POSITION)
+SIF STAR_OWNER:RESULT != 国家ID_企業連合
+  RETURN 0
+SIF QUEST_COMPLETE_DATE:31 + 100 > DAY || QUEST_PROGRESS:31 == 1
+  RETURN 0
+RETURN 1
+;--------------------------
+; クエストの名前を返却
+;--------------------------
+@QUEST_NAME_31
+RESULTS = 債務回収
+RETURN
+
+
+;--------------------------
+; マップでの表示を設定する
+; @QUEST_SET_TILE_  : マップ上対象地点にマークを出す。
+; @QUEST_MAP_INFO_  : 右下小窓にメッセージを出す
+; 引数１： ARG:0 SS31YY　座標データ　マップ上でクリックされた座標。表示条件分岐に。
+;--------------------------
+;;;マップ画面上での表示。 隠したかったら関数コメントアウトか RETURN 0
+;;;色を替えたかったらSETCOLORしておけば後の処理で色反映します
+@QUEST_SET_TILE_31 (ARG:0 )
+	RESULTS '= "！"
+RETURN 1
+
+;;;右下小窓に出す。隠したければ関数コメントアウトか RETURN 0
+@QUEST_MAP_INFO_31 (ARG:0 )
+		RESULTS:0 '= "債務回収者の艦"
+RETURN 1
+
+;-----------------------
+; マップ上からQUEST_BODYを実行する処理
+; @QUEST_SHOW_COMMAND_x : ここで指定した文字列のコマンドを現地で表示する
+; 　　　　　　　　　　 ：(調査する||捜索する||採集する||待ち伏せする||挑戦する)といったフレーバー
+; @QUEST_PLACE_CHECK_x ： 設定マスを踏んだら呼び出される。不要ならば消すか無処理で返す
+;--------------------------
+@QUEST_SHOW_COMMAND_31 ()
+	RESULTS '= "債務回収クエスト実行"
+RETURN 1
+
+@QUEST_REACH_PLACE_31 ()
+; CALL QUEST_BODY_31
+RETURN
+
+;--------------------------
+; クエスト本体
+;--------------------------
+@QUEST_BODY_31
+#DIM CONST QUEST_ID = 31
+#DIM SECTOR_ID
+#DIM X_POS
+#DIM Y_POS
+#DIM SHIP_ID
+#DIM POSITION_ID
+#DIM TARGET_RANK
+
+CALL ID2POS(CHARACTER_POSITION)
+SECTOR_ID = RESULT:0
+X_POS = RESULT:1
+Y_POS = RESULT:2
+POSITION_ID = CHARACTER_POSITION
+
+;;宙域図から呼び出されたらこちら　クエスト進行中
+IF QUESTMAP:(RESULT:0):(RESULT:1):(RESULT:2) == QUEST_ID
+	QUEST_FLAG_SHIP_ID:QUEST_ID = -1
+	PRINTFORML 債務者に通信を開いた
+	PRINTFORML 追手の存在に緊張しているようで、少し興奮気味だ
+	SELECTCASE 債務者ランク
+		CASE 0
+			PRINTFORML 相手は小物で護衛もコルベット数隻の貧弱な艦隊だ
+		CASE 1
+			PRINTFORML 相手はそれなりの人物で、護衛は駆逐艦を旗艦とした小艦隊だ
+		CASE 2
+			PRINTFORML 相手はかなりの金持ちらしく、護衛も巡洋艦を旗艦とした中規模艦隊だ
+	ENDSELECT
+	PRINTFORML さて、どうするか?
+	CALL ASK_YN("説得", "交戦")
+	IF RESULT == 0
+		DRAWLINE
+		PRINTFORML 対抗ロール(高い値を出した方が勝ち)
+		DRAWLINE
+		PRINTFORML %CALLNAME:MASTER%(話術:{ABL:MASTER:話術}) VS 債務者(話術:75)
+		PRINTFORMW %CALLNAME:MASTER%のロール
+		PRINTW ……
+		LOCAL = RAND(ABL:MASTER:話術)
+		PRINTFORMW 結果:{LOCAL}
+		PRINTFORMW 債務者のロール
+		PRINTW ……
+		LOCAL:1 = RAND(75)
+		PRINTFORMW 結果:{LOCAL:1}
+		IF LOCAL > LOCAL:1
+			PRINTFORMW %CALLNAME:MASTER%の勝ち
+			DRAWLINE
+			PRINTFORML 話術で債務者をまるめこんだ%CALLNAME:MASTER%は、債務を徴収することに成功した
+			PRINTFORML 平和的に税金を徴収できて、クライアントである保険会社の人間も安心したようだ
+			PRINTFORML 報酬として$120,000を手に入れた
+			PRINTFORMW また、企業連合の好感度が20上がった
+			MONEY += 120000
+			MONEY:国家ID_企業連合 -= 120000
+			REL_LIKE_COUNTRY:国家ID_企業連合:国家ID_プレイヤー = LIMIT(REL_LIKE_COUNTRY:国家ID_企業連合:国家ID_プレイヤー + 20, -1000, 1000)
+			QUEST_PROGRESS:QUEST_ID = 0
+			CALL QUEST_RELEASE_POINT(QUEST_ID, CHARACTER_POSITION:MASTER)
+			RETURN 1
+		ELSE
+			PRINTFORMW 債務者の勝ち
+			DRAWLINE
+			PRINTFORML 債務者の男を丸め込むのに失敗した
+			PRINTFORML さて、どうするか
+			CALL ASK_YN("交戦", "撤退")
+			IF RESULT == 1
+				PRINTFORML 双方被害の出る争い事は避けたい
+				PRINTFORMW %CALLNAME:MASTER%はクエスト失敗の旨をクライアントに報告し、その場を後にした
+				QUEST_PROGRESS:QUEST_ID = 0
+				CALL QUEST_RELEASE_POINT(QUEST_ID, CHARACTER_POSITION:MASTER)
+				RETURN 1
+			ENDIF
+		ENDIF
+	ENDIF
+	SELECTCASE TARGET_RANK
+		CASE 0
+			FOR SHIP_ID, 0, 5
+				CALL INIT_PRESET_SHIP(国家ID_一般海賊, CHARACTER_POSITION, 汎用コルベット, "護衛コルベット", 汎用コルベット)
+				SIF SHIP_ID == 0
+					QUEST_FLAG_SHIP_ID:QUEST_ID = RESULT
+			NEXT
+			CALL INIT_PRESET_SHIP(国家ID_一般海賊, CHARACTER_POSITION, 汎用輸送船, "護衛対象", 汎用輸送船)
+		CASE 1
+			FOR SHIP_ID, 0, 3
+				CALL INIT_PRESET_SHIP(国家ID_一般海賊, CHARACTER_POSITION, 汎用フリゲート, "護衛フリゲート", 汎用フリゲート)
+			NEXT
+			CALL INIT_PRESET_SHIP(国家ID_一般海賊, CHARACTER_POSITION, 汎用駆逐艦, "護衛駆逐艦", 汎用駆逐艦)
+			QUEST_FLAG_SHIP_ID:QUEST_ID = RESULT
+			CALL INIT_PRESET_SHIP(国家ID_一般海賊, CHARACTER_POSITION, 汎用輸送船, "護衛対象", 汎用輸送船)
+		CASE 2
+			FOR SHIP_ID, 0, 27
+				CALL INIT_PRESET_SHIP(国家ID_一般海賊, CHARACTER_POSITION, 汎用コルベット, "護衛コルベット", 汎用コルベット)
+			NEXT
+			FOR SHIP_ID, 0, 9
+				CALL INIT_PRESET_SHIP(国家ID_一般海賊, CHARACTER_POSITION, 汎用フリゲート, "護衛フリゲート", 汎用フリゲート)
+			NEXT
+			FOR SHIP_ID, 0, 3
+				CALL INIT_PRESET_SHIP(国家ID_一般海賊, CHARACTER_POSITION, 汎用駆逐艦, "護衛駆逐艦", 汎用駆逐艦)
+			NEXT
+			CALL INIT_PRESET_SHIP(国家ID_一般海賊, CHARACTER_POSITION, 汎用巡洋艦, "護衛巡洋艦", 汎用巡洋艦)
+			QUEST_FLAG_SHIP_ID:QUEST_ID = RESULT
+			CALL INIT_PRESET_SHIP(国家ID_一般海賊, CHARACTER_POSITION, 汎用輸送船, "護衛対象", 汎用輸送船)
+	ENDSELECT
+	PRINTFORMW %CALLNAME:MASTER%の命令一下、艦隊が戦闘態勢に入った
+	CALL COMBAT(CHARACTER_POSITION)
+	CALL RETIRE_BROKEN_SHIP
+	IF SHIP_COUNTRY:(QUEST_FLAG_SHIP_ID:QUEST_ID) != 国家ID_一般海賊
+		;; 敵の旗艦を撃破し、自分が撃破されていない
+		IF CHARACTER_POSITION == POSITION_ID
+			QUEST_PROGRESS:QUEST_ID = 2
+			PRINTFORML 敵の旗艦をデブリと化すことができた。ミッション完了だ
+			PRINTFORMW クエスト窓口にミッション完了の報告に行こう
+			FOR SHIP_ID, 0, MAX_SHIP
+				IF SHIP_COUNTRY:SHIP_ID == 国家ID_一般海賊 && SHIP_POSITION:SHIP_ID == CHARACTER_POSITION
+					CALL GET_SHIP_TOTAL_HP(SHIP_ID)
+					SHIP_DAMAGE:SHIP_ID = RESULT
+				ENDIF
+			NEXT
+			CALL RETIRE_BROKEN_SHIP
+		ELSE
+			QUEST_PROGRESS:QUEST_ID = 0
+		ENDIF
+		;; 引き分け。互いに旗艦が生存している状態
+	ELSEIF CHARACTER_POSITION == POSITION_ID
+		PRINTFORMW ミッション失敗だ。ただ命があることを神に感謝しよう
+		QUEST_PROGRESS:QUEST_ID = 0
+	ENDIF
+	CALL QUEST_RELEASE_POINT(QUEST_ID, CHARACTER_POSITION:MASTER)
+ELSEIF QUEST_PROGRESS:QUEST_ID == 2
+	PRINTFORML クエスト窓口でミッション完了の報告をした
+	PRINTFORML これにより報酬と企業連合の評価を得ることができた
+	PRINTFORML 所持金+$80,000
+	PRINTFORMW 企業連合の評価+15
+	MONEY += 80000
+	MONEY:国家ID_企業連合 -= 80000
+	REL_LIKE_COUNTRY:国家ID_企業連合:国家ID_プレイヤー = LIMIT(REL_LIKE_COUNTRY:国家ID_企業連合:国家ID_プレイヤー + 15, -1000, 1000)
+	QUEST_PROGRESS:QUEST_ID = 0
+	QUEST_COMPLETE_DATE:QUEST_ID = DAY
+ELSE
+	PRINTFORML 今回のクエストは逃げ出した債務者から債務回収をすることのようだ
+	PRINTFORML クライアントである保険会社の人間は、暗にいざという時は対象を抹殺してしまっても構わないと言っていた
+	PRINTFORMW ただし、話し合いで解決できればそれに越したことはないだろう
+	PRINTW ………………
+	PRINTW …………
+	PRINTW ……
+	PRINTW 債務者のいる座標に!印が付けられた。早急に向かおう。
+	LOCAL = 1
+	WHILE LOCAL
+		;; 関数つかって適当に。 指定セクター内　6:ちょっと外より を抽選
+		CALL QUEST_SET_RANDPOINT(QUEST_ID, SECTOR_ID, 6 )
+		IF RESULT >= 0
+			X_POS = (RESULT / 100) %100
+			Y_POS = RESULT %100
+			CLEARMAP:SECTOR_ID:X_POS:Y_POS = 1		;;明瞭化おまけ
+			LOCAL --
+		ENDIF
+	WEND
+	QUEST_PROGRESS:QUEST_ID = 1
+ENDIF

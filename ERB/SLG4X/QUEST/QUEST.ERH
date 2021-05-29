@@ -35,6 +35,9 @@
 ;29 徴税
 #DIM SAVEDATA 借金の肩代わり回数
 
+;31 債務回収
+#DIM SAVEDATA 債務者ランク
+
 ;60 MOTHER
 #DIM QUEST_60_対象
 #DIM QUEST_60_デブリ
