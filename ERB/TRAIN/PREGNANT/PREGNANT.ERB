@@ -238,8 +238,13 @@ IF IS_FEMALE(ARG:0) && GET_BUSTSIZE(ARG:0) != 2 && CFLAG:(ARG:0):妊娠時バス
 		PRINTFORMW 妊娠により%ANAME(ARG:0)%の胸のサイズが一段階大きくなりました
 		RESETCOLOR
 	ENDIF
-	SIF BUSTSIZE != 2
-		CALL SET_BUSTSIZE(ARG:0, BUSTSIZE + 1)
+	IF BUSTSIZE != 2
+		IF !CONFIG:44
+			CALL SET_BUSTSIZE(ARG:0, BUSTSIZE + 1)
+		ELSE
+			TALENT:(ARG:0):バストサイズ ++
+		ENDIF
+	ENDIF
 ENDIF
 
 
@@ -950,8 +955,13 @@ IF !TALENT:(ARG:0):妊娠 && LOCAL:5 < 0 && CFLAG:(ARG:0):妊娠時バストサ�
 		PRINTFORMW 出産により大きくなっていた%ANAME(ARG:0)%の胸は元に戻りました
 		RESETCOLOR
 	ENDIF
-	SIF INRANGE(GET_BUSTSIZE(ARG:0), -1, 2) && !CONFIG:44
-		CALL SET_BUSTSIZE(ARG:0, GET_BUSTSIZE(ARG:0) - 1)
+	IF INRANGE(GET_BUSTSIZE(ARG:0), -1, 2)
+		IF !CONFIG:44
+			CALL SET_BUSTSIZE(ARG:0, GET_BUSTSIZE(ARG:0) - 1)
+		ELSE
+			TALENT:(ARG:0):バストサイズ --
+		ENDIF
+	ENDIF
 	CFLAG:(ARG:0):妊娠時バストサイズ増加 = 0
 ENDIF
 
