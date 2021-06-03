@@ -1,0 +1,210 @@
+﻿;--------------------------
+; !!チュートリアルと 32を好きな番号に変える！!
+; チュートリアル
+; ここにクエストの説明
+;--------------------------
+
+
+;--------------------------
+; クエスト受注可能か
+;--------------------------
+@QUEST_ACCEPTABLE_32
+RETURN 1
+
+;--------------------------
+; クエストの名前を返却
+;--------------------------
+@QUEST_NAME_32
+SELECTCASE QUEST_PROGRESS:32
+	CASE 0 TO 1
+		RESULTS = チュートリアル1
+	CASE 2
+		RESULTS = チュートリアル2
+ENDSELECT
+RETURN
+
+;--------------------------
+; クエスト本体
+;--------------------------
+@QUEST_BODY_32
+#DIM QUEST_ID = 32
+SELECTCASE QUEST_PROGRESS:QUEST_ID
+	CASE 0
+		PRINTFORML 「ようこそ あなたは {5324234 + RAND: 1000} 人目の お客様です」
+		PRINTFORML %CALLNAME:MASTER%が宇宙港を歩いていると、思考戦車が話しかけてきた
+		PRINTFORMW アームには古代の記憶ディスク……たしかフロッピーディスクなるものをもっており、変な情報をインストールしてイカれてしまったようだ
+		PRINTL
+		PRINTFORML 「まずは 人助け をしてみてください。ヒントは 資産家 です」
+		PRINTFORML イカれた思考戦車はそれだけ言うと、一切しゃべることをやめてしまった
+		PRINTFORMW ※宇宙港メニューの[4] クエスト から クエスト 資産家の後始末 を受注してみましょう
+		QUEST_PROGRESS:QUEST_ID = 1
+	CASE 1
+		IF QUEST_PROGRESS:8
+			PRINTFORML 資産家の相談に乗りコルベットをもらった%CALLNAME:MASTER%は、うろうろしていた思考戦車に話しかけた
+			PRINTFORML 「チュートリアルの 報酬です」
+			PRINTFORMW そう言うと、思考戦車は$40,000を渡してきた
+			PRINTL
+			MONEY += 40000
+			PRINTFORML 驚く%CALLNAME:MASTER%を他所に、思考戦車は話し続ける
+			PRINTFORML 「そのお金で コルベットの装甲を強化してください。建造したての艦は 想像以上に 柔らかいです」
+			PRINTFORMW ※宇宙港メニューの[2] 装備更新 から コルベットの装甲をより高いTIERのものに変えてみましょう
+			QUEST_PROGRESS:QUEST_ID = 2
+		ELSE
+			PRINTFORML たしかイカれた思考戦車は、たしか人助けをしろと言っていた。ヒントは 資産家 だとも。
+			PRINTFORMW 付き合うのも馬鹿馬鹿しいが、暇つぶしにはいいかもしれない
+			PRINTFORMW ※宇宙港メニューの[4] クエスト から クエスト 資産家の後始末 を受注してみましょう
+		ENDIF
+	CASE 2
+		PRINTFORML 「装備の更新は 完了しましたか?」
+		CALL ASK_YN
+		IF RESULT
+			PRINTFORMW ※宇宙港メニューの[2] 装備更新 から コルベットの装甲をより高いTIERのものに変えてみましょう
+			RETURN
+		ENDIF
+		PRINTFORML 「チュートリアルの 報酬です」
+		PRINTFORML そう言うと、思考戦車は今度は$120,000を渡してきた
+		PRINTFORML 「それで 宙間魚雷 でも買ってください」
+		PRINTW ※宙間魚雷 は命中率と射程に難があるものの、非常に強力なダメージを叩き出す装備です
+		MONEY += 120000
+		PRINTL
+		PRINTFORML 「次は 戦闘のチュートリアルとして 会戦の 記録をみてもらいます」
+		PRINTFORML 「かつて 豊秋津皇国 の 水雷戦隊 と ハールバルズ王国 の 主力艦部隊 が戦った 会戦の記録です」
+		PRINTFORMW ※この会戦では%CALLNAME:MASTER%の艦に被害が出ることはありません
+		PRINTL
+		PRINTW ………………
+		PRINTW …………
+		PRINTW ……
+		FOR LOCAL, 0, 9
+			CALL INIT_PRESET_SHIP(国家ID_豊秋津皇国 , 0, 秋月級コルベット, "第一水雷戦隊コルベット", 秋月級コルベット)
+			SHIP_EQUIP:主砲:0:RESULT = 32
+			SHIP_EQUIP:副砲:0:RESULT = 3
+			SHIP_EQUIP:シールド:0:RESULT = 9
+			SHIP_EQUIP:装甲:0:RESULT = 9
+			SHIP_EQUIP:エンジン:0:RESULT = 9
+			SHIP_EQUIP:AI:0:RESULT = 3
+		NEXT
+		FOR LOCAL, 0, 9
+			CALL INIT_PRESET_SHIP(国家ID_豊秋津皇国 , 0, 秋月級コルベット, "第二水雷戦隊コルベット", 秋月級コルベット)
+			SHIP_EQUIP:主砲:0:RESULT = 32
+			SHIP_EQUIP:副砲:0:RESULT = 3
+			SHIP_EQUIP:シールド:0:RESULT = 9
+			SHIP_EQUIP:装甲:0:RESULT = 9
+			SHIP_EQUIP:エンジン:0:RESULT = 9
+			SHIP_EQUIP:AI:0:RESULT = 3
+		NEXT
+		FOR LOCAL, 0, 9
+			CALL INIT_PRESET_SHIP(国家ID_豊秋津皇国 , 0, 秋月級コルベット, "第三水雷戦隊コルベット", 秋月級コルベット)
+			SHIP_EQUIP:主砲:0:RESULT = 32
+			SHIP_EQUIP:副砲:0:RESULT = 3
+			SHIP_EQUIP:シールド:0:RESULT = 9
+			SHIP_EQUIP:装甲:0:RESULT = 9
+			SHIP_EQUIP:エンジン:0:RESULT = 9
+			SHIP_EQUIP:AI:0:RESULT = 3
+		NEXT
+		FOR LOCAL, 0, 3
+			CALL INIT_PRESET_SHIP(国家ID_豊秋津皇国 , 0, 津軽級フリゲート, "第一水雷戦隊フリゲート", 津軽級フリゲート)
+			SHIP_EQUIP:主砲:0:RESULT = 35
+			SHIP_EQUIP:主砲:1:RESULT = 35
+			SHIP_EQUIP:シールド:0:RESULT = 10
+			SHIP_EQUIP:装甲:0:RESULT = 10
+			SHIP_EQUIP:エンジン:0:RESULT = 10
+			SHIP_EQUIP:AI:0:RESULT = 3
+		NEXT
+		FOR LOCAL, 0, 3
+			CALL INIT_PRESET_SHIP(国家ID_豊秋津皇国 , 0, 津軽級フリゲート, "第二水雷戦隊フリゲート", 津軽級フリゲート)
+			SHIP_EQUIP:主砲:0:RESULT = 35
+			SHIP_EQUIP:主砲:1:RESULT = 35
+			SHIP_EQUIP:シールド:0:RESULT = 10
+			SHIP_EQUIP:装甲:0:RESULT = 10
+			SHIP_EQUIP:エンジン:0:RESULT = 10
+			SHIP_EQUIP:AI:0:RESULT = 3
+		NEXT
+		FOR LOCAL, 0, 3
+			CALL INIT_PRESET_SHIP(国家ID_豊秋津皇国 , 0, 津軽級フリゲート, "第三水雷戦隊フリゲート", 津軽級フリゲート)
+			SHIP_EQUIP:主砲:0:RESULT = 35
+			SHIP_EQUIP:主砲:1:RESULT = 35
+			SHIP_EQUIP:シールド:0:RESULT = 10
+			SHIP_EQUIP:装甲:0:RESULT = 10
+			SHIP_EQUIP:エンジン:0:RESULT = 10
+			SHIP_EQUIP:AI:0:RESULT = 3
+		NEXT
+
+		FOR LOCAL, 0, 4
+			CALL INIT_PRESET_SHIP(国家ID_ハールバルズ , 0, ミアハ級巡洋艦, "戦艦護衛巡洋艦", ミアハ級巡洋艦)
+			SHIP_EQUIP:主砲:0:RESULT = 42
+			SHIP_EQUIP:主砲:1:RESULT = 42
+			SHIP_EQUIP:副砲:0:RESULT = 18
+			SHIP_EQUIP:副砲:1:RESULT = 18
+			SHIP_EQUIP:副砲:2:RESULT = 18
+			SHIP_EQUIP:シールド:0:RESULT = 11
+			SHIP_EQUIP:シールド:1:RESULT = 11
+			SHIP_EQUIP:装甲:0:RESULT = 11
+			SHIP_EQUIP:装甲:1:RESULT = 11
+			SHIP_EQUIP:装甲:2:RESULT = 11
+			SHIP_EQUIP:エンジン:0:RESULT = 11
+			SHIP_EQUIP:AI:0:RESULT = 3
+		NEXT
+		FOR LOCAL, 0, 4
+			CALL INIT_PRESET_SHIP(国家ID_ハールバルズ , 0, ミアハ級巡洋艦, "空母護衛巡洋艦", ミアハ級巡洋艦)
+			SHIP_EQUIP:主砲:0:RESULT = 42
+			SHIP_EQUIP:主砲:1:RESULT = 42
+			SHIP_EQUIP:副砲:0:RESULT = 18
+			SHIP_EQUIP:副砲:1:RESULT = 18
+			SHIP_EQUIP:副砲:2:RESULT = 18
+			SHIP_EQUIP:シールド:0:RESULT = 11
+			SHIP_EQUIP:シールド:1:RESULT = 11
+			SHIP_EQUIP:装甲:0:RESULT = 11
+			SHIP_EQUIP:装甲:1:RESULT = 11
+			SHIP_EQUIP:装甲:2:RESULT = 11
+			SHIP_EQUIP:エンジン:0:RESULT = 11
+			SHIP_EQUIP:AI:0:RESULT = 3
+		NEXT
+		CALL INIT_PRESET_SHIP(国家ID_ハールバルズ , 0, ブリギッド級戦艦, "主力戦艦", ブリギッド級戦艦)
+		SHIP_EQUIP:主砲:0:RESULT = 43
+		SHIP_EQUIP:主砲:1:RESULT = 43
+		SHIP_EQUIP:副砲:0:RESULT = 12
+		SHIP_EQUIP:副砲:1:RESULT = 12
+		SHIP_EQUIP:シールド:0:RESULT = 12
+		SHIP_EQUIP:シールド:1:RESULT = 12
+		SHIP_EQUIP:シールド:2:RESULT = 12
+		SHIP_EQUIP:シールド:3:RESULT = 12
+		SHIP_EQUIP:装甲:0:RESULT = 12
+		SHIP_EQUIP:装甲:1:RESULT = 12
+		SHIP_EQUIP:装甲:2:RESULT = 12
+		SHIP_EQUIP:装甲:3:RESULT = 12
+		SHIP_EQUIP:エンジン:0:RESULT = 12
+		SHIP_EQUIP:AI:0:RESULT = 3
+		CALL INIT_PRESET_SHIP(国家ID_ハールバルズ , 0, ルー級空母, "主力空母", ルー級空母)
+		SHIP_EQUIP:主砲:0:RESULT = 103
+		SHIP_EQUIP:主砲:1:RESULT = 103
+		SHIP_EQUIP:副砲:0:RESULT = 12
+		SHIP_EQUIP:副砲:1:RESULT = 12
+		SHIP_EQUIP:副砲:2:RESULT = 12
+		SHIP_EQUIP:シールド:0:RESULT = 12
+		SHIP_EQUIP:シールド:1:RESULT = 12
+		SHIP_EQUIP:シールド:2:RESULT = 12
+		SHIP_EQUIP:装甲:0:RESULT = 12
+		SHIP_EQUIP:装甲:1:RESULT = 12
+		SHIP_EQUIP:装甲:2:RESULT = 12
+		SHIP_EQUIP:エンジン:0:RESULT = 12
+		SHIP_EQUIP:AI:0:RESULT = 3
+		CALL BATTLE(国家ID_豊秋津皇国, 国家ID_ハールバルズ, 0, 1)
+		FOR LOCAL, 0, MAX_SHIP
+			SIF SHIP_COUNTRY:LOCAL != 国家ID_豊秋津皇国 || SHIP_COUNTRY:LOCAL != 国家ID_ハールバルズ
+				CONTINUE
+			SIF SHIP_POSITION:LOCAL != 0
+				CONTINUE
+			SHIP_DAMAGE:LOCAL = GET_SHIP_TOTAL_HP(LOCAL)
+		NEXT
+		CALL RETIRE_BROKEN_SHIP
+
+		PRINTL
+		PRINTFORML 「会戦は 事前準備の段階で ほぼ勝負が決まります」
+		PRINTFORML 「また 強力な艦種だからといって 常に勝てるわけでは ありません」
+		PRINTFORMW 「あなただけの 戦略 ドクトリン を 見つけてください」
+		QUEST_PROGRESS:QUEST_ID = 3
+	CASE 3
+		
+ENDSELECT
+
+
