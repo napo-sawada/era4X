@@ -9,6 +9,8 @@
 ; クエスト受注可能か
 ;--------------------------
 @QUEST_ACCEPTABLE_32
+SIF QUEST_PROGRESS:32 >= 4
+	RETURN 0
 RETURN 1
 
 ;--------------------------
@@ -20,6 +22,8 @@ SELECTCASE QUEST_PROGRESS:32
 		RESULTS = チュートリアル1
 	CASE 2
 		RESULTS = チュートリアル2
+	CASE 3
+		RESULTS = チュートリアル3
 ENDSELECT
 RETURN
 
@@ -204,7 +208,22 @@ SELECTCASE QUEST_PROGRESS:QUEST_ID
 		PRINTFORMW 「あなただけの 戦略 ドクトリン を 見つけてください」
 		QUEST_PROGRESS:QUEST_ID = 3
 	CASE 3
-		
+		PRINTFORML 宇宙港を歩いていると、狂った思考戦車が話しかけてきた
+		PRINTFORML 「何をするにも お金が必要です。今回は お金稼ぎの方法として 貿易についてお教えいたします」
+		PRINTFORMW 「貿易と言っても簡単 安く買って高く売るだけです。特にアイテム一覧の末尾にある$500~$2000の特産品を売買するのがおすすめです」
+		PRINTL
+		PRINTFORML %CALLNAME:MASTER%の返事を待たずに、思考戦車は話し続ける
+		PRINTFORML 「特産品は その星でしか生産されないユニークなものなので 他の星で売るとほぼ確実に最高値がつきます。手が空いている時は積極的に特産品の貿易で儲けましょう」
+		PRINTFORMW 「貿易についてわかりましたか？」
+		CALL ASK_YN
+		IF RESULT == 0
+			PRINTFORMW 「それは良かった です」
+			QUEST_PROGRESS:QUEST_ID = 4
+			RETURN
+		ELSE
+			PRINTFORMW 「それは残念 です。また聞きにきてください」
+			RETURN
+		ENDIF
 ENDSELECT
 
 
