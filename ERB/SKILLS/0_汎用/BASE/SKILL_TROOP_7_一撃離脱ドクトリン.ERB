@@ -12,7 +12,7 @@ RESULTS = 一撃離脱ドクトリン
 RETURN 3
 
 @SKILL_0_TROOP_7_EXPLANATION
-RESULTS = 艦隊の巡洋艦と戦艦の与ダメージ-10\%、艦隊のコルベットとフリゲートの回避率+5\% 艦隊のコルベットとフリゲートの命中率+5\％
+RESULTS = 艦隊の巡洋艦と戦艦の与ダメージ-20\%、艦隊のコルベットとフリゲートの回避率+10\% 艦隊のコルベットとフリゲートの命中率+10\％
 
 
 @SKILL_0_TROOP_7_EFFECT(VALUE, TYPE, CLASS)
@@ -21,11 +21,11 @@ RESULTS = 艦隊の巡洋艦と戦艦の与ダメージ-10\%、艦隊のコル�
 #DIM CLASS
 
 IF TYPE == TYPE_与ダメージ && (CLASS == 巡洋艦 || CLASS == 戦艦)
-	TIMES VALUE, 0.90
+	TIMES VALUE, 0.80
 ELSEIF TYPE == TYPE_回避 && (CLASS == コルベット || CLASS == フリゲート)
-	TIMES VALUE, 1.05
+	TIMES VALUE, 1.10
 ELSEIF TYPE == TYPE_命中 && (CLASS == コルベット || CLASS == フリゲート)
-	TIMES VALUE, 1.05
+	TIMES VALUE, 1.10
 ENDIF
 
 RETURN VALUE

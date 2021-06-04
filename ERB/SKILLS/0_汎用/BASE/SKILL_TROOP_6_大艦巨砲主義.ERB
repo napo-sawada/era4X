@@ -12,7 +12,7 @@ RESULTS = 大艦巨砲主義
 RETURN 3
 
 @SKILL_0_TROOP_6_EXPLANATION
-RESULTS = 艦隊の対空命中率と艦載機命中率-10\％、艦隊の巡洋艦と戦艦の与ダメージ＋5\％
+RESULTS = 艦隊の対空命中率と艦載機命中率-20\％、艦隊の巡洋艦と戦艦の与ダメージ＋20\％
 
 @SKILL_0_TROOP_6_EFFECT(VALUE, TYPE, CLASS)
 #DIM VALUE
@@ -20,11 +20,11 @@ RESULTS = 艦隊の対空命中率と艦載機命中率-10\％、艦隊の巡洋
 #DIM CLASS
 
 IF TYPE == TYPE_命中 && CLASS == 艦種_航空機
-	TIMES VALUE, 0.90
+	TIMES VALUE, 0.80
 ELSEIF TYPE == TYPE_対空命中
-	TIMES VALUE, 0.90
+	TIMES VALUE, 0.80
 ELSEIF TYPE == TYPE_与ダメージ && (CLASS == 巡洋艦 || CLASS == 戦艦)
-	TIMES VALUE, 1.05
+	TIMES VALUE, 1.20
 ENDIF
 
 RETURN VALUE

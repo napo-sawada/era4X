@@ -12,7 +12,7 @@ RESULTS = 積極的攻勢
 RETURN 3
 
 @SKILL_0_TROOP_4_EXPLANATION
-RESULTS = 艦隊の与ダメージ+7\% 50\%の確率で被ダメ+14\%
+RESULTS = 艦隊の与ダメージ+20\% 50\%の確率で被ダメ+14\%
 
 
 @SKILL_0_TROOP_4_EFFECT(VALUE, TYPE, CLASS)
@@ -21,7 +21,7 @@ RESULTS = 艦隊の与ダメージ+7\% 50\%の確率で被ダメ+14\%
 #DIM CLASS
 
 IF TYPE == TYPE_与ダメージ
-	TIMES VALUE, 1.03
+	TIMES VALUE, 1.20
 ELSEIF TYPE == TYPE_被ダメージ && RAND:100 < 50
 	TIMES VALUE, 1.14
 ENDIF
