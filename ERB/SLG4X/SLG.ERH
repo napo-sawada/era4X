@@ -155,6 +155,16 @@
 #DIM COMMANDER, 2
 #DIMS BATTLEFIELD_NAME
 
+; 戦闘系(ヒットタイプ)
+#DIM CONST 命中 = 0
+#DIM CONST クリティカル = 1
+#DIM CONST 外れ = 2
+#DIM CONST 非直撃 = 3
+
+; 戦闘系(艦種別回避割合とクリティカル割合)
+#DIM CONST 外れ率 = 80, 80, 70, 60, 50, 40, 30, 30, 80, 80
+#DIM CONST クリティカル率 = 50, 80, 70, 60, 50, 40, 30, 30, 50, 50
+
 ; 武器の種類
 #DIM CONST 実体弾 = 0
 #DIM CONST レーザー = 1
@@ -168,11 +178,6 @@
 #DIM CONST TORPED_HP = 500
 #DIM CONST TORPED_AVOID = 30
 
-; ヒットタイプ
-#DIM CONST 命中 = 0
-#DIM CONST クリティカル = 1
-#DIM CONST 外れ = 2
-#DIM CONST 非直撃 = 3
 
 ;ミッション
 #DIM CONST 待機 = 0
