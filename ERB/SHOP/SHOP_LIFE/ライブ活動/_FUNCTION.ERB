@@ -1,0 +1,370 @@
+﻿
+@PERFORMANCE_REMOVE_CARD_FROM_DECK(除去数, デッキ)
+#DIM REF デッキ
+#DIM 除去数
+#DIM ITER
+FOR ITER, 0, 除去数
+    ARRAYREMOVE デッキ, 0, 1
+NEXT
+
+@PERFORMANCE_SHAFFLE_DECK(デッキ)
+#DIM REF デッキ
+#DIM ITER
+ITER = PERFORMANCE_COUNT_NUM_DECK(デッキ)
+WHILE ITER > 1
+    ITER --
+    LOCAL:0 = RAND(0, ITER + 1)
+    LOCAL:1 = デッキ:(LOCAL:0)
+    デッキ:(LOCAL:0)　= デッキ:ITER
+    デッキ:ITER = LOCAL:1
+WEND
+
+@PERFORMANCE_COUNT_NUM_DECK(デッキ)
+#FUNCTION
+#DIM REF デッキ
+#DIM デッキ枚数
+#DIM ITER
+FOR ITER , 0, P_デッキ最大数
+    SIF デッキ:ITER == 0
+        RETURNF ITER
+NEXT
+RETURNF P_デッキ最大数 
+
+@PERFORMANCE_DRAW_CARD(ドロー枚数, 手札, デッキ, 地の文有無)
+#DIM REF 手札
+#DIM REF デッキ
+#DIM ドロー枚数
+#DIM ドロー済枚数
+#DIM 地の文有無
+#DIM ITER
+ドロー済枚数 = 0
+FOR ITER, 0, P_手札最大数
+    IF 手札:ITER == 0
+        IF デッキ:0 == 0 && 地の文有無 != -1
+            CALL COLOR_PRINTL(@"ドロー可能なカードが存在しない", カラー_選択不可)
+            RETURN -1
+        ENDIF 
+        手札:ITER = デッキ:0
+        CALL PERFORMANCE_REMOVE_CARD_FROM_DECK(1, デッキ)
+        ドロー済枚数 ++
+        IF 地の文有無 != -1
+            TRYCALLFORM PERFORMANCE_CARDNAME_{手札:ITER}
+            SETCOLOR カラー_注釈
+            PRINTFORML ― [%RESULTS%] をドロー
+            RESETCOLOR 
+        ENDIF
+    ENDIF
+    SIF ドロー枚数 == ドロー済枚数
+        RETURN 0
+NEXT
+RETURN -1
+
+@PERFORMANCE_ADD_CARD_TO_HAND(対象カードID, 手札,地の文有無)
+#DIM REF 手札
+#DIM 対象カードID
+#DIM 地の文有無
+#DIM ITER
+FOR ITER, 0, P_手札最大数
+    IF 手札:ITER == 0
+        手札:ITER = 対象カードID
+        IF 地の文有無 != -1
+            TRYCALLFORM PERFORMANCE_CARDNAME_{手札:ITER}
+            SETCOLOR カラー_注釈
+            PRINTFORML ― [%RESULTS%] をドロー
+            RESETCOLOR
+        ENDIF
+        RETURN 0
+    ENDIF
+NEXT
+SETCOLOR カラー_注釈
+PRINTFORML ― 手札に空きがありません
+RESETCOLOR 
+RETURN -1
+
+@PERFORMANCE_DROP_CARD_FROM_HAND
+#DIM ITER
+#DIMS 選択カード名
+
+PRINTFORML 破棄するカードを選択
+;破棄対象の手札を出力
+FOR ITER, 0 ,P_手札最大数
+    SIF P_手札:ITER == 0
+        BREAK
+    RESETCOLOR
+    TRYCALLFORM PERFORMANCE_COMNAME_{P_手札:ITER}
+    PRINTBUTTON @"[%RESULTS, 20, LEFT%]", ITER
+    PRINTFORM %"",10,RIGHT%
+    PRINTL
+NEXT
+WHILE 1
+    INPUT
+    LOCAL = RESULT
+    IF LOCAL < 0 || LOCAL > P_手札最大数 - 1
+    ELSE
+        BREAK
+    ENDIF
+    CLEARLINE 1
+WEND
+CLEARLINE 1
+TRYCALLFORM PERFORMANCE_COMNAME_{P_手札:LOCAL}
+選択カード名 = %RESULTS%
+CALL COLOR_PRINTW(@"➡[%選択カード名%]を破棄", カラー_注釈)
+ARRAYREMOVE P_手札, LOCAL, 1
+PRINTL
+
+;-------------------------------------------------
+;数値型一次元配列に要素をPUSH
+;ARG:0 要素格納先(一次元配列)
+;ARG:1 格納する要素
+;RETURN 格納先インデックス()
+;-------------------------------------------------
+@PERFORMANCE_PUSH_ARRAY(配列, 要素)
+#DIM REF 配列
+#DIM 要素
+#DIM IDX
+FOR IDX, 0, VARSIZE("配列")
+    IF 配列:IDX == 0
+        配列:IDX = 要素
+        RETURN IDX
+    ENDIF 
+NEXT
+RETURN -1
+
+;-------------------------------------------------
+;文字列型一次元配列に要素をPUSH
+;ARG:0 要素格納先(一次元配列)
+;ARG:1 格納する要素
+;RETURN 格納先インデックス()
+;-------------------------------------------------
+@PERFORMANCE_PUSH_STRARRAY(配列, 要素)
+#DIMS REF 配列
+#DIMS 要素
+#DIM IDX
+FOR IDX, 0, VARSIZE("配列")
+    IF 配列:IDX == ""
+        配列:IDX = %要素%
+        RETURN IDX
+    ENDIF 
+NEXT
+RETURN -1
+
+;-------------------------------------------------
+;対象カードIDがアンロック可能か確認し、可能であればアンロック
+;ARG:0 対象カードID
+;RETURN 不可:-1,済:0,アンロック:1
+;-------------------------------------------------
+@PERFORMANCE_CHECK_CARD_UNLOCKABLE(対象カードID)
+#DIM 対象カードID
+
+;既アンロック
+SIF P_カードアンロックフラグ:対象カードID == 1
+    RETURN 0
+;アンロック可能ならアンロックフラグを1に
+TRYCALLFORM PERFORMANCE_AVAILABLE_{対象カードID}
+IF RESULT != 1
+    RETURN -1
+ELSE
+    P_カードアンロックフラグ:対象カードID = 1
+    RETURN 1
+ENDIF
+
+;-------------------------------------------------
+;編入対象のカードが編集対象プリセットに既セット済か確認する
+;ARG:0 CHARA_ID
+;ARG:1 編入候補カードID
+;ARG:2 変更対象プリセットID
+;RETURN:0 セット済:-1,セット可能:1
+;RETURN:1 セット不可の場合、同一カードがセットされているスロットID
+;-------------------------------------------------
+@PERFORMANCE_IS_CARD_SETTED(対象, 編入候補カードID, 変更対象プリセットID)
+#DIM 対象
+#DIM 変更対象プリセットID
+#DIM 編入候補カードID
+#DIM ITER
+
+SIF 編入候補カードID == 0
+    RETURN 1
+FOR ITER, 0, P_デッキ最大数
+    ;IF ITER != 変更対象スロットID && 編入候補カードID == P_編成カードID:対象:変更対象プリセットID:ITER
+    IF 編入候補カードID == P_編成カードID:対象:変更対象プリセットID:ITER
+        RESULT:1 = ITER
+        RETURN -1
+    ENDIF
+NEXT
+RETURN 1
+
+;アニメーションするゲージ(増加用)
+@DRAW_ANIMATION_GAUGE( nBarVol, nBarVolMax, nScaleNum, colorLeft, colorRigth, colorEmpty, flgExtra, strScaleText = "" )
+#DIM  nBarVol
+#DIM  nBarVolMax
+#DIM  nScaleNum
+#DIM  colorLeft
+#DIM  colorRigth
+#DIM  colorEmpty
+#DIM  flgExtra
+#DIMS strScaleText
+#DIM ITER
+#DIM 表示量
+ITER = 0
+
+WHILE 1
+    INPUTMOUSEKEY 10
+    SIF ITER > 0
+        CLEARLINE 1
+    POWER LOCAL, ITER, 2
+    表示量 = nBarVol - LOCAL
+    SIF 表示量 < 0
+        表示量 = 0
+    LOCALS = %FuncTagSetText_CreateColorBarText( nBarVol - 表示量, nBarVolMax, nScaleNum, colorLeft, colorRigth, colorEmpty, flgExtra, strScaleText)%
+    ;クリックまたは任意のキーが押された場合BREAK
+    IF 表示量 == 0
+        LOCALS = %FuncTagSetText_CreateColorBarText( nBarVol, nBarVolMax, nScaleNum, colorLeft, colorRigth, colorEmpty, flgExtra, strScaleText)%
+        CALLF FuncTagSetText_Print( LOCALS, 0 )
+        BREAK
+    ENDIF
+    IF RESULT == 1 || RESULT == 3
+        LOCALS = %FuncTagSetText_CreateColorBarText( nBarVol, nBarVolMax, nScaleNum, colorLeft, colorRigth, colorEmpty, flgExtra, strScaleText)%
+        CALLF FuncTagSetText_Print( LOCALS, 0 )
+        BREAK
+    ENDIF
+    CALLF FuncTagSetText_Print( LOCALS, 0 )
+    ITER++
+WEND
+
+@PERFORMANCE_STRIP(対象)
+#DIM 対象
+{
+    LOCAL:0 = 
+        IFRAND(
+        "1",1,
+        "D1,8",P_ステージ衣装:0:衣装部位_上下下着 != 0,
+        "D1,6",P_ステージ衣装:0:衣装部位_下着上 != 0,
+        "D1,7",P_ステージ衣装:0:衣装部位_下着下 != 0,
+        "D1,D6TO7,5",P_ステージ衣装:0:衣装部位_上下服 != 0,
+        "D1,D6TO7,2",P_ステージ衣装:0:衣装部位_上服 != 0,
+        "D1,D6TO7,3",P_ステージ衣装:0:衣装部位_下服 != 0,
+        )
+}
+
+SELECTCASE LOCAL:0
+    CASE 1
+        RESULT:0 = 0
+        RESULT:1 = -1
+        RESULTS = "なし"
+        RETURN RESULT
+    CASE 2 TO 5
+        CALL GET_CLOTH_NAME((LOCAL:0), (P_ステージ衣装:0:(LOCAL:0)))
+        LOCALS:0 = %RESULTS%
+        P_ステージ衣装:0:(LOCAL:0) = 0
+        RESULT:0 = 1
+        RESULT:1 = LOCAL:0
+        RESULTS = %LOCALS:0%
+        RETURN RESULT
+    CASE 6 TO 8
+        CALL GET_CLOTH_NAME((LOCAL:0), (P_ステージ衣装:0:(LOCAL:0)))
+        LOCALS:0 = %RESULTS%
+        P_ステージ衣装:0:(LOCAL:0) = 0
+        RESULT:0 = 2
+        RESULT:1 = LOCAL:0
+        RESULTS = %LOCALS:0%
+        RETURN RESULT
+    CASEELSE
+ENDSELECT
+
+;-------------------------------------------------
+;露出状態の確認
+;
+;RESULT:0 上半身の状態
+;RESULT:1 下半身の状態
+;2 = 着衣, 1 = 下着, 0 = 露出 
+;-------------------------------------------------
+@PERFORMANCE_CHECK_EXPOSURE(対象)
+#DIM 対象
+VARSET RESULT
+IF P_ステージ衣装:0:衣装部位_上下服 == 0
+    IF P_ステージ衣装:0:衣装部位_上服 != 0
+        RESULT:0 = 2
+    ENDIF
+    IF P_ステージ衣装:0:衣装部位_下服 != 0
+        RESULT:1 = 2
+    ENDIF
+ELSE
+    RESULT:0 = 2
+    RESULT:1 = 2
+ENDIF
+IF P_ステージ衣装:0:衣装部位_上下下着 == 0 && P_ステージ衣装:0:衣装部位_上下服 == 0
+    IF P_ステージ衣装:0:衣装部位_下着上 != 0 && P_ステージ衣装:0:衣装部位_上服 == 0
+        RESULT:0 = 1
+    ELSEIF P_ステージ衣装:0:衣装部位_下着上 == 0 && P_ステージ衣装:0:衣装部位_上服 == 0
+        RESULT:0 = 0
+    ENDIF
+    IF P_ステージ衣装:0:衣装部位_下着下 != 0 && P_ステージ衣装:0:衣装部位_下服 == 0
+        RESULT:1 = 1
+    ELSEIF P_ステージ衣装:0:衣装部位_下着下 == 0 && P_ステージ衣装:0:衣装部位_下服 == 0
+        RESULT:1 = 0
+    ENDIF
+ELSEIF P_ステージ衣装:0:衣装部位_上下服 == 0
+    RESULT:0 = 1
+    RESULT:1 = 1
+ENDIF
+
+;-------------------------------------------------
+;カード効果の適用処理
+;-------------------------------------------------
+@PERFORMANCE_APPLY_CARDEFFECT(カード効果)
+#DIMS カード効果
+#DIMS 効果種別
+#DIMS 効果量
+#DIM ITER
+
+IF DIC_CONTAINSKEY(カード効果, "補正値変更")
+    効果量 = %DIC_GET(カード効果, "補正値変更")%
+    FOR ITER, 0, P_演目要素数
+        演技力補正値:ITER += TOINT(LIST_GET(効果量, ITER))
+    NEXT
+ENDIF
+
+IF DIC_CONTAINSKEY(カード効果, "抵抗値変更")
+    効果量 = %DIC_GET(カード効果, "抵抗値変更")%
+    観客心理抵抗値 = (観客心理抵抗値 * (100 + TOINT(効果量))) / 100
+ENDIF
+
+IF DIC_CONTAINSKEY(カード効果, "CC付与")
+    効果量 = %DIC_GET(カード効果, "CC付与")%
+    IF LIST_INDEXOF(P_付与CC, 効果量) == -1
+        P_付与CC = %LIST_ADD(P_付与CC, 効果量)%
+    ENDIF 
+ENDIF
+
+IF DIC_CONTAINSKEY(カード効果, "ACT値変更")
+    効果量 = %DIC_GET(カード効果, "ACT値変更")%
+    P_アクション数 += TOINT(効果量)
+ENDIF
+
+IF DIC_CONTAINSKEY(カード効果, "手札ドロップ")
+    効果量 = %DIC_GET(カード効果, "手札ドロップ")%
+    ;効果量拾っているが、現状一枚しか捨てられない
+    CALL PERFORMANCE_DROP_CARD_FROM_HAND
+ENDIF
+
+IF DIC_CONTAINSKEY(カード効果, "手札ドロー")
+    効果量 = %DIC_GET(カード効果, "手札ドロー")%
+    CALL PERFORMANCE_DRAW_CARD(TOINT(効果量), P_手札, P_デッキ)
+ENDIF
+
+IF DIC_CONTAINSKEY(カード効果, "トークン変更")
+    効果量 = %DIC_GET(カード効果, "トークン変更")%
+    SELECTCASE LIST_GET(効果量, 0)
+        CASE "快楽"
+            P_トークン数:P_トークン_快楽 += TOINT(LIST_GET(効果量, 1))
+        CASE "親衛隊"
+            P_トークン数:P_トークン_親衛隊 += TOINT(LIST_GET(効果量, 1))
+    ENDSELECT
+ENDIF
+
+IF DIC_CONTAINSKEY(カード効果, "任意カード追加")
+    効果量 = %DIC_GET(カード効果, "任意カード追加")%
+    CALL PERFORMANCE_ADD_CARD_TO_HAND(TOINT(効果量), P_手札)
+ENDIF
+
+RETURN

@@ -1,0 +1,511 @@
+﻿;-------------------------------------------------
+; ライブイベント　メニュー画面
+;-------------------------------------------------
+@PERFORMMANCE_MENU(対象)
+#DIM 対象
+#DIMS 編成カード名
+#DIMS 編成カード一覧, P_デッキ最大数
+#DIM 変更対象プリセットID
+#DIM 編成枚数合計
+#DIM 実行ライブID
+#DIM ITER
+#DIM LCNT
+#DIM CONST C_注釈 = 0xa7a9be
+
+
+;変更対象プリセットID = 0
+
+
+;ウィンドウ生成
+;-------------------------------------------------
+;調整用
+;PRINTFORML １２３４５６７８９０１２３４５６７８９０１２３４５６７８９０１２３４５６７８９０１２３４５６７８９０１２３４５６
+;PRINTFORML 1---5---10----5---20----5---30----5---40----5---50----5---60----5---70----5---80----5---90----5---00----5---10--
+;生成済みのウィンドウを初期化
+CALL WndMgr_DestroyWindow(-1)
+
+;メニュー用ウィンドウ生成
+CALL WndMgr_CreateWindow(0, 4, 0, 110, P_MENU_WINDOW_HEIGHT, 0)
+
+CALL WndMgr_CreateWindow(1, 70, 2, 40, 26, 2)
+CALL WndMgr_WindowTitle(1, "編成カード一覧")
+
+CALL WndMgr_CreateWindow(2, 2, 28, 108, 11, 2)
+CALL WndMgr_WindowTitle(2, "参加可能な公演")
+
+
+;メニュー画面メインウィンドウ描画
+;-------------------------------------------------
+WHILE 1
+    LCNT = 0
+
+;ステータス描写
+    CALL PERFORMANCE_DRAW_CHARA_STATUS(対象)
+
+    CALL PERFORMANCE_DRAW_LIVELIST_WINDOW(2, 対象)
+
+;フッター
+    CALL WndMgr_TextSet(0, P_MENU_WINDOW_HEIGHT - 1, @"@B:9999@[戻る]@/B@    @B:9000@[能力確認]@/B@")
+
+
+;編成カード一覧描画
+;-------------------------------------------------
+
+;編成カード一覧作成
+    VARSET 編成カード一覧, ""
+    FOR ITER, 0, P_デッキ最大数
+        TRYCALLFORM PERFORMANCE_CARDNAME_{P_編成カードID:対象:変更対象プリセットID:ITER}
+        編成カード名 = %RESULTS%
+        SIF 編成カード名 == "なし"
+            編成カード名 = ------
+        CALL PERFORMANCE_PUSH_STRARRAY(編成カード一覧, 編成カード名)
+    NEXT
+
+    CALL WndMgr_TextSet(1, 0, @"@C:{C_注釈}@プリセット @B:3000@<<@/B@ {変更対象プリセットID} @B:3001@>>@/B@@/C@")
+
+    FOR ITER, 0, VARSIZE("編成カード一覧")
+        CALLF FuncTagSetText_ShapeSize(@"@B:{ITER}@[%TOSTR(ITER, "00")%]%編成カード一覧:ITER%@/B@", 30, 1, 0)
+        LOCALS:0 = %RESULTS%
+        TRYCALLFORM PERFORMANCE_SETTABLE_BY_CHARA_{P_編成カードID:対象:変更対象プリセットID:ITER}(対象)
+        IF RESULT
+            CALL WndMgr_TextSet(1, ITER + 2, @"%LOCALS%")
+        ELSE
+            CALL WndMgr_TextSet(1, ITER + 2, @"@C:{カラー_警告}@%LOCALS%@/C@")
+        ENDIF
+        SIF P_編成カード枚数:対象:変更対象プリセットID:ITER != 0
+            CALL WndMgr_TextAdd(1, ITER + 2, @"@B:{ITER + 1000}@×{P_編成カード枚数:対象:変更対象プリセットID:ITER} @C:{C_注釈}@+@/C@@/B@")
+    NEXT
+
+    編成枚数合計 = 0
+    FOR ITER, 0, P_デッキ最大数
+        編成枚数合計 += P_編成カード枚数:対象:変更対象プリセットID:ITER
+    NEXT
+    IF 編成枚数合計 >= 10 && 編成枚数合計 <= 20
+        CALL WndMgr_TextSet(1, 23, @"デッキ枚数合計 ({編成枚数合計}/{P_デッキ最大数})")
+    ELSE
+        CALL WndMgr_TextSet(1, 23, @"@C:{カラー_警告}@デッキ枚数合計 ({編成枚数合計}/{P_デッキ最大数})@/C@")
+    ENDIF
+
+;入力受付
+;-------------------------------------------------
+    REDRAW 0
+    CLEARLINE P_MENU_WINDOW_HEIGHT + 1
+    CALL WndMgr_DisplayAll()
+    REDRAW 2
+    INPUT
+    IF RESULT >= 0 && RESULT < P_デッキ最大数
+        CALL PERFORMMANCE_MENU_DECKEDIT(対象, 変更対象プリセットID, RESULT)
+    ;編成カード枚数の変更処理
+    ELSEIF RESULT >= 1000 && RESULT < 2000
+        LOCAL:0 = RESULT - 1000
+        P_編成カード枚数:対象:変更対象プリセットID:(LOCAL:0) ++
+        SIF P_編成カード枚数:対象:変更対象プリセットID:(LOCAL:0) > 3
+            P_編成カード枚数:対象:変更対象プリセットID:(LOCAL:0) = 1
+        TRYCCALLFORM PERFORMANCE_CATEGORY_{P_編成カードID:対象:変更対象プリセットID:(LOCAL:0)}
+            LOCALS:0 = %DIC_GET(RESULTS, "属性")%
+            IF P_編成カード枚数:対象:変更対象プリセットID:(LOCAL:0) > 1 && LOCALS:0 == "SPECIAL"
+                P_編成カード枚数:対象:変更対象プリセットID:(LOCAL:0) = 1
+                CALL COLOR_PRINTW("同一種類のSPECIAL属性カードは2枚以上編成できません", カラー_注意)
+                CLEARLINE 1
+            ENDIF 
+        CATCH
+        ENDCATCH
+    ;公演ボタン押下時の処理
+    ELSEIF RESULT >= 2000 && RESULT < 2000 + P_ライブ公演最大数
+        実行ライブID = RESULT - 2000
+        CLEARLINE 1
+        CALL PERFORMANCE_CHECK_STARTABLE(対象, 変更対象プリセットID)
+        IF RESULT == 1
+            ;編成カード情報と枚数からデッキを生成
+            CALL PERFORMANCE_MAKE_DECK(対象, 変更対象プリセットID)
+            CALL WndMgr_DestroyWindow(-1)
+            RETURN 実行ライブID
+        ENDIF
+    ;プリセット切替ボタン押下時の処理
+    ELSEIF RESULT >= 3000 && RESULT <= 3001
+        IF RESULT == 3000
+            変更対象プリセットID --
+            SIF 変更対象プリセットID < 0
+                変更対象プリセットID = P_編成プリセットID最大数 - 1
+        ELSE
+            変更対象プリセットID ++
+            SIF 変更対象プリセットID > P_編成プリセットID最大数 - 1
+                変更対象プリセットID = 0
+        ENDIF
+    ;能力表示
+    ELSEIF RESULT == 9000
+        CALL SHOW_INFO_WITH_UI(対象, 0)
+        CLEARLINE LINECOUNT
+    ELSEIF RESULT == 9999
+        CALL WndMgr_DestroyWindow(-1)
+        RETURN -1 
+    ENDIF
+WEND
+
+
+;-------------------------------------------------
+;カード一覧処理
+;ARG:1 対象キャラクタ
+;ARG:2 変更対象プリセットID　
+;ARG:3 変更対象スロットID
+;-------------------------------------------------
+@PERFORMMANCE_MENU_DECKEDIT(対象, 変更対象プリセットID, 変更対象スロットID)
+#DIM 対象
+#DIM 変更対象プリセットID
+#DIM 変更対象スロットID
+#DIM 表示カテゴリ
+#DIM 出力カードID
+#DIM 編入候補カードID
+#DIMS CONST カテゴリ名 = "DANCE", "VOCAL", "GESTURE", "SPECIAL", "LEWD"
+#DIM ITER
+#DIM LCNT
+#DIM WINDOW_ID
+
+CALL WndMgr_VacantId()
+WINDOW_ID = RESULT
+CALL WndMgr_Attribute(-1, "Disabled", 1)
+CALL WndMgr_CreateWindow(WINDOW_ID, 5, 5, 102, 30, 2)
+CALL WndMgr_WindowTitle(WINDOW_ID, "カード一覧")
+
+;カード編成編集画面描画
+;-------------------------------------------------
+WHILE 1
+    LCNT = 0
+    FOR ITER , 0, VARSIZE("カテゴリ名")
+        IF ITER == 0
+            IF 表示カテゴリ == ITER
+                CALL WndMgr_TextSet(WINDOW_ID, LCNT, @"@C:{カラー_選択中}@@B:{ITER + 10000}@[%カテゴリ名:ITER%]@/B@@/C@     ")
+            ELSE
+                CALL WndMgr_TextSet(WINDOW_ID, LCNT, @"@B:{ITER + 10000}@[%カテゴリ名:ITER%]@/B@     ")
+            ENDIF
+        ELSE
+            IF 表示カテゴリ == ITER
+                CALL WndMgr_TextAdd(WINDOW_ID, LCNT, @"@C:{カラー_選択中}@@B:{ITER + 10000}@[%カテゴリ名:ITER%]@/B@@/C@     ")
+            ELSE
+                CALL WndMgr_TextAdd(WINDOW_ID, LCNT, @"@B:{ITER + 10000}@[%カテゴリ名:ITER%]@/B@     ")
+            ENDIF
+        ENDIF
+    NEXT
+    LCNT ++
+    CALL WndMgr_TextSet(WINDOW_ID, LCNT++, @"@C:{カラー_選択不可}@―@/C@" * 49)
+
+    FOR ITER, 0, 20
+        出力カードID = ITER + (表示カテゴリ * 200)
+    ;"[0]なし"は出力しない
+        SIF 出力カードID == 0
+            CONTINUE
+        TRYCCALLFORM PERFORMANCE_CARDNAME_{出力カードID}
+        ;既アンロックカードの処理
+            CALL PERFORMANCE_CHECK_CARD_UNLOCKABLE(出力カードID)
+            IF RESULT != -1
+                TRYCALLFORM PERFORMANCE_SETTABLE_BY_CHARA_{出力カードID}(対象)
+                IF RESULT == 1
+                ;編集対象プリセットに既セットのカードは黄緑表示
+                    CALL  PERFORMANCE_IS_CARD_SETTED(対象, 出力カードID, 変更対象プリセットID)
+                    IF RESULT == 1
+                        CALLF FuncTagSetText_ShapeSize(@"@B:{出力カードID}@[%TOSTR(出力カードID, "000")%]%RESULTS%@/B@", 30, 1, 0)
+                    ELSE
+                        CALLF FuncTagSetText_ShapeSize(@"@C:{カラー_黄緑}@@B:{出力カードID}@[%TOSTR(出力カードID, "000")%]%RESULTS%@/B@@/C@", 30, 1, 0)
+                    ENDIF
+                    CALL WndMgr_TextSet(WINDOW_ID, LCNT, @"%RESULTS%")
+                    TRYCALLFORM PERFORMANCE_STATUS_DESC_{出力カードID}
+                    CALL WndMgr_TextAdd(WINDOW_ID, LCNT++, @"@C:{カラー_注釈}@%RESULTS%@/C@")
+                ELSE
+                ;編成対象のキャラクターがカードの編成条件を満たしていない場合の処理
+                ;素質は可変するので編成条件を満たしていなくても編成は可能とする
+                    CALL  PERFORMANCE_IS_CARD_SETTED(対象, 出力カードID, 変更対象プリセットID)
+                    IF RESULT == 1
+                        CALLF FuncTagSetText_ShapeSize(@"@C:{カラー_選択不可}@@B:{出力カードID}@[%TOSTR(出力カードID, "000")%]%RESULTS%@/B@@/C@", 30, 1, 0)
+                    ELSE
+                        CALLF FuncTagSetText_ShapeSize(@"@C:{カラー_警告}@@B:{出力カードID}@[%TOSTR(出力カードID, "000")%]%RESULTS%@/B@@/C@", 30, 1, 0)
+                    ENDIF
+                    CALL WndMgr_TextSet(WINDOW_ID, LCNT, @"%RESULTS%")
+                    TRYCALLFORM PERFORMANCE_SETTABLE_DESC_{出力カードID}
+                    CALL WndMgr_TextAdd(WINDOW_ID, LCNT++, @"@C:{カラー_注釈}@%RESULTS%@/C@")
+                ENDIF
+        ;未アンロックカードの処理
+            ELSE
+                CALLF FuncTagSetText_ShapeSize(@"@C:{カラー_選択不可}@[%TOSTR(出力カードID, "000")%]??????@/C@", 30, 1, 0)
+                CALL WndMgr_TextSet(WINDOW_ID, LCNT, @"%RESULTS%")
+                RESULTS =
+                TRYCALLFORM PERFORMANCE_UNLOCK_HINT_DESC_{出力カードID}
+                CALL WndMgr_TextAdd(WINDOW_ID, LCNT++, @"@C:{カラー_選択不可}@%RESULTS%@/C@")
+            ENDIF
+        CATCH
+            CALL WndMgr_TextSet(WINDOW_ID, LCNT++, @"@C:{カラー_選択不可}@[%TOSTR(出力カードID, "000")%]---@/C@")
+        ENDCATCH
+    NEXT
+    CALL WndMgr_TextSet(WINDOW_ID, 27, @"@B:9999@[閉じる]@/B@     @B:0@[外す]@/B@")
+
+;カード編成編集画面入力受付
+;-------------------------------------------------
+    REDRAW 0
+    CLEARLINE P_MENU_WINDOW_HEIGHT + 1
+    CALL WndMgr_DisplayAll()
+    REDRAW 2
+    INPUT
+        ;カードID選択時の処理
+    IF RESULT >= 0 && RESULT <= 999
+        編入候補カードID = RESULT
+        CALL  PERFORMANCE_IS_CARD_SETTED(対象, 編入候補カードID, 変更対象プリセットID)
+        IF RESULT == -1
+            CALL COLOR_PRINTW("同一種類のカードを編成することはできません", カラー_注意)
+            CLEARLINE 1
+        ENDIF
+            ;セット可能な場合は編成カードを置換
+        IF RESULT == 1
+            P_編成カードID:対象:変更対象プリセットID:変更対象スロットID = 編入候補カードID
+            IF P_編成カードID:対象:変更対象プリセットID:変更対象スロットID == 0
+                P_編成カード枚数:対象:変更対象プリセットID:変更対象スロットID = 0
+            ELSE
+                P_編成カード枚数:対象:変更対象プリセットID:変更対象スロットID = 1
+            ENDIF
+            CALL WndMgr_DestroyWindow(WINDOW_ID)
+            CALL WndMgr_Attribute(-1, "Disabled", 0)
+            RETURN
+        ENDIF
+        ;[閉じる]選択時の処理
+    ELSEIF RESULT == 9999
+        CALL WndMgr_DestroyWindow(WINDOW_ID)
+        CALL WndMgr_Attribute(-1, "Disabled", 0)
+        RETURN
+        ;ページカテゴリ選択時の処理
+    ELSEIF RESULT >= 10000 && RESULT <= 10004
+        表示カテゴリ = RESULT - 10000
+    ENDIF
+WEND
+RETURN
+
+
+;-------------------------------------------------
+;メニュー画面のステータス描写に関する処理
+;ARG:0 CHARA_ID
+;-------------------------------------------------
+@PERFORMANCE_DRAW_CHARA_STATUS(対象)
+#DIM 対象
+#DIMS 名前
+#DIM LCNT
+#DIM CONST C_注釈 = 0xa7a9be
+
+LCNT = 0
+
+CALL WndMgr_TextSet(0, LCNT++, "―" * 53)
+IF !TALENT:対象:姓名逆転
+    名前 = %CSTR:対象:0% %CSTR:対象:1%
+ELSE
+    名前 = %CSTR:対象:1% %CSTR:対象:0%
+ENDIF
+CALL WndMgr_TextSet(0, LCNT++, @"@S@♪ PLOFILE@/S@")
+LCNT++
+CALL WndMgr_TextSet(0, LCNT++, @"%名前%")
+CALL WndMgr_TextSet(0, LCNT++, @"@C:{カラー_選択不可}@￣@/C@" * 15)
+CALL WndMgr_TextSet(0, LCNT, @"@C:{C_注釈}@Height@/C@")
+CALLF FuncTagSetText_ShapeSize(@"@C:{C_注釈}@{(BASE:対象:身長)/10}cm@/C@", 19, 1, 1)
+CALL WndMgr_TextAdd(0, LCNT++, @"%RESULTS%")
+CALL WndMgr_TextSet(0, LCNT++, @"@C:{カラー_選択不可}@-@/C@" * 25)
+CALL WndMgr_TextSet(0, LCNT, @"@C:{C_注釈}@Weight@/C@")
+CALLF FuncTagSetText_ShapeSize(@"@C:{C_注釈}@{(BASE:対象:体重)/10}Kg@/C@", 19, 1, 1)
+CALL WndMgr_TextAdd(0, LCNT++, @"%RESULTS%")
+CALL WndMgr_TextSet(0, LCNT++, @"@C:{カラー_選択不可}@-@/C@" * 25)
+CALL WndMgr_TextSet(0, LCNT, @"@C:{C_注釈}@B-W-H@/C@")
+CALLF FuncTagSetText_ShapeSize(@"@C:{C_注釈}@{(BASE:対象:バスト)/10}-{(BASE:対象:ウェスト)/10}-{(BASE:対象:ヒップ)/10}@/C@", 20, 1, 1)
+CALL WndMgr_TextAdd(0, LCNT++, @"%RESULTS%")
+CALL WndMgr_TextSet(0, LCNT++, @"@C:{カラー_選択不可}@-@/C@" * 25)
+LCNT = LCNT + 2
+CALL WndMgr_TextSet(0, LCNT++, @"@S@♪ PERFOMANCE STATUS@/S@")
+LCNT++
+CALL WndMgr_TextSet(0, LCNT, @"@C:{C_注釈}@歌唱@/C@")
+CALLF FuncTagSetText_ShapeSize(@"{(ABL:対象:歌唱)}", 8, 1, 1)
+CALL WndMgr_TextAdd(0, LCNT, @"@C:{C_注釈}@%RESULTS%@/C@")
+LOCALS '= FuncTagSetText_CreateColorBarText((ABL:対象:歌唱), 300, 40, 0x11FFBD, 0xAAFFA9, 0x000000, 0 )
+CALL WndMgr_TextAdd(0, LCNT, @" %LOCALS%" )
+LCNT++
+CALL WndMgr_TextSet(0, LCNT, @"@C:{C_注釈}@COOL@/C@")
+CALLF FuncTagSetText_ShapeSize(@"{(ABL:対象:演技力ＣＯ)}", 8, 1, 1)
+CALL WndMgr_TextAdd(0, LCNT, @"@C:{C_注釈}@%RESULTS%@/C@")
+LOCALS '= FuncTagSetText_CreateColorBarText((ABL:対象:演技力ＣＯ), 300, 40, 0x00FFFF, 0xf2fcfe, 0x000000, 0 )
+CALL WndMgr_TextAdd(0, LCNT, @" %LOCALS%" )
+LCNT++
+CALL WndMgr_TextSet(0, LCNT, @"@C:{C_注釈}@CUTE@/C@")
+CALLF FuncTagSetText_ShapeSize(@"{(ABL:対象:演技力ＣＵ)}", 8, 1, 1)
+CALL WndMgr_TextAdd(0, LCNT, @"@C:{C_注釈}@%RESULTS%@/C@")
+LOCALS '= FuncTagSetText_CreateColorBarText((ABL:対象:演技力ＣＵ), 300, 40, 0xFFC0C0, 0xffdde1, 0x000000, 0 )
+CALL WndMgr_TextAdd(0, LCNT, @" %LOCALS%" )
+LCNT++
+CALL WndMgr_TextSet(0, LCNT, @"@C:{C_注釈}@PASSION@/C@")
+CALLF FuncTagSetText_ShapeSize(@"{(ABL:対象:演技力ＰＡ)}", 5, 1, 1)
+CALL WndMgr_TextAdd(0, LCNT, @"@C:{C_注釈}@%RESULTS%@/C@")
+LOCALS '= FuncTagSetText_CreateColorBarText((ABL:対象:演技力ＰＡ), 300, 40, 0xEE6600, 0xFFFF98, 0x000000, 0 )
+CALL WndMgr_TextAdd(0, LCNT, @" %LOCALS%" )
+LCNT++
+CALL WndMgr_TextSet(0, LCNT, @"@C:{C_注釈}@LEWD@/C@")
+CALLF FuncTagSetText_ShapeSize(@"{(ABL:対象:演技力ＬＥ)}", 8, 1, 1)
+CALL WndMgr_TextAdd(0, LCNT, @"@C:{C_注釈}@%RESULTS%@/C@")
+LOCALS '= FuncTagSetText_CreateColorBarText((ABL:対象:演技力ＬＥ), 300, 40,0xA30062, 0xfc6767, 0x000000, 0 )
+CALL WndMgr_TextAdd(0, LCNT, @" %LOCALS%" )
+LCNT++
+LCNT++
+CALL WndMgr_TextSet(0, LCNT, @"@C:{C_注釈}@Popularity@/C@")
+CALLF FuncTagSetText_ShapeSize(@"{(P_アイドル人気:対象:0)}", 12, 1, 1)
+CALL WndMgr_TextAdd(0, LCNT, @"@C:{C_注釈}@%RESULTS%@/C@")
+LCNT++
+
+;-------------------------------------------------
+;ライブ公演リスト
+;-------------------------------------------------
+@PERFORMANCE_DRAW_LIVELIST_WINDOW(WINDOW_ID, 対象)
+#DIM WINDOW_ID
+#DIM 対象
+#DIM LCNT
+#DIM ITER
+#DIM CONST ライブ公演最大数 = 4
+#DIM CONST C_注釈 = 0xa7a9be
+#DIMS CONST 難易度表記 = "気軽", "普通", "白熱", "熾烈", "至高"
+
+LCNT = 0
+LCNT++
+
+;ライブイベントが未生成の場合生成
+IF P_ライブ情報:対象:0 == ""
+    FOR ITER, 0, ライブ公演最大数
+        CALL PERFORMANCE_GENERATE_LIVE(ITER, 対象)
+    NEXT
+ENDIF
+
+;リスト出力
+FOR ITER, 0, ライブ公演最大数
+    CALLF FuncTagSetText_ShapeSize(@"{ITER + 1}. %DIC_GET(P_ライブ情報:対象:ITER, "名称")%", 40, 1, 0)
+    CALL WndMgr_TextSet(WINDOW_ID, LCNT, @"@B:{ITER + 2000}@%RESULTS%@/B@")
+    CALL WndMgr_TextAdd(WINDOW_ID, LCNT, @"　@C:{C_注釈}@（演目:%P_演目名:TOINT(DIC_GET(P_ライブ情報:対象:ITER, "演目"))%　難易度:%難易度表記:TOINT(DIC_GET(P_ライブ情報:対象:ITER, "規模"))%）@/C@")
+    LCNT++
+    CALL WndMgr_TextSet(WINDOW_ID, LCNT++, @"@C:{カラー_選択不可}@-@/C@" * 104)
+NEXT
+
+@PERFORMANCE_GENERATE_LIVE(ID, 対象)
+#DIM ID
+#DIM 対象
+#DIMS ライブ名称
+#DIM ライブ規模
+#DIM ライブ演目
+
+;ライブ規模の決定
+{
+    SELECTCASE IFRAND(
+        "0TO19", 1,
+        "20TO39", P_アイドル人気:対象:0 >= 500,
+        "D0TO10,40TO59", P_アイドル人気:対象:0 >= 5000,
+        "D0TO29,60TO79", P_アイドル人気:対象:0 >= 75000,
+        "D0TO79,80TO99", P_GB開催フラグ == 1
+        )
+}
+    CASE 0 TO 19
+        ライブ規模 = 0
+    CASE 20 TO 39
+        ライブ規模 = 1
+    CASE 40 TO 59
+        ライブ規模 = 2
+    CASE 60 TO 79
+        ライブ規模 = 3
+    CASE 80 TO 99
+        ライブ規模 = 4
+    CASEELSE
+ENDSELECT
+;ライブ演目の決定
+;最後の一つは必ずえっちいの
+IF ID == P_ライブ公演最大数 - 1
+    ライブ演目 = P_LEWD
+ELSE
+    ライブ演目 = RAND:3
+ENDIF
+
+IF ライブ演目 != P_LEWD
+    SELECTCASE ライブ規模
+        CASE 0 
+            ライブ名称 = %SPLIT_RAND("ストリートライブ/路上ライブ/路上の弾き語り",1)%
+        CASE 1
+            ライブ名称 = %SPLIT_RAND("タウンホールライブ/街角のイベントライブ/ローカルイベントライブ",1)%
+        CASE 2
+            ライブ名称 = %SPLIT_RAND("シティホールライブ/ナショナルイベントライブ/ミュージックフェス",1)%
+        CASE 3
+            ライブ名称 = %SPLIT_RAND("スペースポートライブ/プラネタリィイベントライブ/グローバルミュージックフェス",1)%
+        CASE 4
+            ライブ名称 = ギャラクティック・ブロードウェイ
+    ENDSELECT
+ELSE
+    SELECTCASE ライブ規模
+        CASE 0 
+            ライブ名称 = %SPLIT_RAND("場末の地下クラブハウス/地下ライブイベント/スラム街の弾き語り",1)%
+        CASE 1
+            ライブ名称 = %SPLIT_RAND("地下社会シンジケートの集会/ローカルマフィアの会合/アングラフェス",1)%
+        CASE 2
+            ライブ名称 = %SPLIT_RAND("腐敗した政党集会/暗黒街の見世物/地下社会の資金パーティ/海賊組織の集会",1)%
+        CASE 3
+            ライブ名称 = %SPLIT_RAND("黒カルテルのパーティ/巨大資本の闇集会/カルティストのサバト/星間シンジケートの会合",1)%
+        CASE 4
+            ライブ名称 = ギャラクティック・ブロードウェイ
+    ENDSELECT
+ENDIF
+P_ライブ情報:対象:ID '= DIC_SET(P_ライブ情報:対象:ID, "名称", @"%ライブ名称%")
+P_ライブ情報:対象:ID '= DIC_SET(P_ライブ情報:対象:ID, "規模", @"{ライブ規模}")
+P_ライブ情報:対象:ID '= DIC_SET(P_ライブ情報:対象:ID, "演目", @"{ライブ演目}")
+
+RETURN 
+
+@PERFORMANCE_CHECK_STARTABLE(対象, 変更対象プリセットID)
+#DIM 対象
+#DIM 変更対象プリセットID
+#DIM 編成枚数合計 
+#DIM ITER
+#DIM キャラ編成不可カード有
+#DIM エラー数
+
+編成枚数合計 = 0
+キャラ編成不可カード有 = 0
+エラー数 = 0
+
+FOR ITER, 0, P_デッキ最大数
+    編成枚数合計 += P_編成カード枚数:対象:変更対象プリセットID:ITER
+    TRYCALLFORM PERFORMANCE_SETTABLE_BY_CHARA_{P_編成カードID:対象:変更対象プリセットID:ITER}(対象)
+    SIF RESULT == 0
+        キャラ編成不可カード有 = 1
+NEXT
+
+IF !(編成枚数合計 >= 10 && 編成枚数合計 <= 20)
+    CALL COLOR_PRINTL("カードの枚数は10枚以上20枚以下である必要があります", カラー_注意)
+    エラー数 ++
+ENDIF
+
+IF キャラ編成不可カード有
+    CALL COLOR_PRINTL("キャラクターが編成条件を満たしていなカードが編成に含まれています", カラー_注意)
+    エラー数 ++
+ENDIF
+
+IF エラー数 != 0
+    WAIT
+    CLEARLINE エラー数
+    RETURN -1
+ENDIF
+RETURN 1
+
+@PERFORMANCE_MAKE_DECK(対象, 変更対象プリセットID)
+#DIM 対象
+#DIM 変更対象プリセットID
+#DIM 編成IDX
+#DIM デッキIDX
+#DIM カードID
+#DIM 枚数
+#DIM ITER
+VARSET P_デッキ, 0
+デッキIDX = 0
+
+FOR 編成IDX, 0, P_デッキ最大数
+    カードID = P_編成カードID:対象:変更対象プリセットID:編成IDX
+    SIF カードID == 0
+        CONTINUE
+    枚数 = P_編成カード枚数:対象:変更対象プリセットID:編成IDX
+    FOR ITER, 0, 枚数
+        P_デッキ:デッキIDX = カードID
+        デッキIDX ++
+    NEXT
+NEXT
+

@@ -1,0 +1,466 @@
+﻿;-------------------------------------------------
+;「ライブ活動」の本体
+;-------------------------------------------------
+@SHOP_LIFE_LIVE_PERFORMANCE(対象)
+#DIM 対象
+#DIM 実行ライブID
+
+;メニュー画面呼び出し
+;-------------------------------------------------
+CALL PERFORMMANCE_MENU(対象)
+実行ライブID = RESULT 
+SIF 実行ライブID == -1
+    RETURN -1
+
+;ゲーム部呼び出し
+;-------------------------------------------------
+CALL SINGLE_DRAWLINE
+PRINTFORML %ANAME(対象)%は%DIC_GET(P_ライブ情報:対象:実行ライブID, "名称")%にやってきた
+P_実行ライブ情報 = %P_ライブ情報:対象:実行ライブID%
+CALL LIVE_PERFORMANCE_LIVE(対象, 実行ライブID)
+
+;ライブ実行後の処理
+;-------------------------------------------------
+
+IF P_ライブ後調教フラグ == 1
+    PRINTL
+    PRINTFORMW ...
+    PRINTFORMW ..
+    PRINTFORMW .
+    CALL COLOR_PRINTW(@"理性を失った観客たちの獣欲に満ちた瞳が%ANAME(対象)%に向けられる……", カラー_ピンク)
+    CALL ASK_MULTI("全力で逃げる","なすがまま","高みの見物")
+    PRINTL
+    SELECTCASE RESULT
+        CASE 0
+            PRINTFORMW %ANAME(対象)%は観客の魔手を払いのけ、脱兎のごとくその場を後にした……
+        CASE 1
+            PRINTFORMW %ANAME(対象)%は抵抗を諦め、伸びる魔の手に身を委ねた……
+            CALL PERFORMMANCE_TRAIN(対象, "乱交")
+        CASE 2
+            PRINTFORMW %ANAME(対象)%は伸びる魔の手をひらりとかわすと高台によじ登り、凶行に及ぶ観客たちを眺め始めた
+            CALL PERFORMMANCE_TRAIN(対象, "見物")
+    ENDSELECT
+ENDIF
+
+;ライブ実行後生成済みのライブ情報を初期化
+VARSET P_ライブ情報
+;実行キャラを行動済みに
+CFLAG:対象:行動済み = 1
+
+RETURN 1
+
+
+;-------------------------------------------------
+;「ライブ活動」ライブパート
+;-------------------------------------------------
+@LIVE_PERFORMANCE_LIVE(対象, 実行ライブID)
+#DIM ITER
+#DIM 対象
+#DIM 実行ライブID
+#DIM 基礎パフォーマンス値, 4
+#DIM 補正パフォーマンス値, 4
+#DIM エモーション値
+#DIM 合計エモーション値
+#DIM ターン計パフォーマンス値
+#DIM 合計パフォーマンス値
+#DIM ライブ成否判定値
+#DIM 演目
+#DIM 規模
+#DIMS 選択カード名
+#DIM 選択カードＩＤ
+
+#DIM 有効キー値, P_手札最大数
+
+演目 = TOINT(DIC_GET(P_ライブ情報:対象:実行ライブID, "演目"))
+規模 = TOINT(DIC_GET(P_ライブ情報:対象:実行ライブID, "規模"))
+P_ターン数 = 9
+
+;-------------------------------------------------
+;初期化処理
+;-------------------------------------------------
+VARSET P_手札, 0
+合計エモーション値 = 0
+合計パフォーマンス値 = 0
+
+;初期演技力補正値の設定
+FOR ITER, 0, P_演目要素数
+    IF ITER == 演目
+        演技力補正値:ITER = 120
+    ELSE
+        演技力補正値:ITER = 50
+    ENDIF
+NEXT
+IF 演目 != P_LEWD
+    演技力補正値:P_LEWD = 0
+ENDIF
+
+;デッキのシャッフル
+CALL PERFORMANCE_SHAFFLE_DECK(P_デッキ)
+
+FOR ITER, 0, P_デッキ最大数
+    DEBUGPRINTFORML P_デッキ:{ITER}の中身{P_デッキ:ITER}
+NEXT
+
+;基礎パフォーマンス値
+FOR ITER, 0 , P_演目要素数
+    基礎パフォーマンス値:ITER = ABL:対象:演目 + ABL:対象:歌唱 / P_演目要素数
+NEXT
+
+;観客心理抵抗値
+観客心理抵抗値 = 心理障壁基準値 + (P_難易度係数 * TOINT(DIC_GET(P_ライブ情報:対象:実行ライブID, "規模")))
+
+;トークン初期化
+VARSET P_トークン数
+
+;ステージ衣装の設定
+FOR ITER, 0, CLOTH_PART_NUM
+    P_ステージ衣装:0:ITER = CLOTH:(対象):ITER
+NEXT
+
+;-------------------------------------------------
+;ライブパフォーマンスのメイン処理
+;-------------------------------------------------
+CALL SINGLE_DRAWLINE
+PRINTFORMW %ANAME(対象)%がステージの中心に立つ
+PRINTL
+PRINTFORMW ―― LIVE START !! ――
+PRINTL
+FONTITALIC
+CUSTOMDRAWLINE ―
+CALL GET_PORT_NAME(CHARACTER_POSITION)
+PRINTFORMW ♪　%RESULTS%　%DIC_GET(P_ライブ情報:対象:実行ライブID, "名称")%　♪
+CUSTOMDRAWLINE ―
+FONTREGULAR
+FOR P_経過ターン数, 0, P_ターン数
+    ;ヘッダー処理
+    CUSTOMDRAWLINE ―
+    PRINTFORML 演目：%P_演目名:演目%
+    ;ターン数表示
+    PRINTFORM ターン数：
+    SETCOLOR カラー_注意
+    FOR ITER, 0, P_ターン数
+        IF P_経過ターン数 > ITER
+            PRINT ★
+        ELSE
+            PRINT ☆
+        ENDIF
+        SIF ITER != 0 && (ITER + 1) % (P_ターン数 / 3) == 0
+            PRINT |
+    NEXT
+    RESETCOLOR
+    PRINTL
+    PRINTL
+    PRINTFORML TOTAL PERFORMANCE SCORE：{合計パフォーマンス値}    
+    PRINTFORML TOTAL EMOTION POINT：{合計エモーション値}
+    DRAWLINE
+
+    IF P_経過ターン数 < (P_ターン数 / 3)
+        PRINTFORM 【序幕】
+    ELSEIF P_経過ターン数 < (P_ターン数 / 3) * 2
+        PRINTFORM 【幕間】
+    ELSEIF P_経過ターン数 < (P_ターン数 / 3) * 3
+        PRINTFORM 【終幕】
+    ELSE
+        PRINTFORM ENCORE!!
+    ENDIF
+    PRINTL
+    PRINTL
+
+    ;パフォーマンス前の情景描写
+    CALL PERFORMMANCE_DESC_TOP(対象, 演目, 合計エモーション値)
+
+    ;第一ターンは手札3枚からスタート
+    IF P_経過ターン数 == 0
+        CALL PERFORMANCE_DRAW_CARD(3, P_手札, P_デッキ, -1)
+    ENDIF
+
+    P_アクション数 = 1
+    P_コンボ数 = 0
+    WHILE P_アクション数 > 0
+    ;パフォーマンスアクションのヘッダ描画
+        DRAWLINE
+        PRINTFORML ― CHOICE YOUR PERFORMANCE CARD ―
+        PRINTFORM ACT:{P_アクション数}
+        IF P_コンボ数 != 0
+            CALL COLOR_PRINT(@"  ― {P_コンボ数} CHAIN !! ―", カラー_女)
+        ENDIF
+        PRINTL
+
+        PRINTFORM TOKEN:
+        ;所持トークンの表示
+        IF P_トークン数:P_トークン_親衛隊 > 0
+            CALL COLOR_PRINT(@"親衛隊×{P_トークン数:P_トークン_親衛隊}   ", カラー_CU)
+        ENDIF
+        IF P_トークン数:P_トークン_快楽 > 0
+            CALL COLOR_PRINT(@"快楽×{P_トークン数:P_トークン_快楽}   ", カラー_LE)
+        ENDIF
+        PRINTL
+        ;付与CCの表示
+        PRINTFORM CLOWD CONTROL:
+        FOR ITER, 0, LIST_COUNT(P_付与CC)
+            PRINTFORM 【%LIST_GET(P_付与CC, ITER)%】
+            PRINTPLAIN    
+        NEXT
+        PRINTL
+        DRAWLINE
+        SETCOLOR カラー_選択不可
+    ;衣装に関する描写
+        CALL PERFORMMANCE_DESC_CLOTH(対象)
+        PRINTL
+    ;補正値の描写
+        PRINTFORM 補正値 
+        FOR ITER, 0, P_演目要素数
+            PRINTFORM %P_演目名:ITER%:
+            IF 演技力補正値:ITER < 100
+                SETCOLOR カラー_選択不可
+            ELSEIF 演技力補正値:ITER < 200
+                RESETCOLOR
+            ELSE
+                SETCOLOR カラー_オレンジ
+            ENDIF
+            PRINTFORM {演技力補正値:ITER}
+            PRINTFORM %"\%", 5, LEFT%
+            SETCOLOR カラー_選択不可
+        NEXT
+        RESETCOLOR
+        PRINTL
+        PRINTL
+
+    ;-------------------------------------------------
+    ;カードプレイ処理
+    ;-------------------------------------------------
+        WHILE 1
+            VARSET 有効キー値, 0
+            FOR ITER, 0 ,P_手札最大数
+                SIF P_手札:ITER == 0
+                    BREAK
+    ;カードはプレイ条件を満たしているか？
+                TRYCALLFORM PERFORMANCE_PLAYABLE_{P_手札:ITER}
+                IF RESULT == 1
+                    RESETCOLOR
+                    TRYCALLFORM PERFORMANCE_COMNAME_{P_手札:ITER}
+                    PRINTBUTTON @"[%RESULTS, 20, LEFT%]", ITER
+                ELSE
+                    SETCOLOR カラー_選択不可
+                    TRYCALLFORM PERFORMANCE_COMNAME_{P_手札:ITER}
+                    PRINTBUTTON @"[%RESULTS, 20, LEFT%]", ITER + 1000
+                    CALL PERFORMANCE_PUSH_ARRAY(有効キー値, ITER + 1000)
+                ENDIF
+                PRINTFORM %"",10,RIGHT%
+                SETCOLOR カラー_注釈
+                TRYCALLFORM PERFORMANCE_STATUS_DESC_{P_手札:ITER}
+                PRINTFORM %RESULTS%
+                RESETCOLOR
+                PRINTL
+            NEXT
+            PRINTL
+            PRINTBUTTON "[アクションをスキップ]", 999
+
+    ;入力受付処理
+    ;-------------------------------------------------
+            WHILE 1
+                INPUT
+                P_選択手札IDX = RESULT 
+                IF (RESULT > 1000 && FINDELEMENT(有効キー値, RESULT) == -1)
+                    CLEARLINE 1
+                    CONTINUE
+                ELSEIF FINDELEMENT(有効キー値, RESULT) != -1 || RESULT == 999
+                    CLEARLINE 1
+                    BREAK
+                ENDIF
+                IF RESULT < 0 || RESULT > P_手札最大数 - 1 || P_手札:RESULT == 0
+                    CLEARLINE 1
+                    CONTINUE
+                ENDIF
+                BREAK
+            WEND
+
+    ;プレイ不可のカードを選択した場合の処理
+            IF P_選択手札IDX >= 1000
+                TRYCALLFORM PERFORMANCE_NOTPLAYABLE_MESSAGE_{P_手札:(P_選択手札IDX - 1000)}
+                PRINTL
+            ELSE
+                BREAK
+            ENDIF
+        WEND
+
+        IF P_手札:0 != 0 && P_選択手札IDX != 999
+            選択カードＩＤ = P_手札:P_選択手札IDX
+            TRYCALLFORM PERFORMANCE_COMNAME_{選択カードＩＤ}
+            選択カード名 = %RESULTS%
+
+            CLEARLINE 1
+            CALL COLOR_PRINTW(@"➡[%選択カード名%]をプレイ", カラー_注釈)
+            PRINTL
+
+    ;カード効果処理
+    ;-------------------------------------------------
+            ARRAYREMOVE P_手札, P_選択手札IDX, 1
+            TRYCALLFORM PERFORMANCE_MAIN_{選択カードＩＤ}(対象)
+            CALL PERFORMANCE_APPLY_CARDEFFECT(RESULTS)
+            TRYCALLFORM PERFORMANCE_PLAY_MESSAGE_{選択カードＩＤ}(対象)
+            PRINTL
+            TRYCALLFORM PERFORMANCE_CATEGORY_{選択カードＩＤ}
+            ;ドン引き処理
+            IF 演目 != P_LEWD && DIC_GET(RESULTS, "演目") == "LEWD"
+                ;CC発情が付与されていない場合ドン引き
+                IF LIST_INDEXOF(P_付与CC, "発情") == -1
+                    PRINTFORML ――観客たちは公然の場で痴態にふける%ANAME(対象)%の姿に驚き、顔をしかめた……
+                    CALL COLOR_PRINTW(@"場違いな演技に観客は不快感を抱いている(心理抵抗値 +15\%)", カラー_注意)
+                    TIMES 観客心理抵抗値, 1.15
+                ELSE
+                    PRINTFORML ――観客たちは恍惚とした様子で痴態にふける%ANAME(対象)%を眺めている……
+                ENDIF
+            ENDIF 
+        ELSE
+            CALL COLOR_PRINTW(@"アクションがスキップされた", カラー_選択不可)
+        ENDIF
+        WAIT
+        P_アクション数 --
+        P_コンボ数 ++
+    WEND
+
+    ;パフォーマンス値の計算処理
+    ターン計パフォーマンス値 = 0
+    FOR ITER, 0 , P_演目要素数
+        補正パフォーマンス値:ITER = 基礎パフォーマンス値:ITER * (演技力補正値:ITER)
+        補正パフォーマンス値:ITER　= 補正パフォーマンス値:ITER / 100
+        ターン計パフォーマンス値 += 補正パフォーマンス値:ITER
+    NEXT
+    合計パフォーマンス値 += ターン計パフォーマンス値
+
+    ;CC効果による補正
+    IF LIST_INDEXOF(P_付与CC, "ヘドバン") != -1
+        CALL COLOR_PRINTL(@"――%ANAME(対象)%の刻む激しいビートに観客たちもヘッドバンキングで応じる！ (心理抵抗値 -5\%)")
+        TIMES 観客心理抵抗値, 0.95
+    ENDIF
+    WAIT
+
+    ;エモ値の計算
+    エモーション値 = ターン計パフォーマンス値 - 観客心理抵抗値
+    ;演技が全く響かないということは無いはずなので最低保障10点をつける
+    SIF エモーション値 < 10
+        エモーション値 = 10
+    合計エモーション値 += エモーション値
+
+
+;    ;聴衆のリアクション描写
+    IF エモーション値 < 10
+        PRINTFORML %ANAME(対象)%の演技は観客の心の壁を超えることができていない！
+        PRINTFORML ……パフォーマンスが虚しく空回りする
+    ENDIF
+    PRINTL
+    ;ターン終了時集計処理
+    CALL COLOR_PRINTL("<<TURN END RESULT>>", カラー_注意)
+    SETCOLOR カラー_注釈
+    PRINTL
+    PRINTFORML 獲得パフォーマンス値：({ターン計パフォーマンス値})
+    PRINTFORML 聴衆心理抵抗値 ({観客心理抵抗値})
+    PRINTFORML 合計エモーション値：{合計エモーション値}(+{エモーション値})
+    IF 演目 != P_LEWD && LIST_INDEXOF(P_付与CC, "発情") == -1
+        CALL DRAW_ANIMATION_GAUGE(合計エモーション値, 1000, 100, 0xFFFF98, 0xEE6600, 0x000000, 0)
+    ELSE
+        CALL DRAW_ANIMATION_GAUGE(合計エモーション値, 1000, 100, カラー_LE, カラー_警告, 0x000000, 0)
+    ENDIF
+    PRINTL
+    PRINTL
+    CALL PERFORMANCE_DRAW_CARD(1, P_手札, P_デッキ)
+    RESETCOLOR
+    PRINTL
+    WAIT
+NEXT
+
+CALL PERFORMANCE_END(対象, 演目, 規模, 合計エモーション値)
+RETURN
+
+;-------------------------------------------------
+;ライブ終了処理
+;-------------------------------------------------
+@PERFORMANCE_END(対象, 演目, 規模, 合計エモーション値)
+#DIM 対象
+#DIM 演目
+#DIM 規模
+#DIM 合計エモーション値
+#DIM 評価係数
+#DIM 獲得人気
+#DIM 獲得報酬
+CALL SINGLE_DRAWLINE
+CALL COLOR_PRINTL("<< FINISH !! >>", カラー_注意)
+PRINTFORMW %ANAME(対象)%は演目を終えた！
+PRINTL
+
+;最終スコア表示
+PRINTFORMW 合計エモーション値：{合計エモーション値}
+
+;評価テキスト表示
+PRINTW
+CALL PERFORMMANCE_DESC_RESULT(対象, 演目, 合計エモーション値)
+PRINTW
+
+;合計エモーション値からの評価係数算出
+SELECTCASE 合計エモーション値
+    CASE 0 TO 99
+        評価係数 = 20
+    CASE 100 TO 299
+        評価係数 = 40
+    CASE 300 TO 499
+        評価係数 = 100
+    CASE 500 TO 699
+        評価係数 = 120
+    CASE 700 TO 899
+        評価係数 = 140
+    CASEELSE
+        評価係数 = 160
+ENDSELECT
+
+;アイドル人気,報酬の加算の加算
+SELECTCASE 規模
+    CASE 0
+        獲得人気 = RAND(80,100) * 評価係数 / 100
+        獲得報酬 = 獲得人気 * RAND(40, 50)
+    CASE 1
+        獲得人気 = RAND(800,1000) * 評価係数 / 100
+        獲得報酬 = 獲得人気 * RAND(20, 30)
+    CASE 2
+        獲得人気 = RAND(8000,10000) * 評価係数 / 100
+        獲得報酬 = 獲得人気 * RAND(240, 480) / 100
+    CASE 3
+        獲得人気 = RAND(40000,50000) * 評価係数 / 100
+        獲得報酬 = 獲得人気 * RAND(240, 320) / 100
+    CASE 4
+        獲得人気 = RAND(80000,100000) * 評価係数 / 100
+        獲得報酬 = 獲得人気 * RAND(800, 1000) / 100
+ENDSELECT
+
+;LEWD固有処理
+IF 演目 == P_LEWD
+    獲得報酬 = 獲得報酬 * 150 / 100
+    SIF 合計エモーション値 >= 700
+        P_ライブ後調教フラグ = 1
+ENDIF
+P_アイドル人気:対象:0 += 獲得人気
+MONEY += 獲得報酬
+CALLF FuncTagSetText_Print(@"%ANAME(対象)%のアイドル人気が@C:{カラー_オレンジ}@{獲得人気}@/C@上昇しました", 1)
+CALLF FuncTagSetText_Print(@"イベントの収益として@C:{カラー_オレンジ}@${獲得報酬}@/C@を得ました", 1)
+PRINTL
+
+
+;経験値の処理
+LOCAL = 規模 / 2
+CALL PRINT_ADD_EXP(対象, "歌唱経験値", 10 + LOCAL, 1)
+SELECTCASE 演目
+    CASE 0
+        CALL PRINT_ADD_EXP(対象, "演技ＣＯ経験", 10 + LOCAL, 1)
+    CASE 1
+        CALL PRINT_ADD_EXP(対象, "演技ＣＵ経験", 10 + LOCAL, 1)
+    CASE 2
+        CALL PRINT_ADD_EXP(対象, "演技ＰＡ経験", 10 + LOCAL, 1)
+    CASE 3
+        CALL PRINT_ADD_EXP(対象, "演技ＬＥ経験", 10 + LOCAL, 1)
+ENDSELECT
+CALL TRAIN_AUTO_ABLUP(対象)
+
+PRINTFORMW
+
+RETURN
+

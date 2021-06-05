@@ -1,0 +1,51 @@
+﻿#DIM CONST P_演目要素数 = 4
+#DIM CONST P_参加可能人数 = 1
+#DIMS CONST P_演目名 = "COOL","CUTE","PASSION","LEWD"
+#DIM CONST P_COOL = 0
+#DIM CONST P_CUTE = 1
+#DIM CONST P_PASSION = 2
+#DIM CONST P_LEWD = 3
+#DIM CONST カラー_CO = 0x00FFFF
+#DIM CONST カラー_CU = 0xFFC0C0
+#DIM CONST カラー_PA = 0xEE6600
+#DIM CONST カラー_LE = 0xFA58F4
+
+#DIM CONST P_カード種類最大数 = 1000
+#DIM CONST P_手札最大数 = 7
+#DIM CONST P_デッキ最大数 = 20
+#DIM CONST P_編成プリセットID最大数 = 4
+#DIM CONST P_MENU_WINDOW_HEIGHT = 40
+
+#DIM SAVEDATA CHARADATA P_編成カードID, P_編成プリセットID最大数, P_デッキ最大数
+#DIM SAVEDATA CHARADATA P_編成カード枚数, P_編成プリセットID最大数, P_デッキ最大数
+#DIM SAVEDATA CHARADATA P_アイドル人気
+#DIM SAVEDATA P_カードアンロックフラグ, P_カード種類最大数
+
+;ゲーム部分の変数
+#DIM CONST P_ライブ公演最大数 = 4
+#DIM CONST 心理障壁基準値 = 60
+#DIM CONST P_難易度係数 = 30
+ ;ライブ情報に関するデータを格納。_DIC
+ ;キャラクター毎に持たせているので登場キャラ数が300を越えたら拡張する必要あり
+ ;格納データ構造 [名称:NAME],[規模:(0-4)],[演目:(0-4)]
+#DIMS P_ライブ情報, 300, P_ライブ公演最大数
+#DIMS P_実行ライブ情報
+#DIM P_ステージ衣装, P_参加可能人数,  CLOTH_PART_NUM
+#DIM P_デッキ, P_デッキ最大数
+#DIM P_手札, P_手札最大数 
+#DIM P_選択手札IDX
+#DIM P_アクション数
+#DIM P_コンボ数
+#DIM P_トークン数, 4
+#DIM CONST P_トークン_親衛隊 = 1
+#DIM CONST P_トークン_快楽 = 3
+#DIMS P_付与CC ;_LIST
+#DIM P_経過ターン数
+#DIM P_ターン数
+#DIMS P_脱衣衣装名
+#DIM 演技力補正値, 4
+#DIM 観客心理抵抗値
+
+;各種フラグ
+#DIM P_GB開催フラグ
+#DIM P_ライブ後調教フラグ

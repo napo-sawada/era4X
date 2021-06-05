@@ -1,0 +1,97 @@
+﻿;-------------------------------------------------
+;「ライブ活動」の名称
+;-------------------------------------------------
+@SHOP_LIFE_NAME68
+RESULTS:0 '= "ライブ活動"
+
+;-------------------------------------------------
+;「ライブ活動」の選択可否
+;-------------------------------------------------
+@SHOP_LIFE_CHECK68
+SIF CFLAG:MASTER:捕虜先
+    RETURN 0
+;前提クエストを完了しているか
+SIF QUEST_PROGRESS:35 == 0
+    RETURN 0
+;星系港にいる場合のみ実行可
+FOR LOCAL, 0, 星系数
+    SIF 星系座標ID:LOCAL == CHARACTER_POSITION
+        RETURN 1
+NEXT
+
+;-------------------------------------------------
+;「ライブ活動」の選択可能キャラ存在判定
+;-------------------------------------------------
+@SHOP_LIFE_CHECKCHARA68(ARG:0)
+;捕虜でない、同一勢力、子供でない
+RETURN CHECK91(ARG:0, 2, CFLAG:(ARG:0):所属 == CFLAG:MASTER:所属 && (ARG:0 == MASTER || CFLAG:(ARG:0):所属) && !CFLAG:(ARG:0):捕虜先 && !IS_ANIMAL(ARG:0) && CFLAG:(ARG:0):行動不能状態 != 行動不能_子供 && ABL:(ARG:0):歌唱 >= 40)
+
+;-------------------------------------------------
+;「ライブ活動」の左カラムメニューの入力処理
+;-------------------------------------------------
+@SHOP_LIFE_EVENTBUY68
+FLAG:拠点フェイズページ = 1
+FLAG:夜這い = 0
+RETURN 0
+
+;-------------------------------------------------
+;「ライブ活動」の右カラム表示処理
+;-------------------------------------------------
+@SHOP_LIFE_EVENTBUY_SHOW68
+CALL COLUMN_RIGHT_TITLE("活動対象者選択", "0", "1", "1", "----", "歌唱40以上")
+CALL COLUMN_RIGHT_PRINTL
+CALL COLUMN_RIGHT_LINE
+CALL COLUMN_RIGHT_PRINTL
+;標準的なキャラリストとページ移動
+CALL COLUMN_RIGHT_CHARALIST(1)
+RETURN
+
+;-------------------------------------------------
+;「ライブ活動」の右カラムキャラリスト１のボタン（関数未指定なら選択中色なし表示）
+;-------------------------------------------------
+@SHOP_LIFE_LIST1_BUTTON68(ARG:0, ARG:1)
+;キャラ, 選択中カラー表示フラグ, ボタン番号に追加する数値, CHECKCHARAの戻り値
+CALL COLUMN_RIGHT_CHARALIST_BUTTON(ARG:0, 0, SHOP_LIFE_LIST1_ADD_INPUT, ARG:1, 0, "TOP")
+RETURN
+
+
+;-------------------------------------------------
+;「ライブ活動」の右カラムキャラリストボタン表示に追尾させる情報
+;　デフォルトの情報を表示しない場合はRETURN 1
+;-------------------------------------------------
+@SHOP_LIFE_BUTTON_ADD68(ARG:0)
+PRINTPLAIN  
+PRINTFORM 歌唱:
+CALL PRINT_ALPHABET_RANK(ランク_ＳＬＧ, ABL:(ARG:0):歌唱)
+PRINTFORM  {ABL:(ARG:0):歌唱, 3, RIGHT} 
+PRINTFORM 
+PRINTFORM COOL:
+CALL PRINT_ALPHABET_RANK(ランク_ＳＬＧ, ABL:(ARG:0):演技力ＣＯ)
+PRINTFORM  {ABL:(ARG:0):演技力ＣＯ, 3, RIGHT} 
+PRINTFORM 
+PRINTFORM CUTE:
+CALL PRINT_ALPHABET_RANK(ランク_ＳＬＧ, ABL:(ARG:0):演技力ＣＵ)
+PRINTFORM  {ABL:(ARG:0):演技力ＣＵ, 3, RIGHT} 
+PRINTFORM 
+PRINTFORM PASSION:
+CALL PRINT_ALPHABET_RANK(ランク_ＳＬＧ, ABL:(ARG:0):演技力ＰＡ)
+PRINTFORM  {ABL:(ARG:0):演技力ＰＡ, 3, RIGHT} 
+PRINTFORM 
+PRINTFORM LEWD:
+CALL PRINT_ALPHABET_RANK(ランク_ＳＬＧ, ABL:(ARG:0):演技力ＬＥ)
+PRINTFORM  {ABL:(ARG:0):演技力ＬＥ, 3, RIGHT} 
+RETURN 1
+;-------------------------------------------------
+;「ライブ活動」
+;-------------------------------------------------
+@SHOP_LIFE_USERSHOP68(対象)
+#DIM 対象
+CALL SHOP_LIFE_LIVE_PERFORMANCE(対象)
+IF RESULT != -1 && P_ライブ後調教フラグ == 0
+    SHOP_TIME ++
+    BEGIN TURNEND
+ELSEIF RESULT != -1 && P_ライブ後調教フラグ == 1
+    P_ライブ後調教フラグ = 0
+    SHOP_TIME ++
+ENDIF
+

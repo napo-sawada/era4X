@@ -1,0 +1,98 @@
+﻿;--------------------------
+; クエスト名　One Step To Broadway
+; [ライブ活動]をアンロックするトリガークエスト
+;--------------------------
+@QUEST_DESCRIPTION_35
+PRINTFORML [クエスト概要]
+PRINTFORML 『アイドル』、この単語の語源については諸説あるが皇国にルーツを持つとする説が有力である
+PRINTFORML 人類が版図を遍く銀河に広げた今日においても、アイドル活動は根強い人気を誇っており、
+PRINTFORML 星間ネットワークを介して配信されるアイドル達の華麗な姿は諸国の人々を熱狂させている
+PRINTFORML
+PRINTFORML しかしそのきらびやかな舞台とは裏腹に、アイドル達の世界は人気と実力のみが物を言う苛烈な戦いの場でもある
+PRINTFORML もし%ANAME(MASTER)%とその仲間たちに気概と実力があれば、このもう一つの戦場で名声を得ることも可能かもしれない……
+PRINTL
+RETURN
+
+;--------------------------
+; クエスト受注可能か
+;--------------------------
+@QUEST_ACCEPTABLE_35
+SIF QUEST_PROGRESS:35 > 0
+	RETURN 0
+
+CALL GET_STAR_ID_FROM_POS(CHARACTER_POSITION)
+SIF STAR_OWNER:RESULT == 国家ID_民主主義
+	RETURN 1
+RETURN 0
+
+;--------------------------
+; クエストの名前を返却
+;--------------------------
+@QUEST_NAME_35
+RESULTS = One Step To Broadway
+RETURN
+
+;--------------------------
+; クエスト本体
+;--------------------------
+@QUEST_BODY_35  
+PRINTFORML 宇宙港のラウンジに備えられたホロスクリーンの前に人だかりができている
+PRINTFORML 映し出された立体映像上には絢爛な衣装に身を包んだ皇国出身のアイドルたちの姿があった
+PRINTFORMW 彼女らがステージ上で華麗なパフォーマンスを披露する度に聴衆から歓声が上がっている
+PRINTFORML 
+PRINTFORML 
+PRINTFORML 映像はラグランジュポイント上に設営された銀河最大規模の娯楽施設
+PRINTFORMW ギャラクティック・ブロードウェイで開催されている国際音楽イベントを中継しているようだ
+PRINTFORML
+PRINTFORML このイベントは星間諸国家の協賛によって開催されている
+PRINTFORMW 仰ぐ御旗やイデオロギーのもとに日夜熾烈な砲火を交わす各国も、イベントの中ではつかの間の休戦を享受することができた
+PRINTFORML 
+PRINTFORML 
+PRINTFORMW ……皇国のアイドル達に続いて壇に上がったのは社会主義国出身のアイドル達のようだ
+PRINTFORML いずれも彫刻を思わせる流麗な顔立ちの美女揃いである
+PRINTFORMW 軍服をモチーフにした衣装に身を包み、一糸乱れぬ完璧な統制の下、郷愁を誘う歌唱を響かせている
+PRINTFORML 
+PRINTFORML 
+PRINTFORMW 続いて現れたのは、機械国家の歌唱アンドロイドのようだ
+PRINTFORML 外見は人間の女性と全く変わらず、そうと知らされていなければ
+PRINTFORMW アンドロイドであることを見抜くのはおそらく不可能だろう……
+PRINTFORML
+PRINTFORML この機械の歌姫は、機械とは到底思えない透き通るような歌声を披露し、瞬く間に聴衆の心を奪った
+PRINTFORMW 彼女の指先にあわせて会場を彩るライブエフェクトが形を変え、演目に華を添えている
+PRINTFORML 
+PRINTFORML 
+PRINTFORMW さらに続いて現れたのは宗教国の聖歌隊の一団で……
+PRINTFORML 
+PRINTFORML 
+PRINTFORML 国威の発揚と対外プロパガンダを目的として、星間国家の強力な後援を得たアイドルが熾烈な鍔迫り合いを演じている
+PRINTFORMW 銀河の覇権闘争がスケールと形を変えてステージの上にあった
+PRINTFORML
+PRINTFORML 『人類文化の恒久的な発展と存続』……そんなイベントに込められたスローガンの裏では
+PRINTFORMW 国家間の弾丸を伴わない戦争が繰り広げられている
+PRINTFORML 
+PRINTFORML 
+PRINTFORMW ところがそんな"国策アイドル"達の間隙を縫って、何の後ろ盾も持たない無名の個人が登壇するケースもあった
+PRINTFORML 
+PRINTFORMW 「ご存知、ないのですか……！？」
+PRINTFORML 
+PRINTFORML 脇に立つ、両手に無数のライトスティックを握り締めた貿易商曰く、
+PRINTFORMW この"無名の個人"の正体は、星間ネットワークに数十億人のフォロワーを持つＶアイドルだというのだ
+PRINTFORMW アイドルの世界では人気と実力さえ伴えば、個人が国家と対等のステージに立つことも不可能ではないのである
+PRINTFORML 
+PRINTFORML 
+PRINTFORMW ホロスクリーンを取り巻く熱狂の前で%ANAME(MASTER)%は思案した
+PRINTFORMW ――ステージへの門戸は誰にでも開かれている。それは%ANAME(MASTER)%とその仲間たちも例外ではない
+PRINTFORML 
+PRINTFORML 宇宙海賊や深宇宙に潜む巨大怪物、大量の砲塔を携えた戦艦と渡り合うことに比べ、
+PRINTFORMW 自分自身を、あるいは仲間をあのブロードウェイの壇上に立たせることは……
+PRINTFORMW それほど難しいことなのだろうか……？
+PRINTL
+CALL COLOR_PRINTL("――[ライブ活動]コマンドが解禁された", カラー_注意)
+CALL COLOR_PRINTL("惑星の星系港上にいる場合、交流画面よりコマンドの実行が可能となる", カラー_注意)
+CALL COLOR_PRINTW("ただし実行には最低限の歌唱力(40以上)が必要だ", カラー_注意)
+PRINTL
+
+
+
+
+QUEST_PROGRESS:35 = 1

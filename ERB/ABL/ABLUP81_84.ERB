@@ -1,0 +1,116 @@
+﻿;経験値のみによる能力上昇(ライブ活動関連能力)
+;-------------------------------------------------
+;演技力ＣＯ
+;-------------------------------------------------
+@ABLUP_EXPNAME81
+RESULTS = 演技ＣＯ経験
+
+@CALC_ABLUP_EXP81(ARG:0)
+;最大値は300
+IF ABL:(ARG:0):演技力ＣＯ >= 300
+	RETURN -1
+ENDIF
+
+LOCAL:0 = ABLUP_NEED_EXP_SLG(ABL:(ARG:0):演技力ＣＯ) / GROWTYPE_RATE(ARG:0, "演技力ＣＯ")
+
+SIF ID_TO_CHARA(FLAG:お気に入り指定キャラ) == ARG:0
+	TIMES LOCAL:0, 0.80
+
+IF TALENT:(ARG:0):サボり魔
+	SELECTCASE ABL:(ARG:0):演技力ＣＯ
+		CASE IS >= 90
+			TIMES LOCAL:0, 1.50
+		CASE IS >= 80
+			TIMES LOCAL:0, 1.25
+		CASEELSE
+			TIMES LOCAL:0, 1.1
+	ENDSELECT
+ENDIF
+RETURN MAX(LOCAL:0, 1)
+
+;-------------------------------------------------
+;演技力ＣＵ
+;-------------------------------------------------
+@ABLUP_EXPNAME82
+RESULTS = 演技ＣＵ経験
+
+@CALC_ABLUP_EXP82(ARG:0)
+;最大値は300
+IF ABL:(ARG:0):演技力ＣＵ >= 300
+	RETURN -1
+ENDIF
+
+LOCAL:0 = ABLUP_NEED_EXP_SLG(ABL:(ARG:0):演技力ＣＵ) / GROWTYPE_RATE(ARG:0, "演技力ＣＵ")
+
+SIF ID_TO_CHARA(FLAG:お気に入り指定キャラ) == ARG:0
+	TIMES LOCAL:0, 0.80
+
+IF TALENT:(ARG:0):サボり魔
+	SELECTCASE ABL:(ARG:0):演技力ＣＵ
+		CASE IS >= 90
+			TIMES LOCAL:0, 1.50
+		CASE IS >= 80
+			TIMES LOCAL:0, 1.25
+		CASEELSE
+			TIMES LOCAL:0, 1.1
+	ENDSELECT
+ENDIF
+RETURN MAX(LOCAL:0, 1)
+
+;-------------------------------------------------
+;演技力ＰＡ
+;-------------------------------------------------
+@ABLUP_EXPNAME83
+RESULTS = 演技ＰＡ経験
+
+@CALC_ABLUP_EXP83(ARG:0)
+;最大値は300
+IF ABL:(ARG:0):演技力ＰＡ >= 300
+	RETURN -1
+ENDIF
+
+LOCAL:0 = ABLUP_NEED_EXP_SLG(ABL:(ARG:0):演技力ＰＡ) / GROWTYPE_RATE(ARG:0, "演技力ＰＡ")
+
+SIF ID_TO_CHARA(FLAG:お気に入り指定キャラ) == ARG:0
+	TIMES LOCAL:0, 0.80
+
+IF TALENT:(ARG:0):サボり魔
+	SELECTCASE ABL:(ARG:0):演技力ＰＡ
+		CASE IS >= 90
+			TIMES LOCAL:0, 1.50
+		CASE IS >= 80
+			TIMES LOCAL:0, 1.25
+		CASEELSE
+			TIMES LOCAL:0, 1.1
+	ENDSELECT
+ENDIF
+RETURN MAX(LOCAL:0, 1)
+
+;-------------------------------------------------
+;演技力ＬＥ
+;-------------------------------------------------
+@ABLUP_EXPNAME84
+RESULTS = 演技ＬＥ経験
+
+@CALC_ABLUP_EXP84(ARG:0)
+;最大値は300
+IF ABL:(ARG:0):演技力ＬＥ >= 300
+	RETURN -1
+ENDIF
+
+LOCAL:0 = ABLUP_NEED_EXP_SLG(ABL:(ARG:0):演技力ＬＥ) / GROWTYPE_RATE(ARG:0, "演技力ＬＥ")
+
+SIF ID_TO_CHARA(FLAG:お気に入り指定キャラ) == ARG:0
+	TIMES LOCAL:0, 0.80
+
+IF TALENT:(ARG:0):サボり魔
+	SELECTCASE ABL:(ARG:0):演技力ＬＥ
+		CASE IS >= 90
+			TIMES LOCAL:0, 1.50
+		CASE IS >= 80
+			TIMES LOCAL:0, 1.25
+		CASEELSE
+			TIMES LOCAL:0, 1.1
+	ENDSELECT
+ENDIF
+RETURN MAX(LOCAL:0, 1)

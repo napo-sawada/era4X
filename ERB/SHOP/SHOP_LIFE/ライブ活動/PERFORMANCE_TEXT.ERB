@@ -1,0 +1,190 @@
+﻿@PERFORMMANCE_DESC_TOP(対象, 演目, 合計エモーション値)
+#DIM 対象
+#DIM 演目
+#DIM 合計エモーション値 
+
+IF 演目 != P_LEWD && LIST_INDEXOF(P_付与CC, "発情") == -1
+    SELECTCASE 合計エモーション値
+        CASE 0 TO 99
+            PRINTFORML 観客の反応:【興味あり】
+            PRINTFORML %ANAME(対象)%の演奏に観客が興味を示し始めている……
+        CASE 100 TO 299
+            PRINTFORML 観客の反応:【傾聴】
+            PRINTFORML %ANAME(対象)%の演奏に観客はじっと耳を傾けている……
+        CASE 300 TO 499
+            PRINTFORML 観客の反応:【まあまあ】
+            PRINTFORML %ANAME(対象)%の演奏に観客が湧く
+            PRINTFORML 場全体が熱気を帯びてきた……
+        CASE 500 TO 699
+            PRINTFORML 観客の反応:【ノリノリ】
+            PRINTFORML %ANAME(対象)%の演奏にあわせて観客がリズムを刻み、歓声をあげる
+            PRINTFORML 場全体が一体感を帯びはじめた……
+        CASE 700 TO 899
+            PRINTFORML 観客の反応:【熱狂】
+            PRINTFORML %ANAME(対象)%の演奏にあわせて観客が大歓声をあげる
+            PRINTFORML 巨大な熱量が場全体を包み込んでいる……
+        CASEELSE
+            PRINTFORML 観客の反応:【心酔】
+            PRINTFORML 今や%ANAME(対象)%は熱狂と大歓声の只中にいる
+            PRINTFORML 今や場は一つの巨大なエネルギーのうねりと化している！
+    ENDSELECT
+ELSE
+    SELECTCASE 合計エモーション値
+        CASE 0 TO 99
+            PRINTFORML 観客の状態:【冷やかし】
+            PRINTFORML 観客は%ANAME(対象)%に次々と卑猥な言葉を投げかけている……
+        CASE 100 TO 299
+            PRINTFORML 観客の状態:【舌なめずり】
+            PRINTFORML 淫猥なパフォーマンスに興じる%ANAME(対象)%に、観客は劣情を抱きはじめている……
+        CASE 300 TO 499
+            PRINTFORML 観客の状態:【興奮】
+            PRINTFORML %ANAME(対象)%が痴態を演じる度に歓声が上がる
+            PRINTFORML 場全体が熱気を帯びてきた……
+        CASE 500 TO 699
+            PRINTFORML 観客の状態:【発情】
+            PRINTFORML 淫らな%ANAME(対象)%の姿に誰もが紅潮し、息を荒げている……
+            PRINTFORML 場全体が獣のような欲望で満ちている……
+        CASE 700 TO 899
+            PRINTFORML 観客の状態:【瓦解する理性】
+            PRINTFORML %ANAME(対象)%が淫欲に満ちた笑みを浮かべる度に観衆が熱狂し、歓声をあげる
+            PRINTFORML 中には興奮のあまり自慰に耽る者もいる……
+            PRINTFORML 濃密な熱気と体液が放つ、むせ返るような臭気が場から理性を奪いとる……
+        CASEELSE
+            PRINTFORML 観客の状態:【狂宴】
+            PRINTFORML 今や人を人たらしめる理性は場から取り払われた
+            PRINTFORML 観衆は完全に理性を失い、誰彼見境なく襲いかかり己の欲望のはけ口としてる
+            PRINTFORML 場全体が汗と精液、愛液の入り交じる巨大な肉欲のうねりと化し、嬌声と悲鳴、絶叫が色を添える
+            PRINTFORML %ANAME(対象)%はステージの上から惨状を見下ろし、恍惚の笑みを浮かべている……
+    ENDSELECT
+ENDIF
+
+@PERFORMMANCE_DESC_RESULT(対象, 演目, 合計エモーション値)
+#DIM 対象
+#DIM 演目
+#DIM 合計エモーション値 
+
+IF 演目 != P_LEWD
+    SELECTCASE 合計エモーション値
+        CASE 0 TO 99
+            PRINTFORML 評価:【いまひとつ】
+            PRINTFORML %ANAME(対象)%の今回のパフォーマンスは今ひとつ盛り上がりに欠けたようだ……
+        CASE 100 TO 299
+            PRINTFORML 評価:【もうひと頑張り】
+            PRINTFORML %ANAME(対象)%が挨拶を終えるとパラパラと拍手がわいた
+            PRINTFORML 頑張りは認めるが……というのが観客の率直な評価のようだ
+        CASE 300 TO 499
+            PRINTFORML 評価:【おおむね好評】
+            PRINTFORML %ANAME(対象)%が挨拶を終えると歓声が沸き指笛が鳴った
+            PRINTFORML 観客たちは%ANAME(対象)%の公演に概ね好意的なようだ
+        CASE 500 TO 699
+            PRINTFORML 評価:【いいね】
+            PRINTFORML %ANAME(対象)%の公演は歓声の中で幕を閉じた
+            PRINTFORML 星間ネットワークの片隅で%ANAME(対象)%の公演に関する話題が盛り上がりを見せている
+        CASE 700 TO 899
+            PRINTFORML 評価:【大盛況】
+            PRINTFORML %ANAME(対象)%のライブは大盛況だった
+            PRINTFORML 観客たちは演目の後も興奮冷め止まぬ様子で語り合っている
+        CASEELSE
+            PRINTFORML 評価:【伝説的公演】
+            PRINTFORML %ANAME(対象)%の公演は大歓声の中で幕を閉じた
+            PRINTFORML この公演は人々の間で長く語り継がれることだろう
+    ENDSELECT
+ELSE
+    SELECTCASE 合計エモーション値
+        CASE 0 TO 99
+            PRINTFORML 評価:【所詮素人】
+            PRINTFORML %ANAME(対象)%は場を盛り上げることができなかった。観客たちは白けた様子で冷ややかな視線を向ける……
+        CASE 100 TO 299
+            PRINTFORML 評価:【初々しい】
+            PRINTFORML 盛り上がりには今ひとつ欠けたものの、これはこれで悪くないという後ろ向きの評価が
+            PRINTFORML 数多の猥語とともに%ANAME(対象)%に贈られた……
+        CASE 300 TO 499
+            PRINTFORML 評価:【場末の娼婦】
+            PRINTFORML %ANAME(対象)%のショーは好評とともに幕を閉じた
+            PRINTFORML 観客たちはさらに過激なパフォーマンスを求めて、%ANAME(対象)%に下品な言葉を浴びせ続けている
+        CASE 500 TO 699
+            PRINTFORML 評価:【高級娼婦】
+            PRINTFORML 淫らな%ANAME(対象)%の姿に誰もが釘付けになっている
+            PRINTFORML すっかり欲情した観客たちは今にも%ANAME(対象)%に襲いかからんばかりだ
+        CASE 700 TO 899
+            PRINTFORML 評価:【色魔】
+            PRINTFORML 観客は%ANAME(対象)%にすっかり魅了されている
+            PRINTFORML 場は愛液と精液が放つ精臭で満たされており、観客は%ANAME(対象)%の一挙手一投足に陶酔している……
+        CASEELSE
+            PRINTFORML 評価:【淫魔】
+            PRINTFORML %ANAME(対象)%を適切に評価できる者は最早この場に残っていない
+            PRINTFORML 観客は皆理性を失っている。無我夢中で自慰に耽る者、目につくものを片端から犯す者、完全に果てて床に転がっている者……
+            PRINTFORML %ANAME(対象)%は観客の理性を完全に破壊してしまった……
+    ENDSELECT
+ENDIF
+
+@PERFORMMANCE_DESC_CLOTH(対象)
+#DIM 対象
+GETFONT
+CHKFONT "Microsoft Himalaya"
+SIF RESULT
+    SETFONT "Microsoft Himalaya"
+PRINTFORM ステージ衣装:
+;衣装の描写 頭から上着
+IF P_ステージ衣装:0:衣装部位_頭 != 0
+    CALL GET_CLOTH_NAME(衣装部位_頭, (P_ステージ衣装:0:衣装部位_頭))
+    PRINTFORM [%RESULTS%]
+ENDIF
+IF P_ステージ衣装:0:衣装部位_首 != 0
+    CALL GET_CLOTH_NAME(衣装部位_首, (P_ステージ衣装:0:衣装部位_首))
+    PRINTFORM [%RESULTS%]
+ENDIF
+IF P_ステージ衣装:0:衣装部位_上着 != 0
+    CALL GET_CLOTH_NAME(衣装部位_上着, (P_ステージ衣装:0:衣装部位_上着))
+    PRINTFORM [%RESULTS%]
+ENDIF
+;衣装の描写 上服(下着上)
+IF P_ステージ衣装:0:衣装部位_上下服 == 0
+    IF P_ステージ衣装:0:衣装部位_上服 != 0
+        CALL GET_CLOTH_NAME(衣装部位_上服, (P_ステージ衣装:0:衣装部位_上服))
+        PRINTFORM [%RESULTS%]
+    ENDIF
+    IF P_ステージ衣装:0:衣装部位_下服 != 0
+        CALL GET_CLOTH_NAME(衣装部位_下服, (P_ステージ衣装:0:衣装部位_下服))
+        PRINTFORM [%RESULTS%]
+    ENDIF
+ELSE
+    CALL GET_CLOTH_NAME(衣装部位_上下服, (P_ステージ衣装:0:衣装部位_上下服))
+    PRINTFORM [%RESULTS%]
+ENDIF
+;衣装の描写 下服(下着下)
+IF P_ステージ衣装:0:衣装部位_上下下着 == 0 && P_ステージ衣装:0:衣装部位_上下服 == 0
+    IF P_ステージ衣装:0:衣装部位_下着上 != 0 && P_ステージ衣装:0:衣装部位_上服 == 0
+        CALL GET_CLOTH_NAME(衣装部位_下着上, (P_ステージ衣装:0:衣装部位_下着上))
+        PRINTFORM [%RESULTS%]
+    ELSEIF P_ステージ衣装:0:衣装部位_下着上 == 0 && P_ステージ衣装:0:衣装部位_上服 == 0
+        CALLF FuncTagSetText_Print(@"@C:{カラー_ピンク}@[胸部露出]@/C@", 0)
+    ENDIF
+    IF P_ステージ衣装:0:衣装部位_下着下 != 0 && P_ステージ衣装:0:衣装部位_下服 == 0
+        CALL GET_CLOTH_NAME(衣装部位_下着下, (P_ステージ衣装:0:衣装部位_下着下))
+        PRINTFORM [%RESULTS%]
+    ELSEIF P_ステージ衣装:0:衣装部位_下着下 == 0 && P_ステージ衣装:0:衣装部位_上服 == 0
+        CALLF FuncTagSetText_Print(@"@C:{カラー_ピンク}@[陰部露出]@/C@", 0)
+    ENDIF
+ELSEIF P_ステージ衣装:0:衣装部位_上下服 == 0
+    CALL GET_CLOTH_NAME(衣装部位_上下下着, (P_ステージ衣装:0:衣装部位_上下下着))
+    PRINTFORM [%RESULTS%]
+ENDIF
+;衣装の描写 腕、靴下からアクセサリ
+IF P_ステージ衣装:0:衣装部位_腕 != 0
+    CALL GET_CLOTH_NAME(衣装部位_腕, (P_ステージ衣装:0:衣装部位_腕))
+    PRINTFORM [%RESULTS%]
+ENDIF
+IF P_ステージ衣装:0:衣装部位_靴下 != 0
+    CALL GET_CLOTH_NAME(衣装部位_靴下, (P_ステージ衣装:0:衣装部位_靴下))
+    PRINTFORM [%RESULTS%]
+ENDIF
+IF P_ステージ衣装:0:衣装部位_靴 != 0
+    CALL GET_CLOTH_NAME(衣装部位_靴, (P_ステージ衣装:0:衣装部位_靴))
+    PRINTFORM [%RESULTS%]
+ENDIF
+IF P_ステージ衣装:0:衣装部位_アクセサリ != 0
+    CALL GET_CLOTH_NAME(衣装部位_アクセサリ, (P_ステージ衣装:0:衣装部位_アクセサリ))
+    PRINTFORM [%RESULTS%]
+ENDIF
+SETFONT
