@@ -30,6 +30,7 @@ WEND
 #DIM ITER
 
 PRINTFORML 宙に無人と思わしき巡洋艦が漂っている
+PRINTFORMW 同乗者入りの移乗ポットで乗り込めれば自分のものにできそうだ。
 FOR ITER, 0, MAX_SLOT
 	IF SHIP_EQUIP:オプション:ITER:(BOARDING_SHIP_ID:MASTER) == 1
 		RESULT = 1
@@ -39,7 +40,6 @@ NEXT
 IF RESULT == 1
 	FINDELEMENT RIDING_WITH, BOARDING_SHIP_ID
 	IF RESULT != -1
-		PRINTFORML 移乗ポッドで乗り込むことができそうだ
 		PRINTL 乗り込みますか?
 		CALL ASK_YN
 		SIF RESULT == 1
