@@ -184,7 +184,9 @@ DRAWLINE
 ;入力
 
 $INPUT_LOOP2
+REDRAW 2
 ONEINPUTS
+REDRAW 0
 
 
 strInputResult '= RESULTS
@@ -195,7 +197,6 @@ IF strInputResult == "_"
 ENDIF
 
 CLEARLINE 2
-REDRAW 1
 
 ;;数字解析できた場合
 ;;セクター内の特定地点をクリックした場合、もしくはセクターマップ切り替え操作した場合のどちらか

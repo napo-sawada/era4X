@@ -71,14 +71,17 @@ RETURN 1
 
 #DIM 有効キー値, P_手札最大数
 
-演目 = TOINT(DIC_GET(P_ライブ情報:対象:実行ライブID, "演目"))
-規模 = TOINT(DIC_GET(P_ライブ情報:対象:実行ライブID, "規模"))
-P_ターン数 = 9
-
 ;-------------------------------------------------
 ;初期化処理
 ;-------------------------------------------------
+演目 = TOINT(DIC_GET(P_ライブ情報:対象:実行ライブID, "演目"))
+規模 = TOINT(DIC_GET(P_ライブ情報:対象:実行ライブID, "規模"))
+
+P_ターン数 = 9
+
 VARSET P_手札, 0
+VARSET P_トークン数
+VARSET P_付与CC
 合計エモーション値 = 0
 合計パフォーマンス値 = 0
 
@@ -96,10 +99,9 @@ ENDIF
 
 ;デッキのシャッフル
 CALL PERFORMANCE_SHAFFLE_DECK(P_デッキ)
-
-FOR ITER, 0, P_デッキ最大数
-    DEBUGPRINTFORML P_デッキ:{ITER}の中身{P_デッキ:ITER}
-NEXT
+; FOR ITER, 0, P_デッキ最大数
+;     DEBUGPRINTFORML P_デッキ:{ITER}の中身{P_デッキ:ITER}
+; NEXT
 
 ;基礎パフォーマンス値
 FOR ITER, 0 , P_演目要素数
@@ -108,9 +110,6 @@ NEXT
 
 ;観客心理抵抗値
 観客心理抵抗値 = 心理障壁基準値 + (P_難易度係数 * TOINT(DIC_GET(P_ライブ情報:対象:実行ライブID, "規模")))
-
-;トークン初期化
-VARSET P_トークン数
 
 ;ステージ衣装の設定
 FOR ITER, 0, CLOTH_PART_NUM
