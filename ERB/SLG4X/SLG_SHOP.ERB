@@ -125,6 +125,9 @@ PRINT 　
 PRINTBUTTON "[z] 任務/人員の設定", "z"
 PRINT 　
 
+PRINTBUTTON "[l] 艦船一覧", "l"
+PRINT 　
+
 FOR ITER, 0, 星系数
 	IF 星系座標ID:ITER == CHARACTER_POSITION
 		PRINTBUTTON "[f] 宇宙港", "f"
@@ -292,6 +295,9 @@ SELECTCASE strInputResult
 		FLAG:502 ++
 		SIF FLAG:502 >= 2
 			FLAG:502 = 0
+	;艦船一覧ウィンドウを表示
+	CASE "l"
+		CALL CREATE_WINDOW_INMAP_SHIPLIST
 	;window4メッセージ枠の拡張表示
 	;基本4行＋枠２のタテ６マスのwindowとしている
 	;[一覧表示 / 戻す]　の操作で必要行数まで拡張するための処理。それでも最大100行。これ以上は

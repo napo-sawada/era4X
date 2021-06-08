@@ -30,60 +30,60 @@ $INPUT_LOOP
 
 DRAWLINE
 
-	CALL DRAW_WINDOW( SECTOR_ID , SELECTED , SHIP_ID, 0)
-	CALL ID2POS(SELECTED)
-		
-	PRINTFORML 　　　　%MESSAGE%
-	PRINTL
+CALL DRAW_WINDOW( SECTOR_ID , SELECTED , SHIP_ID, 0)
+CALL ID2POS(SELECTED)
 
-	IF SELECTED>= 0
-		PRINTFORML 　　　　選択中 #{RESULT:0,2,RIGHT} X:{RESULT:1,2,RIGHT} Y:{RESULT:2,2,RIGHT}
-	ELSE
-		PRINTL
-	ENDIF
+PRINTFORML 　　　　%MESSAGE%
+PRINTL
 
+IF SELECTED>= 0
+	PRINTFORML 　　　　選択中 #{RESULT:0,2,RIGHT} X:{RESULT:1,2,RIGHT} Y:{RESULT:2,2,RIGHT}
+ELSE
 	PRINTL
-	PRINT 　　　　　　　　　
-	IF SELECTED >= 0
-		PRINTBUTTON "[ 　決　定　 ]", -1
-	ELSE
-		SETCOLOR 0x666666
-		PRINT [ 　決　定　 ]
-		RESETCOLOR
-	ENDIF
-	PRINTBUTTON " 　　　　[ キャンセル ]", -10
-	PRINTL
-	PRINTL
-	DRAWLINE
+ENDIF
 
-	INPUT
+PRINTL
+PRINT 　　　　　　　　　
+IF SELECTED >= 0
+	PRINTBUTTON "[ 　決　定　 ]", -1
+ELSE
+	SETCOLOR 0x666666
+	PRINT [ 　決　定　 ]
+	RESETCOLOR
+ENDIF
+PRINTBUTTON " 　　　　[ キャンセル ]", -10
+PRINTL
+PRINTL
+DRAWLINE
 
-	IF RESULT == -10	;;キャンセル。上位メニューへ戻る
-		RETURN ARG:0
-	ELSEIF RESULT == -1	;;選択中座標で決定
-		RETURN SELECTED
-	ELSEIF  RESULT % 10000 == 9999 	;下4ケタ9999なら表示セクターの切り替え
-		SECTOR_ID = RESULT /10000
-		SELECTED = -2
-		GOTO INPUT_LOOP
-	ELSEIF RESULT >= 0
-		CALL ID2POS(RESULT)
-		SECTOR_ID = RESULT:0
-		X_POS = RESULT:1
-		Y_POS = RESULT:2
+INPUT
+
+IF RESULT == -10	;;キャンセル。上位メニューへ戻る
+	RETURN ARG:0
+ELSEIF RESULT == -1	;;選択中座標で決定
+	RETURN SELECTED
+ELSEIF  RESULT % 10000 == 9999 	;下4ケタ9999なら表示セクターの切り替え
+	SECTOR_ID = RESULT /10000
+	SELECTED = -2
+	GOTO INPUT_LOOP
+ELSEIF RESULT >= 0
+	CALL ID2POS(RESULT)
+	SECTOR_ID = RESULT:0
+	X_POS = RESULT:1
+	Y_POS = RESULT:2
 
 			;有効なポイント指定 POSIDに格納してマップ描画更新
-		IF ( X_POS >= 0 && X_POS < MAP_WIDTH ) && ( Y_POS >= 0 && Y_POS < MAP_HEIGHT )
-			SELECTED = SECTOR_ID * 10000 + 100 * X_POS + Y_POS
-			GOTO INPUT_LOOP
+	IF ( X_POS >= 0 && X_POS < MAP_WIDTH ) && ( Y_POS >= 0 && Y_POS < MAP_HEIGHT )
+		SELECTED = SECTOR_ID * 10000 + 100 * X_POS + Y_POS
+		GOTO INPUT_LOOP
 			;無効
-		ELSE	;有効でないポイント指定は　POSID無効化して返す　(-1だと情報窓がプレイヤーを追尾）
-			POSID = -2
-			GOTO INPUT_LOOP
-		ENDIF
-	ELSE	;そのほか
+	ELSE	;有効でないポイント指定は　POSID無効化して返す　(-1だと情報窓がプレイヤーを追尾）
+		POSID = -2
 		GOTO INPUT_LOOP
 	ENDIF
+ELSE	;そのほか
+	GOTO INPUT_LOOP
+ENDIF
 
 
 
@@ -140,7 +140,7 @@ RETURN 0, 0, -1
 
 FOR Y_POS, 0, MAP_HEIGHT
 	FOR X_POS, 0, MAP_WIDTH
-		
+
 		SELECTCASE MAP:SECTOR_ID:X_POS:Y_POS 
 			CASE 星
 				SETBIT gFLAG:0, 0
@@ -165,12 +165,94 @@ RETURN gFLAG:0, gFLAG:1, gFLAG:2
 #DIM COUNTRY_B
 
 
-	SELECTCASE REL_LIKE:COUNTRY_A:COUNTRY_B
-		CASE IS <= -1000
-			RETURNF -1 
-		CASE IS >= 1000
-			RETURNF 1
-		CASEELSE
-			RETURNF 0
-	ENDSELECT
+SELECTCASE REL_LIKE:COUNTRY_A:COUNTRY_B
+	CASE IS <= -1000
+		RETURNF -1 
+	CASE IS >= 1000
+		RETURNF 1
+	CASEELSE
+		RETURNF 0
+ENDSELECT
 
+;-------------------------------------------------
+; @GET_SHIP_STATUS_BY_DIC
+;	引数:SHIP_ID
+;	RESULTS:0 
+;	艦船の諸元データを取得し連想配列([キー:値])形式で返却する
+;-------------------------------------------------
+@GET_SHIP_STATUS_BY_DIC(SHIP_ID)
+#DIM DYNAMIC SHIP_ID
+#DIM DYNAMIC FIREPOWER_LIST, 6
+#DIMS 艦船データ
+
+CALL GET_TOTAL_FIREPOWER(SHIP_ID, FIREPOWER_LIST)
+
+艦船データ '= DIC_SET(艦船データ, "ID", TOSTR(SHIP_ID))
+艦船データ '= DIC_SET(艦船データ, "艦名", SHIP_NAME:SHIP_ID)
+艦船データ '= DIC_SET(艦船データ, "艦種", TOSTR(SHIP_CATEGORY:SHIP_ID))
+艦船データ '= DIC_SET(艦船データ, "艦種名", GET_TYPE_NAME(SHIP_CATEGORY:(SHIP_ID)))
+CALL GET_SHIP_HP(SHIP_ID)
+艦船データ '= DIC_SET(艦船データ, "現HP", TOSTR(RESULT))
+CALL GET_SHIP_TOTAL_HP(SHIP_ID)
+艦船データ '= DIC_SET(艦船データ, "最大HP", TOSTR(RESULT))
+CALL GET_SHIP_SIELD(SHIP_ID)
+艦船データ '= DIC_SET(艦船データ, "現シールド", TOSTR(RESULT))
+CALL GET_SHIP_TOTAL_SIELD(SHIP_ID)
+艦船データ '= DIC_SET(艦船データ, "最大シールド", TOSTR(RESULT))
+艦船データ '= DIC_SET(艦船データ, "座標", TOSTR(SHIP_POSITION:SHIP_ID))
+艦船データ '= DIC_SET(艦船データ, "任務", TOSTR(SHIP_MISSION:SHIP_ID))
+艦船データ '= DIC_SET(艦船データ, "任務名", GET_SHIP_MISSION_STR(SHIP_ID))
+VARSET LOCALS
+FOR LOCAL, 0, VARSIZE("FIREPOWER_LIST")
+	LOCALS '= LIST_ADD(LOCALS, TOSTR(FIREPOWER_LIST:LOCAL))
+NEXT
+艦船データ '= DIC_SET(艦船データ, "合計火力リスト", LOCALS)
+艦船データ '= DIC_SET(艦船データ, "実体弾", LIST_GET(DIC_GET(艦船データ, "合計火力リスト"), 0))
+艦船データ '= DIC_SET(艦船データ, "レーザー", LIST_GET(DIC_GET(艦船データ, "合計火力リスト"), 1))
+艦船データ '= DIC_SET(艦船データ, "ミサイル", LIST_GET(DIC_GET(艦船データ, "合計火力リスト"), 2))
+艦船データ '= DIC_SET(艦船データ, "航空", LIST_GET(DIC_GET(艦船データ, "合計火力リスト"), 3))
+艦船データ '= DIC_SET(艦船データ, "雷撃", LIST_GET(DIC_GET(艦船データ, "合計火力リスト"), 4))
+艦船データ '= DIC_SET(艦船データ, "ビーム", LIST_GET(DIC_GET(艦船データ, "合計火力リスト"), 5))
+CALL GET_SUB_ANTI_AIR(SHIP_ID)
+艦船データ '= DIC_SET(艦船データ, "対空", TOSTR(RESULT))
+CALL GET_AVOID(SHIP_ID)
+艦船データ '= DIC_SET(艦船データ, "回避", TOSTR(RESULT))
+
+RESULTS = %艦船データ%
+RETURN 
+
+;-------------------------------------------------
+; @ARRAYSORT_DIC
+;	連想配列を持つ一次元配列を指定したキーで昇順または降順で挿入ソートする
+;	指定するデータは数値型に変換可能であること
+;	　※一次元配列に-1が格納されていた場合はデータの末尾とみなす
+;	引数:1 連想配列を持つ文字列型一次元配列
+;	引数:2 ソート対象のキー値
+;	引数:3 0 = 昇順, 1 = 降順
+;-------------------------------------------------
+@ARRAYSORT_DIC(DIC, KEY, IS_DESCEND)
+#DIMS REF DIC
+#DIMS DYNAMIC KEY
+#DIM DYNAMIC IS_DESCEND
+#DIM DYNAMIC ELEMENT_COUNT
+
+ELEMENT_COUNT = VARSIZE("DIC")
+FINDELEMENT DIC, "-1"
+IF RESULT != -1
+	ELEMENT_COUNT = RESULT
+ENDIF
+
+FOR LOCAL:0, 1, ELEMENT_COUNT
+	LOCAL:1 = LOCAL:0
+	IF IS_DESCEND == 0
+		WHILE (LOCAL:1 > 0) && (TOINT(DIC_GET(DIC:(LOCAL:1 - 1), KEY))) > (TOINT(DIC_GET(DIC:(LOCAL:1), KEY)))
+			SWAP DIC:(LOCAL:1 - 1), DIC:(LOCAL:1)
+			LOCAL:1 --
+		WEND
+	ELSE
+		WHILE (LOCAL:1 > 0) && (TOINT(DIC_GET(DIC:(LOCAL:1 - 1), KEY))) < (TOINT(DIC_GET(DIC:(LOCAL:1), KEY)))
+			SWAP DIC:(LOCAL:1 - 1), DIC:(LOCAL:1)
+			LOCAL:1 --
+		WEND
+	ENDIF
+NEXT
