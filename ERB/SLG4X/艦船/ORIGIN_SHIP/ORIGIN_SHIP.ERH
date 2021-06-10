@@ -23,8 +23,8 @@
 ; 装備サイズ
 #DIM CONST MAIN_WEAPON_SIZES = 0, 1, 2, 2, 3, 4, 4, 0, 0
 #DIM CONST SUB_WEAPON_SIZES = 0, 1, 1, 2, 3, 4, 4, 0, 0
-#DIM CONST SIELD_SIZES = 0, 1, 1, 2, 3, 4, 4, 0, 0
-#DIM CONST ARMOR_SIZES = 0, 1, 1, 2, 3, 4, 4, 0, 0
+#DIM CONST SIELD_SIZES = 0, 1, 2, 2, 3, 4, 4, 0, 0
+#DIM CONST ARMOR_SIZES = 0, 1, 2, 2, 3, 4, 4, 0, 0
 ; 搭載人員数
 #DIM CONST SHIP_CREW_NUMS = 0, 3, 5, 10, 30, 60, 60, 0, 0
 ; 装備スロット数
