@@ -1,0 +1,38 @@
+﻿;-----------------------------------
+; アーマー
+;-----------------------------------
+@GET_ARMOR_NAME_41
+RESULTS = TIER3超大型軽量装甲
+
+@GET_ARMOR_STATUS_41(STATUS)
+#DIM REF STATUS
+
+STATUS:ARMOR = 6400
+STATUS:AVOID = 12
+STATUS:SIZE = 4
+STATUS:PRICE = 960000
+
+;-----------------------------------
+; アーマーの説明
+;-----------------------------------
+@GET_ARMOR_DESCRIPTION_41
+#DIM STATUS, STATUS_LENGTH
+
+CALL GET_ARMOR_STATUS_41(STATUS)
+CALL GET_ARMOR_NAME_41
+PRINTFORML %RESULTS%
+PRINTFORML ダメージ緩和のための高度な電子制御網が組み込まれた、軽量特殊素材の装甲。
+PRINTFORML 高密度センサー素子によって常に監視された電磁装甲は、ダメージに対する瞬間的強度を増大させる。
+PRINTFORML 装甲      : {STATUS:ARMOR}
+PRINTFORML 回避      : {STATUS:AVOID}
+PRINTFORML サイズ    : {STATUS:SIZE}
+
+;-----------------------------------
+; 装甲の資材
+;-----------------------------------
+@GET_ARMOR_RESOURCE_41(USE_RESOURCE)
+#DIM REF USE_RESOURCE
+
+USE_RESOURCE:装甲合金 = 40
+USE_RESOURCE:合金加工剤 = 80
+USE_RESOURCE:超電導回路 = 80

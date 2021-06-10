@@ -1,0 +1,44 @@
+﻿;-----------------------------------
+; メインウェポン
+;-----------------------------------
+@GET_MAIN_WEAPON_NAME_60
+RESULTS = TIER1高密度エネルギーブレード
+
+@GET_MAIN_WEAPON_STATUS_60(STATUS)
+#DIM REF STATUS
+
+STATUS:DAMAGE = 650
+STATUS:FIRE_RATE = 1
+STATUS:HIT_RATE = 50
+STATUS:FIRE_RANGE = 1
+STATUS:SIZE = 1
+STATUS:WEAPON_TYPE = ビーム
+STATUS:PRICE = 40000
+
+;-----------------------------------
+; メインウェポンの説明
+;-----------------------------------
+@GET_MAIN_WEAPON_DESCRIPTION_60
+#DIM STATUS, STATUS_LENGTH
+
+CALL GET_MAIN_WEAPON_STATUS_60(STATUS)
+CALL GET_MAIN_WEAPON_NAME_60
+PRINTFORML %RESULTS%
+PRINTFORML シールド機能の局所的な高密度化によって形成される、エネルギーブレードの展開機構。
+PRINTFORML 非常に高威力ながら、敵機に対し接触寸前、すれ違い様に使用する関係上、取り扱いが難しい。
+PRINTFORML ダメージ  : {STATUS:DAMAGE}
+PRINTFORML 射撃レート: {STATUS:FIRE_RATE}発/ターン
+PRINTFORML 命中率    : {STATUS:HIT_RATE}
+PRINTFORML 有効距離  : {STATUS:FIRE_RANGE}
+PRINTFORML サイズ    : {STATUS:SIZE}
+
+;-----------------------------------
+; メインウェポンの資材
+;-----------------------------------
+@GET_MAIN_WEAPON_RESOURCE_60(USE_RESOURCE)
+#DIM REF USE_RESOURCE
+
+USE_RESOURCE:武装合金 = 2
+USE_RESOURCE:武装制御機器 = 4
+USE_RESOURCE:シールド発生装置 = 2
+USE_RESOURCE:多重シールド発生装置 = 6

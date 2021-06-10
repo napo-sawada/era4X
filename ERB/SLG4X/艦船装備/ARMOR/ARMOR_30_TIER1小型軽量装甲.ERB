@@ -1,0 +1,36 @@
+﻿;-----------------------------------
+; アーマー
+;-----------------------------------
+@GET_ARMOR_NAME_30
+RESULTS = TIER1小型軽量装甲
+
+@GET_ARMOR_STATUS_30(STATUS)
+#DIM REF STATUS
+
+STATUS:ARMOR = 200
+STATUS:AVOID = 3
+STATUS:SIZE = 1
+STATUS:PRICE = 10000
+
+;-----------------------------------
+; アーマーの説明
+;-----------------------------------
+@GET_ARMOR_DESCRIPTION_30
+#DIM STATUS, STATUS_LENGTH
+
+CALL GET_ARMOR_STATUS_30(STATUS)
+CALL GET_ARMOR_NAME_30
+PRINTFORML %RESULTS%
+PRINTFORML この強化装甲は推力比改善を目的に軽量素材が用いられている。
+PRINTFORML 装甲      : {STATUS:ARMOR}
+PRINTFORML 回避      : {STATUS:AVOID}
+PRINTFORML サイズ    : {STATUS:SIZE}
+
+;-----------------------------------
+; 装甲の資材
+;-----------------------------------
+@GET_ARMOR_RESOURCE_30(USE_RESOURCE)
+#DIM REF USE_RESOURCE
+
+USE_RESOURCE:装甲合金 = 3
+USE_RESOURCE:合金加工剤 = 2
