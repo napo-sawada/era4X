@@ -519,13 +519,17 @@ CALL INIT_STAR_RESOURCE(星系座標ID:10, 国家ID_豊秋津皇国)
 CALL ADD_RESOURCE(星系座標ID:10, 国家ID_豊秋津皇国, 日本酒, 1000)
 
 ; 初期艦
-FOR LOCAL, 0, 24
+FOR LOCAL, 0, 12
+	LOCALS = 朱雀級機動武者A-{LOCAL}
+	CALL INIT_PRESET_SHIP(国家ID_豊秋津皇国, 星系座標ID:10, 朱雀級機動武者, LOCALS, 朱雀級機動武者)
+NEXT
+FOR LOCAL, 0, 12
 	CALL INIT_PRESET_SHIP(国家ID_豊秋津皇国, 星系座標ID:10, 秋月級コルベット, , 秋月級コルベット)
 NEXT
-FOR LOCAL, 0, 20
+FOR LOCAL, 0, 16
 	CALL INIT_PRESET_SHIP(国家ID_豊秋津皇国, 星系座標ID:10, 津軽級フリゲート, , 津軽級フリゲート)
 NEXT
-FOR LOCAL, 0, 16
+FOR LOCAL, 0, 12
 	CALL INIT_PRESET_SHIP(国家ID_豊秋津皇国, 星系座標ID:10, 豊後級駆逐艦, , 豊後級駆逐艦)
 NEXT
 FOR LOCAL, 0, 8
