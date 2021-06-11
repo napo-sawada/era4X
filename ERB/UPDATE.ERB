@@ -35,11 +35,23 @@ RETURNF LASTLOAD_VERSION < GET_VERSION_VALUE(バージョン文字列)
 
 強制引き継ぎフラグ = 0
 
+; キャラの追加
 FOR LOCAL:0, 0, MAX_FIXED_CHARA
 	;CSVファイルの存在判定
 	SIF EXISTCSV(LOCAL:0) && GETCHARA(LOCAL:0) == -1
 		CALL ADD_CHARA_FROM_CSV(LOCAL:0)
 NEXT
+
+; 緑の海賊団更新
+IF COUNTRY_NAME:国家ID_レジスタンス == "緑の海賊団"
+	COUNTRY_NAME:国家ID_レジスタンス = 反社会主義レジスタンス
+	REL_LIKE_COUNTRY:国家ID_社会主義:国家ID_レジスタンス = -1000; 獅子身中の虫
+	REL_LIKE_COUNTRY:国家ID_レジスタンス:国家ID_社会主義 = -1000; 国家転覆を狙う
+	REL_LIKE_COUNTRY:国家ID_レジスタンス:国家ID_民主主義 = 1000; 支援を受けている
+	REL_LIKE_COUNTRY:国家ID_民主主義:国家ID_レジスタンス = 1000; 支援している
+ENDIF
+
+
 RETURN
 
 IF LASTLOAD_VERSION != GAMEBASE_VERSION
