@@ -1,0 +1,72 @@
+﻿;--------------------------
+; チュートリアル：白兵戦
+; 白兵戦イベントのサンプルクエスト
+;--------------------------
+@QUEST_DESCRIPTION_33
+PRINTFORML [クエスト概要]
+PRINTFORML この過酷な宇宙で生き延びる上で生身での戦い方も知っておくべきだろう
+PRINTL
+RETURN
+
+;--------------------------
+; クエスト受注可能か
+;--------------------------
+@QUEST_ACCEPTABLE_33
+SIF QUEST_PROGRESS:33 > 0
+	RETURN 0
+RETURN 1
+
+;--------------------------
+; クエストの名前を返却
+;--------------------------
+@QUEST_NAME_33
+RESULTS = チュートリアル：白兵戦
+RETURN
+
+;--------------------------
+; クエスト本体
+;--------------------------
+@QUEST_BODY_33
+#DIM QUEST_ID = 33
+#DIM DYNAMIC JUDGE
+
+PRINTFORML 「トレーニングルームへようこそ」
+PRINTFORML トレーニングルームを訪れた%ANAME(MASTER)%のもとに、思考戦車が語りかけてきた
+PRINTFORMW 「白兵戦について学びたいと？　とうとう艦載砲をぶっ放すだけでは飽きたらなくなったんですね、大変結構！」
+PRINTFORML
+PRINTFORMW 思考戦車は訓練用のレーザーライフルを取り出し%ANAME(MASTER)%に手渡す
+PRINTFORMW 「生身での戦いに小難しい理屈は必要ありません！　撃って殴ってぶっ壊すんです！　早速始めましょう！」
+
+;白兵戦参加メンバーの初期化
+CALL CC_INIT_MEMBER()
+;攻撃側キャラクターの設定(最大6名)
+CALL CC_ADDCHARA("ATTACKER", MASTER)
+CALL CC_ADDMOB("ATTACKER", "リチャードⅠ歩兵戦車", 4800, 4800, 80)
+;防御側キャラクターの設定(最大6名)
+CALL CC_ADDMOB("DEFENDER", "訓練用ドローン１", 1200, 1200, 15)
+CALL CC_ADDMOB("DEFENDER", "訓練用ドローン２", 1200, 1200, 5)
+CALL CC_ADDMOB("DEFENDER", "ターゲットビット１", 200, 200, 5)
+CALL CC_ADDMOB("DEFENDER", "ターゲットビット２", 200, 200, 5)
+;白兵戦イベント呼出
+CALL CLOSE_COMBAT()
+JUDGE = RESULT
+
+PRINTFORMW ...
+PRINTFORMW ..
+PRINTFORMW .
+PRINTL
+;白兵戦経験値獲得処理
+CALL CC_ADD_COMBAT_EXP(10)
+;CLOSE_COMBAT()の戻り値は1 = 攻撃側勝利, 2 = 防御側勝利
+PRINTL
+IF JUDGE == 1
+	PRINTFORMW 「なかなかいい動きでしたねぇ！」
+ELSE 
+	PRINTFORMW 「おや……？　負けるはずがないんですがねぇ……」
+ENDIF
+CALL COLOR_PRINTL("――白兵戦は基本的に自動で執り行われ、ダメージは白兵値によって決まる", カラー_注意)
+CALL COLOR_PRINTW("また、\"白兵値の高いキャラクターから順に行動する\"という点は記憶に留めておくべきだろう", カラー_注意)
+
+QUEST_PROGRESS:QUEST_ID = 1
+
+

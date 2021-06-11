@@ -1,0 +1,390 @@
+﻿;-------------------------------------------------
+;;era4X 白兵戦モジュール
+;シンプルな白兵戦要素を追加するモジュール
+;予め"CC_ATTACKER_LIST", "CC_DEFENDER_LIST"のリスト(連想配列)に指定されたメンバーにて白兵戦を実施する
+; 戻り値 1 = "ATTACKER"勝利, 2 = "DEFENDER"勝利
+;
+;イベント実行例
+; CALL CC_INIT_MEMBER()                                  ;参加メンバーリストを初期化
+; CALL CC_ADDCHARA("ATTACKER", MASTER)                   ;攻撃側に"あなた"を指定
+; CALL CC_ADDMOB("DEFENDER", "モブ", 1200, 1200, 15)     ;防御側にモブキャラを指定
+; CALL CLOSE_COMBAT()                                    ;白兵戦イベントを実行
+;
+;(※より具体的な実装例はera4XのQUEST_33_チュートリアルを参照)
+;-------------------------------------------------
+@CLOSE_COMBAT()
+CALL CLOSE_COMBAT_MAIN(CC_ATTACKER_LIST, CC_DEFENDER_LIST)
+
+RETURN RESULT
+
+;-------------------------------------------------
+;白兵戦処理本体
+;-------------------------------------------------
+@CLOSE_COMBAT_MAIN(MEM_LIST1, MEM_LIST2)
+#DIMS REF MEM_LIST1
+#DIMS REF MEM_LIST2
+#DIMS DYNAMIC ACTOR_LIST, CC_MAX_MEMBER_NUM + 1
+#DIM WINNER
+;初期処理
+;-------------------------------------------------
+;メッセージウィンドウに出力するメッセージを初期化
+VARSET CC_MES_LIST, "-1"
+;全メンバーの行動状態を初期化
+CALL CLOSE_COMBAT_INIT_ACTION(MEM_LIST1, MEM_LIST2)
+
+;メインループ
+;-------------------------------------------------
+
+CALL CC_PRINT("")
+CALL CC_PRINT("")
+CALL CC_PRINT("")
+LOCALS = %FuncTagSetText_ShapeSize(@"@C:{カラー_注意}@―― !! BATTLE START !! ――@/C@", 108, 1, 2)%
+CALL CC_PRINT(LOCALS)
+CALL CLOSE_COMBAT_DRAW_WINDOW(MEM_LIST1, MEM_LIST2)
+WHILE 1
+    CALL CLOSE_COMBAT_JUDGE(MEM_LIST1, MEM_LIST2)
+    IF RESULT != 0
+        WINNER = RESULT
+        BREAK
+    ENDIF
+    CALL CLOSE_COMBAT_INIT_ACTION(MEM_LIST1, MEM_LIST2)
+    CALL CLOSE_COMBAT_SET_ORDER(MEM_LIST1, MEM_LIST2, ACTOR_LIST)
+    CALL CLOSE_COMBAT_SET_TARGET(MEM_LIST1, MEM_LIST2, ACTOR_LIST:LOCAL)
+    CALL CLOSE_COMBAT_ATTACK(RESULTS:0, RESULTS:1, MEM_LIST1, MEM_LIST2)
+    CALL CLOSE_COMBAT_DRAW_WINDOW(MEM_LIST1, MEM_LIST2)
+WEND
+
+IF WINNER == 1
+    LOCALS = %FuncTagSetText_ShapeSize(@"@C:{カラー_注意}@―― 攻撃側の勝利！ ――@/C@", 108, 1, 2)%
+ELSE
+    LOCALS = %FuncTagSetText_ShapeSize(@"@C:{カラー_注意}@―― 防御側の勝利！ ――@/C@", 108, 1, 2)%
+ENDIF
+CALL CC_PRINT("")
+CALL CC_PRINT("")
+CALL CC_PRINT("")
+CALL CC_PRINT(LOCALS)
+CALL CLOSE_COMBAT_DRAW_WINDOW(MEM_LIST1, MEM_LIST2)
+FORCEWAIT
+
+;白兵戦用ウィンドウを破棄
+CALL WndMgr_DestroyWindow(-1)
+
+RETURN WINNER
+
+;-------------------------------------------------
+;参加メンバーの状態遷移
+;-------------------------------------------------
+@CLOSE_COMBAT_INIT_ACTION(MEM_LIST1, MEM_LIST2)
+#DIMS REF MEM_LIST1
+#DIMS REF MEM_LIST2
+#DIM DYNAMIC MEM_CNT
+#DIM DYNAMIC 戦闘可能メンバカウンタ
+#DIM DYNAMIC 行動済メンバカウンタ
+FOR MEM_CNT, 0, FINDELEMENT(MEM_LIST1, "-1")
+    IF DIC_GET(MEM_LIST1:MEM_CNT, "状態") == "行動済"
+        行動済メンバカウンタ ++
+    ELSEIF DIC_GET(MEM_LIST1:MEM_CNT, "状態") == "攻撃"
+        MEM_LIST1:MEM_CNT = %DIC_SET(MEM_LIST1:MEM_CNT, "状態", "行動済")%
+        行動済メンバカウンタ ++
+    ELSEIF DIC_GET(MEM_LIST1:MEM_CNT, "状態") != "戦闘不能"
+        MEM_LIST1:MEM_CNT = %DIC_SET(MEM_LIST1:MEM_CNT, "状態", "待機")%
+    ENDIF
+NEXT
+FOR MEM_CNT, 0, FINDELEMENT(MEM_LIST2, "-1")
+    IF DIC_GET(MEM_LIST2:MEM_CNT, "状態") == "行動済"
+        行動済メンバカウンタ ++
+    ELSEIF DIC_GET(MEM_LIST2:MEM_CNT, "状態") == "攻撃"
+        MEM_LIST2:MEM_CNT = %DIC_SET(MEM_LIST2:MEM_CNT, "状態", "行動済")%
+        行動済メンバカウンタ ++
+    ELSEIF DIC_GET(MEM_LIST2:MEM_CNT, "状態") != "戦闘不能"
+        MEM_LIST2:MEM_CNT = %DIC_SET(MEM_LIST2:MEM_CNT, "状態", "待機")%
+    ENDIF
+NEXT
+;戦闘可能メンバーの総数をカウントする
+FOR MEM_CNT, 0, FINDELEMENT(MEM_LIST1, "-1")
+    IF DIC_GET(MEM_LIST1:MEM_CNT, "状態") != "戦闘不能"
+        戦闘可能メンバカウンタ ++
+    ENDIF
+NEXT
+FOR MEM_CNT, 0, FINDELEMENT(MEM_LIST2, "-1")
+    IF DIC_GET(MEM_LIST2:MEM_CNT, "状態") != "戦闘不能"
+        戦闘可能メンバカウンタ ++
+    ENDIF
+NEXT
+
+;全メンバー行動済みの場合は戦闘不能メンバー以外を全員待機に
+IF 行動済メンバカウンタ == 戦闘可能メンバカウンタ
+    FOR MEM_CNT, 0, FINDELEMENT(MEM_LIST1, "-1")
+        SIF DIC_GET(MEM_LIST1:MEM_CNT, "状態") == "戦闘不能"
+            CONTINUE
+        MEM_LIST1:MEM_CNT = %DIC_SET(MEM_LIST1:MEM_CNT, "状態", "待機")%
+    NEXT
+    FOR MEM_CNT, 0, FINDELEMENT(MEM_LIST2, "-1")
+        SIF DIC_GET(MEM_LIST2:MEM_CNT, "状態") == "戦闘不能"
+            CONTINUE
+        MEM_LIST2:MEM_CNT = %DIC_SET(MEM_LIST2:MEM_CNT, "状態", "待機")%
+    NEXT
+ENDIF
+
+RETURN
+;-------------------------------------------------
+;行動順リストの作成
+;白兵戦値の高い順に行動させる
+;-------------------------------------------------
+@CLOSE_COMBAT_SET_ORDER(MEM_LIST1, MEM_LIST2, ACTOR_LIST)
+#DIMS REF MEM_LIST1
+#DIMS REF MEM_LIST2
+#DIMS REF ACTOR_LIST
+#DIM DYNAMIC ACTOR_LIST_IDX
+#DIM DYNAMIC MEM_CNT
+VARSET ACTOR_LIST
+FOR MEM_CNT, 0, FINDELEMENT(MEM_LIST1, "-1")
+    SIF DIC_GET(MEM_LIST1:MEM_CNT, "状態") == "戦闘不能" ||  DIC_GET(MEM_LIST1:MEM_CNT, "状態") == "行動済"
+        CONTINUE
+    ACTOR_LIST:ACTOR_LIST_IDX = %DIC_SET(ACTOR_LIST:ACTOR_LIST_IDX, "ID", TOSTR(MEM_CNT))%
+    ACTOR_LIST:ACTOR_LIST_IDX = %DIC_SET(ACTOR_LIST:ACTOR_LIST_IDX, "SIDE", DIC_GET(MEM_LIST1:MEM_CNT, "SIDE"))%
+    ACTOR_LIST:ACTOR_LIST_IDX = %DIC_SET(ACTOR_LIST:ACTOR_LIST_IDX, "白兵", DIC_GET(MEM_LIST1:MEM_CNT, "白兵"))%
+    ACTOR_LIST_IDX ++
+NEXT
+
+FOR MEM_CNT, 0, FINDELEMENT(MEM_LIST2, "-1")
+    SIF DIC_GET(MEM_LIST2:MEM_CNT, "状態") == "戦闘不能" ||  DIC_GET(MEM_LIST2:MEM_CNT, "状態") == "行動済"
+        CONTINUE
+    ACTOR_LIST:ACTOR_LIST_IDX = %DIC_SET(ACTOR_LIST:ACTOR_LIST_IDX, "ID", TOSTR(MEM_CNT))%
+    ACTOR_LIST:ACTOR_LIST_IDX = %DIC_SET(ACTOR_LIST:ACTOR_LIST_IDX, "SIDE", DIC_GET(MEM_LIST2:MEM_CNT, "SIDE"))%
+    ACTOR_LIST:ACTOR_LIST_IDX = %DIC_SET(ACTOR_LIST:ACTOR_LIST_IDX, "白兵", DIC_GET(MEM_LIST2:MEM_CNT, "白兵"))%
+    ACTOR_LIST_IDX ++
+NEXT
+ACTOR_LIST:(ACTOR_LIST_IDX) = "-1"
+
+CALL ARRAYSORT_DIC(ACTOR_LIST, "白兵", 1)
+RETURN
+
+
+;-------------------------------------------------
+;ターゲット、非ターゲット決定
+;RESULT:0 攻撃側リスト
+;RESULT:1 防御側リスト
+;-------------------------------------------------
+@CLOSE_COMBAT_SET_TARGET(MEM_LIST1, MEM_LIST2, ACTOR)
+#DIMS REF MEM_LIST1
+#DIMS REF MEM_LIST2
+#DIMS ACTOR
+#DIM DYNAMIC ACTOR_ID
+
+ACTOR_ID = TOINT(DIC_GET(ACTOR, "ID"))
+
+IF DIC_GET(ACTOR, "SIDE") == "1"
+    CALL CLOSE_CONBAT_CHOICE_TARGET(MEM_LIST2)
+    RESULTS:0 = %MEM_LIST1:ACTOR_ID%
+    RESULTS:1 = %MEM_LIST2:RESULT%
+ELSE
+    CALL CLOSE_CONBAT_CHOICE_TARGET(MEM_LIST1)
+    RESULTS:0 = %MEM_LIST2:ACTOR_ID%
+    RESULTS:1 = %MEM_LIST1:RESULT%
+ENDIF
+RETURN
+
+;ターゲット候補のリストからターゲットを選定して返却
+@CLOSE_CONBAT_CHOICE_TARGET(MEM_LIST)
+#DIMS REF MEM_LIST
+#DIMS DYNAMIC TARGET_LIST
+#DIM DYNAMIC TARGET_ID
+FOR LOCAL, 0, FINDELEMENT(MEM_LIST, "-1")
+    SIF DIC_GET(MEM_LIST:LOCAL, "状態") == "戦闘不能"
+        CONTINUE
+    TARGET_LIST = %LIST_ADD(TARGET_LIST, TOSTR(LOCAL))%
+NEXT
+TARGET_ID = TOINT(LIST_GET(TARGET_LIST, RAND(0, LIST_COUNT(TARGET_LIST))))
+RETURN TARGET_ID
+
+;-------------------------------------------------
+;攻撃処理
+;-------------------------------------------------
+@CLOSE_COMBAT_ATTACK(ATTACKER, DEFENDER, MEM_LIST1, MEM_LIST2)
+#DIMS ATTACKER
+#DIMS DEFENDER
+#DIMS REF MEM_LIST1
+#DIMS REF MEM_LIST2
+#DIM CONST ダメージ基準倍率 = 80
+#DIM DYNAMIC CC_DAMAGE
+#DIM DYNAMIC DEFENDER_ID
+#DIM DYNAMIC ATTACKER_ID
+#DIM DYNAMIC HP
+
+;ダメージ計算式
+CC_DAMAGE = SQRT(TOINT(DIC_GET(ATTACKER, "白兵"))) * ダメージ基準倍率 * RAND(80, 100) / 100
+
+DEFENDER_ID = TOINT(DIC_GET(DEFENDER, "ID"))
+ATTACKER_ID = TOINT(DIC_GET(ATTACKER, "ID"))
+IF DIC_GET(DEFENDER, "SIDE") == "1"
+    MEM_LIST2:ATTACKER_ID = %DIC_SET(MEM_LIST2:ATTACKER_ID, "状態", "攻撃")%
+    HP = TOINT(DIC_GET(MEM_LIST1:DEFENDER_ID, "体力"))
+    HP = HP - CC_DAMAGE
+    CALL CC_PRINT(@"%DIC_GET(ATTACKER,"名前")%の攻撃は%DIC_GET(DEFENDER,"名前")%に@C:{カラー_オレンジ}@{CC_DAMAGE}@/C@ダメージを与えた")
+    IF HP < 0
+        HP = 0
+        MEM_LIST1:DEFENDER_ID = %DIC_SET(MEM_LIST1:DEFENDER_ID, "状態", "戦闘不能")%
+        CALL CC_PRINT(@"@C:{カラー_注意}@――%DIC_GET(DEFENDER,"名前")%は戦闘不能になった！@/C@")
+    ENDIF
+    MEM_LIST1:DEFENDER_ID = %DIC_SET(MEM_LIST1:DEFENDER_ID, "体力", TOSTR(HP))%
+ELSE
+    MEM_LIST1:ATTACKER_ID = %DIC_SET(MEM_LIST1:ATTACKER_ID, "状態", "攻撃")%
+    HP = TOINT(DIC_GET(MEM_LIST2:DEFENDER_ID, "体力"))
+    HP = HP - CC_DAMAGE
+    CALL CC_PRINT(@"%DIC_GET(ATTACKER,"名前")%の攻撃は%DIC_GET(DEFENDER,"名前")%に@C:{カラー_オレンジ}@{CC_DAMAGE}@/C@ダメージを与えた")
+    IF HP < 0
+        HP = 0
+        MEM_LIST2:DEFENDER_ID = %DIC_SET(MEM_LIST2:DEFENDER_ID, "状態", "戦闘不能")%
+        CALL CC_PRINT(@"@C:{カラー_注意}@――%DIC_GET(DEFENDER,"名前")%は戦闘不能になった！@/C@")
+    ENDIF
+    MEM_LIST2:DEFENDER_ID = %DIC_SET(MEM_LIST2:DEFENDER_ID, "体力", TOSTR(HP))%
+ENDIF
+
+RETURN
+
+;-------------------------------------------------
+;勝利判定
+;-------------------------------------------------
+@CLOSE_COMBAT_JUDGE(MEM_LIST1, MEM_LIST2)
+#DIMS REF MEM_LIST1
+#DIMS REF MEM_LIST2
+#DIM DYNAMIC 戦闘不能カウンタ
+
+;LIST1の判定
+FOR LOCAL, 0, FINDELEMENT(MEM_LIST1, "-1")
+    IF DIC_GET(MEM_LIST1:LOCAL, "状態") == "戦闘不能"
+        戦闘不能カウンタ ++
+    ENDIF
+NEXT
+IF 戦闘不能カウンタ == FINDELEMENT(MEM_LIST1, "-1")
+    RETURN 2
+ENDIF
+;LIST2の判定
+戦闘不能カウンタ = 0
+FOR LOCAL, 0, FINDELEMENT(MEM_LIST2, "-1")
+    IF DIC_GET(MEM_LIST2:LOCAL, "状態") == "戦闘不能"
+        戦闘不能カウンタ ++
+    ENDIF
+NEXT
+IF 戦闘不能カウンタ == FINDELEMENT(MEM_LIST2, "-1")
+    RETURN 1
+ENDIF
+
+RETURN 0
+
+;-------------------------------------------------
+;テキストメッセージ出力
+;-------------------------------------------------
+@CC_PRINT(TEXT)
+#DIMS DYNAMIC TEXT
+LOCAL:1 = FINDELEMENT(CC_MES_LIST, "-1")
+SIF LOCAL:1 == -1 
+    RETURN
+FOR LOCAL, LOCAL:1, LOCAL:1 + 1
+    CC_MES_LIST:LOCAL = %TEXT%
+NEXT
+RETURN
+
+
+;-------------------------------------------------
+;画面描画
+;-------------------------------------------------
+@CLOSE_COMBAT_DRAW_WINDOW(MEM_LIST1, MEM_LIST2)
+#DIMS REF MEM_LIST1
+#DIMS REF MEM_LIST2
+#DIM DYNAMIC WND_ID_MEM, CC_MAX_MEMBER_NUM
+
+#DIM CONST TOTAL_WND_WIDTH = 108
+#DIM CONST LIST_WND_WIDTH = 52
+#DIM CONST LIST_WND_HEIGHT = 30
+#DIM CONST BOTTOM_WND_HEIGHT = 10
+#DIM CONST MEM_WND_WIDTH = 30
+#DIM CONST MEM_WND_HEIGHT = 4
+#DIM CONST MARGIN = 0
+
+#DIM DYNAMIC L_CNT
+REDRAW 0
+;画面消去
+CLEARLINE LINECOUNT
+;ウィンドウ初期化
+CALL WndMgr_DestroyWindow(-1)
+;ウィンドウ生成
+CALL WndMgr_CreateWindow(WND_ID_LEFT, 2, 2, LIST_WND_WIDTH + 2, LIST_WND_HEIGHT, 2)
+CALL WndMgr_CreateWindow(WND_ID_RIGHT, LIST_WND_WIDTH + 4, 2, LIST_WND_WIDTH + 2, LIST_WND_HEIGHT, 2)
+CALL WndMgr_CreateWindow(WND_ID_BOTTOM, 2, LIST_WND_HEIGHT+ 2, TOTAL_WND_WIDTH, BOTTOM_WND_HEIGHT, 2)
+
+;右側リストの描画
+;-------------------------------------------------
+;ヘッダー
+L_CNT = 0
+LOCALS = %FuncTagSetText_ShapeSize(@"@C:{カラー_女}@ATTTACKER@/C@", LIST_WND_WIDTH -2 , 1, 2)%
+CALL WndMgr_TextSet(WND_ID_LEFT, L_CNT++, LOCALS)
+CALL WndMgr_TextSet(WND_ID_LEFT, L_CNT++, @"@C:{カラー_選択不可}@―@/C@" * (LIST_WND_WIDTH / 2))
+;メンバーリスト
+FOR LOCAL, 0 , FINDELEMENT(MEM_LIST2, "-1")
+    L_CNT = 0
+    CALL WndMgr_VacantId()
+    WND_ID_MEM:LOCAL = RESULT
+    CALL WndMgr_CreateWindow(WND_ID_MEM:LOCAL, TOTAL_WND_WIDTH - MEM_WND_WIDTH, 5 + (LOCAL *(MEM_WND_HEIGHT)), MEM_WND_WIDTH,MEM_WND_HEIGHT, 2)
+    CALL WndMgr_WindowTitle(WND_ID_MEM:LOCAL, @"%DIC_GET(MEM_LIST2:LOCAL, "名前")%")
+    CALL WndMgr_TextSet(WND_ID_MEM:LOCAL, L_CNT++, @"白兵:%DIC_GET(MEM_LIST2:LOCAL, "白兵")%           %DIC_GET(MEM_LIST2:LOCAL, "状態")%")
+    LOCALS '= FuncTagSetText_CreateColorBarText(TOINT(DIC_GET(MEM_LIST2:LOCAL, "体力")), TOINT(DIC_GET(MEM_LIST2:LOCAL, "最大体力")), 12, 0xEE6600, 0xFFFF98, 0x000000, 1)
+    CALL WndMgr_TextSet(WND_ID_MEM:LOCAL, L_CNT++, LOCALS)
+    IF DIC_GET(MEM_LIST2:LOCAL, "状態") == "攻撃"
+        CALL WndMgr_Move(WND_ID_MEM:LOCAL, TOTAL_WND_WIDTH - MEM_WND_WIDTH - 4 , 5 + (LOCAL *(MEM_WND_HEIGHT)))
+    ENDIF
+    IF DIC_GET(MEM_LIST2:LOCAL, "状態") == "戦闘不能"
+        CALL WndMgr_Attribute( WND_ID_MEM:LOCAL, "Disabled", 1)
+    ENDIF
+NEXT
+
+;左側リストの描画
+;-------------------------------------------------
+;ヘッダー
+L_CNT = 0
+LOCALS = %FuncTagSetText_ShapeSize(@"@C:{カラー_男}@DEFENDER@/C@", LIST_WND_WIDTH -2, 1, 2)%
+CALL WndMgr_TextSet(WND_ID_RIGHT, L_CNT++, LOCALS)
+CALL WndMgr_TextSet(WND_ID_RIGHT, L_CNT++, @"@C:{カラー_選択不可}@―@/C@" * (LIST_WND_WIDTH / 2))
+;メンバーリスト
+FOR LOCAL, 0 , FINDELEMENT(MEM_LIST1, "-1")
+    L_CNT = 0
+    CALL WndMgr_VacantId()
+    WND_ID_MEM:LOCAL = RESULT
+    CALL WndMgr_CreateWindow(WND_ID_MEM:LOCAL, 4, 5 + (LOCAL *(MEM_WND_HEIGHT)), MEM_WND_WIDTH,MEM_WND_HEIGHT, 2)
+    CALL WndMgr_WindowTitle(WND_ID_MEM:LOCAL, @"%DIC_GET(MEM_LIST1:LOCAL, "名前")%")
+    CALL WndMgr_TextSet(WND_ID_MEM:LOCAL, L_CNT++, @"白兵:%DIC_GET(MEM_LIST1:LOCAL, "白兵")%           %DIC_GET(MEM_LIST1:LOCAL, "状態")%")
+    LOCALS '= FuncTagSetText_CreateColorBarText(TOINT(DIC_GET(MEM_LIST1:LOCAL, "体力")), TOINT(DIC_GET(MEM_LIST1:LOCAL, "最大体力")), 12, 0xEE6600, 0xFFFF98, 0x000000, 1)
+    CALL WndMgr_TextSet(WND_ID_MEM:LOCAL, L_CNT++, LOCALS)
+    IF DIC_GET(MEM_LIST1:LOCAL, "状態") == "攻撃"
+        CALL WndMgr_Move( WND_ID_MEM:LOCAL, 8, 5 + (LOCAL *(MEM_WND_HEIGHT)))
+    ENDIF
+    IF DIC_GET(MEM_LIST1:LOCAL, "状態") == "戦闘不能"
+        CALL WndMgr_Attribute( WND_ID_MEM:LOCAL, "Disabled", 1)
+    ENDIF
+NEXT
+
+;メッセージウィンドウの描画
+LOCAL:1 = FINDELEMENT(CC_MES_LIST, "-1")
+IF LOCAL:1 == -1
+    LOCAL:1 = VARSIZE(CC_MES_LIST)
+ENDIF
+FOR LOCAL, 0, LOCAL:1
+    CALL WndMgr_TextSet(WND_ID_BOTTOM, LOCAL, CC_MES_LIST:LOCAL)
+NEXT
+VARSET CC_MES_LIST, "-1"
+
+CALL WndMgr_DisplayAll()
+REDRAW 2
+CALL CLOSE_COMBAT_INPUT
+
+RETURN
+
+;-------------------------------------------------
+;入力受付処理
+;-------------------------------------------------
+@CLOSE_COMBAT_INPUT
+WAITANYKEY
+RETURN
+
+

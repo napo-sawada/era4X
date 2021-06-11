@@ -1,0 +1,154 @@
+﻿;=================================================
+;白兵戦用のユーザー関数
+;各種イベントやクエストから呼ばれる想定
+;=================================================
+;-------------------------------------------------
+;@CC_INIT_MEMBER()
+;白兵戦参加メンバーを全て初期化する
+;-------------------------------------------------
+@CC_INIT_MEMBER()
+VARSET CC_ATTACKER_LIST, "-1"
+VARSET CC_DEFENDER_LIST, "-1"
+
+;-------------------------------------------------
+;@CC_ADDCHARA
+;キャラクターデータを持つキャラクターをキャラ番号指定でメンバーに追加する
+;引数:1 "ATTACKER","DEFENDER"のいずれかを指定
+;引数:2 キャラ番号
+;-------------------------------------------------
+@CC_ADDCHARA(SIDE, CHARA_ID)
+#DIMS SIDE
+#DIM CHARA_ID
+#DIM IDX
+
+IF SIDE == "ATTACKER"
+    IDX = FINDELEMENT(CC_ATTACKER_LIST, "-1")
+    SIF IDX == -1 || IDX >= CC_MAX_MEMBER_NUM / 2
+        THROW CLOSE_COMBAT:エラー 攻撃側メンバーが上限({CC_MAX_MEMBER_NUM / 2})を超えています
+    CC_ATTACKER_LIST:IDX = 
+    CC_ATTACKER_LIST:IDX = %DIC_SET(CC_ATTACKER_LIST:IDX, "ID",TOSTR(IDX))%
+    CC_ATTACKER_LIST:IDX = %DIC_SET(CC_ATTACKER_LIST:IDX, "SIDE","1")%
+    CALL CC_SET_CHARADATA(CC_ATTACKER_LIST, IDX, CHARA_ID)
+
+ELSE
+    IDX = FINDELEMENT(CC_DEFENDER_LIST, "-1")
+    SIF IDX == -1 || IDX >= CC_MAX_MEMBER_NUM / 2
+        THROW CLOSE_COMBAT:エラー 防御側メンバーが上限({CC_MAX_MEMBER_NUM / 2})を超えています
+    CC_DEFENDER_LIST:IDX = 
+    CC_DEFENDER_LIST:IDX = %DIC_SET(CC_DEFENDER_LIST:IDX, "ID",TOSTR(IDX))%
+    CC_DEFENDER_LIST:IDX = %DIC_SET(CC_DEFENDER_LIST:IDX, "SIDE","2")%
+    CALL CC_SET_CHARADATA(CC_DEFENDER_LIST, IDX, CHARA_ID)
+ENDIF
+RETURN
+
+;-------------------------------------------------
+;@CC_ADDMOB
+;キャラクターデータを持たないモブをパラメータを直接指定して白兵戦メンバーに追加する
+;引数:1 "ATTACKER","DEFENDER"のいずれかを指定
+;引数:2 表示する名前を指定
+;引数:3 現HPを指定
+;引数:4 最大HPを指定
+;引数:5 白兵値を指定
+;-------------------------------------------------
+@CC_ADDMOB(SIDE, CC_NAME, HP, MAXHP, 白兵)
+#DIMS SIDE
+#DIMS CC_NAME
+#DIM HP
+#DIM MAXHP
+#DIM 白兵
+#DIM IDX
+
+IF SIDE == "ATTACKER"
+    IDX = FINDELEMENT(CC_ATTACKER_LIST, "-1")
+    SIF IDX == -1 || IDX >= CC_MAX_MEMBER_NUM / 2
+        THROW CLOSE_COMBAT:エラー 攻撃側メンバーが上限({CC_MAX_MEMBER_NUM / 2})を超えています
+    CC_ATTACKER_LIST:IDX = 
+    CC_ATTACKER_LIST:IDX = %DIC_SET(CC_ATTACKER_LIST:IDX, "ID",TOSTR(IDX))%
+    CC_ATTACKER_LIST:IDX = %DIC_SET(CC_ATTACKER_LIST:IDX, "SIDE","1")%
+    CALL CC_SET_MOBDATA(CC_ATTACKER_LIST, IDX, CC_NAME, HP, MAXHP, 白兵)
+ELSE
+    IDX = FINDELEMENT(CC_DEFENDER_LIST, "-1")
+    SIF IDX == -1 || IDX >= CC_MAX_MEMBER_NUM / 2
+        THROW CLOSE_COMBAT:エラー 防御側メンバーが上限({CC_MAX_MEMBER_NUM / 2})を超えています
+    CC_DEFENDER_LIST:IDX = 
+    CC_DEFENDER_LIST:IDX = %DIC_SET(CC_DEFENDER_LIST:IDX, "ID",TOSTR(IDX))%
+    CC_DEFENDER_LIST:IDX = %DIC_SET(CC_DEFENDER_LIST:IDX, "SIDE","2")%
+    CALL CC_SET_MOBDATA(CC_DEFENDER_LIST, IDX, CC_NAME, HP, MAXHP, 白兵)
+ENDIF
+RETURN
+
+;-------------------------------------------------
+;@CC_ADD_COMBAT_EXP
+;MASTERと同じ所属勢力の白兵戦参加メンバー全員に引数:1 で指定した白兵戦経験値を追加する
+;引数:1 獲得経験値
+;引数:2 経験値獲得メッセージ表示の有無(表示しない場合0を指定)
+;引数:3 自動レベルアップの有無(実施しない場合0を指定)
+;-------------------------------------------------
+@CC_ADD_COMBAT_EXP(COMBAT_EXP, メッセージ表示 = 1, 自動レベルアップ = 1)
+#DIM COMBAT_EXP
+#DIM メッセージ表示
+#DIM 自動レベルアップ
+#DIM DYNAMIC MEMBER_LIST, CC_MAX_MEMBER_NUM + 1
+
+CALL CC_GET_MEMBER_LIST(MEMBER_LIST, CFLAG:MASTER:所属)
+FOR LOCAL, 0, FINDELEMENT(MEMBER_LIST, -1)
+    CALL PRINT_ADD_EXP(MEMBER_LIST:LOCAL, "白兵経験値", COMBAT_EXP, メッセージ表示)
+    IF 自動レベルアップ == 1
+        CALL TRAIN_AUTO_ABLUP(MEMBER_LIST:LOCAL, メッセージ表示 ? 0 # 1)
+    ENDIF
+NEXT
+
+;-------------------------------------------------
+;@CC_GET_MEMBER_LIST
+;第二引数に指定した所属のメンバーを参加メンバーから取得する
+;引数:1 参加メンバーIDを格納するための一次元配列
+;引数:2 CFLAG:ID:所属
+;-------------------------------------------------
+@CC_GET_MEMBER_LIST(MEMBER_LIST, 所属)
+#DIM REF MEMBER_LIST
+#DIM 所属
+#DIM IDX
+VARSET MEMBER_LIST, -1
+
+FOR LOCAL, 0, CC_MAX_MEMBER_NUM / 2
+    IF DIC_GET(CC_ATTACKER_LIST:LOCAL, "所属") == TOSTR(所属)
+        MEMBER_LIST:IDX = TOINT(DIC_GET(CC_ATTACKER_LIST:LOCAL, "キャラID"))
+        IDX ++
+    ENDIF
+NEXT
+FOR LOCAL, 0, CC_MAX_MEMBER_NUM / 2
+    IF DIC_GET(CC_DEFENDER_LIST:LOCAL, "所属") == TOSTR(所属)
+        MEMBER_LIST:IDX = TOINT(DIC_GET(CC_DEFENDER_LIST:LOCAL, "キャラID"))
+        IDX ++
+    ENDIF
+NEXT
+
+RETURN
+
+;=================================================
+;内部処理用
+;=================================================
+@CC_SET_CHARADATA(MEM_LIST, IDX, ID)
+#DIMS REF MEM_LIST
+#DIM ID
+#DIM IDX
+MEM_LIST:IDX = %DIC_SET(MEM_LIST:IDX, "名前", @"%ANAME(ID)%")%
+MEM_LIST:IDX = %DIC_SET(MEM_LIST:IDX, "体力", TOSTR(BASE:ID:体力))%
+MEM_LIST:IDX = %DIC_SET(MEM_LIST:IDX, "最大体力", TOSTR(MAXBASE:ID:体力))%
+MEM_LIST:IDX = %DIC_SET(MEM_LIST:IDX, "白兵", TOSTR(ABL:ID:白兵))%
+MEM_LIST:IDX = %DIC_SET(MEM_LIST:IDX, "キャラID", TOSTR(ID))%
+MEM_LIST:IDX = %DIC_SET(MEM_LIST:IDX, "所属", TOSTR(CFLAG:ID:所属))%
+RETURN
+
+@CC_SET_MOBDATA(MEM_LIST, IDX, CC_NAME, HP, MAXHP, 白兵)
+#DIMS REF MEM_LIST
+#DIM IDX
+#DIMS CC_NAME
+#DIM HP
+#DIM MAXHP
+#DIM 白兵
+MEM_LIST:IDX = %DIC_SET(MEM_LIST:IDX, "名前", CC_NAME)%
+MEM_LIST:IDX = %DIC_SET(MEM_LIST:IDX, "体力", TOSTR(HP))%
+MEM_LIST:IDX = %DIC_SET(MEM_LIST:IDX, "最大体力", TOSTR(MAXHP))%
+MEM_LIST:IDX = %DIC_SET(MEM_LIST:IDX, "白兵", TOSTR(白兵))%
+RETURN
