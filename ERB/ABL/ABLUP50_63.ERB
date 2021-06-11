@@ -147,6 +147,35 @@ ENDIF
 RETURN MAX(LOCAL:0, 1)
 
 ;-------------------------------------------------
+;目星
+;-------------------------------------------------
+@ABLUP_EXPNAME55
+RESULTS = 目星経験値
+
+@CALC_ABLUP_EXP55(ARG:0)
+;最大値は300
+IF ABL:(ARG:0):目星 >= 300
+	RETURN -1
+ENDIF
+
+LOCAL:0 = ABLUP_NEED_EXP_SLG(ABL:(ARG:0):目星) / GROWTYPE_RATE(ARG:0, "目星")
+
+SIF ID_TO_CHARA(FLAG:お気に入り指定キャラ) == ARG:0
+	TIMES LOCAL:0, 0.80
+
+IF TALENT:(ARG:0):サボり魔
+	SELECTCASE ABL:(ARG:0):目星
+		CASE IS >= 90
+			TIMES LOCAL:0, 1.50
+		CASE IS >= 80
+			TIMES LOCAL:0, 1.25
+		CASEELSE
+			TIMES LOCAL:0, 1.1
+	ENDSELECT
+ENDIF
+RETURN MAX(LOCAL:0, 1)
+
+;-------------------------------------------------
 ;歌唱
 ;-------------------------------------------------
 @ABLUP_EXPNAME60
