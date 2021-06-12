@@ -54,7 +54,10 @@ ENDIF
 SIF COUNTRY_NAME:国家ID_社会主義 == "社会主義国家"
 	COUNTRY_NAME:国家ID_社会主義 = 銀河人民統一連邦
 
-
+IF !マップ掃除フラグ
+	CALL QUEST_RELEASE_POINT(24, -1)
+	マップ掃除フラグ = 1
+ENDIF
 RETURN
 
 IF LASTLOAD_VERSION != GAMEBASE_VERSION

@@ -25,6 +25,9 @@
 ;05 ソラのゴミ拾い
 #DIM SAVEDATA QUEST_05_FLAG , 4
 
+;24 模擬戦
+#DIM SAVEDATA マップ掃除フラグ
+
 ;19 蠢く惑星
 #DIM QUEST_25_対象
 #DIM QUEST_25_未開惑星座標
