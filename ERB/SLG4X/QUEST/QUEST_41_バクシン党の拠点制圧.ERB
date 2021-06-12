@@ -1,0 +1,98 @@
+﻿;--------------------------
+; !!クエスト名と 41を好きな番号に変える！!
+; 海賊の討伐
+; 近場に沸いた海賊を討伐する
+;--------------------------
+
+;--------------------------
+; クエスト受注可能か
+;--------------------------
+@QUEST_ACCEPTABLE_41
+SIF QUEST_PROGRESS:41 < 1
+	RETURN 0
+RETURN 1
+
+;--------------------------
+; クエストの名前を返却
+;--------------------------
+@QUEST_NAME_41
+RESULTS = バクシン党の拠点制圧
+RETURN
+
+;--------------------------
+; クエスト本体
+;--------------------------
+@QUEST_BODY_41
+#DIM SECTOR_ID
+#DIM IS_COMPLETE
+#DIM SHIP_ID
+#DIM POSID
+
+IF QUEST_PROGRESS:41 == 1
+	PRINTFORMW %CALLNAME:MASTER%が軍部を訪ねると、皇国の高級軍人らしき男が現れた。
+	PRINTFORML 「ああ、丁度良いところに来てくれた。少し、頼みたいことがあってね」
+	PRINTFORML 口にされるのは静流から聞いた通りの内容であった。
+	PRINTFORMW バクシン党の秘密拠点の一つがアステロイドベルトのデブリに見つかったらしい。
+	PRINTFORML
+	PRINTFORML 小規模部隊ではなく、拠点となればそれなりの戦力だろう。
+	PRINTFORML しかし元武士の多いバクシン党――軍を動かせば逃げ出されるため、手をこまねいているのが現状。
+	PRINTFORMW 是非に君の力を借りたかったのだと彼は告げる。
+	PRINTFORML
+	PRINTFORML 「ただ、どうにも敵は旧式とは言え、大所帯のようだ」
+	PRINTFORMW 確認されているのは旧式の機動歩兵が十五機ほど、フリゲート五隻。中々の相手である。
+	PRINTFORML 「危険もあるだろう。戦力に不安があれば断ってくれて構わない」
+	PRINTFORMW 報酬は$1,000,000を出してくれるらしいが……。
+	PRINTFORML
+	PRINTFORMW 「どうだろう？」
+	$INPUT_LOOP
+	PRINTBUTTON "[0] はい", 0
+	PRINTBUTTON "[1] いいえ", 1
+	INPUT
+	IF RESULT == 0
+		PRINTFORMW 「よろしい。現在、このセクター内のアステロイドベルトに連中は屯しておる」
+		PRINTFORMW 「$1,000,000の報奨を用意しておこう、武運を祈る」
+		PRINTFORMW バクシン党の拠点制圧を引き受けた。
+		QUEST_PROGRESS:41 = 2
+		CALL ID2POS(CHARACTER_POSITION)
+		SECTOR_ID = RESULT:0
+		CALL POS2ID(SECTOR_ID, 12, 12)
+		POSID = RESULT
+		FOR SHIP_ID, 0, 14
+			CALL INIT_PRESET_SHIP(10, POSID, 天狗級機動武者, "天狗級機動武者", 天狗級機動武者)
+		NEXT
+		FOR SHIP_ID, 0, 5
+			CALL INIT_PRESET_SHIP(10, POSID, 汎用フリゲート, "開陽丸級電磁甲艦", 汎用フリゲート)
+		NEXT
+		FOR SHIP_ID, 0, 1
+			CALL INIT_PRESET_SHIP(10, POSID, 朱雀級機動武者, "天狗級機動武者『大天狗』", 朱雀級機動武者)
+		NEXT
+		
+	ELSEIF RESULT == 1
+		PRINTFORMW 「まぁ、危険な依頼だ。リスクとリターンを考えるのは当然のこと……君がそういうなら仕方ない」
+		PRINTFORMW 男は残念そうに言って嘆息した。
+		PRINTFORMW 「元々我々の仕事。仕方ない……色々と考えてみよう」
+		PRINTFORML 
+		PRINTFORMW 後日、皇国の特務艦隊に拠点は制圧されたらしい。
+		QUEST_PROGRESS:41 = 0
+	ELSE
+		GOTO INPUT_LOOP
+	ENDIF
+ELSE
+	IS_COMPLETE = 1
+	CALL ID2POS(CHARACTER_POSITION)
+	SECTOR_ID = RESULT:0
+	CALL POS2ID(SECTOR_ID, 12, 12)
+	SIF SHIP_POSITION:(QUEST_FLAG_SHIP_ID:41) == RESULT:0 && SHIP_COUNTRY:(QUEST_FLAG_SHIP_ID:41) == 国家ID_一般海賊
+		IS_COMPLETE = 0
+	IF IS_COMPLETE == 0
+		PRINTFORMW 「賊の討伐は任せたぞ」
+	ELSE
+		PRINTFORMW 「討伐に成功したか。では報酬を送金しておくとしよう」
+		PRINTFORMW 「かくして連中も、父祖たちと同じく時の流れに飲み込まれた。敵ながら哀れなものよ」
+		PRINTFORMW バクシン党の討伐に成功したことで、報酬$1,000,000を手に入れた。
+		MONEY += 750000
+		MONEY:国家ID_豊秋津皇国 -= 750000
+		QUEST_PROGRESS:41 = 0
+		REL_LIKE_COUNTRY:国家ID_豊秋津皇国:国家ID_プレイヤー = LIMIT(REL_LIKE_COUNTRY:国家ID_豊秋津皇国:国家ID_プレイヤー + 75, -1000, 1000)
+	ENDIF
+ENDIF

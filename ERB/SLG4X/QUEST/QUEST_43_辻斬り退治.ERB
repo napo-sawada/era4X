@@ -1,0 +1,178 @@
+﻿;--------------------------
+; 辻斬り退治
+; ちょっとした白兵戦クエスト
+;--------------------------
+
+;--------------------------
+; クエスト受注可能か
+;--------------------------
+@QUEST_ACCEPTABLE_43
+SIF QUEST_PROGRESS:43 < 1
+	RETURN 0
+RETURN 1
+
+;--------------------------
+; クエストの名前を返却
+;--------------------------
+@QUEST_NAME_43
+RESULTS = 辻斬り退治
+RETURN
+
+;--------------------------
+; クエスト本体
+;--------------------------
+@QUEST_BODY_43
+#DIM QUEST_ID = 43
+#DIM DYNAMIC JUDGE
+	PRINTFORMW 用事を済ませた帰り道、夜の訪れを感じて、静流の言葉を思い出す。
+	PRINTFORML 『お仕事……ではないのですが、どうも、時代錯誤な辻斬りが近頃流行っているのだとか』
+	PRINTFORML 普段なら人が出歩いていてもおかしくはないが、噂の辻斬り騒ぎのせいだろう。
+	PRINTFORMW 人の姿は随分と少なく感じた。
+	PRINTFORML 
+	PRINTFORML 夜で歩く際はお気をつけを、とは言っていたが――そんな折り、ふと視線を感じる。
+	PRINTFORMW 人の姿はなかったが、明らかに何者かが%CALLNAME:MASTER%へと視線を向けていた。
+	PRINTFORML 辻斬りを行なうくらい――当然腕に自信はあるのだろう。
+	PRINTFORMW さて、どうするべきか――。
+	$INPUT_LOOP
+	PRINTBUTTON "[0] たまにはこういう危険も悪くない", 0
+	PRINTBUTTON "[1] 百計逃げるに何とやら", 1
+		INPUT
+		IF RESULT == 0
+			PRINTFORMW たまにはこういう危険も悪くない。
+			PRINTFORML 勘が鈍らないよう、死を間近で感じることは大切な事であった。
+			PRINTFORML それに辻斬り――放っておけば更なる犠牲者が出るだろう。
+			PRINTFORMW 来るなら来い、と覚悟を決める。
+			PRINTFORML 
+			IF ABL:MASTER:白兵 > 70
+				PRINTFORMW 路地から現れたのは時代錯誤な深編笠を被った男。
+					SELECTCASE RAND:4
+					CASE 0
+						PRINTFORML 「なるほど、中々腕に覚えがあるようだ」
+						PRINTFORMW 刀を引き抜き、肩に担ぐようにして男は告げる。
+					CASE 1
+						PRINTFORML 「……我が剣の錆びになってもらおう」
+						PRINTFORMW 納刀したまま、男はゆっくりとこちらに近づく。。
+					CASE 2
+						PRINTFORML 「恨みはないが……これも技の追究のため、許せ」
+						PRINTFORMW 男は白波立たぬ水面のように、静謐な構えを取った。
+					CASE 3
+						PRINTFORML 「きひ……今宵は、わしの刀が血に飢えておる」
+						PRINTFORMW 男は狂った様子で、自らの腕を己の刀で浅く裂いた。
+					ENDSELECT
+					PRINTFORML 
+					PRINTFORMW %CALLNAME:MASTER%は構え、迫る男を睨み付ける。
+					PRINTFORML
+						;白兵戦参加メンバーの初期化
+						CALL CC_INIT_MEMBER()
+						;攻撃側キャラクターの設定(最大6名)
+						CALL CC_ADDCHARA("ATTACKER", MASTER)
+						;防御側キャラクターの設定(最大6名)
+						CALL CC_ADDMOB("DEFENDER", "辻斬り", 2000, 1200, 80)
+						;白兵戦イベント呼出
+						CALL CLOSE_COMBAT()
+						JUDGE = RESULT
+
+						PRINTFORMW ...
+						PRINTFORMW ..
+						PRINTFORMW .
+						PRINTL
+						;白兵戦経験値獲得処理
+						CALL CC_ADD_COMBAT_EXP(10)
+						;CLOSE_COMBAT()の戻り値は1 = 攻撃側勝利, 2 = 防御側勝利
+						PRINTL
+					IF JUDGE == 1
+						PRINTFORMW 「ぐ、ぅ……」
+						IF ABL:MASTER:白兵 > 99
+							PRINTFORML 中々の腕前であったが、しかし数々の修羅場を潜り抜けてきた%CALLNAME:MASTER%の敵ではない。
+							PRINTFORMW 実力差でねじ伏せると、余裕を持って男を拘束する。
+						ELSE
+							PRINTFORML 中々危うい相手であったが、%CALLNAME:MASTER%の実力がそれを上回った。
+							PRINTFORMW 激しい戦いに呼吸を多少乱しながらも、男を拘束する。
+						ENDIF
+						PRINTFORML
+							SELECTCASE RAND:4
+							CASE 0
+								PRINTFORML 後に聞いた話では、相手は名前の知られた剣客であったらしい。
+								PRINTFORMW 道場を畳んで姿を消していた男が見つかったのは、辻斬りとして。
+								PRINTFORMW ニュースでは%CALLNAME:MASTER%の活躍が武勇伝として大きく取り上げられ、報じられたようだ。
+								PRINTFORML 
+								PRINTFORML 「だんなさまっ♥　だめ♥♥　あ――っ♥　あ♥　あっ♥　らめ……っ♥♥♥」
+								PRINTFORMW 辻斬り退治の晩は暴力的な衝動を吐き出すように、静流を抱いた。
+								REL_LIKE_COUNTRY:国家ID_豊秋津皇国:国家ID_プレイヤー += 100
+								CALL FUCK(MASTER, "性技, 性交, Ｃ, 射精", "童貞喪失, キス喪失, Ｖ挿入", 0, "静流の唇", "", "静流の膣", "和姦")
+							CASE 1
+								PRINTFORML 後に聞いた話では、相手は剣客ですらない一般人であったらしい。
+								PRINTFORMW 収監されてからは人が変わり、あの刀を手にしてからの記憶がないと説明していた。
+								PRINTFORMW ニュースでは%CALLNAME:MASTER%の名が報じられたようだが、多くの関心は呪われた刀にあるらしい。
+								PRINTFORML 
+								PRINTFORML 「ゆるしっ♥　はげしすぎっ♥♥　しんじゃっ♥　んんっ♥　――っ♥　あっ♥　ひっ♥♥」
+								PRINTFORMW 辻斬り退治の晩は暴力的な衝動を吐き出すように、静流を抱いた。
+								REL_LIKE_COUNTRY:国家ID_豊秋津皇国:国家ID_プレイヤー += 25
+								CALL FUCK(MASTER, "性技, 性交, Ｃ, 射精", "童貞喪失, キス喪失, Ｖ挿入", 0, "静流の唇", "", "静流の膣", "和姦")
+							CASE 2
+								PRINTFORML 後に聞いた話では、相手は相手は無名の剣客。
+								PRINTFORMW 親族の話では、どうにも修行のため山籠りに行ってからずっと消息不明だったようだ。
+								PRINTFORMW ニュースでは%CALLNAME:MASTER%の活躍が何度か繰り返し報じられた。
+								PRINTFORML 
+								PRINTFORML 「らめっ♥　もうイってますからっ♥♥♥　――っ♥♥♥　はぁ♥　はぁ――ひぐっ　むりっ♥　もうむりですっ♥♥」
+								PRINTFORMW 辻斬り退治の晩は暴力的な衝動を吐き出すように、静流を抱いた。
+								REL_LIKE_COUNTRY:国家ID_豊秋津皇国:国家ID_プレイヤー += 75
+								CALL FUCK(MASTER, "性技, 性交, Ｃ, 射精", "童貞喪失, キス喪失, Ｖ挿入", 0, "静流の唇", "", "静流の膣", "和姦")
+							CASE 3
+								PRINTFORML 後に聞いた話では、相手は皇国貴族であったらしい。
+								PRINTFORMW どうにも元々異常な趣味を持っていたようで、辻斬りもその延長であるとのこと。
+								PRINTFORMW 不名誉極まりないその不祥事を明るみに出せる訳もなく、ニュースは報道されなかった。
+								PRINTFORMW 事件のあとに振り込まれた$500,000は恐らく口止め料なのだろう。
+								PRINTFORML 
+								PRINTFORML 「はげしっ♥　イキま♥♥　あ――っ♥　だめ♥　いまうごくのだめっ♥　ほんとにらめっ♥♥♥」
+								PRINTFORMW 辻斬り退治の晩は暴力的な衝動を吐き出すように、静流を抱いた。
+								CALL FUCK(MASTER, "性技, 性交, Ｃ, 射精", "童貞喪失, キス喪失, Ｖ挿入", 0, "静流の唇", "", "静流の膣", "和姦")
+								MONEY += 500000
+								MONEY:国家ID_豊秋津皇国 -= 500000
+							ENDSELECT
+					ELSE 
+						IF ABL:MASTER:白兵 > 89 
+						;あんまりないはず。
+							PRINTFORMW 驕りと油断があったのか、%CALLNAME:MASTER%は相手の鋭い一撃を避け損ない、地に伏せる。
+							PRINTFORML 
+							PRINTFORMW 自分の勝ちを確信し、緩やかに近づいて来る男――%CALLNAME:MASTER%は死を覚悟する。
+							PRINTFORMW しかし、死の間際、サイレン共に治安隊が駆けつけたことに気付いた男は舌打ちをして走り去った。
+						ELSE
+							PRINTFORML 熾烈な戦いを制したのは相手の方。%CALLNAME:MASTER%は男の鋭い一撃を避け損ない、地に伏せる。
+							PRINTFORML 
+							PRINTFORMW 自分の勝ちを確信し、緩やかに近づいて来る男――%CALLNAME:MASTER%は死を覚悟する。
+							PRINTFORMW しかし、死の間際、サイレン共に治安隊が駆けつけたことに気付いた男は舌打ちをして走り去った。
+						ENDIF
+							PRINTFORML 
+							PRINTFORML その後辻斬り騒動は活発なパトロールで鳴りを潜めたようだ。
+							PRINTFORMW %CALLNAME:MASTER%の名前は憐れな被害者として報じられ、腕前の信用を少し失った。
+							PRINTFORML 
+							PRINTFORML 「だめですよ♥　静養が♥　んっ♥　大事なんですから……♥♥」
+							PRINTFORMW そして静養という名目でしばらくの間軟禁され、随分心配したらしい静流に弄ばれた。
+							REL_LIKE_COUNTRY:国家ID_豊秋津皇国:国家ID_プレイヤー -= 50
+							CALL FUCK(MASTER, "性技, 性交, マゾ, Ｃ, 射精", "童貞喪失, キス喪失, Ｖ挿入", 0, "静流の唇", "", "静流の膣", "和姦")
+					ENDIF
+			ELSE
+				PRINTFORMW たまにはこういう危険も悪くない。
+				PRINTFORML そう考えたものだが、視線が消えて眉を顰める。
+				PRINTFORML 先ほど感じていた殺気はどこかへ消えた。
+				PRINTFORMW 首を傾げながら%CALLNAME:MASTER%は帰路につく。
+				PRINTFORML 
+				PRINTFORML 「ん♥　旦那様♥　こっちに集中♥　してくださ――ぁんっ♥♥」
+				PRINTFORMW そして後日、例の如く静流を抱きながらテレビを見ていると辻斬り犯が捕まったとのニュース。
+				PRINTFORMW 強い相手と戦いたかった、という動機を語っているのを知り、%CALLNAME:MASTER%は何とも言えない気分になった。
+				PRINTFORML 
+				PRINTFORMW その後しばらく、%CALLNAME:MASTER%は白兵訓練に励んだ。
+				CALL FUCK(MASTER, "性技, 性交, Ｃ, 射精", "童貞喪失, キス喪失, Ｖ挿入", 0, "静流の唇", "", "静流の膣", "和姦")
+				CALL PRINT_ADD_EXP(MASTER, "白兵経験値", RAND:10 + 5)
+			ENDIF
+		ELSE
+			PRINTFORMW 報酬もなしに危険を冒すなど馬鹿のすること。
+			PRINTFORML 危険から逃げるのは当然のことで、下らない勝ち負けに興味はなかった。
+			PRINTFORML 
+			PRINTFORML 「ん♥　旦那様♥　こっちに集中♥　してくださ――ぁんっ♥♥」
+			PRINTFORMW 後日、例の如く静流を抱きながらテレビを見ていると辻斬り犯が捕まったとのニュース。
+			PRINTFORMW 強い相手と戦いたかった、という馬鹿な動機を語っているのを知り、%CALLNAME:MASTER%は呆れた。
+			CALL FUCK(MASTER, "性技, 性交, Ｃ, 射精", "童貞喪失, キス喪失, Ｖ挿入", 0, "静流の唇", "", "静流の膣", "和姦")
+		ENDIF
+			QUEST_PROGRESS:43 = 0

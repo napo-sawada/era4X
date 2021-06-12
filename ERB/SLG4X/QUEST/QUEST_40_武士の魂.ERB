@@ -1,0 +1,903 @@
+﻿;--------------------------
+; !!クエスト名と 40を好きな番号に変える！!
+; 武士の魂
+; 朱雀級鎧武者が手に入る
+;--------------------------
+
+
+;--------------------------
+; クエスト受注可能か
+;--------------------------
+@QUEST_ACCEPTABLE_40
+SIF QUEST_PROGRESS:40 < 0
+	RETURN 0
+SIF QUEST_PROGRESS:40 == 10
+;女性用（未実装）
+	RETURN 0
+SIF REL_LIKE_COUNTRY:国家ID_豊秋津皇国:国家ID_プレイヤー < 100
+	RETURN 0
+CALL GET_STAR_ID_FROM_POS(CHARACTER_POSITION)
+SIF STAR_OWNER:RESULT != 国家ID_豊秋津皇国
+	RETURN 0
+SIF QUEST_COMPLETE_DATE:40 + 1 > DAY
+  RETURN 0
+RETURN 1
+
+;--------------------------
+; クエストの名前を返却
+;--------------------------
+@QUEST_NAME_40
+SELECTCASE QUEST_PROGRESS:40
+	CASE 0 TO 3
+		RESULTS = 武士の魂
+	CASE 4 TO 9
+		RESULTS = 皇国の現地妻
+	CASE 10
+		RESULTS = 皇国の友人
+ENDSELECT
+RETURN
+
+
+;--------------------------
+; クエスト本体
+;--------------------------
+@QUEST_BODY_40
+#DIM QUEST_ID = 40
+#DIM SHIP_ID
+#DIM DYNAMIC JUDGE
+SELECTCASE QUEST_PROGRESS:QUEST_ID
+	CASE 0
+		PRINTFORML ちょっとした用事の途中、%CALLNAME:MASTER%が街中を歩いていると、一人の少女が囲まれている所を目にする。
+		PRINTFORML 囲まれているのは白い長髪をした兎の獣尾人――皇国では珍しくない亜人種族。
+		PRINTFORMW 囲んでいる三人組も兎ではないが同様の獣尾人で、帯刀しているところを見るに武士階級の人間だろう。
+		PRINTFORML
+		PRINTFORML 武士が往来でナンパしている、という訳ではなく、知り合い同士であるらしい。
+		PRINTFORML ただ、無理矢理引き留めているのは確かだろう。
+		PRINTFORML 少女の方は話を打ち切り、その場を離れようとしているが、その道を塞ぐように取り巻きが動く。
+		PRINTFORMW あなたがそうして眺めていると、言い寄っている男が少女の手を掴むのが見えた。
+		$INPUT_LOOP
+			PRINTBUTTON "[0] 止めに入る。", 0
+			PRINTL 
+			PRINTBUTTON "[1] 面倒ごとに巻き込まれたくはない（武士の魂終了）", 1
+		INPUT
+		IF RESULT == 0
+			PRINTFORML %CALLNAME:MASTER%が声を上げると彼らはこちらを振り返り、睨み付ける。
+			IF ABL:MASTER:白兵 > 69
+				PRINTFORML しかし%CALLNAME:MASTER%が自然に滲ませる強者の風格が彼らの足を自然に退かせた。
+			ELSEIF ABL:MASTER:超能力 > 69
+				PRINTFORMW しかし%CALLNAME:MASTER%から生じる、超能力者としてのオーラが彼らの足を自然に退かせた。
+			ELSEIF ABL:MASTER:話術 > 69
+				PRINTFORML 事情はともかく、このような往来で女性の腕を無理矢理掴むのはどうだろう。
+				PRINTFORMW 武士としての名誉に関わるのではないか、と%CALLNAME:MASTER%が堂々と告げると彼らは目を見合わせる。
+			ELSE
+				PRINTFORML しかし睨み付けていた彼らは、周囲の視線が集まっていることに気付いた彼らは目を見合わせた。
+				PRINTFORMW 流石に武士としての対面があるのだろう、顔を歪めた。
+			ENDIF
+			PRINTFORML 不利を悟ったか、リーダー格の男は舌打ちを。
+			PRINTFORMW ではまた、と言葉ばかり慇懃に少女に告げると、手下を連れて苛立たしげに歩き去る。
+			PRINTFORML
+			PRINTFORML 少女はほっとしたように胸を撫で下ろし、こちらに向かって深々と頭を下げた。
+			PRINTFORML 「ありがとうございます、お助け頂いて」
+			PRINTFORMW 声を掛けただけだと%CALLNAME:MASTER%が告げると、彼女は静かに首を振る。
+			PRINTFORML
+			PRINTFORML 「少なくとも、それでわたしはとても助かりましたから。武士を相手に、勇気のある御仁なのですね」
+			PRINTFORML そうして彼女と少し話して別れた。
+			PRINTFORMW どうにも近所に家があるらしく、お礼をするのでよろしければ是非また訪ねて欲しいと口にした。
+				QUEST_PROGRESS:40 = 1
+				QUEST_PROGRESS:QUEST_ID = 1
+				QUEST_COMPLETE_DATE:QUEST_ID = DAY
+		ELSEIF RESULT == 1
+			PRINTFORML 相手は武士、厄介ごとに巻き込まれては面倒だ。
+			PRINTFORMW 見て見ぬ振りで立ち去った。
+				QUEST_PROGRESS:40 = -1
+		ELSE
+			GOTO INPUT_LOOP
+		ENDIF
+	CASE 1
+		PRINTFORML
+		PRINTFORML 後日、少女から教えてもらった住所を尋ねると、中々の門構え。
+		PRINTFORML どこをどう見ても武家屋敷であった。
+		PRINTFORML どうしたものかと考えていると、どこかから帰ってきたらしい下女が気付いたようで、%CALLNAME:MASTER%に誰何する。
+		PRINTFORMW 名前を名乗り先日のことを伝えると、深々と頭を下げ、こちらへどうぞと屋敷の中へ案内される。
+		PRINTFORML
+		PRINTFORML しばらく居間で待たされていると、現れたのは先日の少女。
+		PRINTFORML 町娘のような格好であった先日とは違い、優美な着物に身を包み、入室しては楚々とした一礼を。
+			SIF QUEST_COMPLETE_DATE:40 + 100 < DAY
+			PRINTFORML 「あれからしばらくいらっしゃらなかったので、もうお会い出来ないかと思っておりました」
+			PRINTFORMW 少し忙しかったことを告げると、彼女はくすくすと笑みを零して首を振る。
+		PRINTFORML
+		PRINTFORML 「改めまして、立花家当主、立花静流と申します。先日は本当に、ありがとうございました」
+		PRINTFORML どうにも彼女はこの屋敷の主人であるらしい。
+		PRINTFORMW とはいえ形だけ、父と兄の戦死によって家を継ぐことになったのだと彼女は語る。
+		PRINTFORML
+		PRINTFORML しばらくは%CALLNAME:MASTER%について。
+		PRINTFORML 主に宇宙で商売していることは告げていたが、それについての話を興味深そうにあれこれ尋ねた。
+		PRINTFORMW それから少しして、話は先日の男について。
+		PRINTFORML
+		PRINTFORML 話を聞くと、先日の男は以前から立花家を狙って度々彼女に言い寄っているらしい。
+		PRINTFORML 元々は祖父の決めた婚約者であったらしく、ただ、家柄に囚われ、武士としての誇りがないと父の手で破談に。
+		PRINTFORMW しかし父と兄が戦死したことを良いことに、近頃は彼女に付き纏っているのだと憂い顔で告げた。
+		PRINTFORML
+		PRINTFORMW 「こういう暗い話はいけませんね」
+		PRINTFORML そう苦笑すると、見せたいものがあるのだと彼女は告げ、立ち上がる。
+		PRINTFORML それから%CALLNAME:MASTER%に付いてきて欲しい、と口にして、向かうのは艦船用のドック。
+		PRINTFORMW 「お礼に、お渡ししたかったのはこの機体です」
+		PRINTFORML
+		PRINTFORML ――彼女が示すのは、ドックに鎮座する巨大な機動歩兵。
+		PRINTFORML 高密度エネルギーブレードを搭載する、皇国武士の魂とも言える機体であった。
+		PRINTFORML 冗談かと思ったが、彼女は冗談など滲ませない顔で首を振る。
+		PRINTFORMW 「……誇り高い父が乗っていた機体なのです。あの男には渡したくありませんから」
+		PRINTFORML
+		PRINTFORMW 「いずれわたしはあの男の妻になる宿命。そう半ば諦めながらも、気がかりはこの機体」
+		PRINTFORMW 「そんな折り、広い宇宙を飛び回る、あなたのような御仁に出会えたことは運命なのだと思いました」
+		PRINTFORML 必要ならば、%CALLNAME:MASTER%の糧にしてもらっても構わないのだと彼女は告げる。
+		PRINTFORML あの男の所で埃を被るよりはその方がずっと良いだろう、と。
+		PRINTFORML
+		PRINTFORMW 「……どうか、受け取って頂けませんか？」
+		PRINTFORML
+				PRINTBUTTON "[0] 受け取る（武士の魂終了）", 0
+				PRINTL
+				PRINTBUTTON "[1] 受け取らない（武士の魂終了）", 1
+				PRINTL
+				PRINTBUTTON "[2] 彼女の悩みを解消する。", 2
+			INPUT
+			IF RESULT == 0
+				PRINTFORML %CALLNAME:MASTER%が頷くと、彼女は嬉しそうに微笑んだ。
+				PRINTFORML 「きっと、父もこれで浮かばれます」
+				PRINTFORML 本当にありがとうございます、と彼女は口にした。
+				PRINTFORML
+				PRINTFORMW ――朱雀級機動武者『白雲』を手に入れた。
+				CALL INIT_PRESET_SHIP(国家ID_プレイヤー, CHARACTER_POSITION, 朱雀級機動武者, "朱雀級機動武者『白雲』", 朱雀級機動武者)
+				SHIP_EQUIP:オプション:0:RESULT = 7
+				PRINTFORML
+				PRINTFORMW その後しばらくして、風の噂で彼女が結婚した、という話を聞いた。
+					QUEST_PROGRESS:40 = -1
+			ELSEIF RESULT == 1
+				PRINTFORML 流石にそんなものは受け取れない。%CALLNAME:MASTER%がそう告げると、彼女は残念そうに頷いた。
+				PRINTFORML 「申し訳ありません。そうですよね、会ったばかりでこのようなもの……」
+				PRINTFORML 苦笑して、今の話は忘れて下さい、と微笑んだ。
+				PRINTFORML
+				PRINTFORMW その後しばらくして、風の噂で彼女が結婚した、という話を聞いた。
+					QUEST_PROGRESS:40 = -1
+			ELSEIF RESULT == 2
+				PRINTFORML 話を聞いた%CALLNAME:MASTER%は今は受け取れない、と口にした。
+				PRINTFORML そして残念そうにそれを聞いた彼女に、少し待っていて欲しい旨を伝える。
+				PRINTFORML 「待つ……でしょうか？」
+				PRINTFORMW 困惑する彼女に%CALLNAME:MASTER%は頷くと、どうするべきかと思考を巡らせた。
+				PRINTFORML
+				PRINTFORML どうするにせよ、色々調べてみる必要があるだろう。
+				PRINTFORMW 静流にはただ、任せておくといい、と口にした。
+					QUEST_PROGRESS:QUEST_ID = 2
+					QUEST_COMPLETE_DATE:QUEST_ID = DAY
+			ELSE
+				GOTO INPUT_LOOP
+		ENDIF
+	CASE 2
+		PRINTFORML
+		PRINTFORML 色々と調べてみたところ、男の家は中々の名家であるらしい。
+		PRINTFORML ただ、嫡男であるあの男はどうにも無能なようで、優秀な次男との間で対立があった。
+		PRINTFORML 次男は兄を当主の座から引きずり落としたいようだが、半ば軟禁状態で監視され、表立っての行動は取れずにいる。
+		PRINTFORMW これを利用しない手はない。
+		PRINTFORML  
+		PRINTFORML %CALLNAME:MASTER%は何とか次男に連絡を取ることに成功し、彼を信用させることに成功した。
+			IF REL_LIKE_COUNTRY:国家ID_豊秋津皇国:国家ID_プレイヤー < 300
+				PRINTFORML 皇国軍では%CALLNAME:MASTER%の名前は非常に有名だった。
+				PRINTFORMW 皇国艦艇の購入許可を個人で与えられるほどの人間は多くない。
+			ELSEIF ABL:MASTER:白兵 > 69
+				PRINTFORML %CALLNAME:MASTER%の場慣れした気配に感じるものがあったのだろう。
+				PRINTFORMW 素直に用件と目的を告げると、少しの躊躇はあったものの頷いた。
+			ELSEIF ABL:MASTER:超能力 > 69
+				PRINTFORMW %CALLNAME:MASTER%から生じる、強力な超能力者としてのオーラを感じたのだろう。
+				PRINTFORMW 素直に用件と目的を告げると、少しの躊躇はあったものの頷いた。
+			ELSEIF ABL:MASTER:話術 > 69
+				PRINTFORML %CALLNAME:MASTER%の鮮やかな話術をもってすれば難しいことではない。
+				PRINTFORMW 最初は疑念を露わにしていたものの、次第にのめり込むように話を聞いた。
+			ELSEIF REL_LIKE_COUNTRY:国家ID_豊秋津皇国:国家ID_プレイヤー < 50
+				PRINTFORML 皇国軍に所属している彼は偶然にも%CALLNAME:MASTER%の名前を知っていたらしい。
+				PRINTFORMW 仕事ぶりを知っていた事が決め手であったらしい。
+			ELSE
+				PRINTFORML 最初は疑念を露わにしていたものの、ただただ必死な%CALLNAME:MASTER%の言葉。
+				PRINTFORMW その熱意を買ってくれたらしい。
+			ENDIF
+		PRINTFORML
+		PRINTFORML 動けない次男の代わりに彼の醜聞を掻き集め、社会的に男を抹殺する。
+		PRINTFORML 情報集めは難しくなかった。元々無能で家と金の力にモノを言わせるタイプであったらしい。
+		PRINTFORML 特に若くして先代が死んでからは、後見人が名ばかりなことをいいことに、多くの悪事を行なっている。
+		PRINTFORML 次男も自らが動けなかったに過ぎず、多くの有用な伝手と情報を持っていた。
+		PRINTFORMW そうして証拠を固めると、次男に後見人に手紙を書かせる。
+		PRINTFORML 
+		PRINTFORML 武士は醜聞を嫌うもの。次男だけならばともかく、%CALLNAME:MASTER%という外部の人間も関わっている。
+		PRINTFORML 兄を当主の座から引きずり落とし、次男を当主にしろ。でなければこの醜聞は公開され、後見人共々名誉を失う。
+		PRINTFORML 兄の後見人ということは、その不始末は後見人のもの。
+		PRINTFORMW 脅しのような手紙であったが、後見人はその要求を呑んだ。
+		PRINTFORML 
+		PRINTFORML 上役には長男の素行不良を理由に次男を当主に据えることを後見人から説明されることになる。
+		PRINTFORML 醜聞が広まってからならばともかく、事前の報告であれば後見人としての面目は立つ。
+		PRINTFORML 皇国に取ってはそれほど稀なことではなく、その申し立ては問題なく受理された。
+		PRINTFORMW こうして男は権力と金を失い、一件落着――
+		PRINTFORML 
+		PRINTFORML 
+		PRINTFORML 
+		PRINTFORML 
+		PRINTFORML 
+		PRINTFORML 「…………」
+		PRINTFORML そうした顛末を報告された静流は長い耳をピクピクと跳ねさせながら、呆けた様子。
+		PRINTFORML 問題があっさりと解決されたことに驚いているようだった。
+		PRINTFORMW 「わたしのために、そんなことまで……」
+		PRINTFORML 
+		PRINTFORML ――大したことではない、と口にすると、苦笑して、大したことです、と彼女は告げる。
+		PRINTFORMW 「本当に、すごいお方。……そんな大変なことを、あっさりやってしまうだなんて」
+		PRINTFORML 
+		PRINTFORMW そうして褒め続ける静流と謙遜する%CALLNAME:MASTER%のやりとりが繰り返されてしばらく。
+		PRINTFORMW 突如、玄関の方から悲鳴が上がる。
+		PRINTFORML 何事かと二人して立ち上がり、%CALLNAME:MASTER%は自然と彼女を背中に。
+		PRINTFORML 静流はどこだ、と叫びながら、現れたのは件の男。自棄になり静流を襲いに来たのか。
+		PRINTFORMW 抜き身の刀を手に目は憎悪に血走っていた。
+		PRINTFORML 
+		PRINTFORML 「貴様、覚えているぞ、いつぞやの……！　何かがおかしいと思ったのだ、全て上手く行っていたはずなのに！」
+		PRINTFORML 男はその切っ先を%CALLNAME:MASTER%に向ける。
+		PRINTFORML 「全て貴様の仕組んだことか……！」
+		PRINTFORMW そしてその刀を大きく振りかぶった。
+		PRINTFORML 
+		PRINTFORML 「きゃ……っ」
+		PRINTFORMW %CALLNAME:MASTER%は咄嗟に静流を庇い、男を突き飛ばす。
+			;白兵戦参加メンバーの初期化
+				CALL CC_INIT_MEMBER()
+			;攻撃側キャラクターの設定(最大6名)
+				CALL CC_ADDCHARA("ATTACKER", MASTER)
+			;防御側キャラクターの設定(最大6名)
+				CALL CC_ADDMOB("DEFENDER", "抜き身を持った男", 1800, 1200, 40)
+			;白兵戦イベント呼出
+				CALL CLOSE_COMBAT()
+				JUDGE = RESULT
+
+				PRINTFORMW ...
+				PRINTFORMW ..
+				PRINTFORMW .
+				PRINTL
+			;白兵戦経験値獲得処理
+				CALL CC_ADD_COMBAT_EXP(10)
+				;CLOSE_COMBAT()の戻り値は1 = 攻撃側勝利, 2 = 防御側勝利
+				PRINTL
+				IF JUDGE == 1
+					IF ABL:MASTER:白兵 > 99
+						PRINTFORML 
+						PRINTFORML 勝負は一瞬、圧倒的な実力でねじ伏せた%CALLNAME:MASTER%はすぐさま男を縛り上げる。
+						PRINTFORML 呆然とみていた静流が近寄り、%CALLNAME:MASTER%の腕に触れた。
+						PRINTFORML 「その、お傷が……」
+						PRINTFORMW 庇った時のものだろう。かすり傷だと笑って返した。
+					ELSEIF ABL:MASTER:白兵 > 69
+						PRINTFORML 
+						PRINTFORML 男の動きは見えていたが、流石に刀を持った相手。
+						PRINTFORML 静流を守りながらということもあり、多少の傷を負っていた。
+						PRINTFORML 「あ、あの、お怪我が……っ」
+						PRINTFORMW 顔を青くする彼女に、これくらいはかすり傷だと苦笑を返した。
+					ELSE
+						PRINTFORML 
+						PRINTFORML 多少の心得はあるとは言え、激昂した相手から静流を守りながら。
+						PRINTFORML 少々乱暴なものにならざるを得ず、多少の傷を負っていた。
+						PRINTFORML 「あ、あの、お怪我が……っ」
+						PRINTFORMW 顔を真っ青にする彼女に、これくらいは大丈夫だと苦笑を返した。
+					ENDIF
+				ELSE ;多分中々ないはず。
+						PRINTFORML 
+						PRINTFORML 静流を守りながらの、逃げ場のない場所で刀を相手。
+						PRINTFORML 深い傷を負って倒れかけたが、その瞬間、静流が投げた置物が男の頭を直撃する。
+						PRINTFORML 「誰か、誰か来て！　すぐに医者を！」
+						PRINTFORMW 顔を真っ青に叫ぶ彼女を見ながら、%CALLNAME:MASTER%は大丈夫だ、と苦笑した。
+				ENDIF
+		PRINTFORML
+		PRINTFORML
+		PRINTFORML
+		PRINTFORML 当然ながらその後は大騒ぎ。
+		PRINTFORML 流石にここまで大事になるとは思っていなかった%CALLNAME:MASTER%には若干の不安があった。
+		PRINTFORMW 事情聴取が行なわれている最中、現れたのは軍服を着た男――犬の獣尾人。
+		PRINTFORML
+		PRINTFORML 彼は他の者達に出て行くように告げ、椅子に腰掛けると名前を名乗る。
+		PRINTFORML 鏑木少将は静流の父、その上官であったらしい。
+		PRINTFORMW まずは身を挺して静流を助けたことを褒め、事情はおおよそ聞いている、と彼は語る。
+		PRINTFORML
+		PRINTFORML 相手を追い詰めた%CALLNAME:MASTER%は褒められた行動ではないが、その信念は素晴らしいもの。
+		PRINTFORML 個人的に礼を言いたい、と語り、頭を下げ、それから安心するように、と彼は告げる。
+		PRINTFORMW どうにも特にお咎めなく、%CALLNAME:MASTER%は解放されるらしい。
+		PRINTFORML
+		PRINTFORML %CALLNAME:MASTER%の行動を大きく取り上げ美談にすることで、今回の不祥事を覆い隠す事に決まったらしい
+		PRINTFORML %CALLNAME:MASTER%が礼を言うと、鷹揚に頷き彼は退席する。
+		PRINTFORMW ただ、事件は事件。事情聴取はしばらく継続し結局静流とは会えず仕舞いであった。
+			QUEST_PROGRESS:QUEST_ID = 3
+			QUEST_COMPLETE_DATE:QUEST_ID = DAY
+	CASE 3
+		REL_LIKE_COUNTRY:国家ID_豊秋津皇国:国家ID_プレイヤー += 150
+		PRINTFORML
+			SIF QUEST_COMPLETE_DATE:40 + 100 < DAY
+			PRINTFORML 「あれから顔を出して頂けませんでしたから、本当に傷は大丈夫かと心配していたのですが……」
+			PRINTFORMW ご無事で本当に何よりです、と口にして。
+		PRINTFORML 「本当に、ありがとうございました」
+		PRINTFORMW 静流は三つ指を突いて頭を下げ、そこからしばらくは今回の事について。
+		PRINTFORML 
+		PRINTFORML 先日鏑木少将の言っていたように、%CALLNAME:MASTER%はちょっとしたヒーロー扱い。
+		PRINTFORML 狂を発した元皇国武士から姫を守った在野の士としてニュースでは大きく報じられていた。
+		PRINTFORML 元、とはいえ、武士に直接手を出して本当に大丈夫だったのだろうかと多少心配していたが、これでようやく安堵出来る。
+		PRINTFORMW 先日まではそこそこの家の当主だった男が、武士崩れの下郎として扱われていることには多少の憐憫はあったものの。
+		PRINTFORML 
+		PRINTFORML メディアではこれぞ真の武士の魂などとセンセーショナルに。
+		PRINTFORML ここに来るまでも何かと人に見られていて大変だったが、武士に手を出して無事で済んだと思えば悪くない。
+		PRINTFORMW あちらの体面を守るためにも乗っておくのが良いだろう。
+		IF TALENT:MASTER:性別 > 0
+			PRINTFORML
+			PRINTFORML 「その……お礼なのですが」
+			PRINTFORML これだけお世話になった以上、何かを受け取ってもらわなければならない。
+			PRINTFORMW やはり、あの機体を受け取ってもらえないだろうか、と彼女は口にする。
+			PRINTFORML
+			PRINTFORML 「……武士の魂を持つあなたであればこそ、お渡ししたいのです」
+			PRINTFORML そして、彼女はもう一度頭を下げた。
+			PRINTFORMW あなたは――
+					PRINTBUTTON "[0] お礼として素直に受け取る。", 0
+					PRINTL
+					PRINTBUTTON "[1] この家に残しておくべきだと答える。", 1
+				INPUT
+				IF RESULT == 0
+					PRINTFORML %CALLNAME:MASTER%が頷くと、彼女は嬉しそうに微笑んだ。
+					PRINTFORML 「きっと、父もこれで浮かばれます」
+					PRINTFORML 本当にありがとうございます、と彼女は口にした。
+					PRINTFORML
+					PRINTFORMW ――朱雀級機動武者『白雲』を手に入れた。
+					PRINTFORML
+					CALL INIT_PRESET_SHIP(国家ID_プレイヤー, CHARACTER_POSITION, 朱雀級機動武者, "朱雀級機動武者『白雲』", 朱雀級機動武者)
+						SHIP_EQUIP:主砲:0:RESULT = 61 ;ちょっとしたサービス。
+						SHIP_EQUIP:オプション:0:RESULT = 7
+					PRINTFORMW その後顔を出す度、彼女は嬉しそうに%CALLNAME:MASTER%を歓迎した。
+					PRINTFORMW ※女性あなたルートは現在未実装。
+						QUEST_PROGRESS:40 = 10
+				ELSEIF RESULT == 1
+					PRINTFORML いつか良い相手が見つかり、跡継ぎが生まれた時のためにも、ここに残しておくべきだろう。
+					PRINTFORML そのように告げると、彼女はじっとこちらを見つめて、それから目を伏せる。
+					PRINTFORMW 「本当に、素晴らしいお方……あなたがもし、殿方であればと思ってしまいますね」
+					PRINTFORML
+					PRINTFORML 彼女は苦笑しながら、もう一度頭を下げて、ではせめて別なお礼を、と口にした。
+					PRINTFORML 
+					PRINTFORML 立花家名義で200,000のお礼金が振り込まれた。
+					PRINTFORMW そして彼女がこの話を周囲に伝えたことで、皇国における評価が更に上がった。
+						MONEY += 200000
+						REL_LIKE_COUNTRY:国家ID_豊秋津皇国:国家ID_プレイヤー += 50
+					PRINTFORML 
+					PRINTFORMW その後顔を出す度、彼女は嬉しそうに%CALLNAME:MASTER%を歓迎した。
+					PRINTFORMW ※女性あなたルートは現在未実装。
+						QUEST_PROGRESS:40 = 10
+				ENDIF
+		ELSE
+			PRINTFORML
+			PRINTFORML そうして話をしていると、折角ですから夕食はいかがでしょう、と静流が口にする。
+			PRINTFORML ごく自然に口にされたようで、隠しきれない僅かな緊張が見て取れた。
+			PRINTFORMW 白い肌には薄紅を。彼女が自覚しているかはともかく、何かを期待していた。
+					PRINTBUTTON "[0] 泊まっていく（皇国の現地妻）", 0
+					PRINTL
+					PRINTBUTTON "[1] 単なる善意、深い関係になる気はない（武士の魂終了）", 1
+				INPUT
+				IF RESULT == 0
+					PRINTFORML %CALLNAME:MASTER%が頷くと、彼女は嬉しそうに微笑んだ。
+						PRINTFORML
+						PRINTFORML そうして日が暮れ、夜のとばりが。
+						PRINTFORML 静流は甲斐甲斐しく酌をしながら、次々に料理を勧めていく。
+						PRINTFORMW 彼女の手作りらしい料理は非常に美味で箸が進む。酒も稀な美酒であった。
+						PRINTFORML
+						PRINTFORML 距離は徐々に近くなり、%CALLNAME:MASTER%が酒を口にするほど身を寄せる。
+						PRINTFORML 酒をほとんど口にしていないにも関わらず、その大きな瞳が潤んでいるのが分かる。
+						PRINTFORMW 「そろそろお風呂も沸いたようです。お先にいかがでしょう？」
+						PRINTFORML
+						PRINTFORML 湯を浴びると、そのまま和室へ。目は良く冴えていた。
+						PRINTFORML 当然のように、しばらくして襖の外から声が掛けられる。
+						PRINTFORML 「入ってもよろしいでしょうか？」
+						PRINTFORMW それを許すと、白い薄手の長襦袢を身につけた静流が現れる。
+						PRINTFORML
+						PRINTFORMW 白い肌と白い長髪。普段は帯で押さえられた乳房は意外なほど豊かであった。
+						PRINTFORMW 小柄ながらも尻も豊かで、白く短い尾をさらけ出していた。獣尾人用の衣服には皆、尻尾用の切れ込みがあるらしい。
+						PRINTFORMW 普段の凜とした様子はなく、幼くさえ見える愛らしい童顔を真っ赤に火照らせていた。
+						PRINTFORMW 赤い目は潤み、ゆっくりと布団で身を起こした%CALLNAME:MASTER%に身を寄せる。
+						PRINTFORML
+						PRINTFORMW 「……獣尾人は、優れた獣の能力と、人の知性を組み合わせて作られた生き物だそうです」
+						PRINTFORML そう口にしながら、乳房を押しつけた。
+						PRINTFORML 既に硬く尖った乳頭の感触がはっきりと分かる。
+						PRINTFORML
+						PRINTFORML 「……嗅覚や優れた運動性、超人を作るためのものであったそうですが……」
+						PRINTFORML 兎は由来が違うのだとか、と口にする。
+						PRINTFORMW 「他の獣尾人の繁殖用に用意されたのが兎だそうで、当初はそれを目的に『飼育』されていたそうです」
+						PRINTFORML
+						PRINTFORML 熱っぽく息を吐き、腕を抱くように乳房を押しつける。
+						PRINTFORML 「刺激ですぐに発情して排卵する牝の兎は繁殖に都合が良いですからね、ほとんどが女なのもそういう理由」
+						PRINTFORML 鼻先を押しつけると、すんすんと鼻を鳴らして匂いを嗅ぐ。
+						PRINTFORMW 「ただそれも最初の頃の話で……困ったのは兎の比率が増えすぎたこと。欲しいのは優秀な、他の獣尾人ですから」
+						PRINTFORML
+						PRINTFORML そうして行なわれたのは化学的去勢。
+						PRINTFORML ほとんどの兎は去勢され、そしてそれが便利だと性産業や富裕層の妾に。
+						PRINTFORML 後に人道に反するとされ、反差別運動が行なわれるも、性欲と繁殖力の高い兎は社会問題に。
+						PRINTFORML 今も多くの兎は生まれてしばらく経つと、半強制的に避妊処理が行なわれているらしい。
+						PRINTFORMW 「……生来淫乱な兎は、妊娠するにも社会の許可がいるんだそうです」
+						PRINTFORML
+						PRINTFORML すりすりと乳房を押しつけ、腕を挟み込むようにしながら声を漏らす。
+						PRINTFORML そんな話をしながら、明らかに静流は興奮していた。
+						PRINTFORMW 「正妻として迎えられた時か、避妊処理中の極めて稀な妊娠か……今でもそういう、家畜みたいな扱いで」
+						PRINTFORML
+						PRINTFORML 太ももを撫でてやると、んっ、と全身を震わせる。
+						PRINTFORML 潤んだ目を細め、触りやすいようにか少し足を開いた。
+						PRINTFORMW 「でも、性欲抑制剤、今日飲まなかったのですが……そんな扱いされる理由が、よく分かります」
+						PRINTFORML
+						PRINTFORML ゆっくりと動いて%CALLNAME:MASTER%の上に跨がるように。
+						PRINTFORML 真正面から%CALLNAME:MASTER%を潤んだ目で見つめた。
+						PRINTFORMW 「……お酌してる時から、期待してしまって……お腹がむずむずして、着物を汚してしまいそうで」
+						PRINTFORML
+						PRINTFORML ――静流にお情け下さいませんか、と口にする。
+						PRINTFORMW 「……今宵一晩でも構いませんから」
+						PRINTFORML 
+						PRINTFORML 
+						PRINTFORML 
+						PRINTFORML 
+						PRINTFORML 
+						PRINTFORML 
+						PRINTFORML 
+						PRINTFORML 
+						PRINTFORML
+						PRINTFORMW 「ぁっ♥　だめっ♥　だめっ♥　だめで――んん……っ♥」
+						PRINTFORML 淫乱とはまさにこのことだろう。
+						PRINTFORML 全身が性感帯のようでありながら、処女膜を破られ奥まで押し込まれた瞬間には絶頂した。
+						PRINTFORML 子宮への刺激による排卵。着床が難しいだけでそのシステムは生きているらしい。
+						PRINTFORML
+						IF TALENT:MASTER:童貞 > 0
+							PRINTFORML 童貞であった%CALLNAME:MASTER%でさえ少し触れるだけで淫らに震える様に、普段の彼女の面影はない。
+							PRINTFORML 幼児であっても容易くイかせることができるのではないかという過敏さであった。
+						ELSE
+							PRINTFORML 童貞であっても容易くイかせることが出来るのではないかという淫らに、普段の彼女の面影はない。
+							PRINTFORML 抑制剤とやらで抑圧されていたのだろう静流の牝の体は異常なほどの過敏さであった。
+						ENDIF
+						PRINTFORMW 枕に顔を押しつけ、布団を握りしめながら、腰を反らして大きな尻を突き上げるように男根を受け止める。
+						PRINTFORML 破瓜血などというものは既に愛液で流れきり、吸い付き絡みつくようにように男根を愛撫していた。
+						PRINTFORMW 「まっ♥　まって♥　またイク♥　イキます♥　から……っ♥　っ――♥♥♥」
+						PRINTFORML
+						PRINTFORML 紅潮した肌は汗を吹き出し、大きくしなるように震えて絶頂を。
+						PRINTFORML 場合によるとあの屑男に犯されてもこうなっていたのだろうか――想像するとはらわたが煮えくり返る。
+						PRINTFORMW 「ひんっ♥　だめっ♥　ゆるし♥　おしりたたくのっ♥　や、あ――っ♥」
+						PRINTFORML
+						PRINTFORML 尻を叩かれてなお喘ぎ震える体は淫乱そのもの。
+						PRINTFORML 兎がどう、というより単に静流が淫乱なのではないか。
+						PRINTFORMW 尋ねると必死に否定するが、言葉で責められる度、牝穴を締め付ける。
+						PRINTFORML
+						PRINTFORML 貫かれながら許しを乞う内容を聞く限り、初めて助けられた時から既に子宮を疼かせていたらしい。
+						PRINTFORMW 妙に男根が疼くのも、飲まされた酒に原因があるそうで、最初からそのつもりで取り寄せていたそうだ。
+						PRINTFORML
+						PRINTFORML 尻を叩かれると謝罪しながら絶頂する姿は何とも嗜虐欲をくすぐってくる。
+						PRINTFORML これだけ淫乱だと浮気が心配だと告げると、体を許すのはあなただけだと必死に誓う。
+						PRINTFORML 自制心があるか確かめてやる、と動きを止めるも、静流は入ってるだけで我慢出来ないのか
+						PRINTFORML 無理、と謝罪を繰り返して五分も持たずに絶頂する。
+						PRINTFORMW お仕置きだと荒々しく腰を叩き付けると悲鳴を上げて、絶頂に次ぐ絶頂を味わわせた。
+						PRINTFORML 
+						PRINTFORMW 四つん這いで、あるいは壁に手をつかせて荒々しく犯し、
+						PRINTFORML 「あ♥　すき♥　すきっ♥　んむ♥　ぁむ……♥」
+						PRINTFORMW 抱き合いながら優しく愛し、
+						PRINTFORML 「だめ♥　はずかし♥　あ♥　だめ♥　だめ……♥」
+						PRINTFORMW 鏡の前で見せつけながら犯し。
+						PRINTFORML 
+						PRINTFORML 
+						PRINTFORMW 「うぅ……、……あぁ」
+						PRINTFORML 翌朝――昼頃に目覚めた静流は昨晩のことを思い出し、布団から出られなくなっていた。
+						PRINTFORML 散々いやらしいことを言わせながら可愛がった後。
+						PRINTFORML 本性がどちらにあるのかはともかく、少なくとも素の静流は随分な恥ずかしがり屋らしい。
+						PRINTFORML
+						PRINTFORMW 「……静流はもう、旦那様に合わせる顔が……ぁんっ♥」
+						PRINTFORML いくら言っても出てこない静流に突っ込み、そのまま犯している内に天頂から日が傾き。
+						PRINTFORML そうしてようやく諦めたのか、物凄い状態になっていた布団から出て、一番に性欲抑制剤を飲んだ。
+						PRINTFORMW 食事を取ったのはそれからのことだった。
+						;回数的に二回処理。
+						CALL FUCK(MASTER, "性技, 性交, Ｃ, 射精", "童貞喪失, キス喪失, Ｖ挿入", 0, "静流の唇", "", "静流の膣", "和姦")
+						CALL FUCK(MASTER, "性技, 性交, Ｃ, 射精", "童貞喪失, キス喪失, Ｖ挿入", 0, "静流の唇", "", "静流の膣", "和姦")
+						PRINTFORML
+						PRINTFORML 下女達と静流は何とも気まずそうであったが、遅い朝食に腹を満たす。
+						PRINTFORML その頃には頬を赤らめながらも凜とした、普段の静流に戻っていた。
+						PRINTFORML 「……その、宇宙と飛び回る旦那様をこの場所に縛り付けるつもりは、ありません」
+						PRINTFORMW そして切り出したのはそんな言葉。
+						PRINTFORML
+						PRINTFORML 「もちろん、静流の側で暮らして頂けるならばこの上なく嬉しいことではありますけれど……」
+						PRINTFORML きっとそのつもりはございませんでしょう、と静流は続けた。
+						PRINTFORML 「……ただ、願うことが許されるなら、時折我が家のようにここを訪れて、羽休めして頂ければ嬉しく思います」
+						PRINTFORMW そうして深く頭を下げる。
+						PRINTFORML
+						PRINTFORML 「そうでなくともこの土地から、旦那様のご無事を祈る自由をお許し下さい」
+						PRINTFORML 拒む理由もない。機会あればまた尋ねると告げると、彼女は嬉しそうに微笑んだ。
+						PRINTFORML 「……ふふ。旦那様と出会えて本当に良かったと思います」
+						PRINTFORMW そう口にした後、お礼がまだでしたね、と彼女は口にする。
+						PRINTFORML 
+						PRINTFORML 「旦那様が必要であれば、是非にと思っているのですが……いかがでしょう？」
+						PRINTFORML 口にしているのは例の、父の機体の事だろう。
+						PRINTFORMW 「立花の魂……どうか、受け取って下さいませんか？」
+						PRINTFORML
+						PRINTFORMW その言葉に、あなたは――
+								PRINTBUTTON "[0] お礼として素直に受け取る。", 0
+								PRINTL
+								PRINTBUTTON "[1] この家に残しておくべきだと答える。", 1
+							INPUT
+							IF RESULT == 0
+								PRINTFORML %CALLNAME:MASTER%が頷くと、彼女は嬉しそうに微笑んだ。
+								PRINTFORML 「ありがとうございます、旦那様」
+								PRINTFORML 航海のご無事をお祈りしています、と彼女は口にした。
+								PRINTFORML
+								PRINTFORMW ――朱雀級機動武者『白雲』を手に入れた。
+								PRINTFORML
+								CALL INIT_PRESET_SHIP(国家ID_プレイヤー, CHARACTER_POSITION, 朱雀級機動武者, "朱雀級機動武者『白雲』", 朱雀級機動武者)
+									SHIP_EQUIP:主砲:0:RESULT = 61 ;ちょっとしたサービス。
+									SHIP_EQUIP:オプション:0:RESULT = 7
+									QUEST_PROGRESS:40 = 4
+									QUEST_COMPLETE_DATE:QUEST_ID = DAY
+							ELSE
+								PRINTFORMW 「……え？」
+								PRINTFORML お前の子供が生まれた時に必要だろう、と告げると彼女は首を傾げる。
+								PRINTFORML それから大きく目を見開いて%CALLNAME:MASTER%を見つめ、幸せそうに微笑んだ。
+								PRINTFORMW 「……、はい」
+								PRINTFORML そして彼女は少し考え込み、頬を赤らめると、%CALLNAME:MASTER%にすり寄る。
+								PRINTFORML 「では……その、旦那様がいらっしゃる時には、沢山お情けを頂かなければなりませんね」
+								PRINTFORML それから、耳をくすぐるようにそう囁いた。
+								PRINTFORML
+								PRINTFORML
+								PRINTFORML
+								PRINTFORML 立花家名義で200,000のお礼金が振り込まれた。
+								PRINTFORMW この後、彼女との関係が周囲に広まったことで、皇国における信用が更に上がった。
+									MONEY += 200000
+									REL_LIKE_COUNTRY:国家ID_豊秋津皇国:国家ID_プレイヤー += 50
+									QUEST_PROGRESS:40 = 4
+									QUEST_COMPLETE_DATE:QUEST_ID = DAY
+							ENDIF
+				ELSE
+							PRINTFORML
+							PRINTFORML すまないが予定がある、と告げると、彼女は残念そうに目を伏せ、そうですか、と告げる。
+							PRINTFORML 「では、その……お礼なのですが」
+							PRINTFORML これだけお世話になった以上、何かを受け取ってもらわなければならない。
+							PRINTFORMW やはり、あの機体を受け取ってもらえないだろうか、と彼女は口にする。
+							PRINTFORML
+							PRINTFORML 「……武士の魂を持つあなたであればこそ、お渡ししたいのです」
+							PRINTFORML そして、彼女はもう一度頭を下げた。
+							PRINTFORMW あなたは――
+									PRINTBUTTON "[0] お礼として素直に受け取る。", 0
+									PRINTL
+									PRINTBUTTON "[1] この家に残しておくべきだと答える。", 1
+								INPUT
+								IF RESULT == 0
+									PRINTFORML %CALLNAME:MASTER%が頷くと、彼女は嬉しそうに微笑んだ。
+									PRINTFORML 「きっと、父もこれで浮かばれます」
+									PRINTFORML 本当にありがとうございます、と彼女は口にした。
+									PRINTFORML
+									PRINTFORMW ――朱雀級機動武者『白雲』を手に入れた。
+									PRINTFORML
+									CALL INIT_PRESET_SHIP(国家ID_プレイヤー, CHARACTER_POSITION, 朱雀級機動武者, "朱雀級機動武者『白雲』", 朱雀級機動武者)
+										SHIP_EQUIP:主砲:0:RESULT = 61 ;ちょっとしたサービス。
+										SHIP_EQUIP:オプション:0:RESULT = 7
+									PRINTFORMW その後、彼女は尼僧になったと風の噂で聞いた。
+										QUEST_PROGRESS:40 = -1
+								ELSE
+									PRINTFORML いつか良い相手が見つかり、跡継ぎが生まれた時のためにも、ここに残しておくべきだろう。
+									PRINTFORML そのように告げると、彼女はじっとこちらを見つめて、それから目を伏せる。
+									PRINTFORMW 「ふふ……何も受け取っては下さらないのですね」
+									PRINTFORML
+									PRINTFORML 彼女は苦笑しながら、もう一度頭を下げて、ではせめて別なお礼を、と口にした。
+									PRINTFORML 
+									PRINTFORML 立花家名義で200,000のお礼金が振り込まれた。
+									PRINTFORMW そして彼女がこの話を周囲に伝えたことで、皇国における評価が更に上がった。
+										REL_LIKE_COUNTRY:国家ID_豊秋津皇国:国家ID_プレイヤー += 50
+										MONEY += 200000
+									PRINTFORML 
+									PRINTFORMW その後、彼女は尼僧になったと風の噂で聞いた。
+										QUEST_PROGRESS:40 = -1
+								ENDIF
+				ENDIF
+		ENDIF
+	CASE 4
+		PRINTFORML 「お帰りなさいませ、旦那様」
+		PRINTFORMW %CALLNAME:MASTER%が立花家の門戸を潜ると、玄関で三つ指を突き、静流が頭を下げて出迎えた。
+		PRINTFORML 下女は荷物を受け取り、静流は%CALLNAME:MASTER%の手を引いた。
+		SIF QUEST_COMPLETE_DATE:40 + 100 < DAY
+			PRINTFORML 「ふふ、お久しぶりのお帰りでございますね。今日はごゆっくりなさって下さい」
+		PRINTFORMW 静流は心から嬉しそうな笑みを浮かべながら、居間の方へと%CALLNAME:MASTER%を誘う。
+		PRINTFORML 茶と菓子を用意し、当然のように隣へと腰掛け、彼女の笑みは途絶えることがない。
+		IF QUEST_COMPLETE_DATE:40 + 100 < DAY
+			PRINTFORML 「人の噂も七十五日。先日の話も忘れられたように落ち着いて参りました」
+		ELSEIF QUEST_COMPLETE_DATE:40 + 5 < DAY
+			PRINTFORML 「ちょっと前まで何度か旦那様との事が報じられて、少し嬉し恥ずかしでした」
+		ELSE
+			PRINTFORML 「このところはニュースで何度か旦那様との事が報じられて、少し嬉し恥ずかしですね」
+		ENDIF
+		PRINTFORMW そんな風に近況を語って、静流は%CALLNAME:MASTER%の話をせがむ。
+		PRINTFORML 仕事のことや船のこと、静流はどんな話でも楽しそうで、中々の聞き上手であった。
+		PRINTFORML そっちも何かないのかと尋ねると、静流に言い寄っていた男について。
+		PRINTFORML 
+		PRINTFORML どうにも、アステロイドベルトで労役をすることになったらしい。
+		PRINTFORML 順風満帆な人生から急転直下、不憫なことだが、禁固刑よりはマシだろう。
+		PRINTFORMW 軍人として一通り操艦技術がある以上、禁固刑は勿体ないという判断か。
+		PRINTFORML 
+		PRINTFORML それから彼女が口にするのは皇国を騒がせるちょっとした問題など。
+		PRINTFORML バクシン党などの武装組織や共和制国家樹立を目指す運動について――彼女は中々の事情通であった。
+		PRINTFORML どうにも軍人であった父と兄の関係でそうしたことに詳しい知人が多いらしい。
+		PRINTFORMW %CALLNAME:MASTER%が興味深そうに聞いているのを見ると、彼女は少し考え込み、手を叩く。
+		PRINTFORML 
+		PRINTFORML 「旦那様がご興味あるなら、出来る範囲で調べておきましょうか？」
+		PRINTFORML 間諜の真似事は危険だろう、と口にすると、慌てて彼女は首を振る。
+		PRINTFORMW 「いえ、もちろん捕まってしまうようなことは……皇国人同士で普通に話されたり、知られる内容程度です」
+		PRINTFORML 
+		PRINTFORML ローカルネタ、ということだろう。
+		PRINTFORML 確かに、この星では公然の秘密でも、%CALLNAME:MASTER%が知らないことは多くあるだろう。
+		PRINTFORML 変に尋ねれば不審がられてしまう、聞きづらい話題と言うものも存在する。
+		PRINTFORMW 「ふふ、こういう理由付けを作って置けば、旦那様も静流の所を訪ねて下さるでしょうし」
+		PRINTFORML 
+		PRINTFORML 甘えるように身を擦り寄せて、長い耳をぴくぴくと動かした。
+		PRINTFORML 耳を撫でてやると、背中を反らして、全身を震わせる。
+		PRINTFORML 「旦那様が今知りたいのは……兎について、でございましょうか？」
+		PRINTFORMW それから、媚びたように%CALLNAME:MASTER%を見つめた。
+		PRINTFORML 
+		PRINTFORML 
+		PRINTFORML 
+		PRINTFORML 
+		PRINTFORMW 静流は養女であったらしく、祖父の愛妾が偶然孕んだ娘を祖父の死後、父親が引き取ったらしい。
+		PRINTFORML 立花家の血を継ぐ淫らな兎の娘。周囲は静流が幼い頃から静流を狙っており、守ってくれたのが父と兄。
+		PRINTFORML そんな二人に迷惑を掛けないようにと彼女は自分を律して暮らしてきたそうだ。
+		PRINTFORMW 「あ♥　あ♥　あ♥　だめ♥　また♥　またキちゃ――っ、……♥♥♥」
+		PRINTFORML 
+		PRINTFORML 凜とした昼の姿はそうして意図的に作られたもの。
+		PRINTFORML 昼は淑女で夜は娼婦。まさに静流はそういう生き物だった。
+		PRINTFORMW 「あっ♥　あぁ――っ♥」
+		PRINTFORML 
+		PRINTFORML 日常的に古風な着物を身につけ、分厚い帯を身につけるのは本能的な習性を隠すため。
+		PRINTFORML 腰を軽く撫でられると尻を突き出し、服従の姿勢を取りたくなってしまうらしい。
+		PRINTFORML 獣のようにのしかかられて犯される時が最も興奮してしまうらしく、何も言わずともそういう姿勢を取った。
+		PRINTFORMW 「ゆるし♥　おゆるしくださっ♥♥　あ♥　また……♥」
+		PRINTFORML 
+		PRINTFORML ごちゅ、ごちゅ、と粘り蕩ける牝穴を男根で乱暴に犯せば、乱暴にするほど悦んだ。
+		PRINTFORML 逆にゆっくり動かれるのも堪らないのか、悩ましげに腰を揺らしておねだりする。
+		PRINTFORMW 「旦那様♥　せつない、です……んっ♥」
+		PRINTFORML 
+		PRINTFORML イク寸前に引き抜いてやると我慢出来ずに尻を振り、命令するとどんな言葉でも口にした。
+		PRINTFORML 静流の牝の本性はどこまでもいやらしく、繁殖用というのがよく分かる。
+		PRINTFORML 兎が皆こうなのか、それとも静流が特別いやらしいのか――後者の要素も大きいだろう。
+		PRINTFORMW 「イク♥　イキま♥♥　あ――っ♥　だめ♥　いまうごくのほんとにだめ……っ♥♥♥」
+		PRINTFORML 
+		PRINTFORML そうして食事の時間まで交わって、風呂に入りながらまた交わり、床に入ってからも当然。
+		PRINTFORML 種を下さい、孕ませて下さい、と鳴く静流に、出す寸前で外に出してやると、益々興奮したように。
+		PRINTFORML 子供を願っているというより、子作りプレイを楽しんでいると言った風情。
+		PRINTFORMW 子宮に注いでもらうためにいやらしい言葉を言わされるのが好きらしい。
+		PRINTFORML 
+		PRINTFORML 彼女は皇国の現地妻。
+		PRINTFORML いつ帰ってくるかも分からない%CALLNAME:MASTER%の肉体をむさぼり尽くす気なのだろう。
+		PRINTFORML 翌朝――というより翌日の昼には、自ら跨がって朝勃ちの男根を咥え込んでいた。
+		PRINTFORMW 「旦那様♥　おひる♥　です♥　よ……♥」
+		PRINTFORML 
+		PRINTFORML 皇国を訪れた時には可愛がってやるのも悪くない。
+		PRINTFORML 「あっ♥　ぁぁ……♥　おきたばっかりなのに♥♥　だんなさま……っ♥♥♥」
+		PRINTFORMW 今日はどうするかを考えながら、兎の子宮を突き上げた。
+		CALL FUCK(MASTER, "性技, 性交, Ｃ, 射精", "童貞喪失, キス喪失, Ｖ挿入", 0, "静流の唇", "", "静流の膣", "和姦")
+		QUEST_PROGRESS:40 = 5
+		QUEST_COMPLETE_DATE:QUEST_ID = DAY
+		
+	CASE 5
+		PRINTFORML 「お帰りなさいませ、旦那様」
+		PRINTFORMW %CALLNAME:MASTER%が立花家の門戸を潜ると、玄関で三つ指を突き、静流が頭を下げて出迎えた。
+		IF QUEST_COMPLETE_DATE:40 + 10 < DAY
+			SELECTCASE RAND:4
+			CASE 0
+			PRINTFORML 「お荷物をお持ちしますね」
+			CASE 1
+			PRINTFORML 「長旅ご苦労様です。今日はごゆっくりなさってください」
+			CASE 2
+			PRINTFORML 「今回はどこまで行ってらっしゃったのですか？」
+			CASE 3
+			PRINTFORML 「ふふ、旦那様が恋しくなった頃合いでございました」
+			ENDSELECT
+		ELSE
+			SELECTCASE RAND:4
+			CASE 0
+			PRINTFORML 「お早いお帰りでございますね」
+			CASE 1
+			PRINTFORML 「ふふ、こんなすぐ会いに来て下さるだなんて」
+			CASE 2
+			PRINTFORML 「今はこの辺りでお仕事をなさっているのですね」
+			CASE 3
+			PRINTFORML 「ふふ、丁度今朝、旦那様の夢を見ておりました」
+			ENDSELECT
+		ENDIF
+		PRINTFORMW そう言いながら、嬉しそうに静流は微笑む。
+		PRINTFORML 
+		PRINTFORML いつものように居間に案内され、茶と菓子を口にし、静流は隣でニコニコと。
+			IF REL_LIKE_COUNTRY:国家ID_豊秋津皇国:国家ID_プレイヤー < 700
+				SELECTCASE RAND:4
+				CASE 0
+					PRINTFORML 「武士達の間でも旦那様の事がよく話されているそうで」
+					PRINTFORMW 近頃の%CALLNAME:MASTER%の評判について口にし、静流は楽しそうだった。
+				CASE 1
+					PRINTFORML 「この国に旦那様が来て頂けるよう言ってくれないかと、静流の所にも様々な方が」
+					PRINTFORMW 近頃の%CALLNAME:MASTER%の評判について口にし、静流は楽しそうだった。
+				CASE 2
+					PRINTFORML 「上の方では旦那様を勧誘するために色々考えておられるようですね」
+					PRINTFORMW 近頃の%CALLNAME:MASTER%の評判について口にし、静流は楽しそうだった。
+				CASE 3
+					PRINTFORML 「近武士の方にお会いすると、旦那様のことばかり聞かれますね」
+					PRINTFORMW 近頃の%CALLNAME:MASTER%の評判について口にし、静流は楽しそうだった。
+				ENDSELECT
+			ELSEIF REL_LIKE_COUNTRY:国家ID_豊秋津皇国:国家ID_プレイヤー < 600
+				SELECTCASE RAND:4
+				CASE 0
+					PRINTFORML 「武士達の間でも旦那様の事は結構有名なようですね」
+					PRINTFORMW 近頃の%CALLNAME:MASTER%の評判について口にし、静流は楽しそうだった。
+				CASE 1
+					PRINTFORML 「旦那様はこの国に根を下ろすつもりはないのかと、様々な方が静流の所に」
+					PRINTFORMW 近頃の%CALLNAME:MASTER%の評判について口にし、静流は楽しそうだった。
+				CASE 2
+					PRINTFORML 「上の方では旦那様を勧誘するべきではないかと話し合われてるそうですね」
+					PRINTFORMW 近頃の%CALLNAME:MASTER%の評判について口にし、静流は楽しそうだった。
+				CASE 3
+					PRINTFORML 「近頃は武士の方にお会いすると、旦那様のことを聞かれますね」
+					PRINTFORMW 近頃の%CALLNAME:MASTER%の評判について口にし、静流は楽しそうだった。
+				ENDSELECT
+			ELSEIF REL_LIKE_COUNTRY:国家ID_豊秋津皇国:国家ID_プレイヤー < 300
+				SELECTCASE RAND:4
+				CASE 0
+					PRINTFORML 「そういえば先日、旦那様の噂を聞きました」
+					PRINTFORMW 近頃の%CALLNAME:MASTER%の評判について口にし、静流は楽しそうだった。
+				CASE 1
+					PRINTFORML 「実戦部隊の方は旦那様が結構な有名人ようですね」
+					PRINTFORMW 近頃の%CALLNAME:MASTER%の評判について口にし、静流は楽しそうだった。
+				CASE 2
+					PRINTFORML 「上の方でも旦那様は結構評価されているみたいですね」
+					PRINTFORMW 近頃の%CALLNAME:MASTER%の評判について口にし、静流は楽しそうだった。
+				CASE 3
+					PRINTFORML 「武士の方にお会いすると時々、旦那様のことを聞かれますね」
+					PRINTFORMW 近頃の%CALLNAME:MASTER%の評判について口にし、静流は楽しそうだった。
+				ENDSELECT
+			ENDIF
+		PRINTFORMW そんな話を聞きながら、今日は――。
+			PRINTFORML
+			PRINTBUTTON "[0] 何か仕事になりそうな話はないか聞きに来た。", 0
+			PRINTFORML
+			;PRINTBUTTON "[1] 皇国の状況について。", 1　皇国の状況とかを見られたりだとか？
+			PRINTFORML
+			PRINTBUTTON "[2] 静流を抱きに来た。", 2
+				INPUT
+				IF RESULT == 0
+					;前回訪問から二十日経ってないと何もない。
+					IF QUEST_COMPLETE_DATE:40 + 20 < DAY
+						PRINTFORML 
+						PRINTFORMW 「お仕事……そうですね」
+						PRINTFORMW どうにも思い当たるものがあったようだ。
+							SELECTCASE RAND:3
+							CASE 0
+								PRINTFORML
+								PRINTFORMW 「そういえば、バクシン党の拠点の一つが見つかったという話をお聞きしました」
+								PRINTFORML アステロイドベルトのデブリを拠点にしているらしい。
+								PRINTFORML 宙賊のように動いている小規模部隊ではなく、拠点となればそれなりの戦力だろう。
+								PRINTFORML 元武士の多いバクシン党――軍を動かせば逃げ出されるため手をこまねいているのが現状だという。
+								PRINTFORMW 「静流に聞かせたということは、間接的な旦那様への依頼かも知れません」
+								PRINTFORMW 軍部に行けば詳しい内容を聞けるかも知れない。
+								QUEST_PROGRESS:41 = 1
+							CASE 1
+								PRINTFORML
+								PRINTFORMW 「少し大きな宙賊のグループが近頃暴れ回っているのだとか」
+								PRINTFORML 護衛のない輸送船狙いではなく、船団狙いの中規模集団。
+								PRINTFORML 軍の識別コードを読まれて逃げられることもあり、手を焼いているらしい。
+								PRINTFORMW 「静流に聞かせたということは、間接的な旦那様への依頼……ということかも知れません」
+								PRINTFORMW 軍部に行けば詳しい内容を聞けるかも知れない。
+								QUEST_PROGRESS:42 = 1
+							CASE 2
+								PRINTFORML
+								PRINTFORMW 「お仕事……ではないのですが、どうも、時代錯誤な辻斬りが近頃流行っているのだとか」
+								PRINTFORML 人通りのない夜の街、一人の相手を狙って真剣勝負を強制するのだという。
+								PRINTFORML それは確かに時代錯誤甚だしい。
+								PRINTFORMW 「ちょっと怖い話ですね。他の者にも夜は出歩かないよう口にしているのですが」
+								PRINTFORMW 夜出歩く際はお気を付け下さいませ、と静流は口にした。
+								QUEST_PROGRESS:43 = 1
+							ENDSELECT
+						PRINTFORML 
+						PRINTFORML 思いつくのはそれくらいですね、と彼女はしばらく考え込み、微笑む。
+						PRINTFORML 「いえ、それと、もう一つ……これは、静流からの依頼なのですが」
+						PRINTFORMW 期待を声と顔に滲ませながら、静流は身を寄せた。
+					ELSE
+						PRINTFORMW 「今のところは思いつくものが……ああ、いえ、一つ、思い出しました」
+						PRINTFORML 何かと尋ねると、静流は身を寄せ、乳房を%CALLNAME:MASTER%に押しつける。
+						PRINTFORML 「……静流への、種付け依頼だとか」
+						PRINTFORMW 媚びた声音で、いかがでしょう、と囁いた。
+						CALL FUCK(MASTER, "性技, 性交, Ｃ, 射精", "童貞喪失, キス喪失, Ｖ挿入", 0, "静流の唇", "", "静流の膣", "和姦")
+					ENDIF
+				ELSEIF RESULT == 2
+					PRINTFORML 「……まぁ」
+					PRINTFORML まだ日も高いですよ、と口にしながらも、静流は途端に興奮を滲ませた。
+					PRINTFORMW 「でも、旦那様が仰るなら、静流はいつでも、ご奉仕させて頂きます」
+					PRINTFORML
+					PRINTFORML すりすりと身を寄せながら、%CALLNAME:MASTER%の股間に触れてゆっくり撫でる。
+					PRINTFORML そして男根を露出させると愛おしげに、陰嚢から亀頭までを繰り返し口付け、咥え込んだ。
+					PRINTFORMW けれどもどこか、焦らすような意図が感じられ、その証拠に四つん這いになった尻が誘うように揺れている。
+					CALL FUCK(MASTER, "性技, 性交, Ｃ, 射精", "童貞喪失, キス喪失, Ｖ挿入", 0, "静流の唇", "", "静流の膣", "和姦")
+				ENDIF
+		PRINTFORML 
+		PRINTFORML 
+		PRINTFORML 
+		PRINTFORML 
+			SELECTCASE RAND:10
+				CASE 0
+					PRINTFORML
+					PRINTFORMW 「あ♥　んっ♥♥　だめ♥　また♥　またキちゃっ、……♥♥♥」
+					PRINTFORML 淫乱兎の腰を後ろから掴むと、乱暴に男根を突き上げ続ける。
+					PRINTFORML 性処理穴としては最高水準、少々乱暴に使ったところで文句どころか悦び鳴いた。
+					PRINTFORML 自分の快楽だけを考えたレイプまがいの挿入であっても、すぐにそれに順応する。
+					PRINTFORMW 普段は清楚な振りをしている癖にどこまでも淫乱なマゾ兎。
+					PRINTFORMW 尻を叩くと悲鳴のような甘い快楽の鳴き声を響かせ、翌朝までそのまま静流の体を貪った。
+				CASE 1
+					PRINTFORML
+					PRINTFORMW 「っ♥　ぁっ♥　――っ♥　っ……♥♥　ひ……♥♥　しんじゃ……♥♥♥」
+					PRINTFORML 絶頂している静流の体に遠慮なく腰を打ち付け続ける。
+					PRINTFORML 高い場所から降りてこられなくなった静流は声にならない悲鳴を上げて、這うように逃げようとしていた。
+					PRINTFORML その度腰を強引に掴んで引き寄せ、根元まで串刺しに。まともに呼吸も出来ない静流を犯す。
+					PRINTFORMW 牝穴に欲しくて我慢が出来なかったのか、奉仕をさせて見れば焦らしてばかり。
+					PRINTFORMW 淫乱兎へのお仕置きは、そのまま朝まで泊まることはなかった。
+				CASE 2
+					PRINTFORML
+					PRINTFORMW 「あぁ……♥　んっ♥♥　はずかしい♥　のに……♥」
+					PRINTFORML 後ろから貫いたまま動きを止め、気持ち良くするように命じる。
+					PRINTFORML 最初はいつも恥ずかしがりながらも、淫乱兎。我慢が出来なくなると自分から大きな尻を叩き付ける。
+					PRINTFORML 動きが悪いと尻を叩き、その度ぎちぎちと締め付けながら、はい♥　と甘い声で答える。
+					PRINTFORMW 尻を叩かれるためにわざと下手なフリをしているんじゃないか。
+					PRINTFORMW 尋ねる言葉に違います、などと首を振りながらも、静流は尻を叩かれ続けた。
+				CASE 3
+					PRINTFORML
+					PRINTFORMW 「ん♥　だいすき♥♥　だんなさま♥　もっと♥　ちゅーしてくださ、む……♥♥♥」
+					PRINTFORML 激しいセックスから、向かい合っての交わりに。
+					PRINTFORML 静流は汗ばんだ体中を擦りつけるように全身を使い、飽きることなく口付けを。
+					PRINTFORML ぬこぬこと蜜穴で男根を扱きながら、動きはゆったりと味わうよう。
+					PRINTFORMW その目は依存めいた愛情に濁り、蕩けきっていた。。
+					PRINTFORMW 腰を揺すってやると、ひゃん♥　と可愛らしい声で鳴き、眠りにつくまでそのまま彼女の奉仕を受けた。
+				CASE 4
+					PRINTFORML
+					PRINTFORMW 「っ♥　だめっ♥　イクのみちゃだめっ♥　っ……あ♥　あ♥　あ♥　っ――♥　……っ♥♥♥」
+					PRINTFORML 年若く仲が良いらしい、下女の一人に見せつけるようにしながら、静流を後ろから拘束する。
+					PRINTFORML 目を離すな、と命令された下女は顔を真っ赤にしながら静流の結合部を眺める。
+					PRINTFORML 普段とは別人のような主人の姿に膝を摺り合わせながら、時折我慢出来ずに声を漏らした。
+					PRINTFORMW 彼女の存在を意識するほど静流の肉は熱を帯び、%CALLNAME:MASTER%を楽しませる。
+					PRINTFORMW 彼女を帰した後、その内並べて犯してみたい、と口にすると、だめです、と言いながら興奮していた。
+				CASE 5
+					PRINTFORML
+					PRINTFORMW 「ん♥　今日は……♥　しずるがごほーし……♥　しますからね……♥♥♥」
+					PRINTFORML 動いちゃだめです、などと言いながら、静流は上に跨がりゆっくりと腰を揺する。
+					PRINTFORML これはこれで中々気持ちの良いものだが、少し物足りない動き。
+					PRINTFORML わざとなのだろう。静流はご奉仕などと言いながら挑発的にこちらを見ていた。
+					PRINTFORMW お仕置きされるためのわざとらしい焦らしプレイ。
+					PRINTFORMW 後で解放するためのフラストレーションを募らせながら、しばらく静流の『ご奉仕』を受けてやった。
+				CASE 6
+					PRINTFORML
+					PRINTFORMW 「旦那様……♥　んっ♥♥　そろそろ♥　我慢出来なくて……♥」
+					PRINTFORML あえて夜まで抱いてやらず、そして夜になっても焦らしプレイ。
+					PRINTFORML 今日はじっくりと楽しもう、と口にした通り、繋がってキスをする以外をしていない。
+					PRINTFORML しかし牝穴で咥え込まされたまま動けないようにされていると、益々感覚が鋭くなるらしい。
+					PRINTFORMW 腰を掴んで動きを止めているにもせがむようにうねうねと肉襞が蠢き、子宮口が切なげに吸い付く。
+					PRINTFORMW 一時間そうした後、荒々しく腰を叩き付けて冒してやると、焦らされ切った静流は狂ったように乱れた。
+				CASE 7
+					PRINTFORML
+					PRINTFORMW 「だめ♥　旦那様♥　せめてお屋敷♥　お屋敷に……っ♥♥♥」
+					PRINTFORML 夜になると後ろから犯したまま屋敷中を四つん這いで歩かせ、散歩を行なう。
+					PRINTFORML 裸で庭に出されると気が気でないのか声を抑えながらも必死で許して欲しいと懇願した。
+					PRINTFORML しかしそれに反して牝穴はどうしようもないほど興奮でうねり、蜜は足元を滑らせるほど。
+					PRINTFORMW 上手に奉仕出来たら許してやる、と告げると興奮と怯えの混じった様子で腰を揺する。
+					PRINTFORMW 結局%CALLNAME:MASTER%をイかせるまでに静流は五回以上、野外での絶頂を味わわされた。
+				CASE 8
+					PRINTFORML
+					PRINTFORMW 「っ♥　だめっ♥　抜いちゃだめっ♥　っ……♥　うー……♥　だんなさま……っ♥♥♥」
+					PRINTFORML 先ほどからわざと外出しを繰り返していた。
+					PRINTFORML 体に精液を掛けられる度、中出し絶頂を奪われた静流は不満げにこちらを睨む。
+					PRINTFORML しかし、少しやり過ぎたのか。
+					PRINTFORMW 静流は中に出してもらえない事で本気で泣き出してしまったらしい。
+					PRINTFORMW その後は耳元で彼女の望む言葉を繰り返しながら、朝までラブラブセックスに付き合わされた。
+				CASE 9
+					PRINTFORML
+					PRINTFORMW 「んぅ♥　ぁっ♥　旦那様の種付け穴♥　一杯見て下さ、んんっ♥♥♥」
+					PRINTFORML 十回イクまで入れない、という条件でいつもしているオナニーをさせていた。
+					PRINTFORML セックスよりもオナニーは随分恥ずかしいらしく、いつも最初は嫌がるもの。
+					PRINTFORML しかし二、三回イキ始めると我慢出来ずに勝手におねだりを始めるのが彼女の常。
+					PRINTFORMW いつもはどんなことを考えているのか、どういうことがされたいのか。。
+					PRINTFORMW 静流のプライバシーを丸裸にしながら、%CALLNAME:MASTER%は言葉で静流をなじり続けた。
+			ENDSELECT
+					QUEST_PROGRESS:40 = 5
+					QUEST_COMPLETE_DATE:QUEST_ID = DAY
+					CALL FUCK(MASTER, "性技, 性交, Ｃ, 射精", "童貞喪失, キス喪失, Ｖ挿入", 0, "静流の唇", "", "静流の膣", "和姦")
+			
+	ENDSELECT
+	
