@@ -38,8 +38,6 @@ RETURN 1
 ;-------------------------------------------------
 @SHOP_LIFE_CHECKCHARA11(ARG:0)
 ;※使用前に TMP_CREATE_RELATION_MAP 関数を呼び出す必要あり
-;　現在 TMP_CREATE_RELATION_MAP は SHOP.ERB で呼び出されている
-LOCAL:0 = TMP_COUNTRY_RELATION:(CFLAG:MASTER:所属):(CFLAG:(ARG:0):所属)
 ;捕虜として捕まえている場合
 IF CFLAG:(ARG:0):捕虜先
 	;非主人公、主人公勢力の捕虜かつ軟禁中
@@ -52,7 +50,7 @@ IF !CFLAG:MASTER:所属
 	RETURN CHECK91(ARG:0, 2, ARG:0 != MASTER && CFLAG:(ARG:0):特殊状態 == 特殊状態_放浪 && !IS_ANIMAL(ARG:0) && SHOP_LIFE_11_GET_FILTER(ARG:0))
 ELSE
 	;捕虜でない、非主人公、同一勢力or共闘勢力or放浪中で候補リストにいる
-	RETURN CHECK91(ARG:0, 2, ARG:0 != MASTER && (LOCAL:0 >= 2 || FINDELEMENT(MEET_CANDIDATES, GET_ID(ARG:0)) != -1) && !IS_ANIMAL(ARG:0) && SHOP_LIFE_11_GET_FILTER(ARG:0))
+	RETURN CHECK91(ARG:0, 2, ARG:0 != MASTER && CFLAG:(ARG:0):所属 == CFLAG:MASTER:所属 && !IS_ANIMAL(ARG:0) && SHOP_LIFE_11_GET_FILTER(ARG:0))
 ENDIF
 ;-------------------------------------------------
 ;「会いに行く」の選択可能キャラ存在判定リスト２（下・補佐）
