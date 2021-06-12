@@ -1,0 +1,372 @@
+﻿; -----------------------
+; レジスタンス関連
+; -----------------------
+@REGISTANCE_PORT(PROGRESS)
+#DIM PROGRESS
+
+IF PROGRESS == 2
+  CALL REGISTANCE_OPENING
+  CALL INIT_REGISTANCE
+  RETURN 3
+ELSE
+  CALL REGISTANCE_MENU
+  RETURN 3
+ENDIF
+
+@REGISTANCE_OPENING
+PRINTFORML %CALLNAME:MASTER%を待ち受けていたのは歓迎の声ではなく、無機質な銃口だった
+PRINTFORMW 旧世代的な軍服と安価な実体弾タイプのアサルトライフルで武装した男たちが、搭乗口から降りた%CALLNAME:MASTER%を出迎えていたのだ
+PRINTL
+PRINTFORML 敵ではない旨を伝え、なんとか荷台を開けさせると、中から例の男が出てきた
+PRINTFORML 旅の疲れかやつれている男は、しかし男たちの姿をみると顔を輝かせ、男たちの方も例の男を見て歓声を上げた
+PRINTFORML 「アイザック！ 生きていたのか！」
+PRINTFORMW 「なんとかな！ 何度死にかけたことか！」
+PRINTL
+PRINTFORML しばしの間、男たちはワイワイと仲間の帰還を喜び合い、話に花を咲かせている
+PRINTFORMW 手持ち無沙汰の%CALLNAME:MASTER%は、しかし辛抱強く男たちの話がひと段落するのを待った
+PRINTW ………………
+PRINTW …………
+PRINTW ……
+PRINTFORML 「というわけで、最終的にはこの人に助けてもらってここまで帰ってこれたんだ」
+PRINTFORML 「そうだったのか。なんとお礼を言っていいか。すまない、そういえばずっと立たせっぱなしだったな。狭いけどこっちにきて座ってくれ」
+PRINTFORML 話がようやくひと段落ついたところで存在に触れられた%CALLNAME:MASTER%は、男たちに連れられ質素な宇宙港の一角にあるMTGスペースに通された
+PRINTFORMW ウェイターアンドロイドがお茶らしきものを持ってきてくれた。茶色くて何か変な匂いのするお茶っぽい飲み物だ
+PRINTL
+PRINTFORML %CALLNAME:MASTER%が謎の液体を飲むか飲むまいか悩んでいると、向いに例の男が座った
+PRINTFORML 今一度よく観察してみる。齢30前半だが苦労人らしい彫りの濃い顔をしている大柄の男だ。少し白髪が目立つ
+PRINTFORMW 「改めて自己紹介させてくれ。俺はアイザック。ここのリーダーをやっている」
+PRINTL
+PRINTFORML ここは？ そう尋ねると、アイザックは途端に悩ましげな表情を浮かべて気まずそうにし始めた
+PRINTFORML 「あー、そうだな。君のような一般人とは中々関わり合いがないような、でも一般人のために活動している者たちというか、いわゆるその、社会秩序を取り戻そうとしている者たちの集まりだ」
+PRINTFORML その言葉に%CALLNAME:MASTER%は合点が行った。通りで警官や軍人に見つからないよう行動し、見つからない場所で武装しているわけだ
+PRINTFORMW 同時に%CALLNAME:MASTER%は不安になってきた。自分はここから無事に帰れるのか、と。
+PRINTL
+PRINTFORML 「巻き込んでしまって申し訳ない。だがここまで来たのも何かの縁だ。我々の活動に協力してくれないか？」
+PRINTFORML %CALLNAME:MASTER%は途端にアイザックに言われるがままのこのこ此処までやってきてしまった自分を恨んだ。武装兵士が取り囲む中で、断れる訳が無い
+PRINTFORML そんな%CALLNAME:MASTER%の焦りを知ってか知らずか、アイザックは呑気に勧誘話を続ける
+PRINTFORMW 「我々はいまだ小勢力。だが君のような勇敢で仁義に溢れる船乗りが仲間に入れば、銀河人民統一連邦の第三居住惑星であるS03を我々のものにすることができる。その際物資や国家運営は君に噛んでもらっていい。なぜなら我々が求めるのは平和な暮らしなのだから。銀河人民統一連邦の元では平和な暮らしを過ごすことすら難しい。君は銀河人民統一連邦の貧困率を知っているか？全体の実に15\%に登っている。15だぞ。1.5じゃない。それだけ...」
+PRINTL
+PRINTFORML 国家運営など夢のまた夢だが、話に乗らないとここを出るのは難しそうだとアイザックの話を聞き流しながら考える
+PRINTFORML この手の勢力は敵に回すと非常に厄介だ。とはいえ銀河人民統一連邦のような大きな国も敵に回すのも言語道断だ
+PRINTFORML だが%CALLNAME:MASTER%の感は告げていた。この行き当たりばったりの連中をまとめあげれば、自分の勢力に仕立て上げることも不可能じゃないと
+PRINTFORMW ピンチに見える現状だが、逆にこれはチャンスなのだと
+PRINTL
+PRINTFORML どの道、了承しなければ生きて帰れる可能性は低いのだ。ならばこいつらを利用してやるくらいの勢いで関わるのも、いいのではないか
+PRINTFORML 宇宙は広い。失敗すれば民主主義国にでも逃げ込めばいいのだ。
+PRINTFORMW %CALLNAME:MASTER%は自身の感を信じ、アイザックたちの仲間に、いや、アイザックたちを利用しS03を手中に収める野望を打ち立てた
+PRINTW ………………
+PRINTW …………
+PRINTW ……
+PRINTFORML このクエストの最終目的は、S03の奪取です
+PRINTFORML 様々な関連クエストを実行し国家転覆に必要なパラメータを上下させ、国家転覆の成功率を上げましょう。
+PRINTL 
+CALL REGISTANCE_PARAMETER_DESCRIPTION
+PRINTFORMW これらの値の意味は後からレジスタンスアジトで確認できます
+PRINTL
+PRINTFORML レジスタンスアジトで行えること
+PRINTL
+PRINTFORML 金銭の贈与: 活動資金を与え、地上軍戦力や諜報活動を行うための資金に当てさせます
+PRINTL
+PRINTFORML 戦車の購入: 活動資金から戦車を購入させます
+PRINTL
+PRINTFORML 充足補填: 活動資金から充足を補填させます
+PRINTL
+PRINTFORML 徴兵活動: 活動資金を消費し兵士を募集します
+PRINTL
+PRINTFORML 慈善活動: 活動資金を消費し反体制派支持率を上昇させます
+PRINTL
+PRINTFORML 状況の分析: 現状の各パラメータを報告させます。
+PRINTL
+PRINTFORML 開戦: S03の防衛部隊を撃破し、国家転覆作戦を開始します
+PRINTW
+RETURN
+
+@REGISTANCE_MENU
+$INPUT_LOOP
+DRAWLINE
+CALL PRINT_POWER_BALANCE
+PRINTFORML アイザック「状況は以上の通りだ。さて、どうする？」
+PRINTBUTTON "[0]金銭の贈与", 0
+PRINTL
+PRINTBUTTON "[1]戦車の購入", 1
+PRINTL
+PRINTBUTTON "[2]航空機の購入", 2
+PRINTL
+PRINTBUTTON "[3]充足補填", 3
+PRINTL
+PRINTBUTTON "[4]徴兵活動", 4
+PRINTL 
+PRINTBUTTON "[5]慈善活動", 5
+PRINTL
+PRINTBUTTON "[6]特殊艦船研究", 6
+PRINTL
+PRINTBUTTON "[7]用語HELP", 7
+PRINTL
+PRINTBUTTON "[8]宙域画面へ", 8
+PRINTL
+INPUT
+; 金銭の贈与
+IF RESULT == 0
+  CALL REGISTANCE_DONATE
+ELSEIF RESULT == 1
+  CALL REGISTANCE_BUY_TANK
+ELSEIF RESULT == 2
+  CALL REGISTANCE_BUY_AIRSHIP
+ELSEIF RESULT == 3
+  CALL REGISTANCE_BUY_WEAPON
+ELSEIF RESULT == 4
+  CALL REGISTANCE_CONSCRIPTION
+ELSEIF RESULT == 5
+  CALL REGISTANCE_CHARITY
+ELSEIF RESULT == 6
+  CALL REGISTANCE_RESEARCH
+ELSEIF RESULT == 7
+  CALL REGISTANCE_PARAMETER_DESCRIPTION
+ELSEIF RESULT == 8
+  RETURN
+ENDIF
+GOTO INPUT_LOOP
+
+
+@REGISTANCE_PARAMETER_DESCRIPTION
+PRINTFORML パラメータの詳細は以下のとおりです
+PRINTL
+PRINTFORML 政権支持率: 現政権への支持率です。高いほど人民は敵に周ります
+PRINTL
+PRINTFORML 反体制派支持率: 我々への支持率です。高いほど人民が味方になります
+PRINTL
+PRINTFORML 地上軍戦力比: 彼我の戦力差を\%で示した値です。高いほど我々が有利といえます
+PRINTL
+PRINTFORML 戦闘員: 戦闘員の数です。地上軍戦力比に関係します
+PRINTL
+PRINTFORML 非戦闘員数: 非戦闘員の数です。反体制派支持率に関係します
+PRINTL
+PRINTFORML 戦車: 戦車の数です。地上軍戦力比に関係します
+PRINTL
+PRINTFORML 航空機: 航空機の数です。地上軍戦力比に関係します
+PRINTL
+PRINTFORML 充足: 装備の数です。戦闘員一人に対し1の値が必要となります。
+PRINTL
+PRINTFORML 内定進捗率: 銀河人民統一連邦の内偵の進捗率です。100\%になると%CALLNAME:MASTER%が首謀者だとばれ、社会主義国と敵対関係になります。この値は日毎に増えていきます
+PRINTL
+
+@INIT_REGISTANCE
+R支持率 = 1
+R戦車 = 1
+R航空機 = 0
+R充足 = 50
+R戦闘員 = 50
+R非戦闘員 = 10
+
+G支持率 = 60
+G戦車 = 10000
+G航空機 = 3000
+G充足 = 3000000
+G戦闘員 = 3000000
+G非戦闘員 = 1000000000 - G戦闘員
+
+@PRINT_POWER_BALANCE
+PRINTFORML 　　　　　　レジスタンス　VS　銀河人民統一連邦第三居住惑星S03
+PRINTFORML 支持率　　　{R支持率, 6, RIGHT}\% VS　{G支持率}\%
+PRINTFORML 資金　　{MONEY:国家ID_レジスタンス, 10, RIGHT}　VS　{MONEY:国家ID_社会主義}
+PRINTFORML 戦闘員数　　{R戦闘員, 6, RIGHT}　VS　{G戦闘員}
+PRINTFORML 非戦闘員数　{R非戦闘員, 6, RIGHT}　VS　{G非戦闘員}
+PRINTFORML 充足率　　　{R充足, 6, RIGHT}　VS　{G充足}
+PRINTFORML 戦車　　　　{R戦車, 6, RIGHT}　VS　{G戦車}
+PRINTFORML 航空機　　　{R航空機, 6, RIGHT}　VS　{G航空機}
+PRINTL
+PRINTFORML 現在研究中の項目: %R研究名:R_CURRENT_RESEARCH%
+PRINTL
+@REGISTANCE_DONATE
+#DIM 投資額
+$INPUT_LOOP
+PRINTFORML 「いくら投資してくれるんだ？」
+PRINTFORML 現在の所持金: %TOSTR(MONEY, "$###,###")% (0で戻る)
+INPUT
+投資額 = RESULT
+IF 投資額 > 0 && 投資額 <= MONEY
+  PRINTFORML 「%TOSTR(投資額, "$###,###")% 投資してくれるんだな？」
+  CALL ASK_YN
+  IF RESULT == 0
+    MONEY:国家ID_レジスタンス += 投資額
+    MONEY -= 投資額
+  ELSE
+    GOTO INPUT_LOOP
+  ENDIF
+ELSEIF RESULT == 0
+  RETURN
+ELSE
+  GOTO INPUT_LOOP
+ENDIF
+
+@REGISTANCE_BUY_TANK
+#DIM 購入数
+#DIM 最大購入可能台数
+#DIM CONST 単価 = 1500000
+
+$INPUT_LOOP
+PRINTFORML 「何台購入するんだ？」
+最大購入可能台数 = MONEY:国家ID_レジスタンス / 単価
+PRINTFORML 最大購入可能数: {最大購入可能台数} (0で戻る)
+INPUT
+購入数 = RESULT
+IF 購入数 <= 最大購入可能台数 && 購入数 > 0
+  PRINTFORML 「%TOSTR(購入数, "###,###")%台購入するんだな?」
+  CALL ASK_YN
+  IF RESULT == 0
+    MONEY:国家ID_レジスタンス -= 単価 * 購入数
+    R戦車 += 購入数
+  ELSE
+    GOTO INPUT_LOOP
+  ENDIF
+ELSEIF 購入数 == 0
+  RETURN
+ELSE
+  GOTO INPUT_LOOP
+ENDIF
+
+@REGISTANCE_BUY_AIRSHIP
+#DIM 購入数
+#DIM 最大購入可能台数
+#DIM CONST 単価 = 10000000
+
+$INPUT_LOOP
+PRINTFORML 「 何機購入するんだ？」
+最大購入可能台数 = MONEY:国家ID_レジスタンス / 単価
+PRINTFORML 最大購入可能数: {最大購入可能台数} (0で戻る)
+INPUT
+購入数 = RESULT
+IF 購入数 <= 最大購入可能台数 && 購入数 > 0
+  PRINTFORML 「%TOSTR(購入数, "###,###")%機購入するんだな?」
+  CALL ASK_YN
+  IF RESULT == 0
+    MONEY:国家ID_レジスタンス -= 単価 * 購入数
+    R航空機 += 購入数
+  ELSE
+    GOTO INPUT_LOOP
+  ENDIF
+ELSEIF 購入数 == 0
+  RETURN
+ELSE
+  GOTO INPUT_LOOP
+ENDIF
+
+@REGISTANCE_BUY_WEAPON
+#DIM 購入数
+#DIM 最大購入可能台数
+#DIM CONST 単価 = 1800
+
+$INPUT_LOOP
+PRINTFORML 「 何セット購入するんだ？」
+最大購入可能台数 = MONEY:国家ID_レジスタンス / 単価
+PRINTFORML 最大購入可能数: {最大購入可能台数} (0で戻る)
+INPUT
+購入数 = RESULT
+IF 購入数 <= 最大購入可能台数 && 購入数 > 0
+  PRINTFORML 「%TOSTR(購入数, "###,###")%セット購入するんだな?」
+  CALL ASK_YN
+  IF RESULT == 0
+    MONEY:国家ID_レジスタンス -= 単価 * 購入数
+    R充足 += 購入数
+  ELSE
+    GOTO INPUT_LOOP
+  ENDIF
+ELSEIF 購入数 == 0
+  RETURN
+ELSE
+  GOTO INPUT_LOOP
+ENDIF
+
+@REGISTANCE_CONSCRIPTION
+#DIM 購入数
+#DIM 最大購入可能台数
+#DIM CONST 単価 = 1000
+
+$INPUT_LOOP
+PRINTFORML 「 何人徴兵するんだ？」
+最大購入可能台数 = MONEY:国家ID_レジスタンス / 単価
+PRINTFORML 最大雇用可能数: {最大購入可能台数} (0で戻る)
+INPUT
+購入数 = RESULT
+IF 購入数 <= 最大購入可能台数 && 購入数 > 0
+  PRINTFORML 「%TOSTR(購入数, "###,###")%人徴兵するんだな?」
+  CALL ASK_YN
+  IF RESULT == 0
+    購入数 = (購入数 / 2) +  RAND:(購入数/2) + (購入数 / 100 * R支持率)
+    PRINTFORMW 「現場の人間に連絡したところ、今回その額で徴兵できたのは%TOSTR(購入数, "###,###")%人だそうだ……」
+    MONEY:国家ID_レジスタンス -= 単価 * 購入数
+    R戦闘員 += 購入数
+  ELSE
+    GOTO INPUT_LOOP
+  ENDIF
+ELSEIF 購入数 == 0
+  RETURN
+ELSE
+  GOTO INPUT_LOOP
+ENDIF
+
+@REGISTANCE_CHARITY
+#DIM 購入数
+#DIM 最大購入可能台数
+#DIM CONST 単価 = 1
+
+$INPUT_LOOP
+PRINTFORML 「 いくら投資するんだ？」
+最大購入可能台数 = MONEY:国家ID_レジスタンス / 単価
+PRINTFORML 最大投資可能額: {最大購入可能台数} (0で戻る)
+INPUT
+購入数 = RESULT
+IF 購入数 <= 最大購入可能台数 && 購入数 > 0
+  PRINTFORML 「%TOSTR(購入数, "###,###")%投資するんだな?」
+  CALL ASK_YN
+  IF RESULT == 0
+    購入数 = RAND:購入数 + (購入数 / 100 * R支持率)
+    PRINTFORMW 「現場の人間に連絡したところ、今回の事前活動により%TOSTR(購入数, "###,###")%人の非戦闘員が我々に協力してくれることになった」
+    MONEY:国家ID_レジスタンス -= 単価 * 購入数
+    R非戦闘員 += 購入数
+    G非戦闘員 -= 購入数
+  ELSE
+    GOTO INPUT_LOOP
+  ENDIF
+ELSEIF 購入数 == 0
+  RETURN
+ELSE
+  GOTO INPUT_LOOP
+ENDIF
+
+@REGISTANCE_RESEARCH
+#DIM CONST 研究員割合 = 1000000
+
+IF (R非戦闘員 / 研究員割合) == 0
+  PRINTFORML 「研究員がいないので研究を行うことができない」
+  PRINTFORMW 「非戦闘員が%TOSTR(研究員割合, "###,###")%人もいれば一人はいるものなのだが……」
+  RETURN
+ENDIF
+
+IF R_CURRENT_RESEARCH
+  PRINTFORMW 「現在の研究が完了するまで新しい研究には着手できないぞ」
+  RETURN
+ENDIF
+
+$INPUT_LOOP
+PRINTFORML 「どの研究を行う？」
+PRINTBUTTON "[1] 軍用輸送船", 1
+PRINTL
+PRINTBUTTON "[2] 戦車", 2
+PRINTL
+PRINTBUTTON "[3] 航空機", 3
+PRINTL
+PRINTBUTTON "[9] キャンセル", 9
+PRINTL
+INPUT
+IF RESULT == 1
+  R_CURRENT_RESEARCH = 軍用輸送船研究
+ELSEIF RESULT == 2
+  R_CURRENT_RESEARCH = 戦車研究
+ELSEIF RESULT == 3
+  R_CURRENT_RESEARCH = 航空機研究
+ELSEIF RESULT == 9
+  RETURN
+ELSE
+  GOTO INPUT_LOOP
+ENDIF

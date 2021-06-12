@@ -1,0 +1,26 @@
+﻿;-------------------
+; 国家転覆
+;-------------------
+; レジスタンス側
+#DIM SAVEDATA R支持率
+#DIM SAVEDATA R戦車
+#DIM SAVEDATA R航空機
+#DIM SAVEDATA R充足
+#DIM SAVEDATA R戦闘員
+#DIM SAVEDATA R非戦闘員
+#DIM SAVEDATA R研究者
+#DIM SAVEDATA R_CURRENT_RESEARCH
+#DIM SAVEDATA R_RESEARCH_DATE
+#DIM SAVEDATA R_COMPLETE_RESEARCH, 4
+#DIM CONST 軍用輸送船研究 = 1
+#DIM CONST 戦車研究 = 2
+#DIM CONST 航空機研究 = 3
+#DIM CONST R研究日数 = 0, 2000, 500, 800
+#DIMS CONST R研究名 = "なし", "軍用輸送船研究", "戦車研究", "航空機研究"
+
+#DIM SAVEDATA G支持率
+#DIM SAVEDATA G戦車
+#DIM SAVEDATA G航空機
+#DIM SAVEDATA G充足
+#DIM SAVEDATA G戦闘員
+#DIM SAVEDATA G非戦闘員

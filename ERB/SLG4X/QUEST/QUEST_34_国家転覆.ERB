@@ -1,0 +1,107 @@
+﻿;--------------------------
+; !!逃げる男と 34を好きな番号に変える！!
+; 逃げる男
+; ここにクエストの説明
+;--------------------------
+
+
+;--------------------------
+; クエスト受注可能か
+;--------------------------
+@QUEST_ACCEPTABLE_34
+CALL GET_STAR_ID_FROM_POS(CHARACTER_POSITION)
+SIF RESULT != 2
+	RETURN 0
+IF QUEST_PROGRESS:34 == 0
+	FOR LOCAL, 0, MAX_SHIP
+		SIF SHIP_COUNTRY:LOCAL == 国家ID_プレイヤー && SHIP_CATEGORY:LOCAL == 輸送船 && SHIP_POSITION:LOCAL == CHARACTER_POSITION
+			RETURN 1
+	NEXT
+ENDIF
+RETURN 0
+
+;--------------------------
+; クエストの名前を返却
+;--------------------------
+@QUEST_NAME_34
+SETCOLOR 0X00FF00
+RESULTS = 逃げる男
+RETURN
+
+
+;--------------------------
+; マップでの表示を設定する
+; @QUEST_SET_TILE_  : マップ上対象地点にマークを出す。
+; @QUEST_MAP_INFO_  : 右下小窓にメッセージを出す
+; 引数１： ARG:0 SS34YY　座標データ　マップ上でクリックされた座標。表示条件分岐に。
+;--------------------------
+;;;マップ画面上での表示。 隠したかったら関数コメントアウトか RETURN 0
+;;;色を替えたかったらSETCOLORしておけば後の処理で色反映します
+@QUEST_SET_TILE_34 (ARG:0 )
+	RESULTS '= "！"
+RETURN 1
+
+;;;右下小窓に出す。隠したければ関数コメントアウトか RETURN 0
+@QUEST_MAP_INFO_34 (ARG:0 )
+		RESULTS:0 '= "レジスタンスの宇宙港"
+RETURN 1
+
+;-----------------------
+; マップ上からQUEST_BODYを実行する処理
+; @QUEST_SHOW_COMMAND_x : ここで指定した文字列のコマンドを現地で表示する
+; 　　　　　　　　　　 ：(調査する||捜索する||採集する||待ち伏せする||挑戦する)といったフレーバー
+; @QUEST_PLACE_CHECK_x ： 設定マスを踏んだら呼び出される。不要ならば消すか無処理で返す
+;--------------------------
+@QUEST_SHOW_COMMAND_34 ()
+	RESULTS '= "入港"
+RETURN 1
+
+@QUEST_REACH_PLACE_34 ()
+RETURN
+
+;--------------------------
+; クエスト本体
+;--------------------------
+@QUEST_BODY_34
+#DIM CONST QUEST_ID = 34
+#DIM FROM_TARGET_POSITION
+#DIM SECTOR_ID
+
+IF QUEST_PROGRESS:QUEST_ID == 0
+	PRINTFORML %CALLNAME:MASTER%が輸送船の点検をしていると、見知らぬ男が物陰に隠れているのを発見した
+	PRINTFORML すぐに武器を引き抜いて構えた%CALLNAME:MASTER%に、男は手を上げ慌てたように叫ぶ
+	PRINTFORMW 「待ってくれ、訳があるんだ、聞いてくれ！」
+	PRINTL
+	PRINTFORML 話を聞くと、どうやら男は訳ありで銀河人民統一連邦に気づかれず脱出し、仲間の待つ隠し宇宙港へ行きたいらしい
+	SETCOLOR 0XFF0000
+	PRINTFORMW %CALLNAME:MASTER%の感が、重大な選択であることを告げている
+	RESETCOLOR
+	PRINTFORML 男を仲間の元まで運びますか？
+	CALL ASK_YN
+	IF RESULT == 1
+		PRINTFORML こんな胡散臭いやつを匿う理由はない
+		PRINTFORML %CALLNAME:MASTER%はそのまま男を警備の兵士に引き渡した
+		QUEST_PROGRESS:QUEST_ID = 1
+		RETURN
+	ENDIF
+	PRINTFORML 何やら訳ありなのだろう。報酬をもらう約束をして、%CALLNAME:MASTER%は男を指定の宇宙港へ連れて行ってやることにした
+	LOCAL = 1
+	WHILE LOCAL
+		;; 関数つかって適当に。 指定セクター内　6:ちょっと外より を抽選
+		CALL ID2POS(CHARACTER_POSITION)
+		SECTOR_ID = RESULT:0
+		LOCAL:1 = RESULT:1
+		LOCAL:2 = RESULT:2
+		CALL QUEST_SET_RANDPOINT(QUEST_ID, SECTOR_ID, 6 )
+		IF RESULT >= 0
+			レジスタンスアジト = RESULT
+			CLEARMAP:SECTOR_ID:(LOCAL:2):(LOCAL:1) = 1		;;明瞭化おまけ
+			LOCAL --
+		ENDIF
+	WEND
+	QUEST_PROGRESS:QUEST_ID = 2
+	RETURN
+ENDIF
+CALL REGISTANCE_PORT(QUEST_PROGRESS:QUEST_ID)
+QUEST_PROGRESS:QUEST_ID = RESULT
+RETURN

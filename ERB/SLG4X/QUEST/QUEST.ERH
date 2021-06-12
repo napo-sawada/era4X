@@ -38,6 +38,9 @@
 ;31 債務回収
 #DIM SAVEDATA 債務者ランク
 
+;34 国家転覆
+#DIM SAVEDATA レジスタンスアジト
+
 ;60 MOTHER
 #DIM QUEST_60_対象
 #DIM QUEST_60_デブリ
