@@ -180,7 +180,7 @@ SELECTCASE QUEST_PROGRESS:QUEST_ID
 		PRINTFORMW これを利用しない手はない。
 		PRINTFORML  
 		PRINTFORML %CALLNAME:MASTER%は何とか次男に連絡を取ることに成功し、彼を信用させることに成功した。
-			IF REL_LIKE_COUNTRY:国家ID_豊秋津皇国:国家ID_プレイヤー < 300
+			IF REL_LIKE_COUNTRY:国家ID_豊秋津皇国:国家ID_プレイヤー > 300
 				PRINTFORML 皇国軍では%CALLNAME:MASTER%の名前は非常に有名だった。
 				PRINTFORMW 皇国艦艇の購入許可を個人で与えられるほどの人間は多くない。
 			ELSEIF ABL:MASTER:白兵 > 69
@@ -192,7 +192,7 @@ SELECTCASE QUEST_PROGRESS:QUEST_ID
 			ELSEIF ABL:MASTER:話術 > 69
 				PRINTFORML %CALLNAME:MASTER%の鮮やかな話術をもってすれば難しいことではない。
 				PRINTFORMW 最初は疑念を露わにしていたものの、次第にのめり込むように話を聞いた。
-			ELSEIF REL_LIKE_COUNTRY:国家ID_豊秋津皇国:国家ID_プレイヤー < 50
+			ELSEIF REL_LIKE_COUNTRY:国家ID_豊秋津皇国:国家ID_プレイヤー > 50
 				PRINTFORML 皇国軍に所属している彼は偶然にも%CALLNAME:MASTER%の名前を知っていたらしい。
 				PRINTFORMW 仕事ぶりを知っていた事が決め手であったらしい。
 			ELSE
@@ -701,7 +701,7 @@ SELECTCASE QUEST_PROGRESS:QUEST_ID
 		PRINTFORMW そう言いながら、嬉しそうに静流は微笑む。
 		PRINTFORML 
 		PRINTFORML いつものように居間に案内され、茶と菓子を口にし、静流は隣でニコニコと。
-			IF REL_LIKE_COUNTRY:国家ID_豊秋津皇国:国家ID_プレイヤー < 700
+			IF REL_LIKE_COUNTRY:国家ID_豊秋津皇国:国家ID_プレイヤー > 800
 				SELECTCASE RAND:4
 				CASE 0
 					PRINTFORML 「武士達の間でも旦那様の事がよく話されているそうで」
@@ -716,7 +716,7 @@ SELECTCASE QUEST_PROGRESS:QUEST_ID
 					PRINTFORML 「近武士の方にお会いすると、旦那様のことばかり聞かれますね」
 					PRINTFORMW 近頃の%CALLNAME:MASTER%の評判について口にし、静流は楽しそうだった。
 				ENDSELECT
-			ELSEIF REL_LIKE_COUNTRY:国家ID_豊秋津皇国:国家ID_プレイヤー < 600
+			ELSEIF REL_LIKE_COUNTRY:国家ID_豊秋津皇国:国家ID_プレイヤー > 600
 				SELECTCASE RAND:4
 				CASE 0
 					PRINTFORML 「武士達の間でも旦那様の事は結構有名なようですね」
@@ -731,7 +731,7 @@ SELECTCASE QUEST_PROGRESS:QUEST_ID
 					PRINTFORML 「近頃は武士の方にお会いすると、旦那様のことを聞かれますね」
 					PRINTFORMW 近頃の%CALLNAME:MASTER%の評判について口にし、静流は楽しそうだった。
 				ENDSELECT
-			ELSEIF REL_LIKE_COUNTRY:国家ID_豊秋津皇国:国家ID_プレイヤー < 300
+			ELSEIF REL_LIKE_COUNTRY:国家ID_豊秋津皇国:国家ID_プレイヤー > 300
 				SELECTCASE RAND:4
 				CASE 0
 					PRINTFORML 「そういえば先日、旦那様の噂を聞きました」
@@ -747,7 +747,10 @@ SELECTCASE QUEST_PROGRESS:QUEST_ID
 					PRINTFORMW 近頃の%CALLNAME:MASTER%の評判について口にし、静流は楽しそうだった。
 				ENDSELECT
 			ENDIF
-		PRINTFORMW そんな話を聞きながら、今日は――。
+		PRINTFORML 
+		PRINTFORML 来てくれたことがよほど嬉しいのだろう。
+		PRINTFORMW 幸せそうな彼女の様子を見ながら、今日訪れた理由を彼女に伝える。
+		PRINTFORMW 今日は――
 			PRINTFORML
 			PRINTBUTTON "[0] 何か仕事になりそうな話はないか聞きに来た。", 0
 			PRINTFORML
