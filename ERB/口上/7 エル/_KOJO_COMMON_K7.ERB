@@ -37,8 +37,8 @@ RETURN 0
 ;  必要に応じてKOJO_COM_TARGETの代わりに使う
 ;※状況にかかわらず常に実行される。取り扱い注意※
 ;=================================================
-@KOJO_COM_BEFORE_K7
-RETURN 0
+;@KOJO_COM_BEFORE_K7
+;RETURN 0
 
 
 
@@ -48,9 +48,9 @@ RETURN 0
 ;=================================================
 @KOJO_COM_AFTER_K7
 ;[虚ろ]状態の場合、口が塞がっている場合は口上を表示しない
-IF TALENT:虚ろ || IS_EQUIP_CONTINUE(TARGET, "口装着") || CFLAG:400 == 1
-	RETURN 0
-ENDIF
+;IF TALENT:虚ろ || IS_EQUIP_CONTINUE(TARGET, "口装着") || CFLAG:400 == 1
+;	RETURN 0
+;ENDIF
 
 ;-------------------------------------------------
 ;初絶頂は使い回せそうなのでここに作成
