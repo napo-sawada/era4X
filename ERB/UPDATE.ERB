@@ -58,552 +58,554 @@ IF !マップ掃除フラグ
 	CALL QUEST_RELEASE_POINT(24, -1)
 	マップ掃除フラグ = 1
 ENDIF
+
 RETURN
-
-IF LASTLOAD_VERSION != GAMEBASE_VERSION
-	PRINTFORML アップデート処理を行います
-	PRINTFORML 「無限ループの疑いが云々」と出る可能性がありますが、問題はないので続行してください
-	CALL CLEAN_SPERM_MAP()
-ENDIF
-
-
-IF CHECK_UPDATE("1.1.0")
-	CALL COLOR_PRINTW("Ver1.1.0", カラー_注意)
-	PRINTFORML + AIによる訓練
-	PRINTFORML + 口上デイリー
-	PRINTFORML + スキル
-	PRINTFORML + 能力計算式が平方根ベースから比例ベースに（低能力で弱く、高能力で強く）
-ENDIF
-
-IF CHECK_UPDATE("1.1.2")
-	CALL COLOR_PRINTW("Ver1.1.2", カラー_注意)
-	PRINTFORML + 危険日が5期に一度に変更
-	PRINTFORML   ランダムに振りなおされます
-	FOR LOCAL, 0, CHARANUM
-		TALENT:LOCAL:危険日 = RAND:5
-	NEXT
-ENDIF
-
-IF CHECK_UPDATE("1.2.0")
-	CALL COLOR_PRINTW("Ver1.2.0", カラー_注意)
-	PRINTFORML + 口上デイリーの内部的な作り直し
-	PRINTFORML + スキル・口上デイリー
-	PRINTFORML + 都市による火力支援追加
-ENDIF
-
-IF CHECK_UPDATE("1.3.0")
-	CALL COLOR_PRINTW("Ver1.3.0", カラー_注意)
-	PRINTFORML + 素質「妾」追加。「正妻」取得者がいる状態で婚姻の儀実行で取得可
-	PRINTFORML + 自動調教の微妙な拡張
-ENDIF
-
-IF CHECK_UPDATE("1.4.0")
-	CALL COLOR_PRINTW("Ver1.4.0", カラー_注意)
-	PRINTFORML + コマンド実行回数の扱いが内部的に変更
-	PRINTFORML + スキル「暗殺」は強すぎたのでデバフスキル「闇討ち」に変更
-	PRINTFORML + 性交系コマンドの追加
-	FOR LOCAL, 0, CHARANUM
-		FOR LOCAL:1, 0, 300
-			COM_EXP:LOCAL:(LOCAL:1 + 1000) = COM_EXP:LOCAL:(LOCAL:1 + 300)
-			COM_EXP:LOCAL:(LOCAL:1 + 2000) = COM_EXP:LOCAL:(LOCAL:1 + 600)
-			COM_TENDENCY:LOCAL:(LOCAL:1 + 1000) = COM_TENDENCY:LOCAL:(LOCAL:1 + 300)
-			COM_TENDENCY:LOCAL:(LOCAL:1 + 2000) = COM_TENDENCY:LOCAL:(LOCAL:1 + 600)
-			COM_EXP:LOCAL:(LOCAL:1 + 300) = 0
-			COM_EXP:LOCAL:(LOCAL:1 + 600) = 0
-			COM_TENDENCY:LOCAL:(LOCAL:1 + 300) = 0
-			COM_TENDENCY:LOCAL:(LOCAL:1 + 600) = 0
-		NEXT
-	NEXT
-ENDIF
-
-IF CHECK_UPDATE("1.4.7")
-	FOR LOCAL, 0, CHARANUM
-		FOR LOCAL:2, 0, MAX_SKILL_SLOT
-			IF SKILL_NO_SLOT:LOCAL:スキル_ジャンル_TROOP:(LOCAL:2) == 4 && SKILL_ID_SLOT:LOCAL:スキル_ジャンル_TROOP:(LOCAL:2) == 0
-				SKILL_NO_SLOT:LOCAL:スキル_ジャンル_TROOP:(LOCAL:2) = -1
-				SKILL_ID_SLOT:LOCAL:スキル_ジャンル_TROOP:(LOCAL:2) = -1
-			ENDIF
-		NEXT
-	NEXT
-ENDIF
-
-IF CHECK_UPDATE("1.5.0")
-	CALL COLOR_PRINTW("Ver1.5.0", カラー_注意)
-	PRINTFORML + 新規特殊勢力「狂信者」
-	PRINTFORML + 特殊勢力の能力調整
-	PRINTFORML + 口上デイリーをまとめてオン・オフする機能
-ENDIF
-
-IF CHECK_UPDATE("1.6.0")
-	CALL COLOR_PRINTW("Ver1.6.0", カラー_注意)
-	PRINTFORML + 狂信者向けデイリー・口上デイリー
-	PRINTFORML + 戦闘表示の簡略設定
-	PRINTFORML + ヘルプの拡充
-	PRINTFORML + スキル
-ENDIF
-
-IF CHECK_UPDATE("1.7.0")
-	CALL COLOR_PRINTW("Ver1.7.0", カラー_注意)
-	PRINTFORML + 新規スキル・デイリー
-	PRINTFORML + 素質「淫乱」等の取得条件変更
-ENDIF
-
-IF CHECK_UPDATE("1.8.0")
-	CALL COLOR_PRINTW("Ver1.8.0", カラー_注意)
-	PRINTFORML + 新規スキル・デイリー
-	PRINTFORML + 縄など使っておくと調教中怒って帰ったりしにくくなる
-	PRINTFORML + 素質「淫乱」等の取得条件変更
-	PRINTFORML + たまに相手が酔った状態で調教が開始する
-	SIF MAPID == "Japan"
-		THROW 戦国シナリオは取り込み保留中です。旧バージョンで周回し別シナリオを選択してから移行してください。
-ENDIF
-
-IF CHECK_UPDATE("1.9.0")
-	CALL COLOR_PRINTW("Ver1.9.0", カラー_注意)
-	PRINTFORML + 新規スキル・デイリー
-	PRINTFORML + 新規アイテム「不思議な懐中時計」
-	PRINTFORML + 陥落・淫乱素質は調教中に取得できるように
-	PRINTFORML + 調教中のイき具合がマイルドに
-	PRINTFORML + バストサイズ・ペニスサイズの内部的な変更
-
-	FOR LOCAL, 0, CHARANUM
-		IF TALENT:LOCAL:120
-			CALL SET_PENISSIZE(LOCAL, -2)
-		ELSEIF TALENT:LOCAL:121
-			CALL SET_PENISSIZE(LOCAL, -2)
-		ELSEIF TALENT:LOCAL:122
-			CALL SET_PENISSIZE(LOCAL, 1)
-		ELSEIF TALENT:LOCAL:123
-			CALL SET_PENISSIZE(LOCAL, 2)
-		ELSE
-			CALL SET_PENISSIZE(LOCAL, 0)
-		ENDIF
-		IF TALENT:LOCAL:140
-			CALL SET_BUSTSIZE(LOCAL, -2)
-		ELSEIF TALENT:LOCAL:141
-			CALL SET_BUSTSIZE(LOCAL, -1)
-		ELSEIF TALENT:LOCAL:142
-			CALL SET_BUSTSIZE(LOCAL, 1)
-		ELSEIF TALENT:LOCAL:143
-			CALL SET_BUSTSIZE(LOCAL, 2)
-		ELSE
-			CALL SET_PENISSIZE(LOCAL, 0)
-		ENDIF
-	NEXT
-	CVARSET TALENT, 120
-	CVARSET TALENT, 121
-	CVARSET TALENT, 122
-	CVARSET TALENT, 123
-	CVARSET TALENT, 140
-	CVARSET TALENT, 141
-	CVARSET TALENT, 142
-	CVARSET TALENT, 143
-ENDIF
-
-IF CHECK_UPDATE("1.10.2")
-	FOR LOCAL, 0, CHARANUM
-		IF TALENT:LOCAL:401
-			TALENT:LOCAL:動物 = 動物_豚
-		ELSEIF TALENT:LOCAL:402
-			TALENT:LOCAL:動物 = 動物_馬
-		ENDIF
-	NEXT
-	IF CHECK_UPDATE("1.10.0")
-		CALL COLOR_PRINTW("Ver1.10.0", カラー_注意)
-		PRINTFORML + 新作のキャラ追加
-		PRINTFORML + それに応じた幻想郷MAPの変更
-		PRINTFORML + 細かななんやかや
-		CALL ADD_CHARA_FROM_CSV(142)
-		CALL ADD_CHARA_FROM_CSV(143)
-		CALL ADD_CHARA_FROM_CSV(144)
-		CALL ADD_CHARA_FROM_CSV(145)
-		CALL ADD_CHARA_FROM_CSV(146)
-		CALL ADD_CHARA_FROM_CSV(147)
-		CALL ADD_CHARA_FROM_CSV(148)
-		IF MAPID == "DEFAULT"
-			CALL COLOR_PRINTW("注意！", カラー_注意)
-			PRINTFORML マップに大幅変更が加わった都合、新規に周回を開始しないと続けてプレイできません
-			PRINTFORML ここで周回用セーブを作りますか？（周回しない限りプレイ続行はできません）
-			CALL ASK_YN()
-			IF RESULT == 1
-				BEGIN TITLE
-			ELSE
-				強制引き継ぎフラグ = 1
-			ENDIF
-		ENDIF
-	ELSEIF CHECK_UPDATE("1.10.1")
-		CALL INIT_TAG_142(NO_TO_CHARA(142))
-		CALL INIT_TAG_143(NO_TO_CHARA(143))
-		CALL INIT_TAG_144(NO_TO_CHARA(144))
-		CALL INIT_TAG_145(NO_TO_CHARA(145))
-		CALL INIT_TAG_146(NO_TO_CHARA(146))
-		CALL INIT_TAG_147(NO_TO_CHARA(147))
-		CALL INIT_TAG_148(NO_TO_CHARA(148))
-	ENDIF
-ENDIF
-
-IF CHECK_UPDATE("1.11.0")
-	CALL COLOR_PRINTW("Ver1.11.0", カラー_注意)
-	PRINTFORML + 新作キャラぶん含む口上デイリー多数追加
-	PRINTFORML + 「あなた」作成時、父母やきょうだい、子供を設定できるように
-	PRINTFORML + 多数のバグフィクス
-ENDIF
-
-IF CHECK_UPDATE("1.13.0")
-	CALL COLOR_PRINTW("Ver1.13.0", カラー_注意)
-	PRINTFORML + 「あなた」作成時、父母やきょうだい、子供を設定できるように
-	PRINTFORML + 主人公を最優先で部隊編成するコンフィグ追加
-	PRINTFORML + パッチ取り込み
-	PRINTFORML + 多数のバグフィクス
-ENDIF
-
-IF CHECK_UPDATE("1.13.1")
-	FOR LOCAL, 0, CHARANUM
-		SIF ABL:LOCAL:超能力 > 0 && !TALENT:LOCAL:超能力者
-			TALENT:LOCAL:超能力者 = 1
-		SIF TALENT:LOCAL:服従 && TALENT:LOCAL:親友
-			TALENT:LOCAL:親友 = 0
-	NEXT
-ENDIF
-
-IF CHECK_UPDATE("1.14.0")
-	CALL COLOR_PRINTW("Ver1.14.0", カラー_注意)
-	PRINTFORML + 憑依華のキャラ追加
-	PRINTFORML + 放浪中も拠点フェイズで遊べるように
-	PRINTFORML + SLGデイリーの廃止（通常のデイリーに統合）
-	PRINTFORML + UIの改善
-	PRINTFORML + カスタムキャラのエディット自由度の大幅な向上
-	PRINTFORML + 口上デイリーを沢山追加
-	PRINTFORML + コマンド「領地探索」復活（拠点フェイズから）
-	CALL ADD_CHARA_FROM_CSV(149)
-	CFLAG:RESULT:特殊状態 = 特殊状態_放浪
-	CALL ADD_CHARA_FROM_CSV(150)
-	CFLAG:RESULT:特殊状態 = 特殊状態_放浪
-	PRINTFORML 
-	PRINTFORML 
-	PRINTFORMW !!!!!!!!!!!!!!注意!!!!!!!!!!!!!!
-	PRINTFORML カスタムキャラの仕様が変更されました
-	PRINTFORML 引き継ぐには以下の手順を踏んでください（一度だけ実行してください）
-	PRINTFORMW
-	PRINTFORML 1.旧バージョンで「全てのカスタムキャラが登場するセーブデータ」を作成する
-	PRINTFORML 2.そのセーブデータを、このバージョンでロード
-	PRINTFORML 3.このあとの選択肢で「はい」を選び、全てのカスタムキャラを指定
-	PRINTFORML 4.他のデータでもカスタムキャラを扱えるようになる！
-	PRINTFORMW 
-	PRINTFORML このデータは「全てのカスタムキャラが登場するセーブデータ」ですか？
-	CALL ASK_YN()
-	IF RESULT == 0
-		PRINTFORML カスタムキャラを全て指定してください
-		CALL SINGLE_DRAWLINE()
-		CALL SELECT_CHARA_LIST_MULTI_ONLY_LOGIC_SLG(-1, "NONE", "NONE")
-		FOR LOCAL, 0, SELECTED_CHARA_NUM
-			CALL SAVE_CUSTOM_DATA(LOCAL, SELECTED_CHARA:LOCAL)
-		NEXT
-		PRINTFORMW カスタムキャラの移行が完了しました
-		PRINTFORMW 以降は全データにおいて、カスタムキャラを扱えます
-	ENDIF
-ENDIF
-
-IF CHECK_UPDATE("1.15.1")
-	CALL COLOR_PRINTW("Ver1.15.1", カラー_注意)
-	PRINTFORML + 調教コマンド「ペニスバンド口枷」
-	PRINTFORML + 拠点フェイズコマンド「闘技場」
-	PRINTFORML + いろんな便利改変
-	CALL COLOR_PRINTW("「料理長」は「娯楽担当」になりました。料理・歌唱が影響します", カラー_注意)
-	CALL SET_SIBLING_RELATION(NAME_TO_CHARA("紫苑"), NAME_TO_CHARA("女苑"))
-	CALL CLOTH_INIT_149
-	CALL CLOTH_INIT_150
-ENDIF
-
-IF CHECK_UPDATE("1.15.2")
-	CALL COLOR_PRINTW("Ver1.15.2", カラー_注意)
-	PRINTFORML 古いコンフィグ設定をロードすると、コマンドフィルタの設定が吹き飛びます
-	PRINTFORML 再度設定し、コンフィグをセーブしてください
-ENDIF
-
-IF CHECK_UPDATE("1.16.0")
-	CALL COLOR_PRINTW("Ver1.16.0", カラー_注意)
-	PRINTFORML + 「主人」「所有者」実装
-	PRINTFORML   「恋慕」や「服従」に並ぶ、「主人公を屈服させている」ことを示す陥落素質です
-	PRINTFORML   専用数値である「支配度」によって獲得可能です
-	PRINTFORML + スリーサイズ実装
-	PRINTFORML   ともなって、「子供体型」「小柄体型」「豊尻」はボディサイズに統合されました
-	PRINTFORML + 自警団にエロイベント追加
-	PRINTFORML   他の勢力同様、捕虜に調教を行います
-	PRINTFORML   自警団を登場させている場合は注意
-	FOR LOCAL, 0, CHARANUM
-		TALENT:LOCAL:バストサイズ = LIMIT(TALENT:LOCAL:バストサイズ, -2, 2)
-		SIF !EXISTCSV(NO:LOCAL)
-			CONTINUE
-		TALENT:LOCAL:体格 = CSVTALENT(NO:LOCAL, GETNUM(TALENT, "体格"))
-		TALENT:LOCAL:体型 = CSVTALENT(NO:LOCAL, GETNUM(TALENT, "体型"))
-		TALENT:LOCAL:ヒップサイズ = CSVTALENT(NO:LOCAL, GETNUM(TALENT, "ヒップサイズ"))
-	NEXT
-	FOR LOCAL, 0, CHARANUM
-		CALL SET_BODYSIZE(LOCAL)
-	NEXT
-ENDIF
-
-IF CHECK_UPDATE("1.16.1")
-	CALL COLOR_PRINTW("Ver1.16.1", カラー_注意)
-	PRINTFORML ちょっとした不具合修正
-ENDIF
-
-IF CHECK_UPDATE("1.16.2")
-	CALL COLOR_PRINTW("Ver1.16.2", カラー_注意)
-	PRINTFORML ちょっとした不具合修正
-ENDIF
-
-IF CHECK_UPDATE("1.16.3")
-	CALL COLOR_PRINTW("Ver1.16.3", カラー_注意)
-	PRINTFORML キャラの体重が異様に重かった問題修正
-	PRINTFORML ついでにキャラのスリーサイズ算出アルゴリズムを作り直し
-	PRINTFORML オール普通のキャラならおよそ身長に対する理想体型になります
-	FOR LOCAL, 0, CHARANUM
-		CALL SET_BODYSIZE(LOCAL)
-	NEXT
-ENDIF
-
-IF CHECK_UPDATE("1.17.0")
-	CALL COLOR_PRINTW("Ver1.17.0", カラー_注意)
-	PRINTFORML 髪の長さは内部的にシンプルなものに作り替えられました
-	PRINTFORML 
-	FOR LOCAL, 0, CHARANUM
-		IF EXISTCSV(NO:LOCAL)
-			TALENT:LOCAL:髪の長さ = CSVTALENT(NO:LOCAL, GETNUM(TALENT, "髪の長さ"))
-		ELSE
-			SELECTCASE TALENT:LOCAL:髪の長さ
-				CASE IS < 2
-					TALENT:LOCAL:髪の長さ = 0
-				CASE IS < 25
-					TALENT:LOCAL:髪の長さ = 1
-				CASE IS < 175
-					TALENT:LOCAL:髪の長さ = 2
-				CASE IS < 275
-					TALENT:LOCAL:髪の長さ = 3
-				CASE IS < 475
-					TALENT:LOCAL:髪の長さ = 4
-				CASE IS < 675
-					TALENT:LOCAL:髪の長さ = 5
-				CASEELSE
-					TALENT:LOCAL:髪の長さ = 6
-			ENDSELECT
-		ENDIF
-	NEXT
-ENDIF
-
-IF CHECK_UPDATE("1.18.0")
-	CALL COLOR_PRINTW("Ver1.18.0", カラー_注意)
-	PRINTFORML いろいろ便利になりました
-	PRINTFORML 外交の「要求」の処理が作り直され、素の状態ならやや通りやすくなりました
-	PRINTFORML ただし連続して通していると警戒され、通りにくくなります
-ENDIF
-
-IF CHECK_UPDATE("1.19.0")
-	CALL COLOR_PRINTW("Ver1.19.0", カラー_注意)
-	PRINTFORML + 腋毛の実装
-	PRINTFORML + 「兜合わせ」「セルフフェラ」など、新規コマンド群追加
-	PRINTFORML + 「核熱造神ヒソウテンソク」など、新規スキル群追加
-	PRINTFORML + 子宮内精液の扱いをリプレース。能力表示の「家系」タブで参照可
-	PRINTFORML + 露出プレイ中、モブが出現するように
-	FOR LOCAL, 0, CHARANUM
-		IF EXISTCSV(NO:LOCAL)
-			TALENT:LOCAL:腋毛現在値 = CSVTALENT(NO:LOCAL, GETNUM(TALENT, "腋毛現在値"))
-			TALENT:LOCAL:腋毛目標値 = CSVTALENT(NO:LOCAL, GETNUM(TALENT, "腋毛目標値"))
-		ENDIF
-	NEXT
-ENDIF
-
-
-IF CHECK_UPDATE("1.20.0")
-	CALL COLOR_PRINTW("Ver1.20.0", カラー_注意)
-	PRINTFORML + 数多くのスキルの作り直し
-	PRINTFORML   その影響で一旦全キャラのスキルをリセットします
-	PRINTFORML + 新コマンド
-	PRINTFORML + 口上デイリーの実装
-	PRINTFORML + eraFGO Kから一部デザインを逆輸入
-	PRINTFORML + 新陥落素質「良質母胎」「濃厚精液」
-	PRINTFORML + 「酒池肉林」の仕様変更
-	FOR LOCAL, 0, CHARANUM
-		CALL SKILL_INIT(LOCAL)
-		EXP:LOCAL:妊娠経験 = EXP:LOCAL:出産経験
-	NEXT
-ENDIF
-
-IF CHECK_UPDATE("1.20.4")
-	FOR LOCAL, 0, CHARANUM
-		EXP:LOCAL:妊娠経験 = EXP:LOCAL:出産経験
-		SIF TALENT:LOCAL:妊娠
-			EXP:LOCAL:妊娠経験 ++
-	NEXT
-ENDIF
-
-IF CHECK_UPDATE("1.20.7")
-	;1.20.0以降で一度出産させており、妊娠期間が不正に1になる不具合を経験している
-	;または1.20.0より前で妊娠期間中だが、妊娠判明前であり、現行仕様に沿わない状態になっている
-	;以上のキャラに対して妊娠期間を0にする
-	FOR LOCAL, 0, CHARANUM
-		SIF CFLAG:LOCAL:妊娠期間 && !TALENT:LOCAL:妊娠
-			CFLAG:LOCAL:妊娠期間 = 0
-	NEXT
-ENDIF
-
-IF CHECK_UPDATE("1.21.5")
-	FOR LOCAL, 0, CHARANUM
-		FOR LOCAL:1, 0, VARSIZE("SEXUAL_EXPERIENCE_SITUATION")
-			SEXUAL_EXPERIENCE_SITUATION:(LOCAL):(LOCAL:1) =
-			SEXUAL_LAST_EXPERIENCE_SITUATION:(LOCAL):(LOCAL:1) =
-		NEXT
-	NEXT
-ENDIF
-
-IF CHECK_UPDATE("1.23.0")
-	CALL COLOR_PRINTW("Ver1.23.0", カラー_注意)
-	PRINTFORML + 祝☆鬼形獣キャラ実装！
-	PRINTFORML + スキルの入れ替え機能の実装
-	PRINTFORML + 「親友」から「恋慕」などへの発展を禁止する機能の実装
-	CALL ADD_CHARA_FROM_CSV(151)
-	CALL ADD_CHARA_FROM_CSV(152)
-	CALL ADD_CHARA_FROM_CSV(153)
-	CALL ADD_CHARA_FROM_CSV(154)
-	CALL ADD_CHARA_FROM_CSV(155)
-	CALL ADD_CHARA_FROM_CSV(156)
-	CALL ADD_CHARA_FROM_CSV(157)
-ENDIF
-
-
-IF CHECK_UPDATE("1.24.0")
-	CALL COLOR_PRINTW("Ver1.24.0", カラー_注意)
-	PRINTFORML + 華扇の腕、美宵を追加
-	PRINTFORML + 鬼形獣関連の都市を幻想郷マップに追加
-	PRINTFORML + スキルバランスの見直し
-	PRINTFORML + 英語版から多数の変更を取り込み
-	PRINTFORML + 特殊勢力の性能調整
-	PRINTFORML + 高能力のキャラはより強く扱われるように
-	CALL ADD_CHARA_FROM_CSV(158)
-	CALL CHANGE_COUNTRY(RESULT)
-	CALL ADD_CHARA_FROM_CSV(159)
-	CALL CHANGE_COUNTRY(RESULT)
-	IF MAPID == "DEFAULT"
-		CALL COLOR_PRINTW("注意！", カラー_注意)
-		PRINTFORML マップに大幅変更が加わった都合、新規に周回を開始しないと続けてプレイできません
-		PRINTFORML ここで周回用セーブを作りますか？（周回しない限りプレイ続行はできません）
-		CALL ASK_YN()
-		IF RESULT == 1
-			BEGIN TITLE
-		ELSE
-			強制引き継ぎフラグ = 1
-		ENDIF
-	ENDIF
-ENDIF
-
-IF CHECK_UPDATE("1.24.1")
-	IF LASTLOAD_VERSION == GET_VERSION_VALUE("1.24.0")
-		LOCAL:1 = 0
-		FOR LOCAL, 0, CHARANUM
-			SIF CSTR:LOCAL:99 == "早鬼"
-				LOCAL:1 ++
-		NEXT
-		IF LOCAL:1 >= 2
-			FOR LOCAL, CHARANUM - 1, 0, -1
-				IF CSTR:LOCAL:99 == "早鬼"
-					;削除されるキャラを初体験とする
-					;キャラの削除
-					DELCHARA LOCAL
-					;REL_LIKE、REL_HATEの修正
-					FOR LOCAL:1, 0, CHARANUM
-						FOR LOCAL:2, LOCAL, CHARANUM
-							REL_LIKE:(LOCAL:1):(LOCAL:2) = REL_LIKE:(LOCAL:1):(LOCAL:2 + 1)
-							REL_HATE:(LOCAL:1):(LOCAL:2) = REL_HATE:(LOCAL:1):(LOCAL:2 + 1)
-						NEXT
-						REL_LIKE:(LOCAL:1):CHARANUM = 0
-						REL_HATE:(LOCAL:1):CHARANUM = 0
-					NEXT
-					CALL COLOR_PRINTW("WARNING!", カラー_警告)
-					PRINTFORMW 1.23.X以前から1.24.0にアップデートしたときに生じた、「早鬼増殖バグ」を検知しました
-					PRINTFORMW 増殖したほうとおぼしき早鬼は削除しましたが、もしかしたら勢力周りで不具合が生じるかもしれません
-					PRINTFORMW お手数ですが、念のため周回することをお勧めします
-					PRINTFORMW 周回用セーブを作成しますか？
-					CALL ASK_YN()
-					IF RESULT == 1
-					ELSE
-						強制引き継ぎフラグ = 1
-					ENDIF
-					BREAK
-				ENDIF
-			NEXT
-			CALL ADD_CHARA_FROM_CSV(159)
-			CALL CHANGE_COUNTRY(RESULT)
-		ENDIF
-	ENDIF
-ENDIF
-
-IF CHECK_UPDATE("1.25.0")
-	CALL COLOR_PRINTW("Ver1.25.0", カラー_注意)
-	PRINTFORML + 都市開発や技術研究の要素追加
-	PRINTFORML + 新キャラ「運松」「蟒蛇」「抗鬱薬」
-	PRINTFORML + 新コマンドやイベント、陥落素質、スキル
-	VARSET TECHNOLOGY_STATUS, 0
-	VARSET TECHNOLOGY_RESEARCH_TARGET, -1
-	VARSET TECHNOLOGY_RESEARCH_PROGRESS, 0
-	CALL ADD_CHARA_FROM_CSV(160)
-	CALL ADD_CHARA_FROM_CSV(161)
-	CALL ADD_CHARA_FROM_CSV(162)
-	PRINTFORML 都市開発や研究など、ＳＬＧ周りに大きく追加要素が入った都合、
-	PRINTFORML バランス的な面でも一度周回することを推奨します。
-	PRINTFORML 周回用セーブを作成しますか？
-	CALL ASK_YN
-	SIF RESULT == 0
-		強制引き継ぎフラグ = 1
-ENDIF
-
-IF CHECK_UPDATE("1.27.0")
-	CALL COLOR_PRINTW("Ver1.27.0", カラー_注意)
-	PRINTFORML + コマンド「秘貝開帳」など追加、調教システムの便利化
-	PRINTFORML + 子宮に容量制限追加。さらに腸・口も子宮と同じく精子を保存するように
-	PRINTFORML + デイリーイベント等の追加
-	PRINTFORML + 素質「グロマン」は素質でなく、単に締まりの一状態として扱われます
-	CALL COLOR_PRINTW("子宮内精液の変数名変更にともない、子宮内精液の状態がいったんリセットされます")
-	;グロマン削除
-	FOR LOCAL, 0, CHARANUM
-		TALENT:LOCAL:116 = 0
-	NEXT
-ENDIF
-
-IF CHECK_UPDATE("1.28.0")
-	CALL COLOR_PRINTW("Ver1.28.0", カラー_注意)
-	PRINTFORML + コマンド「玉揉み」「ペニスリボン」
-	PRINTFORML + エロイベントで好感度や従属度が減少する際、閾値を割ると陥落素質を喪うように
-	PRINTFORML + 拠点フェイズの「労働」の大幅改修。ターンエンド時に実行されます
-	PRINTFORML + 戦略フェイズのAIの強化
-	FOR LOCAL, 0, MAX_COUNTRY
-		SIF !IS_COUNTRY(LOCAL)
-			CONTINUE
-		LOCAL:2 = GET_COUNTRY_BOSS(LOCAL)
-		FOR LOCAL:1, 0, TECHNOLOGY_MAX_GENRE
-			TECHNOLOGY_STATUS_CHARA:(LOCAL:2):(LOCAL:1) = TECHNOLOGY_STATUS:LOCAL:(LOCAL:1)
-		NEXT
-	NEXT
-	LOADGLOBAL
-	FOR LOCAL, 0, VARSIZE("G_CONFIG_NAME")
-		G_CONFIG_FILTER_NAME:LOCAL = %G_CONFIG_NAME:LOCAL%
-		G_CONFIG_DAILY_NAME:LOCAL = %G_CONFIG_NAME:LOCAL%
-	NEXT
-	SAVEGLOBAL
-ENDIF
-
-IF CHECK_UPDATE("1.29.0")
-	CALL COLOR_PRINTW("Ver1.29.0", カラー_注意)
-	PRINTFORML + Ｕ感覚追加＋尿道関係のコマンド
-	PRINTFORML + 口上デイリーの追加
-	PRINTFORML + AIの強化
-	PRINTFORML + 奴隷市場でモブが買えるように
-ENDIF
-
-IF 強制引き継ぎフラグ
-	FLAG:クリア直後フラグ = 1
-	CALL SAVE_GAME
-	FLAG:クリア直後フラグ = 0
-	BEGIN TITLE
-ENDIF
-
+; 以下今後の参考のために残しているだけ
+;IF LASTLOAD_VERSION != GAMEBASE_VERSION
+;	PRINTFORML アップデート処理を行います
+;	PRINTFORML 「無限ループの疑いが云々」と出る可能性がありますが、問題はないので続行してください
+;	CALL CLEAN_SPERM_MAP()
+;ENDIF
+;
+;
+;IF CHECK_UPDATE("1.1.0")
+;	CALL COLOR_PRINTW("Ver1.1.0", カラー_注意)
+;	PRINTFORML + AIによる訓練
+;	PRINTFORML + 口上デイリー
+;	PRINTFORML + スキル
+;	PRINTFORML + 能力計算式が平方根ベースから比例ベースに（低能力で弱く、高能力で強く）
+;ENDIF
+;
+;IF CHECK_UPDATE("1.1.2")
+;	CALL COLOR_PRINTW("Ver1.1.2", カラー_注意)
+;	PRINTFORML + 危険日が5期に一度に変更
+;	PRINTFORML   ランダムに振りなおされます
+;	FOR LOCAL, 0, CHARANUM
+;		TALENT:LOCAL:危険日 = RAND:5
+;	NEXT
+;ENDIF
+;
+;IF CHECK_UPDATE("1.2.0")
+;	CALL COLOR_PRINTW("Ver1.2.0", カラー_注意)
+;	PRINTFORML + 口上デイリーの内部的な作り直し
+;	PRINTFORML + スキル・口上デイリー
+;	PRINTFORML + 都市による火力支援追加
+;ENDIF
+;
+;IF CHECK_UPDATE("1.3.0")
+;	CALL COLOR_PRINTW("Ver1.3.0", カラー_注意)
+;	PRINTFORML + 素質「妾」追加。「正妻」取得者がいる状態で婚姻の儀実行で取得可
+;	PRINTFORML + 自動調教の微妙な拡張
+;ENDIF
+;
+;IF CHECK_UPDATE("1.4.0")
+;	CALL COLOR_PRINTW("Ver1.4.0", カラー_注意)
+;	PRINTFORML + コマンド実行回数の扱いが内部的に変更
+;	PRINTFORML + スキル「暗殺」は強すぎたのでデバフスキル「闇討ち」に変更
+;	PRINTFORML + 性交系コマンドの追加
+;	FOR LOCAL, 0, CHARANUM
+;		FOR LOCAL:1, 0, 300
+;			COM_EXP:LOCAL:(LOCAL:1 + 1000) = COM_EXP:LOCAL:(LOCAL:1 + 300)
+;			COM_EXP:LOCAL:(LOCAL:1 + 2000) = COM_EXP:LOCAL:(LOCAL:1 + 600)
+;			COM_TENDENCY:LOCAL:(LOCAL:1 + 1000) = COM_TENDENCY:LOCAL:(LOCAL:1 + 300)
+;			COM_TENDENCY:LOCAL:(LOCAL:1 + 2000) = COM_TENDENCY:LOCAL:(LOCAL:1 + 600)
+;			COM_EXP:LOCAL:(LOCAL:1 + 300) = 0
+;			COM_EXP:LOCAL:(LOCAL:1 + 600) = 0
+;			COM_TENDENCY:LOCAL:(LOCAL:1 + 300) = 0
+;			COM_TENDENCY:LOCAL:(LOCAL:1 + 600) = 0
+;		NEXT
+;	NEXT
+;ENDIF
+;
+;IF CHECK_UPDATE("1.4.7")
+;	FOR LOCAL, 0, CHARANUM
+;		FOR LOCAL:2, 0, MAX_SKILL_SLOT
+;			IF SKILL_NO_SLOT:LOCAL:スキル_ジャンル_TROOP:(LOCAL:2) == 4 && SKILL_ID_SLOT:LOCAL:スキル_ジャンル_TROOP:(LOCAL:2) == 0
+;				SKILL_NO_SLOT:LOCAL:スキル_ジャンル_TROOP:(LOCAL:2) = -1
+;				SKILL_ID_SLOT:LOCAL:スキル_ジャンル_TROOP:(LOCAL:2) = -1
+;			ENDIF
+;		NEXT
+;	NEXT
+;ENDIF
+;
+;IF CHECK_UPDATE("1.5.0")
+;	CALL COLOR_PRINTW("Ver1.5.0", カラー_注意)
+;	PRINTFORML + 新規特殊勢力「狂信者」
+;	PRINTFORML + 特殊勢力の能力調整
+;	PRINTFORML + 口上デイリーをまとめてオン・オフする機能
+;ENDIF
+;
+;IF CHECK_UPDATE("1.6.0")
+;	CALL COLOR_PRINTW("Ver1.6.0", カラー_注意)
+;	PRINTFORML + 狂信者向けデイリー・口上デイリー
+;	PRINTFORML + 戦闘表示の簡略設定
+;	PRINTFORML + ヘルプの拡充
+;	PRINTFORML + スキル
+;ENDIF
+;
+;IF CHECK_UPDATE("1.7.0")
+;	CALL COLOR_PRINTW("Ver1.7.0", カラー_注意)
+;	PRINTFORML + 新規スキル・デイリー
+;	PRINTFORML + 素質「淫乱」等の取得条件変更
+;ENDIF
+;
+;IF CHECK_UPDATE("1.8.0")
+;	CALL COLOR_PRINTW("Ver1.8.0", カラー_注意)
+;	PRINTFORML + 新規スキル・デイリー
+;	PRINTFORML + 縄など使っておくと調教中怒って帰ったりしにくくなる
+;	PRINTFORML + 素質「淫乱」等の取得条件変更
+;	PRINTFORML + たまに相手が酔った状態で調教が開始する
+;	SIF MAPID == "Japan"
+;		THROW 戦国シナリオは取り込み保留中です。旧バージョンで周回し別シナリオを選択してから移行してください。
+;ENDIF
+;
+;IF CHECK_UPDATE("1.9.0")
+;	CALL COLOR_PRINTW("Ver1.9.0", カラー_注意)
+;	PRINTFORML + 新規スキル・デイリー
+;	PRINTFORML + 新規アイテム「不思議な懐中時計」
+;	PRINTFORML + 陥落・淫乱素質は調教中に取得できるように
+;	PRINTFORML + 調教中のイき具合がマイルドに
+;	PRINTFORML + バストサイズ・ペニスサイズの内部的な変更
+;
+;	FOR LOCAL, 0, CHARANUM
+;		IF TALENT:LOCAL:120
+;			CALL SET_PENISSIZE(LOCAL, -2)
+;		ELSEIF TALENT:LOCAL:121
+;			CALL SET_PENISSIZE(LOCAL, -2)
+;		ELSEIF TALENT:LOCAL:122
+;			CALL SET_PENISSIZE(LOCAL, 1)
+;		ELSEIF TALENT:LOCAL:123
+;			CALL SET_PENISSIZE(LOCAL, 2)
+;		ELSE
+;			CALL SET_PENISSIZE(LOCAL, 0)
+;		ENDIF
+;		IF TALENT:LOCAL:140
+;			CALL SET_BUSTSIZE(LOCAL, -2)
+;		ELSEIF TALENT:LOCAL:141
+;			CALL SET_BUSTSIZE(LOCAL, -1)
+;		ELSEIF TALENT:LOCAL:142
+;			CALL SET_BUSTSIZE(LOCAL, 1)
+;		ELSEIF TALENT:LOCAL:143
+;			CALL SET_BUSTSIZE(LOCAL, 2)
+;		ELSE
+;			CALL SET_PENISSIZE(LOCAL, 0)
+;		ENDIF
+;	NEXT
+;	CVARSET TALENT, 120
+;	CVARSET TALENT, 121
+;	CVARSET TALENT, 122
+;	CVARSET TALENT, 123
+;	CVARSET TALENT, 140
+;	CVARSET TALENT, 141
+;	CVARSET TALENT, 142
+;	CVARSET TALENT, 143
+;ENDIF
+;
+;IF CHECK_UPDATE("1.10.2")
+;	FOR LOCAL, 0, CHARANUM
+;		IF TALENT:LOCAL:401
+;			TALENT:LOCAL:動物 = 動物_豚
+;		ELSEIF TALENT:LOCAL:402
+;			TALENT:LOCAL:動物 = 動物_馬
+;		ENDIF
+;	NEXT
+;	IF CHECK_UPDATE("1.10.0")
+;		CALL COLOR_PRINTW("Ver1.10.0", カラー_注意)
+;		PRINTFORML + 新作のキャラ追加
+;		PRINTFORML + それに応じた幻想郷MAPの変更
+;		PRINTFORML + 細かななんやかや
+;		CALL ADD_CHARA_FROM_CSV(142)
+;		CALL ADD_CHARA_FROM_CSV(143)
+;		CALL ADD_CHARA_FROM_CSV(144)
+;		CALL ADD_CHARA_FROM_CSV(145)
+;		CALL ADD_CHARA_FROM_CSV(146)
+;		CALL ADD_CHARA_FROM_CSV(147)
+;		CALL ADD_CHARA_FROM_CSV(148)
+;		IF MAPID == "DEFAULT"
+;			CALL COLOR_PRINTW("注意！", カラー_注意)
+;			PRINTFORML マップに大幅変更が加わった都合、新規に周回を開始しないと続けてプレイできません
+;			PRINTFORML ここで周回用セーブを作りますか？（周回しない限りプレイ続行はできません）
+;			CALL ASK_YN()
+;			IF RESULT == 1
+;				BEGIN TITLE
+;			ELSE
+;				強制引き継ぎフラグ = 1
+;			ENDIF
+;		ENDIF
+;	ELSEIF CHECK_UPDATE("1.10.1")
+;		CALL INIT_TAG_142(NO_TO_CHARA(142))
+;		CALL INIT_TAG_143(NO_TO_CHARA(143))
+;		CALL INIT_TAG_144(NO_TO_CHARA(144))
+;		CALL INIT_TAG_145(NO_TO_CHARA(145))
+;		CALL INIT_TAG_146(NO_TO_CHARA(146))
+;		CALL INIT_TAG_147(NO_TO_CHARA(147))
+;		CALL INIT_TAG_148(NO_TO_CHARA(148))
+;	ENDIF
+;ENDIF
+;
+;IF CHECK_UPDATE("1.11.0")
+;	CALL COLOR_PRINTW("Ver1.11.0", カラー_注意)
+;	PRINTFORML + 新作キャラぶん含む口上デイリー多数追加
+;	PRINTFORML + 「あなた」作成時、父母やきょうだい、子供を設定できるように
+;	PRINTFORML + 多数のバグフィクス
+;ENDIF
+;
+;IF CHECK_UPDATE("1.13.0")
+;	CALL COLOR_PRINTW("Ver1.13.0", カラー_注意)
+;	PRINTFORML + 「あなた」作成時、父母やきょうだい、子供を設定できるように
+;	PRINTFORML + 主人公を最優先で部隊編成するコンフィグ追加
+;	PRINTFORML + パッチ取り込み
+;	PRINTFORML + 多数のバグフィクス
+;ENDIF
+;
+;IF CHECK_UPDATE("1.13.1")
+;	FOR LOCAL, 0, CHARANUM
+;		SIF ABL:LOCAL:超能力 > 0 && !TALENT:LOCAL:超能力者
+;			TALENT:LOCAL:超能力者 = 1
+;		SIF TALENT:LOCAL:服従 && TALENT:LOCAL:親友
+;			TALENT:LOCAL:親友 = 0
+;	NEXT
+;ENDIF
+;
+;IF CHECK_UPDATE("1.14.0")
+;	CALL COLOR_PRINTW("Ver1.14.0", カラー_注意)
+;	PRINTFORML + 憑依華のキャラ追加
+;	PRINTFORML + 放浪中も拠点フェイズで遊べるように
+;	PRINTFORML + SLGデイリーの廃止（通常のデイリーに統合）
+;	PRINTFORML + UIの改善
+;	PRINTFORML + カスタムキャラのエディット自由度の大幅な向上
+;	PRINTFORML + 口上デイリーを沢山追加
+;	PRINTFORML + コマンド「領地探索」復活（拠点フェイズから）
+;	CALL ADD_CHARA_FROM_CSV(149)
+;	CFLAG:RESULT:特殊状態 = 特殊状態_放浪
+;	CALL ADD_CHARA_FROM_CSV(150)
+;	CFLAG:RESULT:特殊状態 = 特殊状態_放浪
+;	PRINTFORML 
+;	PRINTFORML 
+;	PRINTFORMW !!!!!!!!!!!!!!注意!!!!!!!!!!!!!!
+;	PRINTFORML カスタムキャラの仕様が変更されました
+;	PRINTFORML 引き継ぐには以下の手順を踏んでください（一度だけ実行してください）
+;	PRINTFORMW
+;	PRINTFORML 1.旧バージョンで「全てのカスタムキャラが登場するセーブデータ」を作成する
+;	PRINTFORML 2.そのセーブデータを、このバージョンでロード
+;	PRINTFORML 3.このあとの選択肢で「はい」を選び、全てのカスタムキャラを指定
+;	PRINTFORML 4.他のデータでもカスタムキャラを扱えるようになる！
+;	PRINTFORMW 
+;	PRINTFORML このデータは「全てのカスタムキャラが登場するセーブデータ」ですか？
+;	CALL ASK_YN()
+;	IF RESULT == 0
+;		PRINTFORML カスタムキャラを全て指定してください
+;		CALL SINGLE_DRAWLINE()
+;		CALL SELECT_CHARA_LIST_MULTI_ONLY_LOGIC_SLG(-1, "NONE", "NONE")
+;		FOR LOCAL, 0, SELECTED_CHARA_NUM
+;			CALL SAVE_CUSTOM_DATA(LOCAL, SELECTED_CHARA:LOCAL)
+;		NEXT
+;		PRINTFORMW カスタムキャラの移行が完了しました
+;		PRINTFORMW 以降は全データにおいて、カスタムキャラを扱えます
+;	ENDIF
+;ENDIF
+;
+;IF CHECK_UPDATE("1.15.1")
+;	CALL COLOR_PRINTW("Ver1.15.1", カラー_注意)
+;	PRINTFORML + 調教コマンド「ペニスバンド口枷」
+;	PRINTFORML + 拠点フェイズコマンド「闘技場」
+;	PRINTFORML + いろんな便利改変
+;	CALL COLOR_PRINTW("「料理長」は「娯楽担当」になりました。料理・歌唱が影響します", カラー_注意)
+;	CALL SET_SIBLING_RELATION(NAME_TO_CHARA("紫苑"), NAME_TO_CHARA("女苑"))
+;	CALL CLOTH_INIT_149
+;	CALL CLOTH_INIT_150
+;ENDIF
+;
+;IF CHECK_UPDATE("1.15.2")
+;	CALL COLOR_PRINTW("Ver1.15.2", カラー_注意)
+;	PRINTFORML 古いコンフィグ設定をロードすると、コマンドフィルタの設定が吹き飛びます
+;	PRINTFORML 再度設定し、コンフィグをセーブしてください
+;ENDIF
+;
+;IF CHECK_UPDATE("1.16.0")
+;	CALL COLOR_PRINTW("Ver1.16.0", カラー_注意)
+;	PRINTFORML + 「主人」「所有者」実装
+;	PRINTFORML   「恋慕」や「服従」に並ぶ、「主人公を屈服させている」ことを示す陥落素質です
+;	PRINTFORML   専用数値である「支配度」によって獲得可能です
+;	PRINTFORML + スリーサイズ実装
+;	PRINTFORML   ともなって、「子供体型」「小柄体型」「豊尻」はボディサイズに統合されました
+;	PRINTFORML + 自警団にエロイベント追加
+;	PRINTFORML   他の勢力同様、捕虜に調教を行います
+;	PRINTFORML   自警団を登場させている場合は注意
+;	FOR LOCAL, 0, CHARANUM
+;		TALENT:LOCAL:バストサイズ = LIMIT(TALENT:LOCAL:バストサイズ, -2, 2)
+;		SIF !EXISTCSV(NO:LOCAL)
+;			CONTINUE
+;		TALENT:LOCAL:体格 = CSVTALENT(NO:LOCAL, GETNUM(TALENT, "体格"))
+;		TALENT:LOCAL:体型 = CSVTALENT(NO:LOCAL, GETNUM(TALENT, "体型"))
+;		TALENT:LOCAL:ヒップサイズ = CSVTALENT(NO:LOCAL, GETNUM(TALENT, "ヒップサイズ"))
+;	NEXT
+;	FOR LOCAL, 0, CHARANUM
+;		CALL SET_BODYSIZE(LOCAL)
+;	NEXT
+;ENDIF
+;
+;IF CHECK_UPDATE("1.16.1")
+;	CALL COLOR_PRINTW("Ver1.16.1", カラー_注意)
+;	PRINTFORML ちょっとした不具合修正
+;ENDIF
+;
+;IF CHECK_UPDATE("1.16.2")
+;	CALL COLOR_PRINTW("Ver1.16.2", カラー_注意)
+;	PRINTFORML ちょっとした不具合修正
+;ENDIF
+;
+;IF CHECK_UPDATE("1.16.3")
+;	CALL COLOR_PRINTW("Ver1.16.3", カラー_注意)
+;	PRINTFORML キャラの体重が異様に重かった問題修正
+;	PRINTFORML ついでにキャラのスリーサイズ算出アルゴリズムを作り直し
+;	PRINTFORML オール普通のキャラならおよそ身長に対する理想体型になります
+;	FOR LOCAL, 0, CHARANUM
+;		CALL SET_BODYSIZE(LOCAL)
+;	NEXT
+;ENDIF
+;
+;IF CHECK_UPDATE("1.17.0")
+;	CALL COLOR_PRINTW("Ver1.17.0", カラー_注意)
+;	PRINTFORML 髪の長さは内部的にシンプルなものに作り替えられました
+;	PRINTFORML 
+;	FOR LOCAL, 0, CHARANUM
+;		IF EXISTCSV(NO:LOCAL)
+;			TALENT:LOCAL:髪の長さ = CSVTALENT(NO:LOCAL, GETNUM(TALENT, "髪の長さ"))
+;		ELSE
+;			SELECTCASE TALENT:LOCAL:髪の長さ
+;				CASE IS < 2
+;					TALENT:LOCAL:髪の長さ = 0
+;				CASE IS < 25
+;					TALENT:LOCAL:髪の長さ = 1
+;				CASE IS < 175
+;					TALENT:LOCAL:髪の長さ = 2
+;				CASE IS < 275
+;					TALENT:LOCAL:髪の長さ = 3
+;				CASE IS < 475
+;					TALENT:LOCAL:髪の長さ = 4
+;				CASE IS < 675
+;					TALENT:LOCAL:髪の長さ = 5
+;				CASEELSE
+;					TALENT:LOCAL:髪の長さ = 6
+;			ENDSELECT
+;		ENDIF
+;	NEXT
+;ENDIF
+;
+;IF CHECK_UPDATE("1.18.0")
+;	CALL COLOR_PRINTW("Ver1.18.0", カラー_注意)
+;	PRINTFORML いろいろ便利になりました
+;	PRINTFORML 外交の「要求」の処理が作り直され、素の状態ならやや通りやすくなりました
+;	PRINTFORML ただし連続して通していると警戒され、通りにくくなります
+;ENDIF
+;
+;IF CHECK_UPDATE("1.19.0")
+;	CALL COLOR_PRINTW("Ver1.19.0", カラー_注意)
+;	PRINTFORML + 腋毛の実装
+;	PRINTFORML + 「兜合わせ」「セルフフェラ」など、新規コマンド群追加
+;	PRINTFORML + 「核熱造神ヒソウテンソク」など、新規スキル群追加
+;	PRINTFORML + 子宮内精液の扱いをリプレース。能力表示の「家系」タブで参照可
+;	PRINTFORML + 露出プレイ中、モブが出現するように
+;	FOR LOCAL, 0, CHARANUM
+;		IF EXISTCSV(NO:LOCAL)
+;			TALENT:LOCAL:腋毛現在値 = CSVTALENT(NO:LOCAL, GETNUM(TALENT, "腋毛現在値"))
+;			TALENT:LOCAL:腋毛目標値 = CSVTALENT(NO:LOCAL, GETNUM(TALENT, "腋毛目標値"))
+;		ENDIF
+;	NEXT
+;ENDIF
+;
+;
+;IF CHECK_UPDATE("1.20.0")
+;	CALL COLOR_PRINTW("Ver1.20.0", カラー_注意)
+;	PRINTFORML + 数多くのスキルの作り直し
+;	PRINTFORML   その影響で一旦全キャラのスキルをリセットします
+;	PRINTFORML + 新コマンド
+;	PRINTFORML + 口上デイリーの実装
+;	PRINTFORML + eraFGO Kから一部デザインを逆輸入
+;	PRINTFORML + 新陥落素質「良質母胎」「濃厚精液」
+;	PRINTFORML + 「酒池肉林」の仕様変更
+;	FOR LOCAL, 0, CHARANUM
+;		CALL SKILL_INIT(LOCAL)
+;		EXP:LOCAL:妊娠経験 = EXP:LOCAL:出産経験
+;	NEXT
+;ENDIF
+;
+;IF CHECK_UPDATE("1.20.4")
+;	FOR LOCAL, 0, CHARANUM
+;		EXP:LOCAL:妊娠経験 = EXP:LOCAL:出産経験
+;		SIF TALENT:LOCAL:妊娠
+;			EXP:LOCAL:妊娠経験 ++
+;	NEXT
+;ENDIF
+;
+;IF CHECK_UPDATE("1.20.7")
+;	;1.20.0以降で一度出産させており、妊娠期間が不正に1になる不具合を経験している
+;	;または1.20.0より前で妊娠期間中だが、妊娠判明前であり、現行仕様に沿わない状態になっている
+;	;以上のキャラに対して妊娠期間を0にする
+;	FOR LOCAL, 0, CHARANUM
+;		SIF CFLAG:LOCAL:妊娠期間 && !TALENT:LOCAL:妊娠
+;			CFLAG:LOCAL:妊娠期間 = 0
+;	NEXT
+;ENDIF
+;
+;IF CHECK_UPDATE("1.21.5")
+;	FOR LOCAL, 0, CHARANUM
+;		FOR LOCAL:1, 0, VARSIZE("SEXUAL_EXPERIENCE_SITUATION")
+;			SEXUAL_EXPERIENCE_SITUATION:(LOCAL):(LOCAL:1) =
+;			SEXUAL_LAST_EXPERIENCE_SITUATION:(LOCAL):(LOCAL:1) =
+;		NEXT
+;	NEXT
+;ENDIF
+;
+;IF CHECK_UPDATE("1.23.0")
+;	CALL COLOR_PRINTW("Ver1.23.0", カラー_注意)
+;	PRINTFORML + 祝☆鬼形獣キャラ実装！
+;	PRINTFORML + スキルの入れ替え機能の実装
+;	PRINTFORML + 「親友」から「恋慕」などへの発展を禁止する機能の実装
+;	CALL ADD_CHARA_FROM_CSV(151)
+;	CALL ADD_CHARA_FROM_CSV(152)
+;	CALL ADD_CHARA_FROM_CSV(153)
+;	CALL ADD_CHARA_FROM_CSV(154)
+;	CALL ADD_CHARA_FROM_CSV(155)
+;	CALL ADD_CHARA_FROM_CSV(156)
+;	CALL ADD_CHARA_FROM_CSV(157)
+;ENDIF
+;
+;
+;IF CHECK_UPDATE("1.24.0")
+;	CALL COLOR_PRINTW("Ver1.24.0", カラー_注意)
+;	PRINTFORML + 華扇の腕、美宵を追加
+;	PRINTFORML + 鬼形獣関連の都市を幻想郷マップに追加
+;	PRINTFORML + スキルバランスの見直し
+;	PRINTFORML + 英語版から多数の変更を取り込み
+;	PRINTFORML + 特殊勢力の性能調整
+;	PRINTFORML + 高能力のキャラはより強く扱われるように
+;	CALL ADD_CHARA_FROM_CSV(158)
+;	CALL CHANGE_COUNTRY(RESULT)
+;	CALL ADD_CHARA_FROM_CSV(159)
+;	CALL CHANGE_COUNTRY(RESULT)
+;	IF MAPID == "DEFAULT"
+;		CALL COLOR_PRINTW("注意！", カラー_注意)
+;		PRINTFORML マップに大幅変更が加わった都合、新規に周回を開始しないと続けてプレイできません
+;		PRINTFORML ここで周回用セーブを作りますか？（周回しない限りプレイ続行はできません）
+;		CALL ASK_YN()
+;		IF RESULT == 1
+;			BEGIN TITLE
+;		ELSE
+;			強制引き継ぎフラグ = 1
+;		ENDIF
+;	ENDIF
+;ENDIF
+;
+;IF CHECK_UPDATE("1.24.1")
+;	IF LASTLOAD_VERSION == GET_VERSION_VALUE("1.24.0")
+;		LOCAL:1 = 0
+;		FOR LOCAL, 0, CHARANUM
+;			SIF CSTR:LOCAL:99 == "早鬼"
+;				LOCAL:1 ++
+;		NEXT
+;		IF LOCAL:1 >= 2
+;			FOR LOCAL, CHARANUM - 1, 0, -1
+;				IF CSTR:LOCAL:99 == "早鬼"
+;					;削除されるキャラを初体験とする
+;					;キャラの削除
+;					DELCHARA LOCAL
+;					;REL_LIKE、REL_HATEの修正
+;					FOR LOCAL:1, 0, CHARANUM
+;						FOR LOCAL:2, LOCAL, CHARANUM
+;							REL_LIKE:(LOCAL:1):(LOCAL:2) = REL_LIKE:(LOCAL:1):(LOCAL:2 + 1)
+;							REL_HATE:(LOCAL:1):(LOCAL:2) = REL_HATE:(LOCAL:1):(LOCAL:2 + 1)
+;						NEXT
+;						REL_LIKE:(LOCAL:1):CHARANUM = 0
+;						REL_HATE:(LOCAL:1):CHARANUM = 0
+;					NEXT
+;					CALL COLOR_PRINTW("WARNING!", カラー_警告)
+;					PRINTFORMW 1.23.X以前から1.24.0にアップデートしたときに生じた、「早鬼増殖バグ」を検知しました
+;					PRINTFORMW 増殖したほうとおぼしき早鬼は削除しましたが、もしかしたら勢力周りで不具合が生じるかもしれません
+;					PRINTFORMW お手数ですが、念のため周回することをお勧めします
+;					PRINTFORMW 周回用セーブを作成しますか？
+;					CALL ASK_YN()
+;					IF RESULT == 1
+;					ELSE
+;						強制引き継ぎフラグ = 1
+;					ENDIF
+;					BREAK
+;				ENDIF
+;			NEXT
+;			CALL ADD_CHARA_FROM_CSV(159)
+;			CALL CHANGE_COUNTRY(RESULT)
+;		ENDIF
+;	ENDIF
+;ENDIF
+;
+;IF CHECK_UPDATE("1.25.0")
+;	CALL COLOR_PRINTW("Ver1.25.0", カラー_注意)
+;	PRINTFORML + 都市開発や技術研究の要素追加
+;	PRINTFORML + 新キャラ「運松」「蟒蛇」「抗鬱薬」
+;	PRINTFORML + 新コマンドやイベント、陥落素質、スキル
+;	VARSET TECHNOLOGY_STATUS, 0
+;	VARSET TECHNOLOGY_RESEARCH_TARGET, -1
+;	VARSET TECHNOLOGY_RESEARCH_PROGRESS, 0
+;	CALL ADD_CHARA_FROM_CSV(160)
+;	CALL ADD_CHARA_FROM_CSV(161)
+;	CALL ADD_CHARA_FROM_CSV(162)
+;	PRINTFORML 都市開発や研究など、ＳＬＧ周りに大きく追加要素が入った都合、
+;	PRINTFORML バランス的な面でも一度周回することを推奨します。
+;	PRINTFORML 周回用セーブを作成しますか？
+;	CALL ASK_YN
+;	SIF RESULT == 0
+;		強制引き継ぎフラグ = 1
+;ENDIF
+;
+;IF CHECK_UPDATE("1.27.0")
+;	CALL COLOR_PRINTW("Ver1.27.0", カラー_注意)
+;	PRINTFORML + コマンド「秘貝開帳」など追加、調教システムの便利化
+;	PRINTFORML + 子宮に容量制限追加。さらに腸・口も子宮と同じく精子を保存するように
+;	PRINTFORML + デイリーイベント等の追加
+;	PRINTFORML + 素質「グロマン」は素質でなく、単に締まりの一状態として扱われます
+;	CALL COLOR_PRINTW("子宮内精液の変数名変更にともない、子宮内精液の状態がいったんリセットされます")
+;	;グロマン削除
+;	FOR LOCAL, 0, CHARANUM
+;		TALENT:LOCAL:116 = 0
+;	NEXT
+;ENDIF
+;
+;IF CHECK_UPDATE("1.28.0")
+;	CALL COLOR_PRINTW("Ver1.28.0", カラー_注意)
+;	PRINTFORML + コマンド「玉揉み」「ペニスリボン」
+;	PRINTFORML + エロイベントで好感度や従属度が減少する際、閾値を割ると陥落素質を喪うように
+;	PRINTFORML + 拠点フェイズの「労働」の大幅改修。ターンエンド時に実行されます
+;	PRINTFORML + 戦略フェイズのAIの強化
+;	FOR LOCAL, 0, MAX_COUNTRY
+;		SIF !IS_COUNTRY(LOCAL)
+;			CONTINUE
+;		LOCAL:2 = GET_COUNTRY_BOSS(LOCAL)
+;		FOR LOCAL:1, 0, TECHNOLOGY_MAX_GENRE
+;			TECHNOLOGY_STATUS_CHARA:(LOCAL:2):(LOCAL:1) = TECHNOLOGY_STATUS:LOCAL:(LOCAL:1)
+;		NEXT
+;	NEXT
+;	LOADGLOBAL
+;	FOR LOCAL, 0, VARSIZE("G_CONFIG_NAME")
+;		G_CONFIG_FILTER_NAME:LOCAL = %G_CONFIG_NAME:LOCAL%
+;		G_CONFIG_DAILY_NAME:LOCAL = %G_CONFIG_NAME:LOCAL%
+;	NEXT
+;	SAVEGLOBAL
+;ENDIF
+;
+;IF CHECK_UPDATE("1.29.0")
+;	CALL COLOR_PRINTW("Ver1.29.0", カラー_注意)
+;	PRINTFORML + Ｕ感覚追加＋尿道関係のコマンド
+;	PRINTFORML + 口上デイリーの追加
+;	PRINTFORML + AIの強化
+;	PRINTFORML + 奴隷市場でモブが買えるように
+;ENDIF
+;
+;IF 強制引き継ぎフラグ
+;	FLAG:クリア直後フラグ = 1
+;	CALL SAVE_GAME
+;	FLAG:クリア直後フラグ = 0
+;	BEGIN TITLE
+;ENDIF
+;
+;
