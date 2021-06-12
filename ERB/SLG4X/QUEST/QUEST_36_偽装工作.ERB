@@ -1,0 +1,80 @@
+﻿;--------------------------
+; !!偽装工作と 36を好きな番号に変える！!
+; 偽装工作
+; ここにクエストの説明
+;--------------------------
+
+
+;--------------------------
+; クエスト受注可能か
+;--------------------------
+@QUEST_ACCEPTABLE_36
+RETURN QUEST_PROGRESS:34 >= 3
+
+;--------------------------
+; クエストの名前を返却
+;--------------------------
+@QUEST_NAME_36
+SETCOLOR 0X00FF00
+RESULTS = 偽装工作
+RETURN
+
+;--------------------------
+; クエスト本体
+;--------------------------
+@QUEST_BODY_36
+#DIM 調査船保有
+PRINTFORML 民主主義国家と銀河人民統一連邦は戦争中でスパイ活動も頻発している
+PRINTFORML %CALLNAME:MASTER%はこれを利用して銀河人民統一連邦の気を引く作戦を思いつていた
+PRINTFORML そのためには調査船を一隻犠牲にしないといけない
+PRINTFORMW その代わり、銀河人民統一連邦の諜報部の目は民主主義国に行き、我々に対する内偵効率を下げることができるだろう
+PRINTL
+調査船保有 = 0
+FOR LOCAL, 0, MAX_SHIP
+	SIF SHIP_COUNTRY:LOCAL == 国家ID_プレイヤー && SHIP_CATEGORY:LOCAL == 調査船
+		調査船保有 ++
+NEXT
+IF !調査船保有
+	PRINTFORML しかし%CALLNAME:MASTER%は調査船を保有していない
+	PRINTFORMW まずは調査船を入手するところからはじめよう
+	RETURN
+ENDIF
+PRINTFORML 調査船を犠牲に銀河人民統一連邦の内偵効率を下げますか?
+CALL ASK_YN
+SIF RESULT
+	RETURN
+$INPUT_LOOP
+PRINTL 犠牲にする調査船を選択してください
+FOR LOCAL, 0, MAX_SHIP
+	IF SHIP_COUNTRY:LOCAL == 国家ID_プレイヤー && SHIP_CATEGORY:LOCAL == 調査船
+		CALL ID2POS(SHIP_POSITION:LOCAL)
+		LOCALS = %SHIP_NAME:LOCAL% 座標＃{RESULT:0} X: {RESULT:2} Y: {RESULT:1}
+		PRINTBUTTON @"%LOCALS%", LOCAL
+		PRINTL
+	ENDIF
+NEXT
+PRINTBUTTON "[キャンセル]", MAX_SHIP
+PRINTL
+INPUT
+IF RESULT >= 0 && RESULT < MAX_SHIP
+	IF SHIP_COUNTRY:RESULT == 国家ID_プレイヤー && SHIP_CATEGORY:RESULT == 調査船
+		CALL GET_SHIP_TOTAL_HP(RESULT)
+		SHIP_DAMAGE = RESULT
+		CALL RETIRE_BROKEN_SHIP
+		PRINTW ………………
+		PRINTW …………
+		PRINTW ……
+		PRINTFORML 後日、%CALLNAME:MASTER%のもとに作戦成功の報が入った
+		SIF 内偵効率 > 1
+			内偵効率 --
+		PRINTFORML 銀河人民統一連邦の内偵効率: {内偵効率}
+		PRINTFORMW 内偵進捗状況: {内偵進捗}/{内偵完了}
+		RETURN
+	ELSE
+		GOTO INPUT_LOOP
+	ENDIF
+ELSEIF RESULT == MAX_SHIP
+	RETURN
+ELSE
+	GOTO INPUT_LOOP
+ENDIF

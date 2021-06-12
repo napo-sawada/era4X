@@ -1,0 +1,286 @@
+﻿;--------------------------
+; !!アジテーションと 37を好きな番号に変える！!
+; アジテーション
+; ここにクエストの説明
+;--------------------------
+
+
+;--------------------------
+; クエスト受注可能か
+;--------------------------
+@QUEST_ACCEPTABLE_37
+CALL GET_STAR_ID_FROM_POS(CHARACTER_POSITION)
+SIF RESULT != 2
+	RETURN 0
+SIF QUEST_COMPLETE_DATE:37 + 100 > DAY
+	RETURN 0
+RETURN QUEST_PROGRESS:34 >= 3
+
+;--------------------------
+; クエストの名前を返却
+;--------------------------
+@QUEST_NAME_37
+SETCOLOR 0X00FF00
+RESULTS = アジテーション
+RETURN
+
+;--------------------------
+; クエスト本体
+;--------------------------
+@QUEST_BODY_37
+#DIM 抑止力
+#DIM 作戦方針
+#DIM 事前準備
+#DIM 試行回数
+
+PRINTFORML 強力な宇宙軍から電波ジャックによるアジテーションを実施し、民衆の支持を取り付ける作戦を考案した%CALLNAME:MASTER%
+抑止力 = 0
+FOR LOCAL, 0, MAX_SHIP
+	SIF SHIP_COUNTRY:LOCAL != 国家ID_プレイヤー
+		CONTINUE
+	SIF SHIP_POSITION:LOCAL != CHARACTER_POSITION
+		CONTINUE
+	SELECTCASE SHIP_CATEGORY:LOCAL
+		CASE コルベット
+			抑止力 += 1
+		CASE フリゲート
+			抑止力 += 3
+		CASE 駆逐艦
+			抑止力 += 9
+		CASE 巡洋艦
+			抑止力 += 27
+		CASE 戦艦
+			抑止力 += 81
+		CASE 空母
+			抑止力 += 100
+	ENDSELECT
+NEXT
+IF 抑止力 == 0
+	PRINTFORML だが現在宙域に滞在している艦隊戦力では抑止力不足だ。すぐに追い払われるのが落ちだろう
+	PRINTFORMW もう少し戦力を集結させてから作戦を実行しよう
+	RETURN
+ELSEIF 抑止力 < 10
+	PRINTFORML 現在の抑止力は最低限だ。言いたいことを言えるか微妙なラインだが……
+	PRINTL 実行しますか?
+	CALL ASK_YN
+	SIF RESULT
+		RETURN
+	試行回数 = 1
+ELSEIF 抑止力 < 30
+	PRINTFORML 現在の抑止力は低だ。言いたいことを言ってさっさと撤退する羽目になるだろう
+	PRINTL 実行しますか?
+	CALL ASK_YN
+	SIF RESULT
+		RETURN
+	試行回数 = 2
+ELSEIF 抑止力 < 100
+	PRINTFORML 現在の抑止力は中だ。正規軍が出張ってくるまでは頑張れるだろう
+	PRINTL 実行しますか?
+	CALL ASK_YN
+	SIF RESULT
+		RETURN
+	試行回数 = 3
+ELSEIF 抑止力 < 300
+	PRINTFORML 現在の抑止力は高だ。小一時間演説できるだろう
+	PRINTFORML ただ勢力が強力すぎて、内偵進捗が進んでしまうだろう
+	PRINTL 実行しますか?
+	CALL ASK_YN
+	SIF RESULT
+		RETURN
+	内偵進捗 += 10
+	試行回数 = 5
+ELSE
+	PRINTFORML 現在の抑止力は最高だ。言いたい放題やりたい放題できるだろう
+	PRINTFORML ただ勢力があまりに大規模すぎて、内偵進捗が大きく進んでしまうだろう
+	PRINTL 実行しますか?
+	CALL ASK_YN
+	SIF RESULT
+		RETURN
+	内偵進捗 += 100
+	試行回数 = 10
+ENDIF
+
+CALL QUEST_37_PREPARATION_PHASE(作戦方針, 事前準備)
+CALL QUEST_37_MAIN_PHASE(作戦方針, 事前準備, 試行回数)
+
+;--------------------------
+; 準備フェーズ
+;--------------------------
+@QUEST_37_PREPARATION_PHASE(作戦方針, 事前準備)
+#DIM REF 作戦方針
+#DIM REF 事前準備
+#DIM 出目
+
+
+$INPUT_LOOP
+PRINTL 作戦方針の決定
+PRINTBUTTON "[0] 星系民族主義の主張", 0
+PRINTL
+PRINTBUTTON "[1] 修正主義批判", 0
+PRINTL
+PRINTBUTTON "[2] 独立の大義名分", 0
+PRINTL
+
+INPUT
+IF RESULT == 0
+	PRINTL 
+	PRINTL [0] 星系民族主義の主張
+	PRINTL 星系民族主義を主張し、支持率を上げる
+	PRINTL 話術により独自の歴史を持つ民族意識を喚起させる
+	PRINTL 話術、知略を用いた事前準備が必要
+	PRINTL
+	PRINTL この作戦方針で行きますか？
+	CALL ASK_YN
+	SIF RESULT
+		GOTO INPUT_LOOP
+	作戦方針 = 0
+ELSEIF RESULT == 1
+	PRINTL
+	PRINTL [1] 修正主義批判
+	PRINTL 本国の政治体制を批判し、その支持率を下げる
+	PRINTL マスコミ、学者との事前交流を通じて論術を練る
+	PRINTL 話術、政治、資金($100,000)を用いた事前準備が必要
+	PRINTL 
+	IF MONEY < 100000
+		PRINTL この作戦を実行するには$100,000が必要だ
+		GOTO INPUT_LOOP
+	ENDIF
+	PRINTL この作戦方針で行きますか？
+	CALL ASK_YN
+	SIF RESULT
+		GOTO INPUT_LOOP
+	作戦方針 = 1
+ELSEIF RESULT == 2
+	PRINTL
+	PRINTL [2] 独立の大義名分
+	PRINTL 他国の支援を主張し、支持率を上げる
+	PRINTL 事前に他国のエージェントと密通し、エージェントの登壇も行う
+	PRINTL 話術、政治、資金($1,000,000)を用いた事前準備が必要
+	PRINTL
+	IF MONEY < 1000000
+		PRINTL この作戦を実行するには$1,000,000が必要だ
+		GOTO INPUT_LOOP
+	ENDIF
+	PRINTL この作戦方針で行きますか？
+	CALL ASK_YN
+	SIF RESULT
+		GOTO INPUT_LOOP
+	作戦方針 = 2
+ELSE
+	GOTO INPUT_LOOP
+ENDIF
+
+SELECTCASE  作戦方針
+	CASE 0
+		PRINTL 作戦方針 -> 星系民族主義の主張
+		PRINTL
+		PRINTL 事前準備
+		PRINTL
+		PRINTW 資料の作成ロール(出目が高いほどいい資料ができる)
+		PRINTFORML %CALLNAME:MASTER%の話術: {ABL:MASTER:話術} + 知略: {ABL:MASTER:知略}
+		出目 = RAND:(ABL:MASTER:話術 + ABL:MASTER:知略)
+		IF 出目 < 10
+			LOCALS = 最低の出来
+			事前準備 = 0
+		ELSEIF 出目 < 30
+			LOCALS = 悪い出来
+			事前準備 = 10
+		ELSEIF 出目 < 50
+			LOCALS = 微妙な出来
+			事前準備 = 20
+		ELSEIF 出目 < 70
+			LOCALS = 普通の出来
+			事前準備 = 40
+		ELSEIF 出目 < 90
+			LOCALS = いい出来
+			事前準備 = 60
+		ELSEIF 出目 < 110
+			LOCALS = 素晴らしい出来
+			事前準備 = 80
+		ELSE
+			LOCALS = 完璧な出来
+			事前準備 = 100
+		ENDIF
+		PRINTFORML 結果: {出目} (%LOCALS%)
+	CASE 1
+		PRINTL 作戦方針 -> 修正主義批判
+		PRINTL
+		PRINTL 事前準備
+		PRINTL
+		PRINTW 資料の作成ロール(出目が高いほどいい資料ができる)
+		PRINTFORML %CALLNAME:MASTER%の話術: {ABL:MASTER:話術} + 政治: {ABL:MASTER:政治}
+		出目 = RAND:(ABL:MASTER:話術 + ABL:MASTER:知略)
+		IF 出目 < 10
+			LOCALS = 最低の出来
+			事前準備 = 0
+		ELSEIF 出目 < 30
+			LOCALS = 悪い出来
+			事前準備 = 10
+		ELSEIF 出目 < 50
+			LOCALS = 微妙な出来
+			事前準備 = 20
+		ELSEIF 出目 < 70
+			LOCALS = 普通の出来
+			事前準備 = 40
+		ELSEIF 出目 < 90
+			LOCALS = いい出来
+			事前準備 = 60
+		ELSEIF 出目 < 110
+			LOCALS = 素晴らしい出来
+			事前準備 = 80
+		ELSE
+			LOCALS = 完璧な出来
+			事前準備 = 100
+		ENDIF
+		PRINTFORML 結果: {出目} (%LOCALS%)
+		MONEY -= 1000000
+	CASE 2
+ENDSELECT
+PRINTW 
+
+@QUEST_37_MAIN_PHASE(作戦方針, 事前準備, 試行回数)
+#DIM 作戦方針
+#DIM 事前準備
+#DIM 試行回数
+#DIM 聴衆
+#DIM 結果
+#DIM TOTAL
+
+PRINTL メインフェーズ
+PRINTL
+PRINTFORML 現場についた%CALLNAME:MASTER%は旗艦に備え付けの電波ジャック装置をオンにした
+PRINTL 「……!」
+聴衆 = 0
+FOR LOCAL, 0, 試行回数
+	PRINTL 演説ロール
+	聴衆 += RAND:1000 + 1000 + ((RAND:1000 + 500) * 試行回数)
+	SIF 作戦方針 == 2
+		聴衆 *= 10
+	PRINTFORML %CALLNAME:MASTER%の話術: {ABL:MASTER:話術} + 事前準備: {事前準備}
+	結果 = RAND:(ABL:MASTER:話術 + 事前準備)
+	PRINTFORMW 結果: {結果}
+	PRINTL
+NEXT
+
+PRINTW ………………
+PRINTW …………
+PRINTW ……
+PRINTL
+PRINTFORML ここらが限界だ。%CALLNAME:MASTER%は演説を切り上げ、その場を後にした
+TOTAL = RAND:(聴衆/2) * 結果 / 100 + 聴衆 / 2
+IF 作戦方針 == 0 || 作戦方針 == 2
+	PRINTFORML 今回の作戦により、合計{TOTAL}人の非戦闘員が仲間になった。
+	R非戦闘員 += TOTAL
+	G非戦闘員 -= TOTAL
+	IF TOTAL > 10000
+		PRINTFORML また、{TOTAL/10000}\%の支持率を新たに得た
+		R支持率 += TOTAL / 10000
+	ENDIF
+ELSEIF 作戦方針 == 1
+	PRINTFORML 今回の作戦により、合計{TOTAL / 1000}\%の銀河人民統一連邦の支持率が下がった
+	G支持率 -= TOTAL / 1000
+ENDIF
+PRINTFORMW また熱りが覚めたら作戦を再度実行しよう
+
+QUEST_COMPLETE_DATE:37 = DAY
+
