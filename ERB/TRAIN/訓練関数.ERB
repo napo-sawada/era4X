@@ -8,6 +8,27 @@ CALL JUDGE_COM_RESULT(MTAR:0, 5, 5)
 
 乱数基準値:0 = MAX(100 - ABL:(MPLY:0):能力 / 3, 30)
 乱数基準値:1 = MAX(100 - ABL:(MTAR:0):能力 / 3, 30)
+
+IF 能力 == GETNUM(ABL, "白兵")
+LOCAL:2 = 0
+FOR LOCAL:3, 0, 星系数
+	FOR LOCAL:1, 0, STAR_PORT_SLOT_NUM
+		SIF STAR_PORT_SLOT:(LOCAL:3):(LOCAL:1) == 白兵訓練所
+			LOCAL:2 = 1
+	NEXT
+NEXT
+FOR LOCAL:3, 0, MAX_PORT
+	FOR LOCAL:1, 0, STAR_PORT_SLOT_NUM
+		SIF PORT_SLOT:(LOCAL:3):(LOCAL:1) == 白兵訓練所
+			LOCAL:2 = 1
+	NEXT
+NEXT
+	IF LOCAL:2
+		TIMES 乱数基準値:0, 2.10
+		TIMES 乱数基準値:1, 2.10
+	ENDIF
+ENDIF
+
 IF ABL:(MPLY:0):能力 > ABL:(MTAR:0):能力 + 10
 	乱数基準値:0 -= 10
 	乱数基準値:1 += 10
@@ -143,7 +164,11 @@ IF !TALENT:(MTAR:0):幼児
 
 	EXP:(MPLY:0):GET_EXP(能力) += LOCAL
 
-	LOCAL = (RAND:100 < 乱数基準値:1)
+	IF LOCAL:2
+		LOCAL = RAND:2 + 2
+	ELSE
+		LOCAL = (RAND:100 < 乱数基準値:1)
+	ENDIF
 
 	IF LOCAL
 		SELECTCASE ABL:(MTAR:0):能力

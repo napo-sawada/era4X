@@ -9,6 +9,8 @@
 ; クエスト受注可能か
 ;--------------------------
 @QUEST_ACCEPTABLE_36
+SIF QUEST_PROGRESS:36 != 0
+	RETURN 0
 RETURN QUEST_PROGRESS:34 >= 3
 
 ;--------------------------
@@ -67,9 +69,10 @@ IF RESULT >= 0 && RESULT < MAX_SHIP
 		PRINTW ……
 		PRINTFORML 後日、%CALLNAME:MASTER%のもとに作戦成功の報が入った
 		SIF 内偵効率 > 1
-			内偵効率 --
+			内偵効率 -= 2
 		PRINTFORML 銀河人民統一連邦の内偵効率: {内偵効率}
 		PRINTFORMW 内偵進捗状況: {内偵進捗}/{内偵完了}
+		QUEST_PROGRESS:36 = 1
 		RETURN
 	ELSE
 		GOTO INPUT_LOOP

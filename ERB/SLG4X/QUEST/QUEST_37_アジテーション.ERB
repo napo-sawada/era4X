@@ -275,10 +275,14 @@ IF 作戦方針 == 0 || 作戦方針 == 2
 	IF TOTAL > 10000
 		PRINTFORML また、{TOTAL/10000}\%の支持率を新たに得た
 		R支持率 += TOTAL / 10000
+		SIF R支持率 + G支持率 > 100
+			G支持率 = 100 - R支持率
 	ENDIF
 ELSEIF 作戦方針 == 1
 	PRINTFORML 今回の作戦により、合計{TOTAL / 1000}\%の銀河人民統一連邦の支持率が下がった
 	G支持率 -= TOTAL / 1000
+	SIF G支持率 < 0
+		G支持率 = 0
 ENDIF
 PRINTFORMW また熱りが覚めたら作戦を再度実行しよう
 

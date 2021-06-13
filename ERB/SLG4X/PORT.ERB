@@ -247,7 +247,7 @@ RETURN 1
 @PORT_MENU(PORTID)
 #DIM PORTID
 #DIM SLOT_ID
-#DIM UNLOCK_FACILITY, 9
+#DIM UNLOCK_FACILITY, 10
 #DIMS LEFT_COLUMNS, MAX_SHIP
 #DIM LEFT_COLUMNS_BUTTON_VALUE, MAX_SHIP
 #DIM CURRENT_MODE
@@ -470,6 +470,9 @@ FOR SLOT_ID, 0, STAR_PORT_SLOT_NUM
         CASE 技術研究所
             SLOT_NAME = %"技術研究所", 20, LEFT%
             PRINTBUTTON @"[{SLOT_ID, 2, RIGHT}] %SLOT_NAME%", SLOT_ID
+        CASE 白兵訓練所
+            SLOT_NAME = %"白兵訓練所", 20, LEFT%
+            PRINTBUTTON @"[{SLOT_ID, 2, RIGHT}] %SLOT_NAME%", SLOT_ID
     ENDSELECT
     SIF SLOT_ID % 4 == 3
         PRINTL
@@ -525,6 +528,9 @@ SELECTCASE PORT_SLOT:PORT_ID:SLOT_ID
     CASE 技術研究所
         PRINT 技術研究所
         PRINTL 効果: 技術研究が行えるようになる(効果は重複しない)
+    CASE 白兵訓練所
+        PRINT 白兵訓練所
+        PRINTL 効果: 白兵訓練の効果が上がる(効果は重複しない)
 ENDSELECT
 PRINTL
 PRINTL 選択できるアイテム(価格): 効果
@@ -540,7 +546,9 @@ PRINTBUTTON "[7] AVスタジオ ($300,000) : AV撮影の効果が劇的に上が
 PRINTL
 PRINTBUTTON "[8] 技術研究所 ($1,000,000): 技術研究が行えるようになる(効果は重複しない)", 8
 PRINTL
-PRINTBUTTON "[9] 戻る", 9
+PRINTBUTTON "[9] 白兵訓練所 ($500,000) : 白兵訓練の効果が上がる(効果は重複しない)", 9
+PRINTL
+PRINTBUTTON "[99] 戻る", 99
 INPUT
 
 IF RESULT == 1
@@ -586,6 +594,13 @@ ELSEIF RESULT == 8
         GOTO INPUT_LOOP
     ENDIF
 ELSEIF RESULT == 9
+    CALL SLOT_CHANGE_DIALOG("白兵訓練所", 500000)
+    IF RESULT == 1
+        PORT_SLOT:PORT_ID:SLOT_ID = 白兵訓練所
+    ELSE
+        GOTO INPUT_LOOP
+    ENDIF
+ELSEIF RESULT == 99
     RETURN
 ELSE
     GOTO INPUT_LOOP
