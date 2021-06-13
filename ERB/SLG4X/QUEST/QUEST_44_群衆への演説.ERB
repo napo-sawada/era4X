@@ -1,0 +1,149 @@
+﻿;--------------------------
+; !!群衆への演説と 44を好きな番号に変える！!
+; 群衆への演説
+; ここにクエストの説明
+;--------------------------
+
+
+;--------------------------
+; クエスト受注可能か
+;--------------------------
+@QUEST_ACCEPTABLE_44
+SIF QUEST_PROGRESS:44
+	RETURN 0
+CALL GET_STAR_ID_FROM_POS(CHARACTER_POSITION)
+SIF RESULT != 2
+	RETURN 0
+RETURN QUEST_PROGRESS:34 >= 3
+
+;--------------------------
+; クエストの名前を返却
+;--------------------------
+@QUEST_NAME_44
+SETCOLOR 0X00FF00
+RESULTS = 群衆への演説
+RETURN
+
+;--------------------------
+; クエスト本体
+;--------------------------
+@QUEST_BODY_44
+#DIM SELECTED, MAX_CHARA_NUM
+#DIM FIRST_LINE
+#DIM SELECTED_COUNT
+
+PRINTFORML 使われていない電波塔と講堂をジャックして、全国放送を行う作戦を考えだした%CALLNAME:MASTER%
+PRINTFORML 目星となるポイントは警察や軍の施設からも遠く、近くに小さな交番があるだけだ
+PRINTFORMW 警官と戦闘になるだろうが……大いなる野望に犠牲はつきものである
+PRINTW ………………
+PRINTW …………
+PRINTW ……
+DRAWLINE
+FIRST_LINE = LINECOUNT
+PRINTL メンバーを選択してください(最大6名)
+SETCOLOR 0X666666
+CUSTOMDRAWLINE =
+RESETCOLOR
+$INPUT_LOOP
+SELECTED_COUNT = 0
+FOR LOCAL, 0, CHARANUM
+	SIF CFLAG:LOCAL:所属 != CFLAG:MASTER:所属
+		CONTINUE
+	SIF SELECTED:LOCAL
+		SELECTED_COUNT ++
+NEXT
+FOR LOCAL, 0, CHARANUM
+	SIF CFLAG:LOCAL:所属 != CFLAG:MASTER:所属
+		CONTINUE
+	IF SELECTED:LOCAL
+		SETCOLOR 0X00FF00
+		PRINTBUTTON @"[{LOCAL}] %CALLNAME:LOCAL% - 白兵: {ABL:LOCAL:白兵}", LOCAL
+		PRINTL
+	ELSEIF !SELECTED:LOCAL && SELECTED_COUNT < 6
+		PRINTBUTTON @"[{LOCAL}] %CALLNAME:LOCAL% - 白兵: {ABL:LOCAL:白兵}", LOCAL
+		PRINTL
+	ELSE
+		PRINTFORML [{LOCAL}] %CALLNAME:LOCAL% - 白兵: {ABL:LOCAL:白兵}
+	ENDIF
+	RESETCOLOR
+NEXT
+SETCOLOR 0X666666
+CUSTOMDRAWLINE =
+RESETCOLOR
+FINDELEMENT SELECTED, 1
+IF RESULT == -1
+	PRINT [決定]
+ELSE
+	PRINTBUTTON "[決定]", CHARANUM
+ENDIF
+PRINT 　
+PRINTBUTTON "[キャンセル]", CHARANUM + 1
+INPUT
+IF RESULT == CHARANUM
+	CALL OCCUPATION_44(SELECTED)
+	RETURN
+ENDIF
+SIF RESULT == CHARANUM + 1
+	RETURN
+IF RESULT < 0 || RESULT >= CHARANUM || CFLAG:RESULT:所属 != CFLAG:MASTER:所属
+	CLEARLINE LINECOUNT - FIRST_LINE
+	GOTO INPUT_LOOP
+ENDIF
+IF SELECTED:RESULT
+	SELECTED:RESULT = 0
+ELSEIF SELECTED_COUNT < 6
+	SELECTED:RESULT = 1
+ENDIF
+CLEARLINE LINECOUNT - FIRST_LINE
+GOTO INPUT_LOOP
+
+@OCCUPATION_44(SELECTED)
+#DIM REF SELECTED, 0
+#DIM 結果
+
+PRINTFORML 寂れた電波塔。緊急時のために電源は生きている
+PRINTFORMW そしてそのそばに設置された講堂。かつてこのエリアを活性化させようと箱を用意したが、うまくいかなかったときの名残らしい
+PRINTL 
+PRINTFORML ここから全国に放送を行った実績もあり、逆にここがここまで警備が手薄なのが意味不明なくらいである
+PRINTFORML だが、その理由は接近するとすぐにわかった
+PRINTFORMW ここを守っていたのは、人ではなく旧式だが強力な対歩兵用の思考戦車だったのだ
+PRINTL
+PRINTFORML 「ぼくらはみんないきている〜」
+PRINTFORML 「ちょっと待ってよ、僕たちは生きていないよ？」
+PRINTFORML しかも二機いる
+PRINTFORML 遠くから観察すると、流暢に歌を歌ったりお喋りしているようだ
+PRINTFORMW そういえば、いつぞや宇宙港で見かけた思考戦車に似ているような……？
+PRINTL
+PRINTFORML とはいえ、あの歩兵戦車を撃破しなければ目的は達成できないだろう
+PRINTFORMW %CALLNAME:MASTER%達は意を決し、静かに思考戦車に銃口を向けた
+PRINTW ………………
+PRINTW …………
+PRINTW ……
+
+;白兵戦参加メンバーの初期化
+CALL CC_INIT_MEMBER()
+;攻撃側キャラクターの設定(最大6名)
+FOR LOCAL, 0, CHARANUM
+	SIF SELECTED:LOCAL
+		CALL CC_ADDCHARA("ATTACKER", LOCAL)
+NEXT
+CALL CC_ADDMOB("DEFENDER", "リチャードⅠ歩兵戦車", 4800, 4800, 80)
+CALL CC_ADDMOB("DEFENDER", "リチャードⅠ歩兵戦車", 4800, 4800, 80)
+;白兵戦イベント呼出
+CALL CLOSE_COMBAT()
+SIF RESULT == 2
+	CALL GAMEOVER_38
+PRINTFORML 見事対歩兵戦車を撃破した%CALLNAME:MASTER%達は、講堂に侵入すると早速全世界に向けて演説を開始した
+結果 = RAND:15000 + 5000
+PRINTFORML その結果、{結果}人の非戦闘員が仲間になった
+PRINTFORML また、3\%の支持率を得ることができた
+PRINTFORMW さらに、各地や各国から支援物資が集まり、充足が+10000された！
+R非戦闘員 += 結果
+R支持率 += 3
+SIF R支持率 > 100
+	R支持率 = 100
+SIF R支持率 + G支持率 > 100
+	G支持率 = 100 - R支持率
+R充足 += 10000
+
+QUEST_PROGRESS:44 = 1
