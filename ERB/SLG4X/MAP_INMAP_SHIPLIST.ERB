@@ -189,7 +189,6 @@ WHILE 1
 	ELSE
 		LOCALS += @"@C:{カラー_選択不可}@>>@/C@"
 	ENDIF
-	DEBUGPRINTFORML %LOCALS%
 	LOCALS = %FuncTagSetText_ShapeSize(@"%LOCALS%", WINDOW_WIDTH - 2, 1, 2)%
 	CALL WndMgr_TextSet(WINDOW_ID, L_CNT++, @"%LOCALS%")
 	;フッター出力

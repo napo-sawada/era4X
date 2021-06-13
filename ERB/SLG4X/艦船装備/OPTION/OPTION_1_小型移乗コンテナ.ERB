@@ -4,6 +4,9 @@
 @GET_OPTION_NAME_1
 RESULTS = 小型移乗コンテナ
 
+@GET_OPTION_TYPE_1
+RESULTS '= "BOARDING_POD"
+
 @GET_OPTION_STATUS_1(STATUS)
 #DIM REF STATUS
 
@@ -17,7 +20,9 @@ STATUS:PRICE = 10000
 CALL GET_OPTION_STATUS_1(STATUS)
 CALL GET_OPTION_NAME_1
 PRINTFORML %RESULTS%
-PRINTFORML 一人乗りの移乗コンテナ。完全放棄された艦船を乗っ取るのに使う。
+PRINTFORML 一人乗りの移乗コンテナ。施設や艦船への移乗時に使用する。
+PRINTFORML 戦闘勝利時に低確率で敵艦への移乗攻撃の実行が可能となる。
+PRINTFORML ※移乗コンテナを装備した艦に、クルーが同乗している必要がある。
 
 ;-----------------------------------
 ; オプションの資材

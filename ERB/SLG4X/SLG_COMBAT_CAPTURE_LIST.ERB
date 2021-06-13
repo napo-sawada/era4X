@@ -1,0 +1,390 @@
+﻿;-------------------------------------------------
+;COMBAT_IS_SHIP_CAPTURABLE
+;鹵獲可能な艦船はこの関数内のリストで定義
+;SHIP_ID が鹵獲可能な艦船である場合1を返す
+;-------------------------------------------------
+@COMBAT_IS_SHIP_CAPTURABLE(SHIP_ID)
+#DIM SHIP_ID
+
+;クエスト指定のイベント艦は鹵獲不可
+FOR LOCAL, 0, QUEST_LENGTH
+	SIF SHIP_ID == QUEST_FLAG_SHIP_ID:LOCAL
+		RETURN 0
+NEXT
+
+;鹵獲可能な艦船リスト
+SELECTCASE SHIP_COUNTRY:SHIP_ID
+	CASE 国家ID_一般海賊
+		{
+			IF
+				SHIP_MODEL:SHIP_ID == 汎用コルベット
+				|| SHIP_MODEL:SHIP_ID == 汎用フリゲート
+				|| SHIP_MODEL:SHIP_ID == 汎用駆逐艦
+				|| SHIP_MODEL:SHIP_ID == 汎用巡洋艦
+		}
+			RETURN 1
+		ELSE
+			RETURN 0
+		ENDIF
+	CASE 国家ID_社会主義
+		{
+			IF
+				SHIP_MODEL:SHIP_ID == 汎用コルベット
+				|| SHIP_MODEL:SHIP_ID == ヴォーロス級コルベット
+				|| SHIP_MODEL:SHIP_ID == 汎用フリゲート
+				|| SHIP_MODEL:SHIP_ID == ペルーン級フリゲート
+				|| SHIP_MODEL:SHIP_ID == 汎用駆逐艦
+				|| SHIP_MODEL:SHIP_ID == マーチ級駆逐艦
+				|| SHIP_MODEL:SHIP_ID == 汎用巡洋艦
+		}
+			RETURN 1
+		ELSE
+			RETURN 0
+		ENDIF
+	CASE 国家ID_企業連合
+		{
+			IF
+				SHIP_MODEL:SHIP_ID == 汎用コルベット
+				|| SHIP_MODEL:SHIP_ID == 汎用フリゲート
+				|| SHIP_MODEL:SHIP_ID == 汎用駆逐艦
+				|| SHIP_MODEL:SHIP_ID == 汎用巡洋艦
+		}
+			RETURN 1
+		ELSE
+			RETURN 0
+		ENDIF
+	CASE 国家ID_民主主義
+		{
+			IF
+				SHIP_MODEL:SHIP_ID == 汎用コルベット
+				|| SHIP_MODEL:SHIP_ID == 汎用フリゲート
+				|| SHIP_MODEL:SHIP_ID == 汎用駆逐艦
+				|| SHIP_MODEL:SHIP_ID == 汎用巡洋艦
+		}
+			RETURN 1
+		ELSE
+			RETURN 0
+		ENDIF
+	CASE 国家ID_アレス宗教
+		{
+			IF
+				SHIP_MODEL:SHIP_ID == 汎用コルベット
+				|| SHIP_MODEL:SHIP_ID == 汎用フリゲート
+				|| SHIP_MODEL:SHIP_ID == 汎用駆逐艦
+				|| SHIP_MODEL:SHIP_ID == 汎用巡洋艦
+		}
+			RETURN 1
+		ELSE
+			RETURN 0
+		ENDIF
+	CASE 国家ID_機械文明
+		{
+			IF
+				SHIP_MODEL:SHIP_ID == 汎用コルベット
+				|| SHIP_MODEL:SHIP_ID == 汎用フリゲート
+				|| SHIP_MODEL:SHIP_ID == 汎用駆逐艦
+				|| SHIP_MODEL:SHIP_ID == 汎用巡洋艦
+		}
+			RETURN 1
+		ELSE
+			RETURN 0
+		ENDIF
+	CASE 国家ID_豊秋津皇国
+		{
+			IF
+				SHIP_MODEL:SHIP_ID == 汎用コルベット
+				|| SHIP_MODEL:SHIP_ID == 汎用フリゲート
+				|| SHIP_MODEL:SHIP_ID == 汎用駆逐艦
+				|| SHIP_MODEL:SHIP_ID == 汎用巡洋艦
+		}
+			RETURN 1
+		ELSE
+			RETURN 0
+		ENDIF
+	CASE 国家ID_ハールバルズ
+		{
+			IF
+				SHIP_MODEL:SHIP_ID == 汎用コルベット
+				|| SHIP_MODEL:SHIP_ID == 汎用フリゲート
+				|| SHIP_MODEL:SHIP_ID == 汎用駆逐艦
+				|| SHIP_MODEL:SHIP_ID == 汎用巡洋艦
+		}
+			RETURN 1
+		ELSE
+			RETURN 0
+		ENDIF
+ENDSELECT
+
+RETURN 0
+
+;-------------------------------------------------
+;COMBAT_CAPTURE_SET_MOB
+;鹵獲対象のSHIP_IDから白兵戦の防衛側として配置するモブを設定
+;-------------------------------------------------
+@COMBAT_CAPTURE_SET_MOB(SHIP_ID)
+#DIM SHIP_ID
+#DIMS DYNAMIC NAME_LIST, MAX_NAME_LIST, SHIP_CATEGORY_COUNT, MAX_RANDOM_NAME
+#DIMS DYNAMIC 勢力詳細分類
+
+
+SELECTCASE SHIP_COUNTRY:SHIP_ID
+	CASE 国家ID_一般海賊
+		;;国家ID_一般海賊は無所属艦に汎用的に使用されているIDのため、艦名からある程度分類
+		;艦名の文字列から雑に類推
+		SIF STRFINDU(SHIP_NAME:SHIP_ID, "海賊") != -1
+			勢力詳細分類 '= "海賊"
+		;艦名ネームリストから照合
+		TRYCALLFORM REGISTER_SHIP_NAME_LIST_{国家ID_一般海賊}(国家ID_一般海賊, NAME_LIST)
+		FOR LOCAL, 0, MAX_RANDOM_NAME
+			IF STRFINDU(SHIP_NAME:SHIP_ID, NAME_LIST:国家ID_一般海賊:(SHIP_CATEGORY:SHIP_ID):LOCAL) != -1
+				勢力詳細分類 '= "海賊"
+				BREAK
+			ENDIF
+		NEXT
+		IF 勢力詳細分類 == "海賊"
+			SELECTCASE SHIP_MODEL:SHIP_ID
+				CASE 汎用コルベット
+					CALL CC_ADDMOB("DEFENDER", "宇宙海賊１", 2000, 2000, RAND(40, 50))
+					CALL CC_ADDMOB("DEFENDER", "宇宙海賊２", 2000, 2000, RAND(40, 50))
+				CASE 汎用フリゲート
+					CALL CC_ADDMOB("DEFENDER", "宇宙海賊１", 2000, 2000, RAND(40, 50))
+					CALL CC_ADDMOB("DEFENDER", "宇宙海賊２", 2000, 2000, RAND(40, 50))
+					CALL CC_ADDMOB("DEFENDER", "宇宙海賊３", 2000, 2000, RAND(40, 50))
+					CALL CC_ADDMOB("DEFENDER", "宇宙海賊４", 2000, 2000, RAND(40, 50))
+				CASE 汎用駆逐艦
+					CALL CC_ADDMOB("DEFENDER", "海賊頭",     2400, 2400, RAND(65, 75))
+					CALL CC_ADDMOB("DEFENDER", "宇宙海賊１", 2000, 2000, RAND(40, 50))
+					CALL CC_ADDMOB("DEFENDER", "宇宙海賊２", 2000, 2000, RAND(40, 50))
+					CALL CC_ADDMOB("DEFENDER", "宇宙海賊３", 2000, 2000, RAND(40, 50))
+					CALL CC_ADDMOB("DEFENDER", "宇宙海賊４", 2000, 2000, RAND(40, 50))
+				CASE 汎用巡洋艦
+					CALL CC_ADDMOB("DEFENDER", "海賊頭",     2400, 2400, RAND(65, 75))
+					CALL CC_ADDMOB("DEFENDER", "宇宙海賊１", 2000, 2000, RAND(40, 50))
+					CALL CC_ADDMOB("DEFENDER", "宇宙海賊２", 2000, 2000, RAND(40, 50))
+					CALL CC_ADDMOB("DEFENDER", "宇宙海賊３", 2000, 2000, RAND(40, 50))
+					CALL CC_ADDMOB("DEFENDER", "MK.1 アサルトウォーカー", 4800, 4800, RAND(80, 90))
+				CASEELSE
+					CALL CC_ADDMOB("DEFENDER", "宇宙海賊１", 2000, 2000, RAND(40, 50))
+					CALL CC_ADDMOB("DEFENDER", "宇宙海賊２", 2000, 2000, RAND(40, 50))
+			ENDSELECT
+		ELSE
+			SELECTCASE SHIP_MODEL:SHIP_ID
+				CASE 汎用コルベット
+					CALL CC_ADDMOB("DEFENDER", "防衛ドローン１", 2000, 2000, RAND(40, 50))
+					CALL CC_ADDMOB("DEFENDER", "防衛ドローン２", 2000, 2000, RAND(40, 50))
+				CASE 汎用フリゲート
+					CALL CC_ADDMOB("DEFENDER", "防衛ドローン１", 2000, 2000, RAND(40, 50))
+					CALL CC_ADDMOB("DEFENDER", "防衛ドローン２", 2000, 2000, RAND(40, 50))
+					CALL CC_ADDMOB("DEFENDER", "防衛ドローン３", 2000, 2000, RAND(40, 50))
+					CALL CC_ADDMOB("DEFENDER", "防衛ドローン４", 2000, 2000, RAND(40, 50))
+				CASE 汎用駆逐艦
+					CALL CC_ADDMOB("DEFENDER", "陸戦隊指揮官",   2400, 2400, RAND(65, 75))
+					CALL CC_ADDMOB("DEFENDER", "防衛ドローン１", 2000, 2000, RAND(40, 50))
+					CALL CC_ADDMOB("DEFENDER", "防衛ドローン２", 2000, 2000, RAND(40, 50))
+					CALL CC_ADDMOB("DEFENDER", "防衛ドローン３", 2000, 2000, RAND(40, 50))
+					CALL CC_ADDMOB("DEFENDER", "防衛ドローン４", 2000, 2000, RAND(40, 50))
+				CASE 汎用巡洋艦
+					CALL CC_ADDMOB("DEFENDER", "陸戦隊指揮官",   2400, 2400, RAND(65, 75))
+					CALL CC_ADDMOB("DEFENDER", "防衛ドローン１", 2000, 2000, RAND(40, 50))
+					CALL CC_ADDMOB("DEFENDER", "防衛ドローン２", 2000, 2000, RAND(40, 50))
+					CALL CC_ADDMOB("DEFENDER", "防衛ドローン３", 2000, 2000, RAND(40, 50))
+					CALL CC_ADDMOB("DEFENDER", "MK.1 アサルトウォーカー", 4800, 4800, RAND(80, 90))
+				CASEELSE
+					CALL CC_ADDMOB("DEFENDER", "防衛ドローン１", 2000, 2000, RAND(40, 50))
+					CALL CC_ADDMOB("DEFENDER", "防衛ドローン２", 2000, 2000, RAND(40, 50))
+			ENDSELECT
+		ENDIF
+	CASE 国家ID_社会主義
+		SELECTCASE SHIP_MODEL:SHIP_ID
+			CASE 汎用コルベット, ヴォーロス級コルベット
+				CALL CC_ADDMOB("DEFENDER", "人民海軍歩兵１", 2000, 2000, RAND(45, 55))
+				CALL CC_ADDMOB("DEFENDER", "人民海軍歩兵２", 2000, 2000, RAND(45, 55))
+			CASE 汎用フリゲート, ペルーン級フリゲート
+				CALL CC_ADDMOB("DEFENDER", "人民海軍歩兵１", 2000, 2000, RAND(45, 55))
+				CALL CC_ADDMOB("DEFENDER", "人民海軍歩兵２", 2000, 2000, RAND(45, 55))
+				CALL CC_ADDMOB("DEFENDER", "人民海軍歩兵３", 2000, 2000, RAND(45, 55))
+				CALL CC_ADDMOB("DEFENDER", "人民海軍歩兵４", 2000, 2000, RAND(45, 55))
+			CASE 汎用駆逐艦, マーチ級駆逐艦
+				CALL CC_ADDMOB("DEFENDER", "政治将校", 1800, 1800, RAND(5, 10))
+				CALL CC_ADDMOB("DEFENDER", "人民海軍歩兵１", 2000, 2000, RAND(45, 55))
+				CALL CC_ADDMOB("DEFENDER", "人民海軍歩兵２", 2000, 2000, RAND(45, 55))
+				CALL CC_ADDMOB("DEFENDER", "人民海軍歩兵３", 2000, 2000, RAND(45, 55))
+				CALL CC_ADDMOB("DEFENDER", "人民海軍歩兵４", 2000, 2000, RAND(45, 55))
+				CALL CC_ADDMOB("DEFENDER", "人民海軍歩兵５", 2000, 2000, RAND(45, 55))
+			CASE 汎用巡洋艦
+				CALL CC_ADDMOB("DEFENDER", "政治将校", 1800, 1800, RAND(5, 10))
+				CALL CC_ADDMOB("DEFENDER", "人民海軍歩兵１", 2000, 2000, RAND(45, 55))
+				CALL CC_ADDMOB("DEFENDER", "人民海軍歩兵２", 2000, 2000, RAND(45, 55))
+				CALL CC_ADDMOB("DEFENDER", "人民海軍歩兵３", 2000, 2000, RAND(45, 55))
+				CALL CC_ADDMOB("DEFENDER", "人民海軍歩兵４", 2000, 2000, RAND(45, 55))
+				CALL CC_ADDMOB("DEFENDER", "Объект-1530歩兵支援ユニット", 5000, 5000, RAND(80, 90))
+			CASEELSE
+				CALL CC_ADDMOB("DEFENDER", "人民海軍歩兵１", 2000, 2000, RAND(45, 55))
+				CALL CC_ADDMOB("DEFENDER", "人民海軍歩兵２", 2000, 2000, RAND(45, 55))
+		ENDSELECT
+	CASE 国家ID_企業連合
+		SELECTCASE SHIP_MODEL:SHIP_ID
+			CASE 汎用コルベット
+				CALL CC_ADDMOB("DEFENDER", "傭兵１", 2000, 2000, RAND(45, 55))
+				CALL CC_ADDMOB("DEFENDER", "傭兵２", 2000, 2000, RAND(45, 55))
+			CASE 汎用フリゲート
+				CALL CC_ADDMOB("DEFENDER", "傭兵１", 2000, 2000, RAND(45, 55))
+				CALL CC_ADDMOB("DEFENDER", "傭兵２", 2000, 2000, RAND(45, 55))
+				CALL CC_ADDMOB("DEFENDER", "傭兵３", 2000, 2000, RAND(45, 55))
+				CALL CC_ADDMOB("DEFENDER", "傭兵４", 2000, 2000, RAND(45, 55))
+			CASE 汎用駆逐艦
+				CALL CC_ADDMOB("DEFENDER", "コーポレートオフィサー", 1800, 1800, RAND(5, 10))
+				CALL CC_ADDMOB("DEFENDER", "傭兵１", 2000, 2000, RAND(45, 55))
+				CALL CC_ADDMOB("DEFENDER", "傭兵２", 2000, 2000, RAND(45, 55))
+				CALL CC_ADDMOB("DEFENDER", "傭兵３", 2000, 2000, RAND(45, 55))
+				CALL CC_ADDMOB("DEFENDER", "傭兵４", 2000, 2000, RAND(45, 55))
+				CALL CC_ADDMOB("DEFENDER", "傭兵５", 2000, 2000, RAND(45, 55))
+			CASE 汎用巡洋艦
+				CALL CC_ADDMOB("DEFENDER", "コーポレートオフィサー", 1800, 1800, RAND(5, 10))
+				CALL CC_ADDMOB("DEFENDER", "傭兵１", 2000, 2000, RAND(45, 55))
+				CALL CC_ADDMOB("DEFENDER", "傭兵２", 2000, 2000, RAND(45, 55))
+				CALL CC_ADDMOB("DEFENDER", "傭兵３", 2000, 2000, RAND(45, 55))
+				CALL CC_ADDMOB("DEFENDER", "傭兵４", 2000, 2000, RAND(45, 55))
+				CALL CC_ADDMOB("DEFENDER", "ウィリアムⅠ歩兵戦車", 5000, 5000, RAND(80, 90))
+			CASEELSE
+				CALL CC_ADDMOB("DEFENDER", "傭兵１", 2000, 2000, RAND(45, 55))
+				CALL CC_ADDMOB("DEFENDER", "傭兵２", 2000, 2000, RAND(45, 55))
+		ENDSELECT
+	CASE 国家ID_民主主義
+		SELECTCASE SHIP_MODEL:SHIP_ID
+			CASE 汎用コルベット
+				CALL CC_ADDMOB("DEFENDER", "海兵隊１", 2000, 2000, RAND(40, 50))
+				CALL CC_ADDMOB("DEFENDER", "海兵隊２", 2000, 2000, RAND(40, 50))
+			CASE 汎用フリゲート
+				CALL CC_ADDMOB("DEFENDER", "海兵隊１", 2000, 2000, RAND(40, 50))
+				CALL CC_ADDMOB("DEFENDER", "海兵隊２", 2000, 2000, RAND(40, 50))
+				CALL CC_ADDMOB("DEFENDER", "海兵隊３", 2000, 2000, RAND(40, 50))
+				CALL CC_ADDMOB("DEFENDER", "海兵隊４", 2000, 2000, RAND(40, 50))
+			CASE 汎用駆逐艦
+				CALL CC_ADDMOB("DEFENDER", "海兵隊指揮官",   2400, 2400, RAND(65, 75))
+				CALL CC_ADDMOB("DEFENDER", "海兵隊１", 2000, 2000, RAND(40, 50))
+				CALL CC_ADDMOB("DEFENDER", "海兵隊２", 2000, 2000, RAND(40, 50))
+				CALL CC_ADDMOB("DEFENDER", "海兵隊３", 2000, 2000, RAND(40, 50))
+				CALL CC_ADDMOB("DEFENDER", "海兵隊４", 2000, 2000, RAND(40, 50))
+			CASE 汎用巡洋艦
+				CALL CC_ADDMOB("DEFENDER", "海兵隊隊指揮官",   2400, 2400, RAND(65, 75))
+				CALL CC_ADDMOB("DEFENDER", "海兵隊１", 2000, 2000, RAND(40, 50))
+				CALL CC_ADDMOB("DEFENDER", "海兵隊２", 2000, 2000, RAND(40, 50))
+				CALL CC_ADDMOB("DEFENDER", "海兵隊３", 2000, 2000, RAND(40, 50))
+				CALL CC_ADDMOB("DEFENDER", "全地形対応強襲揚陸ポッド", 4800, 4800, RAND(80, 90))
+			CASEELSE
+				CALL CC_ADDMOB("DEFENDER", "海兵隊１", 2000, 2000, RAND(40, 50))
+				CALL CC_ADDMOB("DEFENDER", "海兵隊２", 2000, 2000, RAND(40, 50))
+		ENDSELECT
+	CASE 国家ID_アレス宗教
+		SELECTCASE SHIP_MODEL:SHIP_ID
+			CASE 汎用コルベット
+				CALL CC_ADDMOB("DEFENDER", "異端審問官１", 2000, 2000, RAND(45, 55))
+				CALL CC_ADDMOB("DEFENDER", "異端審問官２", 2000, 2000, RAND(45, 55))
+			CASE 汎用フリゲート
+				CALL CC_ADDMOB("DEFENDER", "異端審問官１", 2000, 2000, RAND(45, 55))
+				CALL CC_ADDMOB("DEFENDER", "異端審問官２", 2000, 2000, RAND(45, 55))
+				CALL CC_ADDMOB("DEFENDER", "異端審問官３", 2000, 2000, RAND(45, 55))
+				CALL CC_ADDMOB("DEFENDER", "異端審問官４", 2000, 2000, RAND(45, 55))
+			CASE 汎用駆逐艦
+				CALL CC_ADDMOB("DEFENDER", "従軍司祭", 1800, 1800, RAND(5, 10))
+				CALL CC_ADDMOB("DEFENDER", "異端審問官１", 2000, 2000, RAND(45, 55))
+				CALL CC_ADDMOB("DEFENDER", "異端審問官２", 2000, 2000, RAND(45, 55))
+				CALL CC_ADDMOB("DEFENDER", "異端審問官３", 2000, 2000, RAND(45, 55))
+				CALL CC_ADDMOB("DEFENDER", "異端審問官４", 2000, 2000, RAND(45, 55))
+				CALL CC_ADDMOB("DEFENDER", "異端審問官５", 2000, 2000, RAND(45, 55))
+			CASE 汎用巡洋艦
+				CALL CC_ADDMOB("DEFENDER", "従軍司祭", 1800, 1800, RAND(5, 10))
+				CALL CC_ADDMOB("DEFENDER", "異端審問官１", 2000, 2000, RAND(45, 55))
+				CALL CC_ADDMOB("DEFENDER", "異端審問官２", 2000, 2000, RAND(45, 55))
+				CALL CC_ADDMOB("DEFENDER", "異端審問官３", 2000, 2000, RAND(45, 55))
+				CALL CC_ADDMOB("DEFENDER", "異端審問官４", 2000, 2000, RAND(45, 55))
+				CALL CC_ADDMOB("DEFENDER", "アイアンメイデン", 5000, 5000, RAND(80, 90))
+			CASEELSE
+				CALL CC_ADDMOB("DEFENDER", "異端審問官１", 2000, 2000, RAND(45, 55))
+				CALL CC_ADDMOB("DEFENDER", "異端審問官２", 2000, 2000, RAND(45, 55))
+		ENDSELECT
+	CASE 国家ID_機械文明
+		SELECTCASE SHIP_MODEL:SHIP_ID
+			CASE 汎用コルベット
+				CALL CC_ADDMOB("DEFENDER", "ドロイド歩兵１", 2000, 2000, RAND(40, 50))
+				CALL CC_ADDMOB("DEFENDER", "ドロイド歩兵２", 2000, 2000, RAND(40, 50))
+			CASE 汎用フリゲート
+				CALL CC_ADDMOB("DEFENDER", "ドロイド歩兵１", 2000, 2000, RAND(40, 50))
+				CALL CC_ADDMOB("DEFENDER", "ドロイド歩兵２", 2000, 2000, RAND(40, 50))
+				CALL CC_ADDMOB("DEFENDER", "ドロイド歩兵３", 2000, 2000, RAND(40, 50))
+				CALL CC_ADDMOB("DEFENDER", "ドロイド歩兵４", 2000, 2000, RAND(40, 50))
+			CASE 汎用駆逐艦
+				CALL CC_ADDMOB("DEFENDER", "コマンダーユニット",   2400, 2400, RAND(65, 75))
+				CALL CC_ADDMOB("DEFENDER", "ドロイド歩兵１", 2000, 2000, RAND(40, 50))
+				CALL CC_ADDMOB("DEFENDER", "ドロイド歩兵２", 2000, 2000, RAND(40, 50))
+				CALL CC_ADDMOB("DEFENDER", "ドロイド歩兵３", 2000, 2000, RAND(40, 50))
+				CALL CC_ADDMOB("DEFENDER", "ドロイド歩兵４", 2000, 2000, RAND(40, 50))
+			CASE 汎用巡洋艦
+				CALL CC_ADDMOB("DEFENDER", "コマンダーユニット",   2400, 2400, RAND(65, 75))
+				CALL CC_ADDMOB("DEFENDER", "ドロイド歩兵１", 2000, 2000, RAND(40, 50))
+				CALL CC_ADDMOB("DEFENDER", "ドロイド歩兵２", 2000, 2000, RAND(40, 50))
+				CALL CC_ADDMOB("DEFENDER", "ドロイド歩兵３", 2000, 2000, RAND(40, 50))
+				CALL CC_ADDMOB("DEFENDER", "ED400X 治安維持ユニット", 4800, 4800, RAND(80, 90))
+			CASEELSE
+				CALL CC_ADDMOB("DEFENDER", "ドロイド歩兵１", 2000, 2000, RAND(40, 50))
+				CALL CC_ADDMOB("DEFENDER", "ドロイド歩兵２", 2000, 2000, RAND(40, 50))
+		ENDSELECT
+	CASE 国家ID_豊秋津皇国
+		SELECTCASE SHIP_MODEL:SHIP_ID
+			CASE 汎用コルベット
+				CALL CC_ADDMOB("DEFENDER", "皇国海軍陸戦隊１", 2000, 2000, RAND(40, 50))
+				CALL CC_ADDMOB("DEFENDER", "皇国海軍陸戦隊２", 2000, 2000, RAND(40, 50))
+			CASE 汎用フリゲート
+				CALL CC_ADDMOB("DEFENDER", "皇国海軍陸戦隊１", 2000, 2000, RAND(40, 50))
+				CALL CC_ADDMOB("DEFENDER", "皇国海軍陸戦隊２", 2000, 2000, RAND(40, 50))
+				CALL CC_ADDMOB("DEFENDER", "皇国海軍陸戦隊３", 2000, 2000, RAND(40, 50))
+				CALL CC_ADDMOB("DEFENDER", "皇国海軍陸戦隊４", 2000, 2000, RAND(40, 50))
+			CASE 汎用駆逐艦
+				CALL CC_ADDMOB("DEFENDER", "陸戦隊指揮官",   2400, 2400, RAND(65, 75))
+				CALL CC_ADDMOB("DEFENDER", "皇国海軍陸戦隊１", 2000, 2000, RAND(40, 50))
+				CALL CC_ADDMOB("DEFENDER", "皇国海軍陸戦隊２", 2000, 2000, RAND(40, 50))
+				CALL CC_ADDMOB("DEFENDER", "皇国海軍陸戦隊３", 2000, 2000, RAND(40, 50))
+				CALL CC_ADDMOB("DEFENDER", "皇国海軍陸戦隊４", 2000, 2000, RAND(40, 50))
+			CASE 汎用巡洋艦
+				CALL CC_ADDMOB("DEFENDER", "陸戦隊指揮官",   2400, 2400, RAND(65, 75))
+				CALL CC_ADDMOB("DEFENDER", "皇国海軍陸戦隊１", 2000, 2000, RAND(40, 50))
+				CALL CC_ADDMOB("DEFENDER", "皇国海軍陸戦隊２", 2000, 2000, RAND(40, 50))
+				CALL CC_ADDMOB("DEFENDER", "皇国海軍陸戦隊３", 2000, 2000, RAND(40, 50))
+				CALL CC_ADDMOB("DEFENDER", "AIB-0 多脚戦車", 4800, 4800, RAND(80, 90))
+			CASEELSE
+				CALL CC_ADDMOB("DEFENDER", "皇国海軍陸戦隊１", 2000, 2000, RAND(40, 50))
+				CALL CC_ADDMOB("DEFENDER", "皇国海軍陸戦隊２", 2000, 2000, RAND(40, 50))
+		ENDSELECT
+	CASE 国家ID_ハールバルズ
+		SELECTCASE SHIP_MODEL:SHIP_ID
+			CASE 汎用コルベット
+				CALL CC_ADDMOB("DEFENDER", "王国軍擲弾兵１", 2000, 2000, RAND(45, 55))
+				CALL CC_ADDMOB("DEFENDER", "王国軍擲弾兵２", 2000, 2000, RAND(45, 55))
+			CASE 汎用フリゲート
+				CALL CC_ADDMOB("DEFENDER", "王国軍擲弾兵１", 2000, 2000, RAND(45, 55))
+				CALL CC_ADDMOB("DEFENDER", "王国軍擲弾兵２", 2000, 2000, RAND(45, 55))
+				CALL CC_ADDMOB("DEFENDER", "王国軍擲弾兵３", 2000, 2000, RAND(45, 55))
+				CALL CC_ADDMOB("DEFENDER", "王国軍擲弾兵４", 2000, 2000, RAND(45, 55))
+			CASE 汎用駆逐艦
+				CALL CC_ADDMOB("DEFENDER", "貴族将校", 1800, 1800, RAND(5, 10))
+				CALL CC_ADDMOB("DEFENDER", "王国軍擲弾兵１", 2000, 2000, RAND(45, 55))
+				CALL CC_ADDMOB("DEFENDER", "王国軍擲弾兵２", 2000, 2000, RAND(45, 55))
+				CALL CC_ADDMOB("DEFENDER", "王国軍擲弾兵３", 2000, 2000, RAND(45, 55))
+				CALL CC_ADDMOB("DEFENDER", "王国軍擲弾兵４", 2000, 2000, RAND(45, 55))
+				CALL CC_ADDMOB("DEFENDER", "王国軍擲弾兵５", 2000, 2000, RAND(45, 55))
+			CASE 汎用巡洋艦
+				CALL CC_ADDMOB("DEFENDER", "貴族将校", 1800, 1800, RAND(5, 10))
+				CALL CC_ADDMOB("DEFENDER", "王国軍擲弾兵１", 2000, 2000, RAND(45, 55))
+				CALL CC_ADDMOB("DEFENDER", "王国軍擲弾兵２", 2000, 2000, RAND(45, 55))
+				CALL CC_ADDMOB("DEFENDER", "王国軍擲弾兵３", 2000, 2000, RAND(45, 55))
+				CALL CC_ADDMOB("DEFENDER", "王国軍擲弾兵４", 2000, 2000, RAND(45, 55))
+				CALL CC_ADDMOB("DEFENDER", "フニクズル突撃砲", 5000, 5000, RAND(80, 90))
+			CASEELSE
+				CALL CC_ADDMOB("DEFENDER", "王国軍擲弾兵１", 2000, 2000, RAND(45, 55))
+				CALL CC_ADDMOB("DEFENDER", "王国軍擲弾兵２", 2000, 2000, RAND(45, 55))
+		ENDSELECT
+	CASEELSE
+ENDSELECT
+
+RETURN
