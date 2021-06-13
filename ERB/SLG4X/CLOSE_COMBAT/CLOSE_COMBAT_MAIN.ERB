@@ -41,6 +41,8 @@ CALL CC_PRINT("")
 LOCALS = %FuncTagSetText_ShapeSize(@"@C:{カラー_注意}@―― !! BATTLE START !! ――@/C@", 108, 1, 2)%
 CALL CC_PRINT(LOCALS)
 CALL CLOSE_COMBAT_DRAW_WINDOW(MEM_LIST1, MEM_LIST2)
+SIF DIC_GET(CC_FLAG_DIC, FIRST_STRIKE) == "1"
+    CALL CC_SET_FIRST_STRIKE(MEM_LIST2)
 WHILE 1
     CALL CLOSE_COMBAT_JUDGE(MEM_LIST1, MEM_LIST2)
     IF RESULT != 0
@@ -146,7 +148,6 @@ FOR MEM_CNT, 0, FINDELEMENT(MEM_LIST1, "-1")
     ACTOR_LIST:ACTOR_LIST_IDX = %DIC_SET(ACTOR_LIST:ACTOR_LIST_IDX, "白兵", DIC_GET(MEM_LIST1:MEM_CNT, "白兵"))%
     ACTOR_LIST_IDX ++
 NEXT
-
 FOR MEM_CNT, 0, FINDELEMENT(MEM_LIST2, "-1")
     SIF DIC_GET(MEM_LIST2:MEM_CNT, "状態") == "戦闘不能" ||  DIC_GET(MEM_LIST2:MEM_CNT, "状態") == "行動済"
         CONTINUE
@@ -273,6 +274,17 @@ ENDIF
 
 RETURN 0
 
+;-------------------------------------------------
+;先制攻撃用に防衛側を行動済にする
+;-------------------------------------------------
+@CC_SET_FIRST_STRIKE(MEM_LIST)
+#DIMS REF MEM_LIST
+
+;LIST1の判定
+FOR LOCAL, 0, FINDELEMENT(MEM_LIST, "-1")
+    MEM_LIST:LOCAL = %DIC_SET(MEM_LIST:LOCAL, "状態", "行動済")%
+NEXT
+CC_FLAG_DIC = %DIC_SET(CC_FLAG_DIC, FIRST_STRIKE, "0")%
 ;-------------------------------------------------
 ;テキストメッセージ出力
 ;-------------------------------------------------

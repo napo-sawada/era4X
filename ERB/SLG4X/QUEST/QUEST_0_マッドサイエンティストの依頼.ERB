@@ -22,61 +22,67 @@ RETURN
 ; クエスト本体
 ;--------------------------
 @QUEST_BODY_0
-IF QUEST_PROGRESS:0 == 0
-	PRINTFORML 「やあ。君、面白い人生を送っているようだね。ああ、みなまで言わなくていい。私は職業柄、君のような者の匂いに敏感なんだ。まあ、よく勘違いしてよく怒られるんだけどね」
-	PRINTFORML 宇宙港にいた%CALLNAME:MASTER%に、ふいにアンドロイドがべらべらと話しかけてきた。大分胡散臭い奴のようだ。
-	PRINTFORML 「ああ、そう警戒しないでくれ。私はただの科学者だ。いや、フリーの科学者だから無職と言って差支えないかな。ずいぶん前に研究所を追い出されてしまってね。全くひどい話だよ」
-	PRINTFORML %CALLNAME:MASTER%の返事を待たず、アンドロイドはべちゃくちゃと身の上を話し出した。
-	PRINTFORML 「母国で人体実験を繰り返していたらそれがばれてね。おかげで今やどこの国にも市民権のない流浪の民さ。ああ、このアンドロイドはもちろん遠隔操作だよ。私の記憶と人格をインストールして、各国の港に配置してあるんだ。
-	PRINTFORML さて、さっそくで申し訳ないんだが、君を呼び止めたのには訳がある。私は自分の研究に誇りを持っていて、研究を再開させたいと思っている。
-	PRINTFORML だが研究をするのには莫大な資金が必要だ。それがたとえ最小限の設備を揃えるにとどまったとしてもね。そこで君に提案だ。
-	PRINTFORML 君、私に投資しないか？ 対価として研究結果のすべてを君に共有しよう。仲間をより魅力的にする改造、もとい医療行為を施す手伝いもしよう。
-	PRINTFORML 私が君に求める投資額は……そうだな、$1,000,000だな。それだけあれば最小限の設備が整えられる。どうだい、魅力的な提案だろう？
-	PRINTFORML 分割払いでも構わない。さあ、どうする？こんなおいしい話、中々ないと私は思っているのだがね」
-	PRINTL 
-	QUEST_PROGRESS:0 = 1
-ELSEIF QUEST_PROGRESS:0 == 1
-	PRINTFORML 「やあ、投資してくれる気になってくれたかい？」
+#DIM 入力値
+PRINTFORML %CALLNAME:MASTER%は謎のアンドロイドに声をかけられた
+PRINTFORMW 「やあやあ、こんにちは。少し私の実験に付き合ってくれませんか？治験というやつですね」
+PRINTL
+PRINTFORML 実に怪しいアンドロイドだ。しかし本人は全く気にした様子もなく、話し続ける
+PRINTFORML 「性別変換の手術を受けてくれるだけでいいんです。もちろん費用はこちら持ちですので、ただで構いません。いかがですか？」
+PRINTFORMW %CALLNAME:MASTER%はその依頼を……
+CALL ASK_YN("受け入れた", "断った")
+IF RESULT
+	PRINTFORML 「そうですか。気が向いたらまた声をかけてくださいよ」
+	RETURN
 ENDIF
-PRINTFORML 投資額を入力してください。
-PRINTFORML 投資しない場合は0を入力してください。
+PRINTFORML 「素晴らしい！ちなみにどの性別になりたいですか？」
+$INPUT_LOOP
+PRINTFORM 現在の性別 
+SELECTCASE TALENT:MASTER:性別
+	CASE 0
+		PRINTL 男性
+	CASE 1
+		PRINTL 女性
+	CASE 2
+		PRINTL 女双
+	CASE 3
+		PRINTL 男双
+	CASE 4
+		PRINTL 男の娘
+	CASE 5
+		PRINTL 男の娘双
+ENDSELECT
+SETCOLOR 0X666666
+CUSTOMDRAWLINE =
+RESETCOLOR
+PRINTBUTTON "[0] 男性", 0
+PRINTL
+PRINTBUTTON "[1] 女性", 1
+PRINTL
+PRINTBUTTON "[2] 女双", 2
+PRINTL
+PRINTBUTTON "[3] 男双", 3
+PRINTL
+PRINTBUTTON "[4] 男の娘", 4
+PRINTL
+PRINTBUTTON "[5] 男の娘双", 5
+PRINTL
 INPUT
-IF RESULT > 0 && RESULT <= MONEY
-	MONEY -= RESULT
-	INVESTING_DOCTOR += RESULT
-	PRINTFORML 「ありがとう！君は先見性のある人間だ」
-ELSEIF RESULT > 0 && RESULT > MONEY
-	PRINTFORML 「おや、気持ちはありがたいが手持ちが足りないみたいだね」
-ELSEIF RESULT == 0
-	PRINTFORML 「手持ちがないのかい？残念だが、私はいつでも君の投資を待っているよ」
+入力値 = RESULT
+IF GROUPMATCH(入力値, 0, 1, 2, 3, 4, 5) && TALENT:MASTER:性別 != 入力値
+	PRINTFORML 「わかりました。それではこちらへ」
 ELSE
-	PRINTFORML 「んん？何を言っているんだ？」
+	GOTO INPUT_LOOP
 ENDIF
 
-IF QUEST_PROGRESS:0 == 1 && INVESTING_DOCTOR >= 1000000
-	PRINTFORML 「素晴らしい！投資額が目標額を超えたぞ！これで研究を再開できる。本当に本当にありがとう。
-	PRINTFORML ただラボを建設する星は一つに絞らなくちゃあならない。君さえよければこの星にラボを立ててしまうが、どうする？
-	PRINTFORML なんでそんなことを聞くのかって？なぜならラボのある星に資材を集めるから、そこじゃないと研究成果でできた品を君に販売できないからさ
-	PRINTFORML さて、どうする？ この星にラボを立ててしまっていいかい？」
-	PRINTL
-
-	$INPUT_LOOP
-	PRINTBUTTON "[0]はい", 0
-	PRINTBUTTON "[1]いいえ", 1
-	INPUT
-	IF RESULT == 0
-		PRINTFORML 「わかった。そうしたらさっそくラボを開設するよ。ぜひ実験体、もとい患者を連れてきてくれ」
-		QUEST_PROGRESS:0 = 3
-		HUMAN_LAB = CHARACTER_POSITION
-	ELSEIF RESULT == 1
-		PRINTFORML 「そうか。そうしたらラボを立てたい星にいる私に声をかけてくれ」
-		QUEST_PROGRESS:1 = 2
-	ELSE
-		GOTO INPUT_LOOP
-	ENDIF
-ENDIF
-
-
+PRINTFORML %CALLNAME:MASTER%はタクシーに載せられ、怪しい研究所に連れて行かれた
+PRINTFORMW 『ぎゅいーーーん、がんがんがんがん、どんどんどん、ぽきっ』
+PRINTW ………………
+PRINTW …………
+PRINTW ……
+PRINTFORMW 「成功です！さあ、新しい人生をお楽しみください」
+PRINTL
+PRINTFORMW %CALLNAME:MASTER%は性転換に成功した
+TALENT:MASTER:性別 = 入力値
 RETURN
 
 
