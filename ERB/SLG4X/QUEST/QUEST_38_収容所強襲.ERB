@@ -7,7 +7,7 @@
 ; クエスト受注可能か
 ;--------------------------
 @QUEST_ACCEPTABLE_38
-QUEST_COMPLETE_DATE:38 + 100 > DAY
+SIF QUEST_COMPLETE_DATE:38 + 50 > DAY
 	RETURN 0
 RETURN QUEST_PROGRESS:34 >= 3
 
@@ -162,11 +162,16 @@ SETCOLOR 0X666666
 CUSTOMDRAWLINE =
 RESETCOLOR
 R支持率 += 1
+SIF R支持率 > 100
+	R支持率 = 100
 SIF R支持率 + G支持率 > 100
 	G支持率 = 100 - R支持率
 R戦闘員 += 200
 R非戦闘員 += 300
 R研究者 += 1
+G戦闘員 -= 12
+SIF G戦闘員 < 0
+	G戦闘員 = 0
 
 QUEST_COMPLETE_DATE:38 = DAY
 

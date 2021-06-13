@@ -338,7 +338,7 @@ ENDIF
 @REGISTANCE_RESEARCH
 #DIM CONST 研究員割合 = 1000000
 
-IF (R非戦闘員 / 研究員割合) == 0
+IF (R非戦闘員 / 研究員割合) == 0 && R研究員 == 0
   PRINTFORML 「研究員がいないので研究を行うことができない」
   PRINTFORMW 「非戦闘員が%TOSTR(研究員割合, "###,###")%人もいれば一人はいるものなのだが……」
   RETURN

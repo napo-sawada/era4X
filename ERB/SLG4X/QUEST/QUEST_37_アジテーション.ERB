@@ -116,9 +116,9 @@ $INPUT_LOOP
 PRINTL 作戦方針の決定
 PRINTBUTTON "[0] 星系民族主義の主張", 0
 PRINTL
-PRINTBUTTON "[1] 修正主義批判", 0
+PRINTBUTTON "[1] 修正主義批判", 1
 PRINTL
-PRINTBUTTON "[2] 独立の大義名分", 0
+PRINTBUTTON "[2] 独立の大義名分", 2
 PRINTL
 
 INPUT
@@ -235,6 +235,36 @@ SELECTCASE  作戦方針
 		PRINTFORML 結果: {出目} (%LOCALS%)
 		MONEY -= 1000000
 	CASE 2
+		PRINTL 作戦方針 -> 星系民族主義の主張
+		PRINTL
+		PRINTL 事前準備
+		PRINTL
+		PRINTW 資料の作成ロール(出目が高いほどいい資料ができる)
+		PRINTFORML %CALLNAME:MASTER%の話術: {ABL:MASTER:話術} + 知略: {ABL:MASTER:知略}
+		出目 = RAND:(ABL:MASTER:話術 + ABL:MASTER:知略)
+		IF 出目 < 10
+			LOCALS = 最低の出来
+			事前準備 = 10
+		ELSEIF 出目 < 30
+			LOCALS = 悪い出来
+			事前準備 = 20
+		ELSEIF 出目 < 50
+			LOCALS = 微妙な出来
+			事前準備 = 30
+		ELSEIF 出目 < 70
+			LOCALS = 普通の出来
+			事前準備 = 50
+		ELSEIF 出目 < 90
+			LOCALS = いい出来
+			事前準備 = 70
+		ELSEIF 出目 < 110
+			LOCALS = 素晴らしい出来
+			事前準備 = 100
+		ELSE
+			LOCALS = 完璧な出来
+			事前準備 = 120
+		ENDIF
+		PRINTFORML 結果: {出目} (%LOCALS%)
 ENDSELECT
 PRINTW 
 
@@ -245,6 +275,7 @@ PRINTW
 #DIM 聴衆
 #DIM 結果
 #DIM TOTAL
+#DIM 獲得支持率
 
 PRINTL メインフェーズ
 PRINTL
@@ -253,9 +284,11 @@ PRINTL 「……!」
 聴衆 = 0
 FOR LOCAL, 0, 試行回数
 	PRINTL 演説ロール
-	聴衆 += RAND:1000 + 1000 + ((RAND:1000 + 500) * 試行回数)
-	SIF 作戦方針 == 2
-		聴衆 *= 10
+	IF 作戦方針 == 2
+		聴衆 += (RAND:1000 + 1000 + ((RAND:1000 + 500) * 試行回数)) * 10
+	ELSE
+		聴衆 += RAND:1000 + 1000 + ((RAND:1000 + 500) * 試行回数)
+	ENDIF
 	PRINTFORML %CALLNAME:MASTER%の話術: {ABL:MASTER:話術} + 事前準備: {事前準備}
 	結果 = RAND:(ABL:MASTER:話術 + 事前準備)
 	PRINTFORMW 結果: {結果}
@@ -273,8 +306,24 @@ IF 作戦方針 == 0 || 作戦方針 == 2
 	R非戦闘員 += TOTAL
 	G非戦闘員 -= TOTAL
 	IF TOTAL > 10000
-		PRINTFORML また、{TOTAL/10000}\%の支持率を新たに得た
-		R支持率 += TOTAL / 10000
+		SELECTCASE TOTAL
+			CASE 0 TO 10000
+				獲得支持率 = 1
+			CASE 10001 TO 20000
+				獲得支持率 = 2
+			CASE 20001 TO 30000
+				獲得支持率 = 3
+			CASE 30001 TO 50000
+				獲得支持率 = 4
+			CASE 50001 TO 100000
+				獲得支持率 = 5
+			CASEELSE
+				獲得支持率 = 6
+		ENDSELECT
+		PRINTFORML また、{獲得支持率}\%の支持率を新たに得た
+		R支持率 += 獲得支持率
+		SIF R支持率 > 100
+			R支持率 = 100
 		SIF R支持率 + G支持率 > 100
 			G支持率 = 100 - R支持率
 	ENDIF

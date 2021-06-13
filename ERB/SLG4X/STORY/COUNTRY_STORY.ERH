@@ -11,12 +11,13 @@
 #DIM SAVEDATA R研究者
 #DIM SAVEDATA R_CURRENT_RESEARCH
 #DIM SAVEDATA R_RESEARCH_DATE
-#DIM SAVEDATA R_COMPLETE_RESEARCH, 4
+#DIM SAVEDATA R_COMPLETE_RESEARCH, 5
 #DIM CONST 軍用輸送船研究 = 1
 #DIM CONST 戦車研究 = 2
 #DIM CONST 航空機研究 = 3
-#DIM CONST R研究日数 = 0, 2000, 500, 800
-#DIMS CONST R研究名 = "なし", "軍用輸送船研究", "戦車研究", "航空機研究"
+#DIM CONST 暗号解読 = 4
+#DIM CONST R研究日数 = 0, 2000, 500, 800, 200
+#DIMS CONST R研究名 = "なし", "軍用輸送船研究", "戦車研究", "航空機研究", "暗号解読"
 
 #DIM SAVEDATA G支持率
 #DIM SAVEDATA G戦車
