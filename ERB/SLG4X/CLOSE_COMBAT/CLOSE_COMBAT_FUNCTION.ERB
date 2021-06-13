@@ -2,13 +2,32 @@
 ;白兵戦用のユーザー関数
 ;各種イベントやクエストから呼ばれる想定
 ;=================================================
+
+;-------------------------------------------------
+;@CC_INIT()
+;CC関連の初期化を行う
+;-------------------------------------------------
+@CC_INIT()
+CALL CC_INIT_MEMBER()
+CALL CC_INIT_FLAG_DIC()
+
 ;-------------------------------------------------
 ;@CC_INIT_MEMBER()
 ;白兵戦参加メンバーを全て初期化する
 ;-------------------------------------------------
 @CC_INIT_MEMBER()
-VARSET CC_ATTACKER_LIST, "-1"
+SIF DIC_GET(CC_FLAG_DIC, LINE_CHAN) != "1"
+    VARSET CC_ATTACKER_LIST, "-1"
 VARSET CC_DEFENDER_LIST, "-1"
+
+;-------------------------------------------------
+;@CC_INIT_FLAG_DIC()
+;フラグの連想配列を初期化
+;-------------------------------------------------
+@CC_INIT_FLAG_DIC()
+FOR LOCAL, 0, VARSIZE(CC_FLAG_DIC_KEYS)
+    CC_FLAG_DIC = DIC_SET(CC_FLAG_DIC, LOCAL, 0)
+NEXT
 
 ;-------------------------------------------------
 ;@CC_ADDCHARA
@@ -124,6 +143,19 @@ FOR LOCAL, 0, CC_MAX_MEMBER_NUM / 2
 NEXT
 
 RETURN
+
+;-------------------------------------------------
+;@CC_SET_FLAG
+;第一変数で指定したフラグに第二変数をセットする
+;引数:1 文字列 フラグの名称
+;引数:2 数値 セットする値
+;-------------------------------------------------
+@CC_SET_FLAG(FLAG_NAME, FLAG_VALUE)
+#DIMS FLAG_NAME
+#DIMS FLAG_VALUE
+SIF !GROUPMATCH(FLAG_NAME, LINE_CHAN)
+    THROW Undefined key %FLAG_NAME%
+CC_FLAG_DIC = %DIC_SET(CC_FLAG_DIC, FLAG_NAME, FLAG_VALUE)%
 
 ;=================================================
 ;内部処理用
