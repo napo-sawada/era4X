@@ -391,5 +391,6 @@ ENDIF
 @GET_R_RESEARCH_COMPLETE_DATE(ID)
 #FUNCTION
 #DIM ID
+#DIM CONST 研究員割合 = 1000000
 
 RETURNF R研究日数:ID - (R研究日数:ID / 150 * ((R研究者 + (R非戦闘員 / 研究員割合) - 1)))

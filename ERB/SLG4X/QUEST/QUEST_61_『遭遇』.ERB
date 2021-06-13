@@ -110,13 +110,21 @@ Y_POS = RESULT:2
 IF (QUESTMAP:(SECTOR_ID):(X_POS):(Y_POS) == QUEST_ID) && QUEST_PROGRESS:QUEST_ID == 2
 	PRINTFORML 　{CHARACTER_POSITION:MASTER}
 	PRINTFORML 　「さて母上、指定の座標まで来たが、別に戦う必要はない」
-	PRINTFORML 　「逃げる最中に放った牽制の一撃がウッカリ撃沈すること位たまにあるであろう」
-	PRINTFORML 　「引き渡すメリットは覚えが良くなること、デメリットは私（ワレラ）の端末が研究されることだ」
+	PRINTFORML 　「逃げる最中に放った牽制の一撃がウッカリ撃沈することくらいは」
+	PRINTFORML 　「あるであろうがまあ母上しだいだなあ？」
+	PRINTFORML 　「さて、改めて母上には２つの選択肢がある」
+	PRINTFORMW 　
+	PRINTFORML 　「引き渡すメリットは報酬が良くなること、デメリットは私（ワレラ）の端末が研究されることだ」
 	PRINTFORML 　「最悪、反乱やらに生体艦が使われて星１つが滅ぶことも可能性としてはなくはないだろう」
 	PRINTFORMW 　
-	PRINTFORML 　「次に、撃沈するメリットは、上の将来的に起こりうるリスクが無い。これに尽きる」
+	PRINTFORM 　「次に、撃沈するメリットは、上の
+	CALL COLOR_PRINT(@"『将来的に起こりうるリスク』", カラー_注意)
+	PRINTFORML が無い」
+	PRINTFORML 　或いはあっても最小限にとどめられる。これに尽きる」
+	PRINTFORMW 　
 	PRINTFORML 　「デメリットは確実に沈めるためにも連中とは直接戦う必要があることと」
 	PRINTFORML 　「そして沈める以上任務は失敗に近いから報酬は期待できんと言う事だ」
+	PRINTFORML 　「もっとも、斯様な艦に乗せられるかもしれぬ士官からの評判は期待できるやもしれんがなあ」
 	PRINTFORMW 　
 	PRINTFORML 　さて、どうしようか……。
 	PRINTFORML 　
@@ -133,7 +141,7 @@ IF (QUESTMAP:(SECTOR_ID):(X_POS):(Y_POS) == QUEST_ID) && QUEST_PROGRESS:QUEST_ID
 		PRINTFORML 
 		PRINTFORML 　流石に軍人たちの統率力は優れており、%ANAME(アニー)%曰く、
 		PRINTFORML 　「本能だけでやってるから最低限の統率力しかない」
-		PRINTFORML 　ワープアウトして来た生体艦たちをあっという間に追い詰め、拿捕する事に成功した。
+		PRINTFORML 　という、ワープアウトして来た生体艦たちをあっという間に追い詰め、拿捕する事に成功した。
 		PRINTFORML 　後は報酬を貰うだけだ……。
 		PRINTFORMW 　
 		CALL QUEST_RELEASE_POINT(QUEST_ID, QUEST_61_巡洋艦)
@@ -186,7 +194,7 @@ IF QUEST_PROGRESS:QUEST_ID == 3
 		PRINTFORML 　何とか軍に助けられた%ANAME(MASTER)%達はこっぴどく叱られて港に戻った。
 		PRINTFORML 　ことの顛末を報告しよう。
 		PRINTFORMW 　
-		CHARACTER_POSITION:MASTER = (モヨリ * 10000) + 707
+		CHARACTER_POSITION:MASTER = (QUEST_61_受注星 * 10000) + 707
 		QUEST_PROGRESS:QUEST_ID = 6
 	ELSE
 	;勝った場合
@@ -216,7 +224,7 @@ SELECTCASE QUEST_PROGRESS:QUEST_ID
 		PRINTFORML 　「こっちとしてはそれを使われる身にも……失礼、これはこっちの事情だったね」
 		PRINTFORML 　「もし何かあったらまた君に頼むかもしれないから、その時は頼むよ」
 		PRINTFORML 　
-		PRINTFORML 　口座$500,000　が振り込まれた！
+		PRINTFORML 　口座　$500,000　が振り込まれた！
 		PRINTFORML 　将官達は「敵国に先んじれる技術が手に入るだろう」と喜んでいるようです
 		PRINTFORMW 　
 		CALL GET_STAR_ID_FROM_POS(CHARACTER_POSITION)
@@ -231,7 +239,7 @@ SELECTCASE QUEST_PROGRESS:QUEST_ID
 		PRINTFORML 　「君の評判は決して悪い物ではないだろう」
 		PRINTFORML 　「報酬は後日君の口座に振り込んでおこう、私からは以上だ」
 		PRINTFORML 　
-		PRINTFORML 　口座に$100,000が振り込まれた！
+		PRINTFORML 　口座に　$100,000　が振り込まれた！
 		PRINTFORML 　士官達から「あんなキモイのに乗らされなくて良かった」と大いに喜ばれているようです
 		PRINTFORMW 　
 		CALL GET_STAR_ID_FROM_POS(CHARACTER_POSITION)
@@ -242,7 +250,7 @@ SELECTCASE QUEST_PROGRESS:QUEST_ID
 		PRINTFORML 　「とは言え任務を達成したのは事実だ」
 		PRINTFORML 　「報酬は口座に振り込んでおこう」
 		PRINTFORML 　
-		PRINTFORML 　口座に$600,000　が振り込まれた！
+		PRINTFORML 　口座に　$600,000　が振り込まれた！
 		PRINTFORML 　将官達は「敵国に先んじれる技術が手に入るだろう」と喜んでいるようです
 		PRINTFORMW 　
 		CALL GET_STAR_ID_FROM_POS(CHARACTER_POSITION)
