@@ -241,7 +241,25 @@ FOR Y_SEC, 0, MAX_SECTOR_Y
 		;発見済みかつ星系港のあるエリア
 		ELSEIF HAS_PORT_SECTORMAP(Y_SEC * 10 + X_SEC) == 星 && (CLEARMAP: (Y_SEC * 10 + X_SEC) : 7: 7 ) != 0
 			SETCOLOR 0x33CCCC
-			タイル '= "●"
+			CALL GET_STAR_ID_FROM_POS((Y_SEC * 10 + X_SEC) * 10000 + 707)
+			IF STAR_OWNER:RESULT == 国家ID_社会主義
+				タイル '= "統"
+			ELSEIF STAR_OWNER:RESULT == 国家ID_企業連合
+				タイル '= "企"
+			ELSEIF STAR_OWNER:RESULT == 国家ID_民主主義
+				タイル '= "民"
+			ELSEIF STAR_OWNER:RESULT == 国家ID_アレス宗教
+				タイル '= "教"
+			ELSEIF STAR_OWNER:RESULT == 国家ID_機械文明
+				タイル '= "機"
+			ELSEIF STAR_OWNER:RESULT == 国家ID_豊秋津皇国
+				タイル '= "皇"
+			ELSEIF STAR_OWNER:RESULT == 国家ID_ハールバルズ
+				タイル '= "王"
+			ELSE
+				タイル '= "●"
+			ENDIF
+
 		;発見済みかつ宇宙港のあるエリア
 		ELSEIF HAS_PORT_SECTORMAP(Y_SEC * 10 + X_SEC) == 宇宙港 && !(CLEARMAP: (Y_SEC * 10 + X_SEC) : 7: 7 ) != 0
 			SETCOLOR 0xCCCCFF
@@ -250,9 +268,14 @@ FOR Y_SEC, 0, MAX_SECTOR_Y
 ;		ELSEIF MAP:(Y_SEC*10 + X_SEC): 7: 7 == 星
 ;			SETCOLOR 0x33CCCC
 ;			タイル '= "●"
-	
+
 		;未踏(X07Y07が未発見)エリア
 		ELSEIF (CLEARMAP: (Y_SEC * 10 + X_SEC) : 7: 7 ) == 0
+			SETCOLOR 0x000000
+			タイル '= "■"
+
+		;完全踏破していないエリア
+		ELSEIF (CLEARMAP: (Y_SEC * 10 + X_SEC) : 0: 0 ) == 0 || (CLEARMAP: (Y_SEC * 10 + X_SEC) : 14: 0 ) == 0 || (CLEARMAP: (Y_SEC * 10 + X_SEC) : 0: 14 ) == 0 || (CLEARMAP: (Y_SEC * 10 + X_SEC) : 14: 14 ) == 0
 			SETCOLOR 0x666666
 			タイル '= "■"
 		ENDIF
