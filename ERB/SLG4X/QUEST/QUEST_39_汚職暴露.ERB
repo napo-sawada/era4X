@@ -126,6 +126,7 @@ CALL CC_ADDMOB("DEFENDER", "警備員", 1000, 1000, 10)
 CALL CLOSE_COMBAT()
 SIF RESULT == 2
 	CALL GAMEOVER_38
+CALL CC_ADD_COMBAT_EXP(5)
 PRINTFORML 運転手と警備員を無力した%CALLNAME:MASTER%は、腰が抜けて動けないでいる秘書官を薬で昏睡させ、かついでその場を後にした
 PRINTFORML その後、悲惨な目にあった秘書官は秘密を洗いざらい吐き、それをもとに証拠を集めて政治家の汚職を暴露した
 PRINTFORMW 政治家自身はすぐに蜥蜴の尻尾切りにあったが、確実に政権への支持率は下がっただろう

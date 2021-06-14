@@ -133,6 +133,7 @@ CALL CC_ADDMOB("DEFENDER", "リチャードⅠ歩兵戦車", 4800, 4800, 80)
 CALL CLOSE_COMBAT()
 SIF RESULT == 2
 	CALL GAMEOVER_38
+CALL CC_ADD_COMBAT_EXP(20)
 PRINTFORML 見事対歩兵戦車を撃破した%CALLNAME:MASTER%達は、講堂に侵入すると早速全世界に向けて演説を開始した
 結果 = RAND:15000 + 5000
 PRINTFORML その結果、{結果}人の非戦闘員が仲間になった
