@@ -872,8 +872,9 @@ RETURN 対空ダメージ / TORPED_HP
 #DIM CONST 報酬基準値 = 1500
 #DIM 艦種別報酬係数 ;百分率
 #DIM 報酬合計
-#DIM CONST 鹵獲イベント発生率 = 115 ;千分率
+#DIM CONST 鹵獲イベント発生率 = 300, 200, 130, 100, 50, 0, 0, 300, 300
 #DIMS DYNAMIC 鹵獲候補艦リスト
+#DIM DYNAMIC 対象艦
 
 BROKEN_COUNT = 0
 報酬合計 = 0
@@ -915,8 +916,10 @@ ENDIF
 
 ;鹵獲イベント処理
 LOCAL = RAND:1000
-IF LIST_COUNT(鹵獲候補艦リスト) != 0 && 鹵獲イベント発生率 > LOCAL
-	CALL COMBAT_SHIP_CAPTURE_EVENT(TOINT(LIST_GET(鹵獲候補艦リスト, RAND(0, LIST_COUNT(鹵獲候補艦リスト)))))
+IF LIST_COUNT(鹵獲候補艦リスト) != 0
+	対象艦 = TOINT(LIST_GET(鹵獲候補艦リスト, RAND(0, LIST_COUNT(鹵獲候補艦リスト))))
+	SIF 鹵獲イベント発生率:(SHIP_CATEGORY:対象艦) > LOCAL
+		CALL COMBAT_SHIP_CAPTURE_EVENT(対象艦)
 ENDIF
 
 RETURN
