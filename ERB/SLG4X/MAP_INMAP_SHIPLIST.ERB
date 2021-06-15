@@ -13,15 +13,18 @@
 #DIM DYNAMIC SCROLL_IDX_COL
 #DIM DYNAMIC SORTLIST, MAX_SHIP
 #DIM DYNAMIC SORTMODE
+#DIMS DYNAMIC LISTMODE
 ;ゲーム中はフィルター内容を保持したいのでFILTER_LISTはDYNAMICで宣言しない
 #DIM FILTER_LIST, SHIP_CATEGORY_COUNT
-#DIM CONST FILTER_BTN = 100
+#DIM CONST FILTER_BTN = 10000
+#DIM CONST SHIP_NAME_BTN = 5000
 
 #DIM DYNAMIC SHIP_ID
 #DIM DYNAMIC SHIPLIST_IDX
 #DIMS DYNAMIC  所有船リスト
 #DIMS DYNAMIC 艦船データ, MAX_SHIP
 #DIM DYNAMIC FIREPOWER_LIST, 6
+#DIM DYNAMIC SWAP_SHIP_ID
 
 #DIMS CONST HEADER_ITEM = "艦名", "艦種", "耐久", "ｼｰﾙﾄﾞ", "座標", "任務", "実体弾", "ﾚｰｻﾞｰ  ", "ﾐｻｲﾙ  ", "航空  ", "雷撃  ", "ﾋﾞｰﾑ   ", "対空  ", "回避  " 
 #DIM CONST WIDTH_ITEM = 22, 10, 16, 16, 10, 8, 8, 8, 8, 8, 8, 8, 8, 8
@@ -49,6 +52,8 @@ IF FINDELEMENT(FILTER_LIST, 1) == -1
 	VARSET FILTER_LIST, 1
 ENDIF
 
+
+
 ;ウィンドウ初期化
 CALL WndMgr_DestroyWindow(-1)
 ;ウィンドウ生成
@@ -58,6 +63,8 @@ CALL WndMgr_CreateWindow(WINDOW_ID, 1, 2, WINDOW_WIDTH + 2, WINDOW_HEIGHT, 2)
 CALL WndMgr_WindowTitle(WINDOW_ID, "保有艦船一覧")
 
 CALL WndMgr_DisplayAll()
+
+SWAP_SHIP_ID = -1
 
 FOR SHIP_ID, 0, MAX_SHIP
 	IF SHIP_COUNTRY:SHIP_ID == 国家ID_プレイヤー
@@ -129,7 +136,12 @@ WHILE 1
 		;フィルター対象の艦種は出力を省略
 		SIF FILTER_LIST:TOINT(DIC_GET(艦船データ:SHIPLIST_IDX, "艦種")) == 0
 			CONTINUE
-		LOCALS = %FuncTagSetText_ShapeSize(DIC_GET(艦船データ:SHIPLIST_IDX, "艦名"), WIDTH_ITEM:項目_艦名, 1)%
+		IF LISTMODE != "入替"
+			LOCALS = %FuncTagSetText_ShapeSize(DIC_GET(艦船データ:SHIPLIST_IDX, "艦名"), WIDTH_ITEM:項目_艦名, 1)%
+		ELSE
+			LOCAL = TOINT(DIC_GET(艦船データ:SHIPLIST_IDX, "ID"))
+			LOCALS = %FuncTagSetText_ShapeSize(@"@B:{LOCAL + SHIP_NAME_BTN}@%DIC_GET(艦船データ:SHIPLIST_IDX, "艦名")%@/B@", WIDTH_ITEM:項目_艦名, 1)%
+		ENDIF
 		LOCALS += FuncTagSetText_ShapeSize(DIC_GET(艦船データ:SHIPLIST_IDX, "艦種名"), WIDTH_ITEM:項目_艦種, 1)
 		LOCALS += "    "
 		FOR LOCAL, 2 + SCROLL_IDX_COL, NUM_PRINT_ITEM + SCROLL_IDX_COL
@@ -172,7 +184,14 @@ WHILE 1
 				CASEELSE
 			ENDSELECT
 		NEXT
-		CALL WndMgr_TextSet(WINDOW_ID, L_CNT++, @"%LOCALS%")
+		LOCAL = TOINT(DIC_GET(艦船データ:SHIPLIST_IDX, "ID"))
+		IF LISTMODE != "入替"
+			CALL WndMgr_TextSet(WINDOW_ID, L_CNT++, @"%LOCALS%")
+		ELSEIF LISTMODE == "入替" && SWAP_SHIP_ID == LOCAL
+			CALL WndMgr_TextSet(WINDOW_ID, L_CNT++, @"@C:{カラー_黄緑}@%LOCALS%@/C@")
+		ELSEIF LISTMODE == "入替"
+			CALL WndMgr_TextSet(WINDOW_ID, L_CNT++, @"%LOCALS%")
+		ENDIF
 	NEXT
 	;ページャー出力
 	;-------------------------------------------------
@@ -207,7 +226,11 @@ WHILE 1
 	LOCALS += @"@C:{カラー_注釈}@[@B:{FILTER_BTN + SHIP_CATEGORY_COUNT + 1}@全ON@/B@/@B:{FILTER_BTN + SHIP_CATEGORY_COUNT + 2}@全OFF@/B@]@/C@"
 	CALL WndMgr_TextSet(WINDOW_ID, L_CNT++, @"%LOCALS%")
 	L_CNT++
-	LOCALS '= @"@C:{カラー_選択不可}@[a][d]項目横スクロール　[w][s]ページ送り@/C@                                                        @B:q@[Q]閉じる@/B@"
+	IF LISTMODE != "入替"
+		LOCALS '= @"@C:{カラー_選択不可}@[a][d]項目横スクロール　[w][s]ページ送り@/C@                                      @C:{カラー_選択不可}@@B:c@[c]入替モード(off)@/B@@/C@ @B:q@[Q]閉じる@/B@"
+	ELSE
+		LOCALS '= @"@C:{カラー_選択不可}@入替対象の艦名をクリックしてデータ入替@/C@                                        @C:{カラー_黄}@@B:c@[c]入替モード(on)@/B@@/C@  @B:q@[Q]閉じる@/B@"
+	ENDIF
 	CALL WndMgr_TextSet(WINDOW_ID, L_CNT++, @"%LOCALS%")
 	;画面描画
 	;-------------------------------------------------
@@ -275,6 +298,14 @@ WHILE 1
 			IF PAGE < MAX_PAGE
 				PAGE ++
 			ENDIF
+		CASE "c","C"
+			IF LISTMODE == "入替"
+				LISTMODE '= "通常"
+				CALL ARRAYSORT_DIC(艦船データ, "ID", 0)
+			ELSE
+				LISTMODE '= "入替"
+				CALL ARRAYSORT_DIC(艦船データ, "ID", 0)
+			ENDIF
 		CASE "q","Q"
 		;艦船一覧ウィンドウを破棄
 			CALL WndMgr_DestroyWindow(WINDOW_ID)
@@ -295,6 +326,26 @@ WHILE 1
 			VARSET FILTER_LIST, 0
 			PAGE = 0
 	ENDSELECT
+	IF LISTMODE == "入替" && LOCAL >= SHIP_NAME_BTN && LOCAL < MAX_SHIP + SHIP_NAME_BTN
+		IF SWAP_SHIP_ID == -1 
+			SWAP_SHIP_ID = LOCAL - SHIP_NAME_BTN
+		ELSE
+			DEBUGPRINTFORML 入替{SWAP_SHIP_ID}, {LOCAL - SHIP_NAME_BTN}
+			CALL SWAP_SHIPDATA(SWAP_SHIP_ID, LOCAL - SHIP_NAME_BTN)
+			SWAP_SHIP_ID = -1
+			;艦船データリストを再作成
+			FOR SHIPLIST_IDX, 0, LIST_COUNT(所有船リスト) + 1
+				;データ最後尾は末尾を示す-1を付加
+				IF SHIPLIST_IDX == LIST_COUNT(所有船リスト)
+					艦船データ:SHIPLIST_IDX = "-1"
+					BREAK
+				ENDIF
+				SHIP_ID = TOINT(LIST_GET(所有船リスト, SHIPLIST_IDX))
+				CALL GET_SHIP_STATUS_BY_DIC(SHIP_ID)
+				艦船データ:SHIPLIST_IDX = %RESULTS%
+			NEXT
+		ENDIF
+	ENDIF
 	;;マウス入力によるスクロールや操作も実装したいが現仕様ではボタン入力と共存できない？ようなので一旦保留
 	;;ホイールでぐりぐりしたかった
 	; INPUTMOUSEKEY 100
