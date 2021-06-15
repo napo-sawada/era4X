@@ -1,0 +1,133 @@
+﻿;--------------------------
+; !!民主主義国からの支援と 45を好きな番号に変える！!
+; 民主主義国からの支援
+; ここにクエストの説明
+;--------------------------
+
+
+;--------------------------
+; クエスト受注可能か
+;--------------------------
+@QUEST_ACCEPTABLE_45
+RETURN R支持率 <= 50 && !QUEST_PROGRESS:45
+
+;--------------------------
+; クエストの名前を返却
+;--------------------------
+@QUEST_NAME_45
+SETCOLOR 0X00FF00
+RESULTS = 民主主義国からの支援
+RETURN
+
+
+;--------------------------
+; マップでの表示を設定する
+; @QUEST_SET_TILE_  : マップ上対象地点にマークを出す。
+; @QUEST_MAP_INFO_  : 右下小窓にメッセージを出す
+; 引数１： ARG:0 SS45YY　座標データ　マップ上でクリックされた座標。表示条件分岐に。
+;--------------------------
+;;;マップ画面上での表示。 隠したかったら関数コメントアウトか RETURN 0
+;;;色を替えたかったらSETCOLORしておけば後の処理で色反映します
+@QUEST_SET_TILE_45 (ARG:0 )
+	RESULTS '= "！"
+	SETCOLOR 0xFFFF00
+RETURN 1
+
+;;;右下小窓に出す。隠したければ関数コメントアウトか RETURN 0
+@QUEST_MAP_INFO_45 (ARG:0 )
+		RESULTS:0 '= "密会ポイント"
+RETURN 1
+
+;-----------------------
+; マップ上からQUEST_BODYを実行する処理
+; @QUEST_SHOW_COMMAND_x : ここで指定した文字列のコマンドを現地で表示する
+; 　　　　　　　　　　 ：(調査する||捜索する||採集する||待ち伏せする||挑戦する)といったフレーバー
+; @QUEST_PLACE_CHECK_x ： 設定マスを踏んだら呼び出される。不要ならば消すか無処理で返す
+;--------------------------
+@QUEST_SHOW_COMMAND_45 ()
+	RESULTS '= "エージェントと接触"
+RETURN 1
+
+@QUEST_REACH_PLACE_45 ()
+; CALL QUEST_BODY_45
+RETURN
+
+;--------------------------
+; クエスト本体
+;--------------------------
+@QUEST_BODY_45
+#DIM CONST QUEST_ID = 45
+#DIM SECTOR_ID
+#DIM X_POS
+#DIM Y_POS
+IF QUEST_PROGRESS:QUEST_ID == 0
+	PRINTFORML 民主主義国のエージェントから連絡が入った
+	PRINTFORML 曰く、支援の準備があるので一度民主主義国にて話をさせてくれないかとのことだが……
+	PRINTFORML どうしますか?
+	CALL ASK_YN
+	IF RESULT
+		PRINTFORML 罠の可能性がある。変な介入のされ方をされても厄介だ
+		PRINTFORMW %CALLNAME:MASTER%はこの提案を断ることにした
+		QUEST_PROGRESS:QUEST_ID = 1
+		RETURN
+	ENDIF
+	PRINTFORML 危険はあるが、話だけでも聞いてみるのもいいだろう
+	PRINTFORML %CALLNAME:MASTER%は承諾の旨を返信すると、指定宙域で落ち合う約束をした
+	PRINTFORMW マップに！マークの密会ポイントが記された
+	CALL ID2POS(CHARACTER_POSITION)
+	SECTOR_ID = RESULT:0
+	X_POS = RESULT:1
+	Y_POS = RESULT:2
+	LOCAL = 1
+	WHILE LOCAL
+		;; 関数つかって適当に。 指定セクター内　6:ちょっと外より を抽選
+		CALL QUEST_SET_RANDPOINT(QUEST_ID, SECTOR_ID, 6 )
+		IF RESULT >= 0
+			X_POS = (RESULT / 100) %100
+			Y_POS = RESULT %100
+			CLEARMAP:SECTOR_ID:X_POS:Y_POS = 1		;;明瞭化おまけ
+			LOCAL --
+		ENDIF
+	WEND
+	QUEST_PROGRESS:QUEST_ID = 1
+ELSEIF QUEST_PROGRESS:QUEST_ID == 1
+	PRINTL
+	PRINTFORML 指定宙域で民間船に偽装したエージェントと接触した
+	PRINTFORML 「初めまして。私はジェームズ・ドボン。ジェームズと呼んでくれ」
+	PRINTFORMW 一張羅を身に纏った精悍な顔つきの男がモニタ越しに気さくな様子で話しかけてきた。彼が民主主義国のエージェントらしい
+	PRINTL
+	PRINTFORML ディスプレイ越しからでも伝わってくる剣呑な雰囲気から察するにネゴシエーターというよりはスパイ、あるいは特殊部隊員のようだ……
+	PRINTFORML 「君たちが私たちと同じく銀河人民統一連邦を敵にしていることは知っている」
+	PRINTFORMW 「こう言っては申し訳ないが、いささか早急で素人くさい動きだったから調べるのもそう難しくはなかった」
+	PRINTL
+	PRINTFORML 「早速だが、君たちに提案がある。反乱を半ば成功させつつある君たちに、我が国は支援の準備がある」
+	PRINTFORMW 「銀河人民統一連邦に感づかれてしまう可能性はあるが、大規模な物資の提供だ。具体的な品目のデータを送ろう」
+	PRINTL
+	PRINTL 充足+100000
+	PRINTL 戦車+1000
+	PRINTW 航空機+500
+	PRINTL
+	PRINTFORML 「どうする、受け取るか？」
+	CALL ASK_YN("受け取る", "受け取らない")
+	IF RESULT
+		PRINTFORML 「思ったより警戒心が高いんだな。単なる敵の敵は味方理論で支援するだけなんだ。それでも受け取らないつもりか？」
+		CALL ASK_YN("受け取る", "受け取らない")
+		IF RESULT
+			PRINTFORML 「そうか、ではこの話はなかったことにしよう」
+			PRINTFORML そういうとエージェントは一方的に通信を切り、宙域から離脱していった
+			QUEST_PROGRESS:QUEST_ID = 2
+			CALL QUEST_RELEASE_POINT(QUEST_ID, CHARACTER_POSITION:MASTER)
+		ENDIF
+	ENDIF
+	PRINTFORML 「よしわかった。それでは輸送船で君たちのアジトに物資を送らせよう」
+	PRINTFORML 「話は以上だ。それでは」
+	PRINTFORMW エージェントはそれだけ言うと、通信を切り宙域から離脱していった
+	PRINTL
+	PRINTFORMW 後日、約束の支援物資がアジトに届いた
+	R充足 += 100000
+	R戦車 += 1000
+	R航空機 += 500
+	CALL QUEST_RELEASE_POINT(QUEST_ID, CHARACTER_POSITION:MASTER)
+	QUEST_PROGRESS:QUEST_ID = 2
+ENDIF
+RETURN 1
