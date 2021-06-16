@@ -385,6 +385,7 @@ ELSE
 ENDIF
 
 @TURNEND_STORY_0
+#DIM 相手
 SIF QUEST_PROGRESS:34 < 3
   RETURN
 
@@ -398,10 +399,6 @@ NEXT
 
 IF R_SCHOOL && (DAY % R大学支持率上昇指数 == 0)
   R支持率 ++
-  SIF R支持率 > 100
-    R支持率 = 100
-  SIF R支持率 + G支持率 > 100
-    G支持率 = 100 - R支持率
 ENDIF
 
 IF R_SPY && (DAY % G支持率低下指数 == 0)
@@ -423,6 +420,73 @@ IF R_SPY && RAND:200 == 0
   RESETCOLOR
   R_SPY = 0
 ENDIF
+
+FOR LOCAL, 0, G要所
+  IF R_SUPERVISER:LOCAL && R_SUPERVISER_IS:LOCAL
+    SELECTCASE ABL:(R_SUPERVISER_IS:LOCAL):政治
+      CASE 0 TO 20
+        SIF DAY%500 == 0
+          R支持率 ++
+        R非戦闘員 += 1
+        G非戦闘員 -= 1
+        SIF DAY%10 == 0
+          R戦闘員 += 1
+      CASE 21 TO 50
+        SIF DAY%400 == 0
+          R支持率 ++
+        R非戦闘員 += 2
+        G非戦闘員 -= 2
+        R戦闘員 += 1
+      CASE 51 TO 60
+        SIF DAY%300 == 0
+          R支持率 ++
+        R非戦闘員 += 3
+        G非戦闘員 -= 3
+        R戦闘員 += 1
+      CASE 61 TO 70
+        SIF DAY%250 == 0
+          R支持率 ++
+        R非戦闘員 += 4
+        G非戦闘員 -= 4
+        R戦闘員 += 2
+      CASE 71 TO 80
+        SIF DAY%200 == 0
+          R支持率 ++
+        R非戦闘員 += 8
+        G非戦闘員 -= 8
+        R戦闘員 += 4
+      CASE 81 TO 90
+        SIF DAY%160 == 0
+          R支持率 ++
+        R非戦闘員 += 12
+        G非戦闘員 -= 12
+        R戦闘員 += 5
+      CASE 91 TO 100
+        SIF DAY%130 == 0
+          R支持率 ++
+        R非戦闘員 += 16
+        G非戦闘員 -= 16
+        R戦闘員 += 6
+      CASEELSE
+        SIF DAY%100 == 0
+          R支持率 ++
+        R非戦闘員 += 20
+        G非戦闘員 -= 20
+        R戦闘員 += 10
+    ENDSELECT
+    CALL PRINT_ADD_EXP(R_SUPERVISER_IS:LOCAL, "政治経験値", RAND:3 + 1, 1)
+    CALL TRAIN_AUTO_ABLUP(R_SUPERVISER_IS:LOCAL, 0)
+  ENDIF
+NEXT
+
+
+; 支持率がおかしかった場合修正
+SIF R支持率 > 100
+  R支持率 = 100
+SIF R支持率 + G支持率 > 100
+  G支持率 = 100 - R支持率
+SIF G非戦闘員 < 0
+  G非戦闘員 = 0
 
 IF R_CURRENT_RESEARCH && R_RESEARCH_DATE > GET_R_RESEARCH_COMPLETE_DATE(R_CURRENT_RESEARCH)
   R_COMPLETE_RESEARCH:R_CURRENT_RESEARCH = 1

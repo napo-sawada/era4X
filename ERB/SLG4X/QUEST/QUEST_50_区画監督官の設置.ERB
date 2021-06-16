@@ -1,0 +1,121 @@
+﻿;--------------------------
+; !!区画監督官の設置と 50を好きな番号に変える！!
+; 区画監督官の設置
+; ここにクエストの説明
+;--------------------------
+
+
+;--------------------------
+; クエスト受注可能か
+;--------------------------
+@QUEST_ACCEPTABLE_50
+RETURN QUEST_PROGRESS:34 >= 3
+
+;--------------------------
+; クエストの名前を返却
+;--------------------------
+@QUEST_NAME_50
+SETCOLOR 0X00FF00
+RESULTS = 区画監督官の設置
+RETURN
+
+
+;--------------------------
+; クエスト本体
+;--------------------------
+@QUEST_BODY_50
+#DIM CONST R_監督官設置費用 = 500000
+#DIM DYNAMIC 入力値
+
+PRINTFORML 主要都市に監督官を配置するとことで、レジスタンス勢力を統制し効率的に運用することができるだろう
+PRINTFORML 支持率上昇、戦闘員増加、非戦闘員増加などが見込まれる
+PRINTFORML 監督官の設置には幾らかの資金と、仲間から監督官を任命する必要がある(必要資金: %TOSTR(R_監督官設置費用, "$###,###")%)
+PRINTFORMW さて、どうするか
+
+$INPUT_LOOP
+DRAWLINE
+PRINTL 区画監督官の設置
+SETCOLOR 0X666666
+CUSTOMDRAWLINE =
+RESETCOLOR
+
+FOR LOCAL, 0, G要所
+	; 要所名
+	PRINTFORM %R都市名:LOCAL, 18, LEFT%
+	; 監督官の設置準備
+	IF MONEY >= R_監督官設置費用 && !R_SUPERVISER:LOCAL
+		LOCALS = %"[監督官の設置解放]", 20, LEFT%
+		PRINTBUTTON @"%LOCALS%", LOCAL
+	ELSEIF !R_SUPERVISER:LOCAL
+		PRINTFORM %"費用不足", 20, LEFT%
+	ELSE
+		PRINTFORM %"設置済み", 20, LEFT%
+	ENDIF
+	;監督官
+	IF R_SUPERVISER:LOCAL && R_SUPERVISER_IS:LOCAL
+		LOCALS = [%CALLNAME:(R_SUPERVISER_IS:LOCAL)%]
+		PRINTBUTTON @"%LOCALS, 30, LEFT%", LOCAL + G要所
+		PRINTFORM 政治: {ABL:(R_SUPERVISER_IS:LOCAL):政治}
+	ELSEIF R_SUPERVISER:LOCAL
+		LOCALS = %"[監督官未設置]", 30, LEFT%
+		PRINTBUTTON @"%LOCALS%", LOCAL + G要所
+	ELSE
+		LOCALS = %"[監督官の設置未解放]", 30, LEFT%
+		PRINTFORM %LOCALS%
+	ENDIF
+	PRINTL
+NEXT
+PRINTFORML
+PRINTBUTTON "[戻る]", G要所 * 2
+PRINTL
+SETCOLOR 0X666666
+CUSTOMDRAWLINE =
+RESETCOLOR
+
+INPUT
+入力値 = RESULT
+SIF 入力値 == G要所 * 2
+	RETURN
+IF 入力値 >= 0 && 入力値 < G要所 && MONEY >= R_監督官設置費用 && !R_SUPERVISER:入力値
+	PRINTFORML %R都市名:入力値%の監督官の設置を解放しますか?
+	CALL ASK_YN
+	SIF RESULT
+		GOTO INPUT_LOOP
+	R_SUPERVISER:入力値 = 1
+ELSEIF 入力値 >= G要所 && 入力値 < G要所 * 2 && R_SUPERVISER:(入力値 - G要所)
+	CALL SELECT_SUPERVISER(入力値 - G要所)
+ENDIF
+GOTO INPUT_LOOP
+
+@SELECT_SUPERVISER(ID)
+#DIM ID
+#DIM 入力値
+$INPUT_LOOP
+DRAWLINE
+PRINTL 監督官を選択してください
+FOR LOCAL, 1, CHARANUM
+	SIF CFLAG:LOCAL:所属 != CFLAG:MASTER:所属
+		CONTINUE
+	PRINTBUTTON @"[{LOCAL}] %CALLNAME:LOCAL, 30, LEFT%", LOCAL
+	PRINTFORML 政治: {ABL:LOCAL:政治}
+NEXT
+PRINTBUTTON "[キャンセル]", CHARANUM
+PRINTL
+DRAWLINE
+INPUT
+入力値 = RESULT
+IF 入力値 == CHARANUM
+	RETURN
+ELSEIF 入力値 > 0 && 入力値 < CHARANUM
+	PRINTFORML %CALLNAME:入力値%に割り振られているタスクは全てキャンセルされます。よろしいですか?
+	CALL ASK_YN
+	SIF RESULT
+		GOTO INPUT_LOOP
+	CALL RELEASE_FROM_TASK(入力値)
+	R_SUPERVISER_IS:ID = 入力値
+	RETURN
+ENDIF
+GOTO INPUT_LOOP
+
+
+
