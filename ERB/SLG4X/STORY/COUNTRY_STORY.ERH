@@ -23,6 +23,7 @@
 #DIMS CONST R研究名 = "なし", "軍用輸送船研究", "戦車研究", "航空機研究", "暗号解読"
 #DIMS CONST R都市名 = "首都", "第二都市", "第三都市", "工業都市", "歓楽都市", "研究都市"
 #DIM CONST 秘密工場生産量 = 500
+#DIM CONST R大学支持率上昇指数 = 30
 
 #DIM SAVEDATA G支持率
 #DIM SAVEDATA G戦車
