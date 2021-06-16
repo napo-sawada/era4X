@@ -1,0 +1,68 @@
+﻿;--------------------------
+; !!秘密工場建設と 47を好きな番号に変える！!
+; 秘密工場建設
+; ここにクエストの説明
+;--------------------------
+
+
+;--------------------------
+; クエスト受注可能か
+;--------------------------
+@QUEST_ACCEPTABLE_47
+RETURN QUEST_PROGRESS:34 >= 3
+
+;--------------------------
+; クエストの名前を返却
+;--------------------------
+@QUEST_NAME_47
+SETCOLOR 0X00FF00
+RESULTS = 秘密工場建設
+RETURN
+
+;--------------------------
+; クエスト本体
+;--------------------------
+@QUEST_BODY_47
+#DIM CONST 秘密工場建設費用 = 5000000000
+
+PRINTFORML 攻略地点である銀河人民統一連邦の六大都市近辺に物資生産用の秘密工場を建設すれば、現地部隊の充足を満たせるだろう
+IF MONEY < 秘密工場建設費用
+	PRINTFORML 所持金が足りないようだ。
+	PRINTFORMW 秘密工場建設には%秘密工場建設費用, "$###,###"%必要だ
+	RETURN
+ENDIF
+PRINTFORML 建設には%TOSTR(秘密工場建設費用, "$###,###")%必要だが、建設しますか？
+
+$INPUT_LOOP
+SETCOLOR 0X999999
+CUSTOMDRAWLINE =
+RESETCOLOR
+
+FOR LOCAL, 0, G要所
+	IF !R_SECRET_FACTORY:LOCAL
+		PRINTBUTTON @"[{LOCAL}] %R都市名:LOCAL%", LOCAL
+		PRINTL
+	ELSE
+		SETCOLOR 0X666666
+		PRINTFORML [建設済み] %R都市名:LOCAL%
+		RESETCOLOR
+	ENDIF
+NEXT
+PRINTBUTTON @"[{G要所}}}] 戻る", G要所
+PRINTL
+
+SETCOLOR 0X999999
+CUSTOMDRAWLINE =
+RESETCOLOR
+
+INPUT
+SIF RESULT == G要所
+	RETURN
+IF RESULT >= 0 && RESULT < G要所 && !R_SECRET_FACTORY:RESULT
+	R_SECRET_FACTORY:RESULT = 1
+	PRINTFORML %R都市名:RESULT%に秘密工場を建設した。
+	PRINTFORMW これにより、日に{秘密工場生産量}の充足を生産できることだろう
+	MONEY -= 秘密工場建設費用
+	RETURN
+ENDIF
+GOTO INPUT_LOOP
