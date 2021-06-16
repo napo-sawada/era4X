@@ -396,12 +396,32 @@ FOR LOCAL, 0, G要所
   R充足 += R_SECRET_FACTORY:LOCAL * 秘密工場生産量
 NEXT
 
-IF R_SCHOOL & (DAY % R大学支持率上昇指数 == 0)
+IF R_SCHOOL && (DAY % R大学支持率上昇指数 == 0)
   R支持率 ++
   SIF R支持率 > 100
     R支持率 = 100
   SIF R支持率 + G支持率 > 100
     G支持率 = 100 - R支持率
+ENDIF
+
+IF R_SPY && (DAY % G支持率低下指数 == 0)
+  G支持率--
+  SIF G支持率 < 0
+    G支持率 = 0
+ENDIF
+
+IF R_SPY && RAND:200 == 0
+  SETCOLOR 0XFF0000
+  PRINTFORMW スパイがばれた！スパイは命辛々逃げ出したようだ……
+  RESETCOLOR
+  R_SPY = 0
+ENDIF
+IF R_SPY && RAND:200 == 0
+  SETCOLOR 0XFF0000
+  PRINTFORML 反政権的報道を行っていたレジスタンス御用達のメディアがライセンス剥奪されたようだ
+  PRINTFORMW これによりスパイから入手した情報を拡散する手段を失ってしまった……
+  RESETCOLOR
+  R_SPY = 0
 ENDIF
 
 IF R_CURRENT_RESEARCH && R_RESEARCH_DATE > GET_R_RESEARCH_COMPLETE_DATE(R_CURRENT_RESEARCH)
