@@ -479,6 +479,18 @@ FOR LOCAL, 0, G要所
   ENDIF
 NEXT
 
+IF R_TRANINING_CAMP
+  LOCAL = R民兵訓練施設出力
+  SIF R非戦闘員 < R民兵訓練施設出力
+    LOCAL = R非戦闘員
+  R戦闘員 += LOCAL
+  R非戦闘員 -= LOCAL
+  SIF RAND:10 == 0
+    R戦闘員 --
+  SIF R戦闘員 < 0
+    R戦闘員 = 0
+ENDIF
+
 
 ; 支持率がおかしかった場合修正
 SIF R支持率 > 100

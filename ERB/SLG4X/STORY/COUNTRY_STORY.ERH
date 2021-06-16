@@ -18,6 +18,7 @@
 #DIM SAVEDATA R_SPY
 #DIM SAVEDATA R_SUPERVISER, G要所; 監督官を設置できるか
 #DIM SAVEDATA R_SUPERVISER_IS, G要所; 監督官は誰か
+#DIM SAVEDATA R_TRANINING_CAMP
 #DIM CONST 軍用輸送船研究 = 1
 #DIM CONST 戦車研究 = 2
 #DIM CONST 航空機研究 = 3
@@ -28,6 +29,7 @@
 #DIM CONST 秘密工場生産量 = 500
 #DIM CONST R大学支持率上昇指数 = 30
 #DIM CONST G支持率低下指数 = 30
+#DIM CONST R民兵訓練施設出力 = 10
 
 #DIM SAVEDATA G支持率
 #DIM SAVEDATA G戦車
