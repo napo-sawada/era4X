@@ -1,0 +1,178 @@
+﻿;---------------------------
+; モブ艦隊生成
+; 惑星が無く、宇宙港もないセクターにランダムで海賊の小～中艦隊を出現させる
+;---------------------------
+@IS_HAPPEN_SLG_EVENT_2
+IF DAY % 30 == 0
+	RETURN 1
+ELSE
+	RETURN 0
+ENDIF
+
+@SLG_EVENT_MAIN_2
+#DIM DYNAMIC 戦力係数
+#DIM DYNAMIC セクター内艦船数
+#DIM DYNAMIC SECTOR_ID
+#DIM DYNAMIC SHIP_ID
+#DIM DYNAMIC PORT_ID
+#DIM DYNAMIC POSID
+#DIM DYNAMIC FLG_SKIP
+#DIM DYNAMIC 海賊生成数
+#DIM CONST セクター内出現上限 = 40
+#DIM CONST 海賊生成上限 = 500
+#DIM CONST 生成確率 = 150 ;千分率
+
+FOR LOCAL, 0 ,MAX_SHIP
+	IF SHIP_COUNTRY:LOCAL == 国家ID_プレイヤー
+		SELECTCASE SHIP_CATEGORY:LOCAL
+			CASE コルベット
+				戦力係数 += 1
+			CASE フリゲート
+				戦力係数 += 3
+			CASE 駆逐艦
+				戦力係数 += 5
+			CASE 巡洋艦
+				戦力係数 += 7
+			CASE 戦艦, 空母
+				戦力係数 += 9
+			CASEELSE
+		ENDSELECT
+	ENDIF
+NEXT
+
+FOR LOCAL, 0 ,MAX_SHIP
+	IF SHIP_COUNTRY:LOCAL == 国家ID_一般海賊
+		海賊生成数 ++
+	ENDIF
+NEXT
+SIF 海賊生成数 > 海賊生成上限
+	RETURN
+
+FOR SECTOR_ID, 0, MAX_SECTOR
+	SIF RAND:1000 >= 生成確率
+		CONTINUE
+	;星系港と宇宙港のあるセクターではモブは生成しない
+	FOR PORT_ID, 0, 星系数
+		IF 星系座標ID:PORT_ID / 10000 == SECTOR_ID || PORT_POSITION_ID:PORT_ID / 10000 == SECTOR_ID
+			FLG_SKIP = 1
+			BREAK
+		ENDIF
+	NEXT
+	IF FLG_SKIP == 1
+		FLG_SKIP = 0
+		CONTINUE
+	ENDIF
+	セクター内艦船数 = 0
+	FOR SHIP_ID, 0, MAX_SHIP
+		IF LOCAL == SHIP_POSITION:SHIP_ID / 10000
+			セクター内艦船数 ++ 
+		ENDIF
+	NEXT
+	SIF セクター内艦船数 > セクター内出現上限
+		CONTINUE
+	CALL SLG_EVENT_2_GET_RANDPOS(SECTOR_ID, RAND(4, 6))
+	SIF RESULT == -1
+		CONTINUE
+	POSID = RESULT
+	{
+		SELECTCASE IFRAND(
+			"1",1,
+			"2",戦力係数 > 10,
+			"3",戦力係数 > 20,
+			"D1,4",戦力係数 > 40,
+			"D1TO2,5",戦力係数 > 60
+			)
+	}
+		CASE 1
+			FOR LOCAL, 0, RAND(3, 5)
+				CALL SLG_EVENT_2_GET_RANDOMSHIP(コルベット)
+				CALL INIT_PRESET_SHIP(国家ID_一般海賊, POSID, RESULT, , RESULT)
+			NEXT
+		CASE 2
+			FOR LOCAL, 0, RAND(1, 2)
+				CALL SLG_EVENT_2_GET_RANDOMSHIP(フリゲート)
+				CALL INIT_PRESET_SHIP(国家ID_一般海賊, POSID, RESULT, , RESULT)
+			NEXT
+			FOR LOCAL, 0, RAND(3, 5)
+				CALL SLG_EVENT_2_GET_RANDOMSHIP(コルベット)
+				CALL INIT_PRESET_SHIP(国家ID_一般海賊, POSID, RESULT, , RESULT)
+			NEXT
+		CASE 3
+			FOR LOCAL, 0, RAND(1, 2)
+				CALL SLG_EVENT_2_GET_RANDOMSHIP(駆逐艦)
+				CALL INIT_PRESET_SHIP(国家ID_一般海賊, POSID, RESULT, , RESULT)
+			NEXT
+			FOR LOCAL, 0, RAND(3, 5)
+				CALL SLG_EVENT_2_GET_RANDOMSHIP(フリゲート)
+				CALL INIT_PRESET_SHIP(国家ID_一般海賊, POSID, RESULT, , RESULT)
+			NEXT
+		CASE 4
+			FOR LOCAL, 0, RAND(1, 2)
+				CALL SLG_EVENT_2_GET_RANDOMSHIP(巡洋艦)
+				CALL INIT_PRESET_SHIP(国家ID_一般海賊, POSID, RESULT, , RESULT)
+			NEXT
+			FOR LOCAL, 0, RAND(4, 6)
+				CALL SLG_EVENT_2_GET_RANDOMSHIP(駆逐艦)
+				CALL INIT_PRESET_SHIP(国家ID_一般海賊, POSID, RESULT, , RESULT)
+			NEXT
+		CASE 5
+			FOR LOCAL, 0, RAND(0, 2)
+				CALL SLG_EVENT_2_GET_RANDOMSHIP(戦艦)
+				CALL INIT_PRESET_SHIP(国家ID_一般海賊, POSID, RESULT, , RESULT)
+			NEXT
+			FOR LOCAL, 0, RAND(0, 2)
+				CALL SLG_EVENT_2_GET_RANDOMSHIP(空母)
+				CALL INIT_PRESET_SHIP(国家ID_一般海賊, POSID, RESULT, , RESULT)
+			NEXT
+			FOR LOCAL, 0, RAND(1, 4)
+				CALL SLG_EVENT_2_GET_RANDOMSHIP(巡洋艦)
+				CALL INIT_PRESET_SHIP(国家ID_一般海賊, POSID, RESULT, , RESULT)
+			NEXT
+			FOR LOCAL, 0, RAND(6, 12)
+				CALL SLG_EVENT_2_GET_RANDOMSHIP(駆逐艦)
+				CALL INIT_PRESET_SHIP(国家ID_一般海賊, POSID, RESULT, , RESULT)
+			NEXT
+	ENDSELECT
+NEXT
+
+@SLG_EVENT_2_GET_RANDOMSHIP(カテゴリー)
+#DIM カテゴリー
+#DIM CONST コルベット候補 = 汎用コルベット, アクロバット級コルベット, ヴォーロス級コルベット, 秋月級コルベット, アルテミス級コルベット
+#DIM CONST フリゲート候補 = 汎用フリゲート, ペルーン級フリゲート, ペルーン級フリゲート, 津軽級フリゲート, ディオネ級フリゲート, ネヴァン級フリゲート
+#DIM CONST 駆逐艦候補 = 汎用駆逐艦
+#DIM CONST 巡洋艦候補 = 汎用巡洋艦
+#DIM CONST 戦艦候補 = 汎用戦艦
+#DIM CONST 空母候補 = 汎用空母
+SELECTCASE カテゴリー
+	CASE コルベット
+		RETURN コルベット候補:RAND(0,VARSIZE("コルベット候補"))
+	CASE フリゲート
+		RETURN フリゲート候補:RAND(0,VARSIZE("フリゲート候補"))
+	CASE 駆逐艦
+		RETURN 駆逐艦候補:RAND(0,VARSIZE("駆逐艦候補"))
+	CASE 巡洋艦
+		RETURN 巡洋艦候補:RAND(0,VARSIZE("巡洋艦候補"))
+	CASE 戦艦
+		RETURN 戦艦候補:RAND(0,VARSIZE("戦艦候補"))
+	CASE 空母
+		RETURN 空母候補:RAND(0,VARSIZE("空母候補"))
+	CASEELSE
+ENDSELECT
+
+@SLG_EVENT_2_GET_RANDPOS(SECTOR_ID, ARG:2 = 0 )
+#DIM POSID
+#DIM SECTOR_ID
+#DIM X_POS
+#DIM Y_POS
+
+FOR LOCAL , 1 , 100
+	CALL RAND_CHOICE_XY( MAP_WIDTH, (ARG:2), 4)
+	X_POS = RESULT:0
+	Y_POS = RESULT:1	
+	IF MAP:SECTOR_ID:X_POS:Y_POS == 1
+		POSID = SECTOR_ID * 10000 + X_POS * 100 + Y_POS
+		RETURN POSID
+	ENDIF
+NEXT
+
+RETURN -1
