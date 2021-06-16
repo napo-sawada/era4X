@@ -135,9 +135,9 @@ ELSEIF TALENT:親愛 || TALENT:隷属 || TALENT:正妻 || TALENT:妾
 		CASE 0
 			PRINTFORML 　%ANAME(対象)%の部屋に見慣れない子供がいる……。
 			PRINTFORML 　それも１人ではなく３人。
-			PRINTFORML 　「縺翫��縺よｧ倥→蜻ｼ縺ｶ縺ｹ縺阪〒縺励ｇ縺��°　縺翫§縺��ｧ倥〒縺励ｇ縺��°」
-			PRINTFORML 　「豈堺ｸ翫〒濶ｯ縺�の縺ｧ縺ｯ？」
-			PRINTFORML 　「縺雁ｧ峨＆縺ｾ縺九ｂ縺励ｌ縺ｪ縺�」
+			PRINTFORML 　「縺翫��縺よｧ倥→蜻ｼ縺ｶ縺ｹ縺阪〒縺励ｇ縺��°　縺翫§縺��ｧ倥〒縺励ｇ縺��°」
+			PRINTFORML 　「豈堺ｸ翫〒濶ｯ縺�の縺ｧ縺ｯ？」
+			PRINTFORML 　「縺雁ｧ峨＆縺ｾ縺九ｂ縺励ｌ縺ｪ縺�」
 			PRINTFORML 　３人は顔を見合わせるとテレポートして消えた。
 			PRINTFORML 　また%ANAME(対象)%が何かしたらしい……。
 			PRINTFORMW 
@@ -162,7 +162,7 @@ ELSEIF TALENT:合意
 		SELECTCASE RAND:3
 			CASE 0
 				PRINTFORML 　%ANAME(対象)%の部屋に見慣れない子供がいる……。
-				PRINTFORML 　「縺ゅ▲　縺ｾ縺�蟋ｿ繧定ｦ九○縺｡繧��＞縺代↑縺��ｓ縺�縺｣縺�！」
+				PRINTFORML 　「縺ゅ▲　縺ｾ縺�蟋ｿ繧定ｦ九○縺｡繧��＞縺代↑縺��ｓ縺�縺｣縺�！」
 				PRINTFORML 　%ANAME(対象)%の面影のある子供は慌ててテレポートでどこかへ姿を消してしまった。
 				PRINTFORMW 
 				PRINTFORML 　「どうした母上、鳩が豆鉄砲でも食った様な顔をして」
@@ -303,7 +303,7 @@ ENDIF
 ;-------------------------------------------------
 ;酒酔いによる行動不能　現状死に分岐
 IF TCVAR:53 == 1
-	PRINTFORML 　「縺ｾ縺�驟斐▲縺ｦ縺ｪ縺�　驟斐▲縺ｦ縺ｪ縺��ｂ繧�……」
+	PRINTFORML 　「縺ｾ縺�驟斐▲縺ｦ縺ｪ縺�　驟斐▲縺ｦ縺ｪ縺��ｂ繧�……」
 	PRINTFORML 　普段%ANAME(対象)%の母国語（？）の分からない%ANAME(MASTER)%だったが、
 	PRINTFORML 　流石にこれは分かる……。
 	PRINTFORML 　酔っぱらいの妄言を聞き流すと%ANAME(MASTER)%はベッドに彼女を放り込んだ。
@@ -9367,7 +9367,7 @@ IF SELECTCOM == 302
 ENDIF
 
 ;-------------------------------------------------
-;兵法学習
+;勉強
 ;-------------------------------------------------
 IF SELECTCOM == 303
 	;初めて(主導権を考慮しない)
