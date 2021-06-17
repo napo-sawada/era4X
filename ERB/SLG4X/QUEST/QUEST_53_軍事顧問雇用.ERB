@@ -1,0 +1,76 @@
+﻿;--------------------------
+; !!軍事顧問雇用と 53を好きな番号に変える！!
+; 軍事顧問雇用
+; ここにクエストの説明
+;--------------------------
+
+
+;--------------------------
+; クエスト受注可能か
+;--------------------------
+@QUEST_ACCEPTABLE_53
+RETURN QUEST_PROGRESS:51 == 1 && QUEST_PROGRESS:34 >= 3
+
+;--------------------------
+; クエストの名前を返却
+;--------------------------
+@QUEST_NAME_53
+SETCOLOR 0X00FF00
+RESULTS = 軍事顧問雇用
+RETURN
+
+;--------------------------
+; クエスト本体
+;--------------------------
+@QUEST_BODY_53
+#DIM 入力値
+SIF R_MILITARY_ADVISER == 0
+	R_MILITARY_ADVISER = -1
+PRINTFORML 軍事顧問を任命することで民兵訓練所の効率が上がるだろう
+PRINTFORML ただし軍事顧問に任命する仲間は白兵が70以上必要だ
+PRINTFORML さて、誰を軍事顧問に任命するか……
+PRINTL
+
+$INPUT_LOOP
+DRAWLINE
+PRINT 軍事顧問任命
+SIF R_MILITARY_ADVISER > 0
+	PRINTFORML 現在の軍事顧問(%CALLNAME:R_MILITARY_ADVISER%)
+SETCOLOR 0X666666
+CUSTOMDRAWLINE =
+RESETCOLOR
+
+FOR LOCAL, 1, CHARANUM
+	SIF CFLAG:LOCAL:所属 != CFLAG:MASTER:所属
+		CONTINUE
+	SIF ABL:LOCAL:白兵 < 70
+		CONTINUE
+	SIF R_MILITARY_ADVISER == LOCAL
+		SETCOLOR 0X00FF00
+	PRINTBUTTON @"[{LOCAL}] %CALLNAME:LOCAL, 20, LEFT%", LOCAL
+	PRINTFORML 白兵: {ABL:LOCAL:白兵}
+	RESETCOLOR
+NEXT
+PRINTBUTTON "[解任]", CHARANUM
+PRINTL
+PRINTBUTTON "[戻る]", CHARANUM + 1
+PRINTL
+SETCOLOR 0X666666
+CUSTOMDRAWLINE = 
+RESETCOLOR
+INPUT
+入力値 = RESULT
+
+IF RESULT == CHARANUM
+	R_MILITARY_ADVISER = -1
+ELSEIF RESULT == CHARANUM + 1
+	RETURN
+ELSEIF RESULT > 0 && RESULT < CHARANUM
+	PRINTFORML %CALLNAME:RESULT%に割り振られているタスクは全てキャンセルされます。よろしいですか?
+	CALL ASK_YN
+	SIF RESULT
+		GOTO INPUT_LOOP
+	CALL TO_FREE(入力値)
+	R_MILITARY_ADVISER = 入力値
+ENDIF
+GOTO INPUT_LOOP
