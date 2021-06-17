@@ -511,8 +511,9 @@ IF R_TRANINING_CAMP
     LOCAL = R非戦闘員
   R戦闘員 += LOCAL
   R非戦闘員 -= LOCAL
-  SIF RAND:10 == 0
+  SIF RAND:10 == 0 && !R_FIELD_HOSPITAL
     R戦闘員 --
+    R非戦闘員 ++
   SIF R戦闘員 < 0
     R戦闘員 = 0
 ENDIF
