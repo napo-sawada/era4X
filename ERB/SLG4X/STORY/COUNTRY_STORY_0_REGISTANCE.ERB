@@ -474,6 +474,18 @@ FOR LOCAL, 0, G要所
         G非戦闘員 -= 20
         R戦闘員 += 10
     ENDSELECT
+    IF R_SUPERVISER_COST:LOCAL
+      IF MONEY > 高度な自治維持費
+        MONEY -= 高度な自治維持費
+        SIF DAY%100 == 0
+          R支持率 ++
+        R非戦闘員 += 20
+        G非戦闘員 -= 20
+        R戦闘員 += 5
+      ELSE
+        R_SUPERVISER_COST:LOCAL = 0
+      ENDIF
+    ENDIF
     CALL PRINT_ADD_EXP(R_SUPERVISER_IS:LOCAL, "政治経験値", RAND:3 + 1, 1)
     CALL TRAIN_AUTO_ABLUP(R_SUPERVISER_IS:LOCAL, 0)
   ENDIF
