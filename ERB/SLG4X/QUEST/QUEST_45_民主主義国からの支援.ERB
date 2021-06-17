@@ -9,6 +9,9 @@
 ; クエスト受注可能か
 ;--------------------------
 @QUEST_ACCEPTABLE_45
+CALL GET_STAR_ID_FROM_POS(CHARACTER_POSITION)
+SIF RESULT != 2
+	RETURN 0
 RETURN R支持率 >= 50 && !QUEST_PROGRESS:45 && QUEST_PROGRESS:34 >= 3
 
 ;--------------------------
