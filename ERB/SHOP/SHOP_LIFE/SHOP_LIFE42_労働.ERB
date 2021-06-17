@@ -226,19 +226,19 @@ FOR LOCAL, 0, CHARANUM
 		CASE 労働_広報
 			報酬 += RAND(MAX(ABL:LOCAL:知略 * 3, 0), MAX(ABL:LOCAL:知略 * 5, 1))
 			PRINTFORML %ANAME(LOCAL)%は広報活動を行った……
-			CALL PRINT_ADD_EXP(LOCAL, "知略経験値", RAND(6, 12))
+			CALL PRINT_ADD_EXP(LOCAL, "知略経験値", RAND(1, 6))
 		CASE 労働_街宣
 			報酬 += RAND(MAX(ABL:LOCAL:政治 * 3, 0), MAX(ABL:LOCAL:政治 * 5, 1))
 			PRINTFORML %ANAME(LOCAL)%はプロパガンダ活動を行った……
-			CALL PRINT_ADD_EXP(LOCAL, "政治経験値", RAND(6, 12))
+			CALL PRINT_ADD_EXP(LOCAL, "政治経験値", RAND(1, 6))
 		CASE 労働_炊き出し
 			報酬 += RAND(MAX(ABL:LOCAL:料理 * 3, 0), MAX(ABL:LOCAL:料理 * 5, 1))
 			PRINTFORML %ANAME(LOCAL)%は炊き出しを行った……
-			CALL PRINT_ADD_EXP(LOCAL, "料理経験値", RAND(6, 12))
+			CALL PRINT_ADD_EXP(LOCAL, "料理経験値", RAND(1, 6))
 		CASE 労働_ライブ
 			報酬 += RAND(MAX(ABL:LOCAL:歌唱 * 3, 0), MAX(ABL:LOCAL:歌唱 * 5, 1))
-			PRINTFORML %ANAME(LOCAL)%は領内の民向けにライブを行った……
-			CALL PRINT_ADD_EXP(LOCAL, "歌唱経験値", RAND(6, 12))
+			PRINTFORML %ANAME(LOCAL)%は道端でライブを行った……
+			CALL PRINT_ADD_EXP(LOCAL, "歌唱経験値", RAND(1, 6))
 		CASE 労働_娼館
 			報酬 += RAND(MAX(ABL:LOCAL:欲望 + ABL:LOCAL:性技 + ABL:LOCAL:奉仕 + ABL:LOCAL:性交, 0), MAX((ABL:LOCAL:欲望 + ABL:LOCAL:性技 + ABL:LOCAL:奉仕 + ABL:LOCAL:性交) * 3, 1)) * 8
 			報酬 += GETBIT(TALENT:LOCAL:淫乱系, 素質_淫乱_娼婦) * RAND(500, 1500)
