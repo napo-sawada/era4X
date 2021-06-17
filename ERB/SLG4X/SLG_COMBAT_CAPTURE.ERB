@@ -48,8 +48,6 @@ PRINTFORMW %SHIP_NAME:TARGET_SHIP_ID%への移乗攻撃が開始された！
 CALL COMBAT_CAPTURE_BOARDING_COMBAT(参加メンバーリスト, TARGET_SHIP_ID)
 ;白兵戦勝利
 IF RESULT == 1
-	;装甲値を +1して戦闘終了後に除籍されるのを防ぐ
-	SHIP_DAMAGE:TARGET_SHIP_ID --
 	SHIP_COUNTRY:TARGET_SHIP_ID = 国家ID_プレイヤー
 	PRINTFORML %ANAME(TOINT(LIST_GET(参加メンバーリスト:0)), LIST_COUNT(参加メンバーリスト))%は防衛戦力を排除し、艦内の制圧に成功した
 	CALLF FuncTagSetText_Print(@"@C:{カラー_オレンジ}@%SHIP_NAME:TARGET_SHIP_ID%@/C@を鹵獲した！", 1)
