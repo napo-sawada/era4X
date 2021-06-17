@@ -135,6 +135,17 @@ FOR LOCAL, 0, CHARANUM
 		LOCAL:1 ++
 NEXT
 RETURNF LOCAL:1
+;-------------------------------------------------
+;ARG:0番の勢力について、思考戦車の数を返す関数
+;-------------------------------------------------
+@GET_MECH_NUM(ARG:0)
+#FUNCTION
+LOCAL:1 = 0
+FOR LOCAL, 0, CHARANUM
+	SIF IS_MECH(LOCAL:0) && CFLAG:(LOCAL:0):所属 == ARG:0
+		LOCAL:1 ++
+NEXT
+RETURNF LOCAL:1
 
 ;-------------------------------------------------
 ;ARG:0番の勢力について、現在の部隊の数を返す関数

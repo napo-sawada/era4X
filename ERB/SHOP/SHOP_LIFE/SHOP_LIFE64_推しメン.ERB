@@ -19,7 +19,7 @@ RETURN 1
 ;-------------------------------------------------
 @SHOP_LIFE_CHECKCHARA64(ARG:0)
 ;非主人公、捕虜でない
-RETURN ARG:0 != MASTER && CFLAG:(ARG:0):所属 == CFLAG:MASTER:所属 && CFLAG:(ARG:0):捕虜先 == 0 && !IS_ANIMAL(ARG:0)
+RETURN ARG:0 != MASTER && CFLAG:(ARG:0):所属 == CFLAG:MASTER:所属 && CFLAG:(ARG:0):捕虜先 == 0 && !IS_ANIMAL(ARG:0) && !IS_MECH(ARG:0)
 
 ;-------------------------------------------------
 ;「お気に入り」の左カラムメニューの入力処理

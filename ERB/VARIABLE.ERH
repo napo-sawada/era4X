@@ -471,6 +471,13 @@
 #DIM CONST 動物_豚 = 2
 #DIM CONST 動物_馬 = 3
 #DIM CONST 動物_猿 = 4
+#DIM CONST 機械_球 = 5
+#DIM CONST 機械_車 = 6
+#DIM CONST 機械_人 = 7
+#DIM CONST 機械_狼 = 8
+#DIM CONST 機械_巨 = 9
+#DIM CONST 機械_神 = 10
+
 
 ;-------------------------------------------------
 ;■特殊勢力に関する変数
