@@ -1,0 +1,56 @@
+﻿@GROUND_BATTLE_INIT
+VARSET 師団所属, -1
+VARSET 師団練度, -1
+VARSET 師団付大隊, -1
+VARSET 師団タイプ, -1
+VARSET 師団装備, -1
+
+@EDIT_GROUND_BATTLE_UNIT(ID = -1)
+#DIM ID
+IF ID == -1
+  FINDELEMENT 師団所属, -1
+  IF RESULT == -1
+    ID = 0
+  ELSE
+    ID = RESULT
+  ENDIF
+ENDIF
+$INPUT_LOOP
+
+DRAWLINE
+PRINTL 師団編成
+
+
+
+@SAVE_GROUND_BATTLE_UNIT(SIDE, 熟練度, 支援大隊 = -1, 師団, 装備)
+#DIM SIDE
+#DIM 熟練度
+#DIM 支援大隊
+#DIM 師団
+#DIM 装備
+
+師団所属 = SIDE
+師団練度, 熟練度
+師団付大隊, 支援大隊
+師団タイプ, 師団
+師団装備, 装備
+
+@GROUND_BATTLE_START
+#DIM DYNAMIC 決着フラグ
+#DIM CONST 攻撃側勝利 = 1
+#DIM CONST 防御側勝利 = 2
+
+決着フラグ = 0
+
+PRINTL ------------------------------------------- 
+PRINTL [1I][2I]
+PRINTL -----------------予備----------------------
+PRINTL [3I][1A][1T]
+SETCOLOR 0X666666
+PRINTL -----------------前線----------------------
+RESETCOLOR
+PRINTL [1I][1A][1T]
+PRINTL -----------------予備----------------------
+PRINTL [2I][2A][2T]
+PRINTL -------------------------------------------
+WAIT 
