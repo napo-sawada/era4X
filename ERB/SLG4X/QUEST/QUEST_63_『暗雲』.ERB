@@ -1,0 +1,920 @@
+﻿;--------------------------
+; アノニム関係クエスト第３弾
+; ここにクエストの説明
+;--------------------------
+@QUEST_DESCRIPTION_63
+#DIM 対象
+
+対象 = NAME_TO_CHARA("アノニム")
+SELECTCASE QUEST_PROGRESS:63
+CASE 0
+	PRINTL 
+	PRINTFORML 　街を歩いていると妙に騒がしい。
+	PRINTFORML 　何があったのだろう……？
+	PRINTFORML 　
+	CALL COLOR_PRINTL(@"　【警】開始位置で大きく国家関係が変化します。　　　【警】", カラー_警告)
+	CALL COLOR_PRINTL(@"　【告】本当にこの星系港で開始してもよろしいですか？【告】", カラー_警告)
+	PRINTFORML 　
+CASE 2
+	PRINTL 
+	PRINTFORML 　%ANAME(対象)%は%ANAME(MASTER)%に話があるらしい。
+	PRINTFORML 　誰にも聞かれない様な場所で話を聞こう。
+	PRINTFORML 　
+CASE 4
+	PRINTL 
+	PRINTFORML 　コロニーを制圧したオールドオーダーを倒そう。
+	PRINTFORML 　座標は【{ANONYM_SECTOR}：{ANONYM_X_POS,2,RIGHT}：{ANONYM_Y_POS,2,RIGHT}】だ。
+	PRINTFORML 　
+CASE 8
+	PRINTL 
+	PRINTFORML 　コロニーを制圧したオールドオーダーを倒した。
+	PRINTFORML 　ことの顛末をまとめよう。
+	PRINTFORML 　
+ENDSELECT
+
+RETURN
+;--------------------------
+; クエスト受注可能か
+;--------------------------
+@QUEST_ACCEPTABLE_63
+#DIM SECTOR_ID
+
+SIF QUEST_PROGRESS:63 >= 10
+	RETURN 0
+
+CALL ID2POS(CHARACTER_POSITION:MASTER)
+SECTOR_ID = RESULT:0
+
+CALL GET_STAR_ID_FROM_POS((QUEST_61_受注星) * 10000 + 707)
+LOCAL = RESULT
+CALL GET_STAR_ID_FROM_POS(CHARACTER_POSITION)
+SIF STAR_OWNER:RESULT == LOCAL
+	RETURN 0
+SIF QUEST_PROGRESS:63 == 2
+	RETURN 1
+SIF QUEST_PROGRESS:63 == 4
+	RETURN 1
+SIF QUEST_PROGRESS:63 == 8
+	RETURN 1
+SIF QUEST_PROGRESS:62 >= 10 && CFLAG:NAME_TO_CHARA("アノニム"):所属 == 国家ID_プレイヤー
+	RETURN 1
+RETURN 0
+
+;--------------------------
+; クエストの名前を返却
+;--------------------------
+@QUEST_NAME_63
+RESULTS = 『 暗雲 』― 信号途絶都市 ―
+RETURN
+
+;--------------------------
+; マップでの表示を設定する
+; @QUEST_SET_TILE_  : マップ上対象地点にマークを出す。
+; @QUEST_MAP_INFO_  : 右下小窓にメッセージを出す
+; 引数１： ARG:0 SSXXYY　座標データ　マップ上でクリックされた座標。表示条件分岐に。
+;--------------------------
+@QUEST_SET_TILE_63 (ARG:0)
+#DIM QUEST_ID = 63
+SETCOLOR 0xB40000
+IF QUEST_PROGRESS:QUEST_ID == 2
+	RESULTS '= "＊"
+ELSEIF QUEST_PROGRESS:QUEST_ID == 4
+	RESULTS '= "●"
+ENDIF
+RETURN 1
+
+;;;右下小窓に出す。隠したければ関数コメントアウトか RETURN 0
+@QUEST_MAP_INFO_63 (ARG:0 )
+#DIM QUEST_ID = 63
+IF QUEST_PROGRESS:QUEST_ID 　== 2
+		RESULTS:0 '= "この辺りでいいだろう"
+		RESULTS:1 '= "早速話を聞こう"
+		RESULTS:2 '= ""
+		RESULTS:3 '= ""
+		RESULTS:4 '= ""
+ELSEIF QUEST_PROGRESS:QUEST_ID 　== 4
+		RESULTS:0 '= "コロニーをレーダーに収められる位置に来た"
+		RESULTS:1 '= "既に赤い点が無数に映っている……"
+		RESULTS:2 '= ""
+		RESULTS:3 '= ""
+		RESULTS:4 '= ""
+ENDIF
+RETURN 1
+
+;-----------------------
+; マップからQUEST_BODYを実行する処理
+;--------------------------
+@QUEST_SHOW_COMMAND_63()
+#DIM QUEST_ID = 63
+
+IF QUEST_PROGRESS:QUEST_ID == 2
+	RESULTS '= "話を聞く"
+ELSEIF QUEST_PROGRESS:QUEST_ID == 4
+	RESULTS '= "作戦開始"
+ENDIF
+RETURN 1
+
+;--------------------------------------------------
+;出現ポイント作成
+;--------------------------------------------------
+@QUEST_63_SET_QUEST_POINT_ON_MAP(QUEST_ID, SECTOR_ID, DISTANCE_FROM_STAR)
+#DIM QUEST_ID
+#DIM SECTOR_ID
+#DIM DISTANCE_FROM_STAR
+#DIM POS_ID
+#DIM X_POS
+#DIM Y_POS
+#DIM ITER
+
+
+FOR ITER, 0 ,100
+	CALL QUEST_SET_RANDPOINT(QUEST_ID, SECTOR_ID, DISTANCE_FROM_STAR)
+	IF RESULT >= 0
+		X_POS = (RESULT / 100) %100
+		Y_POS = RESULT %100
+		CALL POS2ID(SECTOR_ID, X_POS, Y_POS)
+		QUEST_63_途絶都市 = RESULT
+		ANONYM_SECTOR = SECTOR_ID
+		ANONYM_X_POS  = X_POS
+		ANONYM_Y_POS  = Y_POS
+		CLEARMAP:SECTOR_ID:X_POS:Y_POS = 明瞭
+		RETURN
+	ENDIF
+	IF ITER == 99
+		CALL COLOR_PRINTW(@"エラー：マップ上にクエストを生成可能な領域が存在しません", カラー_警告)
+		FORCEWAIT
+	ENDIF
+NEXT
+
+;--------------------------
+; クエスト本体
+;--------------------------
+@QUEST_BODY_63
+#DIM SECTOR_ID
+#DIM POS_ID
+#DIM X_POS
+#DIM Y_POS
+#DIM ITER
+#DIM CONST DISTANCE_FROM_STAR = 8
+#DIM QUEST_ID = 63
+#DIM 対象
+
+対象 = NAME_TO_CHARA("アノニム")
+;あなた座標
+CALL ID2POS(CHARACTER_POSITION:MASTER)
+SECTOR_ID = RESULT:0
+X_POS = RESULT:1
+Y_POS = RESULT:2
+
+IF (QUESTMAP:(SECTOR_ID):(X_POS):(Y_POS) == QUEST_ID)
+	IF QUEST_PROGRESS:QUEST_ID == 2
+		CALL QUEST_BODY_63_SCENE_2
+		CALL QUEST_RELEASE_POINT(QUEST_ID, QUEST_63_途絶都市)
+		QUEST_PROGRESS:QUEST_ID = 3
+	ELSEIF QUEST_PROGRESS:QUEST_ID == 4
+		CALL QUEST_BODY_63_SCENE_4
+		CALL QUEST_RELEASE_POINT(QUEST_ID, QUEST_63_途絶都市)
+		QUEST_PROGRESS:QUEST_ID = 8
+	ENDIF
+ELSEIF QUEST_PROGRESS:QUEST_ID >= 0
+	SELECTCASE QUEST_PROGRESS:QUEST_ID
+	CASE 0
+		CALL QUEST_BODY_63_SCENE_0
+	CASE 2
+		PRINTFORML 　
+		PRINTFORML 　誰にも聞かれないような場所に移動しよう。
+		PRINTFORML 　目的地は{ANONYM_SECTOR}:{ANONYM_X_POS}:{ANONYM_Y_POS}だ。
+		PRINTFORML 　
+		PRINTFORMW 　
+	CASE 8
+		CALL QUEST_BODY_63_SCENE_8
+	ENDSELECT
+ENDIF
+
+
+IF QUEST_PROGRESS:QUEST_ID == 1
+	CALL QUEST_63_SET_QUEST_POINT_ON_MAP(QUEST_ID, SECTOR_ID, 8)
+	QUEST_PROGRESS:QUEST_ID = 2
+ELSEIF QUEST_PROGRESS:QUEST_ID == 3
+	CALL QUEST_63_SET_QUEST_POINT_ON_MAP(QUEST_ID, SECTOR_ID, 5)
+	CALL QUEST_BODY_63_SCENE_3
+	QUEST_PROGRESS:QUEST_ID = 4
+ENDIF
+
+
+RETURN
+;--------------------------
+; ８，ことの顛末
+;--------------------------
+@QUEST_BODY_63_SCENE_8
+#DIM QUEST_ID = 63
+#DIM 対象
+対象 = NAME_TO_CHARA("アノニム")
+
+CALL GET_STAR_ID_FROM_POS((QUEST_61_受注星) * 10000 + 707)
+QUEST_63_都市記録Ａ = RESULT
+CALL GET_STAR_ID_FROM_POS(CHARACTER_POSITION)
+QUEST_63_都市記録Ｂ = RESULT
+
+
+IF STAR_OWNER:QUEST_63_都市記録Ａ == 国家ID_社会主義
+	LOCALS = 銀河人民統一連邦
+ELSEIF STAR_OWNER:QUEST_63_都市記録Ａ == 国家ID_企業連合
+	LOCALS = 企業連合
+ELSEIF STAR_OWNER:QUEST_63_都市記録Ａ == 国家ID_民主主義
+	LOCALS = 民主主義国
+ELSEIF STAR_OWNER:QUEST_63_都市記録Ａ == 国家ID_アレス宗教
+	LOCALS = アレス宗教国
+ELSEIF STAR_OWNER:QUEST_63_都市記録Ａ == 国家ID_機械文明
+	LOCALS = 機械文明
+ELSEIF STAR_OWNER:QUEST_63_都市記録Ａ == 国家ID_豊秋津皇国
+	LOCALS = 豊秋津皇国
+ELSEIF STAR_OWNER:QUEST_63_都市記録Ａ == 国家ID_ハールバルズ
+	LOCALS = ハールバルズ王国
+ELSE
+ENDIF
+
+PRINTFORML 
+PRINTFORML 　「さて母上、此度のことは、正確には伝わらぬだろう」
+PRINTFORML 　「大凡――海賊、あるいはどこどこの国が田舎のコロニーを制圧しようとした」
+PRINTFORML 　「と言うところだ」
+PRINTFORMW 　
+PRINTFORML 　「当然、２国間の感情は悪くなるであろうな」
+PRINTFORML 　「今の人類にオールドオーダーの存在を信じさせるには無理がある」
+PRINTFORML 　「歴史書に軽く目を通したが、私（ワレラ）の計算が合っているなら」
+PRINTFORML 　「連中がいたのは入植期以前のそれから千年以上前、いや万年か？　この位前のことだぞ？」
+PRINTFORMW 
+PRINTFORML 　「――見よ母上、たった今ニュースが流れて来た」
+PRINTFORML 　%ANAME(対象)%の言う通り、%LOCALS%の侵略行為に強く抗議する声明が発表されている。
+PRINTFORML 　勿論、濡れ衣、陰謀だと%LOCALS%は主張しているが、不信の種を取り除くことはできないだろう。
+PRINTFORMW 　
+PRINTFORML 　世界に、不穏な気配が確かに忍び寄っていることを%ANAME(MASTER)%は実感している。
+PRINTFORML 
+PRINTFORMW 　………………。
+PRINTFORMW 　…………。
+PRINTFORMW 　……。
+PRINTFORMW 
+PRINTFORML 　「それはそうとして母上、新しい生体艦の話を聞くかなあ？」
+PRINTFORML 　強襲揚陸艦……と言うには少々大きすぎる何時もの様に長い生体艦の説明をしたいようだ。
+PRINTFORML 　説明を聞こうか？
+PRINTFORML 
+CALL ASK_YN("聞く","聞かない")
+IF RESULT == 1
+	PRINTFORML 　「さようか、私（ワレラ）が生体艦を用意できるのはこれで最後やも知れぬ」
+	PRINTFORML 　「まああれだけやれれば不要かも知れぬなあ？」
+	PRINTFORML 　%ANAME(対象)%はくつくつと嗤いながら、どことなく落ち着かない様子だった……。
+	PRINTFORMW 　
+ELSE
+	PRINTFORML 　「今回使ったバイシザー級生体強襲艦は、見ての通り白兵戦に特化した生体――巡洋艦だ」
+	PRINTFORML 　「ハサミが２倍だからバイシザー。単純よな」
+	PRINTFORML 　「まず武装面だが……主砲は最低のものしか積めぬが、代わりに副砲を４つ搭載できる」
+	PRINTFORML 　「現状では生体粒子ブレードを搭載しているが、これを対空砲に取り換えれば」
+	PRINTFORML 　「空母に対する備えにも出来よう」
+	PRINTFORMW 
+	PRINTFORML 　「次に、オプションを３つ積める。３つだぞお？」
+	PRINTFORML 　「これにより普通の巡洋艦には出来ぬ回避機動を取れる。良いだろう？」
+	PRINTFORML 　「まあ今は乗り込むためのコンテナが積まれているがな」
+	PRINTFORMW 
+	PRINTFORML 　「それ以外の性能は巡洋艦に準ずる。例によって改造は不可逆だからそこにだけは気を付けよ」
+	PRINTFORMW 　
+ENDIF
+CALL INIT_PRESET_SHIP(国家ID_プレイヤー, CHARACTER_POSITION, バイシザー強襲生体艦, "バイシザー強襲生体艦", バイシザー強襲生体艦)
+
+REL_LIKE_COUNTRY:(STAR_OWNER:QUEST_63_都市記録Ａ):(STAR_OWNER:QUEST_63_都市記録Ｂ) += -500
+REL_LIKE_COUNTRY:(STAR_OWNER:QUEST_63_都市記録Ｂ):(STAR_OWNER:QUEST_63_都市記録Ａ) += -500
+QUEST_PROGRESS:QUEST_ID += 10
+;--------------------------
+; ７，白兵戦
+;--------------------------
+@QUEST_BODY_63_SCENE_7
+#DIM QUEST_ID = 63
+#DIM 対象
+
+対象 = NAME_TO_CHARA("アノニム")
+
+PRINTFORML 　
+PRINTFORML 　%ANAME(MASTER)%が送り込んだ強襲部隊……を乗せた生体艦は、
+PRINTFORML 　ちょうど行政府の庭先に不時着した。
+PRINTFORML 　コロニーに多少穴は空けてしまったがコラテラルダメージだと割り切ろう。
+PRINTFORML 　幸い誰もいない区画だったし死者は居ない……筈だ。
+PRINTFORMW 
+PRINTFORML 　『警告：直ちに武器を捨て、投降せよ』
+PRINTFORML 　侵入者を討ち取る為、骨董品の思考戦機が陸戦隊に向かってきた、マシンガンを既にばらまきながら。
+PRINTFORML 　周囲を見回すと、職員と思わしき人々が口にするも憚られる屍となって転がっている。
+PRINTFORMW 
+PRINTFORML 　投降を呼びかけながら既にマシンガンをぶっ放しているのは何かの冗談のつもりだろうか？
+PRINTFORML 　見ると耳の長い痩せぎすの男……エルフが意味の分からない言語をがなり立てながら指揮を執っている。
+PRINTFORML 　どうやらあれが目標のオールドオーダーらしい。
+PRINTFORMW 
+PRINTFORML 　陸戦隊は武器を構え、突撃した。
+PRINTFORML 
+PRINTFORMW 
+
+;白兵戦参加メンバーの初期化
+CALL CC_INIT_MEMBER()
+;攻撃側キャラクターの設定(最大6名)
+FOR LOCAL, 0, CHARANUM
+	SIF ANONYM_CQC_SELECTED:LOCAL
+		CALL CC_ADDCHARA("ATTACKER", LOCAL)
+NEXT
+CALL CC_ADDMOB("DEFENDER", "ＥＤ902Ａ", 2000, 2000, 45)
+CALL CC_ADDMOB("DEFENDER", "ＥＤ902Ｂ", 2000, 2000, 45)
+CALL CC_ADDMOB("DEFENDER", "旧式思考戦車", 2400, 2000, 55)
+CALL CC_ADDMOB("DEFENDER", "洗脳された警備員Ａ", 2000, 2000, 30)
+CALL CC_ADDMOB("DEFENDER", "洗脳された警備員Ｂ", 2000, 2000, 30)
+CALL CC_ADDMOB("DEFENDER", "オールドオーダー", 4000, 4000, 75)
+;白兵戦イベント呼出
+CALL CLOSE_COMBAT()
+IF RESULT == 2
+	PRINTFORML 　
+	PRINTFORML 　%ANAME(MASTER)%が送り込んだ部隊は全滅した。
+	PRINTFORML 　作戦は失敗した……。
+	PRINTFORML 
+	PRINTFORMW 
+	CALL ANONYM_GAME_OVER
+ELSE
+	PRINTFORML 　
+	PRINTFORML 　何かを喚き散らしていた男と哀れな警備員２名はジューシーなひき肉になった。
+	PRINTFORML 　超能力は確かに強力だったがポンコツと名高い警備ドロイドは陸戦隊の敵ではない。
+	PRINTFORMW 
+	PRINTFORML 　生体艦が脱出のついでに生体反応の消え失せた行政府を吹き飛ばすと、
+	PRINTFORML 　陸戦隊は急いでコロニーを脱出した。
+	PRINTFORML 　あとは港で合流するだけだ……。
+	PRINTFORMW 
+	CALL REBOARDING_SHIP
+ENDIF
+
+
+;--------------------------
+; ６，３戦目（下側）
+; 7 = ３戦目勝利
+; 敗北（ゲームオーバー）
+;--------------------------
+@QUEST_BODY_63_SCENE_6
+#DIM QUEST_ID = 63
+#DIM SECTOR_ID
+#DIM SHIP_ID
+#DIM POS_ID
+#DIM X_POS
+#DIM Y_POS
+#DIM 対象
+対象 = NAME_TO_CHARA("アノニム")
+
+CALL ID2POS(QUEST_63_途絶都市)
+SECTOR_ID = RESULT:0
+X_POS = 14
+Y_POS = 14
+CALL POS2ID(SECTOR_ID, X_POS, Y_POS)
+POS_ID = RESULT
+
+CALL INIT_PRESET_SHIP(10, POS_ID, 汎用巡洋艦, "オールドオーダー旗艦", 汎用巡洋艦)
+SHIP_EQUIP:主砲:0:RESULT = 5
+SHIP_EQUIP:主砲:1:RESULT = 5
+SHIP_EQUIP:副砲:0:RESULT = 8
+SHIP_EQUIP:副砲:1:RESULT = 11
+SHIP_EQUIP:副砲:2:RESULT = 22
+SHIP_EQUIP:シールド:0:RESULT = 31
+SHIP_EQUIP:シールド:1:RESULT = 31
+SHIP_EQUIP:装甲:0:RESULT = 7
+SHIP_EQUIP:装甲:1:RESULT = 7
+SHIP_EQUIP:オプション:1:RESULT = 4
+FOR LOCAL, 0, 3
+	CALL INIT_PRESET_SHIP(10, POS_ID, ケンツバ級生体艦, "バグナウ級生体艦", ケンツバ級生体艦)
+	SHIP_EQUIP:装甲:0:RESULT = 39
+	SHIP_EQUIP:装甲:1:RESULT = 39
+	SHIP_EQUIP:シールド:0:RESULT = 27
+	SHIP_EQUIP:シールド:1:RESULT = 27
+	SHIP_EQUIP:シールド:2:RESULT = 27
+	SHIP_EQUIP:シールド:3:RESULT = 27
+	SHIP_EQUIP:オプション:0:RESULT = 7
+NEXT
+FOR LOCAL, 0, 5
+	CALL INIT_PRESET_SHIP(10, POS_ID, 津軽級フリゲート, "強襲白兵フリゲート艦", 津軽級フリゲート)
+	SHIP_EQUIP:主砲:0:RESULT = 60
+	SHIP_EQUIP:主砲:1:RESULT = 60
+	SHIP_EQUIP:装甲:0:RESULT = 35
+	SHIP_EQUIP:エンジン:0:RESULT = 10
+	SHIP_EQUIP:シールド:0:RESULT = 27
+	SHIP_EQUIP:AI:0:RESULT = 3
+	SHIP_EQUIP:オプション:0:RESULT = 7
+NEXT
+FOR LOCAL, 0, 3
+	CALL INIT_PRESET_SHIP(10, POS_ID, オクスタン級生体艦, "オクスタン級改", オクスタン級生体艦)
+	SHIP_EQUIP:副砲:0:RESULT = 60
+	SHIP_EQUIP:装甲:0:RESULT = 38
+	SHIP_EQUIP:エンジン:0:RESULT = 10
+	SHIP_EQUIP:シールド:0:RESULT = 27
+	SHIP_EQUIP:AI:0:RESULT = 3
+	SHIP_EQUIP:オプション:0:RESULT = 7
+NEXT
+
+
+
+
+CALL COMBAT(POS_ID)
+
+CALL QUEST_ANONYM_BATTLE_RESULT(POS_ID)
+IF RESULT == 99
+	PRINTFORML 　
+	PRINTFORML 　下部艦隊のせん滅に成功した。
+	PRINTFORML 　上部艦隊も丁度せん滅に成功したようだ。
+	PRINTFORML 　後は歩兵部隊の働きを待つだけだ。
+	PRINTFORMW 
+ELSE
+	PRINTFORML 　
+	PRINTFORML 　敵の勢力は強大で、下部艦隊は壊滅した。
+	PRINTFORML 　両方向から攻められた%ANAME(MASTER)%の艦隊は持ちこたえる事が出来ず、
+	PRINTFORML 　やがてその全てがスペースデブリへと変わった……。
+	PRINTFORMW 
+	CALL ANONYM_GAME_OVER
+ENDIF
+
+FOR LOCAL, 0, MAX_SHIP
+	SIF SHIP_COUNTRY:LOCAL != 国家ID_プレイヤー
+		CONTINUE
+	SIF SHIP_POSITION:LOCAL != POS_ID
+		CONTINUE
+	SIF ANONYM_FLEET_SELECTED:LOCAL != 0
+		CONTINUE
+	SHIP_POSITION:LOCAL = QUEST_63_途絶都市
+NEXT
+
+
+;--------------------------
+; ５，２戦目（上側）
+; 6 = ２戦目勝利
+; 敗北（ゲームオーバー）
+;--------------------------
+@QUEST_BODY_63_SCENE_5
+#DIM QUEST_ID = 63
+#DIM SECTOR_ID
+#DIM SHIP_ID
+#DIM POS_ID
+#DIM X_POS
+#DIM Y_POS
+#DIM 対象
+対象 = NAME_TO_CHARA("アノニム")
+
+CALL ID2POS(QUEST_63_途絶都市)
+SECTOR_ID = RESULT:0
+X_POS = 14
+Y_POS = 14
+CALL POS2ID(SECTOR_ID, X_POS, Y_POS)
+POS_ID = RESULT
+
+
+
+FOR LOCAL, 0, MAX_SHIP
+	SIF SHIP_COUNTRY:LOCAL != 国家ID_プレイヤー
+		CONTINUE
+	SIF SHIP_POSITION:LOCAL != QUEST_63_途絶都市
+		CONTINUE
+	SIF ANONYM_FLEET_SELECTED:LOCAL != 0
+		CONTINUE
+	SHIP_POSITION:LOCAL = POS_ID
+NEXT
+
+
+PRINTFORML 　
+PRINTFORML 　上部方面に向かった艦隊が敵艦隊と対峙する。
+PRINTFORML 　敵艦隊は不自然な程に静かだ……。
+PRINTFORMW 　
+PRINTFORML 　とは言え、今更引き下がるつもりはない。
+PRINTFORML 　戦闘準備を整え、命令を下した。
+PRINTFORMW 
+
+
+CALL INIT_PRESET_SHIP(10, QUEST_63_途絶都市, 汎用巡洋艦, "オールドオーダー旗艦", 汎用巡洋艦)
+SHIP_EQUIP:主砲:0:RESULT = 5
+SHIP_EQUIP:主砲:1:RESULT = 5
+SHIP_EQUIP:副砲:0:RESULT = 8
+SHIP_EQUIP:副砲:1:RESULT = 11
+SHIP_EQUIP:副砲:2:RESULT = 22
+SHIP_EQUIP:シールド:0:RESULT = 31
+SHIP_EQUIP:シールド:1:RESULT = 31
+SHIP_EQUIP:装甲:0:RESULT = 7
+SHIP_EQUIP:装甲:1:RESULT = 7
+SHIP_EQUIP:オプション:1:RESULT = 4
+
+FOR LOCAL, 0, 3
+	CALL INIT_PRESET_SHIP(10, QUEST_63_途絶都市, ケンツバ級生体艦, "バグナウ級生体艦", ケンツバ級生体艦)
+	SHIP_EQUIP:装甲:0:RESULT = 27
+	SHIP_EQUIP:装甲:1:RESULT = 27
+	SHIP_EQUIP:シールド:0:RESULT = 31
+	SHIP_EQUIP:シールド:1:RESULT = 31
+	SHIP_EQUIP:シールド:2:RESULT = 31
+	SHIP_EQUIP:シールド:3:RESULT = 31
+NEXT
+FOR LOCAL, 0, 2
+	CALL INIT_PRESET_SHIP(10, QUEST_63_途絶都市, ケンツバ級生体艦, "ガントレット級生体艦", ケンツバ級生体艦)
+	SHIP_EQUIP:主砲:0:RESULT = 44
+	SHIP_EQUIP:シールド:0:RESULT = 31
+	SHIP_EQUIP:シールド:1:RESULT = 31
+	SHIP_EQUIP:シールド:2:RESULT = 31
+	SHIP_EQUIP:シールド:3:RESULT = 31
+NEXT
+FOR LOCAL, 0, 4
+	CALL INIT_PRESET_SHIP(10, QUEST_63_途絶都市, 汎用フリゲート, "オールドオーダー護衛艦", 汎用フリゲート)
+	SHIP_EQUIP:主砲:0:RESULT = 45
+	SHIP_EQUIP:主砲:1:RESULT = 21
+	SHIP_EQUIP:シールド:0:RESULT = 30
+	SHIP_EQUIP:装甲:0:RESULT = 23
+NEXT
+
+CALL COMBAT(QUEST_63_途絶都市)
+
+CALL QUEST_ANONYM_BATTLE_RESULT(QUEST_63_途絶都市)
+IF RESULT == 99
+	PRINTFORML 　
+	PRINTFORML 　上部艦隊のせん滅に成功した。
+	PRINTFORML 　一方、下部艦隊はと言うと……。
+	PRINTFORML 　
+	PRINTFORMW 
+ELSE
+	PRINTFORML 　
+	PRINTFORML 　敵の勢力は強大で、上部艦隊は壊滅した。
+	PRINTFORML 　両方向から攻められた%ANAME(MASTER)%の艦隊は持ちこたえる事が出来ず、
+	PRINTFORML 　やがてその全てがスペースデブリへと変わった……。
+	PRINTFORMW 
+	CALL ANONYM_GAME_OVER
+ENDIF
+
+
+
+
+
+
+;--------------------------
+; ４，信号途絶都市
+; 5 = １戦目勝利
+; 6 = １戦目敗北
+;--------------------------
+@QUEST_BODY_63_SCENE_4
+#DIM QUEST_ID = 63
+#DIM SECTOR_ID
+#DIM SHIP_ID
+#DIM POS_ID
+#DIM X_POS
+#DIM Y_POS
+#DIM 対象
+対象 = NAME_TO_CHARA("アノニム")
+
+
+CALL ID2POS(CHARACTER_POSITION)
+SECTOR_ID = RESULT:0
+X_POS = RESULT:1
+Y_POS = RESULT:2
+CALL POS2ID(SECTOR_ID, X_POS, Y_POS)
+POS_ID = RESULT
+
+PRINTFORML 
+PRINTFORML 　%ANAME(MASTER)%はコロニーをレーダーに収められる場所までやってきた。
+PRINTFORM 　レーダーには既に……
+
+CALL GET_STAR_ID_FROM_POS((QUEST_61_受注星) * 10000 + 707)
+LOCALS = %COUNTRY_NAME:(STAR_OWNER:RESULT)%
+PRINTFORML %LOCALS%の大艦隊が待ち構えていた！
+PRINTFORMW 
+PRINTFORML 　「母上、後戻りはできんぞ？　向こう側も気付いた故にな」
+PRINTFORML 　%ANAME(対象)%に言われるまでもない。
+PRINTFORMW 
+PRINTFORML 　%ANAME(MASTER)%は艦隊に攻撃を命令した。
+PRINTFORML 　
+
+FOR SHIP_ID, 0, 12
+	CALL INIT_PRESET_SHIP(10, POS_ID, 汎用フリゲート, "防衛用フリゲート", 汎用フリゲート)
+	SHIP_EQUIP:主砲:0:RESULT = 44
+	SHIP_EQUIP:エンジン:0:RESULT = 5
+	SHIP_EQUIP:AI:0:RESULT = 2
+NEXT
+FOR SHIP_ID, 0, 7
+	CALL INIT_PRESET_SHIP(10, POS_ID, 汎用駆逐艦, "駆逐艦", 汎用駆逐艦)
+	SHIP_EQUIP:主砲:0:RESULT = 21
+	SHIP_EQUIP:シールド:0:RESULT = 30
+	SHIP_EQUIP:装甲:0:RESULT = 25
+	SHIP_EQUIP:装甲:1:RESULT = 25
+NEXT
+FOR SHIP_ID, 0, 3
+	CALL INIT_PRESET_SHIP(10, POS_ID, 汎用巡洋艦, "長射程攻撃艦", 汎用巡洋艦)
+	SHIP_EQUIP:主砲:0:RESULT = 3
+	SHIP_EQUIP:主砲:1:RESULT = 3
+	SHIP_EQUIP:装甲:0:RESULT = 11
+	SHIP_EQUIP:装甲:1:RESULT = 11
+NEXT
+CALL COMBAT(CHARACTER_POSITION:MASTER)
+
+CALL QUEST_ANONYM_BATTLE_RESULT()
+
+IF RESULT == 99
+	PRINTFORML 　
+	PRINTFORML 　第一波の艦隊をデブリに変えてやった。
+	PRINTFORML 　しかし、まだ敵戦力は残っている。
+	PRINTFORMW 
+	PRINTFORML 　「母上よ、誰を送り込むか決めたか？」
+	PRINTFORML 　「送り込むための艦は用意した故、それに乗せるが」
+	PRINTFORML 　見ると凄まじく速そうな生体艦がこちらに信号を送っている。
+	PRINTFORML 　ケンツバ級の応用で戦艦の主砲に撃たれようが数回は耐えきれるらしい。
+	PRINTFORML 　いつの間に用意したのだろう……。
+	PRINTFORMW 
+	PRINTFORML 　「ここで送った戦力は艦隊戦には参加できぬ」
+	PRINTFORML 　「良いか母上？　送るなら思考戦車などがいいであろう」
+	PRINTFORML 　%ANAME(MASTER)%は頷くと、白兵戦に挑む戦力を選び始めた……。
+	PRINTFORMW 　
+	$CQC_LOOP
+	CALL QUEST_ANONYM_SQUAD_CHOICE
+	FINDELEMENT ANONYM_CQC_SELECTED, 1
+	IF RESULT == -1
+		PRINTFORML 　「なんだ母上、キャンセルなど出来ぬぞ」
+		PRINTFORMW 　
+		CLEARLINE LINECOUNT
+		GOTO CQC_LOOP
+	ENDIF
+	CALL QUEST_ANONYM_SPLIT_FLEET("上部艦隊に向かわせる艦を選択してください")
+	CALL QUEST_BODY_63_SCENE_5
+	CALL QUEST_BODY_63_SCENE_6
+	CALL QUEST_BODY_63_SCENE_7
+ELSE
+	PRINTFORML 　敵戦力は強大だ。
+	PRINTFORML 　%ANAME(MASTER)%は一旦港へ撤退することにした。
+	CHARACTER_POSITION:MASTER = (SECTOR_ID * 10000) + 707
+	CALL INIT_PRESET_SHIP(国家ID_プレイヤー, (CHARACTER_POSITION:MASTER), 汎用コルベット, "損傷したコルベット", 汎用コルベット)
+	BOARDING_SHIP_ID:(MASTER) = RESULT
+	SHIP_DAMAGE:RESULT = 740
+	QUEST_PROGRESS:QUEST_ID = 4
+ENDIF
+;--------------------------
+; ２，話の続き
+; 3 = 作戦説明へ
+;--------------------------
+@QUEST_BODY_63_SCENE_2
+#DIM QUEST_ID = 63
+#DIM 対象
+対象 = NAME_TO_CHARA("アノニム")
+
+PRINTFORML 　
+PRINTFORMW 　「浅層次元巡航艦検知……反応なし」
+PRINTFORMW 　「マトリクス……オフライン」
+PRINTFORMW 　「遡行参照実行……該当なし」
+PRINTFORML 　「此処ならば絶対に聞かれる心配は無い」
+PRINTFORML 　%ANAME(対象)%が指定した座標は暗黒宙域、と呼べるような往来の一切ない場所だった。
+PRINTFORMW 
+PRINTFORML 　「さて母上、まずは良い報せからだ」
+PRINTFORML 　「あの端末を解析した結果、私(ワレラ)の能力がより洗練されたものになった」
+PRINTFORML 　「具体的に言えば、白兵戦力、操艦能力、超能力のいずれかをより強力なものに調整できる」
+PRINTFORML 　「全てを選んでも良し、それはトータルでは勝るが一点では劣ろう」
+PRINTFORMW 
+PRINTFORML 　「まずはいずれかを選ぶが良い、無回答は全てと扱うぞお？」
+PRINTFORML 
+CALL ASK_MULTI("白兵", "操艦", "超能力","全部で")
+PRINTFORML 
+IF RESULT == 0
+	ABL:対象:白兵 += 10
+	CALL COLOR_PRINTL(@"　アノニムの白兵が１０上がった！", カラー_注意)
+ELSEIF RESULT == 1
+	ABL:対象:操艦 += 10
+	CALL COLOR_PRINTL(@"　アノニムの操艦が１０上がった！", カラー_注意)
+ELSEIF RESULT == 2
+	ABL:対象:超能力 += 10
+	CALL COLOR_PRINTL(@"　アノニムの超能力が１０上がった！", カラー_注意)
+ELSE
+	ABL:対象:白兵 += 4
+	ABL:対象:操艦 += 4
+	ABL:対象:超能力 += 4
+	CALL COLOR_PRINTL(@"　アノニムの白兵が　４上がった！", カラー_注意)
+	CALL COLOR_PRINTL(@"　アノニムの操艦が　４上がった！", カラー_注意)
+	CALL COLOR_PRINTL(@"　アノニムの超能力が４上がった！", カラー_注意)
+ENDIF
+PRINTFORML 
+PRINTFORML 　「よし、これで良い。ふふ、力の一端が戻って来たのを感じるぞお？　ン？」
+PRINTFORML 　「さて此処からは悪い報せだ」
+PRINTFORML 　「私（ワレラ）を好き勝手にしてくれた連中が蘇った」
+PRINTFORMW 
+PRINTFORML 　「この銀河ではエルフと呼ばれている連中の、特に――気の遠くなるほど旧い奴等だ」
+PRINTFORML 　「名が無いのも不便だからオールドオーダーと呼ぶのが良かろう」
+PRINTFORML 　「敢えてこう呼ぶのは、現行のエルフとは白と黒ほどの差があるからだ」
+PRINTFORML 　%ANAME(対象)%が彼らを憎んでいることだけは理解した。
+PRINTFORMW 
+PRINTFORML 　「さて、手始めにコロニーの１つを乗っ取って勢力を伸ばすつもりだ」
+PRINTFORML 　「連中は以前遭遇した海賊連中とは違って完全な制御能力を持っておる」
+PRINTFORML 　「流石に母上の胎を経由した私（ワレラ）や、私が制御した艦には効かぬが」
+PRINTFORMW 
+PRINTFORML 　「それでも奴らが強大であることには変わりはあるまい」
+PRINTFORM 　「現時点で相当な戦力――
+CALL COLOR_PRINT(@"巡洋艦クラスの戦力は揃っている", カラー_注意)
+PRINTFORML と見て良い」
+PRINTFORMW 
+PRINTFORML 　「そしてもう１つ。此方の方が大変かもしれぬ」
+PRINTFORM 　「都市に逃げ込んだ奴等を
+CALL COLOR_PRINT(@"白兵戦で確実に始末する", カラー_注意)
+PRINTFORML 必要がある」
+PRINTFORMW 
+PRINTFORML 　「白兵戦力は整っておるか？　６人程……１小隊は欲しい」
+PRINTFORML 　「足りぬのであれば思考戦車でも買うと良いぞお？」
+PRINTFORML 　「ターロスクラスが２体ほどいれば負けんであろう」
+PRINTFORML 　「私（ワレラ）がそこに居ればなおよい」
+PRINTFORMW 
+
+;--------------------------
+; ３，作戦説明
+; 4 = 作戦開始
+;--------------------------
+@QUEST_BODY_63_SCENE_3
+#DIM QUEST_ID = 63
+#DIM 対象
+対象 = NAME_TO_CHARA("アノニム")
+
+PRINTFORML 　「逃げ込んだと思われるのは{ANONYM_SECTOR}：{ANONYM_X_POS,2,RIGHT}：{ANONYM_Y_POS,2,RIGHT}だ。」
+PRINTFORML 　「文字で説明するのもアレだしモニターに映すぞ母上」
+PRINTFORMW 　
+CLEARLINE LINECOUNT
+PRINTL 
+PRINTL 
+PRINTFORML 　　■━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━■
+PRINTFORML 　　┃　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　┃
+PRINTFORML 　　┃　　　　　　　　　　ALLIANCE　　　　　　ENEMY 　　　　　　　　　＜　　　　　　　　　　　　　・　　　┃
+PRINTFORML 　　┃　　　　　　　　　／￣￣￣￣　　　　　　￣￣￣＼　　　　　　　　＜　　　　　　　　　・　　　　　　　┃
+PRINTFORML 　　┃　　　　　　　　／　　　　　　　　　　　　　　　＼　　　　　　　＜　　　　　　　　　　　　　　　　　┃
+PRINTFORML 　　┃　・　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　┃
+PRINTFORML 　　┃　　　　　　　　　　　　　　　　　　・　　　　　　　　　　　＜　　　　■■■■■　　　　　　　　　　┃
+PRINTFORML 　　┃　　　　　＞　　　　　　　　　　　　　　　　　　　　　　　　＜　　　■■■■■■■　　　　　　　　　┃
+PRINTFORML 　　┃　　　　　＞　　　　　　　　　　　　　　　　　　　　　　　　＜　　　■■■■■■■　　　　　　　　　┃
+PRINTFORML 　　┃　　　　　＞　　　　　　　　　　　　　　　　　　　　　　　　　　　　■■■■■■■　　　　　　　　　┃
+PRINTFORML 　　┃　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　■■■■■■■　　　　　　　　　┃
+PRINTFORML 　　┃　　　　　　　　　　　　・　　　　　　　　　　　　　　＜　　　　　　■■■■■■■　　　　　　　　　┃
+PRINTFORML 　　┃　　・　　　＞　　　　　　　　　　　　　　　　　　　　＜　　　　　　■■■■■■■　　　　　　　　　┃
+PRINTFORML 　　┃　　　　　　＞　　　　　　　　　　　　　　　　　　　　＜　　　　　　■■■■■■■　　　　　　　　　┃
+PRINTFORML 　　┃　　　　　　＞　　　　　　　　　　　　　　　　　・　　　　　　　　　■■■■■■■　　　　　　　　　┃
+PRINTFORML 　　┃　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　＜　　　■■■■■■■　　　　　　　　　┃
+PRINTFORML 　　┃　　　　＞　　　　　　　　　　　　　　　　　　　　　　　　　＜　　　■■■■■■■　　　　　　　　　┃
+PRINTFORML 　　┃　　　　＞　　　　　　　　　　　　・　　　　　　　　　　　　＜　　　■■■■■■■　　　　　　　　　┃
+PRINTFORML 　　┃　　　　＞　　　　　　　　　　　　　　　　　　　　　　　　　　　　　■■■■■■■　　　　　・　　　┃
+PRINTFORML 　　┃　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　■■■■■■■　　　　　　　　　┃
+PRINTFORML 　　┃　　　　　　　　　　　　　　　　　　　　　　　　　　　＜　　　　　　■■■■■■■　　　　　　　　　┃
+PRINTFORML 　　┃　　　　　　　　　　　　　・　　　　　　　　　　　　　＜　　　　　　　■■■■■　　　　　　　　　　┃
+PRINTFORML 　　┃　　　　　　　　　　　　　　　　　　　　　　　　　　　＜　　　　　　　　　　　　　＼　　　　　　　　┃
+PRINTFORML 　　┃　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　＼COLONY　　　　┃
+PRINTFORML 　　┃　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　＜　　　　　　　　　￣￣￣　　　　┃
+PRINTFORML 　　┃　　・　　　　　・　　　　　　　　　・　　　　　＜　　　　　　　　＜　　　　　　　　　　　　　　　　┃
+PRINTFORML 　　┃　　　　　　　　　　　　　　　　　　　　　　　　＜　　　　　　　　＜　　　　　　　　　　　　　　　　┃
+PRINTFORML 　　┃　　　　　　　　　　　　　　　　　　　　　　　　＜　　　　　　　　　　　　　　　＜　　　　　　　　　┃
+PRINTFORML 　　┃　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　＜　　　　　　　　　┃
+PRINTFORML 　　┃　　　　　　　・　　　　　・　　　　　　　　　　　　　　　　・　　　　　　　　　＜　　　┌─────┨
+PRINTFORML 　　┃　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　│{ANONYM_SECTOR}：{ANONYM_X_POS,2,RIGHT}：{ANONYM_Y_POS,2,RIGHT}┃
+PRINTFORML 　　■━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┷━━━━━■
+CALL QUEST_63_TEXT("見ての通りコロニー周辺には","多数の艦隊が展開しておる。","これをどうにかせぬことには近づく事もままならぬ。")
+CALL QUEST_63_TEXT("最低でもこの一角を撃破し、","行政区に居るだろう","オールドオーダーを討ち取るのが作戦の流れだ")
+CALL QUEST_63_TEXT("斬首戦術で良いのかと？","奴等さえ居なくなれば洗脳など","私（ワレラ）で解除できるとも。")
+
+CLEARLINE LINECOUNT
+PRINTL 
+PRINTL 
+PRINTFORML 　　■━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━■
+PRINTFORML 　　┃　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　┃
+PRINTFORML 　　┃　　　　　　　　　　　　　　　　　　　　ENEMY 　　　　　　　　　　　　　　　　　　　　　　　・　　　┃
+PRINTFORML 　　┃　　　　　　　　　　　　　　　　　　　　￣￣￣＼　　　　　　　　　　　　　　　　　　・　　　　　　　┃
+PRINTFORML 　　┃　　　　　　　　　　　　　　　　　　　　　　　　＼　　　　　∨　∨　　　　　　　　　　　　　　　　　┃
+PRINTFORML 　　┃　・　　　　　　　　　　　　　　　　　　　　　∨　∨　　　　　　　∨　　　　　　　　　　　　　　　　┃
+PRINTFORML 　　┃　　　　　　　　　　　　　　　　　　・　　　　　　　　∨　∨　　　　　■■■■■　　　　　　　　　　┃
+PRINTFORML 　　┃　　　　　　　　　　　　　　　　　　　　　　∨　　　●　　　●　　　■■■■■■■　　　　　　　　　┃
+PRINTFORML 　　┃　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　■■■■■■■　　　　　　　　　┃
+PRINTFORML 　　┃　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　■■■■■■■　　　　　　　　　┃
+PRINTFORML 　　┃　　　　　　　　　　　　　　　　　　　　　　　●　　　　　　　　　　■■■■■■■　　　　　　　　　┃
+PRINTFORML 　　┃　　　　　　　　　　　　・　　　　　　　　　∧　　∧∧∧　∧∧∧　　■■■■■■■　　　　　　　　　┃
+PRINTFORML 　　┃　　・　　　　　　　　　　　　　　●●　　∧　　　　　　　　　　　　■■■■■■■　　　　　　　　　┃
+PRINTFORML 　　┃　　　　　　　　　　　　　　　　　　　　　　　∧　　　　　●　＞　　■■■■■■■　　　　　　　　　┃
+PRINTFORML 　　┃　　　　　　　　　　　　　　　　　　　　　　　　・＞　　　　　　＞　■■■■■■■　　　　　　　　　┃
+PRINTFORML 　　┃　　　　　　　　　　　　　　　　●　　　　／　　　　＞　　　●＞　　■■■■■■■　　　　　　　　　┃
+PRINTFORML 　　┃　　　　　　　　　　　　　　　　ALLIANCE／　　　　＞　　　　　　　　■■■■■■■　　　　　　　　　┃
+PRINTFORML 　　┃　　　　　　　　　　　　　　　　￣￣￣￣・　　∨　　　　●　∨　　　■■■■■■■　　　　　　　　　┃
+PRINTFORML 　　┃　　　　　　　　　　　　　　　　　　　　　　　　∨●∨　　∨　●　　■■■■■■■　　　　　・　　　┃
+PRINTFORML 　　┃　　　　　　　　　　　　　　　　　　　　　　　　　　　●　　　　　　■■■■■■■　　　　　　　　　┃
+PRINTFORML 　　┃　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　■■■■■■■　　　　　　　　　┃
+PRINTFORML 　　┃　　　　　　　　　　　　　・　　　　　　　　　　　　　　　　　∧　　　■■■■■　　　　　　　　　　┃
+PRINTFORML 　　┃　　　　　　　　　　　　　　　●　　　　　　　　　∧　　∧　　　　　　　　　　　　＼　　　　　　　　┃
+PRINTFORML 　　┃　　　　　　　　　　　　　　　　　　　　　　∧　　　∧　　　∧　　　　　　　　　　　＼COLONY　　　　┃
+PRINTFORML 　　┃　　　　　　　　　　　　　　　　　　　　／　　　　　　　　　　　　＜　　　　　　　　　￣￣￣　　　　┃
+PRINTFORML 　　┃　　・　　　　　・　　　　　　　ENEMY ／　　　　　　　　●　　　　＜　　　　　　　　　　　　　　　　┃
+PRINTFORML 　　┃　　　　　　　　　　　　　　　　￣￣￣　　　　　　　　●　　　　　＜　　　　　　　　　　　　　　　　┃
+PRINTFORML 　　┃　　　　　　　　　　　　　　　　　　　　　　　●　　　　　　　　　　　　　　　　＜　　　　　　　　　┃
+PRINTFORML 　　┃　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　＜　　　　　　　　　┃
+PRINTFORML 　　┃　　　　　　　・　　　　　・　　　　　　　　　　　　　　　　・　　　　　　　　　＜　　　┌─────┨
+PRINTFORML 　　┃　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　│{ANONYM_SECTOR}：{ANONYM_X_POS,2,RIGHT}：{ANONYM_Y_POS,2,RIGHT}┃
+PRINTFORML 　　■━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┷━━━━━■
+CALL QUEST_63_TEXT("ここまで済めば次は白兵戦だ","行政区を抑える部隊と","それを維持する艦隊が必要になる")
+CALL QUEST_63_TEXT("両面の敵に艦を割り振る必要が出る訳だなあ","見た所上部は高耐久の艦","下部は回避力の高い艦を揃えているようだ")
+CALL QUEST_63_TEXT("この２つの艦隊を撃破、","或いは脱出まで持ちこたえる必要がある","")
+CALL QUEST_63_TEXT("白兵部隊は討ち取り次第撤収、","あとは軍部がどうとでも料理するであろう","")
+
+CLEARLINE LINECOUNT
+PRINTFORML 
+PRINTFORML 　「さて母上、準備を整えたなら指定した座標まで行くぞ」
+PRINTFORML 　「念は押しておくが母上、１戦目を消化試合に出来なければ２戦目はまず勝てんぞ」
+PRINTFORMW 
+;--------------------------
+; モニターにテキストを映す処理
+;--------------------------
+@QUEST_63_TEXT(ARGS:0,ARGS:1,ARGS:2)
+#DIM WINDOW_COUNT
+
+WINDOW_COUNT = LINECOUNT
+
+PRINTFORML 　　┃　
+PRINTFORML 　　┃　%ARGS:0%
+PRINTFORML 　　┃　%ARGS:1%
+PRINTFORML 　　┃　%ARGS:2%
+PRINTFORML 　　┃　
+PRINTFORMW 　　■━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━■
+
+CLEARLINE LINECOUNT - WINDOW_COUNT
+
+;--------------------------
+; ０，ことのあらまし
+; 1 = ランダム作成
+;--------------------------
+@QUEST_BODY_63_SCENE_0
+#DIM QUEST_ID = 63
+#DIM 対象
+#DIM 勝敗
+対象 = NAME_TO_CHARA("アノニム")
+
+CALL GET_STAR_ID_FROM_POS((QUEST_61_受注星) * 10000 + 707)
+QUEST_63_都市記録Ａ = RESULT
+CALL GET_STAR_ID_FROM_POS(CHARACTER_POSITION)
+QUEST_63_都市記録Ｂ = RESULT
+PRINTFORML 　
+PRINTFORML 　%ANAME(MASTER)%が%ANAME(対象)%と共に街中を歩いていると、
+PRINTFORML 　突如として路地から一人の男が転がり出て来た。
+PRINTFORML 　どう見てもカタギではないが、%ANAME(MASTER)%を見ると「助けてくれ！」と縋り付いて来た。
+PRINTFORML 　男は異様に震え、股間からは生暖かい液体がこぼれている……。
+PRINTFORMW 　
+PRINTFORML 　「母上よ、コイツをどうこうしている暇はないぞ。錯乱に分類される信号を感知した」
+PRINTFORML 　逃げられない様に触手で絡め取りながら、%ANAME(対象)%が路地裏を指すと、
+PRINTFORML 　そこには人型をした触手……いや、触手と融合した男が居た。
+PRINTFORML 　少なくとも、逃げたり、話し合いが成立しそうな相手ではない事は確実だ。
+PRINTFORMW 
+IF ABL:MASTER:白兵 < 30
+	PRINTFORML 　「母上は私（ワレラ）の後ろに下がっているが良い。流れ弾は来るやもしれぬが」
+ELSEIF ABL:MASTER:白兵 < 60
+	PRINTFORML 　「ふむ、まあ母上と私（ワレラ）ならどうとでもなりそうな相手だな」
+ELSEIF ABL:MASTER:白兵 < 90
+	PRINTFORML 　「負けはせんだろうが、油断はせぬようにな」
+ELSE
+	PRINTFORML 　「負ける方が難しいだろう、とっとと捕縛するぞ母上」
+ENDIF
+PRINTFORML 　%ANAME(MASTER)%はブラスターを構えて、正気には見えないそれと向かい合った。
+PRINTFORMW 　
+
+CALL CC_INIT_MEMBER()
+CALL CC_ADDCHARA("ATTACKER", MASTER)
+CALL CC_ADDCHARA("ATTACKER", 対象)
+CALL CC_ADDMOB("DEFENDER", "融合人間", 1200, 1200, 55)
+
+CALL CLOSE_COMBAT()
+勝敗 = RESULT
+
+PRINTFORML 
+PRINTFORMW 　………………。
+PRINTFORMW 　…………。
+PRINTFORMW 　……。
+PRINTFORML 
+;CLOSE_COMBAT()の戻り値は1 = 攻撃側勝利, 2 = 防御側勝利
+PRINTFORML
+IF 勝敗 == 1
+	CALL CC_ADD_COMBAT_EXP(15)
+	PRINTFORML 　「ふん、この程度なら相手にもならぬ、なあ？」
+	PRINTFORML 　「ちょっと制御を乗っ取るから待っておるが良い」
+	PRINTFORMW 
+	PRINTFORML 　「え？　引き渡した方が良い？　制御が先でも大差なかろうよ」
+	PRINTFORML 　そう言うと%ANAME(対象)%は、宙吊りにした男と視線を交わし、触手が分離した。
+	PRINTFORML 　どうやら男の命に別状は無いようだ、右腕とか色々無くなってはいるが。
+	PRINTFORMW 
+	PRINTFORML 　「別に必要もないのに殺す事はなかろう」
+	PRINTFORML 　「今乗っ取った端末――制御ハイヴが持っていた情報を照らし合わせたところ」
+	PRINTFORML 　「どうも私（ワレラ）を制御する技術を得た（制御できるとは言っていない）様だな」
+	PRINTFORML 　「コイツ等も目ぼしい情報を持っていないからなあ。別に放しても良かろう」
+	PRINTFORMW 
+	PRINTFORML 　「そしてその技術の出所も大凡判明した」
+	PRINTFORML 　「ただ、ここで話す事は出来ん」
+	PRINTFORML 　「後で話そうぞ」
+	PRINTFORMW 
+	PRINTFORML 　かなり重要な情報のようだ。後で聞かれないような場所で話を聞こう。
+	PRINTFORMW 
+ELSE 
+	CALL CC_ADD_COMBAT_EXP(5)
+	PRINTFORML 　「チッ！　オォォォプン――ゲットォォォォ！」
+	PRINTFORML 　肉を切らせて骨を断つ、触手人間の攻撃が%ANAME(対象)%の心臓部分を捉えた瞬間、
+	PRINTFORML 　ちょうど３人分のサイズに分離した%ANAME(対象)%（頭担当）が触手人間の首を引きちぎり、
+	PRINTFORML 　そのまま胴体担当が頭があった場所に植わって体の制御を奪い取る。
+	PRINTFORMW 　
+	PRINTFORML 　「いや、普通は斯様な曲芸みたいなことはせんのだが……どこで衰えたのかなあ？」
+	PRINTFORML 　脚担当の%ANAME(対象)%が首を傾げているが、何はともかく触手人間は止まった。
+	PRINTFORMW 
+	PRINTFORML 　「それに……うっかり殺してしまったのは不味いな。うん」
+	PRINTFORML 　騒ぎを聞きつけた警察に事情を説明し、解放されたのは日付も変わってのことだった。
+	PRINTFORML 　%ANAME(対象)%から話があるらしい。後で聞きに行こう。
+	PRINTFORMW 
+ENDIF
+
+QUEST_PROGRESS:QUEST_ID = 1
+
+RETURN

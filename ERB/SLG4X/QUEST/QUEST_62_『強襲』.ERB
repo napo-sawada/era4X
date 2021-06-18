@@ -36,7 +36,7 @@ RETURN 0
 ; クエストの名前を返却
 ;--------------------------
 @QUEST_NAME_62
-RESULTS = 『 強襲 』― 悪性変異研究所 ―
+RESULTS = 『 強襲 』― 増殖悪性変異 ―
 RETURN
 
 ;--------------------------
@@ -47,7 +47,7 @@ RETURN
 ;--------------------------
 @QUEST_SET_TILE_62 (ARG:0)
 	RESULTS '= "▲"
-	SETCOLOR 0x6C0C00
+	SETCOLOR 0xB40000
 RETURN 1
 
 ;;;右下小窓に出す。隠したければ関数コメントアウトか RETURN 0
@@ -105,9 +105,9 @@ FOR ITER, 0 ,100
 		Y_POS = RESULT %100
 		CALL POS2ID(QUEST_61_受注星, X_POS, Y_POS)
 		QUEST_62_研究所 = RESULT
-		QUEST_62_SECTOR = QUEST_61_受注星
-		QUEST_62_X_POS  = X_POS
-		QUEST_62_Y_POS  = Y_POS
+		ANONYM_SECTOR = QUEST_61_受注星
+		ANONYM_X_POS  = X_POS
+		ANONYM_Y_POS  = Y_POS
 		CLEARMAP:QUEST_61_受注星:X_POS:Y_POS = 明瞭
 		RETURN
 	ENDIF
@@ -163,7 +163,7 @@ ELSEIF QUEST_PROGRESS:QUEST_ID >= 0
 	CASE 3
 		PRINTFORML 　
 		PRINTFORML 　目的地に向かおう。
-		PRINTFORML 　目的地は{QUEST_62_SECTOR}:{QUEST_62_X_POS}:{QUEST_62_Y_POS}だ。
+		PRINTFORML 　目的地は{ANONYM_SECTOR}:{ANONYM_X_POS}:{ANONYM_Y_POS}だ。
 		PRINTFORML 　
 		PRINTFORMW 　
 	CASE 6
@@ -209,6 +209,7 @@ PRINTFORML 　少なくとも艦の１隻や２隻ではどうにもならない
 PRINTFORMW 　
 PRINTFORML 　「母上、補填にはならぬだろうが１隻の生体艦の制御を乗っ取ることは出来てなあ」
 PRINTFORML 　「耐久力に長ける生体艦、ケンツバ級を加えておいたぞお？」
+PRINTFORMW 　
 PRINTFORML 　%ANAME(MASTER)%が端末を見ると見慣れない名前の艦が加わっていた。
 PRINTFORML 　そして作戦の支援報酬として３０万クレジットが振り込まれた！
 PRINTFORMW 
@@ -259,6 +260,7 @@ IF RESULT == 1
 ELSE
 	PRINTFORML 　「まずはケンツバ級、最初に発見されたのが豊秋津皇国周辺でな」
 	PRINTFORML 　「ケンツバ……セスタスの様な見た目をしていることからそう名前が付いた」
+	PRINTFORMW 　
 	PRINTFORML 　「コヤツめの役割は“盾”よ。攻撃を防ぐ盾となって後続が敵を討つ」
 	PRINTFORML 　「裏を返せば、後続の火力が足りなければ十分な働きが出来ぬという事だ」
 	PRINTFORML 　「そして、それ以外のことは殆ど出来ぬ。火力は一切期待出来ぬぞ」
@@ -267,6 +269,7 @@ ELSE
 	PRINTFORMW 
 	PRINTFORML 　「次の生体艦はオクスタン級。これは王国で最初に出現が確認され」
 	PRINTFORML 　「その“バジョウソウ”の様な見た目から名前が付いた」
+	PRINTFORMW 　
 	PRINTFORML 　「大きさの割に大きな砲口――波動砲のつるべ打ちで敵を倒す艦だな」
 	PRINTFORML 　「例によってそれ以外は一切出来ん。前衛が倒れればそのまま狩られる運命よ」
 	PRINTFORML 　「とは言え、精度には優れておるから、軽量の艦は近づかれる前に狩れるであろうな」
@@ -299,7 +302,6 @@ RETURN
 #DIM Y_POS_2
 #DIM ITER
 #DIM QUEST_ID = 62
-#DIM SHIP_COUNT
 #DIM アニー
 
 アニー = NAME_TO_CHARA("アノニム")
@@ -320,7 +322,6 @@ CALL INIT_PRESET_SHIP(10, POS_ID, オクスタン級生体艦, "浮遊砲台？"
 CALL INIT_PRESET_SHIP(10, POS_ID, 汎用コルベット,"寄生コルベット", 汎用コルベット)
 CALL INIT_PRESET_SHIP(10, POS_ID, 汎用コルベット,"寄生コルベット", 汎用コルベット)
 CALL INIT_PRESET_SHIP(10, POS_ID, 汎用コルベット,"寄生コルベット", 汎用コルベット)
-SHIP_COUNT = 8
 
 PRINTFORML 　更に生体艦がワープアウトして来た。
 PRINTFORML 　先程よりも戦力は劣っているようだが一切油断はできない。
@@ -329,7 +330,7 @@ PRINTFORMW
 
 CALL COMBAT(CHARACTER_POSITION:MASTER)
 
-CALL QUEST_BODY_62_BATTLE_RESULT(SHIP_COUNT)
+CALL QUEST_ANONYM_BATTLE_RESULT()
 
 IF RESULT == 99
 	PRINTFORML 　「よし、この位で良いであろう。どれ、ちょっと制御を乗っ取って来るぞお」
@@ -371,7 +372,6 @@ ENDIF
 #DIM ITER
 #DIM QUEST_ID = 62
 #DIM SHIP_ID
-#DIM SHIP_COUNT
 #DIM DESTROYED_COUNT
 #DIM アニー
 
@@ -393,11 +393,10 @@ CALL INIT_PRESET_SHIP(10, POS_ID, オクスタン級生体艦, "浮遊砲台？"
 CALL INIT_PRESET_SHIP(10, POS_ID, 汎用コルベット,"寄生コルベット", 汎用コルベット)
 CALL INIT_PRESET_SHIP(10, POS_ID, 汎用コルベット,"寄生コルベット", 汎用コルベット)
 CALL INIT_PRESET_SHIP(10, POS_ID, 汎用コルベット,"寄生コルベット", 汎用コルベット)
-SHIP_COUNT = 5
 
 CALL COMBAT(CHARACTER_POSITION:MASTER)
 
-CALL QUEST_BODY_62_BATTLE_RESULT(SHIP_COUNT)
+CALL QUEST_ANONYM_BATTLE_RESULT()
 IF RESULT == 99
 	PRINTFORML 　「何とか勝てたなあ母上、ではちょっと制御を乗っ取って来るぞお」
 	PRINTFORML 　そう言うと、%ANAME(アニー)%はテレポートして残骸と化した生体艦へと飛び移った。
@@ -436,7 +435,6 @@ ENDIF
 #DIM Y_POS_2
 #DIM ITER
 #DIM QUEST_ID = 62
-#DIM SHIP_COUNT
 #DIM アニー
 
 アニー = NAME_TO_CHARA("アノニム")
@@ -462,18 +460,16 @@ SELECTCASE QUEST_PROGRESS:61
 		CALL INIT_PRESET_SHIP(10, POS_ID, オクスタン級生体艦, "浮遊砲台？", オクスタン級生体艦)
 		CALL INIT_PRESET_SHIP(10, POS_ID, オクスタン級生体艦, "浮遊砲台？", オクスタン級生体艦)
 		CALL INIT_PRESET_SHIP(10, POS_ID, オクスタン級生体艦, "浮遊砲台？", オクスタン級生体艦)
-		SHIP_COUNT = 6
 	CASEELSE
 		;（強いパターン）
 		CALL INIT_PRESET_SHIP(10, POS_ID, ケンツバ級生体艦, "主力？生体艦", ケンツバ級生体艦)
 		QUEST_FLAG_SHIP_ID:62 = RESULT
 		CALL INIT_PRESET_SHIP(10, POS_ID, オクスタン級生体艦, "浮遊砲台？", オクスタン級生体艦)
 		CALL INIT_PRESET_SHIP(10, POS_ID, オクスタン級生体艦, "浮遊砲台？", オクスタン級生体艦)
-		SHIP_COUNT = 3
 ENDSELECT
 CALL COMBAT(CHARACTER_POSITION:MASTER)
 
-CALL QUEST_BODY_62_BATTLE_RESULT(SHIP_COUNT)
+CALL QUEST_ANONYM_BATTLE_RESULT()
 
 IF RESULT == 99
 	SELECTCASE QUEST_PROGRESS:61 
@@ -526,8 +522,10 @@ PRINTFORML 　仕事を探している%ANAME(MASTER)%の下に%ANAME(アニー)%
 PRINTFORMW 　
 PRINTFORML 　「先日海賊を乗っ取った生体艦にまつわる仕事を受けたのは覚えているな？」
 PRINTFORML 　%ANAME(MASTER)%は頷いた。
+PRINTFORMW 　
 PRINTFORML 　「私の端末……あるハイヴが妙な信号を出しているのをキャッチしてな」
-PRINTFORMW 　「母上は艦隊の長である故、その判断を仰ごうと思うてなあ」
+PRINTFORML 　「母上は艦隊の長である故、その判断を仰ごうと思うてなあ」
+PRINTFORMW 　
 PRINTFORML 　「報酬は３０万と、オマケに私が制御を乗っ取った生体艦を考えているが」
 PRINTFORML 　「どうする母上、やるかあ？」
 PRINTFORML 
@@ -566,38 +564,6 @@ ENDIF
 QUEST_PROGRESS:QUEST_ID = 2
 CALL QUEST_BODY_62_SETUMEI
 ;--------------------------
-; 戦闘勝敗処理
-;--------------------------
-@QUEST_BODY_62_BATTLE_RESULT(SHIP_COUNT)
-#DIM SHIP_ID
-#DIM SHIP_COUNT
-#DIM DESTROYED_COUNT
-
-
-DESTROYED_COUNT = 0
-FOR SHIP_ID, 0, MAX_SHIP
-	IF SHIP_POSITION:SHIP_ID != QUEST_62_研究所
-		DESTROYED_COUNT = 99
-		CONTINUE
-	ELSEIF SHIP_COUNTRY:SHIP_ID == 国家ID_一般海賊
-		CALL GET_SHIP_TOTAL_HP(SHIP_ID)
-		IF SHIP_DAMAGE:SHIP_ID >= RESULT
-			DESTROYED_COUNT ++
-		ELSE
-			SHIP_DAMAGE = RESULT
-		ENDIF
-	ENDIF
-NEXT
-CALL RETIRE_BROKEN_SHIP
-PRINTFORML 　
-PRINTFORMW 　………………。
-PRINTFORMW 　…………。
-PRINTFORMW 　……。
-PRINTFORML 　{DESTROYED_COUNT}/{SHIP_COUNT}
-PRINTFORML 
-
-RETURN DESTROYED_COUNT
-;--------------------------
 ; 仕事の説明
 ;--------------------------
 @QUEST_BODY_62_SETUMEI
@@ -633,6 +599,7 @@ SELECTCASE QUEST_PROGRESS:61
 	CASEELSE
 		PRINTFORML 　「案の定研究所は乗っ取られて工場に作り替えられた様だなあ」
 		PRINTFORML 　「私（ワレラ）にとって肉も機械もさしたる違いは無い。信号で動く以上、な」
+		PRINTFORMW 　
 		PRINTFORML 　「母上がやることは１つ。研究所からワープアウトしてくる生体艦を撃破すること」
 		PRINTFORML 　「まあ軍も動いているし、そうそう難しいことにはならんよ」
 		PRINTFORMW 

@@ -1,0 +1,46 @@
+﻿;-----------------------------------
+; サブウェポン
+;-----------------------------------
+@GET_SUB_WEAPON_NAME_204
+RESULTS = 生体粒子ブレード
+
+@GET_SUB_WEAPON_STATUS_204(STATUS)
+#DIM REF STATUS
+
+STATUS:DAMAGE = 900
+STATUS:FIRE_RATE = 1
+STATUS:ANTI_AIR = 0
+STATUS:HIT_RATE = 55
+STATUS:FIRE_RANGE = 1
+STATUS:SIZE = 1
+STATUS:WEAPON_TYPE = ビーム
+STATUS:PRICE = 60000
+
+;-----------------------------------
+; サブウェポンの説明
+;-----------------------------------
+@GET_SUB_WEAPON_DESCRIPTION_204
+#DIM STATUS, STATUS_LENGTH
+
+CALL GET_SUB_WEAPON_STATUS_204(STATUS)
+CALL GET_SUB_WEAPON_NAME_204
+PRINTFORML %RESULTS%
+PRINTFORML シールド機能の局所的な高密度化によって形成される、エネルギーブレードの展開機構……を模した器官。
+PRINTFORML バイシザー強襲生体艦はアーム状器官による角度調整でこれを自由に操る。
+PRINTFORML ダメージ  : {STATUS:DAMAGE}
+PRINTFORML 射撃レート: {STATUS:FIRE_RATE}発/ターン
+PRINTFORML 対空攻撃力: {STATUS:ANTI_AIR}
+PRINTFORML 命中率    : {STATUS:HIT_RATE}
+PRINTFORML 有効距離  : {STATUS:FIRE_RANGE}
+PRINTFORML サイズ    : {STATUS:SIZE}
+
+;-----------------------------------
+; サブウェポンの資材
+;-----------------------------------
+@GET_SUB_WEAPON_RESOURCE_204(USE_RESOURCE)
+#DIM REF USE_RESOURCE
+
+USE_RESOURCE:武装合金 = 4
+USE_RESOURCE:武装制御機器 = 5
+USE_RESOURCE:シールド発生装置 = 5
+USE_RESOURCE:多重シールド発生装置 = 10

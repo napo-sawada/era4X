@@ -25,7 +25,7 @@ RETURN 0
 ; クエストの名前を返却
 ;--------------------------
 @QUEST_NAME_61
-RESULTS = 『 遭遇 』― 異形の新型艦 ―
+RESULTS = 『 遭遇 』― 彷徨異形艦隊 ―
 RETURN
 
 ;--------------------------
@@ -36,7 +36,7 @@ RETURN
 ;--------------------------
 @QUEST_SET_TILE_61 (ARG:0)
 	RESULTS '= "▲"
-	SETCOLOR 0x6C0C00
+	SETCOLOR 0xB40000
 RETURN 1
 
 ;;;右下小窓に出す。隠したければ関数コメントアウトか RETURN 0
@@ -317,8 +317,10 @@ ENDIF
 QUEST_PROGRESS:QUEST_ID = 1
 PRINTFORML 　「よし、素晴らしい」
 PRINTFORML 　「直前に捕捉された座標を送った。くれぐれも気を付けてくれ」
+PRINTFORMW 　
 PRINTFORML 　「危険だと思ったら逃げても構わないし、沈めても構わない。残骸から得られるものはあるからね」
 PRINTFORML 　「沈めた場合の報酬に関しては……まあ期待しないでくれ」
+PRINTFORMW 　
 PRINTFORML 　「……っと、これがフォトデータだ。変な艦だろう？」
 PRINTFORML 　%ANAME(MASTER)%に手渡されたフォトデータは漂う肉塊としか表現できないグロテスクなものだった。
 PRINTFORML 　これを使おうと思った海賊のセンスは良く分からない……。
@@ -335,12 +337,14 @@ PRINTFORMW 　
 PRINTFORML 　%ANAME(MASTER)%の知る生体巡洋艦は汎用巡洋艦と余り差異がないものだが、本来は違うのかと尋ねると、
 PRINTFORML 　「未知のエイリアンが港に姿を現すのと、肉塊にしか見えん艦が姿を現すのでは警戒度も違うであろう母上」
 PRINTFORML 　「私（ワレラ）もその程度の気配りは出来るとも」
+PRINTFORMW 　
 PRINTFORML 　「誰がやったかは分からぬが、雑な制御のお蔭で殆ど暴走しておる。艦の人間は全て同化されていると見て良いぞ」
 PRINTFORML 　「根拠？　これほどの大きさの端末がいるなら私（ワレラ）にも感知できるはずだからな」
 PRINTFORML 　%ANAME(MASTER)%が%ANAME(アニー)%に、何の意図があるのか尋ねると、彼女は首を振って言った。
 PRINTFORMW 　
 PRINTFORML 　「これだけでは大方阿呆な海賊が怪しげなバイヤーから安くて強くて潰しの利く艦を買った、位しか考えられん」
 PRINTFORML 　「母上にはクライアントから言われた通り選択肢が２つある」
+PRINTFORMW 　
 PRINTFORML 　「１つはオトリ役に徹すること、もう１つは完全に消し飛ばすことだ」
 PRINTFORML 　「双方にメリットとデメリットがあろう」
 PRINTFORML 　「向こうもああ言った以上“うっかり”消し飛ばしてしまってもとやかくは言うまい」

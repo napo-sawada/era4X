@@ -22,18 +22,28 @@ PRINTL 師団編成
 
 
 
-@SAVE_GROUND_BATTLE_UNIT(SIDE, 熟練度, 支援大隊 = -1, 師団, 装備)
+@SAVE_GROUND_BATTLE_UNIT(SIDE, 熟練度, 支援大隊 = -1, 師団, 装備, ID = -1)
 #DIM SIDE
 #DIM 熟練度
 #DIM 支援大隊
 #DIM 師団
 #DIM 装備
+#DIM ID
 
-師団所属 = SIDE
-師団練度, 熟練度
-師団付大隊, 支援大隊
-師団タイプ, 師団
-師団装備, 装備
+IF ID == -1
+  FINDELEMENT 師団所属, -1
+  IF RESULT == -1
+    ID = 0
+  ELSE
+    ID = RESULT
+  ENDIF
+ENDIF
+
+師団所属:ID = SIDE
+師団練度:ID = 熟練度
+師団付大隊:ID = 支援大隊
+師団タイプ:ID = 師団
+師団装備:ID = 装備
 
 @GROUND_BATTLE_START
 #DIM DYNAMIC 決着フラグ
