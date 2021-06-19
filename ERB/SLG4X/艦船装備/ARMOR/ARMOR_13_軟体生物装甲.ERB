@@ -2,14 +2,14 @@
 ; アーマー
 ;-----------------------------------
 @GET_ARMOR_NAME_13
-RESULTS = TIER3超大型装甲
+RESULTS = 軟体生物装甲
 
 @GET_ARMOR_STATUS_13(STATUS)
 #DIM REF STATUS
 
 STATUS:ARMOR = 800
 STATUS:SIZE = 1
-STATUS:PRICE = 800
+STATUS:PRICE = 80000
 
 ;-----------------------------------
 ; アーマーの説明
@@ -28,8 +28,6 @@ PRINTFORML サイズ    : {STATUS:SIZE}
 ;-----------------------------------
 @GET_ARMOR_RESOURCE_13(USE_RESOURCE)
 #DIM REF USE_RESOURCE
-
-USE_RESOURCE:装甲合金 = 4
 
 @IS_SALE_ARMOR_13
 RETURN 0

@@ -1,0 +1,41 @@
+﻿;-----------------------------------
+; メインウェポン
+;-----------------------------------
+@GET_MAIN_WEAPON_NAME_52
+RESULTS = TIER2中型連装レールガン
+
+@GET_MAIN_WEAPON_STATUS_52(STATUS)
+#DIM REF STATUS
+
+STATUS:DAMAGE = 300
+STATUS:FIRE_RATE = 2
+STATUS:HIT_RATE = 90
+STATUS:FIRE_RANGE = 3
+STATUS:SIZE = 2
+STATUS:WEAPON_TYPE = 実体弾
+STATUS:PRICE = 40000
+
+;-----------------------------------
+; メインウェポンの説明
+;-----------------------------------
+@GET_MAIN_WEAPON_DESCRIPTION_52
+#DIM STATUS, STATUS_LENGTH
+
+CALL GET_MAIN_WEAPON_STATUS_52(STATUS)
+CALL GET_MAIN_WEAPON_NAME_52
+PRINTFORML %RESULTS%
+PRINTFORML 質量弾をローレンツ力で撃ち出す実弾兵器。連装式にすることで低い連射性を補っている。
+PRINTFORML ダメージ  : {STATUS:DAMAGE}
+PRINTFORML 射撃レート: {STATUS:FIRE_RATE}発/ターン
+PRINTFORML 命中率    : {STATUS:HIT_RATE}
+PRINTFORML 有効距離  : {STATUS:FIRE_RANGE}
+PRINTFORML サイズ    : {STATUS:SIZE}
+
+;-----------------------------------
+; メインウェポンの資材
+;-----------------------------------
+@GET_MAIN_WEAPON_RESOURCE_52(USE_RESOURCE)
+#DIM REF USE_RESOURCE
+
+USE_RESOURCE:武装合金 = 8
+USE_RESOURCE:武装制御機器 = 4

@@ -1,0 +1,42 @@
+﻿;-----------------------------------
+; メインウェポン
+;-----------------------------------
+@GET_MAIN_WEAPON_NAME_56
+RESULTS = TIER2中型精密レールガン
+
+@GET_MAIN_WEAPON_STATUS_56(STATUS)
+#DIM REF STATUS
+
+STATUS:DAMAGE = 500
+STATUS:FIRE_RATE = 1
+STATUS:HIT_RATE = 95
+STATUS:FIRE_RANGE = 3
+STATUS:SIZE = 2
+STATUS:WEAPON_TYPE = 実体弾
+STATUS:PRICE = 40000
+
+;-----------------------------------
+; メインウェポンの説明
+;-----------------------------------
+@GET_MAIN_WEAPON_DESCRIPTION_56
+#DIM STATUS, STATUS_LENGTH
+
+CALL GET_MAIN_WEAPON_STATUS_56(STATUS)
+CALL GET_MAIN_WEAPON_NAME_56
+PRINTFORML %RESULTS%
+PRINTFORML 質量弾をローレンツ力で撃ち出す実弾兵器。コイルガンと比べて射程に優れるが連射性に劣る。
+PRINTFORML エネルギー伝達系統などの改良により命中精度と威力が向上した。
+PRINTFORML ダメージ  : {STATUS:DAMAGE}
+PRINTFORML 射撃レート: {STATUS:FIRE_RATE}発/ターン
+PRINTFORML 命中率    : {STATUS:HIT_RATE}
+PRINTFORML 有効距離  : {STATUS:FIRE_RANGE}
+PRINTFORML サイズ    : {STATUS:SIZE}
+
+;-----------------------------------
+; メインウェポンの資材
+;-----------------------------------
+@GET_MAIN_WEAPON_RESOURCE_56(USE_RESOURCE)
+#DIM REF USE_RESOURCE
+
+USE_RESOURCE:武装合金 = 8
+USE_RESOURCE:武装制御機器 = 4

@@ -1,0 +1,43 @@
+﻿;-----------------------------------
+; サブウェポン
+;-----------------------------------
+@GET_SUB_WEAPON_NAME_30
+RESULTS = TIER3速射砲
+
+@GET_SUB_WEAPON_STATUS_30(STATUS)
+#DIM REF STATUS
+
+STATUS:DAMAGE = 25
+STATUS:FIRE_RATE = 3
+STATUS:ANTI_AIR = 50
+STATUS:HIT_RATE = 70
+STATUS:FIRE_RANGE = 2
+STATUS:SIZE = 2
+STATUS:WEAPON_TYPE = 実体弾
+STATUS:PRICE = 80000
+
+;-----------------------------------
+; サブウェポンの説明
+;-----------------------------------
+@GET_SUB_WEAPON_DESCRIPTION_30
+#DIM STATUS, STATUS_LENGTH
+
+CALL GET_SUB_WEAPON_STATUS_30(STATUS)
+CALL GET_SUB_WEAPON_NAME_30
+PRINTFORML %RESULTS%
+PRINTFORML 機銃と小型主砲との中間的な口径を有する、独立式の小型実弾兵器。
+PRINTFORML ダメージ  : {STATUS:DAMAGE}
+PRINTFORML 射撃レート: {STATUS:FIRE_RATE}発/ターン
+PRINTFORML 対空攻撃力: {STATUS:ANTI_AIR}
+PRINTFORML 命中率    : {STATUS:HIT_RATE}
+PRINTFORML 有効距離  : {STATUS:FIRE_RANGE}
+PRINTFORML サイズ    : {STATUS:SIZE}
+
+;-----------------------------------
+; サブウェポンの資材
+;-----------------------------------
+@GET_SUB_WEAPON_RESOURCE_30(USE_RESOURCE)
+#DIM REF USE_RESOURCE
+
+USE_RESOURCE:武装合金 = 8
+USE_RESOURCE:武装制御機器 = 8

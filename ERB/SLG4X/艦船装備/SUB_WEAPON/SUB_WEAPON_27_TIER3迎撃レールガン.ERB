@@ -1,0 +1,44 @@
+﻿;-----------------------------------
+; サブウェポン
+;-----------------------------------
+@GET_SUB_WEAPON_NAME_27
+RESULTS = TIER3迎撃レールガン
+
+@GET_SUB_WEAPON_STATUS_27(STATUS)
+#DIM REF STATUS
+
+STATUS:DAMAGE = 120
+STATUS:FIRE_RATE = 1
+STATUS:ANTI_AIR = 300
+STATUS:HIT_RATE = 85
+STATUS:FIRE_RANGE = 3
+STATUS:SIZE = 3
+STATUS:WEAPON_TYPE = 実体弾
+STATUS:PRICE = 240000
+
+;-----------------------------------
+; サブウェポンの説明
+;-----------------------------------
+@GET_SUB_WEAPON_DESCRIPTION_27
+#DIM STATUS, STATUS_LENGTH
+
+CALL GET_SUB_WEAPON_STATUS_27(STATUS)
+CALL GET_SUB_WEAPON_NAME_27
+PRINTFORML %RESULTS%
+PRINTFORML 迎撃用に散弾を使用する独立式の小型電磁投射砲。
+PRINTFORML ダメージ  : {STATUS:DAMAGE}
+PRINTFORML 射撃レート: {STATUS:FIRE_RATE}発/ターン
+PRINTFORML 対空攻撃力: {STATUS:ANTI_AIR}
+PRINTFORML 命中率    : {STATUS:HIT_RATE}
+PRINTFORML 有効距離  : {STATUS:FIRE_RANGE}
+PRINTFORML サイズ    : {STATUS:SIZE}
+
+;-----------------------------------
+; サブウェポンの資材
+;-----------------------------------
+@GET_SUB_WEAPON_RESOURCE_27(USE_RESOURCE)
+#DIM REF USE_RESOURCE
+
+USE_RESOURCE:武装合金 = 8
+USE_RESOURCE:武装制御機器 = 8
+USE_RESOURCE:超電導回路 = 4

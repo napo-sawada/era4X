@@ -1,0 +1,42 @@
+﻿;-----------------------------------
+; メインウェポン
+;-----------------------------------
+@GET_MAIN_WEAPON_NAME_58
+RESULTS = TIER2超大型精密レールガン
+
+@GET_MAIN_WEAPON_STATUS_58(STATUS)
+#DIM REF STATUS
+
+STATUS:DAMAGE = 2200
+STATUS:FIRE_RATE = 1
+STATUS:HIT_RATE = 95
+STATUS:FIRE_RANGE = 4
+STATUS:SIZE = 4
+STATUS:WEAPON_TYPE = 実体弾
+STATUS:PRICE = 160000
+
+;-----------------------------------
+; メインウェポンの説明
+;-----------------------------------
+@GET_MAIN_WEAPON_DESCRIPTION_58
+#DIM STATUS, STATUS_LENGTH
+
+CALL GET_MAIN_WEAPON_STATUS_58(STATUS)
+CALL GET_MAIN_WEAPON_NAME_58
+PRINTFORML %RESULTS%
+PRINTFORML 質量弾をローレンツ力で撃ち出す実弾兵器。大型化により高い威力と命中精度を両立させている。
+PRINTFORML エネルギー伝達系統などの改良により命中精度と威力が向上した。
+PRINTFORML ダメージ  : {STATUS:DAMAGE}
+PRINTFORML 射撃レート: {STATUS:FIRE_RATE}発/ターン
+PRINTFORML 命中率    : {STATUS:HIT_RATE}
+PRINTFORML 有効距離  : {STATUS:FIRE_RANGE}
+PRINTFORML サイズ    : {STATUS:SIZE}
+
+;-----------------------------------
+; メインウェポンの資材
+;-----------------------------------
+@GET_MAIN_WEAPON_RESOURCE_58(USE_RESOURCE)
+#DIM REF USE_RESOURCE
+
+USE_RESOURCE:武装合金 = 32
+USE_RESOURCE:武装制御機器 = 16
