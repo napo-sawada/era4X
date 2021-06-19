@@ -1,0 +1,69 @@
+﻿@GB_AUTO_PREPARATION(_陣営, _戦術)
+#DIM _陣営
+#DIM _戦術
+
+SELECTCASE _戦術
+  CASE 0
+    CALL GB_NPC_TACTICS_0(_陣営)
+ENDSELECT
+
+;---------------------------------------------------------
+; チュートリアルの戦術
+; 肉の壁で半数の戦線を耐えているうちに戦車師団で残る戦線を突破する戦術
+;---------------------------------------------------------
+@GB_NPC_TACTICS_0(_陣営)
+#DIM _陣営
+#DIM CONST _戦線継続ターン指数 = 100
+#DIM DYNAMIC _前線_前線, 最大師団数
+#DIM DYNAMIC _前線_予備, 最大師団数
+#DIM DYNAMIC _前線_待機, 最大師団数
+#DIM DYNAMIC 勝利確定前線数
+#DIM DYNAMIC 突破前線リスト, 最大戦線数
+
+FOR LOCAL, 0, 最大戦線数
+  SIF 戦線名:LOCAL == 非アクティブ戦線名
+    CONTINUE
+  勝利確定前線数 ++
+NEXT
+IF 勝利確定前線数 % 2
+  勝利確定前線数 = 勝利確定前線数 / 2 + 1
+ELSE
+  勝利確定前線数 = 勝利確定前線数 / 2
+ENDIF
+
+CALL GB_REGISTER_DIVISION_TEMPLATE(20, "民兵師団", 熟練度_民兵, 師団_歩兵師団, 装備_B, 支援大隊_補給大隊)
+CALL GB_REGISTER_DIVISION_TEMPLATE(21, "戦車師団", 熟練度_正規兵, 師団_戦車師団, 装備_B, 支援大隊_砲兵大隊)
+CALL GB_BATTLE_FRONT_RANDOM_PICK(勝利確定前線数, 突破前線リスト)
+
+; 前線を埋める
+FOR LOCAL, 0, 最大戦線数
+  SIF 戦線名:LOCAL == 非アクティブ戦線名
+    CONTINUE
+  IF 突破前線リスト:LOCAL
+    CALL DIVISION_PLACEMENT_FROM_TEMPLATE(21, _陣営, LOCAL, 前線配置_前線)
+    CALL DIVISION_PLACEMENT_FROM_TEMPLATE(21, _陣営, LOCAL, 前線配置_前線)
+    CALL DIVISION_PLACEMENT_FROM_TEMPLATE(20, _陣営, LOCAL, 前線配置_前線)
+  ELSE
+    CALL DIVISION_PLACEMENT_FROM_TEMPLATE(20, _陣営, LOCAL, 前線配置_前線)
+    CALL DIVISION_PLACEMENT_FROM_TEMPLATE(20, _陣営, LOCAL, 前線配置_前線)
+    CALL DIVISION_PLACEMENT_FROM_TEMPLATE(20, _陣営, LOCAL, 前線配置_前線)
+  ENDIF
+NEXT
+; 予備と待機を埋めていく
+WHILE GET_GB_TURN_COST_BY_SIDE(GB_攻撃側) 
+
+
+@GB_BATTLE_FRONT_RANDOM_PICK(_選択数, 前線一覧)
+#DIM _選択数
+#DIM REF 前線一覧, 0
+
+WHILE _選択数 > 0
+  FOR LOCAL, 0, 最大戦線数
+    SIF !_選択数
+      BREAK
+    IF 戦線名 != 非アクティブ戦線名 && !前線一覧:LOCAL && RAND:_選択数 == 0
+      前線一覧:LOCAL = 1
+      _選択数--
+    ENDIF
+  NEXT
+WEND

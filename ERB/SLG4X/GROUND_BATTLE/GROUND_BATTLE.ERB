@@ -1,14 +1,67 @@
-﻿@GROUND_BATTLE_INIT
+﻿;-----------------------
+; 地上戦の初期化
+;-----------------------
+@GROUND_BATTLE_INIT
 VARSET 師団所属, -1
-VARSET 師団練度, -1
-VARSET 師団付大隊, -1
-VARSET 師団タイプ, -1
-VARSET 師団装備, -1
+VARSET 師団配置, -1
+VARSET 前線配置, -1
+VARSET 師団攻撃対象, -1
+VARSET 師団ダメージ, -1
+VARSET 師団ステータス, -1
+VARSET 師団テンプレート, -1
+VARSET 戦線名, 非アクティブ戦線名
 
-@EDIT_GROUND_BATTLE_UNIT(ID = -1)
+;-----------------------
+; 編集する地上戦ユニットのテンプレート選択
+;-----------------------
+@SELECT_EDIT_DIVISION
+$INPUT_LOOP
+DRAWLINE
+FOR LOCAL, 0, 最大師団テンプレート / 2
+  PRINTBUTTON @"[{LOCAL, 2, LEFT}] %師団テンプレート_名称:LOCAL%", LOCAL
+  PRINTL
+NEXT
+SETCOLOR 0X666666
+CUSTOMDRAWLINE =
+RESETCOLOR
+PRINTBUTTON @"[{最大師団テンプレート}] 戻る", 最大師団テンプレート
+PRINTL
+DRAWLINE
+INPUT
+IF RESULT == 最大師団テンプレート
+  RETURN
+ELSEIF RESULT >= 0 && RESULT <　最大師団テンプレート
+  CALL EDIT_DIVISION_TEMPLATE(RESULT)
+ENDIF
+GOTO INPUT_LOOP
+
+;-----------------------
+; 地上戦ユニットのテンプレート編集
+;-----------------------
+@EDIT_DIVISION_TEMPLATE(ID = -1)
 #DIM ID
+#DIMS _名称
+#DIM _練度
+#DIM _兵科
+#DIM _装備
+#DIM _大隊
+#DIM DYNAMIC 入力値
+IF ID != -1 && 師団テンプレート_ステータス:ID == 師団テンプレート_作成済
+  _名称 = %師団テンプレート_名称:ID%
+  _練度 = 師団テンプレート_練度:ID
+  _兵科 = 師団テンプレート_兵科:ID
+  _装備 = 師団テンプレート_装備:ID
+  _大隊 = 師団テンプレート_大隊:ID
+ELSE
+  _名称 = 名称未設定
+  _練度 = -1
+  _兵科 = -1
+  _装備 = -1
+  _大隊 = -1
+ENDIF
+
 IF ID == -1
-  FINDELEMENT 師団所属, -1
+  FINDELEMENT 師団テンプレート_兵科, -1
   IF RESULT == -1
     ID = 0
   ELSE
@@ -16,51 +69,1116 @@ IF ID == -1
   ENDIF
 ENDIF
 $INPUT_LOOP
+DRAWLINE
+PRINTBUTTON @"[%_名称%]", 0
+PRINTL を編集中
+SETCOLOR 0X666666
+CUSTOMDRAWLINE =
+RESETCOLOR
+PRINTFORML ■練度
+FOR LOCAL, 0, VARSIZE("熟練度_名称")
+  SIF _練度 == LOCAL
+    SETCOLOR 0X00FF00
+  PRINTBUTTON @"[%熟練度_名称:LOCAL%]", 10 + LOCAL
+  RESETCOLOR
+NEXT
+PRINTL
+PRINTL
+PRINTFORML ■兵科
+FOR LOCAL, 0, VARSIZE("師団_名称")
+  SIF _兵科 == LOCAL
+    SETCOLOR 0X00FF00
+  PRINTBUTTON @"[%師団_名称:LOCAL%]", 100 + LOCAL
+  RESETCOLOR
+NEXT
+PRINTL
+PRINTL
+PRINTFORML ■装備
+FOR LOCAL, 0, VARSIZE("装備名")
+  SIF _装備 == LOCAL
+    SETCOLOR 0X00FF00
+  PRINTBUTTON @"[%装備名:LOCAL%]", 1000 + LOCAL
+  RESETCOLOR
+NEXT
+PRINTL
+PRINTL
+PRINTFORML ■師団付大隊(OPTION)
+FOR LOCAL, 0, VARSIZE("支援大隊_名称")
+  SIF _大隊 == LOCAL
+    SETCOLOR 0X00FF00
+  PRINTBUTTON @"[%支援大隊_名称:LOCAL%]", 10000 + LOCAL
+  RESETCOLOR
+NEXT
+PRINTL
+SETCOLOR 0X666666
+CUSTOMDRAWLINE =
+RESETCOLOR
+CALL PRINT_DIVISION_STATUS(_名称, _練度, _兵科, _装備, _大隊)
+SETCOLOR 0X666666
+CUSTOMDRAWLINE =
+RESETCOLOR
+IF _練度 != -1 && _兵科 != -1 && _装備 != -1
+  PRINTBUTTON "[決定]", 999999
+ELSE
+  SETCOLOR 0X666666
+  PRINT [決定]
+  RESETCOLOR
+ENDIF
+PRINTBUTTON "[キャンセル]", 1000000
+PRINTL
 
 DRAWLINE
-PRINTL 師団編成
-
-
-
-@SAVE_GROUND_BATTLE_UNIT(SIDE, 熟練度, 支援大隊 = -1, 師団, 装備, ID = -1)
-#DIM SIDE
-#DIM 熟練度
-#DIM 支援大隊
-#DIM 師団
-#DIM 装備
-#DIM ID
-
-IF ID == -1
-  FINDELEMENT 師団所属, -1
-  IF RESULT == -1
-    ID = 0
+INPUT
+入力値 = RESULT
+;練度
+IF 入力値 == 0
+  CALL UPDATE_DIVISION_NAME()
+  _名称 = %RESULTS%
+ELSEIF 入力値 >= 10 && 入力値 < 100 && (入力値 - 10) < VARSIZE("熟練度_名称")
+  _練度 = 入力値 - 10
+ELSEIF 入力値 >= 100 && 入力値 < 1000 && (入力値 - 100) < VARSIZE("師団_名称")
+  _兵科 = 入力値 - 100
+ELSEIF 入力値 >= 1000 && 入力値 < 10000 && (入力値 - 1000) < VARSIZE("装備名")
+  _装備 = 入力値 - 1000
+ELSEIF 入力値 >= 10000 && 入力値 < 100000 && (入力値 - 10000) < VARSIZE("支援大隊_名称")
+  IF _大隊 == 入力値 - 10000
+    _大隊 = -1
   ELSE
-    ID = RESULT
+    _大隊 = 入力値 - 10000
   ENDIF
+ELSEIF RESULT == 999999
+  CALL GB_REGISTER_DIVISION_TEMPLATE(ID, _名称, _練度, _兵科, _装備, _大隊)
+  RETURN
+ELSEIF RESULT == 1000000
+  RETURN
+ENDIF
+  
+GOTO INPUT_LOOP
+
+;-----------------------
+; 地上戦ユニットのテンプレート選択
+;-----------------------
+@SELECT_DIVISION_FROM_TEMPLATE_LIST
+$INPUT_LOOP
+DRAWLINE
+FOR LOCAL, 0, 最大師団テンプレート / 2
+  SIF 師団テンプレート_ステータス:LOCAL != 師団テンプレート_作成済
+    CONTINUE
+  PRINTBUTTON @"[{LOCAL, 2, LEFT}] %師団テンプレート_名称:LOCAL%", LOCAL
+  PRINTL
+NEXT
+SETCOLOR 0X666666
+CUSTOMDRAWLINE =
+RESETCOLOR
+PRINTBUTTON @"[{最大師団テンプレート}] 戻る", 最大師団テンプレート
+PRINTL
+DRAWLINE
+INPUT
+IF RESULT == 最大師団テンプレート
+  RETURN -1
+ELSEIF RESULT >= 0 && RESULT <　最大師団テンプレート
+  RETURN RESULT
+ENDIF
+GOTO INPUT_LOOP
+
+
+;-----------------------
+; 地上戦ユニットのステータス表示
+;-----------------------
+@PRINT_DIVISION_STATUS(_名称, _練度 = -1, _兵科 = -1, _装備 = -1, _大隊 = -1)
+#DIMS _名称
+#DIM _練度
+#DIM _兵科
+#DIM _装備
+#DIM _大隊
+
+#DIM DYNAMIC テンプレート_攻撃力
+#DIM DYNAMIC テンプレート_防御力
+#DIM DYNAMIC テンプレート_必要物資
+#DIM DYNAMIC テンプレート_対装甲
+#DIM DYNAMIC テンプレート_装甲
+#DIM DYNAMIC テンプレート_コスト
+
+IF _練度 != -1
+  テンプレート_攻撃力 += 熟練度_攻撃力:_練度
+  テンプレート_防御力 += 熟練度_防御力:_練度
+  テンプレート_必要物資 += 熟練度_必要物資:_練度
+  テンプレート_対装甲 += 熟練度_対装甲:_練度
+  テンプレート_装甲 += 熟練度_装甲:_練度
+  テンプレート_コスト += 熟練度_コスト:_練度
+ENDIF
+IF _兵科 != -1
+  テンプレート_攻撃力 += 師団_攻撃力:_兵科
+  テンプレート_防御力 += 師団_防御力:_兵科
+  テンプレート_必要物資 += 師団_必要物資:_兵科
+  テンプレート_対装甲 += 師団_対装甲:_兵科
+  テンプレート_装甲 += 師団_装甲:_兵科
+  テンプレート_コスト += 師団_コスト:_兵科
+ENDIF
+IF _装備 != -1
+  テンプレート_攻撃力 += 装備_攻撃力:_装備
+  テンプレート_防御力 += 装備_防御力:_装備
+  テンプレート_必要物資 += 装備_必要物資:_装備
+  テンプレート_対装甲 += 装備_対装甲:_装備
+  テンプレート_装甲 += 装備_装甲:_装備
+  テンプレート_コスト += 装備_コスト:_装備
+ENDIF
+IF _大隊 != -1
+  テンプレート_攻撃力 += 支援大隊_攻撃力:_大隊
+  テンプレート_防御力 += 支援大隊_防御力:_大隊
+  テンプレート_必要物資 += 支援大隊_必要物資:_大隊
+  テンプレート_対装甲 += 支援大隊_対装甲:_大隊
+  テンプレート_装甲 += 支援大隊_装甲:_大隊
+  テンプレート_コスト += 支援大隊_コスト:_大隊
 ENDIF
 
-師団所属:ID = SIDE
-師団練度:ID = 熟練度
-師団付大隊:ID = 支援大隊
-師団タイプ:ID = 師団
-師団装備:ID = 装備
+PRINTFORML %"名称", 8, LEFT%: %_名称% - 師団の名称
+PRINTFORML %"攻撃力", 8, LEFT%: {テンプレート_攻撃力} - 師団の攻撃力 
+PRINTFORML %"防御力", 8, LEFT%: {テンプレート_防御力} - 師団の防御力
+PRINTFORML %"必要物資", 8, LEFT%: {テンプレート_必要物資} - 師団の維持に必要な物資量
+PRINTFORML %"対装甲", 8, LEFT%: {テンプレート_対装甲} - 師団の対装甲貫通力 敵の装甲より低いと与えるダメージが1/8になる
+PRINTFORML %"装甲", 8, LEFT%: {テンプレート_装甲} - 師団の装甲 敵の対装甲より高いと受けるダメージを1/8にできる 
+PRINTFORML %"コスト", 8, LEFT%: {テンプレート_コスト} - 師団の編成コスト 必要物資とは別に、師団を編成する際に支払うコスト 
 
+
+;-----------------------
+; 師団IDから地上戦ユニットのステータス表示
+;-----------------------
+@PRINT_DIVISION_STATUS_FROM_DIVISION_ID(_師団ID, _戦時表示 = 0)
+#DIM _師団ID
+#DIM _戦時表示
+#DIM _師団テンプレートID
+
+_師団テンプレートID = 師団テンプレート:_師団ID
+CALL PRINT_DIVISION_STATUS(師団テンプレート_名称:_師団テンプレートID, 師団テンプレート_練度:_師団テンプレートID, 師団テンプレート_兵科:_師団テンプレートID, 師団テンプレート_装備:_師団テンプレートID, 師団テンプレート_大隊:_師団テンプレートID)
+IF _戦時表示
+PRINTL
+PRINTFORML 師団耐久　　　: {(師団人数 - 師団ダメージ:_師団ID) * 100 / 師団人数}\%
+PRINTFORML 師団ステータス: %師団ステータス名:(師団ステータス:_師団ID)%
+SIF 師団ステータス:_師団ID == 師団ステータス_攻撃
+  PRINTFORML 攻撃対象　　　: 師団ID-{師団攻撃対象:_師団ID}を攻撃中
+SIF 師団ステータス:_師団ID == 師団ステータス_移動
+  PRINTFORML 移動先　　　　: %師団ステータス名:(師団移動先:_師団ID)%
+CUSTOMDRAWLINE =
+ENDIF
+
+;-----------------------
+; 地上戦ユニットテンプレートの名称変更
+;-----------------------
+@UPDATE_DIVISION_NAME
+$INPUT_LOOP
+PRINTL 師団テンプレートの名称を入力してください
+INPUTS
+PRINTFORML %RESULTS%でよろしいですか？
+CALL ASK_YN
+IF RESULT
+  GOTO INPUT_LOOP
+ELSE
+  RETURN
+ENDIF
+
+;-----------------------
+; 戦線の追加
+;-----------------------
+@GB_ADD_BATTLE_FRONT(_戦線名)
+#DIMS _戦線名
+FINDELEMENT 戦線名, 非アクティブ戦線名
+IF RESULT == -1
+  戦線名:0 = %_戦線名%
+ELSEIF RESULT == 最大戦線数
+  THROW これ以上戦線を追加できません
+ELSE
+  戦線名:RESULT = %_戦線名%
+ENDIF
+
+;-----------------------
+; コストの定義
+;-----------------------
+@GB_DEFINE_TOTAL_COST(_陣営, _コスト)
+#DIM _陣営
+#DIM _コスト
+GB_COST:_陣営 = _コスト
+
+;-----------------------
+; 地上戦準備フェーズ
+;-----------------------
+@GB_PREPARATION_PHASE(_陣営)
+#DIM _陣営
+
+$INPUT_LOOP
+DRAWLINE
+FINDELEMENT 戦線名, 非アクティブ戦線名
+PRINTFORML 戦線数: {RESULT} - 戦線の数です。半分以上の戦線で勝利すると勝ちになります
+PRINTL
+PRINTFORML 保有コスト: {GB_COST:_陣営} - 0になると全予備師団が解体されコストに変換されます。予備師団がない場合敗北します
+PRINTL
+PRINTFORML 残戦車数: N台 - 0になると戦車師団は戦闘を継続できません
+PRINTL
+PRINTFORML 残航空機数: N機 - 0になると追加配備ができなくなります
+PRINTL
+SETCOLOR 0X666666
+CUSTOMDRAWLINE =
+RESETCOLOR
+PRINTBUTTON "[師団編成]", 0
+PRINTL - 師団テンプレートを編集します
+PRINTBUTTON "[師団配置]", 1
+PRINTL - 各戦線に師団を配置します
+PRINTBUTTON "[航空師団配備]", 2
+PRINTL - 各戦線に航空機を配備します
+PRINTBUTTON "[準備完了]", 3
+PRINTL - 準備フェーズを完了します
+INPUT
+IF RESULT == 0
+  CALL SELECT_EDIT_DIVISION
+ELSEIF RESULT == 1
+  CALL DIVISION_PLACEMENT(_陣営)
+ELSEIF RESULT == 3
+  RETURN
+ENDIF
+GOTO INPUT_LOOP
+
+
+;-----------------------
+; 事前準備
+;-----------------------
+@DIVISION_PLACEMENT(_陣営)
+#DIM _陣営
+#DIM DYNAMIC 表示戦線
+#DIM DYNAMIC ユニット概要一覧, 最大戦線数, 3, 最大師団テンプレート
+#DIM DYNAMIC _前線師団数
+
+$INPUT_LOOP
+FOR LOCAL, 0, 最大戦線数
+  FOR LOCAL:1, 0, 3
+    FOR LOCAL:2, 0, 最大師団テンプレート
+      ユニット概要一覧:LOCAL:(LOCAL:1):(LOCAL:2) = 0
+    NEXT
+  NEXT
+NEXT
+
+
+FOR LOCAL, 0, 最大師団数
+  SIF 師団所属:LOCAL != _陣営
+    CONTINUE
+  ユニット概要一覧:(師団配置:LOCAL):(前線配置:LOCAL):(師団テンプレート:LOCAL) ++
+NEXT
+
+_前線師団数 = 0
+
+DRAWLINE
+PRINTFORML 残りコスト: {GB_COST:_陣営 - GET_GB_ORGANIZATION_COST(ユニット概要一覧)} - 戦線の維持にも使うので使い切らないでください
+SETCOLOR 0X666666
+CUSTOMDRAWLINE =
+RESETCOLOR
+FOR LOCAL, 0, 最大戦線数
+  SIF 戦線名:LOCAL == 非アクティブ戦線名
+    CONTINUE
+  SIF LOCAL == 表示戦線
+    SETCOLOR 0X00FF00
+  PRINTBUTTON @"[%戦線名:LOCAL%]", LOCAL
+  RESETCOLOR
+NEXT
+PRINTL
+SETCOLOR 0X666666
+CUSTOMDRAWLINE =
+RESETCOLOR
+PRINTL
+PRINTL
+SETCOLOR 0X666666
+PRINTFORML -----------------前線----------------------
+RESETCOLOR 
+
+FOR LOCAL, 0, 最大師団テンプレート / 2
+  SIF 師団テンプレート_ステータス:LOCAL != 師団テンプレート_作成済
+    CONTINUE
+  PRINTFORM %師団テンプレート_名称:LOCAL, 20, LEFT%: 
+  PRINTBUTTON "[-1]", 100 + LOCAL
+  PRINTFORM {ユニット概要一覧:表示戦線:前線配置_前線:LOCAL, 3, RIGHT}師団
+  PRINTBUTTON "[+1]", 200 + LOCAL
+  _前線師団数 += ユニット概要一覧:表示戦線:前線配置_前線:LOCAL
+  PRINTL
+NEXT
+SETCOLOR 0X666666
+PRINTFORML -----------------予備(即時前線移動可能)----------------------
+RESETCOLOR
+FOR LOCAL, 0, 最大師団テンプレート / 2
+  SIF 師団テンプレート_ステータス:LOCAL != 師団テンプレート_作成済
+    CONTINUE
+  PRINTFORM %師団テンプレート_名称:LOCAL, 20, LEFT%: 
+  PRINTBUTTON "[-100]", 1000 + LOCAL
+  PRINTBUTTON "[-10]", 1100 + LOCAL
+  PRINTBUTTON "[-1]", 1200 + LOCAL
+  PRINTFORM {ユニット概要一覧:表示戦線:前線配置_予備:LOCAL, 3, RIGHT}師団
+  PRINTBUTTON "[+1]", 2000 + LOCAL
+  PRINTBUTTON "[+10]", 2100 + LOCAL
+  PRINTBUTTON "[+100]", 2200 + LOCAL
+  PRINTL
+NEXT
+SETCOLOR 0X666666
+PRINTFORML -----------------待機(予備への移動に10ターン)----------------------
+RESETCOLOR
+FOR LOCAL, 0, 最大師団テンプレート / 2
+  SIF 師団テンプレート_ステータス:LOCAL != 師団テンプレート_作成済
+    CONTINUE
+  PRINTFORM %師団テンプレート_名称:LOCAL, 20, LEFT%: 
+  PRINTBUTTON "[-100]", 3000 + LOCAL
+  PRINTBUTTON "[-10]", 3100 + LOCAL
+  PRINTBUTTON "[-1]", 3200 + LOCAL
+  PRINTFORM {ユニット概要一覧:表示戦線:前線配置_待機:LOCAL, 3, RIGHT}師団
+  PRINTBUTTON "[+1]", 4000 + LOCAL
+  PRINTBUTTON "[+10]", 4100 + LOCAL
+  PRINTBUTTON "[+100]", 4200 + LOCAL
+  PRINTL
+NEXT
+DRAWLINE
+LOCAL = GET_GB_TURN_COST(ユニット概要一覧)
+PRINTFORM ターンごとの消費コスト: {LOCAL} 
+SIF LOCAL == 0
+  LOCAL = 1
+PRINTFORML 戦線維持可能ターン数: {(GB_COST:_陣営 - GET_GB_ORGANIZATION_COST(ユニット概要一覧)) / LOCAL}ターン
+DRAWLINE
+PRINTBUTTON "[決定]", -1
+PRINTL
+DRAWLINE
+PRINTL
+INPUT
+IF RESULT == -1
+  RETURN 
+ELSEIF RESULT >= 0 && RESULT < 最大戦線数
+  SIF 戦線名:RESULT != 非アクティブ戦線名
+    表示戦線 = RESULT
+ELSEIF RESULT >= 100 && RESULT < 100 + 最大師団テンプレート
+  CALL DIVISION_NUMBER_EDIT((RESULT - 100), _陣営, 表示戦線, 前線配置_前線, -1, ユニット概要一覧)
+ELSEIF RESULT >= 200 && RESULT < 200 + 最大師団テンプレート
+  IF _前線師団数 >= 最大前線師団数
+    PRINTFORMW 前線には{最大前線師団数}師団までしか配置できません
+  ELSE
+    CALL DIVISION_NUMBER_EDIT((RESULT - 200), _陣営, 表示戦線, 前線配置_前線, 1, ユニット概要一覧)
+  ENDIF
+ELSEIF RESULT >= 1000 && RESULT < 1000 + 最大師団テンプレート
+  CALL DIVISION_NUMBER_EDIT((RESULT - 1000), _陣営, 表示戦線, 前線配置_予備, -100, ユニット概要一覧)
+ELSEIF RESULT >= 1100 && RESULT < 1100 + 最大師団テンプレート
+  CALL DIVISION_NUMBER_EDIT((RESULT - 1100), _陣営, 表示戦線, 前線配置_予備, -10, ユニット概要一覧)
+ELSEIF RESULT >= 1200 && RESULT < 1200 + 最大師団テンプレート
+  CALL DIVISION_NUMBER_EDIT((RESULT - 1200), _陣営, 表示戦線, 前線配置_予備, -1, ユニット概要一覧)
+ELSEIF RESULT >= 2000 && RESULT < 2000 + 最大師団テンプレート
+  CALL DIVISION_NUMBER_EDIT((RESULT - 2000), _陣営, 表示戦線, 前線配置_予備, 1, ユニット概要一覧)
+ELSEIF RESULT >= 2100 && RESULT < 2100 + 最大師団テンプレート
+  CALL DIVISION_NUMBER_EDIT((RESULT - 2100), _陣営, 表示戦線, 前線配置_予備, 10, ユニット概要一覧)
+ELSEIF RESULT >= 2200 && RESULT < 2200 + 最大師団テンプレート
+  CALL DIVISION_NUMBER_EDIT((RESULT - 2200), _陣営, 表示戦線, 前線配置_予備, 100, ユニット概要一覧)
+ELSEIF RESULT >= 3000 && RESULT < 3000 + 最大師団テンプレート
+  CALL DIVISION_NUMBER_EDIT((RESULT - 3000), _陣営, 表示戦線, 前線配置_待機, -100, ユニット概要一覧)
+ELSEIF RESULT >= 3100 && RESULT < 3100 + 最大師団テンプレート
+  CALL DIVISION_NUMBER_EDIT((RESULT - 3100), _陣営, 表示戦線, 前線配置_待機, -10, ユニット概要一覧)
+ELSEIF RESULT >= 3200 && RESULT < 3200 + 最大師団テンプレート
+  CALL DIVISION_NUMBER_EDIT((RESULT - 3200), _陣営, 表示戦線, 前線配置_待機, -1, ユニット概要一覧)
+ELSEIF RESULT >= 4000 && RESULT < 4000 + 最大師団テンプレート
+  CALL DIVISION_NUMBER_EDIT((RESULT - 4000), _陣営, 表示戦線, 前線配置_待機, 1, ユニット概要一覧)
+ELSEIF RESULT >= 4100 && RESULT < 4100 + 最大師団テンプレート
+  CALL DIVISION_NUMBER_EDIT((RESULT - 4100), _陣営, 表示戦線, 前線配置_待機, 10, ユニット概要一覧)
+ELSEIF RESULT >= 4200 && RESULT < 4200 + 最大師団テンプレート
+  CALL DIVISION_NUMBER_EDIT((RESULT - 4200), _陣営, 表示戦線, 前線配置_待機, 100, ユニット概要一覧)
+ENDIF
+
+GOTO INPUT_LOOP
+
+;-----------------------
+; 師団テンプレートから師団作成
+;-----------------------
+@DIVISION_PLACEMENT_FROM_TEMPLATE(_テンプレートID, _陣営, _戦線, _前線)
+#DIM _テンプレートID
+#DIM _陣営
+#DIM _戦線
+#DIM _前線
+#DIM ID
+
+FINDELEMENT 師団所属, -1
+IF RESULT == -1
+  ID = 0
+ELSEIF RESULT == 最大師団数/2
+  PRINTFORMW これ以上師団を作成できません(師団数制限)
+  RETURN -1
+ELSE
+  ID = RESULT
+ENDIF
+師団所属:ID = _陣営
+師団配置:ID = _戦線
+前線配置:ID = _前線
+師団ダメージ:ID = 0
+師団ステータス:ID = 師団ステータス_待機
+師団テンプレート:ID = _テンプレートID
+RETURN ID
+
+;-----------------------
+; 師団解体
+;-----------------------
+@DIVISION_DISMATLING(_師団ID)
+#DIM _師団ID
+
+師団所属:_師団ID = -1
+師団配置:_師団ID = -1
+前線配置:_師団ID = -1
+師団攻撃対象:_師団ID = -1
+師団ダメージ:_師団ID = -1
+師団ステータス:_師団ID = -1
+師団テンプレート:_師団ID = -1
+
+;-----------------------
+; 指定条件の師団の増減
+; COUNTER: INT どれだけ増減させるか
+;-----------------------
+@DIVISION_NUMBER_EDIT(_テンプレートID, _陣営, _戦線, _前線, _COUNTER, ユニット概要一覧)
+#DIM _テンプレートID
+#DIM _陣営
+#DIM _戦線
+#DIM _前線
+#DIM _COUNTER
+#DIM REF ユニット概要一覧, 0, 0, 0
+
+IF _COUNTER == 0
+  RETURN
+ELSEIF _COUNTER > 0
+  FOR LOCAL, 0, _COUNTER
+    CALL DIVISION_PLACEMENT_FROM_TEMPLATE(_テンプレートID, _陣営, _戦線, _前線)
+    SIF RESULT == -1
+      BREAK
+    ユニット概要一覧:_戦線:_前線:_テンプレートID ++
+  NEXT
+ELSEIF _COUNTER < 0
+  LOCAL:1 = 0
+  FOR LOCAL, 0, 最大師団数
+    SIF LOCAL:1 >= ABS(_COUNTER)
+      BREAK
+    SIF 師団テンプレート:LOCAL != _テンプレートID
+      CONTINUE
+    SIF 師団所属:LOCAL != _陣営
+      CONTINUE
+    SIF 師団配置:LOCAL != _戦線
+      CONTINUE
+    SIF 前線配置:LOCAL != _前線
+      CONTINUE
+    CALL DIVISION_DISMATLING(LOCAL)
+    ユニット概要一覧:_戦線:_前線:_テンプレートID --
+    _COUNTER ++
+  NEXT
+ENDIF
+
+;-----------------------
+; ターンごとの消費コストを返却
+;-----------------------
+@GET_GB_TURN_COST(ユニット概要一覧)
+#FUNCTION
+#DIM REF ユニット概要一覧, 0, 0, 0
+#DIM DYNAMIC テンプレート_必要物資
+#DIM DYNAMIC TOTAL_COST
+#DIM DYNAMIC 師団テンプレートID
+
+FOR LOCAL, 0, 最大戦線数
+  FOR LOCAL:1, 0, 2; 待機は消費しない
+    FOR LOCAL:2, 0, 最大師団テンプレート
+      師団テンプレートID = LOCAL:2
+      SIF 師団テンプレート_ステータス:師団テンプレートID != 師団テンプレート_作成済
+        CONTINUE
+      テンプレート_必要物資 = 熟練度_必要物資:(師団テンプレート_練度:師団テンプレートID)
+      テンプレート_必要物資 += 師団_必要物資:(師団テンプレート_兵科:師団テンプレートID)
+      テンプレート_必要物資 += 装備_必要物資:(師団テンプレート_装備:師団テンプレートID)
+      SIF 師団テンプレート_大隊:師団テンプレートID != -1
+        テンプレート_必要物資 += 支援大隊_必要物資:(師団テンプレート_大隊:師団テンプレートID)
+      TOTAL_COST += ユニット概要一覧:LOCAL:(LOCAL:1):師団テンプレートID * テンプレート_必要物資
+    NEXT
+  NEXT
+NEXT
+RETURNF TOTAL_COST
+
+;-----------------------
+; 指定陣営のターンごとの消費コストを返却
+;-----------------------
+@GET_GB_TURN_COST_BY_SIDE(_陣営)
+#FUNCTION
+#DIM _陣営
+#DIM DYNAMIC TOTAL_COST
+#DIM DYNAMIC 師団テンプレートID
+
+FOR LOCAL, 0, 最大師団数
+  IF 師団所属:LOCAL == _陣営 && GROUPMATCH(前線配置:LOCAL, 前線配置_前線, 前線配置_予備)
+    師団テンプレートID = 師団テンプレート:LOCAL
+    TOTAL_COST += 熟練度_必要物資:(師団テンプレート_練度:師団テンプレートID)
+    TOTAL_COST += 師団_必要物資:(師団テンプレート_兵科:師団テンプレートID)
+    TOTAL_COST += 装備_必要物資:(師団テンプレート_装備:師団テンプレートID)
+    SIF 師団テンプレート_大隊:師団テンプレートID != -1
+      TOTAL_COST += 支援大隊_必要物資:(師団テンプレート_大隊:師団テンプレートID)
+  ENDIF
+NEXT
+
+RETURNF TOTAL_COST
+
+;-----------------------
+; 師団のテンプレを登録
+;-----------------------
+@GB_REGISTER_DIVISION_TEMPLATE(ID, _名称, _練度, _兵科, _装備, _大隊)
+#DIM ID
+#DIMS _名称
+#DIM _練度
+#DIM _兵科
+#DIM _装備
+#DIM _大隊
+
+師団テンプレート_名称:ID = %_名称%
+師団テンプレート_練度:ID = _練度
+師団テンプレート_大隊:ID = _大隊
+師団テンプレート_兵科:ID = _兵科
+師団テンプレート_装備:ID = _装備
+師団テンプレート_ステータス:ID = 師団テンプレート_作成済
+
+;-----------------------
+; 全師団の編成コストを返却
+;-----------------------
+@GET_GB_ORGANIZATION_COST(ユニット概要一覧)
+#FUNCTION
+#DIM REF ユニット概要一覧, 0, 0, 0
+#DIM DYNAMIC テンプレート_コスト
+#DIM DYNAMIC TOTAL_COST
+#DIM DYNAMIC 師団テンプレートID
+
+FOR LOCAL, 0, 最大戦線数
+  FOR LOCAL:1, 0, 3
+    FOR LOCAL:2, 0, 最大師団テンプレート
+      師団テンプレートID = LOCAL:2
+      SIF 師団テンプレート_ステータス:師団テンプレートID != 師団テンプレート_作成済
+        CONTINUE
+      テンプレート_コスト == 熟練度_コスト:(師団テンプレート_練度:師団テンプレートID)
+      テンプレート_コスト += 師団_コスト:(師団テンプレート_兵科:師団テンプレートID)
+      テンプレート_コスト += 装備_コスト:(師団テンプレート_装備:師団テンプレートID)
+      SIF 師団テンプレート_大隊:師団テンプレートID != -1
+        テンプレート_コスト += 支援大隊_コスト:(師団テンプレート_大隊:師団テンプレートID)
+      TOTAL_COST += ユニット概要一覧:LOCAL:(LOCAL:1):師団テンプレートID * テンプレート_コスト
+    NEXT
+  NEXT
+NEXT
+RETURNF TOTAL_COST
+
+;-----------------------
+; 地上戦本体
+;-----------------------
 @GROUND_BATTLE_START
-#DIM DYNAMIC 決着フラグ
 #DIM CONST 攻撃側勝利 = 1
 #DIM CONST 防御側勝利 = 2
+#DIM DYNAMIC 表示戦線
+#DIM DYNAMIC 決着フラグ
+#DIM DYNAMIC SELECTED_ITEM
+#DIM DYNAMIC GB_防御側前線, 最大師団数
+#DIM DYNAMIC GB_防御側予備, 最大師団数
+#DIM DYNAMIC GB_防御側待機, 最大師団数
+#DIM DYNAMIC GB_攻撃側前線, 最大師団数
+#DIM DYNAMIC GB_攻撃側予備, 最大師団数
+#DIM DYNAMIC GB_攻撃側待機, 最大師団数
+#DIM DYNAMIC 師団テンプレートID
 
-決着フラグ = 0
+SELECTED_ITEM = -1
+; 師団の生成コストを支払う(直にマスタをいじるのはいけてないな...)
+FOR LOCAL, 0, 最大師団数
+  SIF 師団所属:LOCAL == -1
+    CONTINUE
+  師団テンプレートID = 師団テンプレート:LOCAL
+  GB_COST:(師団所属:LOCAL) -= 熟練度_コスト:(師団テンプレート_練度:師団テンプレートID)
+  GB_COST:(師団所属:LOCAL) -= 師団_コスト:(師団テンプレート_兵科:師団テンプレートID)
+  GB_COST:(師団所属:LOCAL) -= 装備_コスト:(師団テンプレート_装備:師団テンプレートID)
+  SIF 師団テンプレート_大隊:師団テンプレートID != -1
+    GB_COST:(師団所属:LOCAL) -= 支援大隊_コスト:(師団テンプレート_大隊:師団テンプレートID)
+NEXT
 
-PRINTL ------------------------------------------- 
-PRINTL [1I][2I]
-PRINTL -----------------予備----------------------
-PRINTL [3I][1A][1T]
+CUSTOMDRAWLINE =
+PRINTFORML 間も無く開戦です。一般人の方はシェルターに避難してください。繰り返します。間も無く...
+CUSTOMDRAWLINE =
+WAITANYKEY
+
+
+$INPUT_LOOP
+VARSET GB_防御側前線, -1
+VARSET GB_防御側予備, -1
+VARSET GB_防御側待機, -1
+VARSET GB_攻撃側前線, -1
+VARSET GB_攻撃側予備, -1
+VARSET GB_攻撃側待機, -1
+
+FOR LOCAL, 0, 最大師団数
+  IF 師団所属:LOCAL == GB_防御側
+    IF 前線配置:LOCAL == 前線配置_前線
+      FINDELEMENT GB_防御側前線, -1
+      IF RESULT == -1
+        GB_防御側前線:0 = LOCAL
+      ELSE
+        GB_防御側前線:RESULT = LOCAL
+      ENDIF
+    ELSEIF 前線配置:LOCAL == 前線配置_予備
+      FINDELEMENT GB_防御側予備, -1
+      IF RESULT == -1
+        GB_防御側予備:0 = LOCAL
+      ELSE
+        GB_防御側予備:RESULT = LOCAL
+      ENDIF
+    ELSEIF 前線配置:LOCAL == 前線配置_待機
+      FINDELEMENT GB_防御側待機, -1
+      IF RESULT == -1
+        GB_防御側待機:0 = LOCAL
+      ELSE
+        GB_防御側待機:RESULT = LOCAL
+      ENDIF
+    ENDIF
+  ELSE
+    IF 前線配置:LOCAL == 前線配置_前線
+      FINDELEMENT GB_攻撃側前線, -1
+      IF RESULT == -1
+        GB_攻撃側前線:0 = LOCAL
+      ELSE
+        GB_攻撃側前線:RESULT = LOCAL
+      ENDIF
+    ELSEIF 前線配置:LOCAL == 前線配置_予備
+      FINDELEMENT GB_攻撃側予備, -1
+      IF RESULT == -1
+        GB_攻撃側予備:0 = LOCAL
+      ELSE
+        GB_攻撃側予備:RESULT = LOCAL
+      ENDIF
+    ELSEIF 前線配置:LOCAL == 前線配置_待機
+      FINDELEMENT GB_攻撃側待機, -1
+      IF RESULT == -1
+        GB_攻撃側待機:0 = LOCAL
+      ELSE
+        GB_攻撃側待機:RESULT = LOCAL
+      ENDIF
+    ENDIF
+  ENDIF
+NEXT
+
+
+FOR LOCAL, 0, 最大戦線数
+  SIF 戦線名:LOCAL == 非アクティブ戦線名
+    CONTINUE
+  SIF LOCAL == 表示戦線
+    SETCOLOR 0X00FF00
+  PRINTBUTTON @"[%戦線名:LOCAL%]", 最大師団数 + LOCAL
+  RESETCOLOR
+NEXT
+PRINTL
+PRINTFORML ----------------防衛側---------------------
+PRINTL
+FOR LOCAL, 0, 最大師団数
+  IF GB_防御側待機:LOCAL != -1 && 表示戦線 == 師団配置:(GB_防御側待機:LOCAL)
+    CALL GB_SET_COLOR(GB_防御側待機:LOCAL)
+    PRINTBUTTON @"[%師団テンプレート_名称:(師団テンプレート:(GB_防御側待機:LOCAL))%]", GB_防御側待機:LOCAL
+    RESETCOLOR
+    PRINT  
+  ENDIF
+NEXT
+PRINTL
+PRINTL
+PRINTFORML -----------------待機----------------------
+PRINTL
+FOR LOCAL, 0, 最大師団数
+  IF GB_防御側予備:LOCAL != -1 && 表示戦線 == 師団配置:(GB_防御側予備:LOCAL)
+    CALL GB_SET_COLOR(GB_防御側予備:LOCAL)
+    PRINTBUTTON @"[%師団テンプレート_名称:(師団テンプレート:(GB_防御側予備:LOCAL))%]", GB_防御側予備:LOCAL
+    RESETCOLOR
+    PRINT  
+  ENDIF
+NEXT
+PRINTL
+PRINTL
+PRINTFORML -----------------予備----------------------
+PRINTL
+FOR LOCAL, 0, 最大師団数
+  IF GB_防御側前線:LOCAL != -1 && 表示戦線 == 師団配置:((GB_防御側前線:LOCAL))
+    CALL GB_SET_COLOR((GB_防御側前線:LOCAL))
+    PRINTBUTTON @"[%師団テンプレート_名称:(師団テンプレート:(GB_防御側前線:LOCAL))%]", GB_防御側前線:LOCAL
+    RESETCOLOR
+    PRINT  
+  ENDIF
+NEXT
+PRINTL
+PRINTL
+PRINTFORML -----------------前線----------------------
+PRINTL
+FOR LOCAL, 0, 最大師団数
+  IF GB_攻撃側前線:LOCAL != -1 && 表示戦線 == 師団配置:(GB_攻撃側前線:LOCAL)
+    CALL GB_SET_COLOR(GB_攻撃側前線:LOCAL)
+    PRINTBUTTON @"[%師団テンプレート_名称:(師団テンプレート:(GB_攻撃側前線:LOCAL))%]", GB_攻撃側前線:LOCAL
+    RESETCOLOR
+    PRINT  
+  ENDIF
+NEXT
+PRINTL
+PRINTL
+PRINTFORML -----------------予備----------------------
+PRINTL
+FOR LOCAL, 0, 最大師団数
+  IF GB_攻撃側予備:LOCAL != -1 && 表示戦線 == 師団配置:(GB_攻撃側予備:LOCAL)
+    CALL GB_SET_COLOR(GB_攻撃側予備:LOCAL)
+    PRINTBUTTON @"[%師団テンプレート_名称:(師団テンプレート:(GB_攻撃側予備:LOCAL))%]", GB_攻撃側予備:LOCAL
+    RESETCOLOR
+    PRINT  
+  ENDIF
+NEXT
+PRINTL
+PRINTL
+PRINTFORML -----------------待機----------------------
+PRINTL
+FOR LOCAL, 0, 最大師団数
+  IF GB_攻撃側待機:LOCAL != -1 && 表示戦線 == 師団配置:(GB_攻撃側待機:LOCAL)
+    CALL GB_SET_COLOR(GB_攻撃側待機:LOCAL)
+    PRINTBUTTON @"[%師団テンプレート_名称:(師団テンプレート:(GB_攻撃側待機:LOCAL))%]", GB_攻撃側待機:LOCAL
+    RESETCOLOR
+    PRINT  
+  ENDIF
+NEXT
+PRINTL
+PRINTL
+PRINTFORML ----------------攻撃側---------------------
+PRINTL
+CUSTOMDRAWLINE =
+IF SELECTED_ITEM != -1
+  CALL PRINT_DIVISION_STATUS_FROM_DIVISION_ID(SELECTED_ITEM, 1)
+ENDIF
 SETCOLOR 0X666666
-PRINTL -----------------前線----------------------
+CUSTOMDRAWLINE -
 RESETCOLOR
-PRINTL [1I][1A][1T]
-PRINTL -----------------予備----------------------
-PRINTL [2I][2A][2T]
-PRINTL -------------------------------------------
-WAIT 
+CALL PRINT_COST
+CUSTOMDRAWLINE =
+PRINTBUTTON "[進行]", -1
+PRINTL
+DRAWLINE
+INPUT
+IF RESULT >= 最大師団数 && RESULT < 最大師団数 + 最大戦線数
+  SIF 戦線名:(RESULT - 最大師団数) != 非アクティブ戦線名
+    表示戦線 = RESULT - 最大師団数
+ELSEIF RESULT >= 0 && RESULT < 最大師団数
+  SELECTED_ITEM = RESULT
+  GOTO INPUT_LOOP
+ELSEIF RESULT == -1
+  CALL GB_OPEN_FIRE
+  ;決着がついていた場合
+  IF RESULT
+    CALL GB_SETTLEMENT(RESULT)
+    RETURN RESULT
+  ENDIF
+  GOTO INPUT_LOOP
+ENDIF
+SELECTED_ITEM = -1
+GOTO INPUT_LOOP
+
+;-----------------------
+; 師団の体力状況に応じて色をセットする
+;-----------------------
+@GB_SET_COLOR(_ID)
+#DIM _ID
+
+SELECTCASE (師団人数 - 師団ダメージ:_ID) * 100 / 師団人数
+  CASE 100
+    SETCOLOR 0XFFFFFF
+  CASE 80 TO 99
+    SETCOLOR 0XCCCC00
+  CASE 70 TO 79
+    SETCOLOR 0XCC6600
+  CASE 51 TO 69
+    SETCOLOR 0XFF6600
+  CASE 0 TO 50
+    SETCOLOR 0XFF0000
+ENDSELECT
+
+;-----------------------
+; 交戦
+;-----------------------
+@GB_OPEN_FIRE
+#DIM DYNAMIC 攻撃側ユニット一覧, 最大戦線数
+#DIM DYNAMIC 防御側ユニット一覧, 最大戦線数
+#DIM DYNAMIC 攻撃側勝利戦線数
+#DIM DYNAMIC 防御側勝利戦線数
+#DIM DYNAMIC GB_総戦線数
+#DIM DYNAMIC GB_勝利条件数
+
+
+FOR LOCAL, 0, VARSIZE("戦線名")
+  SIF 戦線名:LOCAL != 非アクティブ戦線名
+    GB_総戦線数++
+NEXT
+IF GB_総戦線数 % 2
+  GB_勝利条件数 = GB_総戦線数 / 2 + 1
+ELSE
+  GB_勝利条件数 = GB_総戦線数 / 2
+ENDIF
+
+;師団のステータス変更
+CALL GB_UPDATE_DIVISION_STATUS
+;コストの支払い
+GB_COST:GB_攻撃側 -= GET_GB_TURN_COST_BY_SIDE(GB_攻撃側)
+SIF GB_COST:GB_攻撃側 <= 0
+  RETURN GB_防御側勝利
+GB_COST:GB_防御側 -= GET_GB_TURN_COST_BY_SIDE(GB_防御側)
+SIF GB_COST:GB_防御側 <= 0
+  RETURN GB_攻撃側勝利
+;師団の移動
+CALL GB_MOVE_DIVISION
+;戦闘
+CALL GB_COMBAT
+
+; 決着している戦線がないか確認
+$INPUT_LOOP
+VARSET 攻撃側ユニット一覧, 0
+VARSET 防御側ユニット一覧, 0
+攻撃側勝利戦線数 = 0
+防御側勝利戦線数 = 0
+
+FOR LOCAL, 0, 最大師団数
+  IF 師団所属:LOCAL == GB_攻撃側 && 前線配置:LOCAL == 前線配置_前線
+    攻撃側ユニット一覧:(師団配置:LOCAL) ++
+  ELSEIF 師団所属:LOCAL == GB_防御側 && 前線配置:LOCAL == 前線配置_前線
+    防御側ユニット一覧:(師団配置:LOCAL) ++
+  ENDIF
+NEXT
+
+FOR LOCAL, 0, 最大戦線数
+  SIF 戦線名:LOCAL == 非アクティブ戦線名
+    CONTINUE
+  IF !攻撃側ユニット一覧:LOCAL
+    戦線状況:LOCAL = GB_防御側勝利
+    防御側勝利戦線数 ++
+  ELSEIF !防御側ユニット一覧:LOCAL
+    戦線状況:LOCAL = GB_攻撃側勝利
+    攻撃側勝利戦線数 ++
+  ELSE
+    戦線状況:LOCAL = GB_戦闘中
+  ENDIF
+NEXT
+
+IF 防御側勝利戦線数 >= GB_勝利条件数
+  RETURN GB_防御側勝利
+ELSEIF 攻撃側勝利戦線数 >= GB_勝利条件数
+  RETURN GB_攻撃側勝利
+ELSE
+  RETURN 0
+ENDIF
+
+;-----------------------
+; 師団のステータスを変更する
+;-----------------------
+@GB_UPDATE_DIVISION_STATUS
+
+FOR LOCAL, 0, 最大師団数
+  ; 前線に居てHP50%以上だったら交戦
+  IF 前線配置:LOCAL == 前線配置_前線 && ((師団人数 - 師団ダメージ:LOCAL) * 100 / 師団人数) >= 50
+    師団ステータス:LOCAL = 師団ステータス_攻撃
+    ; 攻撃対象が未設定の場合、ランダムに選択される
+    IF 師団攻撃対象:LOCAL == -1
+      CALL GB_LOTTERY_TARGET(師団配置:LOCAL, 師団所属:LOCAL == GB_攻撃側 ? GB_防御側 # GB_攻撃側 )
+      IF RESULT == -1
+        師団ステータス:LOCAL = 師団ステータス_待機
+      ELSE
+        師団攻撃対象:LOCAL = RESULT
+      ENDIF
+    ENDIF
+  ; 前線に居てHP50%未満だったら撤退
+  ELSEIF 前線配置:LOCAL == 前線配置_前線
+    師団ステータス:LOCAL = 師団ステータス_移動
+    師団移動先:LOCAL = 前線配置_予備
+    師団移動時間:LOCAL = 1
+    ; 予備にいて配置転換できる師団を検索
+    CALL GB_LOTTERY_RESERVE(師団配置:LOCAL, 師団テンプレート:LOCAL)
+    IF RESULT != -1
+      師団ステータス:RESULT = 師団ステータス_移動
+      師団移動先:RESULT = 前線配置_前線
+      師団移動時間:RESULT = 1
+    ENDIF
+  ELSEIF 前線配置:LOCAL == 前線配置_予備 && ((師団人数 - 師団ダメージ:LOCAL) * 100 / 師団人数) < 50 && 師団移動時間:LOCAL <= 0
+    師団ステータス:LOCAL = 師団ステータス_移動
+    師団移動先:LOCAL = 前線配置_待機
+    師団移動時間:LOCAL = 10
+  ELSEIF 前線配置:LOCAL == 前線配置_待機 && ((師団人数 - 師団ダメージ:LOCAL) * 100 / 師団人数) < 50
+    ; ここにコストを足す処理
+    CALL DIVISION_DISMATLING(LOCAL)
+  ENDIF
+NEXT
+
+;-----------------------
+; 攻撃対象の決定
+;-----------------------
+@GB_LOTTERY_TARGET(_戦線, _攻撃対象陣営)
+#DIM _戦線
+#DIM _攻撃対象陣営
+#DIM DYNAMIC _攻撃候補, 最大前線師団数
+
+VARSET _攻撃候補, -1
+
+FOR LOCAL, 0, 最大師団数
+  IF 師団配置:LOCAL == _戦線 && 師団所属:LOCAL == _攻撃対象陣営 && 前線配置:LOCAL == 前線配置_前線
+    FINDELEMENT _攻撃候補, -1
+    SIF RESULT >= 0
+      _攻撃候補:RESULT = LOCAL
+  ENDIF
+NEXT
+
+FINDELEMENT _攻撃候補, -1
+IF RESULT == 0
+  RETURN -1
+ELSEIF RESULT == -1
+  RETURN _攻撃候補:(RAND:最大前線師団数)
+ELSE
+  RETURN _攻撃候補:(RAND:(RESULT + 1))
+ENDIF
+
+;-----------------------
+; 前線に出る予備役を返却する
+;-----------------------
+@GB_LOTTERY_RESERVE(_戦線, _師団テンプレート)
+#DIM _戦線
+#DIM _師団テンプレート
+#DIM DYNAMIC _師団候補, 最大師団数
+
+VARSET _師団候補, -1
+
+FOR LOCAL, 0, 最大師団数
+  SIF 師団配置:LOCAL != _戦線 || 前線配置:LOCAL != 前線配置_予備 || 師団テンプレート:LOCAL != _師団テンプレート
+    CONTINUE
+  ;同時に複数師団撤退した場合、同じ師団が抽選されるのを防ぐ
+  SIF 師団ステータス:LOCAL == 師団ステータス_移動 && 師団移動先:LOCAL == 前線配置_前線
+    CONTINUE
+  SIF ((師団人数 - (師団ダメージ:LOCAL)) * 100 / 師団人数) >= 50
+    RETURN LOCAL
+NEXT
+; 配置転換できる同じ師団がいなかった場合、ランダムで師団を抽出
+FOR LOCAL, 0, 最大師団数
+  SIF 前線配置:LOCAL != 前線配置_予備 || ((師団人数 - (師団ダメージ:LOCAL)) * 100 / 師団人数) < 50
+    CONTINUE
+  FINDELEMENT _師団候補, -1
+  SIF RESULT >= 0 && RESULT < 最大師団数
+    _師団候補:RESULT = LOCAL
+NEXT
+
+FINDELEMENT _師団候補, -1
+IF RESULT == 0
+  RETURN -1
+ELSEIF RESULT == -1
+  RETURN _師団候補:(RAND:最大師団数)
+ELSE
+  RETURN _師団候補:(RESULT + 1)
+ENDIF
+
+;-----------------------
+; 移動状態の師団を移動させる
+;-----------------------
+@GB_MOVE_DIVISION
+FOR LOCAL, 0, 最大師団数
+  IF 師団ステータス:LOCAL == 師団ステータス_移動 && --師団移動時間:LOCAL == 0
+    前線配置:LOCAL = 師団移動先:LOCAL
+  ENDIF
+NEXT
+
+;-----------------------
+; コストの表示
+;-----------------------
+@PRINT_COST
+PRINTFORML 攻撃側: {GET_GB_TURN_COST_BY_SIDE(GB_攻撃側)} コスト/ターン 現状コスト: {GB_COST:GB_攻撃側} 活動限界まで{GB_COST:GB_攻撃側/GET_GB_TURN_COST_BY_SIDE(GB_攻撃側)}ターン
+PRINTFORML 防御側: {GET_GB_TURN_COST_BY_SIDE(GB_防御側)} コスト/ターン 現状コスト: {GB_COST:GB_防御側} 活動限界まで{GB_COST:GB_防御側/GET_GB_TURN_COST_BY_SIDE(GB_防御側)}ターン
+
+;-----------------------
+; 戦闘状態の師団を交戦させる
+;-----------------------
+@GB_COMBAT
+FOR LOCAL, 0, 最大師団数
+  IF 前線配置:LOCAL == 前線配置_前線 && 師団ステータス:LOCAL == 師団ステータス_攻撃
+    ; 攻撃対象が前線から離脱していた場合
+    IF 前線配置:(師団攻撃対象:LOCAL) != 前線配置_前線
+      CALL GB_LOTTERY_TARGET(師団配置:LOCAL, 師団所属:LOCAL == GB_攻撃側 ? GB_防御側 # GB_攻撃側)
+      SIF RESULT != -1
+        師団攻撃対象:LOCAL = RESULT
+    ENDIF
+    CALL GB_ATTACK(LOCAL)
+  ENDIF
+NEXT
+
+;-----------------------
+; 攻撃
+;-----------------------
+@GB_ATTACK(_GB_攻撃側)
+#DIM _GB_攻撃側
+#DIM DYNAMIC _GB_防御側
+#DIM DYNAMIC _GB_ダメージ
+#DIM DYNAMIC _GB_攻撃側攻撃力
+
+_GB_防御側 = 師団攻撃対象:_GB_攻撃側
+
+_GB_ダメージ = POWER(GET_DIVISION_STATUS(_GB_攻撃側, GB_攻撃力), 2) / GET_DIVISION_STATUS(_GB_防御側, GB_防御力)
+_GB_ダメージ = RAND(150, 180) * _GB_ダメージ / 100
+SIF GET_DIVISION_STATUS(_GB_攻撃側, GB_対装甲) < GET_DIVISION_STATUS(_GB_防御側, GB_装甲)
+  _GB_ダメージ /= GB_未貫通軽減指数
+
+師団ダメージ:_GB_防御側 += _GB_ダメージ
+
+;-----------------------
+; 師団のステータス取得
+;-----------------------
+@GET_DIVISION_STATUS(_ID, _ステータス)
+#FUNCTION
+#DIM _ID
+#DIM _ステータス
+#DIM DYNAMIC _TOTAL
+
+SELECTCASE _ステータス
+  CASE GB_攻撃力
+    _TOTAL += 熟練度_攻撃力:(師団テンプレート_練度:(師団テンプレート:_ID))
+    _TOTAL += 師団_攻撃力:(師団テンプレート_兵科:(師団テンプレート:_ID))
+    _TOTAL += 装備_攻撃力:(師団テンプレート_装備:(師団テンプレート:_ID))
+    SIF 師団テンプレート_大隊:(師団テンプレート:_ID) != -1
+      _TOTAL += 支援大隊_攻撃力:(師団テンプレート_大隊:(師団テンプレート:_ID))
+  CASE GB_防御力
+    _TOTAL += 熟練度_防御力:(師団テンプレート_練度:(師団テンプレート:_ID))
+    _TOTAL += 師団_防御力:(師団テンプレート_兵科:(師団テンプレート:_ID))
+    _TOTAL += 装備_防御力:(師団テンプレート_装備:(師団テンプレート:_ID))
+    SIF 師団テンプレート_大隊:(師団テンプレート:_ID) != -1
+      _TOTAL += 支援大隊_防御力:(師団テンプレート_大隊:(師団テンプレート:_ID))
+  CASE GB_必要物資
+    _TOTAL += 熟練度_必要物資:(師団テンプレート_練度:(師団テンプレート:_ID))
+    _TOTAL += 師団_必要物資:(師団テンプレート_兵科:(師団テンプレート:_ID))
+    _TOTAL += 装備_必要物資:(師団テンプレート_装備:(師団テンプレート:_ID))
+    SIF 師団テンプレート_大隊:(師団テンプレート:_ID) != -1
+      _TOTAL += 支援大隊_必要物資:(師団テンプレート_大隊:(師団テンプレート:_ID))
+  CASE GB_対装甲
+    _TOTAL += 熟練度_対装甲:(師団テンプレート_練度:(師団テンプレート:_ID))
+    _TOTAL += 師団_対装甲:(師団テンプレート_兵科:(師団テンプレート:_ID))
+    _TOTAL += 装備_対装甲:(師団テンプレート_装備:(師団テンプレート:_ID))
+    SIF 師団テンプレート_大隊:(師団テンプレート:_ID) != -1
+      _TOTAL += 支援大隊_対装甲:(師団テンプレート_大隊:(師団テンプレート:_ID))
+  CASE GB_装甲
+    _TOTAL += 熟練度_装甲:(師団テンプレート_練度:(師団テンプレート:_ID))
+    _TOTAL += 師団_装甲:(師団テンプレート_兵科:(師団テンプレート:_ID))
+    _TOTAL += 装備_装甲:(師団テンプレート_装備:(師団テンプレート:_ID))
+    SIF 師団テンプレート_大隊:(師団テンプレート:_ID) != -1
+      _TOTAL += 支援大隊_装甲:(師団テンプレート_大隊:(師団テンプレート:_ID))
+  CASE GB_コスト
+    _TOTAL += 熟練度_コスト:(師団テンプレート_練度:(師団テンプレート:_ID))
+    _TOTAL += 師団_コスト:(師団テンプレート_兵科:(師団テンプレート:_ID))
+    _TOTAL += 装備_コスト:(師団テンプレート_装備:(師団テンプレート:_ID))
+    SIF 師団テンプレート_大隊:(師団テンプレート:_ID) != -1
+      _TOTAL += 支援大隊_コスト:(師団テンプレート_大隊:(師団テンプレート:_ID))
+ENDSELECT
+RETURNF _TOTAL
+
+;-----------------------
+; 決着
+;-----------------------
+@GB_SETTLEMENT(_勝利側)
+#DIM _勝利側
+
+REDRAW 2
+CUSTOMDRAWLINE =
+PRINTFORM 決着: 
+IF _勝利側 == GB_攻撃側勝利
+  PRINTFORML 攻撃側の勝利
+ELSE
+  PRINTFORML 防御側の勝利
+ENDIF
+CUSTOMDRAWLINE =
+PRINTW ………………
+PRINTW …………
+PRINTW ……
+RETURN _勝利側

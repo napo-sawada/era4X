@@ -29,11 +29,38 @@ CALL ASK_YN
 SIF RESULT
 	RETURN
 PRINTFORML 「それじゃあ　今日は地上戦の練習でも しましょうか」
-PRINTFORMW 「いつか役に立つ日が くるかもしれないですし」
+PRINTFORMW 「いつか役に立つ日が くるかもしれないですよ」
 PRINTL
 PRINTFORMW そういうと思考戦車はシミュレーターを展開した
 PRINTW ………………
 PRINTW …………
 PRINTW ……
 CALL GROUND_BATTLE_INIT
+PRINTFORML 「まずは師団テンプレートの編成から始めましょう」
+PRINTFORMW 「とりあえず歩兵 自動車化 戦車師団それぞれ用意しましょう」
+PRINTL
+PRINTFORML 「私のおすすめはもちろん戦車師団です」
+PRINTFORML 「装甲が敵の対装甲より高いと、ダメージを1/8にできますよ」
+PRINTFORMW 「ただし貫通されると歩兵よりも脆いのでご注意を」
+CALL SELECT_EDIT_DIVISION
+CALL GB_DEFINE_TOTAL_COST(GB_攻撃側, 1000000)
+CALL GB_DEFINE_TOTAL_COST(GB_防御側, 1000000)
+CALL GB_ADD_BATTLE_FRONT("首都")
+CALL GB_ADD_BATTLE_FRONT("研究都市")
+PRINTFORML 「次は事前準備のフェーズですね」
+PRINTFORML 「[師団配置]から各戦線の前線 予備 待機に師団を配置してください」
+PRINTFORMW 「前線には{最大前線師団数}師団まで配置できます 前線には限界まで配置した方がいいですよ」
+PRINTL
+CALL GB_PREPARATION_PHASE(GB_攻撃側)
+CALL GB_AUTO_PREPARATION(GB_防御側, 0)
 CALL GROUND_BATTLE_START
+IF RESULT == GB_攻撃側勝利
+	PRINTFORML 「ギギ ガガ この私の戦車師団が破れるとは……」
+	PRINTFORMW 「地上戦指揮官の才能もお持ちのようですね」
+ELSE
+	PRINTFORML 「やった 私の勝ちですね」
+	PRINTFORMW 「やはり戦車は無敵です」
+ENDIF
+PRINTL
+PRINTFORML 「また暇潰ししたくなったら いつでもお声がけください」
+PRINTFORMW 「それでは」
