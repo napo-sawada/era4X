@@ -32,7 +32,7 @@ SELECTCASE QUEST_PROGRESS:40
 		RESULTS = 武士の魂
 	CASE 4 TO 9
 		RESULTS = 皇国の現地妻
-	CASE 10
+	CASE 10 TO 12
 		RESULTS = 皇国の友人
 ENDSELECT
 RETURN
@@ -346,23 +346,21 @@ SELECTCASE QUEST_PROGRESS:QUEST_ID
 					CALL INIT_PRESET_SHIP(国家ID_プレイヤー, CHARACTER_POSITION, 朱雀級機動武者, "朱雀級機動武者『白雲』", 朱雀級機動武者)
 						SHIP_EQUIP:主砲:0:RESULT = 61 ;ちょっとしたサービス。
 						SHIP_EQUIP:オプション:0:RESULT = 7
-					PRINTFORMW その後顔を出す度、彼女は嬉しそうに%CALLNAME:MASTER%を歓迎した。
-					PRINTFORMW ※女性あなたルートは現在未実装。
 						QUEST_PROGRESS:40 = 10
 				ELSEIF RESULT == 1
 					PRINTFORML いつか良い相手が見つかり、跡継ぎが生まれた時のためにも、ここに残しておくべきだろう。
 					PRINTFORML そのように告げると、彼女はじっとこちらを見つめて、それから目を伏せる。
-					PRINTFORMW 「本当に、素晴らしいお方……あなたがもし、殿方であればと思ってしまいますね」
-					PRINTFORML
-					PRINTFORML 彼女は苦笑しながら、もう一度頭を下げて、ではせめて別なお礼を、と口にした。
+					PRINTFORMW 「本当に、素晴らしいお方……。あなたが、もし……」
+					;IF TALENT:MASTER:性別で派生させようと思ったものの、男の娘双とふたなりの違いだとか、分かる気がして分からない。
+					;とりあえず、生殖本能を掻き立てられなかったということに。女分岐はオミット版になりそうなので、その辺りの加筆は大歓迎です。
+					PRINTFORML 静流は%CALLNAME:MASTER%をじっと見つめた。
+					PRINTFORML 「いえ、何でもありません」
+					PRINTFORMW 彼女は言いかけた言葉を止めて苦笑しながら、もう一度頭を下げると、ではせめて別なお礼を、と口にした。
 					PRINTFORML 
 					PRINTFORML 立花家名義で200,000のお礼金が振り込まれた。
 					PRINTFORMW そして彼女がこの話を周囲に伝えたことで、皇国における評価が更に上がった。
 						MONEY += 200000
 						REL_LIKE_COUNTRY:国家ID_豊秋津皇国:国家ID_プレイヤー += 50
-					PRINTFORML 
-					PRINTFORMW その後顔を出す度、彼女は嬉しそうに%CALLNAME:MASTER%を歓迎した。
-					PRINTFORMW ※女性あなたルートは現在未実装。
 						QUEST_PROGRESS:40 = 10
 				ENDIF
 		ELSE
@@ -470,17 +468,22 @@ SELECTCASE QUEST_PROGRESS:QUEST_ID
 						PRINTFORML 無理、と謝罪を繰り返して五分も持たずに絶頂する。
 						PRINTFORMW お仕置きだと荒々しく腰を叩き付けると悲鳴を上げて、絶頂に次ぐ絶頂を味わわせた。
 						PRINTFORML 
+						PRINTFORML 「ゃんっ♥　旦那様♥　乱暴なの♥　興奮しすぎて……♥♥♥　」
 						PRINTFORMW 四つん這いで、あるいは壁に手をつかせて荒々しく犯し、
 						PRINTFORML 「あ♥　すき♥　すきっ♥　んむ♥　ぁむ……♥」
 						PRINTFORMW 抱き合いながら優しく愛し、
-						PRINTFORML 「だめ♥　はずかし♥　あ♥　だめ♥　だめ……♥」
+						PRINTFORML 「だめ♥　はずかし♥　あ♥　だめ♥　だめ……♥♥♥」
 						PRINTFORMW 鏡の前で見せつけながら犯し。
+						PRINTFORML 
+						PRINTFORML 
+						PRINTFORML 
+						PRINTFORML 
 						PRINTFORML 
 						PRINTFORML 
 						PRINTFORMW 「うぅ……、……あぁ」
 						PRINTFORML 翌朝――昼頃に目覚めた静流は昨晩のことを思い出し、布団から出られなくなっていた。
 						PRINTFORML 散々いやらしいことを言わせながら可愛がった後。
-						PRINTFORML 本性がどちらにあるのかはともかく、少なくとも素の静流は随分な恥ずかしがり屋らしい。
+						PRINTFORMW 本性がどちらにあるのかはともかく、少なくとも素の静流は随分な恥ずかしがり屋らしい。
 						PRINTFORML
 						PRINTFORMW 「……静流はもう、旦那様に合わせる顔が……ぁんっ♥」
 						PRINTFORML いくら言っても出てこない静流に突っ込み、そのまま犯している内に天頂から日が傾き。
@@ -587,6 +590,7 @@ SELECTCASE QUEST_PROGRESS:QUEST_ID
 								ENDIF
 				ENDIF
 		ENDIF
+	;男あなたの現地妻ルート。基本的に更新のメインで想定は身持ちの堅い純愛現地妻系。
 	CASE 4
 		PRINTFORML 「お帰りなさいませ、旦那様」
 		PRINTFORMW %CALLNAME:MASTER%が立花家の門戸を潜ると、玄関で三つ指を突き、静流が頭を下げて出迎えた。
@@ -602,15 +606,14 @@ SELECTCASE QUEST_PROGRESS:QUEST_ID
 		ELSE
 			PRINTFORML 「このところはニュースで何度か旦那様との事が報じられて、少し嬉し恥ずかしですね」
 		ENDIF
-		PRINTFORMW そんな風に近況を語って、静流は%CALLNAME:MASTER%の話をせがむ。
-		PRINTFORML 仕事のことや船のこと、静流はどんな話でも楽しそうで、中々の聞き上手であった。
-		PRINTFORML そっちも何かないのかと尋ねると、静流に言い寄っていた男について。
-		PRINTFORML 
-		PRINTFORML どうにも、アステロイドベルトで労役をすることになったらしい。
+		PRINTFORML 静流に言い寄っていた男はどうにも、アステロイドベルトで労役をすることになったらしい。
 		PRINTFORML 順風満帆な人生から急転直下、不憫なことだが、禁固刑よりはマシだろう。
 		PRINTFORMW 軍人として一通り操艦技術がある以上、禁固刑は勿体ないという判断か。
 		PRINTFORML 
-		PRINTFORML それから彼女が口にするのは皇国を騒がせるちょっとした問題など。
+		PRINTFORML そんな風に近況を語って、静流は%CALLNAME:MASTER%の話をせがむ。
+		PRINTFORMW 仕事のことや船のこと、静流はどんな話でも楽しそうで、中々の聞き上手であった。
+		PRINTFORML 
+		PRINTFORML そっちも他に何かないのかと尋ねると、それから彼女が口にするのは皇国を騒がせるちょっとした問題など。
 		PRINTFORML バクシン党などの武装組織や共和制国家樹立を目指す運動について――彼女は中々の事情通であった。
 		PRINTFORML どうにも軍人であった父と兄の関係でそうしたことに詳しい知人が多いらしい。
 		PRINTFORMW %CALLNAME:MASTER%が興味深そうに聞いているのを見ると、彼女は少し考え込み、手を叩く。
@@ -698,7 +701,7 @@ SELECTCASE QUEST_PROGRESS:QUEST_ID
 			PRINTFORML 「ふふ、丁度今朝、旦那様の夢を見ておりました」
 			ENDSELECT
 		ENDIF
-		PRINTFORMW そう言いながら、嬉しそうに静流は微笑む。
+		PRINTFORMW そう言いながら、嬉しそうに静流は微笑み手を引いた。
 		PRINTFORML 
 		PRINTFORML いつものように居間に案内され、茶と菓子を口にし、静流は隣でニコニコと。
 			IF REL_LIKE_COUNTRY:国家ID_豊秋津皇国:国家ID_プレイヤー > 800
@@ -713,7 +716,7 @@ SELECTCASE QUEST_PROGRESS:QUEST_ID
 					PRINTFORML 「上の方では旦那様を勧誘するために色々考えておられるようですね」
 					PRINTFORMW 近頃の%CALLNAME:MASTER%の評判について口にし、静流は楽しそうだった。
 				CASE 3
-					PRINTFORML 「近武士の方にお会いすると、旦那様のことばかり聞かれますね」
+					PRINTFORML 「近頃は武士の方にお会いすると、旦那様のことばかり聞かれますね」
 					PRINTFORMW 近頃の%CALLNAME:MASTER%の評判について口にし、静流は楽しそうだった。
 				ENDSELECT
 			ELSEIF REL_LIKE_COUNTRY:国家ID_豊秋津皇国:国家ID_プレイヤー > 600
@@ -737,7 +740,7 @@ SELECTCASE QUEST_PROGRESS:QUEST_ID
 					PRINTFORML 「そういえば先日、旦那様の噂を聞きました」
 					PRINTFORMW 近頃の%CALLNAME:MASTER%の評判について口にし、静流は楽しそうだった。
 				CASE 1
-					PRINTFORML 「実戦部隊の方は旦那様が結構な有名人ようですね」
+					PRINTFORML 「実戦部隊の方では旦那様が結構な有名人ようですね」
 					PRINTFORMW 近頃の%CALLNAME:MASTER%の評判について口にし、静流は楽しそうだった。
 				CASE 2
 					PRINTFORML 「上の方でも旦那様は結構評価されているみたいですね」
@@ -902,5 +905,213 @@ SELECTCASE QUEST_PROGRESS:QUEST_ID
 					QUEST_COMPLETE_DATE:QUEST_ID = DAY
 					CALL FUCK(MASTER, "性技, 性交, Ｃ, 射精", "童貞喪失, キス喪失, Ｖ挿入", 0, "静流の唇", "", "静流の膣", "和姦")
 			
+
+
+
+
+
+
+	;男あなた以外の友人ルート。基本的にやっつけなオミット版なので、女あなたメインの方のera的な加筆は大歓迎です。
+	CASE 10
+		PRINTFORML 「いらっしゃいませ、ようこそお越し下さいました」
+		PRINTFORMW %CALLNAME:MASTER%が立花家の門戸を潜ると、玄関で出迎えた静流が頭を下げた。
+		PRINTFORML 下女は荷物を受け取り、静流は%CALLNAME:MASTER%を先導する。
+		SIF QUEST_COMPLETE_DATE:40 + 100 < DAY
+			PRINTFORML 「ふふ、お久しぶりですね。お疲れでしょうし、今日はごゆっくりなさって下さい」
+		PRINTFORMW 静流は心から嬉しそうな笑みを浮かべながら、居間の方へと%CALLNAME:MASTER%を誘う。
+		PRINTFORML 茶と菓子を用意し、対面へと腰掛け、朗らかな笑みを浮かべた。
+		IF QUEST_COMPLETE_DATE:40 + 100 < DAY
+			PRINTFORML 「人の噂も七十五日。先日の話も忘れられたように落ち着いて参りました」
+		ELSEIF QUEST_COMPLETE_DATE:40 + 5 < DAY
+			PRINTFORML 「ちょっと前まで事件の事が報じられて、身辺が騒がしかったのですが……それも落ち着いてきました」
+		ELSE
+			PRINTFORML 「事件のせいで好奇の目もあり、あまり外を出歩けませんが……ふふ、でも大丈夫です」
+		ENDIF
+		PRINTFORML 静流に言い寄っていた男はどうにも、アステロイドベルトで労役をすることになったらしい。
+		PRINTFORML 順風満帆な人生から急転直下、不憫なことだが、禁固刑よりはマシだろう。
+		PRINTFORMW 軍人として一通り操艦技術がある以上、禁固刑は勿体ないという判断か。
+		PRINTFORML 
+		PRINTFORMW そんな風に近況を語って、静流は%CALLNAME:MASTER%の話をせがむ。
+		PRINTFORMW 彼女は尋ねられると近況を語って、それよりも、と%CALLNAME:MASTER%の話をせがむ。
+		PRINTFORML 仕事のことや船のこと、静流はどんな話でも楽しそうで、中々の聞き上手であった。
+		PRINTFORML 
+		PRINTFORML そっちも他に何かないのかと尋ねると、それから彼女が口にするのは皇国を騒がせるちょっとした問題など。
+		PRINTFORML バクシン党などの武装組織や共和制国家樹立を目指す運動について――彼女は中々の事情通であった。
+		PRINTFORML どうにも軍人であった父と兄の関係でそうしたことに詳しい知人が多いらしい。
+		PRINTFORMW %CALLNAME:MASTER%が興味深そうに聞いているのを見ると、彼女は少し考え込み、手を叩く。
+		PRINTFORML 
+		PRINTFORML 「ご興味あるなら、出来る範囲で調べておきましょうか？」
+		PRINTFORML 間諜の真似事は危険だろう、と口にすると、慌てて彼女は首を振る。
+		PRINTFORMW 「いえ、もちろん捕まってしまうようなことは……皇国人同士で普通に話されたり、知られる内容程度です」
+		PRINTFORML 
+		PRINTFORML ローカルネタ、ということだろう。
+		PRINTFORML 確かに、この星では公然の秘密でも、%CALLNAME:MASTER%が知らないことは多くあるだろう。
+		PRINTFORML 変に尋ねれば不審がられてしまう、聞きづらい話題と言うものも存在する。
+		PRINTFORMW 「ふふ、大きな恩のお返しも兼ねて……何かお役に立てればとも思いますし」
+		PRINTFORML 
+		PRINTFORML 今後、仕事をしていく上でもこうした縁は悪くはない。
+		PRINTFORML 不安定で、どこに落とし穴があるかも分からない%CALLNAME:MASTER%としては、頼れる味方は重要であった。
+		PRINTFORML 「軍部や武家の方とはそれなりにご縁もありますし……皇国は色々としがらみも多いですから」
+		PRINTFORMW 外部の力を借りたい場面も出てくるでしょうし、と%CALLNAME:MASTER%を見つめた。
+		PRINTFORML 
+		PRINTFORML 「%CALLNAME:MASTER%様のような方となれば尚更でしょう。……実は、今度会ったらよろしく伝えて欲しい、と何人からか」
+		PRINTFORML ちょっとした人助けのつもりが嬉しい評価であった。
+		PRINTFORML 「先日のことは武士達の間でも結構評判だそうですから、そうした方面でも良いご縁をお繋ぎ出来るかも知れません」
+		PRINTFORML 
+		PRINTFORML 
+		PRINTFORMW %CALLNAME:MASTER%に皇国の友人が出来たようだ
+		QUEST_PROGRESS:40 = 11
+		QUEST_COMPLETE_DATE:QUEST_ID = DAY
+		
+	CASE 5
+		PRINTFORML 「いらっしゃいませ、お待ちしておりました」
+		PRINTFORMW %CALLNAME:MASTER%が立花家の門戸を潜ると、玄関で静流が頭を下げて出迎えた。
+		IF QUEST_COMPLETE_DATE:40 + 10 < DAY
+			SELECTCASE RAND:4
+			CASE 0
+			PRINTFORML 「お荷物をお持ちしますね」
+			CASE 1
+			PRINTFORML 「長旅ご苦労様です。今日はごゆっくりなさってください」
+			CASE 2
+			PRINTFORML 「今回はどこまで行ってらっしゃったのですか？」
+			CASE 3
+			PRINTFORML 「ふふ、お会いしたいと思っていた頃合いでございました」
+			ENDSELECT
+		ELSE
+			SELECTCASE RAND:4
+			CASE 0
+			PRINTFORML 「先日に続いて、ふふ、皇国にいらっしゃるときはいつでも訪ねてきてくださいね」
+			CASE 1
+			PRINTFORML 「ふふ、実は先ほど、美味しい茶菓子を買いに行ってまして……」
+			CASE 2
+			PRINTFORML 「今はこの辺りでお仕事をなさっているのですね」
+			CASE 3
+			PRINTFORML 「ふふ、すぐにお茶を入れますね」
+			ENDSELECT
+		ENDIF
+		PRINTFORMW そう言いながら、嬉しそうに静流は微笑む。
+		PRINTFORML 
+		PRINTFORML いつものように居間に案内され、茶と菓子を口にし、静流は隣でニコニコと。
+			IF REL_LIKE_COUNTRY:国家ID_豊秋津皇国:国家ID_プレイヤー > 800
+				SELECTCASE RAND:4
+				CASE 0
+					PRINTFORML 「武士達の間でもよく話されているそうで」
+					PRINTFORMW 近頃の%CALLNAME:MASTER%の評判について口にし、静流は楽しそうだった。
+				CASE 1
+					PRINTFORML 「この国に%CALLNAME:MASTER%様が来て頂けるよう言ってくれないかと、わたしの所にも様々な方が」
+					PRINTFORMW 近頃の%CALLNAME:MASTER%の評判について口にし、静流は楽しそうだった。
+				CASE 2
+					PRINTFORML 「上の方では%CALLNAME:MASTER%様を皇国に勧誘するべく色々考えておられるようですね」
+					PRINTFORMW 近頃の%CALLNAME:MASTER%の評判について口にし、静流は楽しそうだった。
+				CASE 3
+					PRINTFORML 「最近は名誉皇国武士、だなんて呼ばれているそうですよ」
+					PRINTFORMW 近頃の%CALLNAME:MASTER%の評判について口にし、静流は楽しそうだった。
+				ENDSELECT
+			ELSEIF REL_LIKE_COUNTRY:国家ID_豊秋津皇国:国家ID_プレイヤー > 600
+				SELECTCASE RAND:4
+				CASE 0
+					PRINTFORML 「武士達の間でも結構有名なようですね」
+					PRINTFORMW 近頃の%CALLNAME:MASTER%の評判について口にし、静流は楽しそうだった。
+				CASE 1
+					PRINTFORML 「%CALLNAME:MASTER%様はこの国に根を下ろすつもりはないのかと、様々な方がわたしの所に」
+					PRINTFORMW 近頃の%CALLNAME:MASTER%の評判について口にし、静流は楽しそうだった。
+				CASE 2
+					PRINTFORML 「上の方では%CALLNAME:MASTER%様を皇国に勧誘するべきではないかと話し合われてるそうですね」
+					PRINTFORMW 近頃の%CALLNAME:MASTER%の評判について口にし、静流は楽しそうだった。
+				CASE 3
+					PRINTFORML 「近頃は武士の方にお会いすると、必ずと言っていいくらい%CALLNAME:MASTER%様のことを聞かれますね」
+					PRINTFORMW 近頃の%CALLNAME:MASTER%の評判について口にし、静流は楽しそうだった。
+				ENDSELECT
+			ELSEIF REL_LIKE_COUNTRY:国家ID_豊秋津皇国:国家ID_プレイヤー > 300
+				SELECTCASE RAND:4
+				CASE 0
+					PRINTFORML 「そういえば先日、噂を聞きました」
+					PRINTFORMW 近頃の%CALLNAME:MASTER%の評判について口にし、静流は楽しそうだった。
+				CASE 1
+					PRINTFORML 「実戦部隊の方では結構な有名人ようですね」
+					PRINTFORMW 近頃の%CALLNAME:MASTER%の評判について口にし、静流は楽しそうだった。
+				CASE 2
+					PRINTFORML 「上の方でも結構評価されているみたいですね」
+					PRINTFORMW 近頃の%CALLNAME:MASTER%の評判について口にし、静流は楽しそうだった。
+				CASE 3
+					PRINTFORML 「武士の方にお会いすると時々%CALLNAME:MASTER%様のことを聞かれますね」
+					PRINTFORMW 近頃の%CALLNAME:MASTER%の評判について口にし、静流は楽しそうだった。
+				ENDSELECT
+			ENDIF
+		PRINTFORML 
+		PRINTFORML 来てくれたことが嬉しいのだろう。
+		PRINTFORMW 楽しそうな彼女の様子を見ながら、今日訪れた理由を彼女に伝える。
+		PRINTFORMW 今日は――
+			PRINTFORML
+			PRINTBUTTON "[0] 何か仕事になりそうな話はないか聞きに来た。", 0
+			;PRINTFORML
+			;PRINTBUTTON "[1] 皇国の状況について。", 1　皇国の状況とかを見られたりだとか？
+			;PRINTFORML
+			;PRINTBUTTON "[2] 静流を抱きに来た。", 2
+				INPUT
+				IF RESULT == 0
+					;前回訪問から二十日経ってないと何もない。
+					IF QUEST_COMPLETE_DATE:40 + 20 < DAY
+						PRINTFORML 
+						PRINTFORMW 「お仕事……そうですね」
+						PRINTFORMW どうにも思い当たるものがあったようだ。
+							SELECTCASE RAND:3
+							CASE 0
+								PRINTFORML
+								PRINTFORMW 「そういえば、バクシン党の拠点の一つが見つかったという話をお聞きしました」
+								PRINTFORML アステロイドベルトのデブリを拠点にしているらしい。
+								PRINTFORML 宙賊のように動いている小規模部隊ではなく、拠点となればそれなりの戦力だろう。
+								PRINTFORML 元武士の多いバクシン党――軍を動かせば逃げ出されるため手をこまねいているのが現状だという。
+								PRINTFORMW 「わたしに聞かせたということは、間接的な依頼と言えるのかも知れません」
+								PRINTFORMW 軍部に行けば詳しい内容を聞けるかも知れない。
+								QUEST_PROGRESS:41 = 1
+							CASE 1
+								PRINTFORML
+								PRINTFORMW 「少し大きな宙賊のグループが近頃暴れ回っているのだとか」
+								PRINTFORML 護衛のない輸送船狙いではなく、船団狙いの中規模集団。
+								PRINTFORML 軍の識別コードを読まれて逃げられることもあり、手を焼いているらしい。
+								PRINTFORMW 「わたしに聞かせたということは、間接的な依頼……ということかも知れません」
+								PRINTFORMW 軍部に行けば詳しい内容を聞けるかも知れない。
+								QUEST_PROGRESS:42 = 1
+							CASE 2
+								PRINTFORML
+								PRINTFORMW 「お仕事……ではないのですが、どうも、時代錯誤な辻斬りが近頃流行っているのだとか」
+								PRINTFORML 人通りのない夜の街、一人の相手を狙って真剣勝負を強制するのだという。
+								PRINTFORML それは確かに時代錯誤甚だしい。
+								PRINTFORMW 「ちょっと怖い話ですね。他の者にも夜は出歩かないよう口にしているのですが」
+								PRINTFORMW 夜出歩く際はお気を付け下さいませ、と静流は口にした。
+								QUEST_PROGRESS:43 = 1
+							ENDSELECT
+						PRINTFORML 
+						PRINTFORMW 思いつくのはそれくらいですね、と彼女はしばらく考え込み、微笑む。
+					ELSE
+						PRINTFORMW 「今のところは思いつくものが……すみません。また何か、聞いておきますね」
+						PRINTFORMW 
+					ENDIF
+				ENDIF
+		PRINTFORML 
+		PRINTFORML 
+		PRINTFORML 
+		PRINTFORML 
+			SELECTCASE RAND:10
+				CASE 0
+					PRINTFORML
+					PRINTFORMW 「むぅ……難しい手でございますね」
+					PRINTFORMW その日は結局、彼女と将棋をしてのんびりと過ごした。
+				CASE 1
+					PRINTFORML
+					PRINTFORMW 「ふふ、今日の夕食はですね……」
+					PRINTFORMW その日はそのまま、彼女手作りの夕食をご馳走になって帰った。
+				CASE 2
+					PRINTFORML
+					PRINTFORMW 「皇国においては――」
+					PRINTFORMW その日は話の流れで、皇国の文化についての話を聞かせてもらった。
+				CASE 3
+					PRINTFORML
+					PRINTFORMW 「まぁ……それで、どうなったのでしょう？」
+					PRINTFORMW その後、夜遅くまでちょっとした冒険譚を語って聞かせた。
+			ENDSELECT
+					QUEST_PROGRESS:40 = 11
+					QUEST_COMPLETE_DATE:QUEST_ID = DAY
+			
 	ENDSELECT
-	

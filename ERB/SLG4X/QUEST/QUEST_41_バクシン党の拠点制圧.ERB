@@ -30,7 +30,7 @@ RETURN
 
 IF QUEST_PROGRESS:41 == 1
 	PRINTFORMW %CALLNAME:MASTER%が軍部を訪ねると、皇国の高級軍人らしき男が現れた。
-	PRINTFORML 「ああ、丁度良いところに来てくれた。少し、頼みたいことがあってね」
+	PRINTFORML 「ああ、丁度良いところに来てくれた。彼女から聞いたかも知れないが、少し、頼みたいことがあってね」
 	PRINTFORML 口にされるのは静流から聞いた通りの内容であった。
 	PRINTFORMW バクシン党の秘密拠点の一つがアステロイドベルトのデブリに見つかったらしい。
 	PRINTFORML
@@ -41,7 +41,7 @@ IF QUEST_PROGRESS:41 == 1
 	PRINTFORML 「ただ、どうにも敵は旧式とは言え、大所帯のようだ」
 	PRINTFORMW 確認されているのは旧式の機動歩兵が十五機ほど、フリゲート五隻。中々の相手である。
 	PRINTFORML 「危険もあるだろう。戦力に不安があれば断ってくれて構わない」
-	PRINTFORMW 報酬は$1,000,000を出してくれるらしいが……。
+	PRINTFORMW 報酬は$750,000を出してくれるらしいが……。
 	PRINTFORML
 	PRINTFORMW 「どうだろう？」
 	$INPUT_LOOP
@@ -50,7 +50,7 @@ IF QUEST_PROGRESS:41 == 1
 	INPUT
 	IF RESULT == 0
 		PRINTFORMW 「よろしい。現在、このセクター内のアステロイドベルトに連中は屯しておる」
-		PRINTFORMW 「$1,000,000の報奨を用意しておこう、武運を祈る」
+		PRINTFORMW 「$750,000の報奨を用意しておこう、武運を祈る」
 		PRINTFORMW バクシン党の拠点制圧を引き受けた。
 		QUEST_PROGRESS:41 = 2
 		CALL ID2POS(CHARACTER_POSITION)

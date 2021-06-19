@@ -94,28 +94,63 @@ RETURN
 							CASE 0
 								PRINTFORML 後に聞いた話では、相手は名前の知られた剣客であったらしい。
 								PRINTFORMW 道場を畳んで姿を消していた男が見つかったのは、辻斬りとして。
-								PRINTFORMW ニュースでは%CALLNAME:MASTER%の活躍が武勇伝として大きく取り上げられ、報じられたようだ。
+								PRINTFORMW 翌日のニュースでは%CALLNAME:MASTER%の活躍が武勇伝として大きく取り上げられ、報じられたようだ。
 								PRINTFORML 
-								PRINTFORML 「だんなさまっ♥　だめ♥♥　あ――っ♥　あ♥　あっ♥　らめ……っ♥♥♥」
-								PRINTFORMW 辻斬り退治の晩は暴力的な衝動を吐き出すように、静流を抱いた。
+								IF TALENT:MASTER:性別 > 0
+									PRINTFORML 「まぁ……本当にお手柄でございますね」
+									PRINTFORMW 静流の所で流れるニュースを眺めつつ、ずず、と%CALLNAME:MASTER%は茶を啜った。
+								ELSE
+									PRINTFORML 「だんなさまっ♥　だめ♥♥　あ――っ♥　あ♥　あっ♥　らめ……っ♥♥♥」
+									PRINTFORMW 静流の腰を揺すりながらそれを眺めて、%CALLNAME:MASTER%は戦いの余韻に浸った。
+									SELECTCASE RAND:2
+										CASE 0
+											PRINTFORMW 強い牡だと意識しながら交尾すると余計に興奮するらしい。いつも以上に肉がうねり、種をせがんで子宮口を吸い付かせた。
+										CASE 1
+											
+											PRINTFORMW ニュースで報じられる相手に種を付けられるのが興奮するのか、静流はいつにも増して従順だった
+									ENDSELECT
+								ENDIF
 								REL_LIKE_COUNTRY:国家ID_豊秋津皇国:国家ID_プレイヤー += 100
 								CALL FUCK(MASTER, "性技, 性交, Ｃ, 射精", "童貞喪失, キス喪失, Ｖ挿入", 0, "静流の唇", "", "静流の膣", "和姦")
 							CASE 1
 								PRINTFORML 後に聞いた話では、相手は剣客ですらない一般人であったらしい。
 								PRINTFORMW 収監されてからは人が変わり、あの刀を手にしてからの記憶がないと説明していた。
-								PRINTFORMW ニュースでは%CALLNAME:MASTER%の名が報じられたようだが、多くの関心は呪われた刀にあるらしい。
+								PRINTFORMW 翌日のニュースでは%CALLNAME:MASTER%の名が報じられたようだが、多くの関心は呪われた刀にあるらしい。
 								PRINTFORML 
-								PRINTFORML 「ゆるしっ♥　はげしすぎっ♥♥　しんじゃっ♥　んんっ♥　――っ♥　あっ♥　ひっ♥♥」
-								PRINTFORMW 辻斬り退治の晩は暴力的な衝動を吐き出すように、静流を抱いた。
+								IF TALENT:MASTER:性別 > 0
+									PRINTFORML 「まず武勇が讃えられるべきだと思うのですが……」
+									PRINTFORMW 静流の所で流れるニュースを眺めつつ、ずず、と%CALLNAME:MASTER%は茶を啜った。
+								ELSE
+									PRINTFORML 「ゆるしっ♥　はげしすぎっ♥♥　しんじゃっ♥　んんっ♥　――っ♥　あっ♥　ひっ♥♥」
+									PRINTFORMW 危険に見合わぬニュースの扱い。%CALLNAME:MASTER%はそれを眺めつつ、静流を犯して溜飲を下げた。
+									SELECTCASE RAND:2
+											CASE 0
+												PRINTFORMW 八つ当たり染みた使われ方で悦ぶ静流は、やはり女の前に牝兎だった。
+											CASE 1
+												PRINTFORMW 激しい交尾は本能をくすぐられるらしく、静流は随分悦んだようだ。
+										ENDSELECT
+								ENDIF
 								REL_LIKE_COUNTRY:国家ID_豊秋津皇国:国家ID_プレイヤー += 25
 								CALL FUCK(MASTER, "性技, 性交, Ｃ, 射精", "童貞喪失, キス喪失, Ｖ挿入", 0, "静流の唇", "", "静流の膣", "和姦")
+								CALL FUCK(MASTER, "性技, 性交, Ｃ, 射精", "童貞喪失, キス喪失, Ｖ挿入", 0, "静流の唇", "", "静流の膣", "和姦")
 							CASE 2
-								PRINTFORML 後に聞いた話では、相手は相手は無名の剣客。
+								PRINTFORML 後で聞いた所、相手は無名の剣客であったらしい。
 								PRINTFORMW 親族の話では、どうにも修行のため山籠りに行ってからずっと消息不明だったようだ。
-								PRINTFORMW ニュースでは%CALLNAME:MASTER%の活躍が何度か繰り返し報じられた。
+								PRINTFORMW 翌日のニュースでは%CALLNAME:MASTER%の活躍が何度か繰り返し報じられた。
 								PRINTFORML 
-								PRINTFORML 「らめっ♥　もうイってますからっ♥♥♥　――っ♥♥♥　はぁ♥　はぁ――ひぐっ　むりっ♥　もうむりですっ♥♥」
-								PRINTFORMW 辻斬り退治の晩は暴力的な衝動を吐き出すように、静流を抱いた。
+								IF TALENT:MASTER:性別 > 0
+									PRINTFORML 「まぁ……お手柄でございますね」
+									PRINTFORMW 静流の所で流れるニュースを眺めつつ、ずず、と%CALLNAME:MASTER%は茶を啜った。
+								ELSE
+									PRINTFORML 「らめっ♥　もうイってますからっ♥♥♥　――っ♥♥♥　はぁ♥　はぁ――ひぐっ　むりっ♥　もうむりですっ♥♥」
+									PRINTFORMW 静流を犯しながらそれを眺めて、%CALLNAME:MASTER%は戦いの熱を吐き出した。
+										SELECTCASE RAND:2
+											CASE 0
+												PRINTFORMW %CALLNAME:MASTER%から感じる暴力な匂いが、静流の牝の興奮を掻き立てたらしい。
+											CASE 1
+												PRINTFORMW 優れた牡に屈服させられ種付けされ、静流の乱れようはまさに牝そのものだった。
+										ENDSELECT
+								ENDIF
 								REL_LIKE_COUNTRY:国家ID_豊秋津皇国:国家ID_プレイヤー += 75
 								CALL FUCK(MASTER, "性技, 性交, Ｃ, 射精", "童貞喪失, キス喪失, Ｖ挿入", 0, "静流の唇", "", "静流の膣", "和姦")
 							CASE 3
@@ -124,8 +159,19 @@ RETURN
 								PRINTFORMW 不名誉極まりないその不祥事を明るみに出せる訳もなく、ニュースは報道されなかった。
 								PRINTFORMW 事件のあとに振り込まれた$500,000は恐らく口止め料なのだろう。
 								PRINTFORML 
-								PRINTFORML 「はげしっ♥　イキま♥♥　あ――っ♥　だめ♥　いまうごくのだめっ♥　ほんとにらめっ♥♥♥」
-								PRINTFORMW 辻斬り退治の晩は暴力的な衝動を吐き出すように、静流を抱いた。
+								IF TALENT:MASTER:性別 > 0
+									PRINTFORML 「皇国という国の歪んだ部分でございますね」
+									PRINTFORMW 静流の所で事の顛末を語りつつ、ずず、と%CALLNAME:MASTER%は茶を啜った。
+								ELSE
+									PRINTFORML 「はげしっ♥　イキま♥♥　あ――っ♥　だめ♥　いまうごくのだめっ♥　ほんとにらめっ♥♥♥」
+									PRINTFORMW ろくでもない貴族もいたものだと、同じ皇国人の静流にしっかりと罰を与えてやった。
+										SELECTCASE RAND:2
+											CASE 0
+												PRINTFORMW 静流は真性のマゾ兎。お仕置きプレイに悦び乱れた。
+											CASE 1
+												PRINTFORMW 理不尽なお仕置きであるにも関わらず、静流は自分から罰をせがんで大いに乱れた。
+										ENDSELECT
+								ENDIF
 								CALL FUCK(MASTER, "性技, 性交, Ｃ, 射精", "童貞喪失, キス喪失, Ｖ挿入", 0, "静流の唇", "", "静流の膣", "和姦")
 								MONEY += 500000
 								MONEY:国家ID_豊秋津皇国 -= 500000
@@ -147,8 +193,13 @@ RETURN
 							PRINTFORML その後辻斬り騒動は活発なパトロールで鳴りを潜めたようだ。
 							PRINTFORMW %CALLNAME:MASTER%の名前は憐れな被害者として報じられ、腕前の信用を少し失った。
 							PRINTFORML 
-							PRINTFORML 「だめですよ♥　静養が♥　んっ♥　大事なんですから……♥♥」
-							PRINTFORMW そして静養という名目でしばらくの間軟禁され、随分心配したらしい静流に弄ばれた。
+							IF TALENT:MASTER:性別 > 0
+									PRINTFORML 「もう、本当お気を付け下さいませ」
+									PRINTFORMW 見舞いに来た静流には、めっですよ、と指を立てられ叱られた。
+							ELSE
+								PRINTFORML 「だめですよ♥　静養が♥　んっ♥　大事なんですから……♥♥」
+								PRINTFORMW そして静養という名目でしばらくの間軟禁され、随分心配したらしい静流に弄ばれた。
+							ENDIF
 							REL_LIKE_COUNTRY:国家ID_豊秋津皇国:国家ID_プレイヤー -= 50
 							CALL FUCK(MASTER, "性技, 性交, マゾ, Ｃ, 射精", "童貞喪失, キス喪失, Ｖ挿入", 0, "静流の唇", "", "静流の膣", "和姦")
 					ENDIF
@@ -158,21 +209,33 @@ RETURN
 				PRINTFORML 先ほど感じていた殺気はどこかへ消えた。
 				PRINTFORMW 首を傾げながら%CALLNAME:MASTER%は帰路につく。
 				PRINTFORML 
-				PRINTFORML 「ん♥　旦那様♥　こっちに集中♥　してくださ――ぁんっ♥♥」
-				PRINTFORMW そして後日、例の如く静流を抱きながらテレビを見ていると辻斬り犯が捕まったとのニュース。
-				PRINTFORMW 強い相手と戦いたかった、という動機を語っているのを知り、%CALLNAME:MASTER%は何とも言えない気分になった。
-				PRINTFORML 
+				IF TALENT:MASTER:性別 > 0
+					PRINTFORML 「本当捕まって良かったですね」
+					PRINTFORMW そして後日、例の如く静流の所で茶を飲み、テレビを眺めていると、辻斬り犯が捕まったとのニュース。
+					PRINTFORMW 強い相手と戦いたかった、という動機を辻斬り犯が語っているのを知り、%CALLNAME:MASTER%は何とも言えない気分になった。
+				ELSE
+					PRINTFORML 「ん♥　旦那様♥　こっちに集中♥　してくださ――ぁんっ♥♥」
+					PRINTFORMW そして後日、例の如く静流を抱きながらテレビを見ていると、辻斬り犯が捕まったとのニュース。
+					PRINTFORMW 強い相手と戦いたかった、という動機を辻斬り犯が語っているのを知り、%CALLNAME:MASTER%は何とも言えない気分になった。
+					PRINTFORML 
+					CALL FUCK(MASTER, "性技, 性交, Ｃ, 射精", "童貞喪失, キス喪失, Ｖ挿入", 0, "静流の唇", "", "静流の膣", "和姦")
+				ENDIF
 				PRINTFORMW その後しばらく、%CALLNAME:MASTER%は白兵訓練に励んだ。
-				CALL FUCK(MASTER, "性技, 性交, Ｃ, 射精", "童貞喪失, キス喪失, Ｖ挿入", 0, "静流の唇", "", "静流の膣", "和姦")
 				CALL PRINT_ADD_EXP(MASTER, "白兵経験値", RAND:10 + 5)
 			ENDIF
 		ELSE
 			PRINTFORMW 報酬もなしに危険を冒すなど馬鹿のすること。
 			PRINTFORML 危険から逃げるのは当然のことで、下らない勝ち負けに興味はなかった。
 			PRINTFORML 
-			PRINTFORML 「ん♥　旦那様♥　こっちに集中♥　してくださ――ぁんっ♥♥」
-			PRINTFORMW 後日、例の如く静流を抱きながらテレビを見ていると辻斬り犯が捕まったとのニュース。
-			PRINTFORMW 強い相手と戦いたかった、という馬鹿な動機を語っているのを知り、%CALLNAME:MASTER%は呆れた。
-			CALL FUCK(MASTER, "性技, 性交, Ｃ, 射精", "童貞喪失, キス喪失, Ｖ挿入", 0, "静流の唇", "", "静流の膣", "和姦")
+			IF TALENT:MASTER:性別 > 0
+				PRINTFORML 「本当、逃げて正解でございましたね」
+				PRINTFORMW そして後日、例の如く静流の所で茶を飲み、テレビを眺めていると、辻斬り犯が捕まったとのニュース。
+				PRINTFORMW 強い相手と戦いたかった、という馬鹿な動機を辻斬り犯が語っているのを知り、%CALLNAME:MASTER%は呆れた。
+			ELSE
+				PRINTFORML 「ん♥　旦那様♥　こっちに集中♥　してくださ――ぁんっ♥♥」
+				PRINTFORMW 後日、例の如く静流を抱きながらテレビを見ていると辻斬り犯が捕まったとのニュース。
+				PRINTFORMW 強い相手と戦いたかった、という馬鹿な動機を辻斬り犯が語っているのを知り、%CALLNAME:MASTER%は呆れた。
+				CALL FUCK(MASTER, "性技, 性交, Ｃ, 射精", "童貞喪失, キス喪失, Ｖ挿入", 0, "静流の唇", "", "静流の膣", "和姦")
+			ENDIF
 		ENDIF
-			QUEST_PROGRESS:43 = 0
+		QUEST_PROGRESS:43 = 0
