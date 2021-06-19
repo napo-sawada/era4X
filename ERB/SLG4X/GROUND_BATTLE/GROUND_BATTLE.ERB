@@ -258,7 +258,7 @@ PRINTFORML 師団ステータス: %師団ステータス名:(師団ステータ�
 SIF 師団ステータス:_師団ID == 師団ステータス_攻撃
   PRINTFORML 攻撃対象　　　: 師団ID-{師団攻撃対象:_師団ID}を攻撃中
 SIF 師団ステータス:_師団ID == 師団ステータス_移動
-  PRINTFORML 移動先　　　　: %師団ステータス名:(師団移動先:_師団ID)%
+  PRINTFORML 移動先　　　　: %師団配置名:(師団移動先:_師団ID)%
 CUSTOMDRAWLINE =
 ENDIF
 
@@ -367,9 +367,11 @@ _前線師団数 = 0
 
 DRAWLINE
 PRINTFORML 残りコスト: {GB_COST:_陣営 - GET_GB_ORGANIZATION_COST(ユニット概要一覧)} - 戦線の維持にも使うので使い切らないでください
+PRINTFORML TIPS: 各戦線の前線には{最大前線師団数}師団配置することを強く推奨します
 SETCOLOR 0X666666
 CUSTOMDRAWLINE =
 RESETCOLOR
+PRINT 戦線一覧: 
 FOR LOCAL, 0, 最大戦線数
   SIF 戦線名:LOCAL == 非アクティブ戦線名
     CONTINUE
@@ -415,7 +417,7 @@ FOR LOCAL, 0, 最大師団テンプレート / 2
   PRINTL
 NEXT
 SETCOLOR 0X666666
-PRINTFORML -----------------待機(予備への移動に10ターン)----------------------
+PRINTFORML -----------------待機(予備への移動に{待機移動時間}ターン)----------------------
 RESETCOLOR
 FOR LOCAL, 0, 最大師団テンプレート / 2
   SIF 師団テンプレート_ステータス:LOCAL != 師団テンプレート_作成済
@@ -508,6 +510,13 @@ ENDIF
 師団ダメージ:ID = 0
 師団ステータス:ID = 師団ステータス_待機
 師団テンプレート:ID = _テンプレートID
+
+GB_COST:_陣営 -= 熟練度_コスト:(師団テンプレート_練度:_テンプレートID)
+GB_COST:_陣営 -= 師団_コスト:(師団テンプレート_兵科:_テンプレートID)
+GB_COST:_陣営 -= 装備_コスト:(師団テンプレート_装備:_テンプレートID)
+SIF 師団テンプレート_大隊:_テンプレートID != -1
+  GB_COST:_陣営 -= 支援大隊_コスト:(師団テンプレート_大隊:_テンプレートID)
+
 RETURN ID
 
 ;-----------------------
@@ -515,6 +524,17 @@ RETURN ID
 ;-----------------------
 @DIVISION_DISMATLING(_師団ID)
 #DIM _師団ID
+#DIM DYNAMIC _テンプレートID
+#DIM DYNAMIC _COST
+
+_テンプレートID = 師団テンプレート:_師団ID
+_COST += 熟練度_コスト:(師団テンプレート_練度:_テンプレートID)
+_COST += 師団_コスト:(師団テンプレート_兵科:_テンプレートID)
+_COST += 装備_コスト:(師団テンプレート_装備:_テンプレートID)
+SIF 師団テンプレート_大隊:_テンプレートID != -1
+  _COST += 支援大隊_コスト:(師団テンプレート_大隊:_テンプレートID)
+_COST = _COST * (師団人数 - 師団ダメージ) / 師団人数
+GB_COST:(師団所属:_師団ID) += _COST
 
 師団所属:_師団ID = -1
 師団配置:_師団ID = -1
@@ -676,17 +696,6 @@ RETURNF TOTAL_COST
 #DIM DYNAMIC 師団テンプレートID
 
 SELECTED_ITEM = -1
-; 師団の生成コストを支払う(直にマスタをいじるのはいけてないな...)
-FOR LOCAL, 0, 最大師団数
-  SIF 師団所属:LOCAL == -1
-    CONTINUE
-  師団テンプレートID = 師団テンプレート:LOCAL
-  GB_COST:(師団所属:LOCAL) -= 熟練度_コスト:(師団テンプレート_練度:師団テンプレートID)
-  GB_COST:(師団所属:LOCAL) -= 師団_コスト:(師団テンプレート_兵科:師団テンプレートID)
-  GB_COST:(師団所属:LOCAL) -= 装備_コスト:(師団テンプレート_装備:師団テンプレートID)
-  SIF 師団テンプレート_大隊:師団テンプレートID != -1
-    GB_COST:(師団所属:LOCAL) -= 支援大隊_コスト:(師団テンプレート_大隊:師団テンプレートID)
-NEXT
 
 CUSTOMDRAWLINE =
 PRINTFORML 間も無く開戦です。一般人の方はシェルターに避難してください。繰り返します。間も無く...
@@ -989,10 +998,16 @@ FOR LOCAL, 0, 最大師団数
       師団移動先:RESULT = 前線配置_前線
       師団移動時間:RESULT = 1
     ENDIF
+    CALL GB_LOTTERY_WAIT(師団配置:LOCAL, 師団テンプレート:LOCAL)
+    IF RESULT != -1
+      師団ステータス:RESULT = 師団ステータス_移動
+      師団移動先:RESULT = 前線配置_予備
+      師団移動時間:RESULT = 待機移動時間
+    ENDIF
   ELSEIF 前線配置:LOCAL == 前線配置_予備 && ((師団人数 - 師団ダメージ:LOCAL) * 100 / 師団人数) < 50 && 師団移動時間:LOCAL <= 0
     師団ステータス:LOCAL = 師団ステータス_移動
     師団移動先:LOCAL = 前線配置_待機
-    師団移動時間:LOCAL = 10
+    師団移動時間:LOCAL = 待機移動時間
   ELSEIF 前線配置:LOCAL == 前線配置_待機 && ((師団人数 - 師団ダメージ:LOCAL) * 100 / 師団人数) < 50
     ; ここにコストを足す処理
     CALL DIVISION_DISMATLING(LOCAL)
@@ -1062,6 +1077,44 @@ ELSEIF RESULT == -1
 ELSE
   RETURN _師団候補:(RESULT + 1)
 ENDIF
+
+;-----------------------
+; 予備に出る待機を返却する
+;-----------------------
+@GB_LOTTERY_WAIT(_戦線, _師団テンプレート)
+#DIM _戦線
+#DIM _師団テンプレート
+#DIM DYNAMIC _師団候補, 最大師団数
+
+VARSET _師団候補, -1
+
+FOR LOCAL, 0, 最大師団数
+  SIF 師団配置:LOCAL != _戦線 || 前線配置:LOCAL != 前線配置_待機 || 師団テンプレート:LOCAL != _師団テンプレート
+    CONTINUE
+  ;同時に複数師団撤退した場合、同じ師団が抽選されるのを防ぐ
+  SIF 師団ステータス:LOCAL == 師団ステータス_移動 && 師団移動先:LOCAL == 前線配置_予備
+    CONTINUE
+  SIF ((師団人数 - (師団ダメージ:LOCAL)) * 100 / 師団人数) >= 50
+    RETURN LOCAL
+NEXT
+; 配置転換できる同じ師団がいなかった場合、ランダムで師団を抽出
+FOR LOCAL, 0, 最大師団数
+  SIF 前線配置:LOCAL != 前線配置_待機 || ((師団人数 - (師団ダメージ:LOCAL)) * 100 / 師団人数) < 50
+    CONTINUE
+  FINDELEMENT _師団候補, -1
+  SIF RESULT >= 0 && RESULT < 最大師団数
+    _師団候補:RESULT = LOCAL
+NEXT
+
+FINDELEMENT _師団候補, -1
+IF RESULT == 0
+  RETURN -1
+ELSEIF RESULT == -1
+  RETURN _師団候補:(RAND:最大師団数)
+ELSE
+  RETURN _師団候補:(RESULT + 1)
+ENDIF
+
 
 ;-----------------------
 ; 移動状態の師団を移動させる

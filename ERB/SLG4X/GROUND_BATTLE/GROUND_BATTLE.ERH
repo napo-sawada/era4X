@@ -68,6 +68,7 @@
 #DIM CONST 師団ステータス_待機 = 2
 #DIM CONST 師団ステータス_移動 = 3
 #DIMS CONST 師団ステータス名 = "攻撃", "撤退", "待機", "移動"
+#DIMS CONST 師団配置名 = "攻撃", "予備", "待機"
 ; 攻撃力などは算出できるので保存しない
 #DIM CONST 最大師団数 = 1024
 #DIM 師団所属, 最大師団数; 攻撃側/防御側
@@ -83,6 +84,7 @@
 ;戦線
 #DIM CONST 最大戦線数 = 10
 #DIM CONST 最大前線師団数 = 3
+#DIM CONST 待機移動時間 = 10
 #DIM CONST GB_戦闘中 = 0
 #DIM CONST GB_攻撃側勝利 = 1
 #DIM CONST GB_防御側勝利 = 2
