@@ -249,7 +249,11 @@ PRINTFORML %"コスト", 8, LEFT%: {テンプレート_コスト} - 師団の編
 #DIM _戦時表示
 #DIM _師団テンプレートID
 
+SIF 師団テンプレート:_師団ID == -1
+  RETURN -1
+
 _師団テンプレートID = 師団テンプレート:_師団ID
+PRINTFORML %"師団ID", 8, LEFT%: {_師団ID}
 CALL PRINT_DIVISION_STATUS(師団テンプレート_名称:_師団テンプレートID, 師団テンプレート_練度:_師団テンプレートID, 師団テンプレート_兵科:_師団テンプレートID, 師団テンプレート_装備:_師団テンプレートID, 師団テンプレート_大隊:_師団テンプレートID)
 IF _戦時表示
 PRINTL
@@ -806,8 +810,9 @@ FOR LOCAL, 0, 最大師団数
   ENDIF
 NEXT
 PRINTL
-PRINTL
+PRINTFORML
 PRINTFORML -----------------前線----------------------
+PRINTFORML
 PRINTL
 FOR LOCAL, 0, 最大師団数
   IF GB_攻撃側前線:LOCAL != -1 && 表示戦線 == 師団配置:(GB_攻撃側前線:LOCAL)

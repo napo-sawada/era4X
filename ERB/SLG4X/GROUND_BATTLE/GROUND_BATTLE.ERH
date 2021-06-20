@@ -30,11 +30,11 @@
 #DIM CONST 師団_歩兵師団 = 0
 #DIM CONST 師団_自動車化師団 = 1
 #DIM CONST 師団_戦車師団 = 2
-#DIM CONST 師団_攻撃力 = 50, 50, 100
+#DIM CONST 師団_攻撃力 = 50, 100, 100
 #DIM CONST 師団_防御力 = 100, 70, 80
-#DIM CONST 師団_必要物資 = 30, 60, 100
+#DIM CONST 師団_必要物資 = 30, 50, 100
 #DIM CONST 師団_対装甲 = 0, 0, 20
-#DIM CONST 師団_装甲 = 0, 10, 25
+#DIM CONST 師団_装甲 = 0, 10, 35
 #DIM CONST 師団_コスト = 100, 200, 400
 {
   #DIMS CONST 師団_名称 = "歩兵師団", "自動車化師団", "戦車師団"
@@ -50,10 +50,10 @@
 }
 #DIM CONST 装備_攻撃力 = 10, 20, 10
 #DIM CONST 装備_防御力 = 20, 20, 10
-#DIM CONST 装備_必要物資 = 5, 10, 15
+#DIM CONST 装備_必要物資 = 5, 10, 10
 #DIM CONST 装備_対装甲 = 0, 2, 10
 #DIM CONST 装備_装甲 = 0, 0, 0
-#DIM CONST 装備_コスト = 10, 20, 40
+#DIM CONST 装備_コスト = 10, 20, 20
 
 #DIM CONST 師団人数 = 10000
 #DIM CONST GB_未貫通軽減指数 = 8
