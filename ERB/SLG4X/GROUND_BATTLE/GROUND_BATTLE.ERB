@@ -1162,9 +1162,20 @@ NEXT
 ; コストの表示
 ;-----------------------
 @PRINT_COST
-PRINTFORML 攻撃側: {GET_GB_TURN_COST_BY_SIDE(GB_攻撃側)} コスト/ターン 現状コスト: {GB_COST:GB_攻撃側} 活動限界まで{GB_COST:GB_攻撃側/GET_GB_TURN_COST_BY_SIDE(GB_攻撃側)}ターン
-PRINTFORML 防御側: {GET_GB_TURN_COST_BY_SIDE(GB_防御側)} コスト/ターン 現状コスト: {GB_COST:GB_防御側} 活動限界まで{GB_COST:GB_防御側/GET_GB_TURN_COST_BY_SIDE(GB_防御側)}ターン
-
+#DIM DYNAMIC _GB_攻撃側コスト
+#DIM DYNAMIC _GB_防御側コスト
+IF GET_GB_TURN_COST_BY_SIDE(GB_攻撃側) == 0
+  _GB_攻撃側コスト = 1
+ELSE
+  _GB_攻撃側コスト = GET_GB_TURN_COST_BY_SIDE(GB_攻撃側)
+ENDIF
+IF GET_GB_TURN_COST_BY_SIDE(GB_防御側) == 0
+  _GB_防御側コスト = 1
+ELSE
+  _GB_防御側コスト = GET_GB_TURN_COST_BY_SIDE(GB_防御側)
+ENDIF
+PRINTFORML 攻撃側: {_GB_攻撃側コスト} コスト/ターン 現状コスト: {GB_COST:GB_攻撃側} 活動限界まで{GB_COST:GB_攻撃側/_GB_攻撃側コスト}ターン
+PRINTFORML 防御側: {_GB_防御側コスト} コスト/ターン 現状コスト: {GB_COST:GB_防御側} 活動限界まで{GB_COST:GB_防御側/_GB_防御側コスト}ターン
 ;-----------------------
 ; 戦闘状態の師団を交戦させる
 ;-----------------------
