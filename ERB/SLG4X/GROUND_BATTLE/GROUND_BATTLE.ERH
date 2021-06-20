@@ -83,7 +83,7 @@
 
 ;戦線
 #DIM CONST 最大戦線数 = 10
-#DIM CONST 最大前線師団数 = 3
+#DIM CONST 最大前線師団数 = 5
 #DIM CONST 待機移動時間 = 10
 #DIM CONST GB_戦闘中 = 0
 #DIM CONST GB_攻撃側勝利 = 1
@@ -105,6 +105,11 @@
 
 ;コスト
 #DIM GB_COST, 2
+
+; 航空機
+#DIM GB_AIRCRAFT, 2
+#DIM GB_前線配備機数, 2, 最大戦線数
+#DIM CONST GB_航空戦力拮抗 = 0
 
 ;ステータス名称
 #DIM GB_攻撃力 = 0

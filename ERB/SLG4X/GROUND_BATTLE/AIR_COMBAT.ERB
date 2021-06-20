@@ -1,0 +1,185 @@
+﻿;------------------------------
+; 航空機の登録
+;------------------------------
+@GB_DEFINE_AIRCRAFT(_陣営, _機数)
+#DIM _陣営
+#DIM _機数
+
+GB_AIRCRAFT:_陣営 = _機数
+
+;------------------------------
+; 各戦線への航空機の配備
+;------------------------------
+@SETUP_ARI_COMBAT(_陣営)
+#DIM _陣営
+#DIM DYNAMIC TOTAL_DEPLOYED_AIRCRAFT
+
+$INPUT_LOOP
+DRAWLINE
+PRINTFORML 各戦線に配備する航空機を設定してください
+DRAWLINE
+
+LOCAL:1 = 0
+FOR LOCAL, 0, 最大戦線数
+  LOCAL:1 += GB_前線配備機数:_陣営:LOCAL
+NEXT
+
+PRINTFORML 配備可能機数: {GB_AIRCRAFT:_陣営 - LOCAL:1}
+PRINTL
+
+FOR LOCAL, 0, 最大戦線数
+  SIF 戦線名:LOCAL == 非アクティブ戦線名
+    CONTINUE
+  PRINTFORML %戦線名:LOCAL%
+  PRINTBUTTON "[-100]", LOCAL
+  PRINTBUTTON "[-10]", LOCAL + 10
+  PRINTBUTTON "[-1]", LOCAL + 100
+  PRINTFORM   {GB_前線配備機数:_陣営:LOCAL}機 
+  PRINTBUTTON "[+1]", LOCAL + 1000
+  PRINTBUTTON "[+10]", LOCAL + 10000
+  PRINTBUTTON "[+100]", LOCAL + 100000
+  PRINTL
+NEXT
+PRINTL
+PRINTBUTTON "[戻る]", 9999
+PRINTL
+
+INPUT
+IF RESULT == 9999
+  RETURN
+ELSEIF RESULT < 10
+  CALL UPDATE_AIRCRAFT_NUM(RESULT, -100, _陣営)
+ELSEIF RESULT < 100
+  CALL UPDATE_AIRCRAFT_NUM(RESULT - 10, -10, _陣営)
+ELSEIF RESULT < 1000
+  CALL UPDATE_AIRCRAFT_NUM(RESULT -100, -1, _陣営)
+ELSEIF RESULT < 10000
+  CALL UPDATE_AIRCRAFT_NUM(RESULT - 1000, 1, _陣営)
+ELSEIF RESULT < 100000
+  CALL UPDATE_AIRCRAFT_NUM(RESULT - 10000, 10, _陣営)
+ELSEIF RESULT < 1000000
+  CALL UPDATE_AIRCRAFT_NUM(RESULT - 100000, 100, _陣営)
+ENDIF
+GOTO INPUT_LOOP
+;------------------------------
+; 航空機の増減
+;------------------------------
+@UPDATE_AIRCRAFT_NUM(_GB_戦線, _増減機数, _陣営)
+#DIM _GB_戦線
+#DIM _増減機数
+#DIM _陣営
+#DIM _当該戦線残余白
+
+LOCAL:1 = 0
+FOR LOCAL, 0, 最大戦線数
+  LOCAL:1 += GB_前線配備機数:_陣営:LOCAL
+NEXT
+_当該戦線残余白 = GB_AIRCRAFT:_陣営 - LOCAL:1
+
+SIF _当該戦線残余白 < _増減機数
+  _増減機数 = _当該戦線残余白
+
+GB_前線配備機数:_陣営:_GB_戦線 = LIMIT(GB_前線配備機数:_陣営:_GB_戦線 + _増減機数, 0, GB_AIRCRAFT:_陣営)
+
+;------------------------------
+; 航空戦の状況を表示
+;------------------------------
+@PRINT_GB_AIRCOMBAT_STATUS(_GB_戦線, _プレイヤー陣営)
+#DIM _GB_戦線
+#DIM _プレイヤー陣営
+
+PRINTFORM 航空戦戦況: 
+SIF _プレイヤー陣営 == GB_攻撃側
+  PRINTFORM （%CALLNAME:MASTER%陣営）
+PRINTFORM 攻撃側 {GB_前線配備機数:GB_攻撃側:_GB_戦線}機 VS 
+SIF _プレイヤー陣営 == GB_防御側
+  PRINTFORM （%CALLNAME:MASTER%陣営）
+PRINTFORML 防御側 {GB_前線配備機数:GB_防御側:_GB_戦線}機
+
+;------------------------------
+; 航空優勢判定
+;------------------------------
+@GB_AIR_SUPERIORITY(_GB_戦線)
+#FUNCTION
+#DIM _GB_戦線
+
+
+;------------------------------
+; 航空攻撃
+;------------------------------
+@GB_AIRCRAFT_ATTACK
+#DIM _GB_戦線
+#DIM _GB_航空余剰戦力
+#DIM _GB_攻撃対象
+#DIM _GB_威力
+#DIM _GB_威力振れ幅 = 100
+#DIM _GB_航空交戦撃墜数 = 2
+
+FOR _GB_戦線, 0, 最大戦線数
+  SIF 戦線状況:_GB_戦線 != GB_戦闘中
+    CONTINUE
+  ;対空砲 OR 超能力
+  FOR LOCAL, 0, 最大師団数
+    IF 師団配置:LOCAL == _GB_戦線 && 前線配置:LOCAL == 前線配置_前線
+      IF 師団テンプレート_大隊:(師団テンプレート:LOCAL) == 支援大隊_対空砲大隊
+        IF 師団所属:LOCAL == GB_攻撃側
+          GB_前線配備機数:GB_防御側:_GB_戦線 = LIMIT(GB_前線配備機数:GB_防御側:_GB_戦線 - 2, 0, GB_前線配備機数:GB_防御側:_GB_戦線)
+        ELSE
+          GB_前線配備機数:GB_攻撃側:_GB_戦線 = LIMIT(GB_前線配備機数:GB_攻撃側:_GB_戦線 - 2, 0, GB_前線配備機数:GB_攻撃側:_GB_戦線)
+        ENDIF
+      ELSEIF 師団テンプレート_大隊:(師団テンプレート:LOCAL) == 支援大隊_超能力者大隊
+        IF 師団所属:LOCAL == GB_防御側
+          GB_前線配備機数:GB_防御側:_GB_戦線 = LIMIT(GB_前線配備機数:GB_防御側:_GB_戦線 - 1, 0, GB_前線配備機数:GB_防御側:_GB_戦線)
+        ELSE
+          GB_前線配備機数:GB_攻撃側:_GB_戦線 = LIMIT(GB_前線配備機数:GB_攻撃側:_GB_戦線 - 1, 0, GB_前線配備機数:GB_攻撃側:_GB_戦線)
+        ENDIF
+      ENDIF
+    ENDIF
+  NEXT
+
+  ; ダメージ計算
+  IF GB_前線配備機数:GB_攻撃側:_GB_戦線 > GB_前線配備機数:GB_防御側:_GB_戦線
+    _GB_航空余剰戦力 = GB_前線配備機数:GB_攻撃側:_GB_戦線 - GB_前線配備機数:GB_防御側:_GB_戦線
+    _GB_攻撃対象 = GB_防御側
+  ELSEIF GB_前線配備機数:GB_攻撃側:_GB_戦線 < GB_前線配備機数:GB_防御側:_GB_戦線
+    _GB_航空余剰戦力 = GB_前線配備機数:GB_防御側:_GB_戦線 - GB_前線配備機数:GB_攻撃側:_GB_戦線
+    _GB_攻撃対象 = GB_攻撃側
+  ENDIF
+  SELECTCASE _GB_航空余剰戦力
+    CASE 0 TO 100
+      _GB_威力 = 100
+    CASE 101 TO 200
+      _GB_威力 = 150
+    CASE 201 TO 300
+      _GB_威力 = 200
+    CASE 301 TO 400
+      _GB_威力 = 300
+    CASE 401 TO 500
+      _GB_威力 = 400
+    CASE 501 TO 750
+      _GB_威力 = 500
+    CASE 751 TO 1000
+      _GB_威力 = 700
+    CASEELSE
+      _GB_威力 = 900
+  ENDSELECT
+  FOR LOCAL, 0, 最大師団数
+    SIF 師団所属:LOCAL == _GB_攻撃対象 && 師団配置:LOCAL == _GB_戦線 && 前線配置:LOCAL == 前線配置_前線
+      師団ダメージ:LOCAL += RAND(_GB_威力 - _GB_威力振れ幅, _GB_威力 + _GB_威力振れ幅)
+  NEXT
+
+  ; 与ダメ
+  IF GB_前線配備機数:GB_攻撃側:_GB_戦線 > 0 && GB_前線配備機数:GB_防御側:_GB_戦線 > 0
+    LOCAL = ABS(GB_前線配備機数:GB_攻撃側:_GB_戦線 - GB_前線配備機数:GB_防御側:_GB_戦線)
+    IF LOCAL < _GB_航空交戦撃墜数
+      GB_前線配備機数:GB_攻撃側:_GB_戦線 = LIMIT(GB_前線配備機数:GB_攻撃側:_GB_戦線 - LOCAL, 0, GB_前線配備機数:GB_攻撃側:_GB_戦線)
+      GB_前線配備機数:GB_防御側:_GB_戦線 = LIMIT(GB_前線配備機数:GB_防御側:_GB_戦線 - LOCAL, 0, GB_前線配備機数:GB_防御側:_GB_戦線)
+    ELSE
+      GB_前線配備機数:GB_攻撃側:_GB_戦線 = LIMIT(GB_前線配備機数:GB_攻撃側:_GB_戦線 - _GB_航空交戦撃墜数, 0, GB_前線配備機数:GB_攻撃側:_GB_戦線)
+      GB_前線配備機数:GB_防御側:_GB_戦線 = LIMIT(GB_前線配備機数:GB_防御側:_GB_戦線 - _GB_航空交戦撃墜数, 0, GB_前線配備機数:GB_防御側:_GB_戦線)
+    ENDIF
+  ENDIF
+NEXT
+
+
+

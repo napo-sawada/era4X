@@ -10,6 +10,9 @@ VARSET 師団ダメージ, -1
 VARSET 師団ステータス, -1
 VARSET 師団テンプレート, -1
 VARSET 戦線名, 非アクティブ戦線名
+VARSET 戦線状況, GB_戦闘中
+VARSET GB_COST, 0
+VARSET GB_AIRCRAFT, 0
 
 ;-----------------------
 ; 編集する地上戦ユニットのテンプレート選択
@@ -314,11 +317,11 @@ DRAWLINE
 FINDELEMENT 戦線名, 非アクティブ戦線名
 PRINTFORML 戦線数: {RESULT} - 戦線の数です。半分以上の戦線で勝利すると勝ちになります
 PRINTL
-PRINTFORML 保有コスト: {GB_COST:_陣営} - 0になると全予備師団が解体されコストに変換されます。予備師団がない場合敗北します
+PRINTFORML 保有コスト: {GB_COST:_陣営} - 師団に配備・維持するために必要なコストです。0になると敗北します
 PRINTL
 PRINTFORML 残戦車数: N台 - 0になると戦車師団は戦闘を継続できません
 PRINTL
-PRINTFORML 残航空機数: N機 - 0になると追加配備ができなくなります
+PRINTFORML 残航空機数: {GB_AIRCRAFT:_陣営}機 - 配備できる航空機の数です
 PRINTL
 SETCOLOR 0X666666
 CUSTOMDRAWLINE =
@@ -336,6 +339,8 @@ IF RESULT == 0
   CALL SELECT_EDIT_DIVISION
 ELSEIF RESULT == 1
   CALL DIVISION_PLACEMENT(_陣営)
+ELSEIF RESULT == 2
+  CALL SETUP_ARI_COMBAT(_陣営)
 ELSEIF RESULT == 3
   RETURN
 ENDIF
@@ -685,7 +690,8 @@ RETURNF TOTAL_COST
 ;-----------------------
 ; 地上戦本体
 ;-----------------------
-@GROUND_BATTLE_START
+@GROUND_BATTLE_START(プレイヤー陣営)
+#DIM プレイヤー陣営
 #DIM CONST 攻撃側勝利 = 1
 #DIM CONST 防御側勝利 = 2
 #DIM DYNAMIC 表示戦線
@@ -819,7 +825,7 @@ FOR LOCAL, 0, 最大師団数
 NEXT
 PRINTL
 PRINTFORML
-PRINTFORML -----------------前線----------------------
+PRINTL ==================前線=====================
 PRINTFORML
 PRINTL
 FOR LOCAL, 0, 最大師団数
@@ -872,6 +878,10 @@ SETCOLOR 0X666666
 CUSTOMDRAWLINE -
 RESETCOLOR
 CALL PRINT_COST
+SETCOLOR 0X666666
+CUSTOMDRAWLINE -
+RESETCOLOR
+CALL PRINT_GB_AIRCOMBAT_STATUS(表示戦線, プレイヤー陣営)
 CUSTOMDRAWLINE =
 PRINTBUTTON "[進行]", -1
 PRINTL
@@ -885,6 +895,7 @@ ELSEIF RESULT >= 0 && RESULT < 最大師団数
   GB_現在の攻撃対象 = 師団攻撃対象:SELECTED_ITEM
   GOTO INPUT_LOOP
 ELSEIF RESULT == -1
+  CALL GB_AIRCRAFT_ATTACK
   CALL GB_OPEN_FIRE
   ;決着がついていた場合
   IF RESULT

@@ -14,12 +14,15 @@ ENDSELECT
 @GB_NPC_TACTICS_0(_陣営)
 #DIM _陣営
 #DIM CONST _戦線継続ターン指数 = 100
+#DIM CONST _航空戦力抽出数 = 100
 #DIM DYNAMIC _前線_前線, 最大師団数
 #DIM DYNAMIC _前線_予備, 最大師団数
 #DIM DYNAMIC _前線_待機, 最大師団数
 #DIM DYNAMIC 勝利確定前線数
 #DIM DYNAMIC 突破前線リスト, 最大戦線数
 #DIM DYNAMIC _ITER
+#DIM DYNAMIC _GB_戦線数
+#DIM DYNAMIC _余剰航空戦力
 
 FOR LOCAL, 0, 最大戦線数
   SIF 戦線名:LOCAL == 非アクティブ戦線名
@@ -37,19 +40,51 @@ CALL GB_REGISTER_DIVISION_TEMPLATE(21, "戦車師団", 熟練度_正規兵, 師�
 CALL GB_BATTLE_FRONT_RANDOM_PICK(勝利確定前線数, 突破前線リスト)
 
 ; 前線を埋める
+
 FOR LOCAL, 0, 最大戦線数
   SIF 戦線名:LOCAL == 非アクティブ戦線名
     CONTINUE
+  _GB_戦線数 ++
   IF 突破前線リスト:LOCAL
     CALL DIVISION_PLACEMENT_FROM_TEMPLATE(21, _陣営, LOCAL, 前線配置_前線)
     CALL DIVISION_PLACEMENT_FROM_TEMPLATE(21, _陣営, LOCAL, 前線配置_前線)
+    CALL DIVISION_PLACEMENT_FROM_TEMPLATE(21, _陣営, LOCAL, 前線配置_前線)
+    CALL DIVISION_PLACEMENT_FROM_TEMPLATE(20, _陣営, LOCAL, 前線配置_前線)
     CALL DIVISION_PLACEMENT_FROM_TEMPLATE(20, _陣営, LOCAL, 前線配置_前線)
   ELSE
     CALL DIVISION_PLACEMENT_FROM_TEMPLATE(20, _陣営, LOCAL, 前線配置_前線)
     CALL DIVISION_PLACEMENT_FROM_TEMPLATE(20, _陣営, LOCAL, 前線配置_前線)
     CALL DIVISION_PLACEMENT_FROM_TEMPLATE(20, _陣営, LOCAL, 前線配置_前線)
+    CALL DIVISION_PLACEMENT_FROM_TEMPLATE(20, _陣営, LOCAL, 前線配置_前線)
+    CALL DIVISION_PLACEMENT_FROM_TEMPLATE(20, _陣営, LOCAL, 前線配置_前線)
   ENDIF
 NEXT
+
+; 攻めたい前線に航空機を優先配備埋める
+LOCAL:1 = 0
+FOR LOCAL, 0, 最大戦線数
+  SIF 戦線名:LOCAL == 非アクティブ戦線名
+    CONTINUE
+  GB_前線配備機数:_陣営:LOCAL = GB_AIRCRAFT:_陣営 / _GB_戦線数
+  IF !突破前線リスト:LOCAL
+    ;指定機数抽出できるなら抽出、できないなら全機抽出
+    IF GB_前線配備機数:_陣営:LOCAL > _航空戦力抽出数
+      GB_前線配備機数:_陣営:LOCAL -= _航空戦力抽出数
+      _余剰航空戦力 += _航空戦力抽出数
+    ELSE
+      _余剰航空戦力 += GB_前線配備機数:_陣営:LOCAL
+      GB_前線配備機数:_陣営:LOCAL = 0
+    ENDIF
+  ELSE
+    LOCAL:1 ++
+  ENDIF
+NEXT
+FOR LOCAL, 0, 最大戦線数
+  IF 突破前線リスト:LOCAL
+    GB_前線配備機数:_陣営:LOCAL += _余剰航空戦力 / LOCAL:1
+  ENDIF
+NEXT
+
 
 _ITER = 0
 ; 予備と待機を埋めていく
