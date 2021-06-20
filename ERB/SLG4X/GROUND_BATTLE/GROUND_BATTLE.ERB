@@ -698,8 +698,10 @@ RETURNF TOTAL_COST
 #DIM DYNAMIC GB_攻撃側予備, 最大師団数
 #DIM DYNAMIC GB_攻撃側待機, 最大師団数
 #DIM DYNAMIC 師団テンプレートID
+#DIM DYNAMIC GB_現在の攻撃対象
 
 SELECTED_ITEM = -1
+GB_現在の攻撃対象 = -1
 
 CUSTOMDRAWLINE =
 PRINTFORML 間も無く開戦です。一般人の方はシェルターに避難してください。繰り返します。間も無く...
@@ -780,6 +782,8 @@ PRINTL
 FOR LOCAL, 0, 最大師団数
   IF GB_防御側待機:LOCAL != -1 && 表示戦線 == 師団配置:(GB_防御側待機:LOCAL)
     CALL GB_SET_COLOR(GB_防御側待機:LOCAL)
+    SIF GB_防御側待機:LOCAL == GB_現在の攻撃対象
+      SETCOLOR 0X6666FF
     PRINTBUTTON @"[%師団テンプレート_名称:(師団テンプレート:(GB_防御側待機:LOCAL))%]", GB_防御側待機:LOCAL
     RESETCOLOR
     PRINT  
@@ -792,6 +796,8 @@ PRINTL
 FOR LOCAL, 0, 最大師団数
   IF GB_防御側予備:LOCAL != -1 && 表示戦線 == 師団配置:(GB_防御側予備:LOCAL)
     CALL GB_SET_COLOR(GB_防御側予備:LOCAL)
+    SIF GB_防御側予備:LOCAL == GB_現在の攻撃対象
+      SETCOLOR 0X6666FF
     PRINTBUTTON @"[%師団テンプレート_名称:(師団テンプレート:(GB_防御側予備:LOCAL))%]", GB_防御側予備:LOCAL
     RESETCOLOR
     PRINT  
@@ -803,7 +809,9 @@ PRINTFORML -----------------予備----------------------
 PRINTL
 FOR LOCAL, 0, 最大師団数
   IF GB_防御側前線:LOCAL != -1 && 表示戦線 == 師団配置:((GB_防御側前線:LOCAL))
-    CALL GB_SET_COLOR((GB_防御側前線:LOCAL))
+    CALL GB_SET_COLOR(GB_防御側前線:LOCAL)
+    SIF GB_防御側前線:LOCAL == GB_現在の攻撃対象
+      SETCOLOR 0X6666FF
     PRINTBUTTON @"[%師団テンプレート_名称:(師団テンプレート:(GB_防御側前線:LOCAL))%]", GB_防御側前線:LOCAL
     RESETCOLOR
     PRINT  
@@ -817,6 +825,8 @@ PRINTL
 FOR LOCAL, 0, 最大師団数
   IF GB_攻撃側前線:LOCAL != -1 && 表示戦線 == 師団配置:(GB_攻撃側前線:LOCAL)
     CALL GB_SET_COLOR(GB_攻撃側前線:LOCAL)
+    SIF GB_攻撃側前線:LOCAL == GB_現在の攻撃対象
+      SETCOLOR 0X6666FF
     PRINTBUTTON @"[%師団テンプレート_名称:(師団テンプレート:(GB_攻撃側前線:LOCAL))%]", GB_攻撃側前線:LOCAL
     RESETCOLOR
     PRINT  
@@ -829,6 +839,8 @@ PRINTL
 FOR LOCAL, 0, 最大師団数
   IF GB_攻撃側予備:LOCAL != -1 && 表示戦線 == 師団配置:(GB_攻撃側予備:LOCAL)
     CALL GB_SET_COLOR(GB_攻撃側予備:LOCAL)
+    SIF GB_攻撃側予備:LOCAL == GB_現在の攻撃対象
+      SETCOLOR 0X6666FF
     PRINTBUTTON @"[%師団テンプレート_名称:(師団テンプレート:(GB_攻撃側予備:LOCAL))%]", GB_攻撃側予備:LOCAL
     RESETCOLOR
     PRINT  
@@ -841,6 +853,8 @@ PRINTL
 FOR LOCAL, 0, 最大師団数
   IF GB_攻撃側待機:LOCAL != -1 && 表示戦線 == 師団配置:(GB_攻撃側待機:LOCAL)
     CALL GB_SET_COLOR(GB_攻撃側待機:LOCAL)
+    SIF GB_攻撃側待機:LOCAL == GB_現在の攻撃対象
+      SETCOLOR 0X6666FF
     PRINTBUTTON @"[%師団テンプレート_名称:(師団テンプレート:(GB_攻撃側待機:LOCAL))%]", GB_攻撃側待機:LOCAL
     RESETCOLOR
     PRINT  
@@ -868,6 +882,7 @@ IF RESULT >= 最大師団数 && RESULT < 最大師団数 + 最大戦線数
     表示戦線 = RESULT - 最大師団数
 ELSEIF RESULT >= 0 && RESULT < 最大師団数
   SELECTED_ITEM = RESULT
+  GB_現在の攻撃対象 = 師団攻撃対象:SELECTED_ITEM
   GOTO INPUT_LOOP
 ELSEIF RESULT == -1
   CALL GB_OPEN_FIRE
@@ -878,6 +893,7 @@ ELSEIF RESULT == -1
   ENDIF
   GOTO INPUT_LOOP
 ENDIF
+GB_現在の攻撃対象 = -1
 SELECTED_ITEM = -1
 GOTO INPUT_LOOP
 
