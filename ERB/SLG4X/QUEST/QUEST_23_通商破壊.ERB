@@ -143,20 +143,20 @@ IF QUESTMAP:(RESULT:0):(RESULT:1):(RESULT:2) == QUEST_ID
 	CALL QUEST_RELEASE_POINT(QUEST_ID, CHARACTER_POSITION:MASTER)
 ELSEIF QUEST_PROGRESS:QUEST_ID == 2
 	PRINTFORML クエスト窓口でミッション完了の報告をした
-	PRINTFORML これにより報酬と社会主義国の評価を得ることができた
+	PRINTFORML これにより報酬と銀河人民統一連邦の評価を得ることができた
 	PRINTFORML 所持金+$250,000
-	PRINTFORMW 社会主義国の評価+15
+	PRINTFORMW 銀河人民統一連邦の評価+15
 	MONEY += 250000
 	MONEY:国家ID_社会主義 -= 250000
 	REL_LIKE_COUNTRY:国家ID_社会主義:国家ID_プレイヤー = LIMIT(REL_LIKE_COUNTRY:国家ID_社会主義:国家ID_プレイヤー + 15, -1000, 1000)
 	QUEST_PROGRESS:QUEST_ID = 0
 	QUEST_COMPLETE_DATE:QUEST_ID = DAY
 ELSE
-	PRINTFORML 社会主義国の非正規軍として通商破壊ミッションに参加することにした%CALLNAME:MASTER%は、臨時の上官からミッション概要を聞いていた
+	PRINTFORML 銀河人民統一連邦の非正規軍として通商破壊ミッションに参加することにした%CALLNAME:MASTER%は、臨時の上官からミッション概要を聞いていた
 	PRINTFORML 「今回のミッションは敵輸送部隊及び、その護衛部隊を撃破することにある」
 	PRINTFORMW 「敵の部隊構成は不明だが、情報部が予測した情報によると輸送艦10隻前後、駆逐艦を旗艦とした1個戦闘分隊から巡洋艦を旗艦とした1個戦闘小隊が護衛についているようだ」
 	PRINTL
-	PRINTFORML 話をまとめると、社会主義国の周辺の指定座標×で、護衛艦の破壊に注力すればいいようだ
+	PRINTFORML 話をまとめると、銀河人民統一連邦の周辺の指定座標×で、護衛艦の破壊に注力すればいいようだ
 	PRINTW ………………
 	PRINTW …………
 	PRINTW ……

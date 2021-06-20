@@ -1,5 +1,5 @@
 ﻿;--------------------------
-; AI COUNTRY 社会主義国家
+; AI COUNTRY 銀河人民統一連邦家
 ;--------------------------
 @SLG_AI_ACTION_2
 #DIM CONST COUNTRY_ID = 2
@@ -77,7 +77,7 @@ ELSEIF WAR_PHASE:COUNTRY_ID == 集合
     IF IS_COMPLETE == 0
         WAR_PHASE:COUNTRY_ID = 進撃
         SETCOLOR 0XFF0000
-        PRINTL [ニュース] 社会主義国が民主主義国に向けて進軍を開始しました
+        PRINTL [ニュース] 銀河人民統一連邦が民主主義国に向けて進軍を開始しました
         RESETCOLOR
         WAIT
         WAIT
@@ -100,7 +100,7 @@ ELSEIF WAR_PHASE:COUNTRY_ID == 進撃
     NEXT
     IF WAR_PHASE:COUNTRY_ID == 進撃 && COUNTER < 36
         SETCOLOR 0XFF0000
-        PRINTL [ニュース] 損耗が激しいため、社会主義国の侵攻部隊は退却しました
+        PRINTL [ニュース] 損耗が激しいため、銀河人民統一連邦の侵攻部隊は退却しました
         RESETCOLOR
         FOR SHIP_ID, 0, MAX_SHIP
             IF SHIP_COUNTRY:SHIP_ID != COUNTRY_ID
