@@ -1024,13 +1024,13 @@ FOR LOCAL, 0, 最大師団数
     師団移動先:LOCAL = 前線配置_予備
     師団移動時間:LOCAL = 1
     ; 予備にいて配置転換できる師団を検索
-    CALL GB_LOTTERY_RESERVE(師団配置:LOCAL, 師団テンプレート:LOCAL)
+    CALL GB_LOTTERY_RESERVE(師団配置:LOCAL, 師団テンプレート:LOCAL, 師団所属:LOCAL)
     IF RESULT != -1
       師団ステータス:RESULT = 師団ステータス_移動
       師団移動先:RESULT = 前線配置_前線
       師団移動時間:RESULT = 1
     ENDIF
-    CALL GB_LOTTERY_WAIT(師団配置:LOCAL, 師団テンプレート:LOCAL)
+    CALL GB_LOTTERY_WAIT(師団配置:LOCAL, 師団テンプレート:LOCAL, 師団所属:LOCAL)
     IF RESULT != -1
       師団ステータス:RESULT = 師団ステータス_移動
       師団移動先:RESULT = 前線配置_予備
@@ -1076,14 +1076,17 @@ ENDIF
 ;-----------------------
 ; 前線に出る予備役を返却する
 ;-----------------------
-@GB_LOTTERY_RESERVE(_戦線, _師団テンプレート)
+@GB_LOTTERY_RESERVE(_戦線, _師団テンプレート, _所属)
 #DIM _戦線
 #DIM _師団テンプレート
+#DIM _所属
 #DIM DYNAMIC _師団候補, 最大師団数
 
 VARSET _師団候補, -1
 
 FOR LOCAL, 0, 最大師団数
+  SIF 師団所属:LOCAL != _所属 || 師団テンプレート:LOCAL == 師団ステータス_移動
+    CONTINUE
   SIF 師団配置:LOCAL != _戦線 || 前線配置:LOCAL != 前線配置_予備 || 師団テンプレート:LOCAL != _師団テンプレート
     CONTINUE
   ;同時に複数師団撤退した場合、同じ師団が抽選されるのを防ぐ
@@ -1094,10 +1097,12 @@ FOR LOCAL, 0, 最大師団数
 NEXT
 ; 配置転換できる同じ師団がいなかった場合、ランダムで師団を抽出
 FOR LOCAL, 0, 最大師団数
-  SIF 前線配置:LOCAL != 前線配置_予備 || ((師団人数 - (師団ダメージ:LOCAL)) * 100 / 師団人数) < 50
+  SIF 師団所属:LOCAL != _所属 || 師団テンプレート:LOCAL == 師団ステータス_移動
+    CONTINUE
+  SIF 師団配置:LOCAL != _戦線 || 前線配置:LOCAL != 前線配置_予備 || 師団ダメージ:LOCAL > (師団人数 / 2)
     CONTINUE
   FINDELEMENT _師団候補, -1
-  SIF RESULT >= 0 && RESULT < 最大師団数
+  SIF RESULT != -1
     _師団候補:RESULT = LOCAL
 NEXT
 
@@ -1105,22 +1110,25 @@ FINDELEMENT _師団候補, -1
 IF RESULT == 0
   RETURN -1
 ELSEIF RESULT == -1
-  RETURN _師団候補:(RAND:最大師団数)
+  RETURN _師団候補:(RAND:RESULT)
 ELSE
-  RETURN _師団候補:(RESULT + 1)
+  RETURN _師団候補:(RAND:(RESULT + 1))
 ENDIF
 
 ;-----------------------
 ; 予備に出る待機を返却する
 ;-----------------------
-@GB_LOTTERY_WAIT(_戦線, _師団テンプレート)
+@GB_LOTTERY_WAIT(_戦線, _師団テンプレート, _所属)
 #DIM _戦線
 #DIM _師団テンプレート
+#DIM _所属
 #DIM DYNAMIC _師団候補, 最大師団数
 
 VARSET _師団候補, -1
 
 FOR LOCAL, 0, 最大師団数
+  SIF 師団所属:LOCAL != _所属 || 師団テンプレート:LOCAL == 師団ステータス_移動
+    CONTINUE
   SIF 師団配置:LOCAL != _戦線 || 前線配置:LOCAL != 前線配置_待機 || 師団テンプレート:LOCAL != _師団テンプレート
     CONTINUE
   ;同時に複数師団撤退した場合、同じ師団が抽選されるのを防ぐ
@@ -1131,10 +1139,12 @@ FOR LOCAL, 0, 最大師団数
 NEXT
 ; 配置転換できる同じ師団がいなかった場合、ランダムで師団を抽出
 FOR LOCAL, 0, 最大師団数
-  SIF 前線配置:LOCAL != 前線配置_待機 || ((師団人数 - (師団ダメージ:LOCAL)) * 100 / 師団人数) < 50
+  SIF 師団所属:LOCAL != _所属 || 師団テンプレート:LOCAL == 師団ステータス_移動
+    CONTINUE
+  SIF 師団配置:LOCAL != _戦線 || 前線配置:LOCAL != 前線配置_待機 || 師団ダメージ:LOCAL > (師団人数 / 2)
     CONTINUE
   FINDELEMENT _師団候補, -1
-  SIF RESULT >= 0 && RESULT < 最大師団数
+  SIF RESULT != -1
     _師団候補:RESULT = LOCAL
 NEXT
 
@@ -1144,7 +1154,7 @@ IF RESULT == 0
 ELSEIF RESULT == -1
   RETURN _師団候補:(RAND:最大師団数)
 ELSE
-  RETURN _師団候補:(RESULT + 1)
+  RETURN _師団候補:(RAND:(RESULT + 1))
 ENDIF
 
 
