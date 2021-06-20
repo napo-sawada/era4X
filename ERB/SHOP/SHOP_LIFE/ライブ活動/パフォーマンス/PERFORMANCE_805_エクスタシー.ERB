@@ -33,7 +33,7 @@ RETURN 1
 ;セット可能なキャラクター条件
 ;-------------------------------------------------
 @PERFORMANCE_SETTABLE_BY_CHARA_805(ARG:0)
-IF ABL:(ARG:0):露出 >= 5 && CFLAG:(ARG:0):陥落済み
+IF ABL:(ARG:0):露出 >= 5 && P_CHECK_CHARA(ARG:0, "陥落")
     RETURN 1
 ENDIF
 RETURN 0

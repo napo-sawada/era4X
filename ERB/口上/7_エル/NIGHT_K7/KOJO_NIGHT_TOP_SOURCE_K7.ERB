@@ -181,7 +181,7 @@ IF SOURCE:エル_対象:苦痛 >= 10
 		PRINTFORM %BREAK_K7("中", エル_対象)%
 	ENDIF
 	PRINTDATA
-		DATAFORM 痛いかな？　少し我慢してよ　
+		DATAFORM 痛いかな？　少し我慢してよ
 		DATAFORM ダメだったら言ってくれよ……？
 	ENDDATA
 ENDIF
@@ -267,6 +267,9 @@ IF CHECK_K7("陥落", エル_対象)
 			DATAFORM 恥ずかしがらないで……ちゃんと見せてよ
 			DATAFORM もっと……%CALLNAME_K7(エル_対象)%のかわいい姿を見せてよ
 			DATAFORM えっち……だね
+			DATAFORM ふふっ……すごく、かわいいよ
+			DATAFORM ふふっ……いまの%CALLNAME_K7(エル_対象)%、すごくいい顔してるよ
+			DATAFORM %CALLNAME_K7(エル_対象)%の恥ずかしいところ、もっと知りたいな
 		ENDDATA
 	ENDIF
 ENDIF
@@ -381,7 +384,7 @@ ELSE
 	ELSE
 		IF エル_最大部位 == エル_今回部位
 			PRINTDATA
-				DATAFORM いいですよ❤　%エル_今回部位称%でイってよ
+				DATAFORM いいよ❤　%エル_今回部位称%でイってよ
 				DATAFORM %エル_今回部位称%で気持ちよくなってよ
 				DATAFORM 気持ちいいかい？　%エル_今回部位称%❤　
 			ENDDATA

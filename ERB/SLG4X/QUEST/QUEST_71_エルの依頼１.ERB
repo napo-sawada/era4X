@@ -1,0 +1,185 @@
+﻿;--------------------------
+; クエスト名　エルの依頼１
+; 
+;--------------------------
+@QUEST_DESCRIPTION_71
+PRINTFORML [クエスト概要]
+PRINTFORML
+PRINTFORML エルの依頼１：旧世界のレコード
+PRINTFORML エルが回収した観測機械を修理するためには幾つかの部品を必要としている
+PRINTFORML 赤原石が1つ、耐熱合金が5個あれば事足りるそうだ
+PRINTL
+RETURN
+
+;--------------------------
+; クエスト受注可能か
+;--------------------------
+@QUEST_ACCEPTABLE_71
+SIF QUEST_PROGRESS:71 > 2
+	RETURN 0
+
+SIF エル_クエスト管理フラグ:1 == 1
+	RETURN 1
+RETURN 0
+
+;--------------------------
+; クエストの名前を返却
+;--------------------------
+@QUEST_NAME_71
+RESULTS = エルの依頼１
+RETURN
+
+;--------------------------
+; クエスト本体
+;--------------------------
+@QUEST_BODY_71  
+SETCOLOR エル_口上カラー
+QUEST_PROGRESS:71 = 1
+
+PRINTFORML 「手伝ってくれるんだね、ありがとう」
+PRINTFORML 「修理には赤原石が1つ、耐熱合金が5個必要なんだけれど」
+PRINTFORMW 「持っているかな？」
+PRINTL
+CALL KOJO_ASK_K7("エルに材料を渡す","今はやめておく")
+IF RESULT == 0
+	;在庫があれば回収
+	{
+		IF  GET_RESOURCE_NUM(CHARACTER_POSITION, 国家ID_プレイヤー, 赤原石) >= 1 &&
+			GET_RESOURCE_NUM(CHARACTER_POSITION, 国家ID_プレイヤー, 耐熱合金) >= 5
+	}
+		CALLF REMOVE_RESOURCE(CHARACTER_POSITION, 国家ID_プレイヤー, 赤原石, 1)
+		CALLF REMOVE_RESOURCE(CHARACTER_POSITION, 国家ID_プレイヤー, 耐熱合金, 5)
+	ELSE
+		PRINTFORMW 「ん？　足りないね。赤原石が1つ、耐熱合金が5個だよ。どこの宇宙港でも手に入れられると思う」
+		RESETCOLOR
+		RETURN 
+	ENDIF
+ELSE
+	RETURN
+ENDIF
+PRINTFORMW 「ありがとう。手間をかけたね」
+PRINTFORMDW %ANAME(MASTER)%はエルが器用に機械を修復するのを見守った
+PRINTL
+PRINTFORMW 「よし、完成だ。これでこの奇妙な記憶媒体もデコードできるはずだよ。早速試してみよう」
+PRINTL
+PRINTFORMDW ...
+PRINTFORMDW ..
+PRINTFORMDW .
+PRINTL
+RESETCOLOR
+FONTSTYLE 1
+CALL TYPE_PRINT("UNITY-4X OS release 1824+v9", 40)
+FONTSTYLE 0
+GETTIME
+LOCALS '= SUBSTRINGU(RESULTS, 11, 10)
+CALL TYPE_PRINT(@"Last login: DAY:{DAY} %LOCALS%(GMT)", 40)
+PRINTL
+PRINTL
+CALL TYPE_PRINT("Login:", 40)
+WAIT
+CALL TYPE_PRINT("Eleonora", 40)
+WAIT
+CALL TYPE_PRINT("Password:", 40)
+WAIT
+CALL TYPE_PRINT("\*\*\*\*\*\*", 40)
+PRINTL
+PRINTL
+CALL TYPE_PRINT("User authorized... Hello Elle !", 40)
+WAIT
+PRINTL
+PRINTL
+WAIT
+CALL TYPE_PRINT("> Decode Crew/Eleonora/Newfolder/UnknownRecord.ERB", 20)
+WAIT
+CALL TYPE_PRINT("Error(72) ./UnknownRecord.ERB is not found.", 40)
+WAIT
+PRINTL
+CALL TYPE_PRINT("> Decode Crew/Eleonora/New-NewFolder(7)/UnknownRecord.ERB", 10)
+WAIT
+CALL TYPE_PRINT("Now decording...", 40)
+WAIT
+PRINTL
+CALL DRAW_ANIMATION_GAUGE(100, 100, 80, 0xC0C0C0, 0xC0C0C0, 0x000000, 1, "*", 100)
+WAIT
+PRINTL
+CALL TYPE_PRINT("Decode completed.", 40)
+WAIT
+PRINTL
+PRINTFORMDW 機器に接続された円盤型の記憶媒体が回転を始め、音声が流れ始めた……
+PRINTFORMDW ...
+PRINTFORMDW ..
+PRINTFORMDW .
+FONTSTYLE 2
+SETCOLOR カラー_注釈
+PRINTFORMW Heartf..lt... gree.. t...
+PRINTFORMW Bonjou....tous... le...de...
+PRINTFORMW .......你..好
+PRINTL
+PRINTFORMW ....こん...にち.は...
+PRINTFORMW ...
+FONTSTYLE 0
+SETCOLOR エル_口上カラー
+PRINTL
+PRINTFORMDW 音声は酷くノイズにまみれているが幾つかは聞き取ることができる。非常に古い言語だ
+PRINTFORMW 「とても古い言語だけど……たぶんどれも挨拶を示す言葉だね」
+PRINTFORMDW ……まだ続きがあるようだ
+PRINTL
+FONTSTYLE 2
+SETCOLOR カラー_注釈
+PRINTFORMW Hello..from.the...... of ...
+PRINTL 
+WAIT
+PRINTFORMW planet Earth.
+FONTSTYLE 0
+PRINTL
+PRINTFORMW ...
+PRINTL
+SETCOLOR エル_口上カラー
+PRINTFORMDW メッセージを聞き終えたエルが声を上げて笑った
+PRINTL
+PRINTFORML 「あぁ、どうりで！　どうりで既視感があるわけだ！」
+PRINTFORMW 「これは宇宙探査機だよ、前宇宙時代の我々人類のね。遠い遠いご先祖様が打ち上げたものだ」
+PRINTFORMW 「おそらくこれは、異星に文明があることを期待して外宇宙に向けて放たれた、幾つかのうちの一つだよ」
+PRINTL 
+PRINTFORMW 「……どうやら私達が光速を超える航法を得たことで、先回りしてしまったみたいだね」
+PRINTFORMDW ……なるほど、それでは自分で流したボトルレターを自分で拾ってしまったようなものだ
+PRINTFORMW 「そうだね、当時の人々もまさか同じ人類に拾われるとは思ってもみなかっただろう」
+PRINTL
+PRINTFORMW 「さて、この探査機は……どうしたものだろう？」
+CALL KOJO_ASK_K7("再び宇宙に放つ","古物商に売却する")
+IF RESULT == 0
+	PRINTFORMW 「うん、私も同意見だよ。良き出会いに恵まれることを祈ろう。かつて人々がそう願ったようにね」
+	PRINTL
+	PRINTFORMDW %ANAME(MASTER)%とエルは修復した宇宙探査機を深宇宙に向けて射出した
+	PRINTFORMDW 宇宙探査機は吸い込まれるように小さくなり、やがて星空の深淵に消えた…
+	PRINTL
+	PRINTFORMDW ... 
+	PRINTFORMDW  エルの好感度 + 150
+	CFLAG:NAME_TO_CHARA("エル"):好感度 += 150
+	QUEST_PROGRESS:71 = 3
+ELSE
+	PRINTFORMW 「うーん……、売ったところで二束三文にしかならないんじゃないかな。もうあれこれ手を加えてしまったしね」
+	PRINTFORMDW ――まぁ当座の資金の足しにはなるだろう
+	PRINTL
+	PRINTFORMDW ... 
+	PRINTFORMDW  探査機を売却し資金 $50,000 を手に入れた
+	PRINTFORMDW  エルの好感度 - 100
+	MONEY += 50000
+	CFLAG:NAME_TO_CHARA("エル"):好感度 -= 100
+	QUEST_PROGRESS:71 = 2
+ENDIF
+PRINTL
+PRINTFORMDW 探査機の分析を通してエルは目星の経験を得たようだ
+;CSVに後付で目星を設定したので、CSVの値を下回る場合はここでざっくり補正
+IF ABL:NAME_TO_CHARA("エル"):目星 < 30
+	CALL PRINT_ADD_EXP(NAME_TO_CHARA("エル"), "目星経験値", 350, 1)
+	CALL TRAIN_AUTO_ABLUP(NAME_TO_CHARA("エル"))
+ELSEIF ABL:NAME_TO_CHARA("エル"):目星 < 70
+	CALL PRINT_ADD_EXP(NAME_TO_CHARA("エル"), "目星経験値", 150, 1)
+	CALL TRAIN_AUTO_ABLUP(NAME_TO_CHARA("エル"))
+ELSE
+	CALL PRINT_ADD_EXP(NAME_TO_CHARA("エル"), "目星経験値", 10, 1)
+	CALL TRAIN_AUTO_ABLUP(NAME_TO_CHARA("エル"))
+ENDIF
+WAIT
+RESETCOLOR 

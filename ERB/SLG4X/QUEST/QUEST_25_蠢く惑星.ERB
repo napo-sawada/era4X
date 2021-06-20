@@ -23,7 +23,7 @@ CALL GET_STAR_ID_FROM_POS(CHARACTER_POSITION)
 SIF (QUEST_PROGRESS:QUEST_ID  == 0 || QUEST_PROGRESS:QUEST_ID <= 5) && STAR_OWNER:RESULT == 国家ID_社会主義
 	RETURN 1
 RETURN 0
-	
+
 ;--------------------------
 ; クエストの名前を返却
 ;--------------------------
@@ -44,18 +44,18 @@ RETURN 1
 ;右下小窓に出す。隠したければ関数コメントアウトか"空白宙域"
 @QUEST_MAP_INFO_25(ARG:0)
 #DIM QUEST_ID = 25
-	IF QUEST_PROGRESS:QUEST_ID <= 5
-		RESULTS:0 '= "眼下には未知の惑星が見える"
-		RESULTS:1 '= ""
-		RESULTS:2 '= ""
-		RESULTS:3 '= ""
-		RESULTS:4 '= ""
-	ELSEIF QUEST_PROGRESS:QUEST_ID >= 7
-		RESULTS:0 '= "眼下に惑星が見える"
-		RESULTS:1 '= "大量の触手生物の巣食う惑星だ"
-		RESULTS:2 '= ""
-		RESULTS:3 '= ""
-		RESULTS:4 '= ""
+IF QUEST_PROGRESS:QUEST_ID <= 5
+	RESULTS:0 '= "眼下には未知の惑星が見える"
+	RESULTS:1 '= ""
+	RESULTS:2 '= ""
+	RESULTS:3 '= ""
+	RESULTS:4 '= ""
+ELSEIF QUEST_PROGRESS:QUEST_ID >= 7
+	RESULTS:0 '= "眼下に惑星が見える"
+	RESULTS:1 '= "大量の触手生物の巣食う惑星だ"
+	RESULTS:2 '= ""
+	RESULTS:3 '= ""
+	RESULTS:4 '= ""
 ENDIF
 RETURN 1
 
@@ -72,31 +72,31 @@ RETURN 1
 ;ココはターンエンドで呼び出されるので文字だけや戦闘に入るならなくていい
 ;CALL DRAW_WINDOW( CHARACTER_POSITION:MASTER/10000 , -1 , BOARDING_SHIP_ID:MASTER , 0)
 SELECTCASE QUEST_PROGRESS:QUEST_ID
-CASE 4
-	DRAWLINE
-	PRINTFORML
-	PRINTFORML 新たに発見された居住可能惑星がある座標に到達した
-	PRINTFORML 
-	PRINTFORML 眼下には清涼な青い海を湛えた惑星が広がっている
-	PRINTFORML 大陸には赤みがかった色合いの森林が見て取れる。どうやら植生も豊富なようだ。
-	PRINTFORML
-	PRINTFORML 計器は理想的な居住可能惑星であることを示している。今のところ危険な兆候は見られないが……
-	PRINTFORML
-	CALL COLOR_PRINTL("[Q] 軌道降下　コマンドでクルーを惑星に送り込める", カラー_注意)
-	PRINTW
-CASE 5
-	PRINTFORML
-	PRINTFORML 未開惑星の上空にいる
-	PRINTFORML 
-	PRINTFORML あの森林の一つ、一つが飢えた触手生物の群体であり、哀れな犠牲者を待ち構えているのだろう……
-	PRINTFORML
-CASE 7
-	PRINTFORML 
-	PRINTFORML 触手生物の巣食う未開惑星の上空に侵入した
-	PRINTFORML 
-	PRINTFORML あの森林の一つ、一つが飢えた触手生物の群体であり、哀れな犠牲者を待ち構えている
-	PRINTFORML
-	CALL COLOR_PRINTL("[Q] 軌道降下　コマンドでクルーを惑星に送り込める", カラー_注意)
+	CASE 4
+		DRAWLINE
+		PRINTFORML
+		PRINTFORML 新たに発見された居住可能惑星がある座標に到達した
+		PRINTFORML 
+		PRINTFORML 眼下には清涼な青い海を湛えた惑星が広がっている
+		PRINTFORML 大陸には赤みがかった色合いの森林が見て取れる。どうやら植生も豊富なようだ。
+		PRINTFORML
+		PRINTFORML 計器は理想的な居住可能惑星であることを示している。今のところ危険な兆候は見られないが……
+		PRINTFORML
+		CALL COLOR_PRINTL("[Q] 軌道降下　コマンドでクルーを惑星に送り込める", カラー_注意)
+		PRINTW
+	CASE 5
+		PRINTFORML
+		PRINTFORML 未開惑星の上空にいる
+		PRINTFORML 
+		PRINTFORML あの森林の一つ、一つが飢えた触手生物の群体であり、哀れな犠牲者を待ち構えているのだろう……
+		PRINTFORML
+	CASE 7
+		PRINTFORML 
+		PRINTFORML 触手生物の巣食う未開惑星の上空に侵入した
+		PRINTFORML 
+		PRINTFORML あの森林の一つ、一つが飢えた触手生物の群体であり、哀れな犠牲者を待ち構えている
+		PRINTFORML
+		CALL COLOR_PRINTL("[Q] 軌道降下　コマンドでクルーを惑星に送り込める", カラー_注意)
 ENDSELECT
 RETURN
 
@@ -186,10 +186,10 @@ $INPUT_LOOP
 PRINTL
 DRAWLINE
 PRINTFORMW 誰を降下させよう？
-CALL COLOR_PRINTL("対象メンバーはクルーとして同乗している必要がある", カラー_注意)
+CALL COLOR_PRINTL("あなた自身、あるいは同乗しているクルーが調査に向かうことができる", カラー_注意)
 PRINTL
-FOR ID, 1, CHARANUM
-	IF RIDING_WITH:ID == BOARDING_SHIP_ID && RIDING_WITH:ID != -1
+FOR ID, 0, CHARANUM
+	IF (RIDING_WITH:ID == BOARDING_SHIP_ID && RIDING_WITH:ID != -1) || ID == MASTER
 		PRINTBUTTON @"[{ID, 2, RIGHT}] %CALLNAME:ID%", ID
 		PRINTL
 	ENDIF
@@ -200,7 +200,7 @@ PRINTBUTTON "[999] 中止", 999
 INPUT
 SIF RESULT == 999
 	RETURN 999
-IF RESULT > 0 && RESULT < CHARANUM && RIDING_WITH:RESULT == BOARDING_SHIP_ID
+IF RESULT >= 0 && RESULT < CHARANUM && (RIDING_WITH:RESULT == BOARDING_SHIP_ID) || RESULT == MASTER
 	RETURN RESULT
 ENDIF
 GOTO INPUT_LOOP
@@ -213,7 +213,7 @@ GOTO INPUT_LOOP
 
 #DIM QUEST_ID = 25
 QUEST_PROGRESS:QUEST_ID = 1
-PRINTFORMW %ANAME(MASTER)%は社会主義国の異星生物研究所を訪ねた
+PRINTFORMW %ANAME(MASTER)%は銀河人民統一連邦の異星生物研究所を訪ねた
 PRINTFORMW 依頼主の研究所所長は沈鬱な表情で腰掛けている
 PRINTFORML
 PRINTFORMW 「遠路遥々お越しいただきありがとうございます。早速本題に入らせていただきましょう」
@@ -231,14 +231,14 @@ PRINTFORMW ……彼女の説明を聞く限り相応の危険が伴うのは間
 PRINTFORMW この依頼を引き受けるべきだろうか？
 PRINTFORML
 CALL ASK_YN("引き受ける","断る")
-	IF RESULT == 1
-		QUEST_PROGRESS:QUEST_ID = 2
-		PRINTFORMW %ANAME(MASTER)%の答えに研究所所長は落胆してうなだれた
-		PRINTFORMW 「そうですか……しかし、もし気が変わったどうか、どうか、どうかよろしくお願いいたします」
-		PRINTFORMW 「調査チームのメンバーはいずれも将来を嘱望された、若き優秀な者たちなのです」
-		PRINTFORMW 
-		RETURN
-	ENDIF
+IF RESULT == 1
+	QUEST_PROGRESS:QUEST_ID = 2
+	PRINTFORMW %ANAME(MASTER)%の答えに研究所所長は落胆してうなだれた
+	PRINTFORMW 「そうですか……しかし、もし気が変わったどうか、どうか、どうかよろしくお願いいたします」
+	PRINTFORMW 「調査チームのメンバーはいずれも将来を嘱望された、若き優秀な者たちなのです」
+	PRINTFORMW 
+	RETURN
+ENDIF
 PRINTFORMW 「ありがとうございます！　……どうか、どうか彼女たちをよろしく頼みます」
 PRINTFORMW 「皆いずれも将来を嘱望された、若き優秀な者たちなのです」
 PRINTFORML
@@ -249,17 +249,17 @@ QUEST_PROGRESS:QUEST_ID = 3
 @QUEST_25_TALE__QUEST_START_B
 #DIM QUEST_ID = 25
 
-PRINTFORMW %ANAME(MASTER)%は再び社会主義国の異星生物研究所を尋ねた
+PRINTFORMW %ANAME(MASTER)%は再び銀河人民統一連邦の異星生物研究所を尋ねた
 PRINTFORMW 「……どうでしょうか？　引き受けていただける気には……なりましたか？」
 PRINTFORML
 CALL ASK_YN("引き受ける","断る")
-	IF RESULT == 1
-		PRINTFORMW %ANAME(MASTER)%の答えに研究所所長は落胆してうなだれた
-		PRINTFORMW 「そうですか……しかし、もし気が変わったどうか、どうか、どうかよろしくお願いいたします」
-		PRINTFORMW 「調査チームのメンバーはいずれも将来を嘱望された、若き優秀な者たちなのです」
-		PRINTFORMW 
-		RETURN
-	ENDIF
+IF RESULT == 1
+	PRINTFORMW %ANAME(MASTER)%の答えに研究所所長は落胆してうなだれた
+	PRINTFORMW 「そうですか……しかし、もし気が変わったどうか、どうか、どうかよろしくお願いいたします」
+	PRINTFORMW 「調査チームのメンバーはいずれも将来を嘱望された、若き優秀な者たちなのです」
+	PRINTFORMW 
+	RETURN
+ENDIF
 PRINTFORMW 「ありがとうございます！　……どうか、どうか彼女たちをよろしく頼みます」
 PRINTFORMW 「皆いずれも将来を嘱望された、若き優秀な者なのです」
 PRINTFORML
@@ -340,7 +340,7 @@ CALL COLOR_PRINTW("グジュリ……", カラー_ピンク)
 PRINTFORMW 
 PRINTFORMW 異様な感触に%ANAME(QUEST_25_対象)%は思わず手を引っ込めた。手のひらはべっとりと青臭い臭気を放つ粘液で覆われてた
 PRINTFORMW 
- CALL COLOR_PRINTW("グジュッ……ジュチュッ……ジュルリ……", カラー_ピンク)
+CALL COLOR_PRINTW("グジュッ……ジュチュッ……ジュルリ……", カラー_ピンク)
 PRINTFORMW 
 PRINTFORMW 次第に鮮明になる視界に映ったのは陰惨な光景だった
 PRINTFORMW 僅かに開けた空間に３名の若い女性が見える。依頼にあった研究チームのメンバーだろう
@@ -353,7 +353,7 @@ PRINTFORMW 「あぁ……う゛ぐぅ……んんっ……ぁぁ……」
 PRINTFORMW 
 PRINTFORMW 意味をなさないうめきが響く。激しい触手の注挿を受けている彼女らの瞳に光は見て取れない
 PRINTFORMW 
- CALL COLOR_PRINTW("ジュブッ……グジュッ！ジュルル、……グヂュ……", カラー_ピンク)
+CALL COLOR_PRINTW("ジュブッ……グジュッ！ジュルル、……グヂュ……", カラー_ピンク)
 PRINTFORMW
 PRINTFORMW 毒々しい色合いの茎が膣に突き入れられるたびに、彼女たちの肢体が力なく上下に揺れる
 PRINTFORMW 
@@ -371,7 +371,7 @@ IF RESULT == 1
 	PRINTFORML
 	PRINTFORMW ――%ANAME(QUEST_25_対象)%は脱出を決意した。 
 	PRINTFORMW 
- 	CALL COLOR_PRINTW("グジュッ……クチュ……ジュッ……ブジュッ……", カラー_ピンク)
+	CALL COLOR_PRINTW("グジュッ……クチュ……ジュッ……ブジュッ……", カラー_ピンク)
 	PRINTFORMW 
 	PRINTFORMW 背後から肉を穿つ淫猥な水音が、まるで呪詛のように反響を続ける……
 	PRINTFORML
@@ -431,6 +431,8 @@ VARSET COM_TENDENCY:QUEST_25_対象:0, -1
 ;SLG4Xパートからクエストやアノマリーで調教パートを呼出すにはSLG4Xの入力受付ループを抜ける必要があるようなので
 ;SLG4X調教開始フラグを立ててSTART_TRAIN_COMMONをCALLする
 FLAG:SLG4X調教開始フラグ = 1
+;START_TRAIN_COMMON実行時にSHOP_TIMEが加算されるのでここで相殺する
+SHOP_TIME --
 CALL START_TRAIN_COMMON
 RETURN
 
@@ -455,7 +457,7 @@ CALL ASK_YN("右から崖上を目指す","左奥から後退する")
 PRINTFORMW
 PRINTFORMW ところが天井から降り注いだ無数の肉塊が%ANAME(QUEST_25_対象)%の行く手を阻む！
 PRINTFORMW
- CALL COLOR_PRINTW("　逃　げ　ら　れ　な　い　！", カラー_警告)
+CALL COLOR_PRINTW("　逃　げ　ら　れ　な　い　！", カラー_警告)
 PRINTFORMW
 PRINTFORML 触手は悲痛な悲鳴をあげる%ANAME(QUEST_25_対象)%を拘束すると
 PRINTFORMW 捕えられた研究者たちとともに、さらなる深淵へと引きずり込んだ
@@ -562,7 +564,7 @@ PRINTFORMW .
 PRINTFORML
 IF RESULT == 0
 	QUEST_PROGRESS:QUEST_ID = 6
-	PRINTFORMW 惑星上に巣食う無数の触手生物を『体制保全上看過できない脅威』と判断した社会主義国の動きは迅速だった
+	PRINTFORMW 惑星上に巣食う無数の触手生物を『体制保全上看過できない脅威』と判断した統一連邦の動きは迅速だった
 	PRINTFORML
 	PRINTFORMW 数隻の戦艦を含む戦隊が惑星軌道上に集結し、苛烈な軌道爆撃を展開する
 	PRINTFORML
@@ -573,14 +575,14 @@ IF RESULT == 0
 	PRINTFORML
 	PRINTFORMW あのおぞましい生物が人間を襲うことはもうないだろう……
 	PRINTL
-	CALL COLOR_PRINTW(@"社会主義国との関係性 + 50", カラー_注意)
+	CALL COLOR_PRINTW(@"銀河人民統一連邦との関係性 + 50", カラー_注意)
 	CALL QUEST_RELEASE_POINT(QUEST_ID, QUEST_25_未開惑星座標)
 	REL_LIKE_COUNTRY:国家ID_社会主義:国家ID_プレイヤー += 50
 ELSE
 	QUEST_PROGRESS:QUEST_ID = 7
 	PRINTFORMW 惑星は異星生物研究のサンプルとして保全されることが決まった
 	PRINTFORML
-	PRINTFORML 宙域には社会主義国の哨戒艦が展開され、不注意な者の立ち入りを阻んでいる
+	PRINTFORML 宙域には統一連邦の哨戒艦が展開され、不注意な者の立ち入りを阻んでいる
 	PRINTFORMW これ以上哀れな被害者が増えることもないだろう
 	PRINTFORML
 	PRINTFORMW ……ただし、もし%ANAME(MASTER)%が望むならば、再び立ち入ることは不可能ではない
@@ -595,9 +597,15 @@ ENDIF
 @QUEST_25_TALE__AFTER
 #DIM QUEST_ID = 25
 #DIM ITER
-PRINTFORMW %ANAME(MASTER)%は調査と偽って%ANAME(QUEST_25_対象)%を惑星地表、それも"森"の中心に降下させた
-PRINTFORML
-PRINTFORMW %ANAME(QUEST_25_対象)%を待ち受ける凄惨な運命を承知の上で…
+IF QUEST_25_対象 != MASTER
+	PRINTFORMW %ANAME(MASTER)%は調査と偽って%ANAME(QUEST_25_対象)%を惑星地表、それも"森"の中心に降下させた
+	PRINTFORML
+	PRINTFORMW %ANAME(QUEST_25_対象)%を待ち受ける凄惨な運命を承知の上で……
+ELSE
+	PRINTFORMW %ANAME(MASTER)%は惑星の"調査"へ赴くことにした
+	PRINTFORML
+	PRINTFORMW 待ち受ける凄惨な運命を承知の上で……
+ENDIF
 PRINTFORML
 PRINTFORMW ...
 PRINTFORMW ..
@@ -789,30 +797,30 @@ EXP:対象:絶頂経験 = 500
 VARSET COM_TENDENCY:対象:0, -1
 SELECTCASE RAND:7
 	CASE 0 TO 3
-    COM_TENDENCY:対象:GETNUM(TRAINNAME, "触手召喚") = 3
-    COM_TENDENCY:対象:GETNUM(TRAINNAME, "媚薬") = 3
-    COM_TENDENCY:対象:GETNUM(TRAINNAME, "触手緊縛") = 1
-    COM_TENDENCY:対象:GETNUM(TRAINNAME, "触手挿入") = 3
-    COM_TENDENCY:対象:GETNUM(TRAINNAME, "触手クリ責め") = 3
-    COM_TENDENCY:対象:GETNUM(TRAINNAME, "触手産卵") = 3
+		COM_TENDENCY:対象:GETNUM(TRAINNAME, "触手召喚") = 3
+		COM_TENDENCY:対象:GETNUM(TRAINNAME, "媚薬") = 3
+		COM_TENDENCY:対象:GETNUM(TRAINNAME, "触手緊縛") = 1
+		COM_TENDENCY:対象:GETNUM(TRAINNAME, "触手挿入") = 3
+		COM_TENDENCY:対象:GETNUM(TRAINNAME, "触手クリ責め") = 3
+		COM_TENDENCY:対象:GETNUM(TRAINNAME, "触手産卵") = 3
 	CASE 4 TO 5
-    COM_TENDENCY:対象:GETNUM(TRAINNAME, "触手召喚") = 3
-    COM_TENDENCY:対象:GETNUM(TRAINNAME, "媚薬") = 3
-    COM_TENDENCY:対象:GETNUM(TRAINNAME, "触手緊縛") = 1
-    COM_TENDENCY:対象:GETNUM(TRAINNAME, "触手挿入") = 3
-    COM_TENDENCY:対象:GETNUM(TRAINNAME, "触手Ａ挿入") = 3
-    COM_TENDENCY:対象:GETNUM(TRAINNAME, "触手Ａ産卵") = 3
-    COM_TENDENCY:対象:GETNUM(TRAINNAME, "触手尿道挿入") = 3
-    COM_TENDENCY:対象:GETNUM(TRAINNAME, "触手Ｕ産卵") = 3
+		COM_TENDENCY:対象:GETNUM(TRAINNAME, "触手召喚") = 3
+		COM_TENDENCY:対象:GETNUM(TRAINNAME, "媚薬") = 3
+		COM_TENDENCY:対象:GETNUM(TRAINNAME, "触手緊縛") = 1
+		COM_TENDENCY:対象:GETNUM(TRAINNAME, "触手挿入") = 3
+		COM_TENDENCY:対象:GETNUM(TRAINNAME, "触手Ａ挿入") = 3
+		COM_TENDENCY:対象:GETNUM(TRAINNAME, "触手Ａ産卵") = 3
+		COM_TENDENCY:対象:GETNUM(TRAINNAME, "触手尿道挿入") = 3
+		COM_TENDENCY:対象:GETNUM(TRAINNAME, "触手Ｕ産卵") = 3
 	CASEELSE
-    COM_TENDENCY:対象:GETNUM(TRAINNAME, "触手召喚") = 3
-    COM_TENDENCY:対象:GETNUM(TRAINNAME, "媚薬") = 3
-    COM_TENDENCY:対象:GETNUM(TRAINNAME, "触手緊縛") = 2
-    COM_TENDENCY:対象:GETNUM(TRAINNAME, "触手挿入") = 3
-    COM_TENDENCY:対象:GETNUM(TRAINNAME, "触手胸愛撫") = 3
-    COM_TENDENCY:対象:GETNUM(TRAINNAME, "触手搾乳") = 3
-    COM_TENDENCY:対象:GETNUM(TRAINNAME, "触手乳腺開発") = 2
-    COM_TENDENCY:対象:GETNUM(TRAINNAME, "触手口辱") = 2
+		COM_TENDENCY:対象:GETNUM(TRAINNAME, "触手召喚") = 3
+		COM_TENDENCY:対象:GETNUM(TRAINNAME, "媚薬") = 3
+		COM_TENDENCY:対象:GETNUM(TRAINNAME, "触手緊縛") = 2
+		COM_TENDENCY:対象:GETNUM(TRAINNAME, "触手挿入") = 3
+		COM_TENDENCY:対象:GETNUM(TRAINNAME, "触手胸愛撫") = 3
+		COM_TENDENCY:対象:GETNUM(TRAINNAME, "触手搾乳") = 3
+		COM_TENDENCY:対象:GETNUM(TRAINNAME, "触手乳腺開発") = 2
+		COM_TENDENCY:対象:GETNUM(TRAINNAME, "触手口辱") = 2
 ENDSELECT
 TALENT:対象:超能力者 = 1
 TALENT:対象:絶倫 = 1

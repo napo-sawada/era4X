@@ -29,7 +29,7 @@ SELECTCASE エル機嫌
 			ENDDATA
 		ELSE
 			PRINTDATAL
-				DATAFORM 「読書の邪魔をしないでください」
+				DATAFORM 「読書の邪魔をしないでくれないかな」
 				DATAFORM 「……」
 				DATAFORM 「たった今機嫌が悪くなったから、一人にしてくれないかな」
 			ENDDATA
@@ -74,20 +74,65 @@ ENDSELECT
 ;●スキンシップ・背中を洗う
 ;─────────────────────────────────────── 
 IF GROUPMATCH(SELECTCOM, 320, 358)
-	;エルに主導権なし
-	IF !IS_INITIATIVE(エル)
-		PRINTDATAL
-			DATAFORM 「こう……かな？　ふふっ♪」
-			DATAFORM 「はいはい。こうでいいかい？」
-			DATAFORM 「こんな感じで……どうかな？」
-		ENDDATA
-	;エルに主導権あり
-	ELSE
-		PRINTDATAL
-			DATAFORM 「くすぐったい？　ちょっと我慢してよ」
-			DATAFORM 「こんな感じで……どうかな？」
-		ENDDATA
-	ENDIF
+	{
+		SELECTCASE IFRAND(
+			"1",1,
+			"D1,2", エル機嫌 == "良" || エル機嫌 == "悦" || エル機嫌 == "幸",
+			"D1,3", (エル機嫌 == "良" || エル機嫌 == "悦" || エル機嫌 == "幸") && TFLAG:17 == 1,
+			"D1TO9,10", SELECTCOM == 320 && CHECK_K7("陥落", エル_対象) && PALAM:エル:欲情 >= 9000 && PALAM:エル_対象:欲情 >= 6000 && !IS_EQUIP(エル, 332) && HAS_PENIS(エル_対象)
+			)
+	}
+		CASE 1
+			PRINTDATAL
+				DATAFORM 「お疲れさま。肩をほぐしてあげよう」
+				DATAFORM 「ん……？　こうでいいのかな」
+				DATAFORM 「マッサージしてあげよう。多少は楽になるかもしれないよ」
+			ENDDATA
+		CASE 2
+			;エルに主導権なし
+			IF !IS_INITIATIVE(エル)
+				PRINTDATAL
+					DATAFORM 「こう……かな？　ふふっ♪」
+					DATAFORM 「はいはい。こうでいいかい？」
+					DATAFORM 「こんな感じで……どうかな？」
+				ENDDATA
+			;エルに主導権あり
+			ELSE
+				PRINTDATAL
+					DATAFORM 「くすぐったい？　ちょっと我慢してよ」
+					DATAFORM 「こんな感じで……どうかな？」
+					DATAFORM 「ほら、じっとしててよ。そうそう」
+					DATAFORM 「たっぷりほぐしてあげよう。ほら、力を抜いて」
+				ENDDATA
+			ENDIF
+		CASE 3
+			IF !IS_INITIATIVE(エル)
+				PRINTDATAL
+					DATAFORM 「%CALLNAME_K7(エル_対象)%の身体は……温かいね」
+					DATAFORM 「%CALLNAME_K7(エル_対象)%も大概甘えんぼうだなぁ。　よしよし❤」
+					DATAFORM 「ねぇ……、 息が荒いよ？　ん、私も？　……誰のせいだと思ってるんだい？」
+				ENDDATA
+			ELSE
+				PRINTDATAL
+					DATAFORM 「ほら、力抜いてよ❤」
+					DATAFORM 「ふふっ、目がとろんとしてるよ？　かわいいなぁもう」
+					DATAFORM 「%CALLNAME_K7(エル_対象)%の身体は……温かいね」
+					DATAFORM 「ふふっ❤　たっぷり甘やかしてあげよう」
+					DATAFORM 「ねぇ、今いやらしいこと考えただろう？　ふふっ、ごまかしてもバレバレなんだから……ね？」
+				ENDDATA
+			ENDIF
+		CASE 10
+			PRINTFORMDW %ANAME(エル)%は%ANAME(MASTER)%の身体を弄りながら情欲を帯びた笑みを浮かべている……
+			PRINTFORML 「ふふっ……❤　ねぇ……ここ、ガチガチだよ？」
+			PRINTFORMW 「気持ち良くしてあげよう❤　もう我慢しなくていいようにね」
+			PRINTL
+			PRINTFORMDL %ANAME(エル)%は%ANAME(MASTER)%の下腹部にそっと顔をうずめ、
+			PRINTFORMDW 細く白い指で、固く主張する%ANAME(MASTER)%の肉棒を扱きはじめた……
+			CALL SET_EQUIP(332, 1)
+			RETURN 1
+		CASEELSE
+	ENDSELECT
+
 	RETURN 0
 ENDIF
 
@@ -107,7 +152,7 @@ IF GROUPMATCH(SELECTCOM, 321)
 			DATAFORM 「頭を撫でて欲しい？　どうした、頭でもぶつけたのかい？」
 			DATAFORM 「……まぁいいよ、おいで」
 		ENDDATA
-			PRINTL
+		PRINTL
 		PRINTDATAL
 			DATAFORM 「%SPLIT_RAND("よしよし♪/いいこ、いいこ",1)%」
 			DATAFORM 「ふふっ、私がこうしてあげるのも……たまには悪くないね」
@@ -193,14 +238,14 @@ ENDIF
 ;●日常フェラ
 ;─────────────────────────────────────── 
 IF SELECTCOM == 330
-{
-	SELECTCASE IFRAND(
-				"1",1,
-				"D1,2",GROUPMATCH(PREVCOM, 303, 304, 502, 503),
-				"D1,3",(TFLAG:54 == 1) || PREVCOM == 305,
-				"D1TO9,10",CUM_GET_COUNT:(エル):射精部位_口 > 1
-				)
-}
+	{
+		SELECTCASE IFRAND(
+			"1",1,
+			"D1,2",GROUPMATCH(PREVCOM, 303, 304, 502, 503),
+			"D1,3",(TFLAG:54 == 1) || PREVCOM == 305,
+			"D1TO9,10",CUM_GET_COUNT:(エル):射精部位_口 > 1
+			)
+	}
 		CASE 1 ;通常
 			IF !IS_INITIATIVE(エル)
 				PRINTDATAL
@@ -208,8 +253,8 @@ IF SELECTCOM == 330
 					DATAFORM 「何も今じゃなくてもいいだろうに……」
 					DATAFORM 「そういうのは時と場所をわきまえてくれないかな……」
 				ENDDATA
-					PRINTFORMW 「%SPLIT_RAND("本当にまったく……/仕方がないなぁ……",1)%」
-					PRINTL
+				PRINTFORMW 「%SPLIT_RAND("本当にまったく……/仕方がないなぁ……",1)%」
+				PRINTL
 			ELSE
 				PRINTDATAL
 					DATAFORM 「こ、これは%CALLNAME_K7(エル_対象)%が集中できるようにするためでだね……、その、決して……」
@@ -217,7 +262,7 @@ IF SELECTCOM == 330
 					DATAFORM 「……溜まっているんだろう？　我慢しなくていいよ」
 					DATAFORM 「口で気持ちよくしてあげよう。はぁむ」
 				ENDDATA
-					PRINTFORMW
+				PRINTFORMW
 			ENDIF
 		CASE 2 ;机下フェラ
 			IF !IS_INITIATIVE(エル)
@@ -226,14 +271,14 @@ IF SELECTCOM == 330
 					DATAFORM 「何も今じゃなくてもいいだろうに……」
 					DATAFORM 「そういうのは時と場所をわきまえてくれないかな……」
 				ENDDATA
-					PRINTFORMW 「まぁ……仕方ない」
-					PRINTL
+				PRINTFORMW 「まぁ……仕方ない」
+				PRINTL
 			ELSE
 				PRINTDATAL
 					DATAFORM 「こ、これは%CALLNAME_K7(エル_対象)%が集中できるようにするためでだね……、その、決して……」
 					DATAFORM 「……ここでかい？……全く……」
 				ENDDATA
-					PRINTFORMW
+				PRINTFORMW
 			ENDIF
 		CASE 3 ;屋外フェラ　TFLAG:54(市街地)
 			IF !IS_INITIATIVE(エル)
@@ -242,36 +287,40 @@ IF SELECTCOM == 330
 					DATAFORM 「何も今じゃなくてもいいだろうに……」
 					DATAFORM 「そういうのは時と場所をわきまえてくれないかな……」
 				ENDDATA
-					PRINTFORML 「%SPLIT_RAND("本当にまったく……/仕方がないなぁ……",1)%」
-					PRINTL
-					PRINTDATAW
-						DATAFORM （流石にこんな姿……人には見せられないな）
-						DATAFORM （まさか外でこんなことするなんてね……）
-					ENDDATA
-					PRINTL
+				PRINTFORML 「%SPLIT_RAND("本当にまったく……/仕方がないなぁ……",1)%」
+				PRINTL
+				PRINTDATAW
+					DATAFORM （流石にこんな姿……人には見せられないな）
+					DATAFORM （まさか外でこんなことするなんてね……）
+				ENDDATA
+				PRINTL
 			ELSE
 				PRINTDATAL
 					DATAFORM 「ここなら……ひと目も気にしなくていいだろう？」
 					DATAFORM 「%CALLNAME_K7(エル_対象)%がいけないのだよ……？　こんなところで発情して……」
 				ENDDATA
-					PRINTFORMW
+				PRINTFORMW
 			ENDIF
 		CASE 10 ;
 			PRINTDATAW
 				DATAFORM 「%TOSTR(CUM_GET_COUNT:(エル):射精部位_口)%回も%SPLIT_RAND("口の中に出し/口に射精し/女の子の口を犯し/いたいけな女の子の口を精子まみれにし",1)%てもまだ満足できないんだね」
 				DATAFORM 「すごいね❤　%TOSTR(CUM_GET_COUNT:(エル):射精部位_口)%回も%SPLIT_RAND("口の中に出し/口に射精し",1)%てるのにまだまだ元気だ」
 				DATAFORM 「ふふっ❤　%TOSTR(SUM_CUM_TO_COUNT_K7(エル_対象))%回も射精したのに、まだこんなに大きいよ」
+				DATAFORM 「口の中……とろとろになってしまったよ。……まだ足りないのかい？」
 			ENDDATA
-			PRINTFORMW 「こんな%SPLIT_RAND("ドスケベ/いやらしい/欲張り",1)%%CALL_DIRTY_K7("Ｐ")%%SPLIT_RAND("は、もっとご奉仕してあげないとね❤/は、もっと気持ち良くしてあげないと❤",1)%」
+			PRINTDATAW
+				DATAFORM 「こんな%SPLIT_RAND("ドスケベ/いやらしい/欲張り",1)%%CALL_DIRTY_K7("Ｐ")%%SPLIT_RAND("は、もっとご奉仕してあげないとね❤/は、もっと気持ち良くしてあげないと❤",1)%」
+				DATAFORM 「それじゃあこの%SPLIT_RAND("ドスケベ/いやらしい/欲張り",1)%%CALL_DIRTY_K7("Ｐ")%%SPLIT_RAND("に、沢山ご奉仕してあげないとね❤/が満足するまでたっぷりしてあげよう❤",1)%」
+			ENDDATA
 			PRINTDATAL
-				DATAFORM 「……大いに感謝してほしいね」
 				DATAFORM 「ほら、力を抜いて……」
 				DATAFORM 「ふふっ、いただきます❤」
-				DATAFORM 「……お望みのままに搾り尽くしてあげよう❤」
+				DATAFORM 「……お望みのままに搾り尽くしてあげるからね❤」
+				DATAFORM
 			ENDDATA
 			PRINTL
-			CASEELSE
-		ENDSELECT
+		CASEELSE
+	ENDSELECT
 	;口塞口上につなぐ
 	CALL KOJO_K7_CANNOT_TALK(エル_対象)
 	RETURN 0

@@ -1,0 +1,608 @@
+﻿;--------------------------
+; クエスト名　エルの依頼１
+; 
+;--------------------------
+@QUEST_DESCRIPTION_72
+PRINTFORML [クエスト概要]
+PRINTFORML
+PRINTFORML エルの依頼２：フォーオブアカインド
+PRINTFORML エルの重力波望遠鏡が異常な重力の歪みを検知した
+PRINTFORML 彼女は現地に趣き実地調査を行いたいと言っているが……
+PRINTL
+RETURN
+
+;--------------------------
+; クエスト受注可能か
+;--------------------------
+@QUEST_ACCEPTABLE_72
+SIF QUEST_PROGRESS:72 > 2
+	RETURN 0
+SIF エル_クエスト管理フラグ:2 == 1
+	RETURN 1
+RETURN 0
+
+;--------------------------
+; クエストの名前を返却
+;--------------------------
+@QUEST_NAME_72
+RESULTS = エルの依頼２
+RETURN
+
+;--------------------------
+; マップでの表示
+;--------------------------
+@QUEST_SET_TILE_72(ARG:0)
+#DIM CONST QUEST_ID = 72
+;2byte分なら全角でも半角でも崩れない
+RESULTS '= "◎"
+SETCOLOR 0x165e83
+RETURN 1
+
+;右下小窓に出す。隠したければ関数コメントアウトか"空白宙域"
+@QUEST_MAP_INFO_72(ARG:0)
+#DIM CONST QUEST_ID = 72
+IF QUEST_PROGRESS:QUEST_ID <= 5
+	RESULTS:0 '= "歪んだワームホールが"
+	RESULTS:1 '= "虚空に口を開けている"
+	RESULTS:2 '= ""
+	RESULTS:3 '= ""
+	RESULTS:4 '= ""
+	RETURN 1
+ENDIF
+
+;-----------------------
+; マップからQUEST_BODYを実行する処理
+;--------------------------
+@QUEST_SHOW_COMMAND_72()
+RESULTS '= "ワームホールを調査する"
+RETURN 1
+
+@QUEST_REACH_PLACE_72()
+DRAWLINE
+PRINTFORMDW エルの示した重力波異常の根源はこのワームホールのようだ
+PRINTFORML
+PRINTFORMW その空間の異常性はひと目で認めることができる
+PRINTFORMW 一見はセクター間の航路を繋ぐワープゲートによく似ている
+PRINTFORML
+PRINTFORMW しかしワームホールの中心部は空間をでたらめに引き裂いたような有様だ
+PRINTFORML 中心部から気まぐれに星間物質を放射したかと思えば次の瞬間にはぴたりと沈黙し、
+PRINTFORMW 取り巻くガスや小惑星、有象無象のデブリを不規則に集散させている……
+PRINTFORML
+PRINTFORMW より詳細な調査を行うにはエルの知見を借りる必要があるだろう……
+PRINTFORML
+CALL COLOR_PRINTL("[Q] ワームホールを調査する　コマンドで調査を開始できる", カラー_注意)
+CALL COLOR_PRINTW("ただし調査の開始にはエルがクルーとして同乗している必要がある", カラー_注意)
+;--------------------------
+; クエスト本体
+;--------------------------
+@QUEST_BODY_72
+#DIM CONST QUEST_ID = 72
+#DIM QUEST_SECTOR_ID
+#DIM QUEST_POSID
+#DIM X_POS
+#DIM Y_POS
+#DIM SECTOR_ID
+SETCOLOR エル_口上カラー
+QUEST_対象 = (NAME_TO_CHARA("エル"))
+
+SIF QUEST_PROGRESS:72 == 0
+	QUEST_PROGRESS:72 = 1
+
+;クエスト受注時
+;-------------------------------------------------
+IF QUEST_PROGRESS:72 == 1
+	CALL QUEST_72_GET_RAND_SECTOR()
+	QUEST_SECTOR_ID = RESULT 
+	FOR LOCAL, 0 ,100
+		CALL QUEST_SET_RANDPOINT(QUEST_ID, QUEST_SECTOR_ID, 7)
+		IF RESULT >= 0
+			X_POS = (RESULT / 100) % 100
+			Y_POS = RESULT % 100
+			CLEARMAP:SECTOR_ID:X_POS:Y_POS = 明瞭
+			BREAK
+		ENDIF
+		IF LOCAL == 99
+			CALL COLOR_PRINTW(@"エラー：マップ上にクエストを生成可能な領域が存在しません", カラー_警告)
+			FORCEWAIT
+		ENDIF
+	NEXT
+	PRINTFORML 「おや、連れて行ってくれる気になったかい？　問題の源はセクター＃%TOFULL(TOSTR(QUEST_SECTOR_ID))%にあるみたいなんだ」
+	PRINTFORMDW 彼女が示すセクターに向かえば、異常な重力波の正体を確認することができるかもしれない
+	QUEST_PROGRESS:72 = 2
+	RESETCOLOR
+	RETURN
+ENDIF
+
+;クエスト受注後・クエスト座標以外
+;-------------------------------------------------
+CALL QUEST_GET_POINT_POSID(QUEST_ID)
+QUEST_POSID = TOINT(LIST_GET(RESULTS, 0))
+
+IF QUEST_PROGRESS:72 == 2 && CHARACTER_POSITION:MASTER != QUEST_POSID
+	PRINTFORML 「おや、連れて行ってくれる気になったかい？　問題の源はセクター＃%TOFULL(TOSTR(QUEST_SECTOR_ID))%にあるみたいなんだ」
+	PRINTFORMDW 彼女が示すセクターに向かえば、異常な重力波の正体を確認することができるかもしれない
+	RESETCOLOR
+	RETURN
+ENDIF
+
+
+;クエスト受注後・クエスト座標（マップコマンドから呼び出される処理）
+;-------------------------------------------------
+IF QUEST_PROGRESS:72 == 2 && CHARACTER_POSITION:MASTER == QUEST_POSID
+	IF BOARDING_SHIP_ID:MASTER == RIDING_WITH:QUEST_対象
+		CALL QUEST_STORY_72(QUEST_ID, QUEST_対象)
+	ELSE
+		CALL COLOR_PRINTW("調査の開始にはエルがクルーとして同乗している必要がある", カラー_注意)
+	ENDIF
+ENDIF
+
+@QUEST_STORY_72(QUEST_ID, QUEST_対象)
+#DIM QUEST_ID
+
+SETCOLOR エル_口上カラー
+PRINTFORML 
+PRINTFORMDW ...
+PRINTFORMDW ..
+PRINTFORMDW .
+PRINTFORML 
+PRINTFORMW 「……すごいね、こんな物は初めて見たよ、とても歪なワームホールだ」
+PRINTFORMW 「これをご覧よ。艦の空間パッシブソナーが感知したピンガーはこの艦から発せれたものだ」
+PRINTFORML
+PRINTFORMW 「ただし"発せらた"という表現は正確ではない」
+PRINTFORMW 「なぜならこの艦の空間アクティブソナーはまだピンガーを打っていない。これは、これから打たれるはずのものだ」
+PRINTFORML 
+PRINTFORMDW %ANAME(MASTER)%はエルの説明に首をかしげる他なかった
+PRINTFORML 
+PRINTFORMW 「時空構造が中ででたらめにねじ曲がっているんだ」
+PRINTFORMW 「きっとあの中は予測不可能な因果律で満たされてるに違いない。なんとも……わくわくする光景だね」
+PRINTFORML 
+PRINTFORMDW その時、航行管制ＡＩがけたたましく警報を掻き鳴らした。これは……衝突警報だ
+PRINTFORML 
+PRINTFORMDW ――そんなはずはない、つい直前まで%SHIP_NAME:(BOARDING_SHIP_ID)%の脅威推定アルゴリズムは安全を示すグリーンを示していたはずだ 
+PRINTFORML 
+PRINTFORMDW %ANAME(MASTER)%はコンソールを再度確認する。判定結果は全て致命的な脅威を告げる毒々しい赤色で輝いていた
+PRINTFORMDW ――しまった！　%ANAME(MASTER)%は自身の軽率さを悟った
+PRINTFORMDW 歪んだ力場の影響が艦の周囲も少しずつ及んでいるのだ
+PRINTFORMDW 因果が歪み、事前に算定された確率が意味を失いつつある……
+PRINTFORML 
+PRINTFORMDW %ANAME(MASTER)%とエルを乗せた%SHIP_NAME:(BOARDING_SHIP_ID)%の船体を大質量のデブリが強打した
+PRINTFORMDW 弾き出された船体は力場の回帰不可能点を越え、次元の断層に引きずり込まれてしまった……
+PRINTFORML 
+PRINTFORMDW ...
+PRINTFORMDW ..
+PRINTFORMDW .
+PRINTFORML 
+PRINTFORMDW ――どうやら気絶していたらしい
+PRINTFORML 
+PRINTFORMDW 目を覚まし、椅子から身体を起こすとコンソール上で数式を操るエルの姿があった
+PRINTFORMDL 脇には溢れんばかりに並々とコーヒーの注がれたカップが置かれている
+PRINTFORMDW ただし、そのまま長い時間放置されていたのか、すっかり冷めてしまっているようだ
+PRINTFORML 
+PRINTFORMW 「やぁ、おはよう。ごめんね、これは私にも予想できなかった」
+PRINTFORMW 「ところで、良いニュースと悪いニュースがあるよ」
+PRINTFORML 
+PRINTFORMDW 状況は深刻に思えるが……彼女の口調はいつもどおり何処となくあっけらかんとしている
+CALL KOJO_ASK_K7("良い知らせから聞く", "悪い知らせから聞く")
+IF RESULT == 0
+	PRINTFORMW 「船体はほぼ無傷だ、機関も問題なく動くよ」
+	PRINTFORMW 「悪いニュースの方は……脱出まで標準時でまるまる２日は必要だってことかな。それまではここで待ちぼうけだ」
+ELSE
+	PRINTFORMW 「……脱出まで標準時でまるまる２日かかる。それまでは……何も出来ることはないよ、ここで待ちぼうけだ」
+	PRINTFORMW 「良いニュースの方は……船体はほぼ無傷で、機関も問題なく稼働可能だ」
+ENDIF
+PRINTFORML 
+PRINTFORMDW ……悪いニュースの方も状況に比してそれほど悪くは聞こえないが……
+PRINTFORMW 「とんでもない！　二日後にはチェルシーのグレートモールで『特製スターゲイジーイールゼリー』の限定販売がある」
+PRINTFORMW 「……あれは並ばないと絶対に手に入らないんだ……」
+PRINTFORML
+PRINTFORMDW 彼女の口からこぼれた名状し難き調理の名を%ANAME(MASTER)%はそっと聞き流す
+PRINTFORML
+PRINTFORMW 「ん……？　いや、もしかすると……間に合ってしまうかもしれないね」
+PRINTFORML
+PRINTFORMDW 彼女は何かをひらめいたのか、コンソールに向き合い素早くいくつかの数式を打ち込む
+PRINTFORMW 「このワームホールの中では時間も因果もねじ曲がってしまうけれど……、時空の歪曲には一定の周期性がある」
+PRINTFORML
+PRINTFORML
+PRINTFORMW 「それを応用してしまえば……例えばね……」
+PRINTFORML
+PRINTFORMDW ...
+PRINTFORML
+PRINTFORML 「これが」
+PRINTFORMW 「これが」
+PRINTFORML
+PRINTFORMW 
+PRINTFORML 「こうなって」
+PRINTFORML 「こうなって」
+PRINTFORMW 「こうなって」
+PRINTFORML
+PRINTFORMW 
+PRINTFORML 「こうなってしまうんだ」
+PRINTFORML 「こうなってしまうんだ」
+PRINTFORML 「こうなってしまうんだ」
+PRINTFORMW 「こうなってしまうんだ」
+PRINTFORMW 
+PRINTFORMDW ――%ANAME(MASTER)%は酷く化かされたような気分になった。……エルが……四人いる？
+PRINTFORML
+PRINTFORML 「ふふっ、やっぱりキミにはそう見えるんだね」
+PRINTFORML 「ふふっ、やっぱりキミにはそう見えるんだね」
+PRINTFORML 「ふふっ、やっぱりキミにはそう見えるんだね」
+PRINTFORMW 「ふふっ、やっぱりキミにはそう見えるんだね」
+PRINTFORML 
+PRINTFORML 「因果律がぐちゃぐちゃにねじ曲がったおかげで、ここでは異なる時間軸の私が矛盾なく併存してしまう」
+PRINTFORML 「因果律がぐちゃぐちゃにねじ曲がったおかげで、ここでは異なる時間軸の私が矛盾なく併存してしまう」
+PRINTFORML 「因果律がぐちゃぐちゃにねじ曲がったおかげで、ここでは異なる時間軸の私が矛盾なく併存してしまう」
+PRINTFORMW 「因果律がぐちゃぐちゃにねじ曲がったおかげで、ここでは異なる時間軸の私が矛盾なく併存してしまう」
+PRINTFORML 
+PRINTFORMDW ――四人のエルが全く同じ調子で、話を続ける
+PRINTFORML 
+PRINTFORML 「今私の隣にいるのは……比較的近い時間軸の私のはずだよ」
+PRINTFORML 「今私の隣にいるのは……未来の時間軸の私のはずだよ」
+PRINTFORML 「今私の隣にいるのは……過去の時間軸の私のはずだよ」
+PRINTFORMW 「今私の隣にいるのは……ついさっきの時間軸の私のはずだよ」
+PRINTFORML
+PRINTFORMDW ...
+PRINTFORMK 
+PRINTFORMW 「二日後…正確には48時間30分後にこの時空は私達の元の時間軸に収束する。そこで脱出できるはずだ」
+CLEARLINE 1
+PRINTFORML 「もうすぐ…正確には8時間15分後にこの時空は私達の元の時間軸に収束する。そこで脱出できるはずだ」
+PRINTFORMW 「三日後…正確には71時間45分後にこの時空は私達の元の時間軸に収束する。そこで脱出できるはずだ」
+PRINTFORMW 「二日後…正確には48時間35分後にこの時空は私達の元の時間軸に収束する。そこで脱出できるはずだ」
+CLEARLINE 1
+PRINTFORML 「もうすぐ…正確には8時間15分後にこの時空は私達の元の時間軸に収束する。そこで脱出できるはずだ」
+PRINTFORMW 「二日後…正確には48時間30分後にこの時空は私達の元の時間軸に収束する。そこで脱出できるはずだ」
+CLEARLINE 4
+PRINTFORML 「二日後…正確には48時間30分後にこの時空は私達の元の時間軸に収束する。そこで脱出できるはずだ」
+PRINTFORML 「もうすぐ…正確には8時間15分後にこの時空は私達の元の時間軸に収束する。そこで脱出できるはずだ」
+PRINTFORML 「三日後…正確には71時間45分後にこの時空は私達の元の時間軸に収束する。そこで脱出できるはずだ」
+PRINTFORML 「二日後…正確には48時間35分後にこの時空は私達の元の時間軸に収束する。そこで脱出できるはずだ」
+REDRAW 1
+PRINTFORML
+PRINTFORML
+PRINTFORMDW ...
+PRINTFORMDW ……頭がおかしくなりそうだ……
+PRINTFORMW
+PRINTFORML 「まぁ、時間軸が収束するまでは……ここでじっと待つしか無いね」
+PRINTFORML 「まぁ、時間軸が収束するまでは……ここでじっと待つしか無いね」
+PRINTFORML 「まぁ、時間軸が収束するまでは……ここでじっと待つしか無いね」
+PRINTFORMW 「まぁ、時間軸が収束するまでは……ここでじっと待つしか無いね」
+PRINTFORML
+PRINTFORMDW しかし他に何もできることはなさそうだ、彼女"達"の言う通りただ待つ他は無いだろう
+PRINTFORMW
+PRINTFORMDW 困惑し、狐につままれたような表情で腰掛ける%ANAME(MASTER)%をエルが囲む
+PRINTFORMW
+PRINTFORMW
+PRINTFORML 「……ところで」
+PRINTFORML 「……ところで」
+PRINTFORML 「……ところで」
+PRINTFORMW 「……ところで」
+PRINTFORMW
+PRINTFORML 「窮屈な空間に閉ざされた親しい者同士が、時間を持て余した時にすることといえば」
+PRINTFORML 「窮屈な空間に閉ざされた親しい者同士が、時間を持て余した時にすることといえば」
+PRINTFORML 「窮屈な空間に閉ざされた親しい者同士が、時間を持て余した時にすることといえば」
+PRINTFORMW 「窮屈な空間に閉ざされた親しい者同士が、時間を持て余した時にすることといえば」
+PRINTFORMW
+PRINTFORMW
+SETCOLOR カラー_妊娠
+PRINTFORML 「一つしか無いと思うのだけど……ね❤」
+PRINTFORML 「一つしか無いと思うのだけど……ね❤」
+PRINTFORML 「一つしか無いと思うのだけど……ね❤」
+PRINTFORMW 「一つしか無いと思うのだけど……ね❤」
+RESETCOLOR 
+PRINTFORMW
+PRINTFORMW 
+RESETCOLOR
+
+;調教の条件を設定
+CVARSET CFLAG, GETNUM(CFLAG, "慰安参加者") , 0
+CVARSET CFLAG, GETNUM(CFLAG, "調教参加フラグ") , 0
+CFLAG:QUEST_対象:調教参加フラグ  = 1
+FLAG:調教モード = 5
+FLAG:閨逆調教 = 1
+FLAG:連続調教フラグ = 1
+FLAG:ウフフフラグ = 1
+TRAIN_PLACE = 次元断層
+FLAG:SLG4X調教開始フラグ = 1
+
+;エルのCOM_TENDENCYを一時退避
+FOR LOCAL, 0, 3000
+	SAVE_COM_TENDENCY:QUEST_対象:LOCAL = COM_TENDENCY:QUEST_対象:LOCAL
+NEXT
+VARSET COM_TENDENCY:QUEST_対象:0, -1
+
+COM_TENDENCY:QUEST_対象:GETNUM(TRAINNAME, "愛撫") = 2
+COM_TENDENCY:QUEST_対象:GETNUM(TRAINNAME, "胸愛撫") = 2
+COM_TENDENCY:QUEST_対象:GETNUM(TRAINNAME, "クンニ") = 0
+COM_TENDENCY:QUEST_対象:GETNUM(TRAINNAME, "指挿入れ") = 0
+COM_TENDENCY:QUEST_対象:GETNUM(TRAINNAME, "手コキ") = 1
+COM_TENDENCY:QUEST_対象:GETNUM(TRAINNAME, "足コキ") = 1
+COM_TENDENCY:QUEST_対象:GETNUM(TRAINNAME, "髪コキ") = 1
+COM_TENDENCY:QUEST_対象:GETNUM(TRAINNAME, "キス") = 3
+
+FOR LOCAL, 0 ,3
+	CALL QUEST_72_CREATE_CLONE(QUEST_対象)
+NEXT
+
+CALL ADD_EVENTTRAIN_CALLEE("QUEST_72_TRAIN1")
+CALL ADD_EVENTEND_CALLEE("QUEST_72_TRAIN1")
+
+SHOP_TIME --
+CALL START_TRAIN_COMMON
+PRINTW
+
+@EVENTTRAIN_QUEST_72_TRAIN1
+TFLAG:56 = 20
+
+@EVENTEND_QUEST_72_TRAIN1 
+;エルのCOM_TENDENCYを元に戻す
+FOR LOCAL, 0, 3000
+	COM_TENDENCY:QUEST_対象:LOCAL = SAVE_COM_TENDENCY:QUEST_対象:LOCAL
+NEXT
+SETCOLOR エル_口上カラー
+PRINTFORML
+PRINTFORMDW ...
+PRINTFORMDW ..
+PRINTFORMDW .
+PRINTFORML
+PRINTFORMDW 前戯だけだとしても……四人から同時に責め立てられては敵わない……
+PRINTFORMDW %ANAME(MASTER)%の呼吸は既に絶え絶えで、肩で呼吸をしている状態だ
+PRINTFORML
+PRINTFORMW
+PRINTFORMW 「ふふっ、随分いい表情になったね❤」
+PRINTFORML
+PRINTFORMDW エルが蠱惑的な表情を浮かべて、汗まみれの%ANAME(MASTER)%の肌に指を這わす
+PRINTFORML
+PRINTFORMW 「もしかしたら……もう果ててしまったかな？　でもまだまだ……」
+PRINTFORML
+PRINTFORMW 「ねぇ、まだ……始めたばかりだよね……？」
+PRINTFORML
+PRINTFORMW
+PRINTFORMW 「それとも……もう随分交わっていた……のかな？　ふふっ、私もわからなくなってしまったよ❤」
+PRINTFORML
+PRINTFORML
+PRINTFORMW
+PRINTFORML
+PRINTFORMW 「……そろそろ……かな」
+PRINTFORML
+PRINTFORMW 「３……」
+PRINTFORMW
+PRINTFORMW 「２…」
+PRINTFORMW
+PRINTFORMW 「１」
+PRINTFORML
+PRINTFORMW
+CALL COLOR_PRINTW(@"――%ANAME(MASTER)%をとりまく時間が逆巻く！", カラー_注意)
+PRINTFORML
+FOR LOCAL, 0 ,100
+	CLEARLINE 2
+	TWAIT 1, 1
+NEXT
+REDRAW 0
+CLEARLINE 100
+PRINTFORML 「こうなってしまうわけだ」
+PRINTFORML 「こうなってしまうわけだ」
+PRINTFORML 「こうなってしまうわけだ」
+PRINTFORML 「こうなってしまうわけだ」
+PRINTFORML 
+PRINTFORMDL ――%ANAME(MASTER)%は酷く化かされたような気分になった。……エルが……四人いる？
+PRINTFORML
+PRINTFORML 「ふふっ、やっぱりキミにはそう見えるんだね」
+PRINTFORML 「ふふっ、やっぱりキミにはそう見えるんだね」
+PRINTFORML 「ふふっ、やっぱりキミにはそう見えるんだね」
+PRINTFORML 「ふふっ、やっぱりキミにはそう見えるんだね」
+PRINTFORML 
+PRINTFORML 「因果律がぐちゃぐちゃにねじ曲がったおかげで、ここでは異なる時間軸の私が矛盾なく併存してしまう」
+PRINTFORML 「因果律がぐちゃぐちゃにねじ曲がったおかげで、ここでは異なる時間軸の私が矛盾なく併存してしまう」
+PRINTFORML 「因果律がぐちゃぐちゃにねじ曲がったおかげで、ここでは異なる時間軸の私が矛盾なく併存してしまう」
+PRINTFORML 「因果律がぐちゃぐちゃにねじ曲がったおかげで、ここでは異なる時間軸の私が矛盾なく併存してしまう」
+PRINTFORML 
+PRINTFORMDL ――四人のエルが全く同じ調子で、話を続ける
+PRINTFORML 
+PRINTFORML 「今私の隣にいるのは……比較的近い時間軸の私のはずだよ」
+PRINTFORML 「今私の隣にいるのは……未来の時間軸の私のはずだよ」
+PRINTFORML 「今私の隣にいるのは……過去の時間軸の私のはずだよ」
+PRINTFORML 「今私の隣にいるのは……ついさっきの時間軸の私のはずだよ」
+PRINTFORML
+PRINTFORMDL ...
+PRINTFORML
+PRINTFORML 「二日後…正確には48時間30分後にこの時空は私達の元の時間軸に収束する。そこで脱出できるはずだ」
+PRINTFORML 「もうすぐ…正確には8時間15分後にこの時空は私達の元の時間軸に収束する。そこで脱出できるはずだ」
+PRINTFORML 「三日後…正確には71時間45分後にこの時空は私達の元の時間軸に収束する。そこで脱出できるはずだ」
+PRINTFORML 「二日後…正確には48時間35分後にこの時空は私達の元の時間軸に収束する。そこで脱出できるはずだ」
+PRINTFORML
+PRINTFORML
+PRINTFORMDL ...
+PRINTFORMDL ……頭がおかしくなりそうだ……
+PRINTFORML
+PRINTFORML 「まぁ、時間軸が収束するまでは……ここでじっと待つしか無いね」
+PRINTFORML 「まぁ、時間軸が収束するまでは……ここでじっと待つしか無いね」
+PRINTFORML 「まぁ、時間軸が収束するまでは……ここでじっと待つしか無いね」
+PRINTFORML 「まぁ、時間軸が収束するまでは……ここでじっと待つしか無いね」
+PRINTFORML
+PRINTFORMDL 困惑し、狐につままれたような表情で腰掛ける%ANAME(MASTER)%をエルが囲む
+PRINTFORMDL しかし他に何もできることはなさそうだ、彼女"達"の言う通りただ待つ他は無いだろう
+PRINTFORML
+PRINTFORML
+PRINTFORML 「……ところで」
+PRINTFORML 「……ところで」
+PRINTFORML 「……ところで」
+PRINTFORML 「……ところで」
+PRINTFORML
+PRINTFORML 「窮屈な空間に閉ざされた親しい者同士が、時間を持て余した時にすることといえば」
+PRINTFORML 「窮屈な空間に閉ざされた親しい者同士が、時間を持て余した時にすることといえば」
+PRINTFORML 「窮屈な空間に閉ざされた親しい者同士が、時間を持て余した時にすることといえば」
+PRINTFORML 「窮屈な空間に閉ざされた親しい者同士が、時間を持て余した時にすることといえば」
+PRINTFORML
+PRINTFORML
+SETCOLOR カラー_妊娠
+PRINTFORML 「一つしか無いと思うのだけど……ね❤」
+PRINTFORML 「一つしか無いと思うのだけど……ね❤」
+PRINTFORML 「一つしか無いと思うのだけど……ね❤」
+PRINTFORML 「一つしか無いと思うのだけど……ね❤」
+RESETCOLOR 
+PRINTFORML
+PRINTFORML 
+REDRAW 2
+
+PRINTFORML
+PRINTFORMDW ...
+PRINTFORMDW ..
+PRINTFORMDW .
+PRINTFORML
+PRINTFORMW
+BASE:MASTER:体力 = MAXBASE:MASTER:体力
+BASE:MASTER:気力 = MAXBASE:MASTER:気力
+CALL COLOR_PRINTW(@"――%ANAME(MASTER)%の気力、体力が全快した！", カラー_注意)
+PRINTFORML
+PRINTFORMW
+SETCOLOR エル_口上カラー
+PRINTFORMW 「それじゃあ……、本番にしようか……❤」
+RESETCOLOR
+
+CVARSET CFLAG, GETNUM(CFLAG, "慰安参加者") , 0
+CVARSET CFLAG, GETNUM(CFLAG, "調教参加フラグ") , 0
+CFLAG:QUEST_対象:調教参加フラグ  = 1
+FLAG:調教モード = 5
+FLAG:閨逆調教 = 1
+FLAG:ウフフフラグ = 1
+FLAG:SLG4X調教開始フラグ = 1
+TRAIN_PLACE = 次元断層
+
+FOR LOCAL, 0 ,3
+	CALL QUEST_72_CREATE_CLONE(QUEST_対象)
+NEXT
+
+CALL ADD_EVENTTRAIN_CALLEE("QUEST_72_TRAIN2")
+CALL ADD_EVENTEND_CALLEE("QUEST_72_TRAIN2")
+
+SHOP_TIME --
+CALL START_TRAIN_COMMON
+PRINTW
+
+@EVENTTRAIN_QUEST_72_TRAIN2
+TFLAG:56 = 30
+
+@EVENTEND_QUEST_72_TRAIN2
+#DIM CONST QUEST_ID = 72
+
+SETCOLOR エル_口上カラー
+PRINTFORML
+PRINTFORMDW ...
+PRINTFORMDW ..
+PRINTFORMDW .
+PRINTFORML
+PRINTFORMW
+PRINTFORMDW 一時間、二時間……、あるいは数日？　一体どれ程の間身体を重ねているのだろうか……？
+PRINTFORML
+PRINTFORMW
+PRINTFORMDW %ANAME(MASTER)%とそれぞれの時間軸のエルは互いに貪り合っては果て、再び貪り合っては果てをひたすらに繰り返す
+PRINTFORML
+PRINTFORMDW 普段の理知的で鋭敏な態度をかなぐり捨て、狂ったように喘ぐエルを%ANAME(MASTER)%は背後から犯している
+CLEARLINE 2
+PRINTFORML
+PRINTFORMDL %ANAME(MASTER)%の陰部をエルが淫らな水音を響かせてひたすらにすすっている
+PRINTFORML
+PRINTFORMDW 汗と体液にまみれ、細い肢体を雫で淫猥に照らすエルを下から突き上げている
+REDRAW 1
+PRINTFORML
+PRINTFORMDW 普段の理知的で鋭敏な態度をかなぐり捨て、狂ったように喘ぐ少女を%ANAME(MASTER)%は背後から犯している
+CLEARLINE 2
+PRINTFORML
+PRINTFORMDL 船室の椅子の上で華奢な彼女の身体を抱え、下から秘部を突き上げている
+REDRAW 1
+PRINTFORML
+PRINTFORMDW 上向きにピンと張り詰めた乳首を指でなぶりながら、口の中に舌をねじ込み貪っている
+CLEARLINE 2
+PRINTFORML
+SIF HAS_PENIS(MASTER)
+	PRINTFORMDL 異なる時間軸のエルに順番に子種を注いでいる……
+PRINTFORMW
+PRINTFORML
+PRINTFORMDW %ANAME(MASTER)%とそれぞれの時間軸のエルは互いに貪り合っては果て、再び貪り合っては果てをひたすらに繰り返す
+PRINTFORMW
+PRINTFORML
+PRINTFORMDW 熱気と快楽の中で時間の感覚が溶けていく……
+PRINTFORML
+PRINTFORMW ...
+PRINTFORMW ..
+PRINTFORMW .
+PRINTFORML
+PRINTFORML
+PRINTFORMW
+PRINTFORMDW 気がついたときには%ANAME(MASTER)%は船室のベッドに横たわっていた
+PRINTFORML 
+PRINTFORMDW 横にはシーツを身にまとったエルがいる
+PRINTFORMW 
+PRINTFORMDW %ANAME(MASTER)%が身を起こすと彼女は気恥ずかしげにはにかんだ
+PRINTFORML 
+PRINTFORMW 「まぁ、その……なんというか……えっと……悪ノリが過ぎてしまったね……」
+PRINTFORML
+PRINTFORMW
+PRINTFORMW 「艦は無事に脱出できたよ。今から２日前にね」
+PRINTFORML 
+PRINTFORMDL 認識していた時間との帳尻が全くあわない……
+PRINTFORMDW おそろしく奇妙な夢を見ていたようだ
+PRINTFORMW
+PRINTFORMDW 困惑する%ANAME(MASTER)%をよそに、エルは自身の下腹部を慈しむような手付きでゆっくりとなぞる
+PRINTFORML
+PRINTFORMDW そして%ANAME(MASTER)%の耳元にぐっと顔を寄せ、囁いた
+PRINTFORML
+PRINTFORMW 「……こんなにもデタラメなセックスをしたのは……ふふっ、人類でも私達がはじめてだろうね」 
+PRINTFORMW
+PRINTFORMW
+PRINTFORM　「……ねぇ、キミは……
+SETCOLOR カラー_妊娠
+PRINTFORM 過去と現在と未来の私を同時に犯していたんだよ……❤
+RESETCOLOR 
+PRINTFORMW
+PRINTFORMW
+SETCOLOR エル_口上カラー
+PRINTFORMW 「一体どうやってこの責任を……取ってくれるんだろうね❤」
+PRINTFORML
+PRINTFORMDW ...
+PRINTFORMDW ..
+PRINTFORMDW .
+PRINTFORML
+RESETCOLOR
+PRINTFORMW エルの好感度 + 1000
+CFLAG:QUEST_対象:好感度 += 1000
+PRINTFORMDW ワームホールの解析結果からエルは目星の大きな経験を得たようだ
+CALL PRINT_ADD_EXP(QUEST_対象, "目星経験値", 50, 1)
+CALL TRAIN_AUTO_ABLUP(QUEST_対象)
+PRINTFORMW
+QUEST_PROGRESS:72 = 3
+CALL QUEST_RELEASE_POINT(QUEST_ID)
+
+@QUEST_72_CREATE_CLONE(複製対象)
+#DIM 複製対象
+#DIM DYNAMIC 対象
+#DIMS DYNAMIC 名前
+CALL SAVE_CUSTOM_DATA(-1, 複製対象)
+CALL LOAD_CUSTOM_DATA(-1)
+対象 = RESULT
+名前 = %SPLIT_RAND("1秒後の/5秒前の/2分前の/1分後の/昨日の/明日の/1時間前の/2時間後の/過去の/未来の",1)%%ANAME(複製対象)%
+NAME:対象 =  %名前%
+CALLNAME:対象 = %名前%
+CFLAG:対象:調教参加フラグ  = 1
+CFLAG:対象:慰安モブ = 1
+RETURN
+
+@QUEST_72_GET_RAND_SECTOR()
+#DIM DYNAMIC SECTOR_ID
+#DIM DYNAMIC PORT_ID
+#DIM DYNAMIC FLG_SKIP
+
+WHILE 1
+	SECTOR_ID = RAND:MAX_SECTOR
+	;星系港と宇宙港のあるセクターを抽選対象から除外する
+	FOR PORT_ID, 0, 星系数
+		IF 星系座標ID:PORT_ID / 10000 == SECTOR_ID || PORT_POSITION_ID:PORT_ID / 10000 == SECTOR_ID
+			FLG_SKIP = 1
+			BREAK
+		ENDIF
+	NEXT
+	SIF FLG_SKIP == 0
+		BREAK
+	FLG_SKIP = 0
+WEND
+
+RETURN SECTOR_ID

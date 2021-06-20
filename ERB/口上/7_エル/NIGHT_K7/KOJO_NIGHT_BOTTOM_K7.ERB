@@ -22,7 +22,7 @@ ENDIF
 IF SELECTCOM == 111
 	;主導権がないと渋々だが陥落してると乗り気、慰安だと何も言わない
 	IF !IS_INITIATIVE(エル) && FLAG:調教モード != 調教_慰安
- 		IF CHECK_K7("陥落", エル_対象)
+		IF CHECK_K7("陥落", エル_対象)
 		ENDIF
 	ENDIF
 	;対象が男性
@@ -141,7 +141,7 @@ ENDIF
 IF SELECTCOM == 101 || SELECTCOM == 102
 	IF IS_MPLY(エル) && !IS_INITIATIVE(エル)
 		PRINTDATAL
-			DATAFORM 「く、苦しくないですか……？」
+			DATAFORM 「く、苦しくない……？」
 		ENDDATA
 	ENDIF
 ENDIF
@@ -191,6 +191,55 @@ IF SELECTCOM == 100 || SELECTCOM == 211
 ;		IF CHECK_K7("陥落", エル_対象)
 ;		ENDIF
 	ENDIF
+	RETURN 0
+ENDIF
+
+;─────────────────────────────────────── 
+;◆クリ愛撫
+;─────────────────────────────────────── 
+IF SELECTCOM == 333
+	{
+		SELECTCASE IFRAND(
+			"1",1,
+			"D1,2",エル機嫌 == "良" || エル機嫌 == "悦" || エル機嫌 == "幸",
+			"D1,3",エル機嫌 == "良" || エル機嫌 == "悦" || エル機嫌 == "幸" && CHECK_K7("陥落")
+			)
+	}
+		CASE 1
+			PRINTDATAL
+				DATAFORM 「……ちょっと、ねぇ……いまはそういう時じゃないだろう？」
+				DATAFORM 「……私だって怒るよ？」
+				DATAFORM 「んんっ！？　なにして……！」
+			ENDDATA
+		CASE 2
+			PRINTDATAL
+				DATAFORM 「んっ、あっ……ま、まったく」
+				DATAFORM 「ねぇ……なにもこんな時にでなくても……あっ」
+				DATAFORM 「どこに手を入れてるんだい……？　まったく……」
+			ENDDATA
+		CASE 3
+			CALLF FuncTagSetText_Print(@"@C:{カラー_ピンク}@%ONOMATOPE_PRESET_K7("くちゅ音短", 0, 0)%@/C@", 1)
+			IF エル_衣装:衣装部位_下着下 != ""
+				PRINTDATAD
+					DATAFORM %ANAME(エル_対象)%は%ANAME(エル)%の%STR_CLOTH_K7(エル, 衣装部位_下着下)%の中に手を入れて、
+					DATAFORM %ANAME(エル_対象)%は%ANAME(エル)%の%STR_CLOTH_K7(エル, 衣装部位_下着下)%の上から、
+				ENDDATA		
+			ELSE
+				PRINTDATAD
+					DATAFORM %ANAME(エル_対象)%は%ANAME(エル)%の%STR_BODY("陰唇")%
+					DATAFORM %ANAME(エル_対象)%は%ANAME(エル)%の%STR_BODY("陰唇")%
+				ENDDATA		
+			ENDIF
+			PRINTFORMDL %STR_BODY("陰唇")%%SPLIT_RAND("を指でなぞった/にそって指を這わせた/をまさぐった/をかき回すようにまさぐった",1)%
+			PRINTDATAL
+				DATAFORM 「やんっ❤　も、もぅ……こ、ここでなくてもいいだろう？」
+				DATAFORM 「あ、んんっ……。ちょ、ちょっと、こっちは心の準備が」
+				DATAFORM 「きゃっ❤　ど、どこに手を入れて……ああんっ」
+			ENDDATA
+			PRINTL 
+			RETURN 1
+		CASEELSE
+	ENDSELECT
 	RETURN 0
 ENDIF
 
@@ -412,7 +461,7 @@ IF GROUPMATCH(SELECTCOM, 30, 32, 33, 34, 35, 36, 37, 38, 39, 52, 160) && CHECK_K
 		CASE 2
 			PRINTDATAL
 				DATAFORM （入ってる……%CALLNAME_K7(エル_対象)%の%CALL_DIRTY_K7("Ｐ")%が私の%CALL_DIRTY_K7("Ｖ")%に……❤） 
- 				DATAFORM 「ん゛んっ！　ひゃんっ❤　は、激しすぎるよぉ……」
+				DATAFORM 「ん゛んっ！　ひゃんっ❤　は、激しすぎるよぉ……」
 				DATAFORM 「はぁん……❤　熱い……」
 			ENDDATA
 		CASE 3
@@ -443,7 +492,7 @@ IF GROUPMATCH(SELECTCOM, 31) && CHECK_K7("活力", エル_対象)
 		CASE 2
 			PRINTDATAL
 				DATAFORM （入ってる……%CALLNAME_K7(エル_対象)%の%CALL_DIRTY_K7("Ｐ")%が私の%CALL_DIRTY_K7("Ｖ")%に……❤） 
- 				DATAFORM 「ん゛んっ！　ひゃんっ❤　は、激しすぎるよぉ……」
+				DATAFORM 「ん゛んっ！　ひゃんっ❤　は、激しすぎるよぉ……」
 				DATAFORM 「はぁん……❤　熱い……」
 				DATAFORM 「%CALLNAME_K7(エル_対象)%の顔がみたいのに……うしろからなんて…んんっ！」
 				DATAFORM 「ら、乱暴だよ%CALLNAME_K7(エル_対象)%……。もう少し優しく…ん゛んっ！」
@@ -453,7 +502,7 @@ IF GROUPMATCH(SELECTCOM, 31) && CHECK_K7("活力", エル_対象)
 				DATAFORM 「後ろから突かれるのすきぃ❤　もっと、もっとぉ❤　わたしの%CALL_DIRTY_K7("Ｖ")%、%CALLNAME_K7(エル_対象)%の%CALL_DIRTY_K7("Ｐ")%で、ん゛んっ、犯してくださぃ❤」
 				DATAFORM 「好きぃ！　後ろからじゅぼじゅぼ%CALL_DIRTY_K7("Ｐ")%で突かれるの気持ちいいよぉ！ ひゃぁぁん❤❤！」
 				DATAFORM 「教えて❤　%SPLIT_RAND("セックス/性交",1)%の快楽、私にもっと、たくさん、んんっ――――❤❤❤！」
- 				DATAFORM 「い゛ぐっ❤　ん゛んっ！　%CALL_DIRTY_K7("Ｖ")%ぐちゃぐちゃになっちゃうよぉ❤❤❤」
+				DATAFORM 「い゛ぐっ❤　ん゛んっ！　%CALL_DIRTY_K7("Ｖ")%ぐちゃぐちゃになっちゃうよぉ❤❤❤」
 			ENDDATA
 		CASEELSE
 	ENDSELECT

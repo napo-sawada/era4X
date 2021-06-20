@@ -194,7 +194,7 @@ NEXT
 RETURN 1
 
 ;アニメーションするゲージ(増加用)
-@DRAW_ANIMATION_GAUGE( nBarVol, nBarVolMax, nScaleNum, colorLeft, colorRigth, colorEmpty, flgExtra, strScaleText = "" )
+@DRAW_ANIMATION_GAUGE( nBarVol, nBarVolMax, nScaleNum, colorLeft, colorRigth, colorEmpty, flgExtra, strScaleText = "" , WAITTIME = 10)
 #DIM  nBarVol
 #DIM  nBarVolMax
 #DIM  nScaleNum
@@ -204,11 +204,12 @@ RETURN 1
 #DIM  flgExtra
 #DIMS strScaleText
 #DIM ITER
+#DIM WAITTIME
 #DIM 表示量
 ITER = 0
 
 WHILE 1
-    INPUTMOUSEKEY 10
+    INPUTMOUSEKEY WAITTIME
     SIF ITER > 0
         CLEARLINE 1
     POWER LOCAL, ITER, 2
@@ -368,3 +369,17 @@ IF DIC_CONTAINSKEY(カード効果, "任意カード追加")
 ENDIF
 
 RETURN
+
+@P_CHECK_CHARA(対象, チェック内容)
+#DIM 対象
+#DIMS チェック内容
+#FUNCTION
+SELECTCASE チェック内容
+    CASE "陥落"
+        SIF 対象 == MASTER
+            RETURNF 1
+        SIF CFLAG:(対象):陥落済み
+            RETURNF 1
+    CASEELSE
+ENDSELECT
+RETURNF 0

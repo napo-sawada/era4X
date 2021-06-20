@@ -1,0 +1,761 @@
+﻿;─────────────────────────────────────── 
+;■閨_攻め_実行前
+;　汎用台詞「KOJO_K7_共_閨_攻_汎用.ERB」を呼び出す前に
+;　特殊なコマンドを個別に表示してRETURNする
+;─────────────────────────────────────── 
+@KOJO_K7_NIGHT_BEFORE_TOP(エル_対象)
+#DIM エル
+#DIM エル_対象
+#DIMS エル機嫌
+#DIM 汎用攻め省略 
+
+IF !エル_対象
+	エル_対象 = MASTER
+ENDIF
+
+エル = NAME_TO_CHARA("エル")
+エル機嫌 '= TOSTR_EMOTION(エル)
+
+汎用攻め省略 = 0
+
+;─────────────────────────────────────── 
+;◆慰安中の攻めは煽らず曖昧に奉仕
+;─────────────────────────────────────── 
+IF FLAG:調教モード == 調教_慰安
+	PRINTFORM 「
+	IF RAND:5 == 0
+		PRINTFORM %CALLNAME_K7(エル_対象)%
+		PRINTFORM %SPLIT_R("……：、：。")%
+		PRINTFORM %SPLIT_R("ここ、が：こんな、感じで：は、ふ")%
+		PRINTFORM %SPLIT_R("……気持ちいいかい？：……いいかい？：……悦んでくれるのかい？")%
+	ENDIF
+	PRINTFORM %SPLIT_R("はふ、あ：んんっ：んぅ：んう")%
+	PRINTFORM %BREAK_K7("中", エル_対象)%
+	PRINTFORM %SPLIT_R("んっ……：んふ……：んく……：はぁ……：んぅ……：ん：はふ")%
+	PRINTFORM %BREAK_K7("末", エル_対象)%
+	PRINTFORML 」
+	RETURN 0
+ENDIF
+
+;─────────────────────────────────────── 
+;◆不機嫌時
+;─────────────────────────────────────── 
+SELECTCASE エル機嫌
+	CASE "恨", "怒", "憤"
+		IF RAND:3 < 1
+			PRINTFORMDL %ANAME(エル)%は眉をひそめて様子を伺っている
+		ENDIF
+		IF PALAM:エル:怒主 <= PALAM:エル:怒外
+			PRINTDATAL
+				DATAFORM 「……」
+			ENDDATA
+		ELSE
+			PRINTDATAL
+				DATAFORM 「ふんっ」
+				DATAFORM 「…………」
+				DATAFORM 「なんなんのかな……」
+			ENDDATA
+		ENDIF
+		RETURN 0
+
+	CASE "鬱", "悲", "憂"
+		IF RAND:3 < 1
+			PRINTFORMDL %ANAME(エル)%は悲しげな表情で目を背けた
+		ENDIF
+		IF PALAM:エル:哀主 <= PALAM:エル:哀外
+			PRINTDATAL
+				DATAFORM 「……」
+			ENDDATA
+		ELSE
+			PRINTDATAL
+				DATAFORM 「こんなの……あんまりじゃないかな」
+				DATAFORM 「私を何だと思っているんだい……」
+				DATAFORM 「…………」
+			ENDDATA
+		ENDIF
+		RETURN 0
+
+	CASE  "狂", "恐", "怯"
+		IF RAND:3 < 1
+			PRINTFORMDL %ANAME(エル)%は恐怖のあまり震えている
+		ENDIF
+		IF PALAM:エル:怖主 <= PALAM:エル:怖外
+			PRINTDATAL
+				DATAFORM 「%CALLNAME_K7(エル_対象)%、私……はもう耐えられないよ……」
+				DATAFORM 「ひっ……」
+			ENDDATA
+		ELSE
+			PRINTDATAL
+				DATAFORM 「…………」
+				DATAFORM 「ひっ……」
+			ENDDATA
+		ENDIF
+		RETURN 0
+
+	CASEELSE
+ENDSELECT
+
+;─────────────────────────────────────── 
+;◆不機嫌だと喋らない
+;─────────────────────────────────────── 
+IF !GROUPMATCH(エル機嫌, "恨", "怒", "憤", "鬱", "悲", "憂", "狂", "恐", "怯")
+	IF SELECTCOM == PREVCOM
+		IF RAND:10 == 0 && IS_INITIATIVE(エル) && CHECK_K7("活力", エル_対象) && (( IS_MPLY(エル) && MPLY_NUM == 1 )||( IS_MTAR(エル) && MTAR_NUM == 1 ))
+			PRINTDATA
+				DATAFORM 「んっ……
+				DATAFORM 「もっと
+				DATAFORM 「このまま
+				DATAFORM 「もう少し
+			ENDDATA
+			;実行逆転のコマンド
+			IF GROUPMATCH(SELECTCOM, 111, 101, 102, 100, 211, 130, 131, 132, 150, 151)
+				PRINTDATAL
+					DATAFORM %KOJO_COM_NAME_TARGET_K7(SELECTCOM)%たいのかい？」
+					DATAFORM %KOJO_COM_NAME_PLAYER_K7(SELECTCOM)%たいんだね？」
+				ENDDATA
+				LOCAL:0 = COM_EXP:(エル):(SELECTCOM+1000)
+			;実行逆転のコマンド以外
+			ELSE
+				PRINTDATAL
+					DATAFORM %KOJO_COM_NAME_PLAYER_K7(SELECTCOM)%たいな……いいかい？」
+					DATAFORM %KOJO_COM_NAME_TARGET_K7(SELECTCOM)%たいよ……だめかな？」
+				ENDDATA
+				LOCAL:0 = COM_EXP:(エル):(SELECTCOM)
+			ENDIF
+			;性癖設定を参照して該当コマンドの経験回数をチェック
+			;NTR系で経験を稼いでいる場合に違和感が出るからどうしたものか
+			IF RAND:5 == 0
+				IF LOCAL:0 > 100
+					PRINTFORM 「もう何度も
+					PRINTDATAL
+						DATAFORM 教えてあげたんだから
+						DATAFORM 躾けてあげたんだから
+						DATAFORM 教えたんだから
+						DATAFORM 躾けたんだから
+					ENDDATA
+					PRINTFORM %BREAK_K7("中", エル_対象)%
+					PRINTDATAL
+						DATAFORM %CALLNAME_K7(エル_対象)%も理解できたよね？」
+						DATAFORM %CALLNAME_K7(エル_対象)%だって好きなんだよね？」
+						DATAFORM しないとだめな体のはずだよね？」
+						DATAFORM 成果を見せてくれるね？」
+						DATAFORM わかってくれたよね？」
+					ENDDATA
+				ELSEIF LOCAL:0 > 35
+					PRINTFORML 「慣れたかい……？」
+					PRINTFORML 「ふふっ、まだまだ%SPLIT_R("教えて：指導して：躾けて")%あげるからね%BREAK_K7("末", エル_対象)%」
+				ELSE
+					PRINTFORML 「まだ{LOCAL:0}回しかしていないよ？　もっともっと%SPLIT_R("躾け：教育")%が必要だね%BREAK_K7("末", エル_対象)%」
+				ENDIF
+			ENDIF
+			PRINTL
+		ENDIF
+	ENDIF
+ENDIF
+
+;─────────────────────────────────────── 
+;●エル_対象が攻め（主導権によるものもある）
+;─────────────────────────────────────── 
+;おねだりされる・させる
+IF SELECTCOM == 111
+	IF IS_MALE(MASTER)
+		LOCALS:0 '= "精液を搾ってください"
+		LOCALS:1 '= "白い"
+	ELSE
+		LOCALS:0 '= "愛液を掻き出してください"
+		LOCALS:1 '= "透明"
+	ENDIF
+	PRINTDATAL
+		DATAFORM 「%LOCALS:0%、だよね？」
+		DATAFORM 「飲んで欲しいのかい？　%LOCALS:1%のを」
+;		DATALIST
+;			DATAFORM 「%CALLNAME_K7(エル_対象)%の血は全部私の好きにしていい血よね」
+;			DATAFORM 「紅いのも、白いのも、透明なのも」
+;		ENDLIST
+	ENDDATA
+	RETURN 0
+ENDIF
+
+;顔面騎乗 Ａ顔面騎乗する・させる（ターゲットは喋れない）
+IF SELECTCOM == 101 || SELECTCOM == 102
+	IF IS_MPLY(エル)
+		PRINTDATA
+			DATAFORM 「こ、こうかな」
+			DATAFORM 「……どうしようもない変態だね❤」
+			DATAFORM 「躾けてあげよう」
+		ENDDATA
+		RETURN 0
+	ENDIF
+ENDIF
+
+;自慰する・させる（触手も）
+IF SELECTCOM == 100 || SELECTCOM == 211
+	;エルがする
+	IF IS_MPLY(エル)
+		PRINTDATAL
+			DATAFORM 「んっ……ふあぁっ」
+			DATAFORM 「はああぁ……っ。見られながら……するの、いい❤」
+			DATAFORM 「んくぅ……気持ちい……あっ」
+		ENDDATA
+	;エルがエル_対象にさせる
+;	ELSE
+	ENDIF
+	RETURN 0
+ENDIF
+
+;排泄指示
+;IF GROUPMATCH(SELECTCOM, 130, 131, 132, 150, 151) && IS_MTAR(エル) && IS_INITIATIVE(エル)
+;ENDIF
+
+;─────────────────────────────────────── 
+;●実行が攻め
+;─────────────────────────────────────── 
+;捕虜逆調教（80～99）
+;IF SELECTCOM >= 80 && SELECTCOM <= 99
+; ENDIF
+
+;触手系
+; IF SELECTCOM >= 200 && SELECTCOM <= 219
+; ENDIF
+
+;不機嫌な状態で話せるのはここまで
+IF GROUPMATCH(エル機嫌, "恨", "怒", "憤", "鬱", "悲", "憂", "狂", "恐", "怯")
+	RETURN 0
+ENDIF
+
+;─────────────────────────────────────── 
+;◆機嫌が悪いと喋らない
+;─────────────────────────────────────── 
+;ペニバン装着時は汎用攻めを喋らない
+;IF SELECTCOM == 50
+;ENDIF
+
+;１対１の性交系
+IF ( IS_MPLY(エル) && ( GROUPMATCH(SELECTCOM, 30, 31, 32, 33, 34, 35, 36)||GROUPMATCH(SELECTCOM, 40, 41, 42, 43, 44, 45, 46) ) ) || ( IS_EQUIP_PLAYER(エル, 30, 31, 32, 33, 34, 35, 36) || IS_EQUIP_PLAYER(エル, 40, 41, 42, 43, 44, 45, 46) )
+	IF HAS_PENIS(エル)
+		LOCALS:0 '= CALL_DIRTY_K7("Ｐ")
+		LOCALS:1 '= ""
+	ELSE
+		LOCALS:0 '= "玩具の" + CALL_DIRTY_K7("Ｐ")
+		LOCALS:1 '= "の真似を"
+	ENDIF
+	;主導権がある
+	IF IS_INITIATIVE(エル)
+		;陥落がある
+		IF CHECK_K7("陥落", エル_対象)
+			;サド素質でたまに
+			IF GETBIT(TALENT:エル:淫乱系, 素質_淫乱_サド) && RAND:10 == 0
+				IF IS_MALE(エル_対象)
+					PRINTFORML 「女の子に犯されるのが好きなのかい？　つくづくどうしようもない人だね❤」
+				ELSE
+					PRINTFORML 「%LOCALS:0%なら何でもいいのかな？　この変態❤」
+				ENDIF
+			ELSE
+				PRINTDATAL
+					DATAFORM 「今は私の番だよ、大人しく従ってもらおう❤」
+				ENDDATA
+			ENDIF
+		;陥落がない
+		ELSE
+			;サド素質でたまに
+			IF GETBIT(TALENT:エル:淫乱系, 素質_淫乱_サド) && RAND:10 == 0
+				IF IS_MALE(エル_対象)
+					PRINTFORML 女の子に犯されるのが好きなのかい？　つくづくどうしようもない人だね❤」
+				ELSE
+					PRINTFORML 「%CALL_DIRTY_K7("Ｐ")%なら何でもいいのかい？　……Ｌこの変態」
+				ENDIF
+			ELSE
+				PRINTDATAL
+					DATAFORM 「ほらほらっ。%LOCALS:0%が好きなんだろう？」
+					DATAFORM 「ここがいいんだろう？　ほら」
+					DATAFORM 「%LOCALS:0%で気持ちよく%LOCALS:1%してあげよう❤」
+				ENDDATA
+			ENDIF
+		ENDIF
+
+	;主導権がない
+	ELSE
+		PRINTDATAL
+			DATAFORM 「あぁっ。気持ちいいっ」
+			DATAFORM 「出そう……っ！　%CALLNAME_K7(エル_対象, "ぁ")%っ……いいっ❤」
+		ENDDATA
+	ENDIF
+ENDIF
+
+;指愛撫
+IF IS_MTAR(エル) && !IS_MPLY(エル) && GROUPMATCH(SELECTCOM, 0, 1, 3, 4, 10) || IS_EQUIP_TARGET(エル, 0, 1, 3, 4, 10)
+	IF CHECK_K7("陥落", エル_対象)
+		PRINTDATAL
+			DATAFORM 「どうかい？　気持ちいいかな？」
+			DATAFORM 「指で……気持ちよくしてあげるよ❤」
+			DATAFORM 「よしよし❤　気持ちいいかい？」
+		ENDDATA
+	ELSE
+		PRINTDATAL
+			DATAFORM 「どう……かな……？　気持ちいいかい？」
+			DATAFORM 「こう……かな」
+		ENDDATA
+	ENDIF
+ENDIF
+
+;手コキ
+IF IS_MPLY(エル) && SELECTCOM == 10
+	{
+		SELECTCASE IFRAND(
+			"1",1,
+			"D1,2",CHECK_K7("陥落", エル_対象),
+			"D1,3",CHECK_K7("陥落", エル_対象) && PALAM:エル:欲情 >= 6000,
+			"D1,4",CHECK_K7("陥落", エル_対象) && PALAM:エル:欲情 >= 6000 && エル_衣装:衣装部位_下着下 != "なし",
+			"D1TO9,10",CHECK_K7("陥落", エル_対象) && IS_EQUIP(エル, 9),
+			"D1TO9,11",GETBIT(TALENT:エル:淫乱系, 素質_淫乱_淫乱) && IS_EQUIP(エル, 9),
+			"D1TO9,D10,12",GETBIT(TALENT:エル:淫乱系, 素質_淫乱_淫乱) && IS_EQUIP(エル, 9) && TALENT:エル:母乳体質 == 1,
+			)	
+	}
+		CASE 1
+			PRINTDATAL
+				DATAFORM 「どうかな……？　気持ちいいかい？」
+				DATAFORM 「こう……でいいのかな？」
+			ENDDATA
+		CASE 2
+			PRINTDATAL
+				DATAFORM 「どうかい？　気持ちいいかい？」
+				DATAFORM 「よしよし❤　気持ちいいかな？」
+				DATAFORM 「手でしてあげるから……気持ちよくなってくれたまえ……❤」
+				DATAFORM %PRINT_DESC_K7(ANAME(エル) + "が" + ANAME(エル_対象) + "のペニスを手に取りしごきあげる…")% 
+			ENDDATA
+		CASE 3
+			PRINTDATAL (LOCAL:0)
+				DATAFORM 「%CALLNAME_K7(エル_対象)%の%SPLIT_RAND("えっちな/いやらしい",1)%%CALL_DIRTY_K7("Ｐ")%、シコシコしてあげよう❤」
+				DATAFORM 「我慢しなくていいんだよ……？　好きなだけ、気持ちよくしてあげよう」
+			ENDDATA
+	;パンツ扱き
+		CASE 4
+			PRINTFORMW 「こういうのはどうかな？」
+			PRINTFORMDL %ANAME(エル)%は身に着けていた%エル_衣装:衣装部位_下着下%を%ANAME(エル_対象)%のペニスにそっと被せた
+			PRINTFORMW 「私の下着でしごいてあげよう……脱ぎたての❤」
+			CALL SET_STS_K7("特殊口上", "パンツ扱き")
+	;授乳手コキ
+		CASE 10
+			PRINTFORMDL 乳首%SPLIT_RAND("にむしゃぶりつく/を舐め回す/を口の中でねぶる",1)%%ANAME(MASTER)%のペニスを、%ANAME(エル)%が%SPLIT_RAND("優しく/おずおずと/慈しむように",1)%しごきあげる…
+			PRINTDATAL
+				DATAFORM 「よしよし❤　いい子、いい子❤」
+				DATAFORM 「そ、そんなに強く吸っちゃぁ……あぁん！」
+				DATAFORM 「ふふっ❤　まるで赤ちゃんみたいだね❤」
+				DATAFORM 「気が済むまで手でしてあげるから……気持ちよくなってよ……❤」
+			ENDDATA
+		CASE 11
+			PRINTFORMDL 乳首%SPLIT_RAND("にむしゃぶりつく/を舐め回す/を口の中でねぶる",1)%%ANAME(MASTER)%のペニスを、%ANAME(エル)%が%SPLIT_RAND("優しく/ねっとりと/撫で回すように",1)%しごきあげる…
+			PRINTDATAL
+				DATAFORM 「よしよし❤　%SPLIT_RAND("えっちな/いやらしい",1)%赤ちゃんミルク、いっぱいぴゅるぴゅるしていいんだよ❤」
+				DATAFORM 「我慢しなくていいんだよ……？　好きなだけ、気持ちよくしてあげるよ❤」
+				DATAFORM 「手でしてあげるから……%CALL_DIRTY_K7("Ｐ")%で気持ちよくなってよ……❤❤❤」
+			ENDDATA
+		CASE 12
+			PRINTFORMDL 乳首%SPLIT_RAND("にむしゃぶりつく/を舐め回す/を口の中でねぶる",1)%%ANAME(MASTER)%のペニスに、%ANAME(エル)%の華奢な指先が%SPLIT_RAND("優しく/ねっとりと絡みつくように/撫で回すように",1)%伸びる
+			PRINTDATAL
+				DATAFORM 「よしよし❤　%SPLIT_RAND("えっちな/いやらしい",1)%赤ちゃんミルク、いっぱいぴゅるぴゅるしようね❤」
+				DATAFORM 「ふふっ❤　ママのミルク飲みながら……%SPLIT_RAND("えっちな/いやらしい/とろとろの",1)%赤ちゃんミルク、いっぱいぴゅっぴゅしてね、パパ❤❤❤」
+				DATAFORM 「手でシコシコされながら、一生懸命%CALL_DIRTY_K7("Ｂ")%%SPLIT_RAND("ちゅーちゅー/ちゅるちゅる/ちゅぱちゅぱ",1)%して……%CALLNAME_K7(エル_対象)%は本当にいやらしいね❤❤❤」
+			ENDDATA
+		CASEELSE
+	ENDSELECT
+	PRINTL
+ENDIF
+
+;パイズリ
+IF IS_MPLY(エル) && SELECTCOM == 12
+	{
+		SELECTCASE IFRAND(
+			"1",1,
+			"D1,2",CHECK_K7("陥落", エル_対象),
+			"D1,3",CHECK_K7("陥落", エル_対象) &&  GET_BUSTSIZE(エル) < 0,
+			"D1TO3,4",CHECK_K7("陥落", エル_対象) &&  (CUM_GET_COUNT:(エル):射精部位_胸 > 0)
+			)
+	}
+	;通常
+		CASE 1
+			IF IS_INITIATIVE(エル)
+				PRINTDATAL
+					DATAFORM 「どうかな……？　気持ちいいかい？」
+					DATAFORM 「%CALL_DIRTY_K7("Ｂ")%で……気持ちよくなってよ」
+				ENDDATA
+			ELSE
+				PRINTDATAL
+					DATAFORM 「%CALL_DIRTY_K7("Ｂ")%で扱いて欲しい？　……仕方ないなぁ」
+					DATAFORM 「%CALL_DIRTY_K7("Ｂ")%で……？　しょうがないなぁ……」
+				ENDDATA
+			ENDIF
+	;陥落
+		CASE 2
+			IF IS_INITIATIVE(エル)
+				PRINTDATAL
+					DATAFORM 「ふふっ、%CALL_DIRTY_K7("Ｂ")%で奉仕してあげよう」
+					DATAFORM 「%CALL_DIRTY_K7("Ｂ")%で、気持ちよくなってよ」
+				ENDDATA
+			ELSE
+				PRINTDATAL
+					DATAFORM 「%CALL_DIRTY_K7("Ｂ")%で扱いて欲しい？　……仕方ないなぁ❤」
+					DATAFORM 「しょうがないなぁ❤　%CALL_DIRTY_K7("Ｂ")%で奉仕してあげるよ」
+				ENDDATA
+			ENDIF
+		CASE 3
+	;ナイズリ
+			IF IS_INITIATIVE(エル)
+				PRINTFORMDL %ANAME(エル)%は%ANAME(エル_対象)%のペニスに薄い胸板を押し当てた
+				PRINTFORMDL 早鐘のように鳴る%ANAME(エル)%の鼓動が%ANAME(エル_対象)%の亀頭を刺激する…
+				PRINTL
+				PRINTFORML 「%CALL_DIRTY_K7("Ｂ")%で扱いてあげるよ❤　おおきい……とは言えないがね」
+			ELSE
+				PRINTFORMDL %ANAME(エル_対象)%は%ANAME(エル)%の薄い胸板にペニスを押し当て、%SPLIT_RAND("扱き上げる/奉仕する/胸で気持ちよくする",1)%よう要求した
+				PRINTFORMDL 早鐘のように鳴る%ANAME(エル)%の鼓動が%ANAME(エル_対象)%の亀頭を刺激する…
+				PRINTL 
+				PRINTFORML 「ひどいなぁ……私が%CALL_DIRTY_K7("Ｂ")%のこと気にしているの、よく知っているくせに❤」
+			ENDIF
+		CASE 4
+	;ぶっかけ
+			PRINTFORMDL %SPLIT_RAND("ぢゅっ/じゅぶ/ぐちゅ/ぬちゅっ",1)%…%SPLIT_RAND("ちゅぷ/ちゅ/くちゅ/じゅるるっ",1)%……%SPLIT_RAND("ぐちゅ/ちゅっ/ぬちゅ/じゅっ",1)%……
+			IF IS_INITIATIVE(エル)
+				PRINTFORMDL %ANAME(エル)%は胸にこびりついた%SPLIT_RAND("精液/ザーメン/体液",1)%をローション代わりに、%ANAME(エル_対象)%のペニスをさらに扱き上げる…
+				PRINTL
+				PRINTFORML 「私の%CALL_DIRTY_K7("Ｂ")%でもっともっと気持ちよくなってよ❤　ほら❤」
+			ELSE
+				PRINTFORMDL 既に%SPLIT_RAND("精液/ザーメン/体液",1)%で%SPLIT_RAND("白濁した/ドロドロになった/まみれた",1)%%ANAME(エル)%の胸を、%ANAME(エル_対象)%のペニスがさらに蹂躙する…
+				PRINTL
+				PRINTFORML 「まだ汚し足りないのかい❤　まったく%CALLNAME_K7(エル_対象)%は本当に仕方ないなぁ❤」
+			ENDIF
+		CASEELSE
+	ENDSELECT
+	PRINTL
+ENDIF
+
+;足コキ
+IF IS_MPLY(エル) && GROUPMATCH(SELECTCOM, 14) || IS_EQUIP_PLAYER(エル, 14)
+	{
+		SELECTCASE IFRAND(
+			"1",1,
+			"D1,2",CHECK_K7("陥落", エル_対象),
+			"D1TO2,3",CHECK_K7("陥落", エル_対象) && (CUM_GET_COUNT:(エル):射精部位_足 > 0)
+			)
+	}
+;通常
+		CASE 1
+			PRINTDATAL
+				DATAFORM 「こう……でいいのかい……？」
+				DATAFORM 「踏んで欲しい……？　%CALLNAME_K7(エル_対象)%もなかなか救いがたいね……」
+				DATAFORM 「%CALLNAME_K7(エル_対象)%の奇特な性癖に付き合ってあげているんだ。感謝してよ、ほら」
+			ENDDATA
+;陥落
+		CASE 2
+			IF エル_衣装:衣装部位_靴下 != "なし" && RAND:2
+				PRINTDATADL
+					DATAFORM %PRINT_DESC_K7(@"%ANAME(エル)%は%エル_衣装:衣装部位_靴下%を脱ぐと、%SPLIT_RAND("足指を這わせるように/素足で/白くなめらかな足で/艶めかしい足つきで",1)%%ANAME(エル_対象)%のペニスを扱き上げる")%
+					DATAFORM %PRINT_DESC_K7(@"%ANAME(エル)%は%エル_衣装:衣装部位_靴下%で%ANAME(エル_対象)%のペニスを扱き上げる")% 
+				ENDDATA
+				PRINTL 
+			ELSEIF エル_衣装:衣装部位_靴下 == "なし" && RAND:2
+				PRINTFORMDL %PRINT_DESC_K7(@"%ANAME(エル)%は%SPLIT_RAND("足指を這わせるように/素足で/白くなめらかな足で/艶めかしい足つきで",1)%%ANAME(エル_対象)%のペニスを扱き上げる")%
+				PRINTL
+			ENDIF 
+			PRINTDATAL
+				DATAFORM 「足の指で悦ばせてあげよう」
+				DATAFORM 「踏まれるのが気持ちいいんだろう？」
+				DATAFORM 「踏んであげるよ」
+				DATAFORM 「%CALLNAME_K7(エル_対象)%にはお似合いの姿だ」
+				DATAFORM 「こうされるのが好きなんだろう？　ほら❤」
+			ENDDATA
+			IF PALAM:(エル):欲情 > PALAMLV:5 && STRFIND(エル_衣装:衣装部位_下服, "スカート") != -1 && RAND:3
+				PRINTL
+				PRINTFORMDL %SPLIT_RAND("足で奉仕されて/なめらかな白い足でペニスを扱かれ/ぐりぐりとペニスを弄ばれ",1)%悶える%ANAME(エル_対象)%の痴態を前に、%ANAME(エル)%は情欲の笑みを浮かべると、
+				PRINTFORMDL %エル_衣装:衣装部位_下服%をじらすように、ゆっくりとたくし上げる
+				PRINTL
+				PRINTDATAL
+					DATAFORM 「これで……もっと興奮してくれるかい❤」
+					DATAFORM 「ほら❤　これが見たかったんだろう❤」
+					DATAFORM 「いやしい%CALLNAME_K7(エル_対象)%にご褒美をあげよう❤」
+					DATAFORM 「ふふっ❤　%CALLNAME_K7(エル_対象)%の%CALL_DIRTY_K7("Ｐ")%、もっとかたくなったね❤　この変態❤」
+				ENDDATA	
+				IF エル_衣装:衣装部位_下着下 != "なし"
+					PRINTFORMDL ……あらわになった%エル_衣装:衣装部位_下着下%は愛液でぐっしょりと湿り気を帯びている
+				ELSE
+					PRINTFORMDL ……あらわになった秘裂は愛液でぐっしょりと湿り気を帯びている
+				ENDIF
+			ENDIF
+;ぶっかけ
+		CASE 3
+			IF エル_衣装:衣装部位_靴下 != "なし"
+				PRINTFORMDL %ONOMATOPE_PRESET_K7("足コキ_潤",1)%
+				PRINTDATAD
+					DATAFORM %ANAME(エル)%は%エル_衣装:衣装部位_靴下%にこびり付いた%SPLIT_RAND("精液/ザーメン",1)%%SPLIT_RAND("にはお構いなしに/をローション代わりに/を塗りつけるように",1)%、
+					DATAFORM %ANAME(エル)%は%SPLIT_RAND("精液/ザーメン",1)%%SPLIT_RAND("でぐちゃぐちゃになった/でドロドロになった/まみれの",1)%%エル_衣装:衣装部位_靴下%で
+				ENDDATA
+				PRINTFORMDL %ANAME(エル_対象)%のペニスをさらに扱き上げる
+				PRINTL
+				PRINTDATAL
+					DATAFORM 「%SPLIT_RAND("このはしたない/いやらしい/いやしい",1)%%CALL_DIRTY_K7("Ｐ")%はまだ満足できないのかい❤　つくづく度し難いね」
+					DATAFORM 「指先から太ももまで……すっかりドロドロだ❤　後でしっかり……綺麗にしてもらうよ」
+					DATAFORM 「まだ出し足りないのかい❤　ほらっ❤　ほらっ❤」
+					DATAFORM 「はぁ……はぁ❤　私のお気に入りの靴下が台無しじゃないか❤」
+				ENDDATA
+			ELSE
+				PRINTDATAD
+					DATAFORM %ANAME(エル)%は脚にこびり付いた%SPLIT_RAND("精液/ザーメン",1)%%SPLIT_RAND("をローション代わりに/をぬちゃぬちゃと塗りつけるように指先で",1)%
+					DATAFORM %ANAME(エル)%は%SPLIT_RAND("精液/ザーメン",1)%%SPLIT_RAND("のこびりついた/でドロドロになった/まみれの",1)%%SPLIT_RAND("指先/白い太もも/足うら",1)%で
+				ENDDATA
+				PRINTFORMDL %ANAME(エル_対象)%のペニスをさらに扱き上げる
+				PRINTL
+				PRINTDATAL
+					DATAFORM 「この%SPLIT_RAND("はしたない/いやらしい/いやしい",1)%%CALL_DIRTY_K7("Ｐ")%はまだ満足できないのかい❤　つくづく度し難いね」
+					DATAFORM 「まったく……指先から太ももまですっかりドロドロだ❤　後でしっかり……綺麗にしてもらうよ」
+					DATAFORM 「まだ出し足りないのかい❤　ほらっ❤　ほらっ❤」
+					DATAFORM 「はぁ……はぁ❤　私のお気に入りの靴下が台無しじゃないか❤」
+				ENDDATA
+			ENDIF
+			汎用攻め省略 = 1
+		CASEELSE
+	ENDSELECT
+	PRINTL
+ENDIF
+
+;髪コキ
+IF IS_MPLY(エル) && SELECTCOM == 18
+	{
+		SELECTCASE IFRAND(
+			"1",1,
+			"D1,2",CHECK_K7("陥落", エル_対象),
+			"D1TO2,3",CHECK_K7("陥落", エル_対象) &&  (CUM_GET_COUNT:(エル):射精部位_髪 > 0) && CHECK_K7("ふたりきり")
+			)
+	}
+	;通常
+		CASE 1
+			IF IS_INITIATIVE(エル)
+				PRINTDATAL
+					DATAFORM 「どうかな……？　気持ちいいかい？」
+					DATAFORM 「これはその……なんというか……」
+					DATAFORM 「その……うん、これは気持ちいいのだろうか……？」
+				ENDDATA
+			ELSE
+				PRINTDATAL
+					DATAFORM 「髪で扱いて欲しい？　……私の髪を性処理道具か何かと勘違いしているのかい……？」
+					DATAFORM 「髪で……？　いやはや……呆れる他ないよ……」
+				ENDDATA
+			ENDIF
+	;陥落
+		CASE 2
+			IF IS_INITIATIVE(エル)
+				PRINTDATADL
+					DATAFORM %ANAME(エル)%は%SPLIT_RAND("雪のように白く長い/絹のようになめらかな白い/透き通るような白さの/艶めかしく光沢を放つ白い",1)%髪を%ANAME(エル_対象)%のペニスに絡める
+					DATAFORM %ANAME(エル)%は%SPLIT_RAND("雪のように白く長い/絹のようになめらかな白い/透き通るような白さの/艶めかしく光沢を放つ白い",1)%髪を手に取り%ANAME(エル_対象)%の亀頭をくすぐる
+				ENDDATA
+				PRINTL
+				PRINTDATAL
+					DATALIST
+						DATAFORM 「髪は結構自慢なんだ」
+						DATAFORM 「それ%SPLIT_RAND("で扱いてあげる/を性欲処理に使ってあげる",1)%のだから……喜んでくれないと割に合わないね❤」
+					ENDLIST
+					DATALIST
+						DATAFORM 「こうして欲しかったのだろう？」
+						DATAFORM 「私の大事な髪で%SPLIT_RAND("抜いてあげる/扱いてあげる",1)%んだ❤　大いに感謝して欲しいね」
+					ENDLIST
+				ENDDATA
+			ELSE
+				PRINTDATADL
+					DATAFORM %ANAME(エル_対象)%は%ANAME(エル)%の%SPLIT_RAND("白く柔らかい/絹のようになめらかな/流れるような白い",1)%髪の毛を撫で、ペニスを扱くよう要求する
+					DATAFORM %ANAME(エル_対象)%は%ANAME(エル)%の%SPLIT_RAND("白く柔らかい/絹のようになめらかな/流れるような白い",1)%髪でペニスを扱いてほしいと懇願する
+				ENDDATA
+				PRINTL
+				PRINTDATAL
+					DATALIST
+						DATAFORM 「……性行為にかけての%CALLNAME_K7(エル_対象)%の発想の豊かさには毎度驚かされるよ」
+						DATAFORM 「私の大事な大事な髪を%SPLIT_RAND("オナホール/性処理道具/性器",1)%か何かと勘違いしているのかい？」
+						DATAFORM 「つくづく度し難いよ。そんな%CALLNAME_K7(エル_対象)%に付き合ってあげるのだから……後で相応の礼はしてもらおう❤」
+					ENDLIST
+					DATALIST
+						DATAFORM 「%CALLNAME_K7(エル_対象)%が私の大事な髪を%SPLIT_RAND("オナホール/性処理道具/性器",1)%と見なしているのは驚きだ」
+						DATAFORM  「けれどそれ以上に驚きなのは、私が喜々として%CALLNAME_K7(エル_対象)%の%CALL_DIRTY_K7("Ｐ")%に髪を絡めている事実だよ」
+						DATAFORM 「さて……一体どう責任をとってもらおうか……❤❤」
+					ENDLIST
+				ENDDATA
+			ENDIF
+		CASE 3
+	;ぶっかけ
+			PRINTFORMDL %ONOMATOPE_PRESET_K7("髪コキ_潤",0)%
+			IF IS_INITIATIVE(エル)
+				PRINTDATADL
+					DATAFORM %ANAME(エル)%は髪にこびりついた%SPLIT_RAND("精液/ザーメン",1)%をローション代わりに、%ANAME(エル_対象)%のペニスをさらに扱き上げる
+					DATAFORM %ANAME(エル)%は%SPLIT_RAND("精液/ザーメン",1)%まみれの髪を%ANAME(エル_対象)%のペニスに絡みつけ、更に激しく扱き上げる
+					DATAFORM %ANAME(エル)%は髪から滴る%SPLIT_RAND("精液/ザーメン",1)%を弄ぶように指に絡め、%ANAME(エル_対象)%のペニスにさらなる快楽を与える
+				ENDDATA
+				PRINTL
+				PRINTDATAL
+					DATALIST
+						DATAFORM 「どうだい？　私の%SPLIT_RAND("髪オナホ/髪/自慢の髪",1)%に%SPLIT_RAND("精液/ザーメン",1)%をぶち撒けた気分は？」
+						DATAFORM 
+						DATAFORM 「綺麗なものを汚したいと思うのは……人間の普遍的で背徳的な欲求だ。
+						DATAFORM  だから包み隠さなくていいよ……？　私の前ではね❤」
+						DATAFORM 「ねぇ、もっと汚したいのだろう？　好きなだけ%CALL_DIRTY_K7("Ｐ")%を擦り付ければいいさ」
+					ENDLIST
+					DATALIST
+						DATAFORM 「美しい絵画に思いきりペンキをぶち撒けてみたい……
+						DATAFORM  そんな背徳的な感情を抱いても思いとどまれるのは、人間に理性があるからだ」
+						DATAFORM  
+						DATAFORM 「でもこの場にそんなものが必要かな？　
+						DATAFORM  ここには%SPLIT_RAND("ひたすら享楽的な/背徳的な/本能のままに/性欲に身を任せて",1)%%SPLIT_RAND("セックス/性交/まぐわい/姦淫/快楽",1)%%SPLIT_RAND("を重ねる/に耽る/に身を委ねる",1)%、%SPLIT_RAND("淫らな/卑しい/淫猥な",1)%%SPLIT_RAND("獣/動物/生き物",1)%しかいないじゃないか❤❤」
+						DATAFORM 「だからほら……その%SPLIT_RAND("はしたない/いやらしい/いやしい",1)%%CALL_DIRTY_K7("Ｐ")%から……存分に白いペンキをぶち撒ければいい❤」
+					ENDLIST
+				ENDDATA
+			ELSE
+				PRINTDATADL
+					DATAFORM %ANAME(エル_対象)%は%SPLIT_RAND("精液/ザーメン/体液",1)%でまみれた%ANAME(エル)%の髪に一心不乱にペニスを擦り付けている
+					DATAFORM %SPLIT_RAND("精液/ザーメン/体液",1)%%SPLIT_RAND("で白濁した/でドロドロになった/でまみれた/の濃厚な精臭を放つ",1)%%ANAME(エル)%の髪に、%ANAME(エル_対象)%がペニスを擦り付ける
+					DATAFORM 淫猥な水音を立てて、髪を絡めて性器を刺激する%ANAME(エル)%に%ANAME(エル_対象)%はさらなる奉仕を要求する
+				ENDDATA
+				PRINTL
+				PRINTDATAL
+					DATALIST
+						DATAFORM 「んんっ……。はぁ❤　まったく……%CALLNAME_K7(エル_対象)%は本当にひどい人だよ」
+						DATAFORM 「私の自慢の髪をこんなにしてしまって、一体この後どうしたらいいんだい？」
+						DATAFORM 「勿論、洗うのも手伝ってくれるのだろうね？　……お風呂で、一緒にね❤」
+					ENDLIST
+					DATALIST
+						DATAFORM 「どうだい？　うら若い少女を汚して得た快楽は？」
+						DATAFORM 「さぞや心地良かっただろう？　そうでないと困るよ、自慢の髪を%SPLIT_RAND("性処理道具/オナホール",1)%代わりに差し出したのだからね❤」
+					ENDLIST
+					DATALIST
+						DATAFORM 「そんなに気持ちよさそうに擦り付けないでくれたまえ❤　自慢の髪が本当に駄目になってしまうよ」
+						DATAFORM 「口でも膣でも、使える場所は他に幾らでもあるだろう❤」
+					ENDLIST
+				ENDDATA
+			ENDIF
+			汎用攻め省略 = 1
+		CASEELSE
+	ENDSELECT
+	PRINTL
+ENDIF
+
+;─────────────────────────────────────── 
+;◆汎用攻め（コマンド番号に関わらずソースを見る）
+;─────────────────────────────────────── 
+IF 	汎用攻め省略 != 1
+	CALL TEASE_K7(エル_対象)
+ENDIF
+
+;─────────────────────────────────────── 
+;◆戻る
+;─────────────────────────────────────── 
+RETURN 0
+
+;─────────────────────────────────────── 
+;■閨_攻め_実行後
+;─────────────────────────────────────── 
+@KOJO_K7_NIGHT_AFTER_TOP(エル_対象)
+#DIM エル
+#DIM エル_対象
+#DIMS エル機嫌
+#DIM エル_表示フラグ
+#DIMS エル_最大部位称
+
+IF !エル_対象
+	エル_対象 = MASTER
+ENDIF
+
+エル = NAME_TO_CHARA("エル")
+エル機嫌 '= TOSTR_EMOTION(エル)
+
+;この辺りのDIMはSOURCE_K7系の流用
+エル_表示フラグ = 0
+エル_最大部位称 '= ""
+
+;─────────────────────────────────────── 
+;◆不機嫌
+;─────────────────────────────────────── 
+SELECTCASE エル機嫌
+	CASE "恨", "怒", "憤"
+		RETURN 0
+	CASE "鬱", "悲", "憂"
+		RETURN 0
+	CASE  "狂", "恐", "怯"
+		RETURN 0
+ENDSELECT
+
+;─────────────────────────────────────── 
+;◆不機嫌でない
+;─────────────────────────────────────── 
+;●Ｐ絶頂
+IF NOWEX:エル_対象:射精 > NOWEX:エル_対象:Ｃ絶頂 && NOWEX:エル_対象:射精 > NOWEX:エル_対象:Ｂ絶頂 && NOWEX:エル_対象:射精 > NOWEX:エル_対象:Ａ絶頂 && NOWEX:エル_対象:射精 > NOWEX:エル_対象:Ｍ絶頂 && NOWEX:エル_対象:射精 >NOWEX:エル_対象:Ｖ絶頂
+	エル_表示フラグ = 1
+	エル_最大部位称 '= CALL_DIRTY_K7("Ｐ")
+;●Ｃ絶頂
+ELSEIF NOWEX:エル_対象:Ｃ絶頂 >NOWEX:エル_対象:Ｖ絶頂 && NOWEX:エル_対象:Ｃ絶頂 > NOWEX:エル_対象:Ｂ絶頂 && NOWEX:エル_対象:Ｃ絶頂 > NOWEX:エル_対象:Ａ絶頂 && NOWEX:エル_対象:Ｃ絶頂 > NOWEX:エル_対象:Ｍ絶頂 && NOWEX:エル_対象:Ｃ絶頂 > NOWEX:エル_対象:射精
+	エル_表示フラグ = 1
+	エル_最大部位称 '= CALL_DIRTY_K7("Ｃ")
+	IF HAS_PENIS(エル_対象)
+		エル_最大部位称 '= CALL_DIRTY_K7("Ｐ")
+	ENDIF
+;●Ｖ絶頂
+ELSEIF NOWEX:エル_対象:Ｖ絶頂 > NOWEX:エル_対象:Ｃ絶頂 &&NOWEX:エル_対象:Ｖ絶頂 > NOWEX:エル_対象:Ｂ絶頂 && NOWEX:エル_対象:Ｖ絶頂 > NOWEX:エル_対象:Ａ絶頂 && NOWEX:エル_対象:Ｖ絶頂 > NOWEX:エル_対象:Ｍ絶頂 && NOWEX:エル_対象:Ｖ絶頂 > NOWEX:エル_対象:射精
+	エル_表示フラグ = 1
+	エル_最大部位称 '= CALL_DIRTY_K7("Ｖ")
+;●Ａ絶頂
+ELSEIF NOWEX:エル_対象:Ａ絶頂 > NOWEX:エル_対象:Ｃ絶頂 && NOWEX:エル_対象:Ａ絶頂 > NOWEX:エル_対象:Ｂ絶頂 && NOWEX:エル_対象:Ａ絶頂 >NOWEX:エル_対象:Ｖ絶頂 && NOWEX:エル_対象:Ａ絶頂 > NOWEX:エル_対象:Ｍ絶頂 && NOWEX:エル_対象:Ａ絶頂 > NOWEX:エル_対象:射精
+	エル_表示フラグ = 1
+	エル_最大部位称 '= CALL_DIRTY_K7("Ａ")
+;●Ｂ絶頂
+ELSEIF NOWEX:エル_対象:Ｂ絶頂 > NOWEX:エル_対象:Ｃ絶頂 && NOWEX:エル_対象:Ｂ絶頂 >NOWEX:エル_対象:Ｖ絶頂 && NOWEX:エル_対象:Ｂ絶頂 > NOWEX:エル_対象:Ａ絶頂 && NOWEX:エル_対象:Ｂ絶頂 > NOWEX:エル_対象:Ｍ絶頂 && NOWEX:エル_対象:Ｂ絶頂 > NOWEX:エル_対象:射精
+	エル_表示フラグ = 1
+	エル_最大部位称 '= CALL_DIRTY_K7("Ｂ")
+;●Ｍ絶頂
+ELSEIF NOWEX:エル_対象:Ｍ絶頂 > NOWEX:エル_対象:Ｃ絶頂 && NOWEX:エル_対象:Ｍ絶頂 > NOWEX:エル_対象:Ｂ絶頂 && NOWEX:エル_対象:Ｍ絶頂 > NOWEX:エル_対象:Ａ絶頂 && NOWEX:エル_対象:Ｍ絶頂 >NOWEX:エル_対象:Ｖ絶頂 && NOWEX:エル_対象:Ｍ絶頂 > NOWEX:エル_対象:射精
+	エル_表示フラグ = 1
+	エル_最大部位称 '= "口"
+ENDIF
+
+;エルに主導権があれば、エル_対象がなんらかの絶頂を得た場合にコメントする（調子に乗って煽る）
+IF IS_INITIATIVE(エル) && エル_表示フラグ == 1
+	;エル_対象にＰがあり、射精した場合
+	IF HAS_PENIS(エル_対象) && NOWEX:エル_対象:射精 > 0
+		PRINTDATAL
+			DATAFORM 「%CALLNAME_K7(エル_対象)%の%エル_最大部位称%、びくっびくってしているよ❤　よほど気持ちいいのだろうね？」
+			DATAFORM 「ふふっ、%エル_最大部位称%でイッちゃったみたいだね❤」
+			DATAFORM 「%エル_最大部位称%びくびくって。……すごい❤」
+			DATAFORM 「いやらしい%エル_最大部位称%、いっぱい気持ちよくしてあげよう❤」
+			DATAFORM 「ん……すごい匂い。いやらしい、むせ返るような匂いだ。たまらない❤」
+			DATAFORM 「そうそう……、好きなだけ出せばいいよ❤　もっといっぱい出したいのだろう❤？」
+			DATAFORM 「我慢しないいいよ。好きなだけ出させてあげるから❤」
+			DATAFORM 「すごい……。%CALLNAME_K7(エル_対象)%の%エル_最大部位称%どくっどくって脈打っているよ」
+			DATAFORM 「ふふっ、いっぱい出たね」
+			DATAFORM 「%エル_最大部位称%をこうして……。どう？　気持ちいいだろう？」
+			DATAFORM 「よほど溜まっていたようだね。ふふっ、すごい量だ❤」
+			DATAFORM 「空っぽになるまで……搾り取ってあげよう❤」
+			DATAFORM 「お望みならもっと%CALLNAME_K7(エル_対象)%の%エル_最大部位称%を弄ってあげよう。好きなだけ出したらいいさ」
+			DATALIST
+				DATAFORM 「ふふっ。すごく気持ちよさそうだね」
+				DATAFORM 「でも%CALLNAME_K7(エル_対象)%の%エル_最大部位称%はまだ満足できないのだろう❤？　いいよ、もっと奉仕してあげよう❤」
+			ENDLIST
+		ENDDATA
+	;エル_対象にＰがあり、射精しなかった場合
+	ELSEIF HAS_PENIS(エル_対象)
+		PRINTDATAL
+			DATAFORM 「%エル_最大部位称%、すごく気持ちよさそうだね」
+			DATAFORM 「我慢しなくていいんだよ……？　好きなだけ出せばいい」
+		ENDDATA
+	;エル_対象にＰがない場合
+	ELSE
+		PRINTDATAL
+			DATAFORM 「%CALLNAME_K7(エル_対象)%のとろとろのいやらしい液、いっぱい溢れているね❤」
+			DATAFORM 「もっと%SPLIT_RAND("はしたない/かわいい/いやらしい",1)%ところ、見せてよ❤」
+			DATAFORM 「ほら、我慢しなくていいんだよ？　%エル_最大部位称%で好きなだけイったらいい」
+			DATAFORM 「もっとその%SPLIT_RAND("はしたない/かわいい/いやらしい",1)%%エル_最大部位称%を気持ちよくしてあげよう❤」
+			DATAFORM 「とろとろでぐちゃぐちゃの%エル_最大部位称%、とっても%SPLIT_RAND("かわいい/いやらしい",1)%ね……❤」
+		ENDDATA
+	ENDIF
+	エル_表示フラグ = 0
+ELSE
+	CALL KOJO_K7_MESSAGE_AFTER(エル_対象)
+ENDIF
+
+
+;─────────────────────────────────────── 
+;◆戻る
+;─────────────────────────────────────── 
+RETURN 0
+

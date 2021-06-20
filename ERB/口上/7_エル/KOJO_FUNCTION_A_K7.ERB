@@ -112,37 +112,52 @@ ENDIF
 
 エル = NAME_TO_CHARA("エル")
 
-;〇面識
-IF 条件 == "面識"
+;面識
+SELECTCASE 条件
+	CASE  "面識"
 	;エル_対象があなたでエルと面識がある（面識を得るデイリーの発生も含む）
-	IF エル_対象 == MASTER && CFLAG:エル:面識
-		RETURNF 1
+		IF エル_対象 == MASTER && CFLAG:エル:面識
+			RETURNF 1
 	;それ以外
-	ELSE
-		RETURNF 0
-	ENDIF
-ENDIF
-
-;〇陥落
-IF 条件 == "陥落"
+		ELSE
+			RETURNF 0
+		ENDIF
+;陥落
+	CASE "陥落"
 	;エル_対象があなたで恋慕系か服従系の陥落
-	IF エル_対象 == MASTER && (IS_SLAVE(エル) || IS_LOVER(エル))
-		RETURNF 1
-	ENDIF
-ENDIF
-
-;〇活力（気力体力1/3以上または主導権持ち）
-IF 条件 == "活力"
-	IF BASE:エル:気力 > (MAXBASE:エル:気力 / 3) && BASE:エル:体力 > (MAXBASE:エル:体力 / 3)
-		RETURNF 1
-	ENDIF
-	IF IS_INITIATIVE(エル)
-		RETURNF 1
-	ENDIF
-ENDIF
+		IF エル_対象 == MASTER && (IS_SLAVE(エル) || IS_LOVER(エル))
+			RETURNF 1
+		ENDIF
+;深陥落
+	CASE "深陥落"
+	;エル_対象があなたで親愛か所有、隷属の陥落
+		IF エル_対象 == MASTER && IS_MASTER_UP(エル)
+			RETURNF 1
+		ENDIF
+;活力（気力体力1/3以上または主導権持ち）
+	CASE "活力"
+		IF BASE:エル:気力 > (MAXBASE:エル:気力 / 3) && BASE:エル:体力 > (MAXBASE:エル:体力 / 3)
+			RETURNF 1
+		ENDIF
+		IF IS_INITIATIVE(エル)
+			RETURNF 1
+		ENDIF
+;ふたりきり 行為の対象がMASTERかつ調教対象が他に誰もいない
+	CASE "ふたりきり"
+		IF (IS_MTAR(エル_対象 == MASTER) || IS_MPLY(エル_対象 == MASTER) )&& TFLAG:44 == 2
+			RETURNF 1
+		ENDIF
+ENDSELECT
 
 RETURNF 0
 
+@SET_STS_K7(KEY, PARAM)
+#DIMS KEY
+#DIMS PARAM
+エル_状態 = %DIC_SET(エル_状態, KEY, PARAM)%
+@REMOVE_STS_K7(KEY)
+#DIMS KEY
+エル_状態 = %DIC_REMOVE(エル_状態, KEY)%
 
 ;─────────────────────────────────────── 
 ;●エルの文末を決める
@@ -421,13 +436,11 @@ RETURNF 表示テキスト
 
 IF 部位 == "Ｐ"
 	IF エル_淫語頻度 != 2
-		SELECTCASE RAND:4
+		SELECTCASE RAND:3
 			CASE 1
 				表示テキスト '= エル_淫語Ｐ
 			CASE 2
 				表示テキスト '= エル_淫語Ｐ
-			CASE 3
-				表示テキスト '= "肉棒"
 			CASEELSE
 				表示テキスト '= "おちんちん"
 		ENDSELECT
@@ -484,41 +497,6 @@ ELSEIF 部位 == "Ｂ"
 	ENDIF
 ENDIF
 RETURNF 表示テキスト
-
-;●PRINTDATA文の中で口上カラーを無効にして出力
-@PRINT_DESC_K7(ARG1)
-#FUNCTIONS
-#DIMS ARG1
-#DIMS 表示テキスト
-表示テキスト '= ""
-
-PRINTFORMD %ARG1%
-RETURNF 表示テキスト
-
-;●対象が何回射精したか数えて数値で返す
-@SUM_CUM_TO_COUNT_K7(ARG1)
-#FUNCTION
-#DIM ARG1
-#DIM SUM 
-
-SUM = 0
-
-FOR COUNT, 0, CUM_SLOT_NUM
-	SUM = SUM + CUM_TO_COUNT:(ARG1):COUNT
-NEXT
-RETURNF SUM
-
-;●対象の衣装名を文字列で取得する
-@GET_CLOTH_NAME_K7(対象)
-#DIM 対象
-
-FOR LOCAL, 0, CLOTH_PART_NUM
-	CALL GET_CLOTH_NAME(LOCAL, CLOTH:(対象):LOCAL)
-	エル_衣装:LOCAL '= RESULTS
-NEXT
-RETURN 0
-
-
 
 ;─────────────────────────────────────── 
 ;●口上用の選択肢表示用関数
@@ -581,3 +559,334 @@ REDRAW SAVE_REDRAW
 SETCOLOR SAVE_COLOR
 
 RETURN RESULT
+
+;●PRINTDATA文の中で口上カラーを無効にして出力
+@PRINT_DESC_K7(ARG1)
+#FUNCTIONS
+#DIMS ARG1
+#DIMS 表示テキスト
+表示テキスト '= ""
+
+PRINTFORMD %ARG1%
+RETURNF 表示テキスト
+
+;●対象が何回射精したか数えて数値で返す
+@SUM_CUM_TO_COUNT_K7(ARG1)
+#FUNCTION
+#DIM ARG1
+#DIM SUM 
+
+SUM = 0
+
+FOR COUNT, 0, CUM_SLOT_NUM
+	SUM = SUM + CUM_TO_COUNT:(ARG1):COUNT
+NEXT
+RETURNF SUM
+
+;●対象の衣装名を文字列で取得する
+@GET_CLOTH_NAME_K7(対象)
+#DIM 対象
+
+FOR LOCAL, 0, CLOTH_PART_NUM
+	CALL GET_CLOTH_NAME(LOCAL, CLOTH:(対象):LOCAL)
+	エル_衣装:LOCAL '= RESULTS
+NEXT
+RETURN 0
+
+;GET_CLOTH_NAME_K7とセットで使用する
+@STR_CLOTH_K7(対象, 衣装部位, 状況描写オフ = 0)
+#FUNCTIONS
+#DIM 衣装部位
+#DIM 状況描写オフ
+#DIM 対象
+
+SELECTCASE 衣装部位
+	CASE 衣装部位_下着下
+		IF 状況描写オフ == 0
+			IF PALAM:対象:潤滑 >= PALAMLV:5
+				LOCALS:0 = %SPLIT_RAND("ぐっしょりと濡れた/愛液をたっぷりと含んだ",1)%
+			ELSEIF PALAM:対象:潤滑 >= PALAMLV:3
+				LOCALS:0 = %SPLIT_RAND("愛液で濡れた/ねっとりと湿った",1)%
+			ELSEIF PALAM:対象:潤滑 >= PALAMLV:2
+				LOCALS:0 = %SPLIT_RAND("薄っすらと湿った/かすかに湿り気を帯びた",1)%
+			ENDIF
+		ENDIF 
+		LOCALS:0 += エル_衣装:衣装部位_下着下
+	CASEELSE
+ENDSELECT
+RETURNF LOCALS:0
+
+;─────────────────────────────────────── 
+;オノマトペ生成用のプリセット
+; 第1引数は呼出す際のシチュエーション
+; 第2引数 平仮名 = 0, カナ = 1
+; 第3引数 ハート無し = 1　ハートマークをつけたくない時に
+; @ONOMATOPE_K7()のメモ
+; 第2 ~ 6引数は0~10で指定
+; 濁音、促音、付帯音、端音、テンポ
+;─────────────────────────────────────── 
+@ONOMATOPE_PRESET_K7(種類,カナ,ハート無し)
+#FUNCTIONS
+#DIMS 種類
+#DIM カナ
+#DIM ハート無し
+
+
+#DIMS 表示テキスト
+表示テキスト '= ""
+
+SELECTCASE 種類
+	CASE "くちゅ音短"
+		表示テキスト '= ONOMATOPE_K7(@"%SPLIT_RAND("くちゅ/ちゅっ/ぬちゅ",1)%/%SPLIT_RAND("くちゅ/ぬちゃ/ちゅぷ",1)%/%SPLIT_RAND("ちゅっ/じゅっ/ぬちゅ",1)%",5,8,1,1,0,カナ,ハート無し)
+	CASE "くちゅ音長"
+		表示テキスト '= ONOMATOPE_K7(@"%SPLIT_RAND("くちゅ/ちゅっ/ぬちゅ",1)%/%SPLIT_RAND("くちゅ/ぬちゃ/ちゅぷ",1)%/%SPLIT_RAND("ちゅっ/じゅっ/ぬちゅ",1)%",5,8,1,1,0,カナ,ハート無し)
+		表示テキスト '= ARRANGE_ARG_K7(表示テキスト,"文中") ;音節の末尾を整形
+		表示テキスト += ONOMATOPE_K7(@"%SPLIT_RAND("くちゅ/ちゅっ/ぬちゅ",1)%/%SPLIT_RAND("くちゅ/ぬちゃ/ちゅぷ",1)%/%SPLIT_RAND("ちゅく/くちゅ/ぬちゅ",1)%",5,3,1,5,0,カナ,ハート無し)
+	CASE "足コキ_潤"
+		表示テキスト '= ONOMATOPE_K7(@"%SPLIT_RAND("ぐじゅ/じゅっ/ぬちゅ",1)%/%SPLIT_RAND("しゅる/じゅる！/ぬちゅ",1)%/%SPLIT_RAND("ちゅる/じゅっ/ぬちゅ",1)%",5,8,5,1,1,カナ,ハート無し)
+		表示テキスト '= ARRANGE_ARG_K7(表示テキスト,"文中") ;音節の末尾を整形
+		表示テキスト += ONOMATOPE_K7(@"%SPLIT_RAND("ぐじゅ/じゅっ❤/ぬちゅ",1)%/%SPLIT_RAND("ぐじゅ！/じゅる❤/ぬちゅ",1)%/%SPLIT_RAND("ちゅる❤/じゅっ/ぬちゅ❤",1)%",5,3,5,5,0,カナ,ハート無し)
+	CASE "髪コキ_潤"
+		表示テキスト '= ONOMATOPE_K7(@"%SPLIT_RAND("しゅる/しゅっ/しゅる",1)%/%SPLIT_RAND("しゅる！/じゅる❤/ぬちゅ/",1)%/%SPLIT_RAND("しゅっ/じゅっ/しゅる❤/",1)%",2,5,7,1,1,カナ,ハート無し)
+		表示テキスト '= ARRANGE_ARG_K7(表示テキスト,"文中") ;音節の末尾を整形
+		表示テキスト += ONOMATOPE_K7(@"%SPLIT_RAND("しゅる/じゅっ❤/ぬちゅ",1)%/%SPLIT_RAND("じゅる❤/しゅる/ぬちゅ",1)%/%SPLIT_RAND("しゅる❤/じゅっ/ぬちゅ❤",1)%",2,5,7,1,1,カナ,ハート無し)
+	CASEELSE
+ENDSELECT
+
+RETURNF 表示テキスト
+
+;─────────────────────────────────────── 
+;機械的に生成した文字列を接続する際、文として自然になるように整形して返す
+; 第二引数は"文中"か"文末"を指定(未実装)
+;─────────────────────────────────────── 
+@ARRANGE_ARG_K7(文字列,位置)
+#FUNCTIONS 
+#DIMS 文字列
+#DIMS 位置
+;末尾が以下の文字に該当する場合は処理しない
+#DIMS CONST 区切り文字 = "…、。！❤♥♪"
+
+STRLENFORMU %文字列%
+LOCAL:0 = RESULT
+IF STRFINDU(区切り文字, SUBSTRINGU(文字列, LOCAL:0 - 1, LOCAL:0) ) == -1
+	文字列 '= 文字列 + "、"
+ENDIF
+
+RETURNF 文字列
+;─────────────────────────────────────── 
+;与えられた4文字までの文字列をもとにオノマトペを生成し文字列を返す
+; ・文字列は平仮名で指定
+; ・文字列は"/"で区切り3候補まで指定可
+; ・４文字目は記号指定にのみ使用(！❤♥♪)
+; ・第2 ~ 6引数は0~10で指定
+; ・濁音頻度	1文字目が清音の場合どの程度濁音に置換するか
+; ・促音頻度	"っ"をどの程度付加するか
+; ・付帯音頻度	3文字が"る"の時に音を足す。びゅるるっ
+; ・端音頻度	3文字目をどの程度の頻度で出力するか
+; ・テンポ　通常 = 0,2個以上の3点リーダを付加しない = 1
+; ・カナ 平仮名 = 0 カタカナ = 1
+; ・ハート無し = 1 でハートマークを追加しない
+;─────────────────────────────────────── 
+@ONOMATOPE_K7(文字列, 濁音頻度, 促音頻度, 付帯音頻度, 端音頻度, テンポ, カナ, ハート無し = 0)
+#FUNCTIONS
+#DIMS 文字列
+#DIM テンポ
+#DIM カナ
+#DIM ハート無し
+
+#DIMS 表示テキスト, 2
+#DIM 表示テキスト文字数
+#DIMS 基本音, 3 
+#DIM 候補数
+#DIMS 選択基本音
+#DIM 濁音頻度
+#DIM 促音頻度
+#DIM 付帯音頻度
+#DIM 端音頻度
+
+#DIM 子音
+#DIM 促音フラグ
+#DIM 濁音フラグ
+#DIM 端音フラグ
+
+#DIMS CHAR, 4
+#DIM  CNT_A
+#DIM  CNT_B
+
+#DIMS CONST 濁音変換候補 = "くしちぴ"
+#DIMS CONST 濁音変換対応文字列 = "ぐじぢび"
+#DIMS CONST 拗音表 = "ゃゅょ"
+#DIMS CONST 半濁音表, 3 = "ぱ","ぷ","ぽ"
+#DIMS CONST 付帯音表, 3 = "る","るっ","るぅ"
+#DIMS CONST 記号表 = "！❤♥♪"
+
+候補数 = 0
+VARSET 表示テキスト, ""
+
+;生成のベースとする基本音を配列に格納
+SPLIT 文字列, "/", 基本音
+FOR CNT_A, 0, 3
+	IF 基本音:CNT_A == ""
+		ARRAYREMOVE 基本音, CNT_A, 1
+	ENDIF
+NEXT
+FOR CNT_A, 0, 3
+	SIF 基本音:CNT_A != ""
+		候補数 += 1
+NEXT
+
+
+FOR CNT_A, 0, 候補数
+	VARSET CHAR:0, ""
+	選択基本音 '= 基本音:CNT_A 
+	促音フラグ = 0
+	濁音フラグ = 0
+	端音フラグ = 0
+
+	FOR CNT_B, 0, STRLENSU(選択基本音)
+		CHAR:(CNT_B) '= SUBSTRINGU(選択基本音, CNT_B, 1) 
+	NEXT
+
+	;1文字目の処理
+	;特定の文字のみ確率で濁音に変換する
+	LOCAL = STRFINDU(濁音変換候補, CHAR:0) 
+	IF RAND:10 <　濁音頻度 && LOCAL != -1
+		CHAR:0 '= CHARATU(濁音変換対応文字列,LOCAL)
+		SIF STRFINDU(濁音変換対応文字列, CHAR:0) != -1
+			濁音フラグ = 1
+	ENDIF
+	表示テキスト '= 表示テキスト + CHAR:0
+
+
+	表示テキスト '= 表示テキスト + CHAR:1
+	;基本音の2音目が拗音（ゃ、ゅ、ょ）以外の場合;確率で2音目の後に促音（っ）を付加
+	IF STRFINDU(拗音表, CHAR:1) != -1 && FINDELEMENT(付帯音表, CHAR:1) != -1 
+		IF RAND:10 < 促音頻度
+			表示テキスト '= 表示テキスト + "っ"
+			促音フラグ = 1
+		ENDIF
+	ELSE
+		;例えば「ちゅぱ」と「くちゅ」では3文字目の処理を変えないと不自然になるのでこのフラグで制御する
+		端音フラグ = 1
+	ENDIF
+
+	;３音目の処理
+	;確率で３文字目を消去
+	;子音をランダムでずらす。ex.ちゅぷ -> ちゅぱ or ちゅぽ
+	{
+		SELECTCASE IFRAND(
+			"99",1,
+			"D99,1", 端音フラグ == 1,
+			"D99,1",RAND:10 < (端音頻度 && 濁音フラグ != 1) && 端音フラグ != 1
+			)
+	}
+		CASE 1
+			IF FINDELEMENT(半濁音表, CHAR:2) != -1
+				子音 = FINDELEMENT(半濁音表, CHAR:2)
+				IF 子音 != -1 && RAND:3 
+					IF 子音　== 1
+						IF RAND:3 
+							子音 += 1
+						ELSEIF RAND:2
+							子音 -= 1
+						ENDIF
+					ELSEIF 子音 == 0
+						SIF RAND:3 
+							子音 += 1
+					ELSEIF 子音 != 0
+						SIF RAND:3 
+							子音 -= 1
+					ENDIF
+				ENDIF
+				CHAR:2 '= 半濁音表:子音 
+			ENDIF
+			表示テキスト '= 表示テキスト + CHAR:2
+		CASEELSE
+	ENDSELECT 
+
+	;3文字目以降に付帯する音の処理(る、るる)
+	IF FINDELEMENT(付帯音表, CHAR:2) != -1 && 促音フラグ == 0  ;ちゅっるるのような音は不自然なので出現しないように
+		IF RAND:10 < 付帯音頻度
+			表示テキスト '= 表示テキスト + SPLIT_RAND(@"%付帯音表:0%/%付帯音表:1%/%付帯音表:2%",1)
+		ENDIF
+	ENDIF
+	;確率で末尾に促音を負荷
+	IF RAND:10 < 促音頻度 && 促音フラグ == 0
+		表示テキスト '= 表示テキスト + SPLIT_RAND("っ/っ/っ/っ/っっ",1)
+		促音フラグ = 1
+	ENDIF
+
+	;4文字目が存在しない場合、句点か三点リーダを付加
+	IF CHAR:3 == ""
+		;テンポに応じて三点リーダの量を調整する
+		IF テンポ == 0;通常
+			表示テキスト '= 表示テキスト + SPLIT_RAND("、/、/、/…/…/……/……/……/……………",1)
+		ELSE ;早い(二個以上の三点リーダを打たない)
+			表示テキスト '= 表示テキスト + SPLIT_RAND("/、/、/…/…/…/……/……",1)
+		ENDIF
+	ENDIF 
+	;4文字目の処理
+	;特定の記号が指定さている場合は0～3個つける
+	IF  CHAR:3 != ""
+		IF (CHAR:3 == "❤" || CHAR:3 == "♥") && ハート無し != 1
+			表示テキスト '= 表示テキスト + SPLIT_RAND("、/、/❤/❤/❤/…❤/……❤/……❤/❤❤/…❤❤/……❤❤/❤❤❤",1)
+		ELSEIF FINDELEMENT(記号表, CHAR:3) != -1 
+			表示テキスト '= 表示テキスト + SPLIT_RAND(@"、/、/%CHAR:3%/%CHAR:3%/%CHAR:3%%CHAR:3%",1)
+		ENDIF
+		IF CNT_A:0 < 候補数 - 1 
+			IF テンポ == 0;通常
+				表示テキスト '= 表示テキスト + SPLIT_RAND("/…/……/……/…………",1)
+			ELSE
+				表示テキスト '= 表示テキスト + SPLIT_RAND("//…/…/…/……/……",1)
+			ENDIF
+
+		ENDIF
+	ENDIF
+	;音節の末尾に応じた処理
+	STRLENFORMU %表示テキスト%
+	表示テキスト文字数 = RESULT
+	IF SUBSTRINGU(表示テキスト, 表示テキスト文字数 - 1, 表示テキスト文字数) == "っ"
+		表示テキスト '= 表示テキスト + "、"
+	ENDIF
+NEXT
+
+;生成文字列の末尾が句点なら除去
+STRLENFORMU %表示テキスト%
+表示テキスト文字数 = RESULT
+IF SUBSTRINGU(表示テキスト,  表示テキスト文字数 - 1, 表示テキスト文字数) == "、"
+	表示テキスト '= SUBSTRINGU(表示テキスト,0 , 表示テキスト文字数 - 1)
+ENDIF
+
+IF カナ == 1
+	表示テキスト = %TOKANA_K7(表示テキスト)%
+ENDIF
+
+RETURNF 表示テキスト
+
+
+;●平仮名カナ変換
+@TOKANA_K7(ARGS:0)
+#FUNCTIONS 
+#DIMS CONST 平仮名対応表 	= "ぁあぃいぅうぇえぉおかがきぎくぐけげこごさざしじすずせぜそぞただちぢっつづてでとどなにぬねのはばぱひびぴふぶぷへべぺほぼぽまみむめもゃやゅゆょよらりるれろゎわゐゑをん"
+#DIMS CONST カナ対応表	= "ァアィイゥウェエォオカガキギクグケゲコゴサザシジスズセゼソゾタダチヂッツヅテデトドナニヌネノハバパヒビピフブプヘベペホボポマミムメモャヤュユョヨラリルレロヮワヰヱヲン"
+
+#DIM CNT_A	
+#DIM IDX
+#DIMS 対象文字　
+#DIMS 変換後文字列
+
+対象文字 '= ""
+変換後文字列 '= "" 
+
+FOR CNT_A, 0, STRLENSU(ARGS:0)
+	対象文字 '= SUBSTRINGU(ARGS:0, CNT_A, 1)
+	IDX = STRFINDU(平仮名対応表, 対象文字)
+	IF IDX != -1 
+		対象文字 '= CHARATU(カナ対応表, IDX)
+	ENDIF
+	変換後文字列 '= 変換後文字列 + 対象文字
+NEXT
+変換後文字列 '= 変換後文字列
+
+RETURNF 変換後文字列
+

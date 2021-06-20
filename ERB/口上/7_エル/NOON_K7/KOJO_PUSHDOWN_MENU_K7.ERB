@@ -1,0 +1,110 @@
+﻿;─────────────────────────────────────── 
+;●押し倒すから呼ばれるシチュエーション設定関数
+;─────────────────────────────────────── 
+@KOJO_K7_SERVICE(エル, エル_対象, 奉仕内容)
+#DIM エル
+#DIM エル_対象
+#DIMS 奉仕内容
+
+FLAG:調教モード = 5
+FLAG:閨逆調教 = 1
+
+SELECTCASE 奉仕内容
+    CASE "口"
+        CALL K7_SERVICE_BLOWJOB(エル)
+    CASE "足"
+        CALL K7_SERVICE_FOOTJOB(エル)
+    CASE "自慰"
+        CALL K7_SERVICE_SELF(エル)
+    CASE "触れ合い"
+        CALL K7_SERVICE_TENDER(エル)
+    CASEELSE
+        RETURN
+ENDSELECT
+RETURN 
+
+;-------------------------------------------------
+@K7_SERVICE_SELF(エル)
+#DIM エル
+CALL COMMON_SAVE_COM_TENDENCY(エル)
+VARSET COM_TENDENCY:エル:0, -1
+ITEM:A_ローター = 1
+ITEM:A_バイブ = 1
+ITEM:A_アナルバイブ = 1
+ITEM:A_双頭バイブ = 1
+COM_TENDENCY:エル:GETNUM(TRAINNAME, "Ｃ自慰") = 3
+COM_TENDENCY:エル:GETNUM(TRAINNAME, "オナホ自慰") = 3
+COM_TENDENCY:エル:GETNUM(TRAINNAME, "秘貝開帳") = 2
+COM_TENDENCY:エル:GETNUM(TRAINNAME, "指フェラ") = 2
+COM_TENDENCY:エル:GETNUM(TRAINNAME, "おねだり") = 1
+
+;露出系コマンドは主導度Ｕが低いと自動実行されないため主導度Ｕを一時変更
+エル_変更前夜主導度 = ABL:エル:主導度Ｕ
+エル_変更前倒錯度 = ABL:エル:倒錯度
+ABL:エル:主導度Ｕ = -600
+ABL:エル:倒錯度 = 600
+CALL ADD_EVENTEND_CALLEE("K7_TRAIN_END_STATUS_CHANGED")
+
+
+;-------------------------------------------------
+@K7_SERVICE_BLOWJOB(エル)
+#DIM エル
+CALL COMMON_SAVE_COM_TENDENCY(エル)
+VARSET COM_TENDENCY:エル:0, -1
+COM_TENDENCY:エル:GETNUM(TRAINNAME, "フェラチオ") = 3
+COM_TENDENCY:エル:GETNUM(TRAINNAME, "Ｃ自慰") = 1
+COM_TENDENCY:エル:GETNUM(TRAINNAME, "パイズリ") = 1
+COM_TENDENCY:エル:GETNUM(TRAINNAME, "手コキ") = 2
+COM_TENDENCY:エル:GETNUM(TRAINNAME, "玉揉み") = 2
+COM_TENDENCY:エル:GETNUM(TRAINNAME, "亀頭責め手コキ") = 2
+COM_TENDENCY:エル:GETNUM(TRAINNAME, "亀頭責めフェラ") = 3
+COM_TENDENCY:エル:GETNUM(TRAINNAME, "イラマチオ") = 2
+IF HAS_PENIS(MASTER)
+    COM_TENDENCY:エル:GETNUM(TRAINNAME, "クンニ") = 3
+ENDIF
+CALL ADD_EVENTEND_CALLEE("K7_TRAIN_END")
+
+;-------------------------------------------------
+@K7_SERVICE_TENDER(エル)
+#DIM エル
+CALL COMMON_SAVE_COM_TENDENCY(エル)
+VARSET COM_TENDENCY:エル:0, -1
+COM_TENDENCY:エル:GETNUM(TRAINNAME, "キス") = 3
+COM_TENDENCY:エル:GETNUM(TRAINNAME, "愛撫") = 2
+COM_TENDENCY:エル:GETNUM(TRAINNAME, "胸愛撫") = 2
+
+CALL ADD_EVENTEND_CALLEE("K7_TRAIN_END")
+
+;-------------------------------------------------
+@K7_SERVICE_FOOTJOB(エル)
+#DIM エル
+CALL SET_COM_KNOWLEDGE(エル, GETNUM(TRAINNAME, "足コキ"))
+CALL COMMON_SAVE_COM_TENDENCY(エル)
+VARSET COM_TENDENCY:エル:0, -1
+COM_TENDENCY:エル:14 = 3
+COM_TENDENCY:エル:GETNUM(TRAINNAME, "足コキ") = 3
+COM_TENDENCY:エル:GETNUM(TRAINNAME, "Ｃ自慰") = 1
+
+;加虐系コマンドは主導度Ｕが低いと自動実行されないため主導度Ｕを一時変更
+エル_変更前夜主導度 = ABL:エル:主導度Ｕ
+エル_変更前倒錯度 = ABL:エル:倒錯度
+ABL:エル:主導度Ｕ = 600
+ABL:エル:倒錯度 = 600
+CALL ADD_EVENTEND_CALLEE("K7_TRAIN_END_STATUS_CHANGED")
+
+;-------------------------------------------------
+;書き換えたCOM_TENDENCYをリセット
+;-------------------------------------------------
+@EVENTEND_K7_TRAIN_END
+#DIM エル
+エル = NAME_TO_CHARA("エル")
+;エルのCOM_TENDENCYをを戻す
+CALL COMMON_LOAD_COM_TENDENCY(エル)
+
+@EVENTEND_K7_TRAIN_END_STATUS_CHANGED
+#DIM エル
+エル = NAME_TO_CHARA("エル")
+;エルのCOM_TENDENCYをを戻す
+CALL COMMON_LOAD_COM_TENDENCY(エル)
+ABL:エル:主導度Ｕ = エル_変更前夜主導度
+ABL:エル:倒錯度 = エル_変更前倒錯度
