@@ -37,7 +37,7 @@ PRINTW …………
 PRINTW ……
 CALL GROUND_BATTLE_INIT
 PRINTFORML 「まずは師団テンプレートの編成から始めましょう」
-PRINTFORMW 「とりあえず歩兵 自動車化 戦車師団それぞれ用意しましょう」
+PRINTFORMW 「とりあえず対空 対装甲を意識した師団をそれぞれ用意した上で 好きな師団も足していきましょう」
 PRINTL
 PRINTFORML 「私のおすすめはもちろん戦車師団です」
 PRINTFORML 「装甲が敵の対装甲より高いと、ダメージを1/8にできますよ」
@@ -48,6 +48,7 @@ CALL GB_DEFINE_TOTAL_COST(GB_防御側, 1000000)
 CALL GB_DEFINE_AIRCRAFT(GB_攻撃側, 1000)
 CALL GB_DEFINE_AIRCRAFT(GB_防御側, 1000)
 CALL GB_ADD_BATTLE_FRONT("首都")
+CALL GB_ADD_BATTLE_FRONT("副都市")
 CALL GB_ADD_BATTLE_FRONT("研究都市")
 PRINTFORML 「次は事前準備のフェーズですね」
 PRINTFORML 「[師団配置]から各戦線の前線 予備 待機に師団を配置してください」

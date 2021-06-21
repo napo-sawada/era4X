@@ -35,7 +35,7 @@ ELSE
   勝利確定前線数 = 勝利確定前線数 / 2
 ENDIF
 
-CALL GB_REGISTER_DIVISION_TEMPLATE(20, "民兵師団", 熟練度_民兵, 師団_歩兵師団, 装備_B, 支援大隊_補給大隊)
+CALL GB_REGISTER_DIVISION_TEMPLATE(20, "民兵師団", 熟練度_民兵, 師団_機械化歩兵師団, 装備_B, 支援大隊_補給大隊)
 CALL GB_REGISTER_DIVISION_TEMPLATE(21, "中戦車師団", 熟練度_正規兵, 師団_戦車師団, 装備_B, 支援大隊_砲兵大隊)
 CALL GB_REGISTER_DIVISION_TEMPLATE(22, "重戦車師団", 熟練度_正規兵, 師団_戦車師団, 装備_A, 支援大隊_機械化大隊)
 CALL GB_BATTLE_FRONT_RANDOM_PICK(勝利確定前線数, 突破前線リスト)
@@ -119,6 +119,8 @@ WHILE _選択数 > 0
   FOR LOCAL, 0, 最大戦線数
     SIF !_選択数
       BREAK
+    SIF 戦線名:LOCAL == 非アクティブ戦線名
+      CONTINUE
     IF 戦線名 != 非アクティブ戦線名 && !前線一覧:LOCAL && RAND:_選択数 == 0
       前線一覧:LOCAL = 1
       _選択数--
