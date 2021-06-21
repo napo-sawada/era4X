@@ -36,7 +36,8 @@ ELSE
 ENDIF
 
 CALL GB_REGISTER_DIVISION_TEMPLATE(20, "民兵師団", 熟練度_民兵, 師団_歩兵師団, 装備_B, 支援大隊_補給大隊)
-CALL GB_REGISTER_DIVISION_TEMPLATE(21, "戦車師団", 熟練度_正規兵, 師団_戦車師団, 装備_B, 支援大隊_砲兵大隊)
+CALL GB_REGISTER_DIVISION_TEMPLATE(21, "中戦車師団", 熟練度_正規兵, 師団_戦車師団, 装備_B, 支援大隊_砲兵大隊)
+CALL GB_REGISTER_DIVISION_TEMPLATE(22, "重戦車師団", 熟練度_正規兵, 師団_戦車師団, 装備_A, 支援大隊_機械化大隊)
 CALL GB_BATTLE_FRONT_RANDOM_PICK(勝利確定前線数, 突破前線リスト)
 
 ; 前線を埋める
@@ -48,7 +49,7 @@ FOR LOCAL, 0, 最大戦線数
   IF 突破前線リスト:LOCAL
     CALL DIVISION_PLACEMENT_FROM_TEMPLATE(21, _陣営, LOCAL, 前線配置_前線)
     CALL DIVISION_PLACEMENT_FROM_TEMPLATE(21, _陣営, LOCAL, 前線配置_前線)
-    CALL DIVISION_PLACEMENT_FROM_TEMPLATE(21, _陣営, LOCAL, 前線配置_前線)
+    CALL DIVISION_PLACEMENT_FROM_TEMPLATE(22, _陣営, LOCAL, 前線配置_前線)
     CALL DIVISION_PLACEMENT_FROM_TEMPLATE(20, _陣営, LOCAL, 前線配置_前線)
     CALL DIVISION_PLACEMENT_FROM_TEMPLATE(20, _陣営, LOCAL, 前線配置_前線)
   ELSE
@@ -94,9 +95,13 @@ WHILE GET_GB_TURN_COST_BY_SIDE(_陣営) * 250 < GB_COST:_陣営
       CONTINUE
     IF 突破前線リスト:LOCAL
       CALL DIVISION_PLACEMENT_FROM_TEMPLATE(20, _陣営, LOCAL, _ITER % 2 ? 前線配置_待機 # 前線配置_予備)
+      CALL DIVISION_PLACEMENT_FROM_TEMPLATE(20, _陣営, LOCAL, _ITER % 2 ? 前線配置_待機 # 前線配置_予備)
       CALL DIVISION_PLACEMENT_FROM_TEMPLATE(21, _陣営, LOCAL, _ITER % 2 ? 前線配置_待機 # 前線配置_予備)
       CALL DIVISION_PLACEMENT_FROM_TEMPLATE(21, _陣営, LOCAL, _ITER % 2 ? 前線配置_待機 # 前線配置_予備)
+      CALL DIVISION_PLACEMENT_FROM_TEMPLATE(22, _陣営, LOCAL, _ITER % 2 ? 前線配置_待機 # 前線配置_予備)
     ELSE
+      CALL DIVISION_PLACEMENT_FROM_TEMPLATE(20, _陣営, LOCAL, _ITER % 2 ? 前線配置_待機 # 前線配置_予備)
+      CALL DIVISION_PLACEMENT_FROM_TEMPLATE(20, _陣営, LOCAL, _ITER % 2 ? 前線配置_待機 # 前線配置_予備)
       CALL DIVISION_PLACEMENT_FROM_TEMPLATE(20, _陣営, LOCAL, _ITER % 2 ? 前線配置_待機 # 前線配置_予備)
       CALL DIVISION_PLACEMENT_FROM_TEMPLATE(20, _陣営, LOCAL, _ITER % 2 ? 前線配置_待機 # 前線配置_予備)
       CALL DIVISION_PLACEMENT_FROM_TEMPLATE(20, _陣営, LOCAL, _ITER % 2 ? 前線配置_待機 # 前線配置_予備)
