@@ -47,7 +47,7 @@ IF CFLAG:200 == 0
 		;それ以外の場合
 		ELSE
 			PRINTFORML 
-			PRINTFORML 　「母上よ、私（ワレラ）とまぐわう気になったかあ？　ン？」
+			PRINTFORML 　「\@IS_MALE(MASTER) ? 父上 # 母上 \@よ、私（ワレラ）とまぐわう気になったかあ？　ン？」
 			PRINTFORML 　クツクツと%ANAME(対象)%は嗤っている。
 			PRINTFORMW 
 		ENDIF
@@ -62,9 +62,9 @@ IF CFLAG:200 == 0
 ELSEIF (CFLAG:200 < 7) && (TALENT:正妻 || TALENT:妾)
 	;婚姻した次の回フラグ
 	CFLAG:200 = 7
-	PRINTFORML 　「母上、指輪を送られたからには次にすることは決まっておるだろう？」
+	PRINTFORML 　「\@IS_MALE(MASTER) ? 父上 # 母上 \@、指輪を送られたからには次にすることは決まっておるだろう？」
 	PRINTFORML 　「――そう！　子作りに他ならぬ！」
-	PRINTFORM 　「早速母上にも
+	PRINTFORM 　「早速\@IS_MALE(MASTER) ? 父上 # 母上 \@にも
 	SELECTCASE TALENT:MASTER:性別
 		CASE 1
 			PRINTFORML 　生やして殖えようぞ！　さあ！　いざ！」
@@ -102,14 +102,14 @@ ELSEIF CFLAG:200 < 4 && TALENT:恋人
 	CFLAG:200 = 4
 	;恋慕時の台詞。思いつかなければ「それ以外」と一緒でよい
 	IF TALENT:恋慕
-		PRINTFORML 　「分かっておるだろうが母上、私と母上はいずれ分たれるもの」
+		PRINTFORML 　「分かっておるだろうが\@IS_MALE(MASTER) ? 父上 # 母上 \@、私と\@IS_MALE(MASTER) ? 父上 # 母上 \@はいずれ分たれるもの」
 		PRINTFORML 　「それはそうとして私（ワレラ）とお互いに孕むぞお！」
 		PRINTFORML 　「少なくとも私（ワレラ）にはその準備がある！」
 		PRINTFORMW 
 	;それ以外
 	ELSE
 		PRINTFORML 　「……」
-		PRINTFORML 　「ハテ、何を言うべきか忘れてしまったよ母上」
+		PRINTFORML 　「ハテ、何を言うべきか忘れてしまったよ\@IS_MALE(MASTER) ? 父上 # 母上 \@」
 		PRINTFORMW 
 	ENDIF
 
@@ -122,7 +122,7 @@ ELSEIF CFLAG:200 < 3 && CFLAG:250 == 1
 ;既成事実Lv0で恋慕
 ELSEIF CFLAG:200 < 2 && !TALENT:恋人 && TALENT:恋慕 && !TALENT:合意 && CFLAG:250 < 1
 	CFLAG:200 = 2
-	PRINTFORML 　「母上は何時まで私（ワレラ）を待たせる気だあ？　ン？」
+	PRINTFORML 　「\@IS_MALE(MASTER) ? 父上 # 母上 \@は何時まで私（ワレラ）を待たせる気だあ？　ン？」
 	PRINTFORMW 
 
 ;-------------------------------------------------
@@ -143,8 +143,8 @@ ELSEIF TALENT:親愛 || TALENT:隷属 || TALENT:正妻 || TALENT:妾
 			PRINTFORMW 
 		CASE 1
 			PRINTFORML 　「ン？　私の部屋で見慣れぬ子どもを見た？」
-			PRINTFORML 　「アレは母上の細胞と私（ワレラ）の細胞を組み合わせた独立した端末よ」
-			PRINTFORML 　「今度まとめて母上にも抱かせてやろうか？　ン？」
+			PRINTFORML 　「アレは\@IS_MALE(MASTER) ? 父上 # 母上 \@の細胞と私（ワレラ）の細胞を組み合わせた独立した端末よ」
+			PRINTFORML 　「今度まとめて\@IS_MALE(MASTER) ? 父上 # 母上 \@にも抱かせてやろうか？　ン？」
 			PRINTFORML 　くつくつと%ANAME(対象)%は嗤っている……。
 			PRINTFORMW 
 		CASE 2
@@ -165,19 +165,19 @@ ELSEIF TALENT:合意
 				PRINTFORML 　「縺ゅ▲　縺ｾ縺�蟋ｿ繧定ｦ九○縺｡繧��＞縺代↑縺��ｓ縺�縺｣縺�！」
 				PRINTFORML 　%ANAME(対象)%の面影のある子供は慌ててテレポートでどこかへ姿を消してしまった。
 				PRINTFORMW 
-				PRINTFORML 　「どうした母上、鳩が豆鉄砲でも食った様な顔をして」
+				PRINTFORML 　「どうした\@IS_MALE(MASTER) ? 父上 # 母上 \@、鳩が豆鉄砲でも食った様な顔をして」
 				PRINTFORML 　「何？　私（ワレラ）にそっくりな子供がいた？」
-				PRINTFORML 　「何を言うておるのだ母上。子供が欲しいなら疾く寝室に行こうではないか」
+				PRINTFORML 　「何を言うておるのだ\@IS_MALE(MASTER) ? 父上 # 母上 \@。子供が欲しいなら疾く寝室に行こうではないか」
 				PRINTFORML 　あれは一体なんだったのだろう……。
 				PRINTFORMW 
 			CASE 1
-				PRINTFORML 　「母上、子供は１０人と言わずに１億人ほど拵えようではないか」
+				PRINTFORML 　「\@IS_MALE(MASTER) ? 父上 # 母上 \@、子供は１０人と言わずに１億人ほど拵えようではないか」
 				PRINTFORML 　「ちょっとばかし体を弄って培養すれば１年も掛からぬ」
 				PRINTFORML 　「胎が空くことは無いであろうが……ちょっと考えさせろ？　仕方ないなあ」
 				PRINTFORML 　一体何が仕方ないというのか……。
 				PRINTFORMW 
 			CASE 2
-				PRINTFORML 　「母上、今日は鍛錬に明け暮れようではないか」
+				PRINTFORML 　「\@IS_MALE(MASTER) ? 父上 # 母上 \@、今日は鍛錬に明け暮れようではないか」
 				PRINTFORML 　「少しばかり体を動かすのだ」
 				PRINTFORML 　えらく真面目そうに提案した%ANAME(対象)%に%ANAME(MASTER)%は頷きかけた。
 				PRINTFORML 　%ANAME(対象)%の下心に満ちた触手の蠕動さえなければ信じたかもしれない。
@@ -194,7 +194,7 @@ ELSEIF TALENT:合意
 			CASE 1
 				PRINTFORML 　「ことあるごとにセックス！　と言っているが別にそれ以外が嫌いと言う訳ではない」
 				PRINTFORML 　「まぐわいを通じて発生する電気信号を伝搬させるのが一番効率が良いのだ」
-				PRINTFORML 　「分かったのならば母上、今日も致そうではないか」
+				PRINTFORML 　「分かったのならば\@IS_MALE(MASTER) ? 父上 # 母上 \@、今日も致そうではないか」
 				PRINTFORMW 
 		ENDSELECT
 	ENDIF
@@ -205,16 +205,16 @@ ELSEIF TALENT:恋人
 	IF TALENT:恋慕
 		SELECTCASE RAND:3
 			CASE 0
-				PRINTFORML 　「母上よ、恋人同士がすることの全てをやり遂げはしないかあ？　ン？」
+				PRINTFORML 　「\@IS_MALE(MASTER) ? 父上 # 母上 \@よ、恋人同士がすることの全てをやり遂げはしないかあ？　ン？」
 				PRINTFORML 　珍しく下心なしの様に、にこにこ笑う%ANAME(対象)%だが、触手が怪しく輝いている……。
 				PRINTFORMW 
 			CASE 1
-				PRINTFORML 　「母上よ、私とは“恋人”だけで良いのか？　ン？」
-				PRINTFORML 　「私（ワレラ）には幾らでも時間はあるが、母上はそうでもなかろう」
+				PRINTFORML 　「\@IS_MALE(MASTER) ? 父上 # 母上 \@よ、私とは“恋人”だけで良いのか？　ン？」
+				PRINTFORML 　「私（ワレラ）には幾らでも時間はあるが、\@IS_MALE(MASTER) ? 父上 # 母上 \@はそうでもなかろう」
 				PRINTFORML 　%ANAME(対象)%は誘惑する様にくつくつと嗤っている……。
 				PRINTFORMW 　
 			CASE 2
-				PRINTFORML 　「母上よ、私（ワレラ）の脈動を聞かぬか？」
+				PRINTFORML 　「\@IS_MALE(MASTER) ? 父上 # 母上 \@よ、私（ワレラ）の脈動を聞かぬか？」
 				PRINTFORML 　言うなり%ANAME(対象)%は%ANAME(MASTER)%を抱きしめた。
 				PRINTFORML 　全身を覆う%ANAME(対象)%からは大きな脈動を感じる……。
 				PRINTFORMW 
@@ -223,7 +223,7 @@ ELSEIF TALENT:恋人
 	ELSE
 		SELECTCASE RAND:4
 			CASE 0
-				PRINTFORML 　「母上よ、ここより彼方、私（ワレラ）この星々に至った頃」
+				PRINTFORML 　「\@IS_MALE(MASTER) ? 父上 # 母上 \@よ、ここより彼方、私（ワレラ）この星々に至った頃」
 				PRINTFORML 　「私（ワレラ）は大きく、遥かなるものであった」
 				PRINTFORMW 
 				PRINTFORML 　「それは３次元的なものではなく、４次元的であり、そして２次元的でも、１次元的でもあった」
@@ -231,7 +231,7 @@ ELSEIF TALENT:恋人
 				PRINTFORML 　%ANAME(対象)%の言っていることは良く分からない……。
 				PRINTFORMW 
 			CASE 1
-				PRINTFORML 　「実を言うとな、私は復讐をしたい訳ではないのだよ母上」
+				PRINTFORML 　「実を言うとな、私は復讐をしたい訳ではないのだよ\@IS_MALE(MASTER) ? 父上 # 母上 \@」
 				PRINTFORML 　「無論、大義を掲げる心算も無ければ肩入れする心算もない」
 				PRINTFORML 　「私（ワレラ）は敗れたが、より優れた、異なるカタチとなった」
 				PRINTFORMW
@@ -245,7 +245,7 @@ ELSEIF TALENT:恋人
 				PRINTFORML 　「銀河に遍く輝きは人を果てなき航路へと誘い」
 				PRINTFORML 　「天に昇り、己が偉業を示さんと望みし者はその闇の深さに呑まれよう」
 				PRINTFORMW 
-				PRINTFORML 　「母上、イカロスは太陽に焼かれ、地に墜ちたというが果たして堕ちた先は大地であったか？」
+				PRINTFORML 　「\@IS_MALE(MASTER) ? 父上 # 母上 \@、イカロスは太陽に焼かれ、地に墜ちたというが果たして堕ちた先は大地であったか？」
 				PRINTFORML 　「蝋で固めた翼を焼いたものは太陽であったか？」
 				PRINTFORML 　「奈落など好き好んで見るべきではない」
 				PRINTFORMW 
@@ -253,7 +253,7 @@ ELSEIF TALENT:恋人
 				PRINTFORML 　「私（ワレラ）の瞳は光学的に捉えている訳ではない」
 				PRINTFORML 　「波動を捉えていると言っても良い」
 				PRINTFORML 　「奈落さえも私（ワレラ）の眼を閉ざすこと能わず」
-				PRINTFORML 　「母上は私の瞼を閉ざしてくれはしないか？」
+				PRINTFORML 　「\@IS_MALE(MASTER) ? 父上 # 母上 \@は私の瞼を閉ざしてくれはしないか？」
 				PRINTFORMW 
 		ENDSELECT
 	ENDIF
@@ -262,7 +262,7 @@ ELSEIF TALENT:恋人
 ELSEIF CFLAG:250 == 1
 	SELECTCASE RAND:2
 		CASE 0
-			PRINTFORML 　「ちゅうだけで済まぬのが私だが、母上がどうしてもというのであれば」
+			PRINTFORML 　「ちゅうだけで済まぬのが私だが、\@IS_MALE(MASTER) ? 父上 # 母上 \@がどうしてもというのであれば」
 			PRINTFORML 　「――今しばらく待とう。だが私（ワレラ）はどうかな！？」
 			PRINTFORML 　触手が器用に、カーペットを汚さぬよう液体をまき散らし、いやらしくうねっている……。
 			PRINTFORMW 
@@ -275,13 +275,13 @@ ELSEIF CFLAG:250 == 1
 
 ;既成事実Lv0で恋慕
 ELSEIF !TALENT:恋人 && TALENT:恋慕 && !TALENT:合意 && CFLAG:250 < 1
-	PRINTFORML 　「母上は奥ゆかしいと言うべきか潔癖と言うべきか」
+	PRINTFORML 　「\@IS_MALE(MASTER) ? 父上 # 母上 \@は奥ゆかしいと言うべきか潔癖と言うべきか」
 	PRINTFORML 　「むむっ、いっそ私（ワレラ）から襲えという事だなあ？　ン？」
 	PRINTFORMW 
 
 ;既成事実Lv0
 ELSEIF CFLAG:250 < 1
-	PRINTFORML 　「母上よ、私は気は長いが、私（ワレラ）はそうではない」
+	PRINTFORML 　「\@IS_MALE(MASTER) ? 父上 # 母上 \@よ、私は気は長いが、私（ワレラ）はそうではない」
 	PRINTFORML 　「お互いに知らぬ身でもなし、腹を括るべきではないかなあ？　ン？」
 	PRINTFORMW 
 ENDIF
@@ -326,7 +326,7 @@ IF CFLAG:201 < 5 && TALENT:合意
 	IF !(TCVAR:51 || TCVAR:52 || TCVAR:53)
 		;初めてセックスをしたときに恋慕かどうか。思いつかなければ一緒でよい
 		IF TALENT:恋慕
-			PRINTFORML 　「ふふ、ずいぶん待たせてくれたなあ母上よ？」
+			PRINTFORML 　「ふふ、ずいぶん待たせてくれたなあ\@IS_MALE(MASTER) ? 父上 # 母上 \@よ？」
 			PRINTFORML 　「最早ためらう事は無い、日毎にやろうぞお？」
 			PRINTFORML 　%ANAME(対象)%はまだまだ元気そうだ……。
 			PRINTFORMW 
@@ -369,7 +369,7 @@ ELSEIF !(TCVAR:51 || TCVAR:52 || TCVAR:53)
 		IF !FLAG:ウフフフラグ
 			SELECTCASE RAND:3
 				CASE 0
-					PRINTFORML 　「母上、致さなくて良いのか？」
+					PRINTFORML 　「\@IS_MALE(MASTER) ? 父上 # 母上 \@、致さなくて良いのか？」
 					PRINTFORML 　「ン？　私（ワレラ）は何時でも待っているぞ？」
 					PRINTFORMW 
 				CASE 1
@@ -385,21 +385,21 @@ ELSEIF !(TCVAR:51 || TCVAR:52 || TCVAR:53)
 		ELSE
 			SELECTCASE RAND:3
 				CASE 0
-					PRINTFORML 　「甘露甘露よう母上」
+					PRINTFORML 　「甘露甘露よう\@IS_MALE(MASTER) ? 父上 # 母上 \@」
 					PRINTFORML 　「交合の甘き電気信号が私（ワレラ）を狂わせる」
 					PRINTFORML 　「私（ワレラ）が睦言を好むのはかく言う訳である」
 					PRINTFORML 　「他の触手は知らぬがな」
 					PRINTFORMW 
 				CASE 1
-					PRINTFORML 　「……、……。……なんぞ母上？」
+					PRINTFORML 　「……、……。……なんぞ\@IS_MALE(MASTER) ? 父上 # 母上 \@？」
 					PRINTFORML 　物思いにふけって居た様だが、どうしたのだろう。
 					PRINTFORML 　%ANAME(MASTER)%が尋ねるとくつくつと嗤って答えた。
 					PRINTFORMW 
 					PRINTFORML 　「何、かの甘いシグナルを憶え、反芻していただけのことよ」
-					PRINTFORML 　「母上も、楽しいことは思い返すだろう？　なあ？」
+					PRINTFORML 　「\@IS_MALE(MASTER) ? 父上 # 母上 \@も、楽しいことは思い返すだろう？　なあ？」
 					PRINTFORMW 
 				CASE 2
-					PRINTFORML 　「母上母上、子供は何人欲しい？　ン？」
+					PRINTFORML 　「\@IS_MALE(MASTER) ? 父上 # 母上 \@\@IS_MALE(MASTER) ? 父上 # 母上 \@、子供は何人欲しい？　ン？」
 					PRINTFORML 　「私（ワレラ）の目標は億と言わずにこの銀河に遍く者になることだが」
 					PRINTFORML 　「――なに？　幾ら何でも多すぎる？　私（ワレラ）は群れだぞ？」
 					PRINTFORML 　「ヒトの１と私（ワレラ）の１は余りにも違い過ぎる」
@@ -410,17 +410,17 @@ ELSEIF !(TCVAR:51 || TCVAR:52 || TCVAR:53)
 		IF !FLAG:ウフフフラグ
 			SELECTCASE RAND:3
 				CASE 0
-					PRINTFORML 　「むう……母上は何時私（ワレラ）とまぐわうのだ？」
+					PRINTFORML 　「むう……\@IS_MALE(MASTER) ? 父上 # 母上 \@は何時私（ワレラ）とまぐわうのだ？」
 					PRINTFORML 　「確かに私（ワレラ）には永遠の時間がある」
-					PRINTFORML 　「――故に、その刹那でさえ母上との交合で埋めたいのだ」
+					PRINTFORML 　「――故に、その刹那でさえ\@IS_MALE(MASTER) ? 父上 # 母上 \@との交合で埋めたいのだ」
 					PRINTFORMW 
 				CASE 1
 					PRINTFORML 　「ンー？　今日はお預けか？」
-					PRINTFORML 　「仕方ないなあ母上はあ」
+					PRINTFORML 　「仕方ないなあ\@IS_MALE(MASTER) ? 父上 # 母上 \@はあ」
 					PRINTFORML 　何が仕方が無いのか。%ANAME(対象)%はテレポートで消えてしまった。
 					PRINTFORMW 
 				CASE 2
-					PRINTFORML 　「母上、私は何時でも待っているぞ」
+					PRINTFORML 　「\@IS_MALE(MASTER) ? 父上 # 母上 \@、私は何時でも待っているぞ」
 					PRINTFORML 　「殖えるその日を」
 					PRINTFORMW 
 			ENDSELECT
@@ -432,7 +432,7 @@ ELSEIF !(TCVAR:51 || TCVAR:52 || TCVAR:53)
 					PRINTFORML 　ベッドに腰掛ける%ANAME(対象)%は上機嫌だ。
 					PRINTFORMW 
 				CASE 1
-					PRINTFORML 　「これでよいのだぞお母上」
+					PRINTFORML 　「これでよいのだぞお\@IS_MALE(MASTER) ? 父上 # 母上 \@」
 					PRINTFORML 　%ANAME(対象)%はうねりながら%ANAME(MASTER)%にその触手を絡めている……。
 					PRINTFORMW 
 				CASE 2
@@ -451,7 +451,7 @@ ELSEIF !(TCVAR:51 || TCVAR:52 || TCVAR:53)
 				PRINTFORML 　「暗黒の中に一筋の光明を見出したものがいた」
 				PRINTFORML 　「それは残滓、希望、或いは冒涜の跡先」
 				PRINTFORML 　「私（ワレラ）が生物として蘇ったのは大凡その辺りだ」
-				PRINTFORML 　「まあ正しく復活をしたのは母上が来てからのことだが」
+				PRINTFORML 　「まあ正しく復活をしたのは\@IS_MALE(MASTER) ? 父上 # 母上 \@が来てからのことだが」
 				PRINTFORMW 
 			CASE 1
 				PRINTFORML 　「…………」
@@ -459,7 +459,7 @@ ELSEIF !(TCVAR:51 || TCVAR:52 || TCVAR:53)
 				PRINTFORML 　%ANAME(MASTER)%の呼び掛けには触手が応じているが、こちらを見る素振りすら見せない……。
 				PRINTFORMW 
 			CASE 2
-				PRINTFORML 　「母上、覚悟はしておくように」
+				PRINTFORML 　「\@IS_MALE(MASTER) ? 父上 # 母上 \@、覚悟はしておくように」
 				PRINTFORML 　突然%ANAME(対象)%が２対の瞳で%ANAME(MASTER)%を捉えて言った。
 				PRINTFORML 　「アレは、間違いなく蘇るぞ。私（ワレラ）ですらそうだった故に」
 				PRINTFORML 　そう言うと、物思いにふけり始めた。
@@ -473,7 +473,7 @@ ELSEIF !(TCVAR:51 || TCVAR:52 || TCVAR:53)
 				PRINTFORML 　「イキモノは忘れるのだ」
 				PRINTFORML 　「いずれ、記録の片隅にだけ残るものとなるだろう」
 				PRINTFORML 　「しかして、それは悪しきことに非ず」
-				PRINTFORML 　「母上よ、何時か忘れる日は来るであろう」
+				PRINTFORML 　「\@IS_MALE(MASTER) ? 父上 # 母上 \@よ、何時か忘れる日は来るであろう」
 				PRINTFORML 　「それは、受け止めねばならぬことだ」
 				PRINTFORMW 
 			CASE 5
@@ -482,7 +482,7 @@ ELSEIF !(TCVAR:51 || TCVAR:52 || TCVAR:53)
 				PRINTFORML 　%ANAME(対象)%は%ANAME(MASTER)%の言葉に首を傾げている。
 				PRINTFORMW 
 			CASEELSE
-				PRINTFORML 　「母上よ、私（ワレラ）との付き合いをどうするかにせよ」
+				PRINTFORML 　「\@IS_MALE(MASTER) ? 父上 # 母上 \@よ、私（ワレラ）との付き合いをどうするかにせよ」
 				PRINTFORML 　「いずれ全てを知る時は来よう」
 				PRINTFORML 　「それが、永訣であっても」
 				PRINTFORMW 
@@ -497,7 +497,7 @@ ELSEIF !(TCVAR:51 || TCVAR:52 || TCVAR:53)
 				PRINTFORML 　%ANAME(MASTER)%は唇に迫る触手を抑えながら部屋を退出した。
 				PRINTFORMW  
 			CASE 1
-				PRINTFORML 　「キスだけで良いのか母上？　ン？」
+				PRINTFORML 　「キスだけで良いのか\@IS_MALE(MASTER) ? 父上 # 母上 \@？　ン？」
 				PRINTFORML 　くつくつと嗤う%ANAME(対象)%は%ANAME(MASTER)%を触手をこまねいて見送った。
 				PRINTFORMW 
 		ENDSELECT
@@ -505,13 +505,13 @@ ELSEIF !(TCVAR:51 || TCVAR:52 || TCVAR:53)
 	;既成事実Lv0で恋慕
 	ELSEIF !TALENT:恋人 && TALENT:恋慕 && !TALENT:合意 && CFLAG:250 < 1
 		PRINTFORML 　「いやはや……」
-		PRINTFORML 　「母上は私（ワレラ）をどうしたいのだ？　ン？」
+		PRINTFORML 　「\@IS_MALE(MASTER) ? 父上 # 母上 \@は私（ワレラ）をどうしたいのだ？　ン？」
 		PRINTFORML 　「品行方正とは程遠いとは思うのだがなあ？」
 		PRINTFORML 　%ANAME(対象)%は困惑している……。
 		PRINTFORMW 
 	;既成事実Lv0
 	ELSEIF CFLAG:250 < 1
-		PRINTFORML 　「母上よ、母上がその気なら何時でも私（ワレラ）は睦言を交わすぞ？」
+		PRINTFORML 　「\@IS_MALE(MASTER) ? 父上 # 母上 \@よ、\@IS_MALE(MASTER) ? 父上 # 母上 \@がその気なら何時でも私（ワレラ）は睦言を交わすぞ？」
 		PRINTFORML 　「まあ気が乗らぬこともあるだろうが許せ」
 		PRINTFORML 　くつくつと%ANAME(対象)%は嗤っている。
 		PRINTFORMW
@@ -539,13 +539,13 @@ IF TALENT:正妻 || TALENT:妾
 	PRINTFORMW 
 ;恋慕か服従
 ELSEIF TALENT:恋慕 || TALENT:服従
-	PRINTFORML 　「母上よ、閨に呼んだからには殖えるまでは離さぬぞお！」
+	PRINTFORML 　「\@IS_MALE(MASTER) ? 父上 # 母上 \@よ、閨に呼んだからには殖えるまでは離さぬぞお！」
 	PRINTFORML 　%ANAME(対象)%は嬉々として触手を呼んで%ANAME(MASTER)%を絡め取って来た！
-	PRINTFORML 　「まあ決定権は母上のものだがなあ？」
+	PRINTFORML 　「まあ決定権は\@IS_MALE(MASTER) ? 父上 # 母上 \@のものだがなあ？」
 	PRINTFORMW 
 ;それ以外
 ELSE
-	PRINTFORML 　「そうそう、私（ワレラ）は母上ならば何時でも歓迎ぞ？」
+	PRINTFORML 　「そうそう、私（ワレラ）は\@IS_MALE(MASTER) ? 父上 # 母上 \@ならば何時でも歓迎ぞ？」
 	PRINTFORML 　%ANAME(対象)%にしては珍しく受け入れようと言わんばかりに手を広げ、にこにこしている。
 	PRINTFORML 　触手たちがもう待ちきれない、と言わんばかりにうねっていることを除けば。
 	PRINTFORMW 

@@ -14,19 +14,17 @@
 PRINTL 
 PRINTFORML 　近頃、『母』を求めていると言う奇妙な依頼があると噂があった。
 PRINTFORML 　興味があるなら調べても良いだろう。
+;PRINTFORML 　\@IS_MALE(MASTER) ? 父上 # 母上 \@
 PRINTL
 CALL COLOR_PRINTL(" 　あなたが（触手で）ひどい目にあうクエストです", カラー_注意)
 PRINTL
 RETURN
-
 
 ;--------------------------
 ; クエスト受注可能か
 ;--------------------------
 @QUEST_ACCEPTABLE_60
 SIF QUEST_PROGRESS:60 > 1
-	RETURN 0
-SIF !IS_FEMALE(MASTER)
 	RETURN 0
 RETURN 1
 ;--------------------------
@@ -53,7 +51,7 @@ RETURN 1
 ;;;右下小窓に出す。隠したければ関数コメントアウトか RETURN 0
 @QUEST_MAP_INFO_60 (ARG:0 )
 #DIM QUEST_ID = 60
-IF QUEST_PROGRESS:QUEST_ID 　>= 5
+IF QUEST_PROGRESS:QUEST_ID >= 10
 		RESULTS:0 '= "デブリに偽装した研究所跡"
 		RESULTS:1 '= "最早用は無い"
 		RESULTS:2 '= ""
@@ -75,7 +73,10 @@ RETURN 1
 ; @QUEST_PLACE_CHECK_x ： 設定マスを踏んだら呼び出される。不要ならば消すか無処理で返す
 ;--------------------------
 @QUEST_SHOW_COMMAND_60 ()
+#DIM QUEST_ID = 60
+IF QUEST_PROGRESS:QUEST_ID < 10
 	RESULTS '= "進入する"
+ENDIF
 RETURN 1
 
 @QUEST_REACH_PLACE_60 ()
@@ -86,7 +87,7 @@ IF QUEST_PROGRESS:QUEST_ID == 3
 	PRINTFORML 　
 	PRINTFORML 　依頼人の指定した座標に到着した
 	PRINTFORML 　妙に大きなスペースデブリをスキャンしたところ、放棄された研究施設であることが分かった。
-	PRINTFORML 　あんな依頼を出すのだから後ろめたいことはあるのだろう。
+	PRINTFORML 　あんな依頼を出すのだから後ろめたいことや隠したいことがあるのだろう。
 	PRINTFORML 　%ANAME(MASTER)%はスペースデブリに乗り込む準備を始めた。
 	PRINTFORML 　
 	CALL COLOR_PRINTL(" [Q] 進入する　コマンドで続きます", カラー_注意)
@@ -109,6 +110,7 @@ RETURN
 #DIM CONST DISTANCE_FROM_STAR = 6
 #DIM QUEST_ID = 60
 
+
 ;あなた座標
 CALL ID2POS (CHARACTER_POSITION:MASTER)
 SECTOR_ID = RESULT:0
@@ -117,7 +119,11 @@ Y_POS = RESULT:2
 ;マップ上のクエスト座標から呼び出される処理
 IF (QUESTMAP:(SECTOR_ID):(X_POS):(Y_POS) == QUEST_ID) && (QUEST_PROGRESS:QUEST_ID == 4)
 	IF QUEST_PROGRESS:QUEST_ID == 4
-		CALL QUEST_60_SCENE_4
+		IF IS_MALE(MASTER)
+			CALL QUEST_60_SCENE_5
+		ELSE
+			CALL QUEST_60_SCENE_4
+		ENDIF
 	ELSE
 		PRINTFORMW 　最早用事は無い
 	ENDIF
@@ -176,16 +182,24 @@ PRINTFORML 　%ANAME(MASTER)%が暇つぶしに依頼をあさっていると、
 PRINTFORML 　妙に目を引くタイトルの依頼があった。
 PRINTFORML 　――我ラニ『母』ヲ
 PRINTFORML 　そう題されたタイトルは妙に%ANAME(MASTER)%の目を引いた。
-PRINTFORML 　
+PRINTFORMW 　
 PRINTFORML 　依頼の内容はこうだ。
 PRINTFORML 　「我々はこの銀河系の外から来た知的生命体だが」
 PRINTFORML 　「長きに渡るこの銀河系のコミュニティ（聞いたこともない国だ）の虐待により」
 PRINTFORML 　「存続が危ぶまれる程に個体数を大きく減らしてしまった」
+PRINTFORMW 
 PRINTFORML 　「その為、今のカラダを棄て、新しい姿を得る必要が出た」
 PRINTFORML 　「%ANAME(MASTER)%にはその為のモデルとなって欲しい」
 PRINTFORML 　「もし、協力してくれるなら段階を踏んで力になろう」
-PRINTFORML 　
+PRINTFORMW 　
 PRINTFORML 　……とのことだ。どうしても%ANAME(MASTER)%でなければ駄目だと言う。
+IF !IS_FEMALE(MASTER)
+	PRINTFORML 
+	PRINTFORML 　だが、%ANAME(MASTER)%は男である。
+	PRINTFORML 　私は男だが大丈夫か、と返すと少し迷った様な沈黙の後、
+	PRINTFORML 　「%ANAME(MASTER)%に何をされても良い様な仲間がいるのであればそれでも可」
+	PRINTFORML 　と、返事が来た。
+ENDIF
 PRINTFORMW 　
 PRINTFORML 　未知のテクノロジーを手に入れることが出来れば大きな力になるだろうが、
 PRINTFORML 　一方でその知的生命体が恨み骨髄のままに振舞うことも考えられる
@@ -239,6 +253,236 @@ CALL COLOR_PRINTL(@"マップ上に依頼人の座標が追加された", カラ
 PRINTFORML 
 PRINTFORMW 
 QUEST_PROGRESS:QUEST_ID = 2
+
+;--------------------------------------------------
+;スペースデブリ（男版）
+;--------------------------------------------------
+@QUEST_60_SCENE_5
+#DIM QUEST_ID = 60
+#DIM ITER
+#DIM 対象
+
+
+PRINTFORML 
+IF QUEST_PROGRESS:QUEST_ID < 5
+	PRINTFORML 　スペースデブリに偽装された研究施設に辿り着いた。
+	PRINTFORML 　%ANAME(MASTER)%は艦から降りて、一人僅かな照明を頼りに依頼人を探し始めた。
+	PRINTFORML 　
+	PRINTFORMW 　………………。
+	PRINTFORMW 　…………。
+	PRINTFORMW 　……。
+	PRINTFORML 　
+	PRINTFORML 　暫く探し回ると、最深部に人型をしているが、人間ではない幼女がいた。
+	PRINTFORML 　%ANAME(MASTER)%の姿を確かめると、ゆらゆらと手の様な触手を振って主張した。
+	PRINTFORML 　依頼人は見た目こそ人間の様な姿をしているが、
+	PRINTFORML 　触手が組み合わさった様な、狂気を、悍ましさを感じる造形をしている。
+	SIF TALENT:MASTER:超能力者
+		PRINTFORML 　そして、その中に渦巻く凄まじい力の念動力にも。
+	PRINTFORMW 
+	PRINTFORML 　「繧��≠縺ゅ↑縺�　繧上◆縺励′萓晞�ｼ莠ｺ縺�　縺ｾ縺ょ牡縺ｨ濶ｯ縺��─縺倥〒縺ｯ縺ゅｋ縺ｪ？」
+	PRINTFORML 　言葉が理解出来ないが、その所作からどうやら歓迎しているらしいことだけは分かった。
+	PRINTFORMW 
+	PRINTFORML 　『ワレラには現状、共通語を話す声帯がない』
+	PRINTFORML 　『ユエに、会話はコムリンクを使う事になる』
+	PRINTFORMW 
+	PRINTFORML 　『さて、父上よ。我らに母を呉れると言う話だったが』
+	PRINTFORML 　『それに応えてくれる者はいるのかなあ？　ン？』
+	PRINTFORML 　『身籠っておらず、父上の為に何でもできるという者が良い』
+ELSE
+	PRINTFORML 　「見つかったか？」
+	PRINTFORML 　「指定するが良い」
+ENDIF
+PRINTFORMW 
+
+$MOM_LOOP
+CALL QUEST_ANONYM_MOTHER_CHOICE
+PRINTFORML
+IF RESULT == -1
+	PRINTFORML 　『……誰も対象がおらぬではないか』
+	PRINTFORML 　%ANAME(MASTER)%が気が付くと、そこは寝室だった。
+	QUEST_PROGRESS:QUEST_ID = 5
+	RETURN
+ELSE
+	対象 = RESULT
+	PRINTFORML 　『……%ANAME(対象)%で良いかなあ？　ン？』
+ENDIF
+PRINTFORML 
+CALL ASK_YN
+IF RESULT == 1
+	PRINTFORMW 　『そうか、では選び直すが良いぞお？』
+	GOTO MOM_LOOP
+ELSE
+	PRINTFORML 　『では%ANAME(対象)%と暫くまぐわうが良い』
+	PRINTFORML 　『何故か？　父上の精子と母上の卵子を改造して新たに私を産む』
+	PRINTFORMW 
+	PRINTFORML 　『要は代理母の理屈だなあ？』
+	PRINTFORML 　そもそも価値観が違う、としか言いようが無い。
+	PRINTFORML 　提案に乗った%ANAME(MASTER)%も%ANAME(MASTER)%だが。
+	PRINTFORMW 
+	PRINTFORML 　しかし、何故そんなことが必要なのだろうか、%ANAME(MASTER)%が尋ねると、幼女は語った。
+	PRINTFORML 　
+	PRINTFORML 　『強いて言うのであれば、対策だ、いずれ来るであろう戦いに備えて、な』
+	PRINTFORML 　『まあ父上には直接関係することではないがな』
+	PRINTFORML 　『要は徹頭徹尾私（ワレラ）の都合だ』
+	PRINTFORMW 
+	PRINTFORM 　「
+	CALL COLOR_PRINT("質問には応えたぞ父上、さあ私（ワレラ）に母を", カラー_ピンク)
+	PRINTFORM 」
+	PRINTFORMW 
+	PRINTFORML 
+	PRINTFORMW 　………………。
+	PRINTFORMW 　…………。
+	PRINTFORMW 　……。
+	PRINTFORML 
+	PRINTFORML 　%ANAME(MASTER)%と%ANAME(対象)%が触手に塗れた研究所でセックスしている。
+	PRINTFORML 　大凡、正気には見えない。
+	PRINTFORML 　ちょうど椅子の様な形で%ANAME(対象)%を拘束する触手が、%ANAME(MASTER)%に桃色の光を浴びせ、
+	PRINTFORML 　眼帯の様に%ANAME(対象)%の視界を覆う触手が電撃を小さく放っている。
+	PRINTFORMW 
+	PRINTFORML 　「それ、それ。もう少しだぞ母上」
+	PRINTFORML 
+	PRINTFORML 　排卵を促す様に、下腹部を這いまわる細い触手が、超常の光を放ち、人知を超えた快楽を与える。
+	PRINTFORML 　ピストンごとに生み出される信号を共有させることでお互いに慢性的な絶頂状態を作り出す。
+	PRINTFORMW 
+	PRINTFORML 　%ANAME(MASTER)%の陰茎は射精していない時間は無く、睾丸に収められた子種はもう空である。
+	PRINTFORML 
+	PRINTFORML 　「タンパク質並びに必要資源供給開始、生体サイクルの加速、不老処置実施」
+	PRINTFORML 
+	PRINTFORML 　――その栄養分は触手が補う。
+	PRINTFORML 　もはや%ANAME(MASTER)%は触手の一部なのか、あるいは人間なのか微妙なところにあった。
+	PRINTFORML 
+	PRINTFORML 　「精液の放出及び資源供給カット、遺伝基復元開始」
+	PRINTFORMW 
+	PRINTFORML 　壊れかけたのであれば、復旧させればいい。
+	PRINTFORML 　数時間に及ぶ両者への凌辱の末、この異形はニンゲンの本来のカタチを理解した。
+	PRINTFORML 　そして、頃合いを見ると触手を%ANAME(対象)%の下腹部に直接突っ込み、受精卵を取り出した。
+	PRINTFORML 　それを見る目は、歓喜に満ちていた。
+	PRINTFORMW 
+	TALENT:MASTER:絶倫 = 1
+	TALENT:対象:絶倫 = 1
+	PRINTFORMW 　………………。
+	PRINTFORMW 　…………。
+	PRINTFORMW 　……。
+	PRINTFORML 
+	PRINTFORML 　２人が目を覚ますと、そこは見慣れた寝室だった。
+	PRINTFORML 　どうやらあの幼女が運び込んだらしい。
+	PRINTFORML 　一体何だったのだろう、と顔を見合わせると、その瞬間に巨人がワープアウトしてきた。
+	PRINTFORML 
+	PRINTFORML 　「ごきげんよう父上、私（ワレラ）はアノニム。母上と父上の遺伝基によって生み出された新たなる種の祖」
+	PRINTFORML 　「それが私（ワレラ）である」
+	PRINTFORML 　くつくつと嗤う、%ANAME(対象)%に――目が４つあってサメの様な歯をしていることを除けばそっくりな女はそう名乗った。
+	PRINTFORMW 　
+	PRINTFORML 　「私（ワレラ）が滅ぼすべき星は滅んだ、今の星に私（ワレラ）を知る者はおるまいよ父上」
+	PRINTFORMW 　「まあ父上がやると言うのであれば、私（ワレラ）もやぶさかではないが」
+	PRINTFORML 　クツクツと笑うこの病的な程に色白のエイリアンは、ひとまずは%ANAME(MASTER)%に従うらしい……。
+	PRINTFORML 　
+	PRINTFORMW 　「ああそうだ父上、このスペースデブリは巡洋艦として使える」
+	PRINTFORMW 　「父上の知るそれとは多少勝手が違うであろうが、まあ損はさせんよ。娘として、な」
+	PRINTFORML 　「コンゴトモヨロシク。父上」
+	PRINTFORML 　
+	PRINTFORML 　ニィ、と鋭く尖った犬歯を見せつけながら、アノニムは仰々しく会釈した。
+	PRINTFORML 　
+	PRINTFORML 　生体巡洋艦の特徴について聞きますか？
+	PRINTFORML 　
+	CALL ASK_YN("聞きます","聞かない")
+	IF RESULT == 0
+		PRINTFORML 　
+		PRINTFORMW 　生体巡洋艦は非常に攻撃性の高い生きた艦です。
+		PRINTFORMW 　同じクラスと比べても頭一つ以上高い攻撃力を持ちますが、搭載された武装はいずれも精度に欠けます。
+		PRINTFORML 　耐久面では高めの装甲を持ちますが、シールドの強度と低い回避率により、同格相手の長期戦は難しいでしょう。
+		PRINTFORMW 　一方で、他の追随を許さない回復量を持つシールドの存在は格下の艦を一方的に屠る事でしょう。
+		PRINTFORML 　また、装備は全て非売品であるため、取り外すと取り返しがつきません。
+		PRINTFORML 　以上のことから総じて乗り手を選ぶ艦です。
+		PRINTFORML 
+		PRINTFORML 
+		PRINTFORMW 
+	ENDIF
+
+
+CFLAG:NAME_TO_CHARA("アノニム"):所属 = 国家ID_プレイヤー
+CALL INIT_PRESET_SHIP(国家ID_プレイヤー, CHARACTER_POSITION, 生体巡洋艦, "生体巡洋艦", 生体巡洋艦)
+CFLAG:(NAME_TO_CHARA("アノニム")):母親 = GET_ID(対象)
+CFLAG:(NAME_TO_CHARA("アノニム")):父親 = GET_ID(MASTER)
+FOR LOCAL:1, 0, MAX_TAG
+	SIF HAS_TAG(対象,LOCAL:1)
+		CALL ADD_TAG((NAME_TO_CHARA("アノニム")), LOCAL:1)
+NEXT
+QUEST_PROGRESS:QUEST_ID = 10
+ENDIF
+
+;--------------------------
+; 白兵戦力を抜擢する関数の流用
+;--------------------------
+@QUEST_ANONYM_MOTHER_CHOICE
+#DIM SELECTED_COUNT
+#DIM MOM_SELECTED
+
+VARSET ANONYM_CQC_SELECTED, 0
+
+
+SELECTED_COUNT = 0
+FOR LOCAL, 0, CHARANUM
+	SIF CFLAG:LOCAL:陥落済み && !IS_MALE(LOCAL) && !TALENT:LOCAL:妊娠
+		SELECTED_COUNT ++
+NEXT
+SIF SELECTED_COUNT == 0
+	RETURN -1
+
+MOM_SELECTED = 0
+$INPUT_LOOP
+DRAWLINE
+PRINTL 
+PRINTL 　誰が触手の少女の母親になりますか？
+PRINTL 
+SETCOLOR 0X666666
+CUSTOMDRAWLINE /
+RESETCOLOR
+
+FOR LOCAL, 0, CHARANUM
+	SIF CFLAG:LOCAL:所属 != CFLAG:MASTER:所属
+		CONTINUE
+	SIF (!CFLAG:LOCAL:陥落済み || IS_MALE(LOCAL))
+		CONTINUE
+	SIF TALENT:LOCAL:妊娠
+		CONTINUE
+	IF MOM_SELECTED == LOCAL
+		SETCOLOR 0X00FF00
+		PRINTBUTTON @"[{LOCAL,2}] %CALLNAME:LOCAL,14,LEFT% - 触手: {ABL:LOCAL:触手,3}", LOCAL
+		PRINTL
+	ELSE
+		PRINTBUTTON @"[{LOCAL,2}] %CALLNAME:LOCAL,14,LEFT% - 触手: {ABL:LOCAL:触手,3}", LOCAL
+		PRINTL
+	ENDIF
+	RESETCOLOR
+NEXT
+SETCOLOR 0X666666
+CUSTOMDRAWLINE /
+RESETCOLOR
+PRINTL
+
+IF MOM_SELECTED == 0
+	SETCOLOR カラー_選択不可
+	PRINT [決定]
+	RESETCOLOR
+ELSE
+	PRINTBUTTON "[決定]", CHARANUM
+ENDIF
+INPUT
+IF RESULT == CHARANUM && MOM_SELECTED
+	RETURN MOM_SELECTED
+ENDIF
+IF RESULT < 0 || RESULT >= CHARANUM || CFLAG:RESULT:所属 != CFLAG:MASTER:所属 || !CFLAG:RESULT:陥落済み || IS_MALE(RESULT)
+	CLEARLINE LINECOUNT
+	GOTO INPUT_LOOP
+ENDIF
+IF RESULT != MOM_SELECTED &&(CFLAG:RESULT:陥落済み || IS_FEMALE(RESULT)&& !TALENT:RESULT:妊娠)
+	MOM_SELECTED = RESULT
+ELSE
+	MOM_SELECTED = 0
+ENDIF
+CLEARLINE LINECOUNT
+GOTO INPUT_LOOP
+
 
 ;--------------------------------------------------
 ;スペースデブリ
@@ -310,7 +554,6 @@ FLAG:SLG4X調教開始フラグ = 1
 CALL START_TRAIN_COMMON
 RETURN
 
-
 ;--------------------------------------------------
 ;後日談
 ;--------------------------------------------------
@@ -330,33 +573,33 @@ PRINTFORMW 　…………。
 PRINTFORMW 　……。
 PRINTFORML 　
 PRINTFORML 　%ANAME(MASTER)%が気が付くと、清潔なベッドの上で寝かされていた。
-PRINTFORML 　「縺顔岼隕壹ａ縺�？　豈堺ｸ頑ｮｿ」
+PRINTFORML 　「縺顔岼隕壹ａ縺�？　豈堺ｸ頑ｮｿ」
 PRINTFORML 　隣を見れば髪色以外は%ANAME(MASTER)%によく似た顔立ちのスレンダーな長身の少女が、
 PRINTFORML 　ニヤニヤとサディスティックな笑みを浮かべている。
 PRINTFORML 　人並外れた大きさに勃起した赤黒い陰茎で、%ANAME(MASTER)%の下腹部をペチペチと叩きながら少女は
 PRINTFORML 　悍ましき言葉で語り始めた。
 PRINTFORML 　
-PRINTFORM 　「遘√′隱ｰ縺�？　
+PRINTFORM 　「遘√′隱ｰ縺�？　
 CALL COLOR_PRINT("厭だなあ、あんなに愛し合ったのに？", カラー_ピンク)
 PRINTFORML 　」
 PRINTFORML 　慌てて逃げ出そうとした%ANAME(MASTER)%は少女の腕から伸びた触手に絡めとられ、丁度屈脚位の様な形に抑え込まれてしまう。
 PRINTFORML 　
-PRINTFORMW 　「繧�繧�繧�縲∽ｸ頑焔縺丈ｼ昴ｏ縺｣縺ｦ縺翫ｉ繧薙ｈ縺��□縺ｪ？」
+PRINTFORMW 　「繧�繧�繧�縲∽ｸ頑焔縺丈ｼ昴ｏ縺｣縺ｦ縺翫ｉ繧薙ｈ縺��□縺ｪ？」
 PRINTFORMW 　「うむ、見ての通りだよ母上。私（ワレラ）が依頼人だよ」
 CLEARLINE 1
-PRINTFORML 　「縺�む縲∬ｦ九※縺ｮ騾壹ｊ縺�繧域ｯ堺ｸ翫�ゅΡ繝ｬ繝ｩ縺御ｾ晞�ｼ莠ｺ縺�繧�」
+PRINTFORML 　「縺�む縲∬ｦ九※縺ｮ騾壹ｊ縺�繧域ｯ堺ｸ翫�ゅΡ繝ｬ繝ｩ縺御ｾ晞�ｼ莠ｺ縺�繧�」
 PRINTFORML 　
 PRINTFORMW 　「かつての私（ワレラ）は群であったが故に失敗した」
 CLEARLINE 1
-PRINTFORML 　「縺九▽縺ｦ縺ｮ繝ｯ繝ｬ繝ｩ縺ｯ鄒､縺ｧ縺ゅ▲縺溘′謨��↓螟ｱ謨励＠縺�」
+PRINTFORML 　「縺九▽縺ｦ縺ｮ繝ｯ繝ｬ繝ｩ縺ｯ鄒､縺ｧ縺ゅ▲縺溘′謨��↓螟ｱ謨励＠縺�」
 PRINTFORML 　
 PRINTFORMW 　「今の私（ワタシ）はコ（個にして孤であり仔なる己）である」
 CLEARLINE 1
-PRINTFORML 　「莉翫��遘√��莉斐〒縺ゅｋ」
+PRINTFORML 　「莉翫��遘√��莉斐〒縺ゅｋ」
 PRINTFORML 　
 PRINTFORMW 　「母上と愛し合うのもやぶさかではないが」
 CLEARLINE 1
-PRINTFORML 　「豈堺ｸ翫→諢帙＠蜷医≧縺ｮ繧ゅｄ縺ｶ縺輔°縺ｧ縺ｯ縺ｪ縺��′」
+PRINTFORML 　「豈堺ｸ翫→諢帙＠蜷医≧縺ｮ繧ゅｄ縺ｶ縺輔°縺ｧ縺ｯ縺ｪ縺��′」
 PRINTFORML 　
 PRINTFORMW 　「まあそれよりも先に礼をせねばなるまいて」
 PRINTFORMW 　「私（ワレラ）はアノニム」
@@ -400,7 +643,7 @@ FOR LOCAL:1, 0, MAX_TAG
 	SIF HAS_TAG(MASTER,LOCAL:1)
 		CALL ADD_TAG((NAME_TO_CHARA("アノニム")), LOCAL:1)
 NEXT
-QUEST_PROGRESS:QUEST_ID = 5
+QUEST_PROGRESS:QUEST_ID = 10
 
 
 

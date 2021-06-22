@@ -235,7 +235,7 @@ ELSE
 ENDIF
 
 PRINTFORML 
-PRINTFORML 　「さて母上、此度のことは、正確には伝わらぬだろう」
+PRINTFORML 　「さて\@IS_MALE(MASTER) ? 父上 # 母上 \@、此度のことは、正確には伝わらぬだろう」
 PRINTFORML 　「大凡――海賊、あるいはどこどこの国が田舎のコロニーを制圧しようとした」
 PRINTFORML 　「と言うところだ」
 PRINTFORMW 　
@@ -244,7 +244,7 @@ PRINTFORML 　「今の人類にオールドオーダーの存在を信じさせ
 PRINTFORML 　「歴史書に軽く目を通したが、私（ワレラ）の計算が合っているなら」
 PRINTFORML 　「連中がいたのは入植期以前のそれから千年以上前、いや万年か？　この位前のことだぞ？」
 PRINTFORMW 
-PRINTFORML 　「――見よ母上、たった今ニュースが流れて来た」
+PRINTFORML 　「――見よ\@IS_MALE(MASTER) ? 父上 # 母上 \@、たった今ニュースが流れて来た」
 PRINTFORML 　%ANAME(対象)%の言う通り、%LOCALS%の侵略行為に強く抗議する声明が発表されている。
 PRINTFORML 　勿論、濡れ衣、陰謀だと%LOCALS%は主張しているが、不信の種を取り除くことはできないだろう。
 PRINTFORMW 　
@@ -254,7 +254,7 @@ PRINTFORMW 　………………。
 PRINTFORMW 　…………。
 PRINTFORMW 　……。
 PRINTFORMW 
-PRINTFORML 　「それはそうとして母上、新しい生体艦の話を聞くかなあ？」
+PRINTFORML 　「それはそうとして\@IS_MALE(MASTER) ? 父上 # 母上 \@、新しい生体艦の話を聞くかなあ？」
 PRINTFORML 　強襲揚陸艦……と言うには少々大きすぎる何時もの様に長い生体艦の説明をしたいようだ。
 PRINTFORML 　説明を聞こうか？
 PRINTFORML 
@@ -575,7 +575,7 @@ CALL GET_STAR_ID_FROM_POS((QUEST_61_受注星) * 10000 + 707)
 LOCALS = %COUNTRY_NAME:(STAR_OWNER:RESULT)%
 PRINTFORML %LOCALS%の大艦隊が待ち構えていた！
 PRINTFORMW 
-PRINTFORML 　「母上、後戻りはできんぞ？　向こう側も気付いた故にな」
+PRINTFORML 　「\@IS_MALE(MASTER) ? 父上 # 母上 \@、後戻りはできんぞ？　向こう側も気付いた故にな」
 PRINTFORML 　%ANAME(対象)%に言われるまでもない。
 PRINTFORMW 
 PRINTFORML 　%ANAME(MASTER)%は艦隊に攻撃を命令した。
@@ -610,21 +610,21 @@ IF RESULT == 99
 	PRINTFORML 　第一波の艦隊をデブリに変えてやった。
 	PRINTFORML 　しかし、まだ敵戦力は残っている。
 	PRINTFORMW 
-	PRINTFORML 　「母上よ、誰を送り込むか決めたか？」
+	PRINTFORML 　「\@IS_MALE(MASTER) ? 父上 # 母上 \@よ、誰を送り込むか決めたか？」
 	PRINTFORML 　「送り込むための艦は用意した故、それに乗せるが」
 	PRINTFORML 　見ると凄まじく速そうな生体艦がこちらに信号を送っている。
 	PRINTFORML 　ケンツバ級の応用で戦艦の主砲に撃たれようが数回は耐えきれるらしい。
 	PRINTFORML 　いつの間に用意したのだろう……。
 	PRINTFORMW 
 	PRINTFORML 　「ここで送った戦力は艦隊戦には参加できぬ」
-	PRINTFORML 　「良いか母上？　送るなら思考戦車などがいいであろう」
+	PRINTFORML 　「良いか\@IS_MALE(MASTER) ? 父上 # 母上 \@？　送るなら思考戦車などがいいであろう」
 	PRINTFORML 　%ANAME(MASTER)%は頷くと、白兵戦に挑む戦力を選び始めた……。
 	PRINTFORMW 　
 	$CQC_LOOP
 	CALL QUEST_ANONYM_SQUAD_CHOICE
 	FINDELEMENT ANONYM_CQC_SELECTED, 1
 	IF RESULT == -1
-		PRINTFORML 　「なんだ母上、キャンセルなど出来ぬぞ」
+		PRINTFORML 　「なんだ\@IS_MALE(MASTER) ? 父上 # 母上 \@、キャンセルなど出来ぬぞ」
 		PRINTFORMW 　
 		CLEARLINE LINECOUNT
 		GOTO CQC_LOOP
@@ -658,7 +658,7 @@ PRINTFORMW 　「遡行参照実行……該当なし」
 PRINTFORML 　「此処ならば絶対に聞かれる心配は無い」
 PRINTFORML 　%ANAME(対象)%が指定した座標は暗黒宙域、と呼べるような往来の一切ない場所だった。
 PRINTFORMW 
-PRINTFORML 　「さて母上、まずは良い報せからだ」
+PRINTFORML 　「さて\@IS_MALE(MASTER) ? 父上 # 母上 \@、まずは良い報せからだ」
 PRINTFORML 　「あの端末を解析した結果、私(ワレラ)の能力がより洗練されたものになった」
 PRINTFORML 　「具体的に言えば、白兵戦力、操艦能力、超能力のいずれかをより強力なものに調整できる」
 PRINTFORML 　「全てを選んでも良し、それはトータルでは勝るが一点では劣ろう」
@@ -696,7 +696,7 @@ PRINTFORML 　%ANAME(対象)%が彼らを憎んでいることだけは理解し
 PRINTFORMW 
 PRINTFORML 　「さて、手始めにコロニーの１つを乗っ取って勢力を伸ばすつもりだ」
 PRINTFORML 　「連中は以前遭遇した海賊連中とは違って完全な制御能力を持っておる」
-PRINTFORML 　「流石に母上の胎を経由した私（ワレラ）や、私が制御した艦には効かぬが」
+PRINTFORML 　「流石に\@IS_MALE(MASTER) ? 父上 # 母上 \@の胎を経由した私（ワレラ）や、私が制御した艦には効かぬが」
 PRINTFORMW 
 PRINTFORML 　「それでも奴らが強大であることには変わりはあるまい」
 PRINTFORM 　「現時点で相当な戦力――
@@ -724,7 +724,7 @@ PRINTFORMW
 対象 = NAME_TO_CHARA("アノニム")
 
 PRINTFORML 　「逃げ込んだと思われるのは{ANONYM_SECTOR}：{ANONYM_X_POS,2,RIGHT}：{ANONYM_Y_POS,2,RIGHT}だ。」
-PRINTFORML 　「文字で説明するのもアレだしモニターに映すぞ母上」
+PRINTFORML 　「文字で説明するのもアレだしモニターに映すぞ\@IS_MALE(MASTER) ? 父上 # 母上 \@」
 PRINTFORMW 　
 CLEARLINE LINECOUNT
 PRINTL 
@@ -807,8 +807,8 @@ CALL QUEST_63_TEXT("白兵部隊は討ち取り次第撤収、","あとは軍部
 
 CLEARLINE LINECOUNT
 PRINTFORML 
-PRINTFORML 　「さて母上、準備を整えたなら指定した座標まで行くぞ」
-PRINTFORML 　「念は押しておくが母上、１戦目を消化試合に出来なければ２戦目はまず勝てんぞ」
+PRINTFORML 　「さて\@IS_MALE(MASTER) ? 父上 # 母上 \@、準備を整えたなら指定した座標まで行くぞ」
+PRINTFORML 　「念は押しておくが\@IS_MALE(MASTER) ? 父上 # 母上 \@、１戦目を消化試合に出来なければ２戦目はまず勝てんぞ」
 PRINTFORMW 
 ;--------------------------
 ; モニターにテキストを映す処理
@@ -847,19 +847,19 @@ PRINTFORML 　突如として路地から一人の男が転がり出て来た。
 PRINTFORML 　どう見てもカタギではないが、%ANAME(MASTER)%を見ると「助けてくれ！」と縋り付いて来た。
 PRINTFORML 　男は異様に震え、股間からは生暖かい液体がこぼれている……。
 PRINTFORMW 　
-PRINTFORML 　「母上よ、コイツをどうこうしている暇はないぞ。錯乱に分類される信号を感知した」
+PRINTFORML 　「\@IS_MALE(MASTER) ? 父上 # 母上 \@よ、コイツをどうこうしている暇はないぞ。錯乱に分類される信号を感知した」
 PRINTFORML 　逃げられない様に触手で絡め取りながら、%ANAME(対象)%が路地裏を指すと、
 PRINTFORML 　そこには人型をした触手……いや、触手と融合した男が居た。
 PRINTFORML 　少なくとも、逃げたり、話し合いが成立しそうな相手ではない事は確実だ。
 PRINTFORMW 
 IF ABL:MASTER:白兵 < 30
-	PRINTFORML 　「母上は私（ワレラ）の後ろに下がっているが良い。流れ弾は来るやもしれぬが」
+	PRINTFORML 　「\@IS_MALE(MASTER) ? 父上 # 母上 \@は私（ワレラ）の後ろに下がっているが良い。流れ弾は来るやもしれぬが」
 ELSEIF ABL:MASTER:白兵 < 60
-	PRINTFORML 　「ふむ、まあ母上と私（ワレラ）ならどうとでもなりそうな相手だな」
+	PRINTFORML 　「ふむ、まあ\@IS_MALE(MASTER) ? 父上 # 母上 \@と私（ワレラ）ならどうとでもなりそうな相手だな」
 ELSEIF ABL:MASTER:白兵 < 90
 	PRINTFORML 　「負けはせんだろうが、油断はせぬようにな」
 ELSE
-	PRINTFORML 　「負ける方が難しいだろう、とっとと捕縛するぞ母上」
+	PRINTFORML 　「負ける方が難しいだろう、とっとと捕縛するぞ\@IS_MALE(MASTER) ? 父上 # 母上 \@」
 ENDIF
 PRINTFORML 　%ANAME(MASTER)%はブラスターを構えて、正気には見えないそれと向かい合った。
 PRINTFORMW 　

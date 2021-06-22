@@ -109,10 +109,10 @@ Y_POS = RESULT:2
 
 IF (QUESTMAP:(SECTOR_ID):(X_POS):(Y_POS) == QUEST_ID) && QUEST_PROGRESS:QUEST_ID == 2
 	PRINTFORML 　{CHARACTER_POSITION:MASTER}
-	PRINTFORML 　「さて母上、指定の座標まで来たが、別に戦う必要はない」
+	PRINTFORML 　「さて\@IS_MALE(MASTER) ? 父上 # 母上 \@、指定の座標まで来たが、別に戦う必要はない」
 	PRINTFORML 　「逃げる最中に放った牽制の一撃がウッカリ撃沈することくらいは」
-	PRINTFORML 　「あるであろうがまあ母上しだいだなあ？」
-	PRINTFORML 　「さて、改めて母上には２つの選択肢がある」
+	PRINTFORML 　「あるであろうがまあ\@IS_MALE(MASTER) ? 父上 # 母上 \@しだいだなあ？」
+	PRINTFORML 　「さて、改めて\@IS_MALE(MASTER) ? 父上 # 母上 \@には２つの選択肢がある」
 	PRINTFORMW 　
 	PRINTFORML 　「引き渡すメリットは報酬が良くなること、デメリットは私（ワレラ）の端末が研究されることだ」
 	PRINTFORML 　「最悪、反乱やらに生体艦が使われて星１つが滅ぶことも可能性としてはなくはないだろう」
@@ -335,7 +335,7 @@ PRINTFORML 　「単純な生き物になってしまった以上超能力者が
 PRINTFORML 　「流石にこれは惨いと言う他ない」
 PRINTFORMW 　
 PRINTFORML 　%ANAME(MASTER)%の知る生体巡洋艦は汎用巡洋艦と余り差異がないものだが、本来は違うのかと尋ねると、
-PRINTFORML 　「未知のエイリアンが港に姿を現すのと、肉塊にしか見えん艦が姿を現すのでは警戒度も違うであろう母上」
+PRINTFORML 　「未知のエイリアンが港に姿を現すのと、肉塊にしか見えん艦が姿を現すのでは警戒度も違うであろう\@IS_MALE(MASTER) ? 父上 # 母上 \@」
 PRINTFORML 　「私（ワレラ）もその程度の気配りは出来るとも」
 PRINTFORMW 　
 PRINTFORML 　「誰がやったかは分からぬが、雑な制御のお蔭で殆ど暴走しておる。艦の人間は全て同化されていると見て良いぞ」
@@ -343,7 +343,7 @@ PRINTFORML 　「根拠？　これほどの大きさの端末がいるなら私
 PRINTFORML 　%ANAME(MASTER)%が%ANAME(アニー)%に、何の意図があるのか尋ねると、彼女は首を振って言った。
 PRINTFORMW 　
 PRINTFORML 　「これだけでは大方阿呆な海賊が怪しげなバイヤーから安くて強くて潰しの利く艦を買った、位しか考えられん」
-PRINTFORML 　「母上にはクライアントから言われた通り選択肢が２つある」
+PRINTFORML 　「\@IS_MALE(MASTER) ? 父上 # 母上 \@にはクライアントから言われた通り選択肢が２つある」
 PRINTFORMW 　
 PRINTFORML 　「１つはオトリ役に徹すること、もう１つは完全に消し飛ばすことだ」
 PRINTFORML 　「双方にメリットとデメリットがあろう」

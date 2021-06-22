@@ -203,11 +203,11 @@ Y_POS = RESULT:2
 
 アニー = NAME_TO_CHARA("アノニム")
 
-PRINTFORML 　「災難であったなあ母上」
+PRINTFORML 　「災難であったなあ\@IS_MALE(MASTER) ? 父上 # 母上 \@」
 PRINTFORML 　クツクツと嗤う%ANAME(アニー)%をよそに、%ANAME(MASTER)%は発生した損害をどう補おうか考えていた。
 PRINTFORML 　少なくとも艦の１隻や２隻ではどうにもならないだろう。
 PRINTFORMW 　
-PRINTFORML 　「母上、補填にはならぬだろうが１隻の生体艦の制御を乗っ取ることは出来てなあ」
+PRINTFORML 　「\@IS_MALE(MASTER) ? 父上 # 母上 \@、補填にはならぬだろうが１隻の生体艦の制御を乗っ取ることは出来てなあ」
 PRINTFORML 　「耐久力に長ける生体艦、ケンツバ級を加えておいたぞお？」
 PRINTFORMW 　
 PRINTFORML 　%ANAME(MASTER)%が端末を見ると見慣れない名前の艦が加わっていた。
@@ -243,14 +243,14 @@ Y_POS = RESULT:2
 
 アニー = NAME_TO_CHARA("アノニム")
 
-PRINTFORML 　「戻ったぞ母上」
+PRINTFORML 　「戻ったぞ\@IS_MALE(MASTER) ? 父上 # 母上 \@」
 PRINTFORML 　ちょうど報告を済ませ、港にやって来た所に%ANAME(アニー)%が戻って来た。
 PRINTFORML 　「ちょうど良い装甲板を探すのが手間でなあ」
 PRINTFORML 　「先程撃沈した生体艦を復旧してハイヴを管制下に置くことに成功した」
 PRINTFORMW 
 PRINTFORML 　見るとひし形が組み合わさった様な奇妙な艦と、非常に長い強いて言うなら剣の様な見た目の艦が止まっていた。
 PRINTFORML 　どうやらこれが先程戦った艦のなれの果ての様だ。
-PRINTFORML 　「ケンツバ級１隻とオクスタン級２隻を支配下に置くことが出来たぞう母上。これの説明を聞くか？　ン？」
+PRINTFORML 　「ケンツバ級１隻とオクスタン級２隻を支配下に置くことが出来たぞう\@IS_MALE(MASTER) ? 父上 # 母上 \@。これの説明を聞くか？　ン？」
 PRINTFORML 
 CALL ASK_YN()
 IF RESULT == 1
@@ -346,7 +346,7 @@ IF RESULT == 99
 	QUEST_PROGRESS:QUEST_ID = 6
 ELSE
 	PRINTFORML 　%ANAME(MASTER)%は%ANAME(アニー)%が何処からもなく持って来たコルベットに乗って命からがら逃げかえった！
-	PRINTFORML 　「軍の方は仕事を完遂した様だな。母上が大損したことを除けば仕事は終わりだな、見るが良い母上」
+	PRINTFORML 　「軍の方は仕事を完遂した様だな。\@IS_MALE(MASTER) ? 父上 # 母上 \@が大損したことを除けば仕事は終わりだな、見るが良い\@IS_MALE(MASTER) ? 父上 # 母上 \@」
 	PRINTFORMW 　
 	PRINTFORML 　%ANAME(アニー)%が外を指差すと、丁度研究所がチリ１つ残らないほど強力な砲撃を浴びて消し飛んだ所だった。
 	PRINTFORML 　これでしばらくは生体艦も現れる事は無いだろう……。
@@ -398,7 +398,7 @@ CALL COMBAT(CHARACTER_POSITION:MASTER)
 
 CALL QUEST_ANONYM_BATTLE_RESULT()
 IF RESULT == 99
-	PRINTFORML 　「何とか勝てたなあ母上、ではちょっと制御を乗っ取って来るぞお」
+	PRINTFORML 　「何とか勝てたなあ\@IS_MALE(MASTER) ? 父上 # 母上 \@、ではちょっと制御を乗っ取って来るぞお」
 	PRINTFORML 　そう言うと、%ANAME(アニー)%はテレポートして残骸と化した生体艦へと飛び移った。
 	PRINTFORMW 　
 	PRINTFORML 　%ANAME(アニー)%が制御を乗っ取っている間に研究所を軍は制圧したようだ。
@@ -410,8 +410,8 @@ IF RESULT == 99
 	CFLAG:NAME_TO_CHARA("アノニム"):所属 = 0
 	QUEST_PROGRESS:QUEST_ID = 6
 ELSE
-	PRINTFORML 　「母上……分かっているだろうが負ける度に敵戦力は増えるのだぞ？　ン？」
-	PRINTFORML 　「この段階なら何度負けても構わぬが……その度に母上は損をするのだぞ？」
+	PRINTFORML 　「\@IS_MALE(MASTER) ? 父上 # 母上 \@……分かっているだろうが負ける度に敵戦力は増えるのだぞ？　ン？」
+	PRINTFORML 　「この段階なら何度負けても構わぬが……その度に\@IS_MALE(MASTER) ? 父上 # 母上 \@は損をするのだぞ？」
 	PRINTFORML 　困惑した顔で%ANAME(アニー)%が%ANAME(MASTER)%に忠告する。
 	PRINTFORML 　どうにかしないと……。
 	PRINTFORMW 　
@@ -475,7 +475,7 @@ IF RESULT == 99
 	SELECTCASE QUEST_PROGRESS:61 
 		CASE 15
 			PRINTFORML 　敵を撃破し、一息ついた%ANAME(MASTER)%だったが、%ANAME(アニー)%曰く、
-			PRINTFORML 　「母上、もう次が来るぞ」
+			PRINTFORML 　「\@IS_MALE(MASTER) ? 父上 # 母上 \@、もう次が来るぞ」
 			PRINTFORML 　とのことだ、一旦港に帰っている暇などないようだ……。
 			PRINTFORMW 　
 			QUEST_PROGRESS:QUEST_ID = 5
@@ -517,17 +517,17 @@ ENDIF
 アニー = NAME_TO_CHARA("アノニム")
 
 PRINTFORML 　{QUEST_61_受注星}
-PRINTFORML 　「母上、良いか？」
+PRINTFORML 　「\@IS_MALE(MASTER) ? 父上 # 母上 \@、良いか？」
 PRINTFORML 　仕事を探している%ANAME(MASTER)%の下に%ANAME(アニー)%がひょっこり顔を出した。
 PRINTFORMW 　
 PRINTFORML 　「先日海賊を乗っ取った生体艦にまつわる仕事を受けたのは覚えているな？」
 PRINTFORML 　%ANAME(MASTER)%は頷いた。
 PRINTFORMW 　
 PRINTFORML 　「私の端末……あるハイヴが妙な信号を出しているのをキャッチしてな」
-PRINTFORML 　「母上は艦隊の長である故、その判断を仰ごうと思うてなあ」
+PRINTFORML 　「\@IS_MALE(MASTER) ? 父上 # 母上 \@は艦隊の長である故、その判断を仰ごうと思うてなあ」
 PRINTFORMW 　
 PRINTFORML 　「報酬は３０万と、オマケに私が制御を乗っ取った生体艦を考えているが」
-PRINTFORML 　「どうする母上、やるかあ？」
+PRINTFORML 　「どうする\@IS_MALE(MASTER) ? 父上 # 母上 \@、やるかあ？」
 PRINTFORML 
 CALL ASK_YN
 IF RESULT == 1
@@ -575,7 +575,7 @@ PRINTFORML 　「ふむ。では先方にはそう伝えておこう」
 PRINTFORML 　どうやら既に受注していたらしい、%ANAME(MASTER)%は勝手な真似を叱ろうとしたが、
 PRINTFORML 　%ANAME(アニー)%はニヤケ顔を崩さない、どこ吹く風のまま続けた。
 PRINTFORMW 
-PRINTFORML 　「勝手な真似？　母上を指定した仕事だぞ？」
+PRINTFORML 　「勝手な真似？　\@IS_MALE(MASTER) ? 父上 # 母上 \@を指定した仕事だぞ？」
 PRINTFORML 　詳しく話を聞くと、自分にそっくりな端末を置いて流れている情報を監視していたらしい。
 PRINTFORMW 
 PRINTFORML 　「マトリクスもそうだが現地に身を置く方が情報は入りやすいからな。それに私（ワレラ）の図体は目立つのだぞお」
@@ -600,7 +600,7 @@ SELECTCASE QUEST_PROGRESS:61
 		PRINTFORML 　「案の定研究所は乗っ取られて工場に作り替えられた様だなあ」
 		PRINTFORML 　「私（ワレラ）にとって肉も機械もさしたる違いは無い。信号で動く以上、な」
 		PRINTFORMW 　
-		PRINTFORML 　「母上がやることは１つ。研究所からワープアウトしてくる生体艦を撃破すること」
+		PRINTFORML 　「\@IS_MALE(MASTER) ? 父上 # 母上 \@がやることは１つ。研究所からワープアウトしてくる生体艦を撃破すること」
 		PRINTFORML 　「まあ軍も動いているし、そうそう難しいことにはならんよ」
 		PRINTFORMW 
 		PRINTFORML 　「多少戦力は増やした方が良いと思うがなあ」
