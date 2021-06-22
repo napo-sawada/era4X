@@ -89,7 +89,7 @@ SELECTCASE 部位
 				ENDIF
 			ENDIF
 			IF CHECK_STRBODY("愛撫", 属性) && !RAND:2
-				IF GET_BUSTSIZE(ARG:0) == 2
+				IF GET_BUSTSIZE(ARG:0) >= 2
 					LOCALS:0 = %LOCALS:0%%SPLIT_R("手に収まらないほどの：抱えるほどの")%%STR_BODY_MOD("胸＿末尾", ARG, 属性)%
 				ELSEIF GET_BUSTSIZE(ARG:0) == 1
 					LOCALS:0 = %LOCALS:0%%SPLIT_R("手から零れるほどの")%%STR_BODY_MOD("胸＿末尾", ARG, 属性)%
@@ -174,7 +174,7 @@ SELECTCASE 部位
 				ENDIF
 				LOCALS:0 = %LOCALS:0%%STR_BODY_MOD("胸＿末尾", ARG, 属性)%
 			ELSEIF CHECK_STRBODY("愛撫", 属性) && GET_BUSTSIZE(ARG:0) != -2 && !RAND:3
-				IF GET_BUSTSIZE(ARG:0) == 2
+				IF GET_BUSTSIZE(ARG:0) >= 2
 					LOCALS:0 = %LOCALS:0%%SPLIT_R("手に収まらないほどの：抱えるほどの：ぐにゃぐにゃと歪む")%
 				ELSEIF GET_BUSTSIZE(ARG:0) == 1
 					LOCALS:0 = %LOCALS:0%%SPLIT_R("手から零れるほどの：手に合わせて歪む")%
@@ -227,6 +227,34 @@ SELECTCASE 部位
 						ENDIF
 					ENDIF
 				ELSEIF GET_BUSTSIZE(ARG:0) == 2
+					IF GETBIT(TALENT:(ARG:0):淫乱系, 素質_淫乱_淫乳) && !RAND:3
+						LOCALS:0 = %LOCALS:0%淫らに成熟した%STR_BODY_MOD("胸＿末尾長", ARG, 属性)%
+					ELSEIF TALENT:(ARG:0):体格 == 体格_子供 && !RAND:3
+						LOCALS:0 = %LOCALS:0%%SPLIT_R("幼さに見合わない：子供らしからぬ：身体に釣り合わない：発育の良すぎる：大人顔負けの")%%STR_BODY_MOD("胸＿末尾長", ARG, 属性)%
+					ELSEIF TALENT:(ARG:0):体格 == 体格_小柄 && !RAND:3
+						LOCALS:0 = %LOCALS:0%%SPLIT_R("小柄な身体に見合わない：身体に釣り合わない")%%STR_BODY_MOD("胸＿末尾長", ARG, 属性)%
+					ELSE
+						IF !RAND:2
+							LOCALS:0 = %LOCALS:0%%SPLIT_R("重量感のある：まるで牛のような：溢れんばかりのサイズの：並外れたサイズの：はちきれそうな：スイカのような")%%STR_BODY_MOD("胸＿末尾長", ARG, 属性, "短")%
+						ELSE
+							LOCALS:0 = %LOCALS:0%%SPLIT_R("ずっしりとした")%%STR_BODY_MOD("胸＿末尾長", ARG, 属性)%
+						ENDIF
+					ENDIF
+				ELSEIF GET_BUSTSIZE(ARG:0) == 3
+					IF GETBIT(TALENT:(ARG:0):淫乱系, 素質_淫乱_淫乳) && !RAND:3
+						LOCALS:0 = %LOCALS:0%淫らに成熟した%STR_BODY_MOD("胸＿末尾長", ARG, 属性)%
+					ELSEIF TALENT:(ARG:0):体格 == 体格_子供 && !RAND:3
+						LOCALS:0 = %LOCALS:0%%SPLIT_R("幼さに見合わない：子供らしからぬ：身体に釣り合わない：発育の良すぎる：大人顔負けの")%%STR_BODY_MOD("胸＿末尾長", ARG, 属性)%
+					ELSEIF TALENT:(ARG:0):体格 == 体格_小柄 && !RAND:3
+						LOCALS:0 = %LOCALS:0%%SPLIT_R("小柄な身体に見合わない：身体に釣り合わない")%%STR_BODY_MOD("胸＿末尾長", ARG, 属性)%
+					ELSE
+						IF !RAND:2
+							LOCALS:0 = %LOCALS:0%%SPLIT_R("重量感のある：まるで牛のような：溢れんばかりのサイズの：並外れたサイズの：はちきれそうな：スイカのような")%%STR_BODY_MOD("胸＿末尾長", ARG, 属性, "短")%
+						ELSE
+							LOCALS:0 = %LOCALS:0%%SPLIT_R("ずっしりとした")%%STR_BODY_MOD("胸＿末尾長", ARG, 属性)%
+						ENDIF
+					ENDIF
+				ELSEIF GET_BUSTSIZE(ARG:0) == 4
 					IF GETBIT(TALENT:(ARG:0):淫乱系, 素質_淫乱_淫乳) && !RAND:3
 						LOCALS:0 = %LOCALS:0%淫らに成熟した%STR_BODY_MOD("胸＿末尾長", ARG, 属性)%
 					ELSEIF TALENT:(ARG:0):体格 == 体格_子供 && !RAND:3
@@ -662,7 +690,25 @@ ENDIF
 
 SELECTCASE ARGS:0
 	CASE "胸＿末尾"
-		IF GET_BUSTSIZE(ARG:0) == 2
+		IF GET_BUSTSIZE(ARG:0) == 4
+			IF RAND:2 && !CHECK_STRBODY("修飾", 親属性)
+				LOCALS:0 = %LOCALS:0%%SPLIT_R("奇乳：長乳")%
+			ELSE
+				SIF 長さ != 1
+					LOCALS:0 = %LOCALS:0%%SPLIT_R("大きすぎる：長大な：育ちすぎた：ロケットのような")%
+				SIF !CHECK_STRBODY("修飾", 親属性)
+					LOCALS:0 = %LOCALS:0%%SPLIT_R("胸：乳房")%
+			ENDIF
+		ELSEIF GET_BUSTSIZE(ARG:0) == 3
+			IF RAND:2 && !CHECK_STRBODY("修飾", 親属性)
+				LOCALS:0 = %LOCALS:0%%SPLIT_R("爆乳：巨乳")%
+			ELSE
+				SIF 長さ != 1
+					LOCALS:0 = %LOCALS:0%%SPLIT_R("大きすぎる：極巨大な：豊かすぎる：重々しい")%
+				SIF !CHECK_STRBODY("修飾", 親属性)
+					LOCALS:0 = %LOCALS:0%%SPLIT_R("胸：乳房")%
+			ENDIF
+		ELSEIF GET_BUSTSIZE(ARG:0) == 2
 			IF RAND:2 && !CHECK_STRBODY("修飾", 親属性)
 				LOCALS:0 = %LOCALS:0%%SPLIT_R("爆乳：巨乳")%
 			ELSE
@@ -712,7 +758,25 @@ SELECTCASE ARGS:0
 				LOCALS:0 = %LOCALS:0%%SPLIT_R("胸：乳房")%
 		ENDIF
 	CASE "胸＿末尾長"
-		IF GET_BUSTSIZE(ARG:0) == 2
+		IF GET_BUSTSIZE(ARG:0) == 4
+			IF RAND:2 && !CHECK_STRBODY("修飾", 親属性)
+				LOCALS:0 = %LOCALS:0%%SPLIT_R("魔乳：長乳：奇乳：バカ乳")%
+			ELSE
+				SIF 長さ != 1
+					LOCALS:0 = %LOCALS:0%%SPLIT_R("大きすぎる：膨れ上がった：超巨大な：豊かすぎる")%
+				SIF !CHECK_STRBODY("修飾", 親属性)
+					LOCALS:0 = %LOCALS:0%%SPLIT_R("胸：乳房：乳肉：乳塊")%
+			ENDIF
+		ELSEIF GET_BUSTSIZE(ARG:0) == 3
+			IF RAND:2 && !CHECK_STRBODY("修飾", 親属性)
+				LOCALS:0 = %LOCALS:0%%SPLIT_R("爆乳：豊乳：超乳：デカ乳")%
+			ELSE
+				SIF 長さ != 1
+					LOCALS:0 = %LOCALS:0%%SPLIT_R("大きな：重そうな：巨大な：豊かすぎる：豊満な")%
+				SIF !CHECK_STRBODY("修飾", 親属性)
+					LOCALS:0 = %LOCALS:0%%SPLIT_R("胸：乳房：乳肉：乳塊")%
+			ENDIF
+		ELSEIF GET_BUSTSIZE(ARG:0) == 2
 			IF RAND:2 && !CHECK_STRBODY("修飾", 親属性)
 				LOCALS:0 = %LOCALS:0%%SPLIT_R("爆乳：豊乳：巨乳：デカ乳")%
 			ELSE

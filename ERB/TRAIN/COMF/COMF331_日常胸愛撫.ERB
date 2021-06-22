@@ -558,10 +558,8 @@ FOR LOCAL:0, 0, MTAR_NUM
 				PRINTFORM  %ANAME(LOCAL:1)%の胸を揉み続けてやるとそれだけで感じまくって身体を跳ねさせ、
 				IF GET_BUSTSIZE(LOCAL:1) == 1
 					PRINTL 目の前でその巨乳を弾ませてこちらの目を楽しませてくれた
-				ELSEIF GET_BUSTSIZE(LOCAL:1) == 2
-					PRINTL 目の前でその爆乳を大きく弾ませてこちらの目を楽しませてくれた
-				ELSEIF GET_BUSTSIZE(LOCAL:1) == 3
-					PRINTL 目の前でその魔乳を大きく弾ませてこちらの目を楽しませてくれた
+				ELSEIF GET_BUSTSIZE(LOCAL:1) >= 2
+					PRINTFORML 目の前でその%TOSTR_BUSTSIZE(LOCAL:1)%を大きく弾ませてこちらの目を楽しませてくれた
 				ELSE
 					PRINTL 緩んだ表情で快楽に身を任せた
 				ENDIF
