@@ -1,0 +1,196 @@
+﻿;--------------------------
+; 元チュートリアル：白兵戦
+; 機械文明用のクエスト
+;--------------------------
+@QUEST_DESCRIPTION_58
+PRINTFORML 　
+PRINTFORML 　%ANAME(MASTER)%の前にナース・メックが現れた。
+PRINTFORML 　思考戦機を持つ%ANAME(MASTER)%に依頼したいことがあるようだ……。
+PRINTL
+RETURN
+
+;--------------------------
+; クエスト受注可能か
+;--------------------------
+@QUEST_ACCEPTABLE_58
+LOCAL:1 = 0
+FOR LOCAL, 0,CHARANUM
+	SIF TALENT:LOCAL:戦闘機械 >= 1 && CFLAG:LOCAL:所属 == CFLAG:MASTER:所属
+		LOCAL:1 ++
+NEXT
+SIF LOCAL:1 == 0
+	RETURN 0
+SIF QUEST_COMPLETE_DATE:58 == 0 || DAY - QUEST_COMPLETE_DATE:58 > 100
+	RETURN 1
+RETURN 0
+;--------------------------
+; クエストの名前を返却
+;--------------------------
+@QUEST_NAME_58
+RESULTS = 異常戦機の鎮圧・治療
+RETURN
+
+;--------------------------
+; クエスト本体
+;--------------------------
+@QUEST_BODY_58
+#DIM QUEST_ID = 58
+#DIM DYNAMIC JUDGE
+#DIM FIRST_LINE
+#DIM KOKANDO
+
+CALL GET_STAR_ID_FROM_POS(CHARACTER_POSITION)
+KOKANDO = REL_LIKE_COUNTRY:(STAR_OWNER:RESULT):国家ID_プレイヤー
+
+
+PRINTFORML 　
+PRINTFORML 　思考戦機を連れた%ANAME(MASTER)%に、ナース・メックが現れた。
+PRINTFORML 　名前の通りナースを思わせるかわいらしい女性型のメックだ――無表情なのが玉に瑕。
+PRINTFORML 　
+IF KOKANDO >= 800
+	PRINTFORML 　『エージェント：%ANAME(MASTER)%、あなたの貢献に多くの市民が感謝しています』
+	PRINTFORML 　『また、それ以上に医療従事者のあなたに名誉市民への推挙の署名が集められています』
+	PRINTFORML 　『――私も、その１人です』
+	PRINTFORML 　ほんの少しだけ、ナース・メックの人工スキンは朱を帯びている。
+	PRINTFORML 
+	PRINTFORML 　いつも通り異常な思考戦機の鎮圧に協力しようか？
+	PRINTFORML 
+ELSEIF KOKANDO >= 500
+	PRINTFORML 　『エージェント：%ANAME(MASTER)%、例によってメックへの新型ウィルスへの対処を要請します』
+	PRINTFORML 　%ANAME(MASTER)%を見かけたナース・メックの表情には薄い笑みが浮かんでいる……。
+	PRINTFORMW 
+	PRINTFORML 　さて、どうしようか……。
+ELSE
+	PRINTFORML 　『エトランゼ：%ANAME(MASTER)%、近頃敵対国家による新型ウィルスによる思考戦機の暴走が問題となっています』
+	PRINTFORML 　『抗体プログラムの投与で当該コンフリクトは解消できますが』
+	PRINTFORML 　『患者にはターロスiiiなどの強力な思考戦機も含まれている他』
+	PRINTFORMW 
+	PRINTFORML 　『不定期的なウィルスの変異もあって成果が思わしくないのが現状です』
+	PRINTFORMW 
+	PRINTFORML 　『よってエトランゼ：%ANAME(MASTER)%にはコンフリクトの解消を要請します』
+	PRINTFORML 　『当該コンフリクトが解消された場合、最低１万、最高１０万くれじっと……』
+	PRINTFORML 　『クレジットの報酬を約束します』
+	PRINTFORML 　ナース・メックはかわいらしい咳ばらいをして言い直した。
+	PRINTFORMW 
+	PRINTFORML 　『よろしいですか？』
+	PRINTFORML 
+ENDIF
+
+CALL ASK_YN("やろう","やらない")
+IF RESULT == 0
+	;白兵戦参加メンバーの初期化
+	CALL CC_INIT_MEMBER()
+	
+	FIRST_LINE = LINECOUNT
+	$CHOICE_LOOP
+	PRINTFORML 　『では、次の３区画からお選びください、下に行くほど高難易度です』
+	PRINTFORML 
+	PRINTBUTTON "　[裏路地]" , 1
+	PRINTFORML 　報酬：　１万
+	PRINTBUTTON "　[ジャンクヤード]" , 2
+	PRINTFORML 　報酬：　５万
+	PRINTBUTTON "　[汚染区画]" , 3
+	PRINTFORML 　報酬：１０万
+	INPUT
+	IF RESULT == 1
+		CALL CC_ADDMOB("DEFENDER", "暴走メックＡ", 1200, 1200, 25)
+		CALL CC_ADDMOB("DEFENDER", "暴走メックＢ", 1200, 1200, 25)
+		CALL CC_ADDMOB("DEFENDER", "暴走メックＣ", 1200, 1200, 55)
+		CALL CC_ADDMOB("DEFENDER", "汚染思考戦車Ａ", 2500, 2500, 55)
+		LOCAL:1 = 10
+		LOCAL:2 = 10000
+		LOCAL:3 = 10
+	ELSEIF RESULT == 2
+		CALL CC_ADDMOB("DEFENDER", "暴走メックＡ", 1800, 1800, 35)
+		CALL CC_ADDMOB("DEFENDER", "暴走メックＢ", 1800, 1800, 35)
+		CALL CC_ADDMOB("DEFENDER", "暴走メックＣ", 1800, 1800, 35)
+		CALL CC_ADDMOB("DEFENDER", "汚染思考戦車Ａ", 2500, 2500, 55)
+		CALL CC_ADDMOB("DEFENDER", "汚染思考戦車Ｂ", 2500, 2500, 55)
+		LOCAL:1 = 15
+		LOCAL:2 = 50000
+		LOCAL:3 = 15
+	ELSEIF RESULT == 3
+		CALL CC_ADDMOB("DEFENDER", "暴走メックＡ", 2200, 2200, 35)
+		CALL CC_ADDMOB("DEFENDER", "暴走メックＢ", 2200, 2200, 35)
+		CALL CC_ADDMOB("DEFENDER", "汚染思考戦車Ａ", 2800, 2800, 55)
+		CALL CC_ADDMOB("DEFENDER", "汚染思考戦車Ｂ", 2800, 2800, 55)
+		CALL CC_ADDMOB("DEFENDER", "汚染ターロスiiiＡ", 3800, 3800, 80)
+		CALL CC_ADDMOB("DEFENDER", "汚染ターロスiiiＢ", 3800, 3800, 80)
+		LOCAL:1 = 25
+		LOCAL:2 = 100000
+		LOCAL:3 = 30
+	ELSE
+		CLEARLINE LINECOUNT - FIRST_LINE
+		GOTO CHOICE_LOOP
+	ENDIF
+ELSE
+	IF KOKANDO >= 800
+		PRINTFORML 　『そうですか……』
+		PRINTFORML 　ナース・メックは俯きがちに、とぼとぼと立ち去って行った……。
+		PRINTFORML 
+	ELSEIF KOKANDO >= 500
+		PRINTFORML 　『そうですか……』
+		PRINTFORML 　%ANAME(MASTER)%の協力が得られないと見るや、ナース・メックは立ち去った。
+		PRINTFORML 　その背中にはわずかに悲しさを感じさせた……。
+	ELSE
+		PRINTFORML 　『そうですか、では他のエージェントに協力を要請します』
+		PRINTFORML 　%ANAME(MASTER)%の協力が得られないと見るや、ナース・メックは立ち去った。
+	ENDIF
+	RETURN 0
+ENDIF
+
+CALL QUEST_ANONYM_SQUAD_CHOICE
+	FINDELEMENT ANONYM_CQC_SELECTED, 1
+	IF RESULT == -1
+		PRINTFORML 　『気が変わりましたかエトランゼ：%ANAME(MASTER)%』
+		PRINTFORML 　『他のエージェントに依頼します』
+		PRINTFORML 　そう言うと、ナース・メックは立ち去った。
+		PRINTFORMW 　
+		RETURN 0
+	ENDIF
+
+FOR LOCAL, 0, CHARANUM
+	SIF ANONYM_CQC_SELECTED:LOCAL
+		CALL CC_ADDCHARA("ATTACKER", LOCAL)
+NEXT
+
+
+;白兵戦イベント呼出
+CALL CLOSE_COMBAT()
+JUDGE = RESULT
+
+;白兵戦経験値獲得処理
+
+;CLOSE_COMBAT()の戻り値は1 = 攻撃側勝利, 2 = 防御側勝利
+PRINTL
+IF JUDGE == 1
+	CALL CC_ADD_COMBAT_EXP(LOCAL:1)
+	PRINTFORML 　『エトランゼ：%ANAME(MASTER)%、見事な貢献です』
+	PRINTFORML 　機動力と攻撃力を失った汚染メック達に、ナースが淡々と抗体プログラムの投与を済ませていった。
+	PRINTFORMW 
+	PRINTFORML 　『直に彼らも本来のルーティンに戻るでしょう』
+	PRINTFORML 　『エトランゼ：%ANAME(MASTER)%の口座に報酬を振り込んでおきました』
+	PRINTFORML 　『エトランゼ：%ANAME(MASTER)%は休息を取り、次のコンフリクトの解消を行って下さい』
+	PRINTFORML 　そう言うと、ナース・メックは深々と頭を下げた。
+	PRINTFORMW 
+	CALL GET_STAR_ID_FROM_POS(CHARACTER_POSITION)
+	MONEY += LOCAL:2
+	REL_LIKE_COUNTRY:(STAR_OWNER:RESULT):国家ID_プレイヤー += LOCAL:3
+	QUEST_COMPLETE_DATE:58 = DAY
+ELSE 
+	LOCAL:1 = LOCAL:1 / 5
+	CALL CC_ADD_COMBAT_EXP(LOCAL:1)
+	PRINTFORML 　『エトランゼ：%ANAME(MASTER)%、コンフリクトの解消は失敗です』
+	PRINTFORML 　思った以上に患者は強力だった。
+	PRINTFORML 　命からがら%ANAME(MASTER)%達は撤退した……。
+	PRINTFORMW 
+ENDIF
+
+FOR LOCAL, 0 ,CHARANUM
+	IF ANONYM_CQC_SELECTED:LOCAL
+		BOARDING_SHIP_ID:LOCAL = PRE_BOARDING_SHIP_ID:LOCAL
+	ENDIF
+NEXT
+RETURN
+
+
