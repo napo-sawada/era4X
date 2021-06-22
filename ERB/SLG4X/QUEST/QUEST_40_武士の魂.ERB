@@ -1079,15 +1079,17 @@ SELECTCASE QUEST_PROGRESS:QUEST_ID
 		PRINTL
 		PRINTBUTTON "[2] 武士について", 2
 		PRINTL
-		PRINTBUTTON "[3] 皇国の現在について", 3
-		PRINTL
-		PRINTBUTTON "[4] 風の噂", 4
+		PRINTBUTTON "[3] 皇国の兵器について", 3
+		;PRINTL
+		;PRINTBUTTON "[4] 未定", 4
 		;PRINTL
 		;PRINTBUTTON "[5] 未定", 5
 		;PRINTL
 		;PRINTBUTTON "[6] 未定", 6
-		;PRINTL
-		;PRINTBUTTON "[7] 未定", 7
+		PRINTL
+		PRINTBUTTON "[7] 皇国の現在について", 7
+		PRINTL
+		PRINTBUTTON "[8] 風の噂", 8
 		PRINTL
 		PRINTBUTTON "[9] 戻る", 9
 			INPUT
@@ -1115,7 +1117,7 @@ SELECTCASE QUEST_PROGRESS:QUEST_ID
 					GOTO INPUT_LOOP
 				ELSEIF RESULT == 1
 					PRINTFORML 
-					PRINTFORML 「獣尾人について特筆すべきはまず、その感覚と身体能力の高さでしょう」
+					PRINTFORMW 「獣尾人について特筆すべきはまず、その感覚と身体能力の高さでしょう」
 					PRINTFORML
 					PRINTFORML 獣尾人は人間と獣を遺伝子的に組み合わせて生まれた、遺伝子強化人間。
 					PRINTFORML 鍛えた獣尾人は機械工学的インプラントを施されたサイボーグにさえ、生身で匹敵することがある。
@@ -1213,6 +1215,25 @@ SELECTCASE QUEST_PROGRESS:QUEST_ID
 				ELSEIF RESULT == 3
 					;皇国限定クエスト関連、今は模擬戦くらい。
 					PRINTFORML
+					PRINTFORMW 「皇国の艦船についてですか？」
+					PRINTFORMW 知っているのか？　と尋ねると、静流は頷いた。
+					PRINTFORMW 「ある程度……でよろしければ、ですが」
+					PRINTFORML 
+					CALL NANINANI_SHIZURU_3
+					CALL HITOIKI_SHIZURU_1
+					GOTO INPUT_LOOP
+				ELSEIF RESULT == 4
+					PRINTFORML
+					GOTO INPUT_LOOP
+				ELSEIF RESULT == 5
+					PRINTFORML
+					GOTO INPUT_LOOP
+				ELSEIF RESULT == 6
+					PRINTFORML
+					GOTO INPUT_LOOP
+				ELSEIF RESULT == 7
+					;皇国限定クエスト関連、今は模擬戦くらい。
+					PRINTFORML
 					PRINTFORMW 「現在の状況……そうですね。少なくとも皇国は平和なものでしょうか」
 					PRINTFORMW 多少賊が輸送船を狙う程度のことで、大きな問題は発生していないらしい。
 					IF QUEST_COMPLETE_DATE:24 + 100 > DAY
@@ -1225,49 +1246,12 @@ SELECTCASE QUEST_PROGRESS:QUEST_ID
 					PRINTFORMW 「他にも何かあれば、またお伝えしますね」
 					CALL HITOIKI_SHIZURU_1
 					GOTO INPUT_LOOP
-				ELSEIF RESULT == 4
-					;他国の限定クエスト関連。基本的にストーリークエスト情報など。
+				ELSEIF RESULT == 8
 					PRINTFORML 
 					PRINTFORML 「風の噂……そうですね」
 					PRINTFORML 静流は考え込む素振りで天井を見上げる。
-					IF QUEST_PROGRESS:34 == 0
-						PRINTFORML それから、これはあくまで風の噂なのですが、と理知的な瞳を向け、やや含みを持たせた様子で口にした。
-						PRINTFORML 「……統一連邦が統治する第三惑星では、反政府組織の動きが活発化しているのだとか」
-						PRINTFORML
-						PRINTFORML 銀河人民統一連邦――社会主義を掲げる大国であった。
-						PRINTFORML 民主化を掲げる反政府組織がこれまでなかった訳ではないが、彼らの活動が実を結んだことはない。
-						PRINTFORMW 意志はあっても力も金もない、搾取される側の人間達。国を相手に何かをするにはあまりに力が無かった。
-						PRINTFORML
-						PRINTFORMW 「中々優秀なようで、水面下で動きながらも統一連邦からの追及を躱し続けて……まだ力は弱いものの、地盤を固めて行っているようですね」
-						PRINTFORML これまでの反政府組織とは少し違うようです、と静流は続ける。
-						PRINTFORMW 「各国注視しているようで、皇国も同じく。これを切っ掛けに大きな騒動が起きるかも知れないと、色々と警戒しているようです」
-						PRINTFORML
-						PRINTFORML 確かに――別にそれが上手く行くかはともかく、国内が不安定になれば民主主義を掲げる敵対国と開戦の切っ掛けにもなるだろう。
-						PRINTFORML そして不安定な状況からは金の匂いも漂ってくる。
-						PRINTFORMW しかし何故、そのような情報を知っているのだろう？
-						PRINTFORML
-						PRINTFORML 「色んな人が少し漏らした話を合わせて精査して、軽く調べれば分かってくることもありますから」
-						PRINTFORMW 危ないことはしていません、と苦笑する。
-						PRINTFORML 「何かのお仕事に繋がるかも知れないとお教えしましたが……統一連邦は怖い国だと聞きます。くれぐれもお気をつけを」
-						PRINTFORMW 静流はそう口にする。
-					ELSE
-						PRINTFORML
-						PRINTFORML 「……今のところは。申し訳ありません」
-						PRINTFORMW あまり気にしないでいい、と%CALLNAME:MASTER%は苦笑した。
-					ENDIF
+					CALL NANINANI_SHIZURU_2
 					CALL HITOIKI_SHIZURU_1
-					GOTO INPUT_LOOP
-				ELSEIF RESULT == 5
-					PRINTFORML
-					GOTO INPUT_LOOP
-				ELSEIF RESULT == 6
-					PRINTFORML
-					GOTO INPUT_LOOP
-				ELSEIF RESULT == 7
-					PRINTFORML
-					GOTO INPUT_LOOP
-				ELSEIF RESULT == 8
-					PRINTFORML
 					GOTO INPUT_LOOP
 				ELSEIF RESULT == 9
 					PRINTFORML
@@ -1275,6 +1259,318 @@ SELECTCASE QUEST_PROGRESS:QUEST_ID
 					GOTO INPUT_LOOP
 				ENDIF
 
+;――――――――――――――――――――――――――――――――――――――――――――――――
+@NANINANI_SHIZURU_2
+;風の噂
+;――――――――――――――――――――――――――――――――――――――――――――――――
+	$INPUT_LOOP
+	DRAWLINE
+	IF QUEST_PROGRESS:34 == 0
+		PRINTBUTTON "[0] 統一連邦の反政府組織", 0
+		PRINTL
+	;ELSEIFで基本的に進行度分岐？　単純に割り当てボタンを増やした方がいいだろうか？
+	ENDIF
+	IF QUEST_PROGRESS:60 == 0 ;現状はちょっとした誘導程度。
+		PRINTBUTTON "[1] 肉の船と彼方からの呼び声", 1
+		PRINTL
+	ENDIF
+	IF QUEST_PROGRESS:35 == 0
+		PRINTBUTTON "[2] アイドル戦争", 2
+		PRINTL
+	ENDIF
+		;PRINTBUTTON "[3] 未定", 3
+		;PRINTL
+		;PRINTBUTTON "[4] 未定", 4
+		;PRINTL
+		;PRINTBUTTON "[5] 未定", 5
+		;PRINTL
+		;PRINTBUTTON "[6] 未定", 6
+		;PRINTL
+		;PRINTBUTTON "[7] 未定", 7
+		PRINTL
+		PRINTBUTTON "[9] 戻る", 9
+			INPUT
+				IF RESULT == 0
+					PRINTFORML
+					PRINTFORML これはあくまで風の噂なのですが、と理知的な瞳を向け、やや含みを持たせた様子で口にした。
+					PRINTFORMW 「……統一連邦が統治する第三惑星では、反政府組織の動きが活発化しているのだとか」
+					PRINTFORML
+					PRINTFORML 銀河人民統一連邦――社会主義を掲げる大国であった。
+					PRINTFORML 民主化を掲げる反政府組織がこれまでなかった訳ではないが、彼らの活動が実を結んだことはない。
+					PRINTFORMW 意志はあっても力も金もない、搾取される側の人間達。国を相手に何かをするにはあまりに力が無かった。
+					PRINTFORML
+					PRINTFORMW 「中々優秀なようで、水面下で動きながらも統一連邦からの追及を躱し続けて……まだ力は弱いものの、地盤を固めて行っているようですね」
+					PRINTFORML これまでの反政府組織とは少し違うようです、と静流は続ける。
+					PRINTFORMW 「各国注視しているようで、皇国も同じく。これを切っ掛けに大きな騒動が起きるかも知れないと、色々と警戒しているようです」
+					PRINTFORML
+					PRINTFORML 確かに――別にそれが上手く行くかはともかく、国内が不安定になれば民主主義を掲げる敵対国と開戦の切っ掛けにもなるだろう。
+					PRINTFORML そして不安定な状況からは金の匂いも漂ってくる。
+					PRINTFORMW しかし何故、そのような情報を知っているのだろう？
+					PRINTFORML
+					PRINTFORML 「色んな人が少し漏らした話を合わせて精査して、軽く調べれば分かってくることもありますから」
+					PRINTFORMW 危ないことはしていません、と苦笑する。
+					PRINTFORML 「何かのお仕事に繋がるかも知れないとお教えしましたが……統一連邦は怖い国だと聞きます。くれぐれもお気をつけを」
+					PRINTFORMW 静流はそう口にする。
+				ELSEIF RESULT == 1
+					PRINTFORML 
+					PRINTFORMW 「軍人達の間で、妙な船を見たという噂があるのだとか」
+					PRINTFORML 妙な船？　と聞き返すと彼女は頷き、妙な船です、と口にする。
+					PRINTFORMW その船はどうにも金属で出来たものではなく、生物のような外観をしているのだという。
+					PRINTFORML
+					PRINTFORML 「どこかの国が作った生体実験兵器か、突如目覚めた太古の遺産か、あるいは外宇宙から来た未知の生命体か」
+					PRINTFORMW まだ何も分かってはいないようですが、と静流は告げる。
+					PRINTFORML
+					PRINTFORML 「少し興味をくすぐられますね。個人的な見解で良いなら三つ目でしょうか」
+					PRINTFORML その理由は？　と尋ねると、耳をぴくりと静流は揺らし、指で示す。
+					PRINTFORMW 「何かの声を聞いた、と語る人もいると聞きました。獣尾人の中には特に、そうした感覚に優れる者がいますから」
+					PRINTFORML 
+					PRINTFORML 彼女が語るには、何かに呼びかけるような、そうした声を聞く者が何人かいたのだという。
+					PRINTFORML 切実に何かを求めて求めるような――まるで、赤子の泣き声のようだ、と。
+					PRINTFORML 
+					PRINTFORMW 「生物のような妙な船、何かを求める声……調べてみた限り時期は一致していますから、関連性もあるのではないかと」
+					PRINTFORML 
+					PRINTFORMW 特に根拠はありませんが、と静流は苦笑した。
+					PRINTFORML
+					PRINTFORMW そう言えば、妙な依頼があったような気がする、と%CALLNAME:MASTER%は記憶を探った。
+				ELSEIF RESULT == 2
+					PRINTFORML
+					PRINTFORMW 「最近は世界中でアイドルブームに火が点いているようですね」
+					PRINTFORML
+					PRINTFORML %CALLNAME:MASTER%が首を傾げると、人前で歌って踊るエンターテイナーの一種です、と簡単に静流は説明する。
+					PRINTFORMW 美少女や美男子がステージで曲や踊りのパフォーマンスを披露するもので、皇国では昔から根強い人気があったらしい。
+					PRINTFORML
+					PRINTFORMW 「現在は星間ネットワークを介して各国が国ぐるみでアイドルを前面に出して、銀河規模の一大産業になっていますよ」
+					PRINTFORML 
+					PRINTFORML %CALLNAME:MASTER%も流石に存在程度は知っていたが、それほどのものであったのか。
+					PRINTFORML 彼女が語るには、もはやそれはアイドル達による、国家の威信を賭けた代理戦争なのだと力強く語る。
+					PRINTFORML 最近の人気アイドル達から歌姫まで――アイドル業界の光と闇についても妙に詳しい。
+					PRINTFORMW 小一時間の力説であった。
+					PRINTFORML 
+					PRINTFORMW 「ち、違います……っ、まさか武家の娘がアイドルなどという軽薄な娯楽に現を抜かすなんてあり得ません」
+					PRINTFORML 
+					PRINTFORML 好きなのかと尋ねると慌てて否定する所を見るに、いかにも怪しい。
+					PRINTFORMW 『世情を知るためのちょっとした勉強』で知り得たにしてはあまりに詳しかった。
+					PRINTFORML 
+					PRINTFORMW 「こほん、と、ともかく……今は民主主義国家を中心に、大きなアイドルの祭典が行われているようですね」
+					PRINTFORML 
+					PRINTFORMW あまり詳しくは知りませんが、と取って付けたような言葉を加えて静流は告げる。
+					PRINTFORML 彼女の話では元々皇国の民間人の間で流行していた文化のようだが、静流の様子を見るに原因はそこだろう。
+					PRINTFORML 体面を重んじる武家の者たちは建前上、そのような娯楽に興じることは許されないらしい。
+					PRINTFORMW 他の国に主催を奪われた理由もその辺りにあるのだろう。難儀なことだった。
+					PRINTFORML 
+					PRINTFORMW しかし、語られる莫大な金の動き。
+					PRINTFORML 上手く人気アイドルを作り出せれば、%CALLNAME:MASTER%は馬鹿に出来ない利潤を手にできるかも知れない。
+					PRINTFORML
+					PRINTFORMW 「うぅ……ち、小さな頃は、アイドルになりたいだなんて、その……で、でも、お父様に叱られて……」
+					PRINTFORML
+					PRINTFORMW 将来の夢はアイドルだったらしい彼女を虐めつつ、%CALLNAME:MASTER%は思考を巡らせる。
+					PRINTFORML
+					PRINTFORMW 参戦するならば中心となる民主主義国家からが良いだろう。歌唱力のある人間も必要だ。
+				ELSEIF RESULT == 3
+					PRINTFORML
+				ELSEIF RESULT == 4
+					PRINTFORML
+				ELSEIF RESULT == 5
+					PRINTFORML
+				ELSEIF RESULT == 6
+					PRINTFORML
+				ELSEIF RESULT == 7
+					PRINTFORML
+				ELSEIF RESULT == 8
+					PRINTFORML
+				ELSEIF RESULT == 9
+					PRINTFORML
+				ELSE
+					PRINTFORML
+				ENDIF
+;――――――――――――――――――――――――――――――――――――――――――――――――
+@NANINANI_SHIZURU_3
+;兵器関係
+;――――――――――――――――――――――――――――――――――――――――――――――――
+	$INPUT_LOOP
+	DRAWLINE
+		PRINTBUTTON "[0] 皇国軍の戦術", 0
+		PRINTL
+		PRINTBUTTON "[1] 秋月級コルベット", 1
+		PRINTL
+		PRINTBUTTON "[2] 津軽級フリゲート", 2
+		PRINTL
+		PRINTBUTTON "[3] 豊後級駆逐艦", 3
+		PRINTL
+		PRINTBUTTON "[4] 大江戸級巡洋艦", 4
+		PRINTL
+		PRINTBUTTON "[5] 舞鶴級護衛空母", 5
+		PRINTL
+		PRINTBUTTON "[6] 大和級戦艦", 6
+		PRINTL
+		PRINTBUTTON "[7] 朱雀級機動武者", 7
+		;PRINTL
+		;PRINTBUTTON "[8] 未定", 8
+		PRINTL
+		PRINTBUTTON "[9] 戻る", 9
+			INPUT
+				IF RESULT == 0
+					PRINTFORML
+					PRINTFORMW 「他の軍に比べた皇国宇宙軍の特徴は何より、精強なる水雷戦隊の存在でしょうか」
+					PRINTFORML 
+					PRINTFORML 皇国が誇る水雷戦隊は確かに有名であった。
+					PRINTFORML 魚雷装備の小型艦を主軸とした皇国宇宙軍の一斉雷撃は、その練度の高さも相まって他国の大型艦を何隻も沈めている。
+					PRINTFORML
+					PRINTFORMW 「特にハーバルズ王国との会戦は有名でございますね。ご存じでしょうか？」
+					IF QUEST_PROGRESS:32 >= 4
+						PRINTFORMW 知っている、と答えると静流は頷く。
+						PRINTFORMW 「護衛艦から引き離した王国大型艦艇を小型艦の雷撃で一網打尽――皇国水雷戦隊の名を宇宙に轟かせた偉大な一戦ですね」
+						PRINTFORMW 王国は皇国の水雷戦隊を前に、その戦で空母と戦艦、巡洋艦八隻を失う大損害を受けたというのは有名な話であった。
+						PRINTFORMW 皇国軍人の誰もが学ぶ戦なのです、と彼女は微笑む。
+					ELSE
+						PRINTFORMW 首を横に振ると、静流は苦笑する。
+						PRINTFORMW 「護衛艦から引き離した王国大型艦艇を小型艦の雷撃で一網打尽――皇国水雷戦隊の名を宇宙に轟かせた偉大な一戦です」
+						PRINTFORMW どうにも王国は皇国の水雷戦隊を前に、空母と戦艦、そして巡洋艦八隻を失う大損害を受けたらしい。
+						PRINTFORMW 皇国軍人の誰もが学ぶ戦なのだと彼女は微笑む。
+					ENDIF
+					PRINTFORML
+					PRINTFORMW 「それもあって艦艇の多くはその水雷戦隊を活かすために設計されたものが多いですね」 
+					PRINTFORML 対大型艦に特化させることで小型艦はコストを下げ、数を揃えやすく
+					PRINTFORML 攻撃こそ最大の防御、まさに皇国という国を示すような小型艦艇達。
+					PRINTFORMW 多くの国家においては艦隊防空を担う盾、そんな小型艦さえ彼らにとっては敵を討つための槍である。
+					PRINTFORML
+					PRINTFORMW 「無論、攻撃に特化した分、応用が利かないという見方はありますが……この辺りは難しいところですね」
+					PRINTFORML 完全無欠の軍などはない。一長あれば一短あり、それは必然だろう。
+					PRINTFORMW その上で多くの国の軍人達が、もっとも効果的な戦闘ドクトリンに頭を捻っているのだから。
+					PRINTFORML 
+					PRINTFORMW 「正解があるならばきっと、どこの軍も同じ結論に至っていることでしょうし」
+					GOTO INPUT_LOOP
+				ELSEIF RESULT == 1
+					PRINTFORML
+					PRINTFORMW 「秋月級コルベットは皇国水雷戦隊の要と呼べる存在でしょうか」
+					PRINTFORML 
+					PRINTFORML 標準的な現行コルベットと比べて、やや旧式に当たるらしい。、
+					PRINTFORMW しかし今なお使われているのは必要最低限の性能とシンプルな機体構造から。
+					PRINTFORML
+					PRINTFORMW 「雷撃艦としては今なお十分な性能のコルベットでございますし、信頼性の高く、性能の差も僅かです」
+					PRINTFORML その分コストが安いのが大きいのだと静流は語る。
+					PRINTFORML 「接近雷撃は非常に危険なものでございますから、性能よりもコストを安く、数を揃えたい、という考えのようですね」 
+					PRINTFORMW 犠牲は付きものというと嫌な言い方ですが、と静流は目を伏せた。
+					PRINTFORML 
+					PRINTFORMW 「とはいえ、戦場とは残酷な世界……それも仕方ない事なのかも知れません」
+					GOTO INPUT_LOOP
+				ELSEIF RESULT == 2
+					PRINTFORML
+					PRINTFORMW 「津軽級フリゲートは皇国水雷戦隊の象徴的な艦艇でございますね」
+					PRINTFORML 
+					PRINTFORML 標準的な現行フリゲートと比べて、副砲一門を廃した代わりに魚雷発射管を計二基搭載。
+					PRINTFORMW まさに正真正銘の雷撃艦であった。
+					PRINTFORML
+					PRINTFORMW 「雷撃用フリゲートとしての攻撃力は凄まじいものがありますが……欠点は運動性能でしょうか」
+					PRINTFORML 魚雷発射管を二基搭載する犠牲は大きく、スラスター推力比には大きな悪影響を与えている。
+					PRINTFORML 「低コストな秋月級で数を揃えようとする理由も、恐らく津軽級にあるのでしょう。残酷な話ですが……」 
+					PRINTFORMW 木を隠すなら森、的は多い方が良い、ということか。
+					PRINTFORML 
+					PRINTFORMW 「戦死した兄は津軽級フリゲートの艦長を。お国のためとはいえ、違う船なら生き残れたのでしょうか……」
+					GOTO INPUT_LOOP
+				ELSEIF RESULT == 3
+					PRINTFORML
+					PRINTFORMW 「豊後級駆逐艦はやや旧式……水雷戦隊の護衛艦として設計されたようですね」
+					PRINTFORML 
+					PRINTFORML 標準的な現行駆逐艦と比べて、副砲一門を廃し、運動性能にやや劣る。
+					PRINTFORMW ただ、信頼性は高く、駆逐艦としてはコストパフォーマンスに優れた船であるらしい。
+					PRINTFORML
+					PRINTFORMW 「小型艦の敵は小型艦、雷撃装備の秋月級や津軽級では同じ小型艦が最大の敵でございますから」
+					PRINTFORML 敵コルベットやフリゲートを想定し、数を揃えるために今も豊後級を使っているのだという。
+					PRINTFORML 「同級の駆逐艦にはやや劣るとは言え、小型艦に対しては十分過ぎる装甲と火力……役割を担うに十分な性能でしょう」 
+					PRINTFORMW 確かに、単純な性能差で劣るとは言え、それで十分なのだろう。
+					PRINTFORML 
+					PRINTFORMW 「水雷戦隊の盾となる豊後級の艦長は、水雷戦隊においては強い敬意を向けられるそうです」
+					GOTO INPUT_LOOP
+				ELSEIF RESULT == 4
+					PRINTFORML
+					PRINTFORMW 「大江戸級巡洋艦はまさに皇国軍の屋台骨――皇国が誇る最新鋭巡洋艦です」
+					PRINTFORML 
+					PRINTFORML ダメージコントロールに優れる強固な船体構造と、大型のシールド用ジェネレーター。
+					PRINTFORMW 運動性維持のため装甲は多少犠牲になったものの、サイズからすれば信じられないほどの強固なシールドを展開できるらしい。
+					PRINTFORML
+					PRINTFORMW 「損耗率の激しい水雷戦隊の穴を埋めるべく、戦線維持能力と継戦能力の高さが特徴でしょうか」
+					PRINTFORML まさに骨の部分――水雷戦隊を打ち破ったとしても、頑強なる大江戸級。これを崩さぬ限りは勝利は無い。
+					PRINTFORML 「肉を割かれても骨は断たれぬ、そういう皇国軍の気概を示すような艦艇でございますね」 
+					PRINTFORMW 間を空ければすぐさま回復し、戦線復帰が行えるシールド主体の大江戸級――皇国の精神を体現する艦であった。
+					PRINTFORML 
+					PRINTFORMW 「父が大江戸級の艦長を。……とても良い艦だと、いつも口にしておられました」
+					GOTO INPUT_LOOP
+				ELSEIF RESULT == 5
+					PRINTFORML
+					PRINTFORMW 「舞鶴級護衛空母は近年設計された艦隊護衛空母でございますね」
+					PRINTFORML 
+					PRINTFORML 標準的な現行空母と比べやや小柄ながらも、十分な艦載機積載容量。
+					PRINTFORMW 激化する制宙権争いを勝ち取るべく、空母推進派の武士が中心となって考案した護衛空母であるらしい。
+					PRINTFORML
+					PRINTFORMW 「必要なのは艦載機の運用能力――副砲火力においては若干他国のそれに劣るようですが、空母はあくまで空母です」
+					PRINTFORML 最低限の自衛手段が備わっていればそれで良い、という考えの元、コストパフォーマンスを意識したらしい。
+					PRINTFORML 「皇国軍人は無駄を嫌いますから、やはりいつもコストを第一に考えるようで 」
+					PRINTFORMW 普通の空母からすれば秋月級二十隻分の金額が浮くとなれば、中々に馬鹿には出来ない。
+					PRINTFORML 
+					PRINTFORMW 「個人的にも、そういう考え方は嫌いではありませんね。無駄遣いは良くありませんし」
+					GOTO INPUT_LOOP
+				ELSEIF RESULT == 6
+					PRINTFORML
+					PRINTFORMW 「大和級はまさに、皇国の威信を賭けた最高傑作の戦艦と言えるでしょうか」
+					PRINTFORML 
+					PRINTFORML 超大型主砲を四門、皇国の艦船設計技術の全てを惜しみなくつぎ込んだ頑強な船体構造。
+					PRINTFORML まさに怪物と呼ぶべき超弩級艦――星系港に停泊する大和級には異様な威圧感を放っていた。
+					PRINTFORML 皇国は貧乏艦船しか作れない、などと揶揄されてはいたが、そうしたものもこの大和級を見れば口を噤むに違いない。
+					PRINTFORMW 果たしてこの要塞のような怪物艦をどうやって沈めれば良いのかと、途方に暮れてしまうだろう。
+					PRINTFORML
+					PRINTFORMW 「皇国の技術力の高さを他国に知らしめるため設計されたこの艦はまさに、怪物の一言でございますね」
+					PRINTFORML 少なくとも他国はこれほどの艦を建造できてはいないのだと静流は告げる。
+					PRINTFORML 「驚くべきは現行の戦艦二隻分で、この巨艦が建造されている、ということです」
+					PRINTFORML 常軌を逸した質量を動かすためには、単純にジェネレーターやスラスターを倍にすれば良いというものではない。
+					PRINTFORMW だというのに、まるで二隻の戦艦を単純に一纏めにしたようなこの戦艦は、既存の技術の一歩先へと踏み出していた。
+					PRINTFORML
+					PRINTFORMW 「これぞまさに皇国艦隊の象徴と呼ぶに相応しい戦艦……同じ皇国人として設計者達を誇りに思いますね」
+					GOTO INPUT_LOOP
+				ELSEIF RESULT == 7
+					PRINTFORML
+					PRINTFORMW 「朱雀級機動武者について語るには……そうですね、メックをご存じでしょうか？」
+					PRINTFORML 
+					PRINTFORML メックというのは地上戦にて用いられる人型兵器の総称であった。
+					PRINTFORML 通電により収縮する強靱な人工筋肉を用いた歩行戦車で、利点は四肢を有することによる操作性。
+					PRINTFORML 基本的に人間と同じ四肢を有するメックの操作は、自分の体を動かすように馴染みやすい。
+					PRINTFORMW 人間のように悪路を踏破し、遮蔽を使い、あらゆる火器を使用できる汎用性の高さから、各国で使用されていた。
+					PRINTFORML
+					PRINTFORMW 「戦車の整備性や信頼性、頑強さには劣るものの、不得手もあり、そして状況は選択肢と機動力が作るものです」
+					PRINTFORML 
+					PRINTFORML 強靱な人工筋肉による高い運動性能。
+					PRINTFORML メックは複雑な地形を利用し、その巨大さに関わらずまるで歩兵さながらの戦術連携を可能とする。
+					PRINTFORMW そこから発展し、宇宙空間に適応出来るように改修が行われたのが機動武者と呼ばれる存在であった。
+					PRINTFORML
+					PRINTFORMW 「元は宇宙空間における要塞攻略を視野に、密閉してスラスターを着けただけのメックだったのですが」
+					PRINTFORML 
+					PRINTFORML その後、スラスターに頼らない、人工筋肉による姿勢制御がＦＣＳ予測を困難にさせるという利点が見つかると、
+					PRINTFORML 本来はおまけであった宙間戦闘能力の強化を図り再設計。
+					PRINTFORML 更なる大型化とシールドの搭載によって、戦闘艦クラスの戦闘能力を手にするに至った。
+					PRINTFORMW それが朱雀級鎧武者と呼ばれる機体であるらしい。
+					PRINTFORML
+					PRINTFORMW 「バクシン党が使う天狗級はメック改修型の旧式機動武者……今では設計からもう別物ですね」
+					PRINTFORML
+					PRINTFORML 宇宙のみならず地上においても活躍できる機動武者は、いざとなれば帝の身辺を守るものにもなる。
+					PRINTFORML それ故、多くの武士に取って憧れの存在であったし、その多くは勲功によって与えられるもの。
+					PRINTFORMW 機動武者の所有は武家としての格を示すもので、その存在そのものが誉れであるのだという。
+					PRINTFORML
+					PRINTFORML そんなものを出会ったばかりの相手に渡そうとしたのかと尋ねると、
+					IF TALENT:MASTER:性別 > 0
+						PRINTFORML 「どうしてでしょう……ふふ、でも、何故だか%CALLNAME:MASTER%様にならばと思いましたから」
+						PRINTFORML などと静流は苦笑した。
+						PRINTFORML 「申し上げたとおり、運命だと感じたのですよ」 
+						PRINTFORMW そして微笑み、じっと%CALLNAME:MASTER%を見つめた。
+					ELSE
+						PRINTFORML 「旦那様を一目見たときに、この人はきっと、静流の運命の人だと気付いたのです」
+						PRINTFORML などと静流は笑い、身を寄せた
+						PRINTFORMW 「きっと、静流の全てはこの方のものだ、だなんて……」 
+						PRINTFORMW 女の直感です、と静流は耳朶をくすぐるように囁いた。
+					ENDIF
+					GOTO INPUT_LOOP
+				ELSE
+					PRINTFORML
+				ENDIF
 ;――――――――――――――――――――――――――――――――――――――――――――――――――――――――
 @INRAN_USAGI_1
 ;気が向いたら複数作って方向性を持たしたい
@@ -1369,7 +1665,7 @@ SELECTCASE QUEST_PROGRESS:QUEST_ID
 ;――――――――――――――――――――――――――――――――――――――――――――――――
 			PRINTFORML
 			PRINTFORML
-			SELECTCASE RAND:6
+			SELECTCASE RAND:7
 				CASE 0
 					PRINTFORMW 「あ、お茶を淹れ直しますね」
 					PRINTFORMW 話に一区切りつくと、彼女は笑顔で急須に湯を注いでくる。
@@ -1388,4 +1684,7 @@ SELECTCASE QUEST_PROGRESS:QUEST_ID
 				CASE 5
 					PRINTFORMW 「羊羹はいかがでしょう？」
 					PRINTFORMW 話に一区切りつくと、彼女は羊羹を勧めてきた。
+				CASE 6
+					PRINTFORMW 「ひとまずこのくらいでしょうか」
+					PRINTFORMW 話に一区切りつくと、彼女は%CALLNAME:MASTER%の様子を窺った。
 			ENDSELECT
