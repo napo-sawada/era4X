@@ -5,6 +5,8 @@
 SELECTCASE _戦術
   CASE 0
     CALL GB_NPC_TACTICS_0(_陣営)
+  CASE 1
+    CALL GB_NPC_TACTICS_1(_陣営)
 ENDSELECT
 
 ;---------------------------------------------------------
@@ -89,7 +91,7 @@ NEXT
 
 _ITER = 0
 ; 予備と待機を埋めていく
-WHILE GET_GB_TURN_COST_BY_SIDE(_陣営) * 250 < GB_COST:_陣営
+WHILE GET_GB_TURN_COST_BY_SIDE(_陣営) * 400 < GB_COST:_陣営
   FOR LOCAL, 0, 最大戦線数
     SIF 戦線名:LOCAL == 非アクティブ戦線名
       CONTINUE
@@ -106,6 +108,73 @@ WHILE GET_GB_TURN_COST_BY_SIDE(_陣営) * 250 < GB_COST:_陣営
       CALL DIVISION_PLACEMENT_FROM_TEMPLATE(20, _陣営, LOCAL, _ITER % 2 ? 前線配置_待機 # 前線配置_予備)
       CALL DIVISION_PLACEMENT_FROM_TEMPLATE(20, _陣営, LOCAL, _ITER % 2 ? 前線配置_待機 # 前線配置_予備)
     ENDIF
+  NEXT
+  _ITER ++
+WEND
+
+;---------------------------------------------------------
+; S03星系戦の戦術
+; 歩兵+戦車でとにかく時間を稼いで息切れを狙う戦法
+;---------------------------------------------------------
+@GB_NPC_TACTICS_1(_陣営)
+#DIM _陣営
+#DIM CONST _戦線継続ターン指数 = 100
+#DIM CONST _航空戦力抽出数 = 100
+#DIM DYNAMIC _前線_前線, 最大師団数
+#DIM DYNAMIC _前線_予備, 最大師団数
+#DIM DYNAMIC _前線_待機, 最大師団数
+#DIM DYNAMIC 勝利確定前線数
+#DIM DYNAMIC 突破前線リスト, 最大戦線数
+#DIM DYNAMIC _ITER
+#DIM DYNAMIC _GB_戦線数
+#DIM DYNAMIC _余剰航空戦力
+
+FOR LOCAL, 0, 最大戦線数
+  SIF 戦線名:LOCAL == 非アクティブ戦線名
+    CONTINUE
+  勝利確定前線数 ++
+NEXT
+IF 勝利確定前線数 % 2
+  勝利確定前線数 = 勝利確定前線数 / 2 + 1
+ELSE
+  勝利確定前線数 = 勝利確定前線数 / 2
+ENDIF
+
+CALL GB_REGISTER_DIVISION_TEMPLATE(20, "陸戦歩兵師団", 熟練度_徴集兵, 師団_機械化歩兵師団, 装備_A, 支援大隊_工兵大隊)
+CALL GB_REGISTER_DIVISION_TEMPLATE(21, "KV戦車部隊", 熟練度_正規兵, 師団_戦車師団, 装備_A, 支援大隊_工兵大隊)
+CALL GB_REGISTER_DIVISION_TEMPLATE(22, "対空歩兵師団", 熟練度_徴集兵, 師団_機械化歩兵師団, 装備_A, 支援大隊_対空砲大隊)
+
+; 前線を埋める
+
+FOR LOCAL, 0, 最大戦線数
+  SIF 戦線名:LOCAL == 非アクティブ戦線名
+    CONTINUE
+  _GB_戦線数 ++
+  CALL DIVISION_PLACEMENT_FROM_TEMPLATE(20, _陣営, LOCAL, 前線配置_前線)
+  CALL DIVISION_PLACEMENT_FROM_TEMPLATE(20, _陣営, LOCAL, 前線配置_前線)
+  CALL DIVISION_PLACEMENT_FROM_TEMPLATE(20, _陣営, LOCAL, 前線配置_前線)
+  CALL DIVISION_PLACEMENT_FROM_TEMPLATE(21, _陣営, LOCAL, 前線配置_前線)
+  CALL DIVISION_PLACEMENT_FROM_TEMPLATE(22, _陣営, LOCAL, 前線配置_前線)
+NEXT
+
+FOR LOCAL, 0, 最大戦線数
+  SIF 戦線名:LOCAL == 非アクティブ戦線名
+    CONTINUE
+  GB_前線配備機数:_陣営:LOCAL = GB_AIRCRAFT:_陣営 / _GB_戦線数
+NEXT
+
+
+_ITER = 0
+; 予備と待機を埋めていく
+WHILE GET_GB_TURN_COST_BY_SIDE(_陣営) * 280 < GB_COST:_陣営
+  FOR LOCAL, 0, 最大戦線数
+    SIF 戦線名:LOCAL == 非アクティブ戦線名
+      CONTINUE
+    CALL DIVISION_PLACEMENT_FROM_TEMPLATE(20, _陣営, LOCAL, _ITER % 2 ? 前線配置_待機 # 前線配置_予備)
+    CALL DIVISION_PLACEMENT_FROM_TEMPLATE(20, _陣営, LOCAL, _ITER % 2 ? 前線配置_待機 # 前線配置_予備)
+    CALL DIVISION_PLACEMENT_FROM_TEMPLATE(20, _陣営, LOCAL, _ITER % 2 ? 前線配置_待機 # 前線配置_予備)
+    CALL DIVISION_PLACEMENT_FROM_TEMPLATE(21, _陣営, LOCAL, _ITER % 2 ? 前線配置_待機 # 前線配置_予備)
+    CALL DIVISION_PLACEMENT_FROM_TEMPLATE(22, _陣営, LOCAL, _ITER % 2 ? 前線配置_待機 # 前線配置_予備)
   NEXT
   _ITER ++
 WEND

@@ -1,0 +1,76 @@
+﻿;--------------------------
+; !!レジスタンスのと 56を好きな番号に変える！!
+; レジスタンスの女
+; ここにクエストの説明
+;--------------------------
+
+
+;--------------------------
+; クエスト受注可能か
+;--------------------------
+@QUEST_ACCEPTABLE_56
+SIF CHARACTER_POSITION != レジスタンスアジト
+	RETURN 0
+RETURN QUEST_PROGRESS:34 >= 3
+
+;--------------------------
+; クエストの名前を返却
+;--------------------------
+@QUEST_NAME_56
+SETCOLOR 0X00FF00
+RESULTS = レジスタンスの女 PART {QUEST_PROGRESS:56 + 1}
+RETURN
+
+;--------------------------
+; クエスト本体
+;--------------------------
+@QUEST_BODY_56
+#DIM CONST QUEST_ID = 56
+
+SELECTCASE QUEST_PROGRESS:QUEST_ID
+	CASE 0
+		PRINTFORML レジスタンスアジトの一角で一人練っていると、一人の女が寄ってきた
+		PRINTFORML その手にはよく分からない緑色の茶らしきものが入った器が二つ
+		PRINTFORMW 思わず顔を引きつらせるが、女は気がつかなかったようで%CALLNAME:MASTER%の隣に遠慮なく座ってきた
+		PRINTL
+		PRINTFORML 「どうぞ、新入りさん」
+		PRINTFORML お茶の入った器を渡してくる女。その顔は好奇心に満ちており、%CALLNAME:MASTER%のことが気になっているようだ
+		PRINTFORMW %CALLNAME:MASTER%はお礼を言ってお茶を受け取ったが口をつけることなく、代わりに女の顔を見返した
+		PRINTL
+		PRINTFORML 整った可愛らしい顔立ちの女である。年は二十代前半といったところか
+		PRINTFORML そして顔を見ていたはずなのに、うっすら視界に入ってくる巨乳。いや、超乳と行ったほうがいいだろうか
+		PRINTFORMW HENTAI-COMICSでしか見ないような大きな胸が、いやがおうにも視界に入ってくる
+		PRINTL
+		PRINTFORML %CALLNAME:MASTER%は鋼の意志で胸ではなく目を見つめると、用件を尋ねた
+		PRINTFORML 「用件なんてないよ。ただ世間話でもどうかなって」
+		PRINTFORMW 女はそういうと、ズズッとお茶を啜った。どうやら飲んでも大丈夫な液体のようである
+		PRINTL
+		PRINTFORML 「最近リーダーの顔が銀河人民統一連邦に割れてからというもの、新人さんなんて全然入ってこなかったからさ。物珍しさで見に来ちゃった」
+		PRINTFORML 「あ、言い忘れてた。私はエカテリーナ。エカって呼んでね」
+		PRINTFORMW 名乗り、握手を求めてくるエカ。%CALLNAME:MASTER%も名乗り返すと、その手を握った。銃を握ったことのない柔らかな一般女性の手だ。なぜこんな女性がレジスタンスに参加しているのだろうか。
+		PRINTL
+		PRINTFORML 少し気になりはしたが、初対面で聞くこともないだろう。%CALLNAME:MASTER%が黙っていると、エカが話を続けた
+		PRINTFORML 「%CALLNAME:MASTER%は何屋さんなの？ここにいるみんなは腕っぷしで闘う戦士ばかりだけど、%CALLNAME:MASTER%は違うようだし」
+		PRINTFORMW はて、自分は何屋なのか。%CALLNAME:MASTER%は答えあぐねてしまった。%CALLNAME:MASTER%自身、定職についているわけでもないし、レジスタンスで決まった役割を持っているわけでもないからだ
+		PRINTL
+		PRINTFORML 考えあぐねているとエカは手を振って考え込もうとする%CALLNAME:MASTER%を止めた。その際、大きな胸が派手に震えた
+		PRINTFORML 「あっ、言いたくないなら言わなくていいよ。ここは訳ありの人もたくさんいるから、答えづらいことは答えないのが暗黙の決まりみたいなものなの」
+		PRINTFORMW 「%CALLNAME:MASTER%はミステリアスな人ってことにするね。それでミステリアスな%CALLNAME:MASTER%は一人で何してたの？」
+		PRINTL
+		PRINTFORML 素直に次の作戦を考えていたことを伝えると、エカは目をキラキラさせた
+		PRINTFORML 「すごーい、作戦を考えるなんて、映画に出てくる参謀みたいだね。私そういう難しいことは考えられないから、尊敬しちゃうな」
+		PRINTFORMW 嫌味なく褒めてくるエカ。人好きのする笑顔で、人の懐に潜り込むのが上手そうだ
+		PRINTL
+		PRINTFORML 「私、腕っぷしも頭も全然ダメダメだから、お茶を入れることくらいしかできないんだよね。あ、飲んでよお茶。冷めちゃうよ？」
+		PRINTFORML 「私も何か得意なことがあったらなぁ。レジスタンスのみんなに貢献できるのに」
+		PRINTFORML 「あ、ごめんね、愚痴っぽくなっちゃって。明るいのが私の唯一の長所なのに」
+		PRINTFORMW 彼女のことをよく知らないので、%CALLNAME:MASTER%は肯定も否定もしないでおいた
+		PRINTL
+		PRINTFORML 「それじゃあ邪魔しちゃ悪いから私いくね。それじゃあまたね〜」
+		PRINTFORMW エカはそう言ってそのまま歩き去っていった
+		QUEST_PROGRESS:QUEST_ID = 1
+	CASE 1
+		PRINTFORML エカは忙しそうにお茶を配っている
+		RETURN
+ENDSELECT
+

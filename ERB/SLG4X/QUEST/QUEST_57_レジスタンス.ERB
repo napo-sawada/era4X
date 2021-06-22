@@ -1,0 +1,135 @@
+﻿;--------------------------
+; !!レジスタンスと 57を好きな番号に変える！!
+; レジスタンス
+; ここにクエストの説明
+;--------------------------
+
+
+;--------------------------
+; クエスト受注可能か
+;--------------------------
+@QUEST_ACCEPTABLE_57
+SIF CHARACTER_POSITION != レジスタンスアジト
+	RETURN 0
+RETURN QUEST_PROGRESS:34 >= 3
+
+;--------------------------
+; クエストの名前を返却
+;--------------------------
+@QUEST_NAME_57
+SETCOLOR 0X00FF00
+RESULTS = レジスタンス PART {QUEST_PROGRESS:57 + 1}
+RETURN
+
+;--------------------------
+; クエスト本体
+;--------------------------
+@QUEST_BODY_57
+#DIM CONST QUEST_ID = 57
+
+SELECTCASE QUEST_PROGRESS:QUEST_ID
+	CASE 0
+		PRINTFORML %CALLNAME:MASTER%はアイザックに誘われて、%CALLNAME:MASTER%は白兵の練習をすることになった
+		PRINTFORML 「レジスタンスという危険な活動に参加する以上、最低限身を守る術を身につけてないといけない」
+		PRINTFORML 「仕掛けられることもあれば仕掛けることもたくさんあるからな。だからお前には手加減した俺を倒せるくらいには強くなってほしい」
+		PRINTFORML 「どうだ、準備はいいか？」
+		CALL ASK_YN
+		SIF RESULT
+			RETURN
+		PRINTFORML 「よし、いくぞ」
+		CALL CC_INIT()
+		CALL CC_ADDCHARA("ATTACKER", MASTER)
+		CALL CC_ADDMOB("DEFENDER", "アイザック(手加減)", 1500, 1500, 50)
+		;白兵戦イベント呼出
+		CALL CLOSE_COMBAT()
+		IF RESULT == 2
+			PRINTFORML %CALLNAME:MASTER%はアイザックにのされてしまった
+			PRINTFORML 「おいおい、そんなんじゃレジスタンスなんてやってられないぞ」
+			PRINTFORMW バケツで水をかけられ目を覚ました%CALLNAME:MASTER%に、アイザックは呆れ顔だ...
+			PRINTFORMW その後、一日かけてみっちり鍛え上げられた
+			DAY ++
+		ELSE
+			PRINTFORML 「よし、いいぞ。それだけの実力があれば、並大抵の兵士には負けないだろう」
+			PRINTFORML 「ただし、戦いは数だ。お前だけ強くても意味がない。強い仲間がいなければ、数の暴力の前になすすべもなく負けることになるだろう」
+			PRINTFORMW 「金があるなら思考戦車やメックを買うという方法もあるが……まあそこはお前に任せる。とりあえず、これからもよろしくな」
+			PRINTFORMW %CALLNAME:MASTER%とアイザックは握手をし、その場を後にした
+			QUEST_PROGRESS:QUEST_ID = 1
+		ENDIF
+		CALL CC_ADD_COMBAT_EXP(5)
+	CASE 1
+		PRINTFORML %CALLNAME:MASTER%とアイザックは宇宙港の隅で飯がてら話をしていた
+		PRINTFORML 「今後の目標について話していなかったな。国家転覆と言っても、何をどうすればいいのか分からないだろう？」
+		PRINTFORMW %CALLNAME:MASTER%はうなずいて見せた。どちらかというより、アイザックとレジスタンスの活動方針を知りたかった
+		PRINTL
+		$INPUT_LOOP
+		PRINTFORML 「国家転覆の大まかな手順を説明するぞ。」
+		PRINTFORML 「まずは艦隊戦に勝利すること。銀河人民統一連邦のS03に駐留する防衛部隊を撃破し、星間国家としての戦力を奪う」
+		PRINTFORML 「次に地上戦。抵抗する体制側の勢力を地上戦力で撃破するんだ。これを速やかに完了させないと内戦になり、国土が荒廃しちまう。そうしたらなんのための国家転覆か分からん」
+		PRINTFORMW 「最後に国民を納得させること。これはどのフェーズでも実行可能で、国民の半数以上を我々の支持者にしていないと仮に地上戦で勝利しても反乱を起こされ内戦が起こる」
+		PRINTL
+		PRINTFORML 「まとめると、艦隊戦、地上戦、国民の取り込み。この三つが肝になる。次は細かい説明をするぞ」
+		PRINTFORMW アイザックはそういうと、一口携帯食をかじり、一息入れる
+		PRINTL
+		PRINTFORML 「まず第一に資金を集める。何をするにも金が必要だ」
+		PRINTFORML 「その次に協力者を集める。非戦闘員のな。非戦闘員の数が体制側より少ないと、例え国家転覆に成功しても内乱が起こってしまうからな」
+		PRINTFORMW 「非戦闘員の協力者を集めながら、同時に戦闘員も集める。そして重要なのが、戦闘員の人数と同数の補給物資、充足を補填することだ」
+		PRINTL
+		PRINTFORML 「戦闘員と充足、この二つのうち少ないほうがコストの値になる。なんのコストかって？ 地上戦のコストだよ」
+		PRINTFORMW 「地上戦はコストを支払って師団を揃える事になる。戦いは数だ。できる限りたくさんのコストを用意できるよう、戦闘員と充足を補充しておかなくてはならない」
+		PRINTL
+		PRINTFORML 「また、地上戦のオプションとして航空機と戦車がある。戦車は強力な兵科で、歩兵やメック以上の装甲を持っており戦場の花形とも言われている」
+		PRINTFORMW 「抜きたい戦線、抜かれたくない戦線には戦車師団がいると安心だ。なぜなら戦車の装甲は貫通されない場合ダメージを1/8にできるからだ」
+		PRINTL
+		PRINTFORML 「次に航空機。これも非常に重要だ。航空戦で劣勢な勢力は、劣勢な分前線師団に空爆を受ける事になる」
+		PRINTFORML 「俺の持論だが、航空劣勢の前線は絶対に勝てない。航空機を揃えられないなら対空砲大隊を入れた対空部隊を用意しろ」
+		PRINTFORMW 「ただ問題なのが、戦車も航空機もバカ高いってことだ。だからここで研究が役に立つ」
+		PRINTL
+		PRINTFORML 「レジスタンスの宇宙港で行える[特殊技術研究]は完了させると戦車や航空機の開発費を激減させることができる」
+		PRINTFORML 「ここで最初の話に戻るのだが、[特殊技術研究]は研究者がいないと行えない。研究者は非戦闘員が100万人いれば1人はいるから、こう言った意味でも非戦闘員を集めることは重要だ」
+		PRINTFORMW 「研究員をさらってくる作戦もあるが、はっきり言って熟練の超能力兵や強力な戦車が無いと攻略不可能だろう。強力な白兵戦力が無い場合は大人しく非戦闘員の指示を集めたほうがいい」
+		PRINTL
+		PRINTFORML どうだ、わかったか?
+		CALL ASK_YN()
+		SIF RESULT
+			GOTO INPUT_LOOP
+		PRINTFORMW 「よし、それじゃあ次は実際に戦闘をシミュレーションしてみよう」
+		QUEST_PROGRESS:QUEST_ID = 2
+	CASE 2
+		PRINTFORML 「地上戦のシミュレーションだ。俺が銀河人民統一連邦で防衛側をやる。お前は攻め側だ」
+		PRINTFORML 「いいか？敵は防御力とコストパフォーマンスに優れた歩兵師団を主軸に敵の息切れを狙ってくる」
+		PRINTFORMW 「攻め手はとにかく火力の高い兵科で戦線を無理やりこじ開けろ。持久戦に持ち込まれると負けるぞ」
+		CALL GROUND_BATTLE_INIT
+		PRINTFORML 「まずは師団テンプレートの編集からだ」
+		PRINTFORMW 「この間も言ったが、対空部隊は入れておけよ。防御力の高い的には特に航空戦力が有効だからな」
+		CALL SELECT_EDIT_DIVISION
+		CALL GB_DEFINE_TOTAL_COST(GB_攻撃側, 3000000)
+		CALL GB_DEFINE_TOTAL_COST(GB_防御側, 3000000)
+		CALL GB_DEFINE_AIRCRAFT(GB_攻撃側, 1000)
+		CALL GB_DEFINE_AIRCRAFT(GB_防御側, 1000)
+		CALL GB_ADD_BATTLE_FRONT("首都")
+		CALL GB_ADD_BATTLE_FRONT("第二都市")
+		CALL GB_ADD_BATTLE_FRONT("第三都市")
+		CALL GB_ADD_BATTLE_FRONT("工業都市")
+		CALL GB_ADD_BATTLE_FRONT("歓楽都市")
+		CALL GB_ADD_BATTLE_FRONT("研究都市")
+		PRINTFORML 「次は事前準備だ」
+		PRINTFORML 「[師団配置]から各戦線の前線 予備 待機に師団を配置しろ」
+		PRINTFORMW 「前線には限界まで師団を配置しろよ。それと[航空師団配備]から航空戦力を各戦線に配備するのも忘れるな」
+		PRINTL
+		PRINTFORMW 「勝利条件は半数の戦線で勝利するか、相手の充足……コストを0にすることだ。よし、いくぞ」
+		PRINTL
+		CALL GB_PREPARATION_PHASE(GB_攻撃側)
+		CALL GB_AUTO_PREPARATION(GB_防御側, 1)
+		CALL GROUND_BATTLE_START(GB_攻撃側)
+		IF RESULT == GB_攻撃側勝利
+			PRINTFORML 「素晴らしい手腕だ。お前は戦術家の才能があるようだな」
+			PRINTFORMW アイザックは嬉しそうに手を叩いて%CALLNAME:MASTER%を賛美した
+		ELSE
+			PRINTFORML 「俺の勝ちだな。いいところまではやれたが」
+			PRINTFORMW 「注力する戦線は限定しろ。満遍なく注力すると、泥沼になって補充切れで負けるぞ」
+		ENDIF
+		QUEST_PROGRESS:QUEST_ID = 3
+	CASE 3
+		PRINTFORML 「申し訳ないが我々には宇宙戦力が足りない。はっきり言ってパトロンがいない限りお前の艦隊だけでS03の防衛艦隊を撃破してもらうことになるだろう」
+		RETURN
+ENDSELECT
