@@ -13,6 +13,9 @@ RETURN
 ; クエスト受注可能か
 ;--------------------------
 @QUEST_ACCEPTABLE_58
+CALL GET_STAR_ID_FROM_POS(CHARACTER_POSITION)
+SIF STAR_OWNER:RESULT != 国家ID_機械文明
+	RETURN 0
 LOCAL:1 = 0
 FOR LOCAL, 0,CHARANUM
 	SIF TALENT:LOCAL:戦闘機械 >= 1 && CFLAG:LOCAL:所属 == CFLAG:MASTER:所属
@@ -46,7 +49,6 @@ KOKANDO = REL_LIKE_COUNTRY:(STAR_OWNER:RESULT):国家ID_プレイヤー
 PRINTFORML 　
 PRINTFORML 　思考戦機を連れた%ANAME(MASTER)%に、ナース・メックが現れた。
 PRINTFORML 　名前の通りナースを思わせるかわいらしい女性型のメックだ――無表情なのが玉に瑕。
-PRINTFORML 　
 IF KOKANDO >= 800
 	PRINTFORML 　『エージェント：%ANAME(MASTER)%、あなたの貢献に多くの市民が感謝しています』
 	PRINTFORML 　『また、それ以上に医療従事者のあなたに名誉市民への推挙の署名が集められています』
@@ -83,42 +85,76 @@ IF RESULT == 0
 	
 	FIRST_LINE = LINECOUNT
 	$CHOICE_LOOP
-	PRINTFORML 　『では、次の３区画からお選びください、下に行くほど高難易度です』
+	IF KOKANDO >= 800
+		PRINTFORML 　『では、次の４区画からお選びください、下に行くほど高難易度です』
+		PRINTFORML 　『最後の区画は極めて危険度の高い地域です。エージェント：%ANAME(MASTER)%ならば解決は可能だと考えられます』
+		PRINTFORML 　『ですが……、いえなんでも』
+		PRINTFORMW 
+	ELSE
+		PRINTFORML 　『では、次の３区画からお選びください、下に行くほど高難易度です』
+	ENDIF
 	PRINTFORML 
-	PRINTBUTTON "　[裏路地]" , 1
+	PRINTBUTTON "　[裏路地　　　　]" , 1
 	PRINTFORML 　報酬：　１万
 	PRINTBUTTON "　[ジャンクヤード]" , 2
 	PRINTFORML 　報酬：　５万
-	PRINTBUTTON "　[汚染区画]" , 3
+	PRINTBUTTON "　[汚染区画　　　]" , 3
 	PRINTFORML 　報酬：１０万
+	IF KOKANDO >= 800
+		SETCOLOR カラー_警告
+		PRINTBUTTON "　[封鎖区画　　　]" , 4
+		PRINTFORML 　報酬：５０万
+		RESETCOLOR
+	ENDIF
+	PRINTL 
+	PRINTL 
 	INPUT
 	IF RESULT == 1
+		CALL QUEST_ANONYM_SQUAD_CHOICE(5)
 		CALL CC_ADDMOB("DEFENDER", "暴走メックＡ", 1200, 1200, 25)
 		CALL CC_ADDMOB("DEFENDER", "暴走メックＢ", 1200, 1200, 25)
 		CALL CC_ADDMOB("DEFENDER", "暴走メックＣ", 1200, 1200, 55)
 		CALL CC_ADDMOB("DEFENDER", "汚染思考戦車Ａ", 2500, 2500, 55)
+		CALL CC_ADDMOB("ATTACKER", "コマンドポスト", 2500, 2500, 20, 50)
 		LOCAL:1 = 10
 		LOCAL:2 = 10000
 		LOCAL:3 = 10
 	ELSEIF RESULT == 2
+		CALL QUEST_ANONYM_SQUAD_CHOICE(5)
 		CALL CC_ADDMOB("DEFENDER", "暴走メックＡ", 1800, 1800, 35)
 		CALL CC_ADDMOB("DEFENDER", "暴走メックＢ", 1800, 1800, 35)
 		CALL CC_ADDMOB("DEFENDER", "暴走メックＣ", 1800, 1800, 35)
 		CALL CC_ADDMOB("DEFENDER", "汚染思考戦車Ａ", 2500, 2500, 55)
 		CALL CC_ADDMOB("DEFENDER", "汚染思考戦車Ｂ", 2500, 2500, 55)
+		CALL CC_ADDMOB("ATTACKER", "コマンドポスト", 2500, 2500, 20, 50)
 		LOCAL:1 = 15
 		LOCAL:2 = 50000
 		LOCAL:3 = 15
 	ELSEIF RESULT == 3
+		CALL QUEST_ANONYM_SQUAD_CHOICE(5)
 		CALL CC_ADDMOB("DEFENDER", "暴走メックＡ", 2200, 2200, 35)
 		CALL CC_ADDMOB("DEFENDER", "暴走メックＢ", 2200, 2200, 35)
 		CALL CC_ADDMOB("DEFENDER", "汚染思考戦車Ａ", 2800, 2800, 55)
 		CALL CC_ADDMOB("DEFENDER", "汚染思考戦車Ｂ", 2800, 2800, 55)
 		CALL CC_ADDMOB("DEFENDER", "汚染ターロスiiiＡ", 3800, 3800, 80)
 		CALL CC_ADDMOB("DEFENDER", "汚染ターロスiiiＢ", 3800, 3800, 80)
+		CALL CC_ADDMOB("ATTACKER", "コマンドポスト", 2500, 2500, 20, 50)
 		LOCAL:1 = 25
 		LOCAL:2 = 100000
 		LOCAL:3 = 30
+	ELSEIF RESULT == 4 && KOKANDO >= 800
+		CALL QUEST_ANONYM_SQUAD_CHOICE(4)
+		CALL CC_ADDMOB("DEFENDER", "汚染思考戦車Ａ", 3200, 3200, 65)
+		CALL CC_ADDMOB("DEFENDER", "汚染思考戦車Ｂ", 3200, 3200, 65)
+		CALL CC_ADDMOB("DEFENDER", "汚染ターロスiiiＡ", 3800, 3800, 80)
+		CALL CC_ADDMOB("DEFENDER", "汚染ターロスiiiＢ", 3800, 3800, 80)
+		CALL CC_ADDMOB("DEFENDER", "汚染ターロスiiiＣ", 3800, 3800, 80)
+		CALL CC_ADDMOB("DEFENDER", "汚染ターロスiv-Pk", 5200, 5200, 110,50)
+		CALL CC_ADDMOB("ATTACKER", "コマンドポスト", 2500, 2500, 20, 50)
+		CALL CC_ADDMOB("ATTACKER", "コマンドポスト", 2500, 2500, 20, 50)
+		LOCAL:1 = 45
+		LOCAL:2 = 500000
+		LOCAL:3 = 100
 	ELSE
 		CLEARLINE LINECOUNT - FIRST_LINE
 		GOTO CHOICE_LOOP
@@ -139,21 +175,42 @@ ELSE
 	RETURN 0
 ENDIF
 
-CALL QUEST_ANONYM_SQUAD_CHOICE
-	FINDELEMENT ANONYM_CQC_SELECTED, 1
-	IF RESULT == -1
+FINDELEMENT ANONYM_CQC_SELECTED, 1
+IF RESULT == -1
+	IF KOKANDO >= 500
+		PRINTFORML 　『気が変わりましたかエージェント：%ANAME(MASTER)%』
+		PRINTFORML 　『我々はあなたの協力を必要としています』
+		PRINTFORML 　『ですが、事前の準備は怠るべきではありません』
+	ELSE
 		PRINTFORML 　『気が変わりましたかエトランゼ：%ANAME(MASTER)%』
 		PRINTFORML 　『他のエージェントに依頼します』
-		PRINTFORML 　そう言うと、ナース・メックは立ち去った。
-		PRINTFORMW 　
-		RETURN 0
 	ENDIF
+	PRINTFORML 　そう言うと、ナース・メックは立ち去った。
+	PRINTFORMW 　
+	RETURN 0
+ELSE
+	PRINTFORML 　『了解しました、では行きましょう』
+	PRINTFORMW 
+ENDIF
+
+PRINTFORML 　ナース・メックの先導で、%ANAME(MASTER)%達は当該区画までやって来た。
+PRINTFORML 　正気でないメック達がお互いに壊し合う、メック達からすると地獄の様な光景だ。
+PRINTFORMW 
+PRINTFORML 　『\@KOKANDO >= 500 ? エージェント # エトランゼ \@：%ANAME(MASTER)%、目的地に到着しました』
+PRINTFORML 　『これよりコマンドポストを敷設し、指向性誘導シグナルを展開します』
+PRINTFORML 　『誘導シグナルには軽度の誘導能力を持ち、正常な思考が出来ないメックに対する釣り餌になります』
+PRINTFORML 　言っているそばから、暴走したメック達がこちらに銃口を向けている！
+PRINTFORMW 
+PRINTFORML 　『コマンドポストを守りながら、市民を取り押さえて下さい』
+PRINTFORML 　『コマンドポストにも自衛能力はありますが、最低限のものでしかありません』
+PRINTFORML 　破壊されても制圧出来れば良いが、守り切るに越したことはないだろう。
+PRINTFORML 　※破壊されても報酬に変化はありません。
+PRINTFORMW 
 
 FOR LOCAL, 0, CHARANUM
 	SIF ANONYM_CQC_SELECTED:LOCAL
 		CALL CC_ADDCHARA("ATTACKER", LOCAL)
 NEXT
-
 
 ;白兵戦イベント呼出
 CALL CLOSE_COMBAT()
@@ -165,12 +222,32 @@ JUDGE = RESULT
 PRINTL
 IF JUDGE == 1
 	CALL CC_ADD_COMBAT_EXP(LOCAL:1)
-	PRINTFORML 　『エトランゼ：%ANAME(MASTER)%、見事な貢献です』
-	PRINTFORML 　機動力と攻撃力を失った汚染メック達に、ナースが淡々と抗体プログラムの投与を済ませていった。
-	PRINTFORMW 
-	PRINTFORML 　『直に彼らも本来のルーティンに戻るでしょう』
-	PRINTFORML 　『エトランゼ：%ANAME(MASTER)%の口座に報酬を振り込んでおきました』
-	PRINTFORML 　『エトランゼ：%ANAME(MASTER)%は休息を取り、次のコンフリクトの解消を行って下さい』
+	IF KOKANDO >= 800 && LOCAL:1 == 45
+		PRINTFORML 　『エージェント：%ANAME(MASTER)%、常日頃の協力に感謝します』
+		PRINTFORML 　『本来であれば禁止されていることですが』
+		PRINTFORML 　『我々はあなたに対し、ある種の感情を抱いています』
+		PRINTFORML 　『それは感謝であり、敬意であり』
+		PRINTFORMW 
+		PRINTFORML 　『好意です』
+		PRINTFORML 　ナース・メックは心からの笑みを浮かべている。
+		PRINTFORML 　『この病が撲滅されるまで我々は戦い続けますが』
+		PRINTFORML 　『どうかそこに、あなたの名前があらんことを』
+		PRINTFORMW 　
+	ELSEIF KOKANDO >= 500
+		PRINTFORML 　『エージェント：%ANAME(MASTER)%、常日頃の協力に感謝します』
+		PRINTFORML 　『――無辜の市民の命を救ってくださった事を』
+		PRINTFORML 　ナース・メックは微笑んでいる。
+		PRINTFORMW 
+		PRINTFORML 　『本ミッションは定期的に発行しています』
+		PRINTFORML 　『再びエージェント：%ANAME(MASTER)%が受ける事を我々は待ち望んでいます』
+	ELSE
+		PRINTFORML 　『エトランゼ：%ANAME(MASTER)%、見事な貢献です』
+		PRINTFORML 　機動力と攻撃力を失った汚染メック達に、ナースが淡々と抗体プログラムの投与を済ませていった。
+		PRINTFORMW 
+		PRINTFORML 　『直に彼らも本来のルーティンに戻るでしょう』
+		PRINTFORML 　『エトランゼ：%ANAME(MASTER)%の口座に報酬を振り込んでおきました』
+		PRINTFORML 　『エトランゼ：%ANAME(MASTER)%は休息を取り、次のコンフリクトの解消を行って下さい』
+	ENDIF
 	PRINTFORML 　そう言うと、ナース・メックは深々と頭を下げた。
 	PRINTFORMW 
 	CALL GET_STAR_ID_FROM_POS(CHARACTER_POSITION)
@@ -180,7 +257,7 @@ IF JUDGE == 1
 ELSE 
 	LOCAL:1 = LOCAL:1 / 5
 	CALL CC_ADD_COMBAT_EXP(LOCAL:1)
-	PRINTFORML 　『エトランゼ：%ANAME(MASTER)%、コンフリクトの解消は失敗です』
+	PRINTFORML 　『コンフリクトの解消は失敗です』
 	PRINTFORML 　思った以上に患者は強力だった。
 	PRINTFORML 　命からがら%ANAME(MASTER)%達は撤退した……。
 	PRINTFORMW 
