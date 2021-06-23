@@ -131,14 +131,6 @@ FOR LOCAL, 0, 3
 		;LOCALS = マーチ級駆逐艦
 		CALL INIT_PRESET_SHIP(国家ID_社会主義, 星系座標ID:LOCAL, マーチ級駆逐艦, , マーチ級駆逐艦)
 	NEXT
-	FOR LOCAL:1, 0, 5
-		;LOCALS = TS1輸送船
-		CALL INIT_PRESET_SHIP(国家ID_社会主義, 星系座標ID:LOCAL,　汎用輸送船, , 汎用輸送船)
-	NEXT
-	FOR LOCAL:1, 0, 5
-		;LOCALS = WS1作業船
-		CALL INIT_PRESET_SHIP(国家ID_社会主義, 星系座標ID:LOCAL,　汎用作業船, , 汎用作業船)
-	NEXT
 NEXT
 
 ;--------------------------
@@ -216,14 +208,6 @@ FOR LOCAL, 3, 5
 		;LOCALS = アリス
 		CALL INIT_PRESET_SHIP(国家ID_企業連合, 星系座標ID:LOCAL, 汎用空母, , 汎用空母)
 	NEXT
-	FOR LOCAL:1, 0, 5
-		;LOCALS = ボブ
-		CALL INIT_PRESET_SHIP(国家ID_企業連合, 星系座標ID:LOCAL, 汎用輸送船, , 汎用輸送船)
-	NEXT
-	FOR LOCAL:1, 0, 5
-		;LOCALS = マーカス
-		CALL INIT_PRESET_SHIP(国家ID_企業連合, 星系座標ID:LOCAL, 汎用作業船, , 汎用作業船)
-	NEXT
 NEXT
 
 
@@ -300,14 +284,6 @@ FOR LOCAL, 5, 8
 		;LOCALS = メルカバー級空母
 		CALL INIT_PRESET_SHIP(国家ID_民主主義, 星系座標ID:LOCAL, メルカバー級空母, , メルカバー級空母)
 	NEXT
-	FOR LOCAL:1, 0, 5
-		;LOCALS = ポーター
-		CALL INIT_PRESET_SHIP(国家ID_民主主義, 星系座標ID:LOCAL, 汎用輸送船, , 汎用輸送船)
-	NEXT
-	FOR LOCAL:1, 0, 5
-		;LOCALS = ワーカー
-		CALL INIT_PRESET_SHIP(国家ID_民主主義, 星系座標ID:LOCAL, 汎用作業船, , 汎用作業船)
-	NEXT
 NEXT
 
 ;--------------------------
@@ -363,14 +339,6 @@ FOR LOCAL, 0, 1
 	;LOCALS = クイーン
 	CALL INIT_PRESET_SHIP(国家ID_アレス宗教, 星系座標ID:8, クイーン級空母, , クイーン級空母)
 NEXT
-FOR LOCAL, 0, 5
-	;LOCALS = 使途の足
-	CALL INIT_PRESET_SHIP(国家ID_アレス宗教, 星系座標ID:8, 汎用輸送船, , 汎用輸送船)
-NEXT
-FOR LOCAL, 0, 5
-	;LOCALS = 使途の手
-	CALL INIT_PRESET_SHIP(国家ID_アレス宗教, 星系座標ID:8, 汎用作業船, , 汎用作業船)
-NEXT
 
 
 
@@ -411,14 +379,6 @@ NEXT
 FOR LOCAL, 0, 10
 	;LOCALS = カラドボルグ級戦艦
 	CALL INIT_PRESET_SHIP(国家ID_機械文明, 星系座標ID:9, カラドボルグ級戦艦, , カラドボルグ級戦艦)
-NEXT
-FOR LOCAL, 0, 5
-	;LOCALS = ストーン
-	CALL INIT_PRESET_SHIP(国家ID_機械文明, 星系座標ID:9, 汎用輸送船, , 汎用輸送船)
-NEXT
-FOR LOCAL, 0, 5
-	;LOCALS = ドリル
-	CALL INIT_PRESET_SHIP(国家ID_機械文明, 星系座標ID:9, 汎用作業船, , 汎用作業船)
 NEXT
 
 ;--------------------------
@@ -548,10 +508,6 @@ NEXT
 FOR LOCAL, 0, 2
 	CALL INIT_PRESET_SHIP(国家ID_豊秋津皇国, 星系座標ID:10, 舞鶴級護衛空母, , 舞鶴級護衛空母)
 NEXT
-FOR LOCAL, 0, 5
-	CALL INIT_PRESET_SHIP(国家ID_豊秋津皇国, 星系座標ID:10, 汎用輸送船, , 汎用輸送船)
-	CALL INIT_PRESET_SHIP(国家ID_豊秋津皇国, 星系座標ID:10, 汎用作業船, , 汎用作業船)
-NEXT
 
 
 ;--------------------------
@@ -609,12 +565,6 @@ FOR LOCAL, 0, 2
 NEXT
 CALL INIT_PRESET_SHIP(国家ID_ハールバルズ, 星系座標ID:11, ルー級空母, , ルー級空母)
 CALL INIT_PRESET_SHIP(国家ID_ハールバルズ, 星系座標ID:12, ルー級空母, , ルー級空母)
-FOR LOCAL, 0, 5
-	CALL INIT_PRESET_SHIP(国家ID_ハールバルズ, 星系座標ID:11, 汎用輸送船, , 汎用輸送船)
-	CALL INIT_PRESET_SHIP(国家ID_ハールバルズ, 星系座標ID:12, 汎用輸送船, , 汎用輸送船)
-	CALL INIT_PRESET_SHIP(国家ID_ハールバルズ, 星系座標ID:11, 汎用作業船, , 汎用作業船)
-	CALL INIT_PRESET_SHIP(国家ID_ハールバルズ, 星系座標ID:12, 汎用作業船, , 汎用作業船)
-NEXT
 
 
 ; 各星の初期化

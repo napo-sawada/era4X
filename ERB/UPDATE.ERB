@@ -32,6 +32,7 @@ RETURNF LASTLOAD_VERSION < GET_VERSION_VALUE(バージョン文字列)
 ;-------------------------------------------------
 @UPDATE
 #DIM 強制引き継ぎフラグ
+#DIM DYNAMIC SHIP_ID
 
 強制引き継ぎフラグ = 0
 
@@ -58,6 +59,14 @@ IF !マップ掃除フラグ
 	CALL QUEST_RELEASE_POINT(24, -1)
 	マップ掃除フラグ = 1
 ENDIF
+
+FOR SHIP_ID, 0, MAX_SHIP
+	IF SHIP_COUNTRY:SHIP_ID != 国家ID_プレイヤー && GROUPMATCH(SHIP_CATEGORY:SHIP_ID, 輸送船, 作業船)
+		CALL GET_SHIP_TOTAL_HP(SHIP_ID)
+		SHIP_DAMAGE:SHIP_ID = RESULT
+	ENDIF
+NEXT
+CALL RETIRE_BROKEN_SHIP
 
 RETURN
 ; 以下今後の参考のために残しているだけ

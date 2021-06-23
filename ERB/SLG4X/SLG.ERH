@@ -268,6 +268,7 @@
 
 ;レート関連
 #DIM CONST STOCK_TARGET = 2000
+#DIM CONST MAX_STOCK_TARGET = 10000
 
 ;-------------------------
 ; 宇宙港関連
