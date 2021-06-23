@@ -132,4 +132,10 @@ SELECTCASE QUEST_PROGRESS:QUEST_ID
 	CASE 3
 		PRINTFORML 「申し訳ないが我々には宇宙戦力が足りない。はっきり言ってパトロンがいない限りお前の艦隊だけでS03の防衛艦隊を撃破してもらうことになるだろう」
 		RETURN
+		PRINTFORML 「その代わり地上戦で役に立てるよう、新しいパトロンを見つけてきた」
+		PRINTFORMW 「そのパトロンの効果で、秘密工場を建てられることになった。お前はどこに立てるのがいいと思う？」
+		PRINTL
+		CALL BUILD_SECRET_FACTORY_47(0)
+		PRINTFORML 「そうか、わかった」
+		RETURN
 ENDSELECT

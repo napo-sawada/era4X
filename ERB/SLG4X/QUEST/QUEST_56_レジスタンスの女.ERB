@@ -9,15 +9,25 @@
 ; クエスト受注可能か
 ;--------------------------
 @QUEST_ACCEPTABLE_56
+CALL GET_STAR_ID_FROM_POS(CHARACTER_POSITION)
+SIF QUEST_PROGRESS:56 == 3 && RESULT >= 0 && QUEST_PROGRESS:34 >= 3
+	RETURN 1
 SIF CHARACTER_POSITION != レジスタンスアジト
 	RETURN 0
-RETURN QUEST_PROGRESS:34 >= 3
+SIF QUEST_PROGRESS:34 < 3
+	RETURN 0
+IF QUEST_PROGRESS:56 == 0
+	RETURN 1
+ELSEIF QUEST_PROGRESS:56 == 1 && QUEST_PROGRESS:57 >= 1
+	RETURN 1
+ENDIF
+RETURN 0
 
 ;--------------------------
 ; クエストの名前を返却
 ;--------------------------
 @QUEST_NAME_56
-SETCOLOR 0X00FF00
+SETCOLOR 0XFF9999
 RESULTS = レジスタンスの女 PART {QUEST_PROGRESS:56 + 1}
 RETURN
 
@@ -70,7 +80,54 @@ SELECTCASE QUEST_PROGRESS:QUEST_ID
 		PRINTFORMW エカはそう言ってそのまま歩き去っていった
 		QUEST_PROGRESS:QUEST_ID = 1
 	CASE 1
-		PRINTFORML エカは忙しそうにお茶を配っている
+		PRINTFORML 「聞いたよー、アイザックと喧嘩して勝ったんでしょ？すごいね!」
+		PRINTFORML 宇宙港の隅で今後の作戦を考えていた%CALLNAME:MASTER%のもとに、エプロン姿のエカがやって来た
+		PRINTFORML 喧嘩したわけではないし、相手も本気だったわけではない。%CALLNAME:MASTER%がそう訂正すると、エカは難しい顔をした
+		PRINTFORMW 「あれ、どこで聞き間違ったんだろう。ま、いいか。どちらにしろアイザックに勝ったんでしょ。あの人昔はハートマン軍曹って呼ばれるほど強いし怖い軍人だったんだよ」
+		PRINTL
+		PRINTFORML 「ハートマン軍曹っていうのは確か、大昔の映画の鬼軍曹だったかな。そんな人に勝てるんだから、自身を持っていいと思うよ」
+		PRINTFORML 明るい笑顔を浮かべるエカ。そんな彼女に、%CALLNAME:MASTER%は話題を変えてエプロンをつけている理由を聞いた
+		PRINTFORMW 「これ？そうそう、私もお茶を入れるだけじゃなくて、ご飯も作れるようになろうかなって。だってみんな美味しくなさそうな四角いおやつみたいなご飯ばかり食べてるんだもん」
+		PRINTL
+		PRINTFORML 携帯固形栄養食のことか。確かに傍目から見るとお菓子みたいだし、それにしてはまずそうな見た目をしている
+		PRINTFORML 「実は料理とかあまり得意じゃないけど、これから頑張って覚えるんだ。よかったら味見役手伝ってね」
+		PRINTFORMW ああ、と%CALLNAME:MASTER%がうなずいて見せると、エカは嬉しそうに笑顔を浮かべる
+		PRINTL
+		PRINTFORML 「やったあ。なんかみんな、味見役を頼むと急にどこかに行っちゃうんだよね。ひどいよね」
+		PRINTFORML 口をへの字に曲げるエカ。もしかして、いや、もしかしなくても早まった答えをしてしまったかもしれない
+		PRINTFORMW 「約束だよ。破ったら怒るからね」
+		PRINTL
+		QUEST_PROGRESS:QUEST_ID = 2
 		RETURN
+	CASE 2
+		PRINTFORML 「ねえ、お願いがあるんだけどいい？」
+		PRINTFORML 「料理の研究のために料理の本のデータが欲しいんだけど、私はここから出られないからさ。代わりに買ってきてくれない？」
+		PRINTFORMW 「どの国でも売ってる有名な本だから、どこかの星に立ち寄った時についでにでもさ。ね、お願い」
+		PRINTL
+		PRINTFORML それくらいなら構わないだろう。%CALLNAME:MASTER%はその依頼を引き受けた。
+		PRINTFORML 「ありがとう！　買ってきてくれたら、お礼に手料理御馳走しちゃうね」
+		PRINTFORMW 早まったかもしれない……
+		PRINTL
+		QUEST_PROGRESS:QUEST_ID = 3
+		RETURN
+	CASE 3
+		PRINTFORML %CALLNAME:MASTER%は宇宙港にあった本屋でエカに指定された本のデータを購入した
+		PRINTFORML これをレジスタンスの宇宙港にいるエカに届けたらミッション完了だ
+		QUEST_PROGRESS:QUEST_ID = 4
+		RETURN
+	CASE 4
+		PRINTFORML 「欲しかった本、買ってきてくれたの？ありがとう！さすが%CALLNAME:MASTER%〜」
+		PRINTFORML %CALLNAME:MASTER%が買ってきた料理の本のデータを嬉しそうに受け取るエカ
+		PRINTFORML 「これで勉強したら、約束通り手料理を御馳走してあげる。楽しみにしててね」
+		PRINTFORMW 勉強して料理の腕が上げてくれるのなら、楽しみにできるだろう。%CALLNAME:MASTER%も頷くと笑って見せた
+		PRINTL
+		PRINTFORML 「あ！ 初めて笑ったところ見たかも。%CALLNAME:MASTER%ていつも無表情かしかめつらだから」
+		PRINTFORML 「えへへ。それじゃあ料理の腕が上がった頃にまたきてね。約束だよ」
+		PRINTFORMW エカはそう言って、厨房の方へ歩いて行った
+		PRINTL
+		QUEST_PROGRESS:QUEST_ID = 5
+		RETURN
+	CASE 5
+		PRINTFORML エカは料理の本とにらめっこしている
 ENDSELECT
 
