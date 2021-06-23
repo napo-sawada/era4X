@@ -10,13 +10,15 @@
 ;--------------------------
 @QUEST_ACCEPTABLE_56
 CALL GET_STAR_ID_FROM_POS(CHARACTER_POSITION)
+SIF QUEST_PROGRESS:56 == 6 || QUEST_PROGRESS:56 == 5
+	RETURN 0
 SIF QUEST_PROGRESS:56 == 3 && RESULT >= 0 && QUEST_PROGRESS:34 >= 3
 	RETURN 1
 SIF CHARACTER_POSITION != レジスタンスアジト
 	RETURN 0
 SIF QUEST_PROGRESS:34 < 3
 	RETURN 0
-IF QUEST_PROGRESS:56 == 0
+IF GROUPMATCH(QUEST_PROGRESS:56, 0, 2, 4, 5)
 	RETURN 1
 ELSEIF QUEST_PROGRESS:56 == 1 && QUEST_PROGRESS:57 >= 1
 	RETURN 1
@@ -128,6 +130,35 @@ SELECTCASE QUEST_PROGRESS:QUEST_ID
 		QUEST_PROGRESS:QUEST_ID = 5
 		RETURN
 	CASE 5
+		PRINTFORML 「お願いがあるの」
+		PRINTFORML %CALLNAME:MASTER%がいつものように宇宙港の隅で作戦を練っていると、エカが歩み寄ってきた
+		PRINTFORMW その顔はどこか思い詰めているようだった
+		PRINTL
+		PRINTFORML 「私を%CALLNAME:MASTER%の仲間にして欲しいの」
+		PRINTFORML すでにレジスタンスの仲間じゃないのか？ そう口にする前に、エカが言葉を続けた
+		PRINTFORMW 「レジスタンスの仲間としてじゃなくて、%CALLNAME:MASTER%の組織？みたいのに入れて欲しいなって」
+		PRINTL
+		PRINTFORML いったいどういうわけか。それを聞くと、エカは暗い顔をする
+		PRINTFORML 「私、ここにいても先がないなって。活動に協力できるわけでもないのにい続けていいのかなって。それをアイザックに相談したら、%CALLNAME:MASTER%に話をしてみろって」
+		PRINTFORMW 要は面倒臭い話をアイザックに押しつけられたようだ。全く迷惑な話である
+		PRINTL
+		PRINTFORML しかし、と%CALLNAME:MASTER%は改めてエカを見つめて思う。
+		PRINTFORML エカは可愛い。そしてスタイルがいい。アイドルなんかやらせたら、すぐに人気が出るんじゃないか
+		PRINTFORMW 「ねえ、いい？」
+		PRINTL
+		PRINTFORML いつも明るい彼女が泣きそうな顔で縋ってくるのは、グッとくるものがある
+		PRINTFORMW %CALLNAME:MASTER%はなし崩し的にエカを仲間にすることになった
+		PRINTL
+		PRINTFORMW あとでアイザックから聞いた話だが、男っけの多いレジスタンスにおいて彼女の存在は必ずトラブルの原因になると危惧されていたらしい。
+		PRINTFORMW だからと言って押し付けるなという話だが、美女が一人仲間にできたのだからいいとしよう……
+		PRINTL
+		SETCOLOR 0XFF9999
+		PRINTW エカが仲間になった
+		RESETCOLOR
+		QUEST_PROGRESS:QUEST_ID = 6
+		CFLAG:NAME_TO_CHARA("エカ"):所属 = 国家ID_プレイヤー
+		RETURN
+	CASEELSE
 		PRINTFORML エカは料理の本とにらめっこしている
 ENDSELECT
 

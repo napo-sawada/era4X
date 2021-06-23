@@ -1430,7 +1430,7 @@ RETURNF "不明"
 ;-------------------------------------------------
 @TOSTR_BUSTSIZE(ARG:0)
 #FUNCTIONS
-ARG:0 = MAX(-2, MIN(2, ARG:0))
+ARG:0 = MAX(-2, MIN(4, ARG:0))
 SELECTCASE ARG:0
 	CASE -2
 		RETURNF "絶壁"
