@@ -304,7 +304,7 @@ TOTAL = RAND:(聴衆/2) * 結果 / 100 + 聴衆 / 2
 IF 作戦方針 == 0 || 作戦方針 == 2
 	PRINTFORML 今回の作戦により、合計{TOTAL}人の非戦闘員が仲間になった。
 	R非戦闘員 += TOTAL
-	G非戦闘員 -= TOTAL
+	GB_非戦闘員:2 -= TOTAL
 	IF TOTAL > 10000
 		SELECTCASE TOTAL
 			CASE 0 TO 10000
@@ -324,14 +324,14 @@ IF 作戦方針 == 0 || 作戦方針 == 2
 		R支持率 += 獲得支持率
 		SIF R支持率 > 100
 			R支持率 = 100
-		SIF R支持率 + G支持率 > 100
-			G支持率 = 100 - R支持率
+		SIF R支持率 + GB_支持率:2 > 100
+			GB_支持率:2 = 100 - R支持率
 	ENDIF
 ELSEIF 作戦方針 == 1
 	PRINTFORML 今回の作戦により、合計{TOTAL / 1000}\%の銀河人民統一連邦の支持率が下がった
-	G支持率 -= TOTAL / 1000
-	SIF G支持率 < 0
-		G支持率 = 0
+	GB_支持率:2 -= TOTAL / 1000
+	SIF GB_支持率:2 < 0
+		GB_支持率:2 = 0
 ENDIF
 PRINTFORMW また熱りが覚めたら作戦を再度実行しよう
 

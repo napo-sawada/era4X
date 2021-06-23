@@ -165,23 +165,23 @@ R充足 = 50
 R戦闘員 = 50
 R非戦闘員 = 10
 
-G支持率 = 60
-G戦車 = 10000
-G航空機 = 3000
-G充足 = 3000000
-G戦闘員 = 3000000
-G非戦闘員 = 1000000000 - G戦闘員
+GB_支持率:2 = 60
+GB_戦車:2 = 10000
+GB_航空機:2 = 3000
+GB_充足:2 = 3000000
+GB_戦闘員:2 = 3000000
+GB_非戦闘員:2 = 1000000000 - GB_戦闘員:2
 内偵効率 = 10
 
 @PRINT_POWER_BALANCE
 PRINTFORML 　　　　　　レジスタンス　VS　銀河人民統一連邦第三居住惑星S03
-PRINTFORML 支持率　　　{R支持率, 6, RIGHT}\% VS　{G支持率}\%
+PRINTFORML 支持率　　　{R支持率, 6, RIGHT}\% VS　{GB_支持率:2}\%
 PRINTFORML 資金　　{MONEY:国家ID_レジスタンス, 10, RIGHT}　VS　{MONEY:国家ID_社会主義}
-PRINTFORML 戦闘員数　　{R戦闘員, 6, RIGHT}　VS　{G戦闘員}
-PRINTFORML 非戦闘員数　{R非戦闘員, 6, RIGHT}　VS　{G非戦闘員}
-PRINTFORML 充足率　　　{R充足, 6, RIGHT}　VS　{G充足}
-PRINTFORML 戦車　　　　{R戦車, 6, RIGHT}　VS　{G戦車}
-PRINTFORML 航空機　　　{R航空機, 6, RIGHT}　VS　{G航空機}
+PRINTFORML 戦闘員数　　{R戦闘員, 6, RIGHT}　VS　{GB_戦闘員:2}
+PRINTFORML 非戦闘員数　{R非戦闘員, 6, RIGHT}　VS　{GB_非戦闘員:2}
+PRINTFORML 充足率　　　{R充足, 6, RIGHT}　VS　{GB_充足:2}
+PRINTFORML 戦車　　　　{R戦車, 6, RIGHT}　VS　{GB_戦車:2}
+PRINTFORML 航空機　　　{R航空機, 6, RIGHT}　VS　{GB_航空機:2}
 PRINTL
 PRINTFORML 現在研究中の項目: %R研究名:R_CURRENT_RESEARCH%
 PRINTL
@@ -431,7 +431,7 @@ SIF QUEST_PROGRESS:34 < 3
 R_RESEARCH_DATE += 1
 
 LOCAL:1 = 0
-FOR LOCAL, 0, G要所
+FOR LOCAL, 0, GB_要所:2
   R充足 += R_SECRET_FACTORY:LOCAL * 秘密工場生産量
 NEXT
 
@@ -439,10 +439,10 @@ IF R_SCHOOL && (DAY % R大学支持率上昇指数 == 0)
   R支持率 ++
 ENDIF
 
-IF R_SPY && (DAY % G支持率低下指数 == 0)
-  G支持率--
-  SIF G支持率 < 0
-    G支持率 = 0
+IF R_SPY && (DAY % GB_支持率低下指数 == 0)
+  GB_支持率:2--
+  SIF GB_支持率:2 < 0
+    GB_支持率:2 = 0
 ENDIF
 
 IF R_SPY && RAND:200 == 0
@@ -468,57 +468,57 @@ FOR LOCAL, 0, CHARANUM
   ENDIF
 NEXT
 
-FOR LOCAL, 0, G要所
+FOR LOCAL, 0, GB_要所:2
   IF R_SUPERVISER:LOCAL && R_SUPERVISER_IS:LOCAL
     SELECTCASE ABL:(R_SUPERVISER_IS:LOCAL):政治
       CASE 0 TO 20
         SIF DAY%500 == 0
           R支持率 ++
         R非戦闘員 += 1
-        G非戦闘員 -= 1
+        GB_非戦闘員:2 -= 1
         SIF DAY%10 == 0
           R戦闘員 += 1
       CASE 21 TO 50
         SIF DAY%400 == 0
           R支持率 ++
         R非戦闘員 += 2
-        G非戦闘員 -= 2
+        GB_非戦闘員:2 -= 2
         R戦闘員 += 1
       CASE 51 TO 60
         SIF DAY%300 == 0
           R支持率 ++
         R非戦闘員 += 3
-        G非戦闘員 -= 3
+        GB_非戦闘員:2 -= 3
         R戦闘員 += 1
       CASE 61 TO 70
         SIF DAY%250 == 0
           R支持率 ++
         R非戦闘員 += 4
-        G非戦闘員 -= 4
+        GB_非戦闘員:2 -= 4
         R戦闘員 += 2
       CASE 71 TO 80
         SIF DAY%200 == 0
           R支持率 ++
         R非戦闘員 += 8
-        G非戦闘員 -= 8
+        GB_非戦闘員:2 -= 8
         R戦闘員 += 4
       CASE 81 TO 90
         SIF DAY%160 == 0
           R支持率 ++
         R非戦闘員 += 12
-        G非戦闘員 -= 12
+        GB_非戦闘員:2 -= 12
         R戦闘員 += 5
       CASE 91 TO 100
         SIF DAY%130 == 0
           R支持率 ++
         R非戦闘員 += 16
-        G非戦闘員 -= 16
+        GB_非戦闘員:2 -= 16
         R戦闘員 += 6
       CASEELSE
         SIF DAY%100 == 0
           R支持率 ++
         R非戦闘員 += 20
-        G非戦闘員 -= 20
+        GB_非戦闘員:2 -= 20
         R戦闘員 += 10
     ENDSELECT
     IF R_SUPERVISER_COST:LOCAL
@@ -527,7 +527,7 @@ FOR LOCAL, 0, G要所
         SIF DAY%100 == 0
           R支持率 ++
         R非戦闘員 += 20
-        G非戦闘員 -= 20
+        GB_非戦闘員:2 -= 20
         R戦闘員 += 5
       ELSE
         R_SUPERVISER_COST:LOCAL = 0
@@ -561,10 +561,10 @@ ENDIF
 ; 支持率がおかしかった場合修正
 SIF R支持率 > 100
   R支持率 = 100
-SIF R支持率 + G支持率 > 100
-  G支持率 = 100 - R支持率
-SIF G非戦闘員 < 0
-  G非戦闘員 = 0
+SIF R支持率 + GB_支持率:2 > 100
+  GB_支持率:2 = 100 - R支持率
+SIF GB_非戦闘員:2 < 0
+  GB_非戦闘員:2 = 0
 
 IF R_CURRENT_RESEARCH && R_RESEARCH_DATE > GET_R_RESEARCH_COMPLETE_DATE(R_CURRENT_RESEARCH)
   R_COMPLETE_RESEARCH:R_CURRENT_RESEARCH = 1

@@ -118,3 +118,11 @@
 #DIM GB_対装甲 = 3
 #DIM GB_装甲 = 4
 #DIM GB_コスト = 5
+
+;各国の陸上戦力
+#DIM SAVEDATA GB_支持率, 星系数
+#DIM SAVEDATA GB_戦車, 星系数
+#DIM SAVEDATA GB_航空機, 星系数
+#DIM SAVEDATA GB_充足, 星系数
+#DIM SAVEDATA GB_戦闘員, 星系数
+#DIM SAVEDATA GB_非戦闘員, 星系数

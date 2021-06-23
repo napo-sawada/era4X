@@ -132,7 +132,7 @@ PRINTFORML その後、悲惨な目にあった秘書官は秘密を洗いざら
 PRINTFORMW 政治家自身はすぐに蜥蜴の尻尾切りにあったが、確実に政権への支持率は下がっただろう
 PRINTL
 PRINTFORMW 銀河人民統一連邦への支持率 -5\%
-G支持率 -= 5
-SIF G支持率 < 0
-	G支持率 = 0
+GB_支持率:2 -= 5
+SIF GB_支持率:2 < 0
+	GB_支持率:2 = 0
 QUEST_COMPLETE_DATE:39 = DAY

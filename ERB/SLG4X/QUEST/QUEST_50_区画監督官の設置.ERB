@@ -39,7 +39,7 @@ SETCOLOR 0X666666
 CUSTOMDRAWLINE =
 RESETCOLOR
 
-FOR LOCAL, 0, G要所
+FOR LOCAL, 0, GB_要所:2
 	; 要所名
 	PRINTFORM %R都市名:LOCAL, 18, LEFT%
 	; 監督官の設置準備
@@ -54,10 +54,10 @@ FOR LOCAL, 0, G要所
 	; 運営費の設定
 	IF R_SUPERVISER:LOCAL && R_SUPERVISER_COST:LOCAL && R_SUPERVISER_IS:LOCAL
 		LOCALS = %"[高度な自治を中止]", 24, LEFT%
-		PRINTBUTTON @"%LOCALS%", LOCAL + (G要所 * 2)
+		PRINTBUTTON @"%LOCALS%", LOCAL + (GB_要所:2 * 2)
 	ELSEIF R_SUPERVISER:LOCAL && R_SUPERVISER_IS:LOCAL
 		LOCALS = %"[高度な自治を実施]", 24, LEFT%
-		PRINTBUTTON @"%LOCALS%", LOCAL + (G要所 * 2)
+		PRINTBUTTON @"%LOCALS%", LOCAL + (GB_要所:2 * 2)
 	ELSEIF R_SUPERVISER:LOCAL && !R_SUPERVISER_IS:LOCAL
 		LOCALS = %"[監督官の未設置]", 24, LEFT%
 		PRINTFORM %LOCALS%
@@ -68,11 +68,11 @@ FOR LOCAL, 0, G要所
 	;監督官
 	IF R_SUPERVISER:LOCAL && R_SUPERVISER_IS:LOCAL
 		LOCALS = [%CALLNAME:(R_SUPERVISER_IS:LOCAL)%]
-		PRINTBUTTON @"%LOCALS, 30, LEFT%", LOCAL + G要所
+		PRINTBUTTON @"%LOCALS, 30, LEFT%", LOCAL + GB_要所:2
 		PRINTFORM 政治: {ABL:(R_SUPERVISER_IS:LOCAL):政治}
 	ELSEIF R_SUPERVISER:LOCAL
 		LOCALS = %"[監督官未設置]", 30, LEFT%
-		PRINTBUTTON @"%LOCALS%", LOCAL + G要所
+		PRINTBUTTON @"%LOCALS%", LOCAL + GB_要所:2
 	ELSE
 		LOCALS = %"[監督官の設置未解放]", 30, LEFT%
 		PRINTFORM %LOCALS%
@@ -80,7 +80,7 @@ FOR LOCAL, 0, G要所
 	PRINTL
 NEXT
 PRINTFORML
-PRINTBUTTON "[戻る]", G要所 * 3
+PRINTBUTTON "[戻る]", GB_要所:2 * 3
 PRINTL
 SETCOLOR 0X666666
 CUSTOMDRAWLINE =
@@ -88,18 +88,18 @@ RESETCOLOR
 
 INPUT
 入力値 = RESULT
-SIF 入力値 == G要所 * 3
+SIF 入力値 == GB_要所:2 * 3
 	RETURN
-IF 入力値 >= 0 && 入力値 < G要所 && MONEY >= R_監督官設置費用 && !R_SUPERVISER:入力値
+IF 入力値 >= 0 && 入力値 < GB_要所:2 && MONEY >= R_監督官設置費用 && !R_SUPERVISER:入力値
 	PRINTFORML %R都市名:入力値%の監督官の設置を解放しますか?
 	CALL ASK_YN
 	SIF RESULT
 		GOTO INPUT_LOOP
 	R_SUPERVISER:入力値 = 1
-ELSEIF 入力値 >= G要所 && 入力値 < G要所 * 2 && R_SUPERVISER:(入力値 - G要所)
-	CALL SELECT_SUPERVISER(入力値 - G要所)
-ELSEIF 入力値 >= (G要所 * 2) && 入力値 < (G要所 * 3) && R_SUPERVISER:(入力値 - G要所*2) && R_SUPERVISER_IS:(入力値 - G要所*2)
-	R_SUPERVISER_COST:(入力値 - (G要所 * 2)) = !R_SUPERVISER_COST:(入力値 - (G要所 * 2))
+ELSEIF 入力値 >= GB_要所:2 && 入力値 < GB_要所:2 * 2 && R_SUPERVISER:(入力値 - GB_要所:2)
+	CALL SELECT_SUPERVISER(入力値 - GB_要所:2)
+ELSEIF 入力値 >= (GB_要所:2 * 2) && 入力値 < (GB_要所:2 * 3) && R_SUPERVISER:(入力値 - GB_要所:2*2) && R_SUPERVISER_IS:(入力値 - GB_要所:2*2)
+	R_SUPERVISER_COST:(入力値 - (GB_要所:2 * 2)) = !R_SUPERVISER_COST:(入力値 - (GB_要所:2 * 2))
 ENDIF
 GOTO INPUT_LOOP
 
