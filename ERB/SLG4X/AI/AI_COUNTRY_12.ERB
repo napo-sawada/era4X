@@ -1,5 +1,5 @@
 ﻿;--------------------------
-; AI ACTION 皇国
+; AI ACTION 王国
 ;--------------------------
 @SLG_AI_ACTION_11
 #DIM CONST COUNTRY_ID = 3
@@ -8,24 +8,20 @@
 @GET_STANDING_ARMY_11(UNIT)
 #DIM REF UNIT
 
-UNIT:朱雀級機動武者 = 24
-UNIT:秋月級コルベット = 32
-UNIT:津軽級フリゲート = 16
-UNIT:豊後級駆逐艦 = 6
-UNIT:大江戸級巡洋艦 = 6
-UNIT:大和級戦艦 = 2
-UNIT:舞鶴級護衛空母 = 1
+UNIT:ネヴァン級フリゲート = 20
+UNIT:スカアハ級駆逐艦 = 10
+UNIT:ミアハ級巡洋艦 = 6
+UNIT:ブリギッド級戦艦 = 2
+UNIT:ルー級空母 = 1
 
 @GET_INVASION_ARMY_11(UNIT)
 #DIM REF UNIT
 
-UNIT:朱雀級機動武者 = 24
-UNIT:秋月級コルベット = 32
-UNIT:津軽級フリゲート = 16
-UNIT:豊後級駆逐艦 = 6
-UNIT:大江戸級巡洋艦 = 6
-UNIT:大和級戦艦 = 2
-UNIT:舞鶴級護衛空母 = 1
+UNIT:ネヴァン級フリゲート = 20
+UNIT:スカアハ級駆逐艦 = 10
+UNIT:ミアハ級巡洋艦 = 6
+UNIT:ブリギッド級戦艦 = 2
+UNIT:ルー級空母 = 1
 
 @AI_ARMED_BUILDUP_11(STAR_ID)
 #DIM STAR_ID
@@ -49,8 +45,8 @@ FOR LOCAL, 0, SHIP_CLASS_TOTAL_COUNT
         CALL BUILD_SHIP(星系座標ID:STAR_ID, 国家ID_豊秋津皇国, 国家ID_豊秋津皇国, LOCAL, ,NEW_SHIP_ID)
 NEXT
 
-; 小型艦は量産性と差し違えても敵を倒す高火力機体に仕上げ、大型艦は大和を主軸とした大艦巨砲主義を採用している
-; 軍国主義のため、国家規模に比べ保有艦艇が多い
+; 王を守るという名目のため、防御主体の艦船で揃えている
+; その実、最近入植した星の開発費に国防費が割かれているため、被害を軽減する防御的ドクトリンを採用しているため
 @AI_UPDATE_WEAPON_11(SHIP_ID)
 #DIM SHIP_ID
 #DIM DYNAMIC SHIP_STATUS, SHIP_STATUS_LENGTH
@@ -58,103 +54,13 @@ NEXT
 TRYCALLFORM GET_SHIP_STATUS_{SHIP_MODEL:SHIP_ID}(SHIP_STATUS)
 
 SELECTCASE SHIP_MODEL:SHIP_ID
-    CASE 朱雀級機動武者
+    CASE ネヴァン級フリゲート
         ;メインウェポン
         FOR LOCAL, 0, SHIP_STATUS:SHIP_MAIN_WEAPON_SLOT
-            IF !SHIP_EQUIP:主砲:LOCAL:SHIP_ID != 61 && !IS_COMPLETE_TECH:OVER_TECH
-                CALL CHANGE_MAIN_WEAPON(SHIP_ID, 11, 61, LOCAL)
-            ELSEIF !SHIP_EQUIP:主砲:LOCAL:SHIP_ID != 62 && IS_COMPLETE_TECH:OVER_TECH
-                CALL CHANGE_MAIN_WEAPON(SHIP_ID, 11, 62, LOCAL)
-            ENDIF
-        NEXT
-        ;サブウェポン
-        FOR LOCAL, 0, SHIP_STATUS:SHIP_SUB_WEAPON_SLOT
-            IF !SHIP_EQUIP:副砲:LOCAL:SHIP_ID != 2 && !IS_COMPLETE_TECH:OVER_TECH
-                CALL CHANGE_SUB_WEAPON(SHIP_ID, 11, 2, LOCAL)
-            ELSEIF !SHIP_EQUIP:副砲:LOCAL:SHIP_ID != 3 && IS_COMPLETE_TECH:OVER_TECH
-                CALL CHANGE_SUB_WEAPON(SHIP_ID, 11, 3, LOCAL)
-            ENDIF
-        NEXT
-        ;シールド
-        FOR LOCAL, 0, SHIP_STATUS:SHIP_SIELD_SLOT
-            IF !SHIP_EQUIP:シールド:LOCAL:SHIP_ID != 5 && !IS_COMPLETE_TECH:OVER_TECH
-                CALL CHANGE_SIELD(SHIP_ID, 11, 5, LOCAL)
-            ELSEIF !SHIP_EQUIP:シールド:LOCAL:SHIP_ID != 9 && IS_COMPLETE_TECH:OVER_TECH
-                CALL CHANGE_SIELD(SHIP_ID, 11, 9, LOCAL)
-            ENDIF
-        NEXT
-        ;装甲
-        FOR LOCAL, 0, SHIP_STATUS:SHIP_ARMOR_SLOT
-            IF !SHIP_EQUIP:装甲:LOCAL:SHIP_ID != 5 && !IS_COMPLETE_TECH:OVER_TECH
-                CALL CHANGE_ARMOR(SHIP_ID, 11, 5, LOCAL)
-            ELSEIF !SHIP_EQUIP:装甲:LOCAL:SHIP_ID != 9 && IS_COMPLETE_TECH:OVER_TECH
-                CALL CHANGE_ARMOR(SHIP_ID, 11, 9, LOCAL)
-            ENDIF
-        NEXT
-        ;エンジン
-        IF !SHIP_EQUIP:エンジン:LOCAL:SHIP_ID != 5 && !IS_COMPLETE_TECH:OVER_TECH
-            CALL CHANGE_ENGIN(SHIP_ID, 11, 5)
-        ELSEIF !SHIP_EQUIP:エンジン:LOCAL:SHIP_ID != 9 && IS_COMPLETE_TECH:OVER_TECH
-            CALL CHANGE_ENGIN(SHIP_ID, 11, 9)
-        ENDIF
-        ;コンピューター
-        IF !SHIP_EQUIP:AI:LOCAL:SHIP_ID != 2 && !IS_COMPLETE_TECH:OVER_TECH
-            CALL CHANGE_COMPUTER(SHIP_ID, 11, 2)
-        ELSEIF !SHIP_EQUIP:AI:LOCAL:SHIP_ID != 3 && IS_COMPLETE_TECH:OVER_TECH
-            CALL CHANGE_COMPUTER(SHIP_ID, 11, 3)
-        ENDIF
-    CASE 秋月級コルベット
-        ;メインウェポン
-        FOR LOCAL, 0, SHIP_STATUS:SHIP_MAIN_WEAPON_SLOT
-            IF !SHIP_EQUIP:主砲:LOCAL:SHIP_ID != 31 && !IS_COMPLETE_TECH:OVER_TECH
-                CALL CHANGE_MAIN_WEAPON(SHIP_ID, 11, 31, LOCAL)
-            ELSEIF !SHIP_EQUIP:主砲:LOCAL:SHIP_ID != 32 && IS_COMPLETE_TECH:OVER_TECH
-                CALL CHANGE_MAIN_WEAPON(SHIP_ID, 11, 32, LOCAL)
-            ENDIF
-        NEXT
-        ;サブウェポン
-        FOR LOCAL, 0, SHIP_STATUS:SHIP_SUB_WEAPON_SLOT
-            IF !SHIP_EQUIP:副砲:LOCAL:SHIP_ID != 2 && !IS_COMPLETE_TECH:OVER_TECH
-                CALL CHANGE_SUB_WEAPON(SHIP_ID, 11, 2, LOCAL)
-            ELSEIF !SHIP_EQUIP:副砲:LOCAL:SHIP_ID != 3 && IS_COMPLETE_TECH:OVER_TECH
-                CALL CHANGE_SUB_WEAPON(SHIP_ID, 11, 3, LOCAL)
-            ENDIF
-        NEXT
-        ;シールド
-        FOR LOCAL, 0, SHIP_STATUS:SHIP_SIELD_SLOT
-            IF !SHIP_EQUIP:シールド:LOCAL:SHIP_ID != 5 && !IS_COMPLETE_TECH:OVER_TECH
-                CALL CHANGE_SIELD(SHIP_ID, 11, 5, LOCAL)
-            ELSEIF !SHIP_EQUIP:シールド:LOCAL:SHIP_ID != 9 && IS_COMPLETE_TECH:OVER_TECH
-                CALL CHANGE_SIELD(SHIP_ID, 11, 9, LOCAL)
-            ENDIF
-        NEXT
-        ;装甲
-        FOR LOCAL, 0, SHIP_STATUS:SHIP_ARMOR_SLOT
-            IF !SHIP_EQUIP:装甲:LOCAL:SHIP_ID != 5 && !IS_COMPLETE_TECH:OVER_TECH
-                CALL CHANGE_ARMOR(SHIP_ID, 11, 5, LOCAL)
-            ELSEIF !SHIP_EQUIP:装甲:LOCAL:SHIP_ID != 9 && IS_COMPLETE_TECH:OVER_TECH
-                CALL CHANGE_ARMOR(SHIP_ID, 11, 9, LOCAL)
-            ENDIF
-        NEXT
-        ;エンジン
-        IF !SHIP_EQUIP:エンジン:LOCAL:SHIP_ID != 5 && !IS_COMPLETE_TECH:OVER_TECH
-            CALL CHANGE_ENGIN(SHIP_ID, 11, 5)
-        ELSEIF !SHIP_EQUIP:エンジン:LOCAL:SHIP_ID != 9 && IS_COMPLETE_TECH:OVER_TECH
-            CALL CHANGE_ENGIN(SHIP_ID, 11, 9)
-        ENDIF
-        ;コンピューター
-        IF !SHIP_EQUIP:AI:LOCAL:SHIP_ID != 2 && !IS_COMPLETE_TECH:OVER_TECH
-            CALL CHANGE_COMPUTER(SHIP_ID, 11, 2)
-        ELSEIF !SHIP_EQUIP:AI:LOCAL:SHIP_ID != 3 && IS_COMPLETE_TECH:OVER_TECH
-            CALL CHANGE_COMPUTER(SHIP_ID, 11, 3)
-        ENDIF
-    CASE 津軽級フリゲート
-        ;メインウェポン
-        FOR LOCAL, 0, SHIP_STATUS:SHIP_MAIN_WEAPON_SLOT
-            IF !SHIP_EQUIP:主砲:LOCAL:SHIP_ID != 34 && !IS_COMPLETE_TECH:OVER_TECH
-                CALL CHANGE_MAIN_WEAPON(SHIP_ID, 11, 34, LOCAL)
-            ELSEIF !SHIP_EQUIP:主砲:LOCAL:SHIP_ID != 35 && IS_COMPLETE_TECH:OVER_TECH
-                CALL CHANGE_MAIN_WEAPON(SHIP_ID, 11, 35, LOCAL)
+            IF !SHIP_EQUIP:主砲:LOCAL:SHIP_ID != 6 && !IS_COMPLETE_TECH:OVER_TECH
+                CALL CHANGE_MAIN_WEAPON(SHIP_ID, 11, 6, LOCAL)
+            ELSEIF !SHIP_EQUIP:主砲:LOCAL:SHIP_ID != 8 && IS_COMPLETE_TECH:OVER_TECH
+                CALL CHANGE_MAIN_WEAPON(SHIP_ID, 11, 8, LOCAL)
             ENDIF
         NEXT
         ;サブウェポン
@@ -193,7 +99,7 @@ SELECTCASE SHIP_MODEL:SHIP_ID
         ELSEIF !SHIP_EQUIP:AI:LOCAL:SHIP_ID != 3 && IS_COMPLETE_TECH:OVER_TECH
             CALL CHANGE_COMPUTER(SHIP_ID, 11, 3)
         ENDIF
-    CASE 豊後級駆逐艦
+    CASE スカアハ級駆逐艦
         ;メインウェポン
         FOR LOCAL, 0, SHIP_STATUS:SHIP_MAIN_WEAPON_SLOT
             IF !SHIP_EQUIP:主砲:LOCAL:SHIP_ID != 16 && !IS_COMPLETE_TECH:OVER_TECH
@@ -238,7 +144,7 @@ SELECTCASE SHIP_MODEL:SHIP_ID
         ELSEIF !SHIP_EQUIP:AI:LOCAL:SHIP_ID != 3 && IS_COMPLETE_TECH:OVER_TECH
             CALL CHANGE_COMPUTER(SHIP_ID, 11, 3)
         ENDIF
-    CASE 大江戸級巡洋艦
+    CASE ミアハ級巡洋艦
         ;メインウェポン
         FOR LOCAL, 0, SHIP_STATUS:SHIP_MAIN_WEAPON_SLOT
             IF !SHIP_EQUIP:主砲:LOCAL:SHIP_ID != 17 && !IS_COMPLETE_TECH:OVER_TECH
@@ -283,7 +189,7 @@ SELECTCASE SHIP_MODEL:SHIP_ID
         ELSEIF !SHIP_EQUIP:AI:LOCAL:SHIP_ID != 3 && IS_COMPLETE_TECH:OVER_TECH
             CALL CHANGE_COMPUTER(SHIP_ID, 11, 3)
         ENDIF
-    CASE 大和級戦艦
+    CASE ブリギッド級戦艦
         ;メインウェポン
         FOR LOCAL, 0, SHIP_STATUS:SHIP_MAIN_WEAPON_SLOT
             IF !SHIP_EQUIP:主砲:LOCAL:SHIP_ID != 14 && !IS_COMPLETE_TECH:OVER_TECH
@@ -328,7 +234,7 @@ SELECTCASE SHIP_MODEL:SHIP_ID
         ELSEIF !SHIP_EQUIP:AI:LOCAL:SHIP_ID != 3 && IS_COMPLETE_TECH:OVER_TECH
             CALL CHANGE_COMPUTER(SHIP_ID, 11, 3)
         ENDIF
-    CASE 舞鶴級護衛空母
+    CASE ルー級空母
         ;メインウェポン
         FOR LOCAL, 0, SHIP_STATUS:SHIP_MAIN_WEAPON_SLOT
             IF !SHIP_EQUIP:主砲:LOCAL:SHIP_ID != 108 && !IS_COMPLETE_TECH:OVER_TECH
