@@ -1,0 +1,42 @@
+﻿;-----------------------------------
+; メインウェポン
+;-----------------------------------
+@GET_MAIN_WEAPON_NAME_40
+RESULTS = TIER2小型汎用ビーム
+
+@GET_MAIN_WEAPON_STATUS_40(STATUS)
+#DIM REF STATUS
+
+STATUS:DAMAGE = 140
+STATUS:FIRE_RATE = 2
+STATUS:HIT_RATE = 70
+STATUS:FIRE_RANGE = 1
+STATUS:SIZE = 1
+STATUS:WEAPON_TYPE = ビーム
+STATUS:PRICE = 20000
+
+;-----------------------------------
+; メインウェポンの説明
+;-----------------------------------
+@GET_MAIN_WEAPON_DESCRIPTION_40
+#DIM STATUS, STATUS_LENGTH
+
+CALL GET_MAIN_WEAPON_STATUS_40(STATUS)
+CALL GET_MAIN_WEAPON_NAME_40
+PRINTFORML %RESULTS%
+PRINTFORML 威力の高い粒子加速砲。精度に問題があり、発射までのタイムラグと合わせて照準が難しい。
+PRINTFORML ダメージ  : {STATUS:DAMAGE}
+PRINTFORML 射撃レート: {STATUS:FIRE_RATE}発/ターン
+PRINTFORML 命中率    : {STATUS:HIT_RATE}
+PRINTFORML 有効距離  : {STATUS:FIRE_RANGE}
+PRINTFORML サイズ    : {STATUS:SIZE}
+
+;-----------------------------------
+; メインウェポンの資材
+;-----------------------------------
+@GET_MAIN_WEAPON_RESOURCE_40(USE_RESOURCE)
+#DIM REF USE_RESOURCE
+
+USE_RESOURCE:武装合金 = 2
+USE_RESOURCE:耐熱合金 = 2
+USE_RESOURCE:武装制御機器 = 2
