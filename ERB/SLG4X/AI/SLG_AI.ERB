@@ -268,9 +268,10 @@ FOR STAR_ID, 0, 星系数
 		SIF LOCAL > 0
 			CALL AUTO_PROCESSING(STAR_ID, COUNTRY_ID, ITEM_ID, LOCAL)
 	NEXT
+	CALL AI_ARMED_BUILDUP(STAR_ID)
 NEXT
 
-CALL AI_AUTO_MINING(COUNTRY_ID)
+;CALL AI_AUTO_MINING(COUNTRY_ID)
 
 ;--------------------------
 ; 自拠点の周りにパトロール軍を出す
@@ -492,3 +493,10 @@ FOR PORT_ID, 0, 星系数
 	NEXT
 NEXT
 
+;--------------------------
+; 軍備増強
+;--------------------------
+@AI_ARMED_BUILDUP(STAR_ID)
+#DIM STAR_ID
+
+TRYCALLFORM AI_ARMED_BUILDUP_{STAR_OWNER:STAR_ID}(STAR_ID)

@@ -1,0 +1,43 @@
+﻿;-----------------------------------
+; メインウェポン
+;-----------------------------------
+@GET_MAIN_WEAPON_NAME_8
+RESULTS = TIER3中型汎用連装コイルガン
+
+@GET_MAIN_WEAPON_STATUS_8(STATUS)
+#DIM REF STATUS
+
+STATUS:DAMAGE = 100
+STATUS:FIRE_RATE = 10
+STATUS:HIT_RATE = 80
+STATUS:FIRE_RANGE = 2
+STATUS:SIZE = 2
+STATUS:WEAPON_TYPE = 実体弾
+STATUS:PRICE = 80000
+
+;-----------------------------------
+; メインウェポンの説明
+;-----------------------------------
+@GET_MAIN_WEAPON_DESCRIPTION_8
+#DIM STATUS, STATUS_LENGTH
+
+CALL GET_MAIN_WEAPON_STATUS_8(STATUS)
+CALL GET_MAIN_WEAPON_NAME_8
+PRINTFORML %RESULTS%
+PRINTFORML コイルを用いた電気回路により、質量弾を電磁投射する旧式兵器。
+PRINTFORML 現代技術により威力を向上させている
+PRINTFORML 冷却と砲門数を改善し、連射性を飛躍的に増大させている。
+PRINTFORML ダメージ  : {STATUS:DAMAGE}
+PRINTFORML 射撃レート: {STATUS:FIRE_RATE}発/ターン
+PRINTFORML 命中率    : {STATUS:HIT_RATE}
+PRINTFORML 有効距離  : {STATUS:FIRE_RANGE}
+PRINTFORML サイズ    : {STATUS:SIZE}
+
+;-----------------------------------
+; メインウェポンの資材
+;-----------------------------------
+@GET_MAIN_WEAPON_RESOURCE_8(USE_RESOURCE)
+#DIM REF USE_RESOURCE
+
+USE_RESOURCE:武装合金 = 16
+USE_RESOURCE:武装制御機器 = 8
