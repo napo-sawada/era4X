@@ -1,0 +1,42 @@
+﻿;-----------------------------------
+; メインウェポン
+;-----------------------------------
+@GET_MAIN_WEAPON_NAME_19
+RESULTS = TIER3中型汎用レーザー
+
+@GET_MAIN_WEAPON_STATUS_19(STATUS)
+#DIM REF STATUS
+
+STATUS:DAMAGE = 400
+STATUS:FIRE_RATE = 2
+STATUS:HIT_RATE = 70
+STATUS:FIRE_RANGE = 2
+STATUS:SIZE = 2
+STATUS:WEAPON_TYPE = レーザー
+STATUS:PRICE = 80000
+
+;-----------------------------------
+; メインウェポンの説明
+;-----------------------------------
+@GET_MAIN_WEAPON_DESCRIPTION_19
+#DIM STATUS, STATUS_LENGTH
+
+CALL GET_MAIN_WEAPON_STATUS_19(STATUS)
+CALL GET_MAIN_WEAPON_NAME_19
+PRINTFORML %RESULTS%
+PRINTFORML 継続的な照射維持が必要であるが、高密度なレーザー照射は対象を融解させ、貫通する。
+PRINTFORML ダメージ  : {STATUS:DAMAGE}
+PRINTFORML 射撃レート: {STATUS:FIRE_RATE}発/ターン
+PRINTFORML 命中率    : {STATUS:HIT_RATE}
+PRINTFORML 有効距離  : {STATUS:FIRE_RANGE}
+PRINTFORML サイズ    : {STATUS:SIZE}
+
+;-----------------------------------
+; メインウェポンの資材
+;-----------------------------------
+@GET_MAIN_WEAPON_RESOURCE_19(USE_RESOURCE)
+#DIM REF USE_RESOURCE
+
+USE_RESOURCE:武装合金 = 8
+USE_RESOURCE:耐熱合金 = 8
+USE_RESOURCE:武装制御機器 = 8

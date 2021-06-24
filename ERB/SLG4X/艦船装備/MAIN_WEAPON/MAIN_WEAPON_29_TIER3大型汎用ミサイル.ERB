@@ -1,0 +1,42 @@
+﻿;-----------------------------------
+; メインウェポン
+;-----------------------------------
+@GET_MAIN_WEAPON_NAME_29
+RESULTS = TIER3大型汎用ミサイル
+
+@GET_MAIN_WEAPON_STATUS_29(STATUS)
+#DIM REF STATUS
+
+STATUS:DAMAGE = 160
+STATUS:FIRE_RATE = 15
+STATUS:HIT_RATE = 100
+STATUS:FIRE_RANGE = 3
+STATUS:SIZE = 3
+STATUS:WEAPON_TYPE = ミサイル
+STATUS:PRICE = 160000
+
+;-----------------------------------
+; メインウェポンの説明
+;-----------------------------------
+@GET_MAIN_WEAPON_DESCRIPTION_29
+#DIM STATUS, STATUS_LENGTH
+
+CALL GET_MAIN_WEAPON_STATUS_29(STATUS)
+CALL GET_MAIN_WEAPON_NAME_29
+PRINTFORML %RESULTS%
+PRINTFORML 追尾性能の非常に高い大型艦用のミサイルユニット。
+PRINTFORML ダメージ  : {STATUS:DAMAGE}
+PRINTFORML 射撃レート: {STATUS:FIRE_RATE}発/ターン
+PRINTFORML 命中率    : {STATUS:HIT_RATE}
+PRINTFORML 有効距離  : {STATUS:FIRE_RANGE}
+PRINTFORML サイズ    : {STATUS:SIZE}
+
+;-----------------------------------
+; メインウェポンの資材
+;-----------------------------------
+@GET_MAIN_WEAPON_RESOURCE_29(USE_RESOURCE)
+#DIM REF USE_RESOURCE
+
+USE_RESOURCE:武装合金 = 16
+USE_RESOURCE:耐熱合金 = 16
+USE_RESOURCE:武装制御機器 = 16
