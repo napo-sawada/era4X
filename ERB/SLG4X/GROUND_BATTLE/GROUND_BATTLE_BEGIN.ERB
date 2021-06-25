@@ -1,0 +1,47 @@
+﻿;-------------------------
+;地上戦開始のお知らせ
+;-------------------------
+@GROUND_BATTLE_BEGIN(PORTID)
+#DIM PORTID
+#DIM DYNAMIC _ATTACK_SIDE_COUNT
+#DIM DYNAMIC _DIFFENCE_SIDE_COUNT
+
+IF PORTID == 2 && STAR_OWNER:PORTID == 国家ID_社会主義
+  PRINTFORMW 宇宙戦闘で勝利した%CALLNAME:MASTER%達は、地上戦を開始した
+  CALL GROUND_BATTLE_INIT
+  CALL GB_DEFINE_TOTAL_COST(GB_攻撃側, GET_COST_FROM_COUNTRY_ID(国家ID_レジスタンス))
+  CALL GB_DEFINE_TOTAL_COST(GB_防御側, GET_COST_FROM_STAR_ID(PORTID))
+  CALL GB_DEFINE_AIRCRAFT(GB_攻撃側, R航空機)
+  CALL GB_DEFINE_AIRCRAFT(GB_防御側, GB_航空機:PORTID)
+  FOR LOCAL, 0, VARSIZE("R都市名")
+    CALL GB_ADD_BATTLE_FRONT(R都市名:LOCAL)
+  NEXT
+  CALL GB_PREPARATION_PHASE(GB_攻撃側)
+  CALL GB_AUTO_PREPARATION(GB_防御側, 1)
+  CALL GROUND_BATTLE_START(GB_攻撃側)
+  IF RESULT == 1
+    STAR_OWNER:PORTID = 国家ID_プレイヤー
+    IF GB_支持率:2 - 20 < R支持率 + 20 && R支持率 + 20 > 50
+      PRINTFORML 宇宙海戦、地上戦、政治工作、その全てに勝利した%CALLNAME:MASTER%は、ついにS03を手に入れた
+      PRINTFORML 表立った運営はアイザック達に任せるが、ほぼ全ての功績を打ち立てた%CALLNAME:MASTER%が実質的な星の支配者として、全ての決定権を得られるだろう
+      PRINTFORMW その後、銀河人民統一連邦の交渉官との交渉の結果、停戦で手打ちすることとなった
+      REL_LIKE_COUNTRY:国家ID_社会主義:国家ID_プレイヤー = -900
+      FOR LOCAL, 0, GB_要所:2
+        SIF R_SUPERVISER_IS:LOCAL
+          CALL DISMISSAL_JOB(LOCAL)
+      NEXT
+      SIF R_MILITARY_ADVISER
+      	R_MILITARY_ADVISER = -1
+    ELSE
+      PRINTFORML 宇宙海戦、地上戦に勝利したものの、十分な支持率を得られなかったため内戦に突入した
+      PRINTFORML その後、銀河人民統一連邦の交渉官との交渉の結果、停戦で手打ちとなった
+      PRINTFORMW 作戦失敗だ……
+      REL_LIKE_COUNTRY:国家ID_社会主義:国家ID_プレイヤー = -900
+    ENDIF
+  ELSE
+    PRINTFORML 敗北……
+    PRINTFORML その後、銀河人民統一連邦の交渉官との交渉の結果、停戦で手打ちとなった
+    PRINTFORMW 作戦失敗だ……
+    REL_LIKE_COUNTRY:国家ID_社会主義:国家ID_プレイヤー = -900
+  ENDIF
+ENDIF
