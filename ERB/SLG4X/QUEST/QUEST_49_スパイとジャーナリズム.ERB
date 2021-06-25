@@ -37,7 +37,7 @@ CALL ASK_YN
 SIF RESULT
 	RETURN
 PRINTFORML %CALLNAME:MASTER%は早速作戦のための手配を行った
-PRINTFORML これで{G支持率低下指数}ターンに1\%の割合で政権の支持率が低下するだろう
+PRINTFORML これで{GB_支持率低下指数}ターンに1\%の割合で政権の支持率が低下するだろう
 MONEY -= QUEST_49_実施費用
 R_SPY = 1
 QUEST_PROGRESS:49 = 1
