@@ -37,7 +37,7 @@ CALL COLUMN_RIGHT_PRINTL
 CALL COLUMN_RIGHT_LINE
 CALL COLUMN_RIGHT_PRINTL
 ;標準的なキャラリストとページ移動
-CALL COLUMN_RIGHT_CHARALIST(3)
+CALL COLUMN_RIGHT_CHARALIST(1)
 RETURN
 
 ;-------------------------------------------------
@@ -54,6 +54,19 @@ RETURN
 ;　デフォルトの情報を表示しない場合はRETURN 1
 ;-------------------------------------------------
 @SHOP_LIFE_BUTTON_ADD69(ARG:0)
+CALL GET_CLOTH_NAME(衣装部位_武器, CLOTH:(ARG:0):衣装部位_武器)
+PRINTFORM 武器 - %RESULTS,20,LEFT%
+PRINTFORM 　攻:
+CALL PRINT_ALPHABET_RANK(ランク_戦闘力, ABL:(ARG:0):攻撃力)
+PRINTFORM 　{ABL:(ARG:0):攻撃力,3,RIGHT} 
+PRINTFORM 　防:
+CALL PRINT_ALPHABET_RANK(ランク_防御力, ABL:(ARG:0):防御力)
+PRINTFORM  {ABL:(ARG:0):防御力,3,RIGHT}/
+CALL PRINT_ALPHABET_RANK(ランク_戦闘力, ABL:(ARG:0):軽減値)
+PRINTFORM  {ABL:(ARG:0):軽減値,3,RIGHT}
+PRINTFORM 　行:
+CALL PRINT_ALPHABET_RANK(ランク_戦闘力, ABL:(ARG:0):行動力)
+PRINTFORM   {ABL:(ARG:0):行動力,3,RIGHT}
 RETURN 1
 ;-------------------------------------------------
 ;「衣装変更」

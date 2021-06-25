@@ -1,5 +1,5 @@
-﻿#DIM CONST CLOTH_PART_NUM = 13
-#DIM CONST COVER_PART_NUM = 13
+﻿#DIM CONST CLOTH_PART_NUM = 14
+#DIM CONST COVER_PART_NUM = 14
 #DIM CONST MAX_CLOTH_ID = 100
 #DIM SAVEDATA CHARADATA CLOTH, CLOTH_PART_NUM
 
@@ -7,14 +7,17 @@
 #DIMS CONST CLOTH_PART_NAME = 
 "頭", "首", "上服", "下服", "上着", 
 "上下服", "下着上", "下着下", "上下下着",
- "腕", "靴下", "靴", "アクセサリ"
+ "腕", "靴下", "靴", "アクセサリ","白兵武器"
 }
 {
 #DIMS CONST CLOTH_PART_NAME_ENG = 
 "HEAD", "NECK", "TOP", "BOTTOM", "OUTER",
 "BODYSUIT", "INNER_TOP", "INNER_BOTTOM", "INNER_BODYSUIT",
-"GLOVE", "SOCKS", "SHOES", "ACCESSORY"
+"GLOVE", "SOCKS", "SHOES", "ACCESSORY", "WEAPON"
 }
+
+#DIM SAVEDATA HAVE_CLOTH, MAX_CLOTH_ID
+
 #DIM CONST 衣装部位_頭 =       0
 #DIM CONST 衣装部位_首 =       1
 #DIM CONST 衣装部位_上服 =     2
@@ -28,6 +31,7 @@
 #DIM CONST 衣装部位_靴下 =     10
 #DIM CONST 衣装部位_靴 =       11
 #DIM CONST 衣装部位_アクセサリ=12
+#DIM CONST 衣装部位_武器      =13
 
 #DIM CONST 被覆部位_顔 =   0
 #DIM CONST 被覆部位_口 =   1
@@ -41,3 +45,62 @@
 #DIM CONST 被覆部位_尻 =   9
 #DIM CONST 被覆部位_脚 =   10
 #DIM CONST 被覆部位_足 =   11
+;-------------------------------------------------
+;■ステータス変化に関する、変数・定数
+;-------------------------------------------------
+#DIM CONST ステータス変化個数 = 5
+#DIM ステータス変化前値, 5
+#DIM ステータス変化後値, 5
+#DIM ステータス変化値, 5
+#DIMS ステータス文字列 = "攻撃力", "防御力", "軽減値", "行動力", "敵視"
+#DIM CONST 武器ラインナップ = 9
+;規制品判定のルール
+;通常用　持ってても怒られない、護身用以下
+;護身用　護身用、大したスペックは無い。
+;規制品　免許なしで大っぴらに出すと捕まります。免許はある？　お前は街中で刀を抜くのか？
+;禁制品　持ってると捕まります。
+;規制_○○○(国名)はその国ならば規制品として購入できる。の意味
+;禁止_○○○(国名)はその国ならば禁制品（他は規制品）の意味、つまり↑の逆
+#DIM CONST 規制_通常用 =   0
+#DIM CONST 規制_護身用 = 100
+#DIM CONST 規制_規制品 = 200
+#DIM CONST 規制_人統連 = 202
+#DIM CONST 規制_企業連 = 203
+#DIM CONST 規制_民主国 = 204
+#DIM CONST 規制_アレス = 205
+#DIM CONST 規制_機械星 = 206
+#DIM CONST 規制_反乱軍 = 207
+#DIM CONST 規制_青商業 = 208
+#DIM CONST 規制_赤傭兵 = 209
+#DIM CONST 規制_豊秋津 = 211
+#DIM CONST 規制_王国   = 212
+#DIM CONST 規制_禁制品 = 300
+#DIM CONST 禁止_人統連 = 302
+#DIM CONST 禁止_企業連 = 303
+#DIM CONST 禁止_民主国 = 304
+#DIM CONST 禁止_アレス = 305
+#DIM CONST 禁止_機械星 = 306
+#DIM CONST 禁止_反乱軍 = 307
+#DIM CONST 禁止_青商業 = 308
+#DIM CONST 禁止_赤傭兵 = 309
+#DIM CONST 禁止_豊秋津 = 311
+#DIM CONST 禁止_王国   = 312
+
+;装備依存の攻撃ロジック(白兵_作戦に組み込まれる)
+#DIM CONST 論理_無作為 = 0
+#DIM CONST 論理_高脅威 = 1
+#DIM CONST 論理_ザコ敵 = 2
+#DIM CONST 論理_能力者 = 3
+#DIM CONST 論理_低耐久 = 4
+
+;分類
+#DIM CONST 分類_格闘   = 0
+#DIM CONST 分類_刀剣類 = 1
+#DIM CONST 分類_軽火器 = 2
+#DIM CONST 分類_重火器 = 3
+#DIM CONST 分類_電子系 = 4
+#DIM CONST 分類_戦車   = 5
+
+
+
+

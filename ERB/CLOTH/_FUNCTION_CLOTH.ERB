@@ -54,6 +54,28 @@ IF ID > 0
 	ENDSELECT
 ENDIF
 
+SELECTCASE 部位
+	CASE 衣装部位_武器
+		CALLFORM CLOTH_SET_EFFECT_%CLOTH_PART_NAME_ENG:部位%_{CLOTH:対象:部位}(対象, -1)
+		CALLFORM CLOTH_SET_EFFECT_%CLOTH_PART_NAME_ENG:部位%_{ID}(対象, 1)
+		
+		IF CFLAG:(対象):所属 == CFLAG:MASTER:所属
+			HAVE_CLOTH:(CLOTH:対象:部位) += 1
+			HAVE_CLOTH:ID -= 1
+			IF HAVE_CLOTH:ID < 0
+				HAVE_CLOTH:ID = 0
+			ENDIF
+			HAVE_CLOTH:0 = 0
+			TRYCCALLFORM CLOTH_IS_SYNC_ITEM_%CLOTH_PART_NAME_ENG:部位%_{ID}()
+				ITEM:RESULT = HAVE_CLOTH:ID
+				HAVE_CLOTH:ID = ITEM:RESULT
+			CATCH
+			ENDCATCH
+		ENDIF
+ENDSELECT
+
+
+
 CLOTH:対象:部位 = ID
 
 RETURN 1
@@ -158,8 +180,16 @@ VARSET 利用可否, 0
 衣装数 = 1
 FOR LOCAL, 1, MAX_CLOTH_ID
 	TRYCCALLFORM CLOTH_NAME_%CLOTH_PART_NAME_ENG:部位%_{LOCAL}()
-		利用可否:LOCAL = 1
-		衣装数 ++
+		IF 部位 == 衣装部位_武器
+			TRYCALLFORM GET_WEAPON_LIMITED_{LOCAL}(対象)
+			IF RESULT == 1 && (HAVE_CLOTH:(LOCAL) > 0 || LOCAL == 0 || LOCAL == CLOTH:対象:部位)
+				利用可否:LOCAL = 1
+				衣装数 ++
+			ENDIF
+		ELSEIF 部位 != 衣装部位_武器
+			利用可否:LOCAL = 1
+			衣装数 ++
+		ENDIF
 	CATCH
 		利用可否:LOCAL = 0
 	ENDCATCH
@@ -183,8 +213,28 @@ FOR LOCAL, 0, MAX_CLOTH_ID
 		CONTINUE
 	CALL GET_CLOTH_NAME(部位, LOCAL)
 	PRINTBUTTON @"[%RESULTS, 20, LEFT%]", LOCAL
+
+	SELECTCASE 部位
+		CASE 衣装部位_武器
+			TRYCALLFORM GET_WEAPON_REGULATION_{LOCAL}
+			CALL PRINT_FORBIDDEN(RESULT)
+			PRINTFORM 【%RESULTS%】
+			IF LOCAL != 0
+				TRYCCALLFORM CLOTH_IS_SYNC_ITEM_%CLOTH_PART_NAME_ENG:部位%_{LOCAL}()
+					HAVE_CLOTH:LOCAL = ITEM:RESULT
+					ITEM:RESULT = HAVE_CLOTH:LOCAL
+				CATCH
+				ENDCATCH
+				PRINTFORM 所持数：%TOSTR(HAVE_CLOTH:LOCAL), 2, RIGHT%
+			ELSE
+				PRINT 　　　　　
+			ENDIF
+			PRINT 　
+			CALL PRINT_STATUS_CHANGE_NEXT(部位, LOCAL, 対象, 1)
+	ENDSELECT
+
 	IF CLOTH:対象:部位 == LOCAL
-		PRINT  着用中
+		PRINTFORM  ●着用中
 	ENDIF
 	PRINTL
 NEXT
@@ -213,3 +263,106 @@ ENDIF
 
 CLEARLINE LINECOUNT - FIRST_LINE
 GOTO SHOW_LOOP
+
+;--------------------------------------------------------------------
+;武器の規制について
+;武器に設定されている規制レベルを表示します
+;--------------------------------------------------------------------
+@PRINT_FORBIDDEN(ARG)
+
+SELECTCASE ARG
+	CASE 0
+		RESULTS = 非武装
+	CASE 100
+		RESULTS = 護身用
+	CASE 200 TO 299
+		RESULTS = 規制品
+	CASE 300 TO 399
+		RESULTS = 禁制品
+ENDSELECT
+;--------------------------------------------------------------------
+;衣装装着後のステータス変化を描画
+;対象が指定されていない場合は、素のステータス変化値を表示
+;(代わりにMASTERを使っています)
+;ARG:0が設定されているとステータスの頭文字を併せて表示します
+;--------------------------------------------------------------------
+@PRINT_STATUS_CHANGE_NEXT(部位, ID, 対象 = -1, ARG:0 = -1)
+#DIM 部位
+#DIM ID
+#DIM 対象
+
+IF 対象:0 < 0 
+	FOR LOCAL:0, 0, ステータス変化個数
+		ステータス変化前値:(LOCAL:0) = ABL:MASTER:(ステータス文字列:(LOCAL:0))
+	NEXT
+	CALLFORM CLOTH_SET_EFFECT_%CLOTH_PART_NAME_ENG:部位%_{ID}(MASTER, 1)
+	FOR LOCAL:0, 0, ステータス変化個数
+		ステータス変化後値:(LOCAL:0) = ABL:MASTER:(ステータス文字列:(LOCAL:0))
+	NEXT
+	CALLFORM CLOTH_SET_EFFECT_%CLOTH_PART_NAME_ENG:部位%_{ID}(MASTER, -1)
+	FOR LOCAL:0, 0, ステータス変化個数
+		ステータス変化値:(LOCAL:0) = ステータス変化後値:(LOCAL:0) - ステータス変化前値:(LOCAL:0)
+	NEXT
+
+	FOR LOCAL:0, 0, ステータス変化個数
+		IF ステータス変化値:(LOCAL:0) > 0
+			SETCOLOR 0xE98FB0
+		ELSEIF ステータス変化値:(LOCAL:0) < 0
+			SETCOLOR 0x8F99E0
+		ENDIF
+		IF ARG:0 > 0
+			PRINTFORM  %CHARATU(ステータス文字列:(LOCAL:0),0)%:%(ステータス変化値:(LOCAL:0) > 0? "↑"# "↓")%%TOSTR(ABS(ステータス変化値:(LOCAL:0))), 3, RIGHT%
+		ELSE
+			PRINTFORM  %(ステータス変化値:(LOCAL:0) == 0)?"　"#(ステータス変化値:(LOCAL:0) > 0? "↑"# "↓")%%TOSTR(ABS(ステータス変化値:(LOCAL:0))), 3, RIGHT%
+		ENDIF
+		RESETCOLOR
+	NEXT
+ELSE
+
+	;ステータス変更後表示
+	FOR LOCAL:0, 0, ステータス変化個数
+		ステータス変化前値:(LOCAL:0) = ABL:対象:(ステータス文字列:(LOCAL:0))
+	NEXT
+	
+	SELECTCASE 部位
+		CASE 衣装部位_武器
+			CALLFORM CLOTH_SET_EFFECT_%CLOTH_PART_NAME_ENG:衣装部位_武器%_{CLOTH:対象:衣装部位_武器}(対象, -1)
+	ENDSELECT
+	
+	CALLFORM CLOTH_SET_EFFECT_%CLOTH_PART_NAME_ENG:部位%_{CLOTH:対象:部位}(対象, -1)
+	CALLFORM CLOTH_SET_EFFECT_%CLOTH_PART_NAME_ENG:部位%_{ID}(対象, 1)
+	FOR LOCAL:0, 0, ステータス変化個数
+		ステータス変化後値:(LOCAL:0) = ABL:対象:(ステータス文字列:(LOCAL:0))
+	NEXT
+	CALLFORM CLOTH_SET_EFFECT_%CLOTH_PART_NAME_ENG:部位%_{ID}(対象, -1)
+	CALLFORM CLOTH_SET_EFFECT_%CLOTH_PART_NAME_ENG:部位%_{CLOTH:対象:部位}(対象, 1)
+	
+	SELECTCASE 部位
+		CASE 衣装部位_武器
+			CALLFORM CLOTH_SET_EFFECT_%CLOTH_PART_NAME_ENG:衣装部位_武器%_{CLOTH:対象:衣装部位_武器}(対象, -1)
+	ENDSELECT
+	
+	FOR LOCAL:0, 0, ステータス変化個数
+		ステータス変化値:(LOCAL:0) = ステータス変化後値:(LOCAL:0) - ステータス変化前値:(LOCAL:0)
+	NEXT
+	
+	FOR LOCAL:0, 0, ステータス変化個数
+		IF ステータス変化値:(LOCAL:0) != 0
+			IF ステータス変化値:(LOCAL:0) > 0
+				SETCOLOR 0xE98FB0
+			ELSE
+				SETCOLOR 0x8F99E0
+			ENDIF
+			IF ARG:0 > 0
+				PRINTFORM  %CHARATU(ステータス文字列:(LOCAL:0),0)%:%(ステータス変化値:(LOCAL:0) > 0? "↑"# "↓")%%TOSTR(ABS(ステータス変化値:(LOCAL:0))), 3, RIGHT%
+			ELSE
+				PRINTFORM  %(ステータス変化値:(LOCAL:0) == 0)?"　"#(ステータス変化値:(LOCAL:0) > 0? "↑"# "↓")%%TOSTR(ABS(ステータス変化値:(LOCAL:0))), 3, RIGHT%
+			ENDIF
+			RESETCOLOR
+		ELSE
+			SIF ステータス変化値:(LOCAL:0) == 0
+				PRINTFORM  %CHARATU(ステータス文字列:(LOCAL:0),0)%:　%TOSTR(ABS(ステータス変化後値:(LOCAL:0))), 3, RIGHT%
+		ENDIF
+	NEXT
+	
+ENDIF

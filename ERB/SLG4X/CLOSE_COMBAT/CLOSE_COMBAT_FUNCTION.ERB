@@ -165,16 +165,58 @@ CC_FLAG_DIC = %DIC_SET(CC_FLAG_DIC, FLAG_NAME, FLAG_VALUE)%
 #DIMS REF MEM_LIST
 #DIM ID
 #DIM IDX
+
+;追加分
+#DIM W_POWER
+#DIM W_ACTIVE
+#DIM 敵視_高脅威
+#DIM 敵視_低脅威
+#DIM 敵視_能力者
+#DIM 敵視_低耐久
+
+
+IF ABL:ID:白兵 >= ABL:ID:攻撃力
+	W_POWER = ABL:ID:白兵 + ABL:ID:攻撃力 / 10
+ELSEIF ABL:ID:白兵 < ABL:ID:攻撃力
+	W_POWER = ABL:ID:白兵 + LIMIT((ABL:ID:攻撃力 - ABL:ID:白兵) / 2, 0 , ABL:ID:白兵)
+ENDIF
+
+W_ACTIVE = ABL:ID:白兵 + (ABL:ID:白兵 * ABL:ID:行動力 / 100) - ABL:ID:白兵 / 2
+
+敵視_高脅威 = ABL:ID:白兵 * ABL:ID:敵視 / 100
+敵視_低脅威 = ABL:ID:白兵 * 100 / MAX(ABL:ID:敵視, 100)
+敵視_能力者 = ABL:ID:超能力 * ABL:ID:敵視 / 100
+敵視_低耐久 = MAXBASE:ID:体力 * ABL:ID:敵視 / 1000
+
+;
+;装備処理ココマデ
+;
+
 MEM_LIST:IDX = %DIC_SET(MEM_LIST:IDX, "名前", @"%ANAME(ID)%")%
 MEM_LIST:IDX = %DIC_SET(MEM_LIST:IDX, "体力", TOSTR(BASE:ID:体力))%
 MEM_LIST:IDX = %DIC_SET(MEM_LIST:IDX, "最大体力", TOSTR(MAXBASE:ID:体力))%
-MEM_LIST:IDX = %DIC_SET(MEM_LIST:IDX, "白兵", TOSTR(ABL:ID:白兵))%
+MEM_LIST:IDX = %DIC_SET(MEM_LIST:IDX, "白兵", TOSTR(W_POWER))%
 MEM_LIST:IDX = %DIC_SET(MEM_LIST:IDX, "超能力", TOSTR(ABL:ID:超能力))%
 MEM_LIST:IDX = %DIC_SET(MEM_LIST:IDX, "キャラID", TOSTR(ID))%
 MEM_LIST:IDX = %DIC_SET(MEM_LIST:IDX, "所属", TOSTR(CFLAG:ID:所属))%
+
+MEM_LIST:IDX = %DIC_SET(MEM_LIST:IDX, "白兵武器", TOSTR(CLOTH:ID:衣装部位_武器))%
+MEM_LIST:IDX = %DIC_SET(MEM_LIST:IDX, "攻撃力", TOSTR(ABL:ID:攻撃力))%
+MEM_LIST:IDX = %DIC_SET(MEM_LIST:IDX, "防御力", TOSTR(ABL:ID:防御力))%
+MEM_LIST:IDX = %DIC_SET(MEM_LIST:IDX, "軽減値", TOSTR(ABL:ID:軽減値))%
+MEM_LIST:IDX = %DIC_SET(MEM_LIST:IDX, "行動力", TOSTR(W_ACTIVE))%
+MEM_LIST:IDX = %DIC_SET(MEM_LIST:IDX, "敵視", TOSTR(ABL:ID:敵視))%
+MEM_LIST:IDX = %DIC_SET(MEM_LIST:IDX, "作戦", TOSTR(ABL:ID:作戦))%
+MEM_LIST:IDX = %DIC_SET(MEM_LIST:IDX, "高脅威", TOSTR(敵視_高脅威))%
+MEM_LIST:IDX = %DIC_SET(MEM_LIST:IDX, "低脅威", TOSTR(敵視_低脅威))%
+MEM_LIST:IDX = %DIC_SET(MEM_LIST:IDX, "能力者", TOSTR(敵視_能力者))%
+MEM_LIST:IDX = %DIC_SET(MEM_LIST:IDX, "低耐久", TOSTR(敵視_低耐久))%
+
+;PRINTFORMW 　%MEM_LIST:IDX%
+
 RETURN
 
-@CC_SET_MOBDATA(MEM_LIST, IDX, CC_NAME, HP, MAXHP, 白兵, 超能力)
+@CC_SET_MOBDATA(MEM_LIST, IDX, CC_NAME, HP, MAXHP, 白兵, 超能力 , MOB_ELITE , 作戦)
 #DIMS REF MEM_LIST
 #DIM IDX
 #DIMS CC_NAME
@@ -182,9 +224,52 @@ RETURN
 #DIM MAXHP
 #DIM 白兵
 #DIM 超能力
+
+;追加分
+#DIM MOB_ELITE
+#DIM 防御力
+#DIM 軽減値
+#DIM 行動力
+#DIM 敵視
+#DIM 作戦
+#DIM 敵視_高脅威
+#DIM 敵視_低脅威
+#DIM 敵視_能力者
+#DIM 敵視_低耐久
+
+IF !MOB_ELITE
+	防御力 = 白兵 / 10
+	軽減値 = LIMIT(MAXHP / 10, 0, 300)
+	行動力 = 白兵 * 5 / 4
+	敵視   = MAXHP / 20 + 白兵
+ELSE
+	防御力 = 白兵 / 8
+	軽減値 = LIMIT(MAXHP / 10, 0, 500)
+	行動力 = 白兵 * 6 / 4
+	敵視   = MAXHP / 10 + 白兵
+ENDIF
+
+敵視_高脅威 = 白兵 * 敵視 / 100
+敵視_低脅威 = 白兵 * 100 / 敵視
+敵視_能力者 = 超能力 * 敵視 / 100
+敵視_低耐久 = MAXHP * 敵視 / 1000
+
 MEM_LIST:IDX = %DIC_SET(MEM_LIST:IDX, "名前", CC_NAME)%
 MEM_LIST:IDX = %DIC_SET(MEM_LIST:IDX, "体力", TOSTR(HP))%
 MEM_LIST:IDX = %DIC_SET(MEM_LIST:IDX, "最大体力", TOSTR(MAXHP))%
 MEM_LIST:IDX = %DIC_SET(MEM_LIST:IDX, "白兵", TOSTR(白兵))%
 MEM_LIST:IDX = %DIC_SET(MEM_LIST:IDX, "超能力", TOSTR(超能力))%
+
+MEM_LIST:IDX = %DIC_SET(MEM_LIST:IDX, "攻撃力", TOSTR(白兵))%
+MEM_LIST:IDX = %DIC_SET(MEM_LIST:IDX, "防御力", TOSTR(防御力))%
+MEM_LIST:IDX = %DIC_SET(MEM_LIST:IDX, "軽減値", TOSTR(軽減値))%
+MEM_LIST:IDX = %DIC_SET(MEM_LIST:IDX, "行動力", TOSTR(行動力))%
+MEM_LIST:IDX = %DIC_SET(MEM_LIST:IDX, "敵視", TOSTR(敵視))%
+MEM_LIST:IDX = %DIC_SET(MEM_LIST:IDX, "作戦", TOSTR(作戦))%
+MEM_LIST:IDX = %DIC_SET(MEM_LIST:IDX, "高脅威", TOSTR(敵視_高脅威))%
+MEM_LIST:IDX = %DIC_SET(MEM_LIST:IDX, "低脅威", TOSTR(敵視_低脅威))%
+MEM_LIST:IDX = %DIC_SET(MEM_LIST:IDX, "能力者", TOSTR(敵視_能力者))%
+MEM_LIST:IDX = %DIC_SET(MEM_LIST:IDX, "低耐久", TOSTR(敵視_低耐久))%
+
+;PRINTFORMW 　%MEM_LIST:IDX%
 RETURN

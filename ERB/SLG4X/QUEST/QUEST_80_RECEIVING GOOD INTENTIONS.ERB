@@ -1,0 +1,178 @@
+﻿;--------------------------
+; ブラックマーケット関連クエスト
+; ここにクエストの説明
+;--------------------------
+@QUEST_DESCRIPTION_80
+
+	PRINTL 
+	PRINTFORML 　
+	PRINTFORML 　かつて艦を融通してくれた人から連絡があった。
+	PRINTFORML 　「商売に役立つネウチモノ、要らないか？」
+	PRINTFORML 　
+RETURN
+;--------------------------
+; クエスト受注可能か
+;--------------------------
+@QUEST_ACCEPTABLE_80
+#DIM SECTOR_ID
+LOCAL:1 = 0
+FOR LOCAL, 0,CHARANUM
+	SIF TALENT:LOCAL:戦闘機械 >= 1 && CFLAG:LOCAL:所属 == CFLAG:MASTER:所属
+		LOCAL:1 ++
+NEXT
+SIF LOCAL:1 == 0
+	RETURN 0
+SIF QUEST_COMPLETE_DATE:80 == 0 || DAY >= QUEST_COMPLETE_DATE:80
+	RETURN 1
+RETURN 0
+
+;--------------------------
+; クエストの名前を返却
+;--------------------------
+@QUEST_NAME_80
+RESULTS = 『ネウチモノ』の買い取り
+RETURN
+
+
+;--------------------------
+; クエスト本体
+;--------------------------
+@QUEST_BODY_80
+#DIM SECTOR_ID
+#DIM POS_ID
+#DIM X_POS
+#DIM Y_POS
+#DIM ITER
+#DIM CONST DISTANCE_FROM_STAR = 8
+#DIM QUEST_ID = 80
+#DIM 対象
+
+
+IF QUEST_PROGRESS:QUEST_ID >= 0
+	SELECTCASE QUEST_PROGRESS:QUEST_ID
+	CASE 0
+		CALL QUEST_BODY_80_SCENE_0
+	CASE 1
+		CALL QUEST_BODY_80_SCENE_1
+	ENDSELECT
+	CALL QUEST_BODY_80_FENCE
+ENDIF
+
+
+RETURN
+;--------------------------
+; －，購入フェイズ
+;--------------------------
+@QUEST_BODY_80_FENCE
+#DIM CONST LINE_UP = 7
+#DIM FENCE_WEAPON, 7
+#DIM FENCE_CHOICE, 7
+#DIM FENCE_PRICE
+#DIM FENCE_LINE
+
+PRINTFORML 　「さあ、今日はどいつが入用だ？」
+PRINTFORML 
+PRINTFORML 　　　　　　所持金：%TOSTR(MONEY," $ ###,###,###,###,###"), 20, RIGHT%
+SETCOLOR 0X666666
+CUSTOMDRAWLINE /
+RESETCOLOR
+
+FOR LOCAL, 0, LINE_UP
+	FENCE_WEAPON:(LOCAL) = RAND:(武器ラインナップ) + 1
+NEXT
+
+FENCE_LINE = LINECOUNT
+$FENCE_LOOP
+FENCE_PRICE = 0
+FOR LOCAL, 0, LINE_UP
+	IF FENCE_CHOICE:LOCAL
+		SETCOLOR カラー_選択中
+		TRYCALLFORM GET_WEAPON_PRICE_{(FENCE_WEAPON:(LOCAL))}
+		FENCE_PRICE += RESULT
+	ELSE
+		RESETCOLOR
+	ENDIF
+	TRYCALLFORM CLOTH_NAME_WEAPON_{(FENCE_WEAPON:(LOCAL))}
+	PRINTBUTTON @"　[%RESULTS, 20, LEFT%]", LOCAL
+	TRYCALLFORM GET_WEAPON_PRICE_{(FENCE_WEAPON:(LOCAL))}
+	PRINTFORML 　%TOSTR(RESULT, " $ #,###,###,###"), 14, RIGHT%
+NEXT
+SETCOLOR 0X666666
+CUSTOMDRAWLINE /
+RESETCOLOR
+PRINTBUTTON @"　[これで決定 - %TOSTR(FENCE_PRICE," $ ###,###,###,###,###"), 24, RIGHT%]", 999
+
+PRINTFORML 
+PRINTBUTTON @"　[止めておく]", 998
+
+INPUT
+
+IF RESULT == 999
+	IF MONEY < FENCE_PRICE
+		PRINTFORML 　「おいおいボウズ、１クレジットだって負からねえからな！」
+		PRINTFORMW 　「考え直せよ」
+		CLEARLINE LINECOUNT - FENCE_LINE
+		GOTO FENCE_LOOP
+	ELSE
+		PRINTFORML 　「毎度あり、コンゴトモごひいきに」
+		PRINTFORMW 　
+		QUEST_COMPLETE_DATE:80 = DAY + RAND:3 * 10
+		PRINTFORML 　「次の仕入れは {QUEST_COMPLETE_DATE:80} 期ってところだな」
+		PRINTFORML 　「あばよ、ボウズ」
+		PRINTFORMW 
+		MONEY -= FENCE_PRICE
+		FOR LOCAL, 0, LINE_UP
+			SIF FENCE_CHOICE:LOCAL
+				HAVE_CLOTH:(FENCE_WEAPON:LOCAL) ++
+		NEXT
+		RETURN
+	ENDIF
+ELSEIF RESULT == 998
+	PRINTFORML 　「なんだい、止めるのかい」
+	PRINTFORML 　「気に入ったものがないなら仕方ないな」
+	PRINTFORMW 
+	QUEST_COMPLETE_DATE:80 = DAY + (RAND:3 + 3) * 10
+	PRINTFORML 　「次の仕入れは {QUEST_COMPLETE_DATE:80} 期ってところだな」
+	PRINTFORML 　「あばよ、ボウズ」
+	PRINTFORMW 
+	RETURN
+ELSEIF 0 <= RESULT || RESULT >= LINE_UP
+	FENCE_CHOICE:RESULT = !FENCE_CHOICE:RESULT
+	 
+ELSE
+ENDIF
+CLEARLINE LINECOUNT - FENCE_LINE
+GOTO FENCE_LOOP
+
+;--------------------------
+; １，２回目以降
+;--------------------------
+@QUEST_BODY_80_SCENE_1
+#DIM QUEST_ID = 80
+
+PRINTFORML 
+PRINTFORML 　「ようボウズ、元気か？」
+PRINTFORML 　%ANAME(MASTER)%は再び故買商店にやって来た。
+PRINTFORMW 
+PRINTFORML 　「今日も良いのが入っているからな、見ていけよ？」
+PRINTFORMW 
+;--------------------------
+; ０，ことのあらまし
+;--------------------------
+@QUEST_BODY_80_SCENE_0
+#DIM QUEST_ID = 80
+
+PRINTFORML 
+PRINTFORML 　「ようボウズ、元気か？」
+PRINTFORML 　%ANAME(MASTER)%、を呼び止めたのは、かつて%ANAME(MASTER)%に、最初の艦を融通してくれた人だ。
+PRINTFORML 　フランクな笑みを浮かべた若い黒服の女性は、見た目の割にかなりの凄味を感じさせる。
+PRINTFORML 　多分黒い関係の人物だが、%ANAME(MASTER)%は背景に興味は無い。
+PRINTFORML 　※奴隷のリクルータはまた別の人である。
+PRINTFORMW 
+PRINTFORML 　「今日はお前に質流れしたネウチモノを売ってやろうと思ってな」
+PRINTFORML 　「蔵で腐らせるのものなんだし、安くしておくぜ？」
+PRINTFORML 　「まあアタシも毎回ボウズの欲しい物を用意できるかどうかは分からないからな」
+PRINTFORML 　「ガチャでも引く気分で見ていけよ」
+PRINTFORMW 
+
+QUEST_PROGRESS:QUEST_ID = 1
