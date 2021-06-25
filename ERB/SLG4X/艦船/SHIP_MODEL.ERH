@@ -43,6 +43,12 @@
 #DIM CONST ルーク級巡洋艦 = 42
 #DIM CONST キング級戦艦 = 43
 #DIM CONST クイーン級空母 = 44
+#DIM CONST 普及型戦闘艇 = 45
+#DIM CONST ダモクレス級戦闘艇 = 46
+#DIM CONST グローム級国民戦闘艇 = 47
+#DIM CONST 千鳥級戦闘艇 = 48
+#DIM CONST バルキリー級戦闘艇 = 49
+#DIM CONST 改ダモクレス級戦闘艇 = 50
 #DIM CONST オクスタン級生体艦 = 52
 #DIM CONST ケンツバ級生体艦 = 53
 #DIM CONST バイシザー強襲生体艦 = 54
