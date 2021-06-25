@@ -64,25 +64,6 @@ CALL RETIRE_BROKEN_SHIP
 #DIM Y_POS
 #DIM ITEM_COUNT
 
-
-;--------------------------
-; AI ACTION 企業連合
-;--------------------------
-@SLG_AI_ACTION_3
-#DIM CONST COUNTRY_ID = 3
-
-;--------------------------
-; AI ACTION 宗教国家
-;--------------------------
-@SLG_AI_ACTION_5
-#DIM CONST COUNTRY_ID = 5
-
-;--------------------------
-; AI ACTION 機械文明
-;--------------------------
-@SLG_AI_ACTION_6
-#DIM CONST COUNTRY_ID = 6
-
 ;--------------------------
 ; AI ACTION 海賊
 ;--------------------------
@@ -143,18 +124,6 @@ FOR SHIP_ID, 0, MAX_SHIP
 		ENDIF
 	ENDIF
 NEXT
-
-;--------------------------
-; AI ACTION 豊秋津皇国
-;--------------------------
-@SLG_AI_ACTION_11
-#DIM CONST COUNTRY_ID = 11
-
-;--------------------------
-; AI ACTION ハールバルズ王国
-;--------------------------
-@SLG_AI_ACTION_12
-#DIM CONST COUNTRY_ID = 12
 
 ;--------------------------
 ; AIの共通処理
