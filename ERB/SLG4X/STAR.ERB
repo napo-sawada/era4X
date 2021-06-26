@@ -9,6 +9,7 @@
 #DIM CONST 資源生産量 = 425
 #DIM _CITY_ID
 #DIM _SLOT_ID
+#DIM _ITEM_ID
 #DIM DYNAMIC _産出物一覧, SC_効果種類
 #DIM DYNAMIC _総算出物一覧, SC_効果種類
 #DIM DYNAMIC _算出アイテム一覧, ITEM_LENGTH
@@ -42,27 +43,30 @@ ENDSELECT
 
 IF STAR_OWNER:STAR_ID == 国家ID_プレイヤー
     FOR _CITY_ID, 0, SC_最大都市数
-        FOR _SLOT_ID, 0, SC_最大建築スロット数
-            VARSET _産出物一覧, 0
-            TRYCALLFORM BUILDINGS_EFFECT_{SC_建造物:STAR_ID:_CITY_ID:_SLOT_ID}(_産出物一覧)
-            _総算出物一覧:SC_税収 += _産出物一覧:SC_税収
-            _総算出物一覧:SC_鉱物 += _産出物一覧:SC_鉱物
-            _総算出物一覧:SC_資源 += _産出物一覧:SC_資源
-            _総算出物一覧:SC_戦車 += _産出物一覧:SC_戦車
-            _総算出物一覧:SC_航空機 += _産出物一覧:SC_航空機
-            _総算出物一覧:SC_軍事 += _産出物一覧:SC_軍事
-            _総算出物一覧:SC_充足 += _産出物一覧:SC_充足
-            _総算出物一覧:SC_食糧 += _産出物一覧:SC_食糧
-            _総算出物一覧:SC_食糧 += _産出物一覧:SC_娯楽食糧
-        NEXT
+        CALL GET_TOTAL_CITY_OUTPUT(STAR_ID, _CITY_ID, SC_税収)
+        _総算出物一覧:SC_税収 += RESULT
+        CALL GET_TOTAL_CITY_OUTPUT(STAR_ID, _CITY_ID, SC_鉱物)
+        _総算出物一覧:SC_鉱物 += RESULT
+        CALL GET_TOTAL_CITY_OUTPUT(STAR_ID, _CITY_ID, SC_資源)
+        _総算出物一覧:SC_資源 += RESULT
+        CALL GET_TOTAL_CITY_OUTPUT(STAR_ID, _CITY_ID, SC_戦車)
+        _総算出物一覧:SC_戦車 += RESULT
+        CALL GET_TOTAL_CITY_OUTPUT(STAR_ID, _CITY_ID, SC_航空機)
+        _総算出物一覧:SC_航空機 += RESULT
+        CALL GET_TOTAL_CITY_OUTPUT(STAR_ID, _CITY_ID, SC_軍事)
+        _総算出物一覧:SC_軍事 += RESULT
+        CALL GET_TOTAL_CITY_OUTPUT(STAR_ID, _CITY_ID, SC_充足)
+        _総算出物一覧:SC_充足 += RESULT
+        CALL GET_TOTAL_CITY_OUTPUT(STAR_ID, _CITY_ID, SC_来客)
+        _総算出物一覧:SC_来客 += RESULT
     NEXT
     ; 資源追加
-    FOR LOCAL , 0, ITEM_LENGTH
-        TRYCALLFORM GET_ITEM_CATEGORY_{LOCAL}
+    FOR _ITEM_ID , 0, ITEM_LENGTH
+        TRYCALLFORM GET_ITEM_CATEGORY_{_ITEM_ID}
         IF RESULTS:0 == "資源" && RESULTS:1 == "原石"
-            CALL ADD_RESOURCE(星系座標ID:STAR_ID, STAR_OWNER:STAR_ID, LOCAL, _総算出物一覧:SC_鉱物 * ONE_WEEK)
+            CALL ADD_RESOURCE(星系座標ID:STAR_ID, STAR_OWNER:STAR_ID, _ITEM_ID, _総算出物一覧:SC_鉱物 * ONE_WEEK)
         ELSEIF RESULTS:0 == "資源"
-            CALL ADD_RESOURCE(星系座標ID:STAR_ID, STAR_OWNER:STAR_ID, LOCAL, _総算出物一覧:SC_資源 * ONE_WEEK)
+            CALL ADD_RESOURCE(星系座標ID:STAR_ID, STAR_OWNER:STAR_ID, _ITEM_ID, _総算出物一覧:SC_資源 * ONE_WEEK)
         ENDIF
     NEXT
     ; 税収
@@ -72,8 +76,35 @@ IF STAR_OWNER:STAR_ID == 国家ID_プレイヤー
     ELSE
         MONEY:国家ID_プレイヤー += _総算出物一覧:SC_税収 * ONE_WEEK
     ENDIF
+    ; 外国からの人口増加
+    GB_非戦闘員:STAR_ID += _総算出物一覧:SC_来客 / 100
+    ; 人口の自然増減
+    FOR _CITY_ID, 0, SC_最大都市数
+        CALL GET_FOOD_PRODUCTION(STAR_ID, _CITY_ID)
+        ; 食糧
+        LOCAL = RESULT / SC_食糧消費量:(SC_食糧消費設定:STAR_ID:_CITY_ID) * 100
+        ; 消費者数
+        CALL GET_CITY_RESIDENT(STAR_ID, _CITY_ID)
+        LOCAL = LOCAL - RESULT
+        ; 食糧が余っている場合
+        IF LOCAL > 0
+            GB_非戦闘員 += RAND:(RESULT / 2000 + 1)
+            SC_食糧備蓄:STAR_ID:_CITY_ID = LIMIT(SC_食糧備蓄:STAR_ID:_CITY_ID + LOCAL, 0, SC_食糧備蓄量:(SC_食糧備蓄設定:STAR_ID:_CITY_ID))
+        ; 食糧が足りない場合備蓄から消費
+        ELSE
+            IF SC_食糧備蓄:STAR_ID:_CITY_ID > ABS(LOCAL)
+                SC_食糧備蓄:STAR_ID:_CITY_ID += LOCAL
+            ;餓死
+            ELSE
+                LOCAL += SC_食糧備蓄:STAR_ID:_CITY_ID
+                SC_食糧備蓄:STAR_ID:_CITY_ID = 0
+                GB_非戦闘員:STAR_ID -= RAND:(ABS(LOCAL + 1))
+            ENDIF
+        ENDIF
+    NEXT
     ; 軍事
     GB_戦闘員:STAR_ID += _総算出物一覧:SC_軍事 * ONE_WEEK
+    GB_非戦闘員:STAR_ID -= _総算出物一覧:SC_軍事 * ONE_WEEK
     GB_戦車:STAR_ID += _総算出物一覧:SC_戦車 * ONE_WEEK
     GB_航空機:STAR_ID += _総算出物一覧:SC_航空機 * ONE_WEEK
     GB_充足:STAR_ID += _総算出物一覧:SC_充足 * ONE_WEEK
@@ -81,7 +112,6 @@ IF STAR_OWNER:STAR_ID == 国家ID_プレイヤー
     FOR _CITY_ID, 0, SC_最大都市数
         CALL GET_CITY_RESIDENT(STAR_ID, _CITY_ID)
         LOCAL = RESULT * SC_食糧消費量:(SC_食糧消費設定:STAR_ID:_CITY_ID) / 100
-        SC_食糧備蓄:STAR_ID:_CITY_ID = LIMIT(SC_食糧備蓄:STAR_ID:_CITY_ID + _総算出物一覧:SC_食糧 - LOCAL, 0, SC_食糧備蓄量:(SC_食糧備蓄設定:STAR_ID:_CITY_ID))
     NEXT
 ELSE
     ; 規定値以下なら地上から採掘

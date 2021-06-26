@@ -16,7 +16,9 @@
 #DIMS DYNAMIC _食糧生産量
 #DIMS DYNAMIC _食糧備蓄
 #DIMS DYNAMIC _食料自給率
-#DIM DYNAMIC _num食糧生産量
+#DIM DYNAMIC _NUM食糧生産量
+#DIM DYNAMIC _人口
+#DIM _入力値
 
 $INPUT_LOOP
 _有効区画数 = 0
@@ -45,10 +47,15 @@ ELSE
 ENDIF
 PRINTFORML 収支: %_収支% 国庫: %RESULTS%
 CALL GET_CITY_RESIDENT(STAR_ID, _CURRENT_CITY)
+_人口 = RESULT
 LOCALS = %TOSTR(RESULT:2, "###,###")%
 SIF RESULT:2 == 0
   LOCALS = 0
-PRINTFORML 住人 %TOSTR(RESULT, "###,###")%人 非住居所持者: %LOCALS%人 全体の{RESULT:2 * 100 / RESULT}\%
+IF _人口 == 0
+  PRINTFORML 住人 0人
+ELSE
+  PRINTFORML 住人 %TOSTR(RESULT, "###,###")%人 非住居所持者: %LOCALS%人 全体の{RESULT:2 * 100 / RESULT}\%
+ENDIF
 CALL GET_FOOD_PRODUCTION(STAR_ID, _CURRENT_CITY) 
 _NUM食糧生産量 = RESULT
 IF RESULT == 0
@@ -65,20 +72,88 @@ CALL GET_CITY_RESIDENT(STAR_ID, _CURRENT_CITY)
 IF _食糧生産量 == "0"
   _食料自給率 = 0\%
 ELSE
-  _食料自給率 = {LIMIT(_NUM食糧生産量 * 100 / RESULT, 1, 100)}\%
+  SIF RESULT == 0
+    RESULT = 1
+  _食料自給率 = {LIMIT(_NUM食糧生産量 * 100 / RESULT / SC_食糧消費量:(SC_食糧消費設定:STAR_ID:_CURRENT_CITY) * 100, 1, 99999)}\%
 ENDIF
 
 PRINTFORML 食糧生産: %_食糧生産量% 食糧備蓄: %_食糧備蓄% 食糧自給率: %_食料自給率%
+;食料消費量設定
+PRINT 食糧消費設定: 
+IF SC_食糧消費設定:STAR_ID:_CURRENT_CITY == 0
+  SETCOLOR 0X00FF00
+  PRINTFORM [抑制]
+  RESETCOLOR
+ELSE
+  PRINTBUTTON "[抑制]", -2
+ENDIF
+PRINT  
+IF SC_食糧消費設定:STAR_ID:_CURRENT_CITY == 1
+  SETCOLOR 0X00FF00
+  PRINTFORM [通常]
+  RESETCOLOR
+ELSE
+  PRINTBUTTON "[通常]", -3
+ENDIF
+PRINT  
+IF SC_食糧消費設定:STAR_ID:_CURRENT_CITY == 2
+  SETCOLOR 0X00FF00
+  PRINTFORM [浪費]
+  RESETCOLOR
+ELSE
+  PRINTBUTTON "[浪費]", -4
+ENDIF
+PRINTFORML  食糧消費量: %TOSTR(_人口 * SC_食糧消費量:(SC_食糧消費設定:STAR_ID:_CURRENT_CITY) / 100, "###,###")%
 
+; 民需の需要を満たしているか
+CALL GET_TOTAL_CITY_OUTPUT(STAR_ID, _CURRENT_CITY, SC_民需)
+IF _人口 != 0
+  PRINTFORML 民需需要補填率: {RESULT * 100 / _人口 * 100 / SC_民需消費量:(SC_民需消費設定:STAR_ID:_CURRENT_CITY)}\%
+ENDIF
+PRINT 民需消費設定: 
+IF SC_民需消費設定:STAR_ID:_CURRENT_CITY == 0
+  SETCOLOR 0X00FF00
+  PRINTFORM [抑制]
+  RESETCOLOR
+ELSE
+  PRINTBUTTON "[抑制]", -5
+ENDIF
+PRINT  
+IF SC_民需消費設定:STAR_ID:_CURRENT_CITY == 1
+  SETCOLOR 0X00FF00
+  PRINTFORM [通常]
+  RESETCOLOR
+ELSE
+  PRINTBUTTON "[通常]", -6
+ENDIF
+PRINT  
+IF SC_民需消費設定:STAR_ID:_CURRENT_CITY == 2
+  SETCOLOR 0X00FF00
+  PRINTFORM [浪費]
+  RESETCOLOR
+ELSE
+  PRINTBUTTON "[浪費]", -7
+ENDIF
+PRINTFORML  民需消費量: %TOSTR(_人口 * SC_民需消費量:(SC_民需消費設定:STAR_ID:_CURRENT_CITY) / 100, "###,###")%
+
+;出力
+CALL GET_CITY_OUTPUT_PER(STAR_ID, _CURRENT_CITY)
+PRINTFORML 都市出力値: {RESULT}\%
+
+PRINTL
+PRINTL ■軍事情報(星全体情報)
+PRINTFORML 軍人: %TOSTR(GB_戦闘員:STAR_ID, "###,###")%人 非戦闘員: %TOSTR(GB_非戦闘員:STAR_ID, "###,###")%人
+PRINTFORML 充足: %TOSTR(GB_充足:STAR_ID, "###,###")% コスト: %TOSTR(MIN(GB_戦闘員:STAR_ID, GB_充足:STAR_ID), "###,###")%
+PRINTFORML 戦車: %TOSTR(GB_戦車:STAR_ID, "###,###")%台, 航空機: %TOSTR(GB_航空機:STAR_ID, "###,###")%機
 
 SETCOLOR 0X666666
 DRAWLINE
 RESETCOLOR
 FOR LOCAL, 0, GET_RELEASED_CITY_NUM(STAR_ID)
-  IF SC_都市名:STAR_ID:_CURRENT_CITY == ""
+  IF SC_都市名:STAR_ID:LOCAL == ""
     LOCALS = %"名称未設定都市", 26, LEFT%
   ELSE
-    LOCALS = %SC_都市名:STAR_ID:_CURRENT_CITY, 26, LEFT%
+    LOCALS = %SC_都市名:STAR_ID:LOCAL, 26, LEFT%
   ENDIF
   IF _CURRENT_CITY == LOCAL
     SETCOLOR 0X00FF00
@@ -102,6 +177,8 @@ PRINTL
 FOR _区画, 0, SC_最大建築スロット数
   TRYCALLFORM BUILDINGS_NAME_{SC_建造物:STAR_ID:_CURRENT_CITY:_区画}
   PRINTBUTTON @"[%RESULTS, 20, LEFT%]", _区画
+  TRYCALLFORM BUILDINGS_COST_{SC_建造物:STAR_ID:_CURRENT_CITY:_区画}
+  PRINTFORM コスト: %TOSTR(RESULT, "###,###")%  
   CALL PRINT_BUILDING_EFFECT(SC_建造物:STAR_ID:_CURRENT_CITY:_区画)
 NEXT
 SETCOLOR 0X666666
@@ -114,13 +191,26 @@ CUSTOMDRAWLINE ///
 RESETCOLOR
 
 INPUT
-IF RESULT == -1
+_入力値 = RESULT
+IF _入力値 == -1
   CALL UPDATE_STAR_CITY_NAME(STAR_ID, _CURRENT_CITY)
-ELSEIF RESULT >= 0 && RESULT < SC_最大建築スロット数
-  CALL UPDATE_STAR_CITY_BUILDINGS(STAR_ID, _CURRENT_CITY, RESULT)
-ELSEIF RESULT >= SC_最大建築スロット数 && RESULT < SC_最大建築スロット数 + SC_最大都市数
-  _CURRENT_CITY = RESULT - SC_最大建築スロット数
-ELSEIF RESULT == -999
+ELSEIF _入力値 >= 0 && _入力値 < SC_最大建築スロット数
+  CALL UPDATE_STAR_CITY_BUILDINGS(STAR_ID, _CURRENT_CITY, _入力値)
+ELSEIF _入力値 >= SC_最大建築スロット数 && _入力値 < SC_最大建築スロット数 + SC_最大都市数
+  _CURRENT_CITY = _入力値 - SC_最大建築スロット数
+ELSEIF _入力値 == -2
+  SC_食糧消費設定:STAR_ID:_CURRENT_CITY = 0
+ELSEIF _入力値 == -3
+  SC_食糧消費設定:STAR_ID:_CURRENT_CITY = 1
+ELSEIF _入力値 == -4
+  SC_食糧消費設定:STAR_ID:_CURRENT_CITY = 2
+ELSEIF _入力値 == -5
+  SC_民需消費設定:STAR_ID:_CURRENT_CITY = 0
+ELSEIF _入力値 == -6
+  SC_民需消費設定:STAR_ID:_CURRENT_CITY = 1
+ELSEIF _入力値 == -7
+  SC_民需消費設定:STAR_ID:_CURRENT_CITY = 2
+ELSEIF _入力値 == -999
   RETURN
 ENDIF
 GOTO INPUT_LOOP
@@ -162,15 +252,30 @@ PRINTFORML 現在の建築物: %RESULTS%
 LOCALS = %"名称", 20, LEFT%
 PRINTFORML %LOCALS% ターンごとの効果
 FOR LOCAL, 0, SC_建築物種類
-  TRYCALLFORM BUILDINGS_NAME_{LOCAL}
-  PRINTBUTTON @"[{LOCAL, 2}] %RESULTS, 20, LEFT%", LOCAL
-  PRINT  効果
-  CALL PRINT_BUILDING_EFFECT(LOCAL)
+  IF SC_建造物:STAR_ID:CITY_ID:SLOT_ID == LOCAL
+    SETCOLOR 0X00FF00
+    TRYCALLFORM BUILDINGS_NAME_{LOCAL}
+    PRINTFORM [{LOCAL, 2}] %RESULTS, 20, LEFT%
+    TRYCALLFORM BUILDINGS_COST_{SC_建造物:STAR_ID:CITY_ID:LOCAL}
+    PRINTFORM コスト: %TOSTR(RESULT, "###,###")%  
+    PRINT  効果
+    CALL PRINT_BUILDING_EFFECT(LOCAL)
+    RESETCOLOR
+  ELSE
+    TRYCALLFORM BUILDINGS_NAME_{LOCAL}
+    PRINTBUTTON @"[{LOCAL, 2}] %RESULTS, 20, LEFT%", LOCAL
+    TRYCALLFORM BUILDINGS_COST_{SC_建造物:STAR_ID:CITY_ID:LOCAL}
+    PRINTFORM コスト: %TOSTR(RESULT, "###,###")%  
+    PRINT  効果
+    CALL PRINT_BUILDING_EFFECT(LOCAL)
+  ENDIF
 NEXT
-
+PRINTBUTTON "[戻る]", -1
 INPUT
 IF RESULT >= 0 && RESULT < SC_建築物種類
   SC_建造物:STAR_ID:CITY_ID:SLOT_ID = RESULT
+ELSEIF RESULT == -1
+  RETURN
 ELSE
   GOTO INPUT_LOOP
 ENDIF
@@ -249,14 +354,14 @@ PRINTFORML  -%LOCALS%
 FOR LOCAL, 0, SC_最大建築スロット数
   TRYCALLFORM BUILDINGS_COST_{SC_建造物:STAR_ID:CITY_ID:LOCAL}
   _収支 -= RESULT
-  TRYCALLFORM BUILDINGS_EFFECT_{SC_建造物:STAR_ID:CITY_ID:LOCAL}(_建造物効果)
-  _収支 += _建造物効果:SC_税収
 NEXT
-
+CALL GET_TAX_PRODUCTION(STAR_ID, CITY_ID)
+RESULTS:1 = %TOSTR(_収支, "$###,###")%
+_収支 += RESULT
 IF _収支 == 0
   RESULTS = $0
 ELSE
-  RESULTS =  %TOSTR(_収支, "$###,###")%
+  RESULTS =  %TOSTR(_収支, "$###,###")% (内訳 維持費: %RESULTS:1% 税収: %TOSTR(RESULT, "$###,###")%)
 ENDIF
 
 ;-----------------------------------
@@ -273,14 +378,18 @@ ENDIF
 #DIM DYNAMIC _比率
 #DIM _建造物効果, SC_効果種類
 #DIM _総住居数
+#DIM DYNAMIC _非居住者数
+#DIM _都市
 
 IF STAR_ID == 2
   GB_戦闘員:STAR_ID = R戦闘員
   GB_非戦闘員:STAR_ID = R非戦闘員
 ENDIF
 _人数 = GB_戦闘員:STAR_ID + GB_非戦闘員:STAR_ID
-SIF _人数 == 0
+IF _人数 == 0
   GB_非戦闘員:STAR_ID = 500000000
+  _人数 += GB_非戦闘員:STAR_ID
+ENDIF
 _解放都市数 = GET_RELEASED_CITY_NUM(STAR_ID)
 ;住人を住居に割り振った後余ったホームレスを各都市に分配。都市ごとに割り振られた総数を返却
 FOR LOCAL, 0, _解放都市数
@@ -292,29 +401,20 @@ FOR LOCAL, 0, _解放都市数
     _住居数:LOCAL += _建造物効果:SC_高級住宅
   NEXT
 NEXT
-
-FOR LOCAL, 0, _解放都市数
-  _総住居数 = SUMARRAY(_住居数)
-  IF _総住居数 > 0
-    _比率 = _住居数:LOCAL * 100 / _総住居数
-  ELSE
-    _比率 = 100
-  ENDIF
-  ; 全住居数の比率に対して区画の住居の比率を取得し、その割合分人数を住まわせる
-  IF _人数 * _比率 / 100 <= _住居数:LOCAL && _住居数:LOCAL
-    _居住者数:LOCAL = _人数
-    _人数 = 0
-  ELSE
-    _居住者数:LOCAL = _住居数:LOCAL
-    _人数 -= _住居数:LOCAL
-  ENDIF
+_総住居数 = SUMARRAY(_住居数)
+_非居住者数 = _人数 - _総住居数
+SIF _総住居数 == 0
+  RETURN 0
+FOR _都市, 0, _解放都市数
+  _比率 = _住居数:_都市 * 100 / _総住居数
+  _居住者数:_都市 = _人数 * _比率 / 100
 NEXT
 RESULT:1 = _居住者数:CITY_ID
 
-IF _人数 > 0
-  _居住者数:CITY_ID += _人数 / _解放都市数
+IF _非居住者数 > 0
+  _居住者数:CITY_ID += _非居住者数 / _解放都市数
   SIF CITY_ID == 0
-    _居住者数:0 += _人数 % _解放都市数
+    _居住者数:0 += _非居住者数 % _解放都市数
 ENDIF
 RESULT:2 = _居住者数:CITY_ID - RESULT:1
 RETURN _居住者数:CITY_ID
@@ -329,11 +429,74 @@ RETURN _居住者数:CITY_ID
 #DIM _区画
 #DIM _建造物効果, SC_効果種類
 
+VARSET RESULT, 0
+
 FOR _区画, 0, SC_最大建築スロット数
   VARSET _建造物効果, 0
   TRYCALLFORM BUILDINGS_EFFECT_{SC_建造物:STAR_ID:CITY_ID:_区画}(_建造物効果)
   _生産量 += _建造物効果:SC_食糧
   _生産量 += _建造物効果:SC_娯楽食糧
+  RESULT:1 += _建造物効果:SC_娯楽食糧
+NEXT
+
+RETURN _生産量
+
+;-----------------------------------
+; 民需生産量の取得
+;-----------------------------------
+@GET_MINJU_PRODUCTION(STAR_ID, CITY_ID)
+#DIM STAR_ID
+#DIM CITY_ID
+#DIM DYNAMIC _生産量
+#DIM _区画
+#DIM _建造物効果, SC_効果種類
+
+VARSET RESULT, 0
+
+FOR _区画, 0, SC_最大建築スロット数
+  VARSET _建造物効果, 0
+  TRYCALLFORM BUILDINGS_EFFECT_{SC_建造物:STAR_ID:CITY_ID:_区画}(_建造物効果)
+  _生産量 += _建造物効果:SC_民需
+NEXT
+
+RETURN _生産量
+
+;-----------------------------------
+; 税収の取得
+;-----------------------------------
+@GET_TAX_PRODUCTION(STAR_ID, CITY_ID)
+#DIM STAR_ID
+#DIM CITY_ID
+#DIM DYNAMIC _生産量
+#DIM _区画
+#DIM _建造物効果, SC_効果種類
+
+VARSET RESULT, 0
+
+FOR _区画, 0, SC_最大建築スロット数
+  VARSET _建造物効果, 0
+  TRYCALLFORM BUILDINGS_EFFECT_{SC_建造物:STAR_ID:CITY_ID:_区画}(_建造物効果)
+  _生産量 += _建造物効果:SC_税収
+NEXT
+
+RETURN _生産量
+
+;-----------------------------------
+; 娯楽生産量の取得
+;-----------------------------------
+@GET_INTERESTING_PRODUCTION(STAR_ID, CITY_ID)
+#DIM STAR_ID
+#DIM CITY_ID
+#DIM DYNAMIC _生産量
+#DIM _区画
+#DIM _建造物効果, SC_効果種類
+
+VARSET RESULT, 0
+
+FOR _区画, 0, SC_最大建築スロット数
+  VARSET _建造物効果, 0
+  TRYCALLFORM BUILDINGS_EFFECT_{SC_建造物:STAR_ID:CITY_ID:_区画}(_建造物効果)
+  _生産量 += _建造物効果:SC_娯楽
 NEXT
 
 RETURN _生産量
@@ -350,3 +513,130 @@ RETURN _生産量
 _人数 = GB_戦闘員:STAR_ID + GB_非戦闘員:STAR_ID
 _解放都市数 = _人数 / MAX_CITY_RESIDENT
 RETURNF LIMIT(_解放都市数, 1, SC_最大都市数)
+
+;-----------------------------------
+; 住居の返却
+;-----------------------------------
+@GET_HOUSE_NUM(STAR_ID, CITY_ID)
+#DIM STAR_ID
+#DIM CITY_ID
+#DIM _区画
+#DIM DYNAMIC _建造物効果, SC_効果種類
+
+VARSET RESULT, 0
+
+FOR _区画, 0, SC_最大建築スロット数
+  VARSET _建造物効果, 0
+  TRYCALLFORM BUILDINGS_EFFECT_{SC_建造物:STAR_ID:CITY_ID:_区画}(_建造物効果)
+  RESULT:1 += _建造物効果:SC_住宅
+  RESULT:2 += _建造物効果:SC_高級住宅
+  RESULT:3 += _建造物効果:SC_低級住宅
+NEXT
+
+RETURN SUMARRAY(RESULT)
+
+;-----------------------------------
+; 都市の出力を返却
+; 何人分の出力を出せるか
+;-----------------------------------
+@GET_CITY_OUTPUT(STAR_ID, CITY_ID)
+#DIM STAR_ID
+#DIM CITY_ID
+#DIM _OUTPUT
+#DIM _食糧生産量
+#DIM _娯楽食糧
+#DIM _人口
+#DIM _家の数
+#DIM _高級住宅
+#DIM _低級住宅
+
+;食料自給率からアウトプットの基礎値を出力
+CALL GET_FOOD_PRODUCTION(STAR_ID, CITY_ID)
+; 娯楽食糧の割合分アプトプットの出力を上昇
+_食糧生産量 = RESULT
+_娯楽食糧 = RESULT:1
+CALL GET_CITY_RESIDENT(STAR_ID, CITY_ID)
+_人口 = RESULT
+_OUTPUT = MIN(_食糧生産量, _人口)
+_OUTPUT += _娯楽食糧 * 3 / 2
+
+;住居所有率からアプトプットの出力を上下
+CALL GET_HOUSE_NUM(STAR_ID, CITY_ID)
+_家の数 = RESULT
+_高級住宅 = RESULT:2
+_低級住宅 = RESULT:3
+_OUTPUT = MIN(_OUTPUT, _家の数)
+;高級住宅は幸福度アップ
+_OUTPUT += _高級住宅 * 3 / 2;高級住宅に住む場合、1.5倍の出力
+_OUTPUT -= _低級住宅 / 2;高級住宅に住む場合、0.5倍の出力
+
+;食料の消費量から出力変動
+IF SC_食糧消費設定:STAR_ID:CITY_ID == 0
+  TIMES _OUTPUT, 0.75
+ELSEIF SC_食糧消費設定:STAR_ID:CITY_ID == 2
+  TIMES _OUTPUT, 1.25
+ENDIF
+
+;民需が満たされていない場合、満たされていない分マイナス
+CALL GET_MINJU_PRODUCTION(STAR_ID, CITY_ID)
+SIF _人口 > RESULT
+  _OUTPUT -= (_人口 - RESULT) / 2
+;民需の消費量から出力変動
+IF SC_民需消費設定:STAR_ID:CITY_ID == 0
+  TIMES _OUTPUT, 0.6
+ELSEIF SC_民需消費設定:STAR_ID:CITY_ID == 2
+  TIMES _OUTPUT, 1.25
+ENDIF
+
+; 娯楽 娯楽はあるだけプラス
+CALL GET_INTERESTING_PRODUCTION(STAR_ID, CITY_ID)
+_OUTPUT += RESULT / 10
+
+
+_OUTPUT = MAX(_OUTPUT, 0)
+
+RETURN _OUTPUT
+
+;-----------------------------------
+; 都市の出力を返却
+; 何人分の出力を出せるか
+;-----------------------------------
+@GET_CITY_OUTPUT_PER(STAR_ID, CITY_ID)
+#DIM STAR_ID
+#DIM CITY_ID
+#DIM _人口
+
+CALL GET_CITY_RESIDENT(STAR_ID, CITY_ID)
+_人口 = RESULT
+SIF _人口 == 0
+  _人口 = 1
+CALL GET_CITY_OUTPUT(STAR_ID, CITY_ID)
+RETURN RESULT * 100 / _人口
+
+;-----------------------------------
+; 都市の効果別出力結果を算出
+;-----------------------------------
+@GET_TOTAL_CITY_OUTPUT(STAR_ID, CITY_ID, SC_TYPE)
+#DIM STAR_ID
+#DIM CITY_ID
+#DIM SC_TYPE
+#DIM _出力
+#DIM _SLOT_ID
+#DIM DYNAMIC _建造物効果, SC_効果種類
+#DIM DYNAMIC _基礎値
+
+CALL GET_CITY_OUTPUT_PER(STAR_ID, CITY_ID)
+_出力 = RESULT
+
+FOR _SLOT_ID, 0, SC_最大建築スロット数
+  VARSET _建造物効果, 0
+  TRYCALLFORM BUILDINGS_EFFECT_{SC_建造物:STAR_ID:CITY_ID:_SLOT_ID}(_建造物効果)
+  _基礎値 +=_建造物効果:SC_TYPE
+NEXT
+SELECTCASE SC_TYPE
+  CASE SC_税収, SC_軍事, SC_外交, SC_来客, SC_研究, SC_鉱物, SC_資源, SC_充足, SC_戦車, SC_航空機
+    SIF SC_TYPE == SC_航空機
+    RETURN _基礎値 * _出力 / 100
+  CASEELSE
+    RETURN _基礎値
+ENDSELECT

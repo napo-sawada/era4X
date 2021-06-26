@@ -55,6 +55,7 @@
 #DIM CONST SC_食糧備蓄量 = 10000000000, 100000000000, 1000000000000
 #DIM CONST SC_食糧備蓄コスト = 5000, 50000, 500000
 #DIM CONST SC_食糧消費量 = 50, 100, 200
+#DIM CONST SC_民需消費量 = 50, 100, 200
 
 #DIM SAVEDATA SC_建造物, 星系数, SC_最大都市数, SC_最大建築スロット数
 #DIMS SAVEDATA SC_都市名, 星系数, SC_最大都市数
@@ -63,3 +64,4 @@
 #DIM SAVEDATA SC_食糧備蓄, 星系数, SC_最大都市数
 #DIM SAVEDATA SC_食糧備蓄設定, 星系数, SC_最大都市数
 #DIM SAVEDATA SC_食糧消費設定, 星系数, SC_最大都市数
+#DIM SAVEDATA SC_民需消費設定, 星系数, SC_最大都市数
