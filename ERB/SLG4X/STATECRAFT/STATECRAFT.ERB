@@ -274,7 +274,13 @@ ENDIF
 #DIM _建造物効果, SC_効果種類
 #DIM _総住居数
 
+IF STAR_ID == 2
+  GB_戦闘員:STAR_ID = R戦闘員
+  GB_非戦闘員:STAR_ID = R非戦闘員
+ENDIF
 _人数 = GB_戦闘員:STAR_ID + GB_非戦闘員:STAR_ID
+SIF _人数 == 0
+  GB_非戦闘員:STAR_ID = 500000000
 _解放都市数 = GET_RELEASED_CITY_NUM(STAR_ID)
 ;住人を住居に割り振った後余ったホームレスを各都市に分配。都市ごとに割り振られた総数を返却
 FOR LOCAL, 0, _解放都市数
