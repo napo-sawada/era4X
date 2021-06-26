@@ -4,15 +4,46 @@
 ; 朱雀級鎧武者が手に入る
 ; クエストを斡旋してくれる皇国現地妻、もしくは友人が手に入る。
 ;--------------------------
-
-
+@QUEST_DESCRIPTION_40
+PRINTFORML [クエスト概要]
+SELECTCASE QUEST_PROGRESS:40
+CASE 0
+	PRINTFORML ちょっとした用事の途中、武士に絡まれている兎耳の少女を目にした。
+	PRINTFORML さて、どうするべきか。
+	PRINTFORML
+CASE 1
+	PRINTFORML 先日出会った静流という少女の家を訪ねてみようか。
+	PRINTFORML 是非訪ねて欲しいと住所も教えられている。
+	PRINTFORML
+CASE 2
+	PRINTFORML 静流を助けるには少々荒いやり方を覚悟しなければならないだろう。
+	PRINTFORML 約束した以上、後には引けない。
+	PRINTFORML
+CASE 3
+	PRINTFORML 事件から事情聴取で会えず仕舞い。
+	PRINTFORML もう一度静流に会いに行くべきだろう。
+	PRINTFORML
+CASE 4
+	PRINTFORML 少し暇も出来た、静流の所に顔を出してやろうか。
+	PRINTFORML
+CASE 5
+	PRINTFORML 少し暇も出来た。
+	PRINTFORML 皇国の現地妻――静流の所に顔を出してやるのも悪くない。
+	PRINTFORML
+CASE 10
+	PRINTFORML 少し暇も出来た、静流の所に顔を出してやろうか。
+	PRINTFORML
+CASE 11
+	PRINTFORML 少し暇も出来た。
+	PRINTFORML 皇国の友人――静流の所に顔を出してやるのも悪くない。
+	PRINTFORML
+ENDSELECT
+RETURN
 ;--------------------------
 ; クエスト受注可能か
 ;--------------------------
 @QUEST_ACCEPTABLE_40
 SIF QUEST_PROGRESS:40 < 0
-	RETURN 0
-SIF REL_LIKE_COUNTRY:国家ID_豊秋津皇国:国家ID_プレイヤー < 100
 	RETURN 0
 CALL GET_STAR_ID_FROM_POS(CHARACTER_POSITION)
 SIF STAR_OWNER:RESULT != 国家ID_豊秋津皇国
@@ -44,7 +75,9 @@ RETURN
 #DIM SHIP_ID
 #DIM DYNAMIC JUDGE
 SELECTCASE QUEST_PROGRESS:QUEST_ID
+;――――――――――――――――――――――――――――――――――――――――――――――――――――――――
 	CASE 0
+;――――――――――――――――――――――――――――――――――――――――――――――――――――――――
 		PRINTFORML ちょっとした用事の途中、%CALLNAME:MASTER%が街中を歩いていると、一人の少女が囲まれている所を目にする。
 		PRINTFORML 囲まれているのは白い長髪をした兎の獣尾人――皇国では珍しくない亜人種族。
 		PRINTFORMW 囲んでいる三人組も兎ではないが同様の獣尾人で、帯刀しているところを見るに武士階級の人間だろう。
@@ -91,7 +124,9 @@ SELECTCASE QUEST_PROGRESS:QUEST_ID
 		ELSE
 			GOTO INPUT_LOOP
 		ENDIF
+;――――――――――――――――――――――――――――――――――――――――――――――――――――――――
 	CASE 1
+;――――――――――――――――――――――――――――――――――――――――――――――――――――――――
 		PRINTFORML
 		PRINTFORML 後日、少女から教えてもらった住所を尋ねると、中々の門構え。
 		PRINTFORML どこをどう見ても武家屋敷であった。
@@ -170,7 +205,9 @@ SELECTCASE QUEST_PROGRESS:QUEST_ID
 			ELSE
 				GOTO INPUT_LOOP
 		ENDIF
+;――――――――――――――――――――――――――――――――――――――――――――――――――――――――
 	CASE 2
+;――――――――――――――――――――――――――――――――――――――――――――――――――――――――
 		PRINTFORML
 		PRINTFORML 色々と調べてみたところ、男の家は中々の名家であるらしい。
 		PRINTFORML ただ、嫡男であるあの男はどうにも無能なようで、優秀な次男との間で対立があった。
@@ -272,8 +309,8 @@ SELECTCASE QUEST_PROGRESS:QUEST_ID
 						PRINTFORMW 顔を青くする彼女に、これくらいはかすり傷だと苦笑を返した。
 					ELSE
 						PRINTFORML 
-						PRINTFORML 多少の心得はあるとは言え、激昂した相手から静流を守りながら。
-						PRINTFORML 少々乱暴なものにならざるを得ず、多少の傷を負っていた。
+						PRINTFORML 多少の心得はあるとは言え、激昂した相手から静流を守りながらの戦い。
+						PRINTFORML 少々乱暴なものにならざるを得ず、多少の手傷を負っていた。
 						PRINTFORML 「あ、あの、お怪我が……っ」
 						PRINTFORMW 顔を真っ青にする彼女に、これくらいは大丈夫だと苦笑を返した。
 					ENDIF
@@ -304,8 +341,10 @@ SELECTCASE QUEST_PROGRESS:QUEST_ID
 		PRINTFORMW ただ、事件は事件。事情聴取はしばらく継続し結局静流とは会えず仕舞いであった。
 			QUEST_PROGRESS:QUEST_ID = 3
 			QUEST_COMPLETE_DATE:QUEST_ID = DAY
+;――――――――――――――――――――――――――――――――――――――――――――――――――――――――
 	CASE 3
-		REL_LIKE_COUNTRY:国家ID_豊秋津皇国:国家ID_プレイヤー += 150
+;――――――――――――――――――――――――――――――――――――――――――――――――――――――――
+		REL_LIKE_COUNTRY:国家ID_豊秋津皇国:国家ID_プレイヤー += 100
 		PRINTFORML
 			SIF QUEST_COMPLETE_DATE:40 + 100 < DAY
 			PRINTFORML 「あれから顔を出して頂けませんでしたから、本当に傷は大丈夫かと心配していたのですが……」
@@ -1079,9 +1118,9 @@ SELECTCASE QUEST_PROGRESS:QUEST_ID
 		PRINTL
 		PRINTBUTTON "[2] 武士について", 2
 		PRINTL
-		PRINTBUTTON "[3] 皇国の兵器について", 3
-		;PRINTL
-		;PRINTBUTTON "[4] 未定", 4
+		PRINTBUTTON "[3] 皇国の軍について", 3
+		PRINTL
+		PRINTBUTTON "[4] 他国の軍について", 4
 		;PRINTL
 		;PRINTBUTTON "[5] 未定", 5
 		;PRINTL
@@ -1183,7 +1222,7 @@ SELECTCASE QUEST_PROGRESS:QUEST_ID
 					PRINTFORML 基本的に血気盛んで直情的――何度か武士達によって、国を揺るがすクーデターが実行されたこともあるそうだ。
 					PRINTFORMW それが危ういながらもバランスを保てているのは帝の威光。
 					PRINTFORML 
-					PRINTFORMW 「とはいえ、大義名分を重んじる武士達に、錦旗に弓を引く者がないことは幸いでございましょう」
+					PRINTFORMW 「とはいえ少なくとも、武士の多くに錦旗に弓引くつもりがないことは幸いでございましょう」
 					PRINTFORML
 					PRINTFORML 帝の側で命を危険に晒すことなく、国政や外交で甘い汁を啜る貴族に不満を覚える者や、現状に疑問を覚える者。
 					PRINTFORML しかし彼らにとっても帝は特別で、帝自身に弓を引こうと考える者は多くない。
@@ -1213,17 +1252,22 @@ SELECTCASE QUEST_PROGRESS:QUEST_ID
 					CALL HITOIKI_SHIZURU_1
 					GOTO INPUT_LOOP
 				ELSEIF RESULT == 3
-					;皇国限定クエスト関連、今は模擬戦くらい。
 					PRINTFORML
-					PRINTFORMW 「皇国の艦船についてですか？」
+					PRINTFORMW 「皇国軍についてですか？」
 					PRINTFORMW 知っているのか？　と尋ねると、静流は頷いた。
 					PRINTFORMW 「ある程度……でよろしければ、ですが」
 					PRINTFORML 
-					CALL NANINANI_SHIZURU_3
+					CALL MILIOTA_SHIZURU_1
 					CALL HITOIKI_SHIZURU_1
 					GOTO INPUT_LOOP
 				ELSEIF RESULT == 4
 					PRINTFORML
+					PRINTFORMW 「なるほど……他国の軍について」
+					PRINTFORMW 静流は%CALLNAME:MASTER%をじっと見つめると頷いた。
+					PRINTFORMW 「……表面的な知識にはなりますが、お役に立てるならば」
+					PRINTFORML 
+					CALL MILIOTA_SHIZURU_2
+					CALL HITOIKI_SHIZURU_1
 					GOTO INPUT_LOOP
 				ELSEIF RESULT == 5
 					PRINTFORML
@@ -1384,8 +1428,8 @@ SELECTCASE QUEST_PROGRESS:QUEST_ID
 					PRINTFORML
 				ENDIF
 ;――――――――――――――――――――――――――――――――――――――――――――――――
-@NANINANI_SHIZURU_3
-;兵器関係
+@MILIOTA_SHIZURU_1
+;皇国軍関係
 ;――――――――――――――――――――――――――――――――――――――――――――――――
 	$INPUT_LOOP
 	DRAWLINE
@@ -1420,25 +1464,39 @@ SELECTCASE QUEST_PROGRESS:QUEST_ID
 					IF QUEST_PROGRESS:32 >= 4
 						PRINTFORMW 知っている、と答えると静流は頷く。
 						PRINTFORMW 「護衛艦から引き離した王国大型艦艇を小型艦の雷撃で一網打尽――皇国水雷戦隊の名を宇宙に轟かせた偉大な一戦ですね」
-						PRINTFORMW 王国は皇国の水雷戦隊を前に、その戦で空母と戦艦、巡洋艦八隻を失う大損害を受けたというのは有名な話であった。
+						PRINTFORMW 皇国の水雷戦隊を前に、王国が空母一隻と戦艦一隻、巡洋艦八隻を失う大損害を受けたというのは有名な話であった。
 						PRINTFORMW 皇国軍人の誰もが学ぶ戦なのです、と彼女は微笑む。
 					ELSE
 						PRINTFORMW 首を横に振ると、静流は苦笑する。
 						PRINTFORMW 「護衛艦から引き離した王国大型艦艇を小型艦の雷撃で一網打尽――皇国水雷戦隊の名を宇宙に轟かせた偉大な一戦です」
-						PRINTFORMW どうにも王国は皇国の水雷戦隊を前に、空母と戦艦、そして巡洋艦八隻を失う大損害を受けたらしい。
+						PRINTFORMW どうにも皇国の水雷戦隊を前に、王国は空母一隻と戦艦一隻、巡洋艦八隻を失う大損害を受けたらしい。
 						PRINTFORMW 皇国軍人の誰もが学ぶ戦なのだと彼女は微笑む。
 					ENDIF
 					PRINTFORML
-					PRINTFORMW 「それもあって艦艇の多くはその水雷戦隊を活かすために設計されたものが多いですね」 
-					PRINTFORML 対大型艦に特化させることで小型艦はコストを下げ、数を揃えやすく
+					PRINTFORMW 「それもあって、艦艇の多くはその水雷戦隊を活かすために設計されたものが多いでしょうか」 
+					PRINTFORML 対大型艦に特化させることで小型艦はコストを下げ、数を揃えやすく。
 					PRINTFORML 攻撃こそ最大の防御、まさに皇国という国を示すような小型艦艇達。
 					PRINTFORMW 多くの国家においては艦隊防空を担う盾、そんな小型艦さえ彼らにとっては敵を討つための槍である。
 					PRINTFORML
-					PRINTFORMW 「無論、攻撃に特化した分、応用が利かないという見方はありますが……この辺りは難しいところですね」
+					PRINTFORMW 「無論、小型艦が雷撃に特化した分、応用が利かないという見方はありますが……」
 					PRINTFORML 完全無欠の軍などはない。一長あれば一短あり、それは必然だろう。
-					PRINTFORMW その上で多くの国の軍人達が、もっとも効果的な戦闘ドクトリンに頭を捻っているのだから。
+					PRINTFORML 無限のリソースがない以上、限界は常に存在するものだった。
+					PRINTFORML 「ええ。この辺りは難しいところですね」
+					PRINTFORMW %CALLNAME:MASTER%の言葉に静流は苦笑する。
 					PRINTFORML 
-					PRINTFORMW 「正解があるならばきっと、どこの軍も同じ結論に至っていることでしょうし」
+					PRINTFORMW 「隙間は機動武者が補い、後ろに控えるは銀河に誇る大和級。艦隊戦において負けはないと思っておりますが……」
+					PRINTFORML それでも絶対とは言い切れぬ所が戦いの難しさですね、と静流は言った。
+					PRINTFORML 「有事に備え、最善を尽くすのはどこの国も同じこと……果たして安心できる日は来るのでしょうか」
+					PRINTFORMW 石拳の必勝法でも見つかるならば、とその呟きに答えると、静流は唇を尖らせる。
+					PRINTFORML 
+					IF TALENT:MASTER:性別 > 0
+						PRINTFORMW 「まぁ、意地悪なことを仰いますね。……仰るとおりでございますけれど」
+					ELSE
+						PRINTFORMW 「まぁ、意地悪なことを仰いますね」
+						PRINTFORML 静流はそのまま身を寄せて、上目遣いに%CALLNAME:MASTER%を見つめた
+						PRINTFORMW 「これはいわゆる振りというもの……心配せずとも自分が守る、と仰って頂きたいところなのですが」
+						PRINTFORMW 悪かった、と頭を撫でると、静流は長耳をぴくぴくと動かし、満足そうに微笑んだ。
+					ENDIF
 					GOTO INPUT_LOOP
 				ELSEIF RESULT == 1
 					PRINTFORML
@@ -1452,7 +1510,9 @@ SELECTCASE QUEST_PROGRESS:QUEST_ID
 					PRINTFORML 「接近雷撃は非常に危険なものでございますから、性能よりもコストを安く、数を揃えたい、という考えのようですね」 
 					PRINTFORMW 犠牲は付きものというと嫌な言い方ですが、と静流は目を伏せた。
 					PRINTFORML 
-					PRINTFORMW 「とはいえ、戦場とは残酷な世界……それも仕方ない事なのかも知れません」
+					PRINTFORMW 「とはいえ、戦場とは残酷な世界……それも仕方ない事なのかも知れませんね」
+					PRINTFORML 
+					PRINTFORMW （※%CALLNAME:MASTER%が購入するには３００を超える勢力好感度が必要なようだ。）
 					GOTO INPUT_LOOP
 				ELSEIF RESULT == 2
 					PRINTFORML
@@ -1467,10 +1527,12 @@ SELECTCASE QUEST_PROGRESS:QUEST_ID
 					PRINTFORMW 木を隠すなら森、的は多い方が良い、ということか。
 					PRINTFORML 
 					PRINTFORMW 「戦死した兄は津軽級フリゲートの艦長を。お国のためとはいえ、違う船なら生き残れたのでしょうか……」
+					PRINTFORML 
+					PRINTFORMW （※――%CALLNAME:MASTER%が購入するには４５０を超える勢力好感度が必要なようだ）
 					GOTO INPUT_LOOP
 				ELSEIF RESULT == 3
 					PRINTFORML
-					PRINTFORMW 「豊後級駆逐艦はやや旧式……水雷戦隊の護衛艦として設計されたようですね」
+					PRINTFORMW 「豊後級駆逐艦はやや旧式……水雷戦隊の護衛艦として設計されたそうです」
 					PRINTFORML 
 					PRINTFORML 標準的な現行駆逐艦と比べて、副砲一門を廃し、運動性能にやや劣る。
 					PRINTFORMW ただ、信頼性は高く、駆逐艦としてはコストパフォーマンスに優れた船であるらしい。
@@ -1478,9 +1540,11 @@ SELECTCASE QUEST_PROGRESS:QUEST_ID
 					PRINTFORMW 「小型艦の敵は小型艦、雷撃装備の秋月級や津軽級では同じ小型艦が最大の敵でございますから」
 					PRINTFORML 敵コルベットやフリゲートを想定し、数を揃えるために今も豊後級を使っているのだという。
 					PRINTFORML 「同級の駆逐艦にはやや劣るとは言え、小型艦に対しては十分過ぎる装甲と火力……役割を担うに十分な性能でしょう」 
-					PRINTFORMW 確かに、単純な性能差で劣るとは言え、それで十分なのだろう。
+					PRINTFORMW 確かに、目的を考えれば必要に足り、余分や無駄を嫌う皇国らしい質実剛健な船と言えた。
 					PRINTFORML 
-					PRINTFORMW 「水雷戦隊の盾となる豊後級の艦長は、水雷戦隊においては強い敬意を向けられるそうです」
+					PRINTFORMW 「水雷戦隊の盾となる豊後級の艦長は、彼らから強い敬意を向けられるのだとか……そういう意味でも誉れ高い船ですね」
+					PRINTFORML 
+					PRINTFORMW （※――%CALLNAME:MASTER%が購入するには６００を超える勢力好感度が必要なようだ）
 					GOTO INPUT_LOOP
 				ELSEIF RESULT == 4
 					PRINTFORML
@@ -1489,12 +1553,14 @@ SELECTCASE QUEST_PROGRESS:QUEST_ID
 					PRINTFORML ダメージコントロールに優れる強固な船体構造と、大型のシールド用ジェネレーター。
 					PRINTFORMW 運動性維持のため装甲は多少犠牲になったものの、サイズからすれば信じられないほどの強固なシールドを展開できるらしい。
 					PRINTFORML
-					PRINTFORMW 「損耗率の激しい水雷戦隊の穴を埋めるべく、戦線維持能力と継戦能力の高さが特徴でしょうか」
-					PRINTFORML まさに骨の部分――水雷戦隊を打ち破ったとしても、頑強なる大江戸級。これを崩さぬ限りは勝利は無い。
+					PRINTFORMW 「損耗率の激しい水雷戦隊の穴を埋めるべく設計されたこの艦の特徴は、戦線維持能力と継戦能力の高さでしょうか」
+					PRINTFORML まさに皇国軍の屋台骨――水雷戦隊を打ち破ったとしても、後ろに控えるは頑強なる大江戸級。これを崩さぬ限りは勝利は無い。
 					PRINTFORML 「肉を割かれても骨は断たれぬ、そういう皇国軍の気概を示すような艦艇でございますね」 
 					PRINTFORMW 間を空ければすぐさま回復し、戦線復帰が行えるシールド主体の大江戸級――皇国の精神を体現する艦であった。
 					PRINTFORML 
 					PRINTFORMW 「父が大江戸級の艦長を。……とても良い艦だと、いつも口にしておられました」
+					PRINTFORML 
+					PRINTFORMW （※――%CALLNAME:MASTER%が購入するには８００を超える勢力好感度が必要なようだ）
 					GOTO INPUT_LOOP
 				ELSEIF RESULT == 5
 					PRINTFORML
@@ -1506,9 +1572,11 @@ SELECTCASE QUEST_PROGRESS:QUEST_ID
 					PRINTFORMW 「必要なのは艦載機の運用能力――副砲火力においては若干他国のそれに劣るようですが、空母はあくまで空母です」
 					PRINTFORML 最低限の自衛手段が備わっていればそれで良い、という考えの元、コストパフォーマンスを意識したらしい。
 					PRINTFORML 「皇国軍人は無駄を嫌いますから、やはりいつもコストを第一に考えるようで 」
-					PRINTFORMW 普通の空母からすれば秋月級二十隻分の金額が浮くとなれば、中々に馬鹿には出来ない。
+					PRINTFORMW 普通の空母からすれば秋月級二十隻分の金額が浮くとなれば、中々馬鹿には出来ない。
 					PRINTFORML 
 					PRINTFORMW 「個人的にも、そういう考え方は嫌いではありませんね。無駄遣いは良くありませんし」
+					PRINTFORML 
+					PRINTFORMW （※――%CALLNAME:MASTER%が購入するには勢力好感度が最高でなければならないようだ）
 					GOTO INPUT_LOOP
 				ELSEIF RESULT == 6
 					PRINTFORML
@@ -1519,13 +1587,15 @@ SELECTCASE QUEST_PROGRESS:QUEST_ID
 					PRINTFORML 皇国は貧乏艦船しか作れない、などと揶揄されてはいたが、そうしたものもこの大和級を見れば口を噤むに違いない。
 					PRINTFORMW 果たしてこの要塞のような怪物艦をどうやって沈めれば良いのかと、途方に暮れてしまうだろう。
 					PRINTFORML
-					PRINTFORMW 「皇国の技術力の高さを他国に知らしめるため設計されたこの艦はまさに、怪物の一言でございますね」
+					PRINTFORMW 「皇国の技術力の高さを他国に知らしめるため。そうして設計されたというこの艦はまさに、怪物の一言でございますね」
 					PRINTFORML 少なくとも他国はこれほどの艦を建造できてはいないのだと静流は告げる。
-					PRINTFORML 「驚くべきは現行の戦艦二隻分で、この巨艦が建造されている、ということです」
+					PRINTFORML 「驚くべきは現行の戦艦二隻分のコストで、この巨艦が建造されている、ということです」
 					PRINTFORML 常軌を逸した質量を動かすためには、単純にジェネレーターやスラスターを倍にすれば良いというものではない。
-					PRINTFORMW だというのに、まるで二隻の戦艦を単純に一纏めにしたようなこの戦艦は、既存の技術の一歩先へと踏み出していた。
+					PRINTFORMW だというのに、まるで二隻の戦艦を一纏めにしたようなこの巨艦は、既存の技術の一歩先へと踏み出していた。
 					PRINTFORML
 					PRINTFORMW 「これぞまさに皇国艦隊の象徴と呼ぶに相応しい戦艦……同じ皇国人として設計者達を誇りに思いますね」
+					PRINTFORML 
+					PRINTFORMW （※――%CALLNAME:MASTER%が購入するには勢力好感度が最高でなければならないようだ）
 					GOTO INPUT_LOOP
 				ELSEIF RESULT == 7
 					PRINTFORML
@@ -1551,11 +1621,12 @@ SELECTCASE QUEST_PROGRESS:QUEST_ID
 					PRINTFORML
 					PRINTFORMW 「バクシン党が使う天狗級はメック改修型の旧式機動武者……今では設計からもう別物ですね」
 					PRINTFORML
-					PRINTFORML 宇宙のみならず地上においても活躍できる機動武者は、いざとなれば帝の身辺を守るものにもなる。
-					PRINTFORML それ故、多くの武士に取って憧れの存在であったし、その多くは勲功によって与えられるもの。
-					PRINTFORMW 機動武者の所有は武家としての格を示すもので、その存在そのものが誉れであるのだという。
+					PRINTFORML 宙間戦闘においてはその機動力と運動性によって、水雷戦隊の露払い、皇国軍の先駆けとして。
+					PRINTFORML そして宇宙のみならず、地上においても活躍できる機動武者はいざとなれば帝の身辺を守る盾にもなる。
+					PRINTFORML その多くが勲功によって与えられるという事情もあって、機動武者の所有は武家としての格を示すもの。
+					PRINTFORMW 多くの武士に取って憧れの存在で、兵器であると同時、家宝であるのだという。
 					PRINTFORML
-					PRINTFORML そんなものを出会ったばかりの相手に渡そうとしたのかと尋ねると、
+					PRINTFORML そんなものを出会ったばかりの相手に渡そうとしたのか、と半ば呆れて尋ねると、
 					IF TALENT:MASTER:性別 > 0
 						PRINTFORML 「どうしてでしょう……ふふ、でも、何故だか%CALLNAME:MASTER%様にならばと思いましたから」
 						PRINTFORML などと静流は苦笑した。
@@ -1567,6 +1638,208 @@ SELECTCASE QUEST_PROGRESS:QUEST_ID
 						PRINTFORMW 「きっと、静流の全てはこの方のものだ、だなんて……」 
 						PRINTFORMW 女の直感です、と静流は耳朶をくすぐるように囁いた。
 					ENDIF
+					PRINTFORML 
+					PRINTFORMW （※――%CALLNAME:MASTER%が購入するには８００を超える勢力好感度が必要なようだ）
+					GOTO INPUT_LOOP
+				ELSE
+					PRINTFORML
+				ENDIF
+;――――――――――――――――――――――――――――――――――――――――――――――――
+@MILIOTA_SHIZURU_2
+;他国軍関係
+;――――――――――――――――――――――――――――――――――――――――――――――――
+	$INPUT_LOOP
+	DRAWLINE
+		PRINTBUTTON "[0] 銀河人民統一連邦", 0
+		PRINTL
+		PRINTBUTTON "[1] 企業連合", 1
+		PRINTL
+		PRINTBUTTON "[2] 民主主義国家", 2
+		PRINTL
+		PRINTBUTTON "[3] アレス宗教国家", 3
+		PRINTL
+		PRINTBUTTON "[4] 機械文明", 4
+		PRINTL
+		PRINTBUTTON "[5] ハールバルズ王国", 5
+		;PRINTL
+		;PRINTBUTTON "[6] 未定", 6
+		;PRINTL
+		;PRINTBUTTON "[7] 未定", 7
+		;PRINTL
+		;PRINTBUTTON "[8] 未定", 8
+		PRINTL
+		PRINTBUTTON "[9] 戻る", 9
+			INPUT
+				IF RESULT == 0
+					PRINTFORML
+					PRINTFORMW 「銀河人民統一連邦は最大の敵対国である民主主義国家、ＵＳＯＦとの戦いに主眼を置いているようですね」
+					PRINTFORML 
+					PRINTFORML ＵＳＯＦはシールド艦を盾とし、ミサイルによる飽和攻撃を主体とする。
+					PRINTFORML 統一連邦の戦闘ドクトリンはそれに合わせたものであると静流は語る。
+					PRINTFORML 純粋な鉄量による弾幕形成――鉄のカーテンによって艦載機、誘導兵器を遮断し、強固なる敵前衛のシールド艦を鉄屑に。
+					PRINTFORML 大型艦ではなく小型艦を中心にしているのは、誘導兵器による集中砲火を避けるためだろう。
+					PRINTFORMW 徹底したリスク分散によって艦隊システムの冗長性を高く保ち、泥沼の消耗戦へと相手を引きずり込むことに主眼が置かれている。
+					PRINTFORML
+					PRINTFORMW 「ＵＳＯＦの艦隊は基本的に、高性能な代わりに高コスト……削り合いに持ち込まれた時点で敗北でしょう」
+					PRINTFORML 技術的な優越だけが勝敗を決めるものではない。
+					PRINTFORML 強力なミサイル、艦載機は戦いを有利にはするが、大事なのは費用が結果に見合うかどうか。
+					PRINTFORMW 大型艦を撃沈できれば大金星だが、ほとんどを弾幕で射耗させられ、撃沈出来るのが小型艦というのでは割に合わない。
+					PRINTFORML 
+					PRINTFORML 「恐らく統一連邦が考えているのは、艦隊決戦の一勝利ではなく、いかに経済的損失を相手に与えるか……」
+					PRINTFORMW 実にしたたかなものです、と静流は語る。
+					PRINTFORML 「突き詰めれば戦争もまた、外交におけるカードの一枚に過ぎぬもの。勝てずとも相手を敗者にすればそれで十分なのでしょう」
+					PRINTFORML 確かに、ある意味では真っ向からぶつかってくる相手よりも恐ろしい。
+					PRINTFORMW 最終的勝利という目的のために、国家という規模で徹することが出来ること――彼らの強みはそこなのだろう。
+					PRINTFORML 
+					PRINTFORMW 「統一連邦の艦艇はその目的に沿った、生産性の高さが特徴ですね。費用対効果を最重要視しているようです」
+					PRINTFORML シンプル且つ強固な船体、運用する装備もまた、信頼性の高い実弾兵器。
+					PRINTFORMW 「この辺りの設計思想は皇国の小型艦艇と近しいものがありますね」
+					GOTO INPUT_LOOP
+				ELSEIF RESULT == 1
+					PRINTFORML
+					PRINTFORMW 「企業連合の艦隊がどのようなものかと、一言で語ることは少し難しいですね」
+					PRINTFORML 
+					PRINTFORML 複数のコングロマリットが国家運営を行う企業連合。
+					PRINTFORML そもそもが軍需産業の中心地でもあり、多くの艦艇はここで開発され、輸出されているという現実がある。
+					PRINTFORML 独自性の高い皇国でさえ民間では彼らの設計した船が用いられていたし、他の国でも同様。
+					PRINTFORML 艦載兵器に関しては、彼らの息が掛かっていないものを探す方が難しい。
+					PRINTFORMW 「あらゆる艦種を揃えた企業連合の艦隊は、ある意味特徴が無いことが特徴と言えるのかも知れません」
+					PRINTFORML
+					PRINTFORMW 小型艦艇から大型艦艇――装備を見ても、まるで兵器の博覧会。
+					PRINTFORML 何かに特化しない代わりに、どんな軍を相手にも優位に立ち回れる豊富な艦隊装備は見事の一言。
+					PRINTFORML 兵器や艦艇設計の莫大なノウハウと高い技術力を見れば、理論上の最強艦隊となり得るだろう、と静流は語る。
+					PRINTFORML
+					PRINTFORMW 「ただ、あくまでそれは理論上。……どんな道具も結局重要なのは、使いこなせるかどうかという所でしょう」
+					PRINTFORML 
+					PRINTFORML 彼らの本質はあくまで商売人、軍人ではない。
+					PRINTFORML 艦隊編成や装備においても各企業の思惑が複雑に絡み合い、艦隊としての統一性――明確な戦闘ドクトリンというものが存在しない。
+					PRINTFORML 信頼性不確かな艦艇や新兵器が無理矢理ねじ込まれることも多く、そのポテンシャルを十全に活かせていないのが問題だという。
+					;性能の違いが戦力の決定的差では（
+					PRINTFORML 
+					PRINTFORMW 「名刀だろうとなまくらだろうと、結局は使い手次第でどちらにもなり得るものです。そういう意味での怖さはありませんね」
+					PRINTFORML もちろん脅威には違いありませんが、と静流は続ける。
+					PRINTFORMW 「素人刃物で人は死ぬもの。下手な鉄砲も何とやら……何をするか分からないという点では、最も怖い、とも言えるのかも知れません」
+					GOTO INPUT_LOOP
+				ELSEIF RESULT == 2
+					PRINTFORML
+					PRINTFORMW 「民主主義国家として、民衆メディアの力が強いＵＳＯＦでは人的損耗を強く恐れる傾向があるようですね」
+					PRINTFORML 
+					PRINTFORML 大型のシールド艦を前面に押し出して盾に、小型艦がミサイル打撃群を形成。
+					PRINTFORML 病的なまでミサイル飽和攻撃によって、有無を言わさず敵艦隊を沈黙させるのが彼らの戦い方なのだと静流は告げる。
+					PRINTFORML 厭戦感情――戦闘艦艇の撃沈とそれに伴う軍人達の戦死が世論に与える影響が心配なのだろう。
+					PRINTFORMW 殺られる前に殺れ、が彼らの流儀であるらしい。
+					PRINTFORML
+					PRINTFORMW 「小型艦艇は高い運動性能によって生存性を高め、大型艦は彼らの盾として。各艦艇の設計思想もそこに重きも置いたものです」
+					PRINTFORML 運動性能を高めたアクロバット級、フォックスハウンド級、そして火力に優れたケルベロス級がミサイル打撃群。
+					PRINTFORMW そして盾となる強力なシールド艦――ベヒーモス級が前面で敵火力を受け止める。
+					PRINTFORML
+					PRINTFORMW 「何よりも面白いのはメルカバー級空母の存在でしょう。機動要塞とも言えるメルカバー級は設計思想からして斬新です」
+					PRINTFORML 普通の空母が行うような航宙機によるアウトレンジ攻撃ではなく、ショートレンジからの殴り合い。
+					PRINTFORML メルカバー級は世にも珍しい、艦隊の盾として設計された重厚な巨大空母であった。
+					PRINTFORML ハリネズミのように設置された副砲と、配備された近接支援用の航宙機の存在。
+					PRINTFORMW 確かにメルカバー級は話を聞く限り、もはや小要塞と呼べる存在と言えるだろう。
+					PRINTFORML 
+					PRINTFORMW 「ただ、無敵の盾は存在しないもの。艦隊防衛を担う大型艦艇が撃沈すれば、途端に脆さを露呈する危うさもありますね」
+					PRINTFORML 盾の許容限界を超える前に、ミサイル打撃で相手の戦闘能力を奪えなければそうなることは必然だった。
+					PRINTFORML 艦隊システムとしての冗長性には欠ける部分があるでしょう、と静流は続ける。
+					PRINTFORMW そして高性能ながら高価な艦艇が多い分、一度崩れれば建て直しも難しい。
+					PRINTFORML 
+					PRINTFORMW 「とはいえ、ここまで振り切った潔さは見事と言わざるを得ないでしょう。……静流ポイントは結構高いです」
+					PRINTFORML 彼女は言いながら深く頷く。
+					PRINTFORMW よく分からないポイント評価であったが、適当に相づちを打って%CALLNAME:MASTER%は流した。
+					GOTO INPUT_LOOP
+				ELSEIF RESULT == 3
+					PRINTFORML
+					PRINTFORMW 「アレス宗教国家はやや前時代的……並べた砲艦による一斉射撃が主体なようですね」
+					PRINTFORML 
+					PRINTFORML 粒子加速砲で主砲はほとんど統一され、副砲もまた同様。
+					PRINTFORML 一時期は砲艦を並べることが艦隊戦最強、唯一無二の戦闘ドクトリンと考えられていたらしい。
+					PRINTFORMW しかし、アレスは今なおその認識のまま進歩がなく、停滞してしまっているのだという。
+					PRINTFORML 
+					PRINTFORMW 「小型航宙機やミサイル、艦艇の推力向上にシールド能力向上……軍事技術の進歩を見るに、少し時代遅れでしょうか」
+					PRINTFORML 粒子加速砲は今でも強力な兵器ではあるが、だからこそ、それを前提に多くの技術が日々発展している。
+					PRINTFORMW 砲艦を並べてど派手なビームを撃つだけでは勝てるほど甘くはないのだと、現代宇宙戦について静流は熱く語った。
+					PRINTFORML
+					PRINTFORML 実に小一時間の力説――戦史から過去の艦艇、装備まで、静流は何やら妙に詳しい。
+					PRINTFORML 「い、いえ……武家の娘として艦隊戦に少し詳しいだけです。あ、あくまで教養の範囲ですから」
+					PRINTFORML 尋ねてみると、決して軍事オタクというわけではないのだと慌てたように否定する。
+					PRINTFORMW なるほど、武家の娘というのは中々都合の良い言葉であった。
+					PRINTFORMW
+					PRINTFORMW 「こ、こほん。ともかく、彼らの戦闘ドクトリンは現在の宇宙戦においては厳しい部分が多いでしょう」
+					PRINTFORML ビーム兵器を多用していることで、対空防御は脆弱。ミサイルや航宙機に対する防御面に欠陥がある。
+					PRINTFORML 対空防御を担って的を散らす、コルベットのような小型艦艇が存在しないことがそれに拍車を掛けていた。
+					PRINTFORMW ＵＳＯＦのようにミサイルを多用する相手に対しては難しいだろう、と静流は続ける。
+					PRINTFORML 
+					PRINTFORMW 「硬直的と言いますか、良い戦闘艦艇が揃っているだけに色々と勿体ない部分がございますね」
+					PRINTFORML ナイト、ビショップ、ルーク、キング、クイーン級と艦艇自体は高性能。
+					PRINTFORML ただ、国内での汚職問題など、内政面に不安を抱えているため、結果的に艦艇数も揃えられていないのだという。
+					PRINTFORMW 「見栄えに拘り分不相応な高級艦……そういうちぐはぐさが良さを殺してしまっているところが悲しいです」
+					PRINTFORML 
+					PRINTFORML 他国のことにも関わらず、純粋な軍事オタク心理というべきものだろうか。
+					PRINTFORML 随分残念そうに見えると口にすると、
+					PRINTFORMW 「ち、違いますよ。良い船ばかりなのに可愛そ……ああいえ、その、違、違うんです」
+					PRINTFORML 彼女は再び、必死な言い訳を再開した。
+					GOTO INPUT_LOOP
+				ELSEIF RESULT == 4
+					PRINTFORML
+					PRINTFORMW 「ＡＩ故の合理性というべきでしょうか。彼らの艦隊は単純明快ですね」
+					PRINTFORML 
+					PRINTFORML イージス級と呼ばれるシールド駆逐艦が盾となり、カラドボルグ級が四門の戦艦主砲で敵艦隊を貫く。
+					PRINTFORMW まさに盾と槍――他の国と比べ、極端なほどシンプルな艦隊編成であった。
+					PRINTFORML 「編成が複雑化すればするほど、どこかに歪みや偏りが生じるもの。艦隊線は基本的に損耗が前提ですから」
+					PRINTFORML どれだけ考え抜かれ、完成された艦隊編成も、崩れてしまえばそれで終わり。
+					PRINTFORMW 艦種統一を行うことで、損耗を前提とした継戦能力を飛躍的に高めたのが彼らの艦隊編成なのだと静流は告げる。
+					PRINTFORML
+					PRINTFORMW 「そういう意味では統一連邦と近しい考え方ですね。生産コストを考えても実に合理的です」
+					PRINTFORML 当然ながら様々な種類の艦艇を建造するほど、建造効率は落ちていくもの。
+					PRINTFORML その点でも、艦種を絞ることは生産ラインが単純化を可能都市、総合的なコスト減に繋がる。
+					PRINTFORMW 戦闘後の戦力補充も容易であり、彼らはそのように国家規模であらゆる効率を追求していた。
+					PRINTFORML 
+					PRINTFORML 「ロマン――あ、いえ、面白味こそありませんが、後方までも考えると、単純ですが中々侮れない艦隊ですね」
+					PRINTFORML シールドジェネレーターを増設し、敵艦シールドを貫く質量兵器で武装したイージス級駆逐艦。
+					PRINTFORML 大型粒子加速砲四門を搭載し、火力を増大させたカラドボルグ級戦艦。
+					PRINTFORMW まさに無機質で機械的な艦隊と言えるだろう。
+					PRINTFORML 
+					PRINTFORMW 「明確な穴が存在しない分、敵に回すと厄介な艦隊……なるべくならば相手にしたくはないものですね」
+					GOTO INPUT_LOOP
+				ELSEIF RESULT == 5
+					PRINTFORML
+					PRINTFORMW 「ハールバルズ王国はなんと言っても、重厚な装甲艦が特徴でしょうか」
+					PRINTFORML 
+					PRINTFORML ＦＴＬ時代にも関わらず、ある意味王国以上に古くからの慣習を重んじる者たち。
+					PRINTFORML しかし決して未開人などではなく、宙間国家として侮れない艦隊戦力を有していた。
+					PRINTFORMW その装甲、シールドは他国の同型艦を圧倒する強度を有するのだという。
+					PRINTFORML 
+					PRINTFORMW 「特に王国の戦艦、ブリギッド級は我が国が誇る大和級に匹敵する耐久性……中々侮れません」
+					PRINTFORML 大和級に匹敵すると言われれば、なるほど、確かに凄まじい。
+					PRINTFORML 空母もまたそれと同等の耐久性を有するとなれば、対面した際の圧力たるやいかなるものか。
+					PRINTFORML
+					PRINTFORMW 「そんな装甲、シールドジェネレーターを搭載しながら推力悪化を最小限に留めている所は賞賛の一言ですね」
+					PRINTFORML 軍事評論家さながら、静流は真面目な顔でそう頷く。
+					PRINTFORMW 装備に関しては質量兵器、レーザーを運用。誘導兵器を使わないものの、バランスが良く搭載されているらしい。
+					PRINTFORML 
+					PRINTFORMW 「艦隊としての弱点は、コルベットのような小型艦を運用しない所ですね。基本的に小回りが利きません」
+					;対ハールバルズ戦術で、フリゲート、駆逐艦と切り離しチュートリアルを再現する艦隊戦なんかも楽しそうな気がする。
+					PRINTFORML 重厚な分、やはり機動性に欠け、戦闘機動においては小型艦と大型艦の距離が開きやすい。
+					PRINTFORMW その隙間を埋めるコルベットが存在しないことが、大きな弱点となっていた。
+					PRINTFORML
+					PRINTFORML 「王の盾とするべく防御性能を引き上げた艦隊と言われていますが……実際は異なる理由かも知れませんね」
+					PRINTFORML 首を傾げると、静流は続ける。
+					PRINTFORMW 「皇国に対する前回の大敗を考えれば小回りの利く小型艦の編成が急務に思えますが、今もなお旧来のままですから」
+					IF QUEST_PROGRESS:32 >= 4
+						PRINTFORMW 皇国の水雷戦隊を前に、空母一隻と戦艦一隻、巡洋艦八隻を失う大損害。
+						PRINTFORMW 大型艦を囮にした皇国戦術に王国駆逐艦とフリゲートは引き離され、丸裸にされた主力艦が雷撃で沈められている。
+						PRINTFORMW 普通に考えれば確かに、彼女の言うとおり小回りの利く小型艦の開発、建造は急務と言えるのかも知れない。
+					ELSE
+						PRINTFORMW 皇国の水雷戦隊を前に、空母一隻と戦艦一隻、巡洋艦八隻を失う大損害を受けたのだという。
+						PRINTFORMW 大型艦を囮にした皇国戦術に王国駆逐艦とフリゲートは引き離され、丸裸にされた主力艦が雷撃で沈められたらしい。
+						PRINTFORMW 普通に考えれば確かに、彼女の言うとおり小回りの利く小型艦の開発、建造は急務と言えるのかも知れない。
+					ENDIF
+					PRINTFORML 
+					PRINTFORML 「あれだけの技術力がある王国が対策を練っていないというのは不思議なもの……今は手が回らないのかも知れません」
+					PRINTFORMW 手が回らない？　と聞き返すと、静流は頷く。
+					PRINTFORML 「現在は新たな星に植民している最中ですから、その莫大な開発費に国防費が削られてしまっているのかも」
+					PRINTFORMW あれから皇国との関係回復に随分と譲歩した、とも聞きますし――と静流は政治を絡めて見解を述べた。
 					GOTO INPUT_LOOP
 				ELSE
 					PRINTFORML

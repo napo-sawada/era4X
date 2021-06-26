@@ -3,7 +3,12 @@
 ; 海賊の討伐
 ; 近場に沸いた海賊を討伐する
 ;--------------------------
-
+@QUEST_DESCRIPTION_42
+PRINTFORML [クエスト概要]
+PRINTFORML 静流の話では近頃、強力なリーダーに率いられた海賊集団が暴れ回っているらしい。
+PRINTFORML 軍部に行けば詳しい話が聞けるかも知れない。
+PRINTFORML 
+RETURN
 ;--------------------------
 ; クエスト受注可能か
 ;--------------------------
@@ -62,6 +67,9 @@ IF QUEST_PROGRESS:42 == 1
 		NEXT
 		FOR SHIP_ID, 0, 1
 			CALL INIT_PRESET_SHIP(10, POSID, 汎用フリゲート, "海賊フリゲート", 汎用フリゲート)
+			SHIP_EQUIP:主砲:0:RESULT = 2
+			SHIP_EQUIP:副砲:0:RESULT = 8
+			SHIP_EQUIP:シールド:0:RESULT = 6
 		NEXT
 		
 	ELSEIF RESULT == 1
@@ -90,6 +98,6 @@ ELSE
 		MONEY += 750000
 		MONEY:国家ID_豊秋津皇国 -= 750000
 		QUEST_PROGRESS:42 = 0
-		REL_LIKE_COUNTRY:国家ID_豊秋津皇国:国家ID_プレイヤー = LIMIT(REL_LIKE_COUNTRY:国家ID_豊秋津皇国:国家ID_プレイヤー + 75, -1000, 1000)
+		REL_LIKE_COUNTRY:国家ID_豊秋津皇国:国家ID_プレイヤー = LIMIT(REL_LIKE_COUNTRY:国家ID_豊秋津皇国:国家ID_プレイヤー + 50, -1000, 1000)
 	ENDIF
 ENDIF

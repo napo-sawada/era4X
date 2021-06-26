@@ -3,7 +3,12 @@
 ; 海賊の討伐
 ; 近場に沸いた海賊を討伐する
 ;--------------------------
-
+@QUEST_DESCRIPTION_41
+PRINTFORML [クエスト概要]
+PRINTFORML 静流の話では近頃、バクシン党の拠点の一つが見つかったと聞いた。
+PRINTFORML 軍部に行けば詳しい話が聞けるかも知れない。
+PRINTFORML 
+RETURN
 ;--------------------------
 ; クエスト受注可能か
 ;--------------------------
@@ -65,6 +70,10 @@ IF QUEST_PROGRESS:41 == 1
 		NEXT
 		FOR SHIP_ID, 0, 1
 			CALL INIT_PRESET_SHIP(10, POSID, 朱雀級機動武者, "天狗級機動武者『大天狗』", 朱雀級機動武者)
+			SHIP_EQUIP:副砲:0:RESULT = 29
+			SHIP_EQUIP:シールド:0:RESULT = 5
+			SHIP_EQUIP:シールド:1:RESULT = 5
+			SHIP_EQUIP:オプション:0:RESULT = 6
 		NEXT
 		
 	ELSEIF RESULT == 1

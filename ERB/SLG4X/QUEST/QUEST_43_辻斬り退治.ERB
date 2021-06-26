@@ -2,7 +2,12 @@
 ; 辻斬り退治
 ; ちょっとした白兵戦クエスト
 ;--------------------------
-
+@QUEST_DESCRIPTION_43
+PRINTFORML [クエスト概要]
+PRINTFORML ちょっとした用事を済ませていた、ある日の夕暮れ。
+PRINTFORML そう言えばと、静流から聞いた辻斬りの噂を思い出す。
+PRINTFORML 
+RETURN
 ;--------------------------
 ; クエスト受注可能か
 ;--------------------------
@@ -110,7 +115,7 @@ RETURN
 											PRINTFORMW ニュースで報じられる相手に種を付けられるのが興奮するのか、静流はいつにも増して従順だった
 									ENDSELECT
 								ENDIF
-								REL_LIKE_COUNTRY:国家ID_豊秋津皇国:国家ID_プレイヤー += 100
+								REL_LIKE_COUNTRY:国家ID_豊秋津皇国:国家ID_プレイヤー += 75
 								CALL FUCK(MASTER, "性技, 性交, Ｃ, 射精", "童貞喪失, キス喪失, Ｖ挿入", 0, "静流の唇", "", "静流の膣", "和姦")
 							CASE 1
 								PRINTFORML 後に聞いた話では、相手は剣客ですらない一般人であったらしい。
@@ -151,7 +156,7 @@ RETURN
 												PRINTFORMW 優れた牡に屈服させられ種付けされ、静流の乱れようはまさに牝そのものだった。
 										ENDSELECT
 								ENDIF
-								REL_LIKE_COUNTRY:国家ID_豊秋津皇国:国家ID_プレイヤー += 75
+								REL_LIKE_COUNTRY:国家ID_豊秋津皇国:国家ID_プレイヤー += 50
 								CALL FUCK(MASTER, "性技, 性交, Ｃ, 射精", "童貞喪失, キス喪失, Ｖ挿入", 0, "静流の唇", "", "静流の膣", "和姦")
 							CASE 3
 								PRINTFORML 後に聞いた話では、相手は皇国貴族であったらしい。
