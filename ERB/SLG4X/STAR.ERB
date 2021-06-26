@@ -1,12 +1,17 @@
 ﻿;--------------------------
 ; 星の民間需要と生産の管理
 ;--------------------------
-; 生産（というか民間からの買い上げ）
+; 生産
 @PRICATE_PRODUCTION(STAR_ID)
 #DIM STAR_ID
 #DIM CONST DAILY_PRODUCTION = 770
 #DIM CONST SPECIAL_ITEM_DAILY_PRODUCTION = 14
 #DIM CONST 資源生産量 = 425
+#DIM _CITY_ID
+#DIM _SLOT_ID
+#DIM DYNAMIC _産出物一覧, SC_効果種類
+#DIM DYNAMIC _総算出物一覧, SC_効果種類
+#DIM DYNAMIC _算出アイテム一覧, ITEM_LENGTH
 {
     #DIM CONST 特産品 = 宇宙たばこ, オーネスワイン, トルス酒, サンロットの香木, フォルス酒, ゴルンミスト発生器,
     ロック布, ナナーシャ鳥, エインズの実, ナイ・ゲーム機, 日本酒, MR観光セット, ペルマティーセット
@@ -35,12 +40,57 @@ SELECTCASE STAR_OWNER:STAR_ID
         CALL AUTO_PROCESSING(STAR_ID, STAR_OWNER:STAR_ID, ビームセイバー, SPECIAL_ITEM_DAILY_PRODUCTION)
 ENDSELECT
 
-; 規定値以下なら地上から採掘
-FOR LOCAL, 0, ITEM_LENGTH
-    TRYCALLFORM GET_ITEM_CATEGORY_{LOCAL}
-    SIF RESULTS:0 == "資源" && GET_RESOURCE_NUM(星系座標ID:STAR_ID, STAR_OWNER:STAR_ID, LOCAL) < STOCK_TARGET
-        CALL ADD_RESOURCE(星系座標ID:STAR_ID, STAR_OWNER:STAR_ID, LOCAL, 資源生産量)
-NEXT
+IF STAR_OWNER:STAR_ID == 国家ID_プレイヤー
+    FOR _CITY_ID, 0, SC_最大都市数
+        FOR _SLOT_ID, 0, SC_最大建築スロット数
+            VARSET _産出物一覧, 0
+            TRYCALLFORM BUILDINGS_EFFECT_{SC_建造物:STAR_ID:_CITY_ID:_SLOT_ID}(_産出物一覧)
+            _総算出物一覧:SC_税収 += _産出物一覧:SC_税収
+            _総算出物一覧:SC_鉱物 += _産出物一覧:SC_鉱物
+            _総算出物一覧:SC_資源 += _産出物一覧:SC_資源
+            _総算出物一覧:SC_戦車 += _産出物一覧:SC_戦車
+            _総算出物一覧:SC_航空機 += _産出物一覧:SC_航空機
+            _総算出物一覧:SC_軍事 += _産出物一覧:SC_軍事
+            _総算出物一覧:SC_充足 += _産出物一覧:SC_充足
+            _総算出物一覧:SC_食糧 += _産出物一覧:SC_食糧
+            _総算出物一覧:SC_食糧 += _産出物一覧:SC_娯楽食糧
+        NEXT
+    NEXT
+    ; 資源追加
+    FOR LOCAL , 0, ITEM_LENGTH
+        TRYCALLFORM GET_ITEM_CATEGORY_{LOCAL}
+        IF RESULTS:0 == "資源" && RESULTS:1 == "原石"
+            CALL ADD_RESOURCE(星系座標ID:STAR_ID, STAR_OWNER:STAR_ID, LOCAL, _総算出物一覧:SC_鉱物 * ONE_WEEK)
+        ELSEIF RESULTS:0 == "資源"
+            CALL ADD_RESOURCE(星系座標ID:STAR_ID, STAR_OWNER:STAR_ID, LOCAL, _総算出物一覧:SC_資源 * ONE_WEEK)
+        ENDIF
+    NEXT
+    ; 税収
+    IF MONEY:国家ID_プレイヤー > 0
+        MONEY += _総算出物一覧:SC_税収 * ONE_WEEK / 100
+        MONEY:国家ID_プレイヤー += _総算出物一覧:SC_税収 * ONE_WEEK * 99 / 100 
+    ELSE
+        MONEY:国家ID_プレイヤー += _総算出物一覧:SC_税収 * ONE_WEEK
+    ENDIF
+    ; 軍事
+    GB_戦闘員:STAR_ID += _総算出物一覧:SC_軍事 * ONE_WEEK
+    GB_戦車:STAR_ID += _総算出物一覧:SC_戦車 * ONE_WEEK
+    GB_航空機:STAR_ID += _総算出物一覧:SC_航空機 * ONE_WEEK
+    GB_充足:STAR_ID += _総算出物一覧:SC_充足 * ONE_WEEK
+    ; 食糧
+    FOR _CITY_ID, 0, SC_最大都市数
+        CALL GET_CITY_RESIDENT(STAR_ID, _CITY_ID)
+        LOCAL = RESULT * SC_食糧消費量:(SC_食糧消費設定:STAR_ID:_CITY_ID) / 100
+        SC_食糧備蓄:STAR_ID:_CITY_ID = LIMIT(SC_食糧備蓄:STAR_ID:_CITY_ID + _総算出物一覧:SC_食糧 - LOCAL, 0, SC_食糧備蓄量:(SC_食糧備蓄設定:STAR_ID:_CITY_ID))
+    NEXT
+ELSE
+    ; 規定値以下なら地上から採掘
+    FOR LOCAL, 0, ITEM_LENGTH
+        TRYCALLFORM GET_ITEM_CATEGORY_{LOCAL}
+        SIF RESULTS:0 == "資源" && GET_RESOURCE_NUM(星系座標ID:STAR_ID, STAR_OWNER:STAR_ID, LOCAL) < STOCK_TARGET
+            CALL ADD_RESOURCE(星系座標ID:STAR_ID, STAR_OWNER:STAR_ID, LOCAL, 資源生産量)
+    NEXT
+ENDIF
 
 
 ; 消費

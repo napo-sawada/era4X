@@ -1,0 +1,65 @@
+﻿;各国の陸上戦力
+#DIM SAVEDATA GB_支持率, 星系数
+#DIM SAVEDATA GB_戦車, 星系数
+#DIM SAVEDATA GB_航空機, 星系数
+#DIM SAVEDATA GB_充足, 星系数
+#DIM SAVEDATA GB_戦闘員, 星系数
+#DIM SAVEDATA GB_非戦闘員, 星系数
+
+#DIM CONST SC_最大建築スロット数 = 20
+#DIM CONST SC_最大都市数 = 10
+#DIM CONST SC_空きスロット = 0
+#DIM CONST SC_商業地区 = 1
+#DIM CONST SC_農業地区 = 2
+#DIM CONST SC_民需工場地区 = 3
+#DIM CONST SC_娯楽地区 = 4
+#DIM CONST SC_住宅地区 = 5
+#DIM CONST SC_警察署 = 6
+#DIM CONST SC_軍事基地 = 7
+#DIM CONST SC_大使館 = 8
+#DIM CONST SC_リゾート地区 = 9
+#DIM CONST SC_カジノ地区 = 10
+#DIM CONST SC_研究地区 = 11
+#DIM CONST SC_スラム地区 = 12
+#DIM CONST SC_採掘地区 = 13
+#DIM CONST SC_化学プラント = 14
+#DIM CONST SC_遺伝子診療所 = 15
+#DIM CONST SC_軍需工場地区 = 16
+#DIM CONST SC_高級住宅地区 = 17
+#DIM CONST SC_食品加工工場 = 18
+#DIM CONST SC_建築物種類 = 19
+
+#DIM CONST SC_税収 = 0
+#DIM CONST SC_食糧 = 1
+#DIM CONST SC_民需 = 2
+#DIM CONST SC_娯楽 = 3
+#DIM CONST SC_住宅 = 4
+#DIM CONST SC_治安 = 5
+#DIM CONST SC_軍事 = 6
+#DIM CONST SC_外交 = 7
+#DIM CONST SC_来客 = 8
+#DIM CONST SC_研究 = 9
+#DIM CONST SC_鉱物 = 10
+#DIM CONST SC_資源 = 11
+#DIM CONST SC_医療 = 12
+#DIM CONST SC_充足 = 13
+#DIM CONST SC_戦車 = 14
+#DIM CONST SC_航空機 = 15
+#DIM CONST SC_高級住宅 = 16
+#DIM CONST SC_低級住宅 = 17
+#DIM CONST SC_娯楽食糧 = 18
+#DIM CONST SC_効果種類 = 19
+
+#DIM CONST MAX_CITY_RESIDENT = 1000000000
+
+#DIM CONST SC_食糧備蓄量 = 10000000000, 100000000000, 1000000000000
+#DIM CONST SC_食糧備蓄コスト = 5000, 50000, 500000
+#DIM CONST SC_食糧消費量 = 50, 100, 200
+
+#DIM SAVEDATA SC_建造物, 星系数, SC_最大都市数, SC_最大建築スロット数
+#DIMS SAVEDATA SC_都市名, 星系数, SC_最大都市数
+#DIM SAVEDATA SC_一般住人, 星系数, SC_最大都市数
+#DIM SAVEDATA SC_軍人, 星系数, SC_最大都市数
+#DIM SAVEDATA SC_食糧備蓄, 星系数, SC_最大都市数
+#DIM SAVEDATA SC_食糧備蓄設定, 星系数, SC_最大都市数
+#DIM SAVEDATA SC_食糧消費設定, 星系数, SC_最大都市数
