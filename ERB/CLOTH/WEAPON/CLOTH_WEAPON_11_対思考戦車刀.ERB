@@ -1,31 +1,37 @@
-﻿@CLOTH_NAME_WEAPON_2
-RESULTS = ビームソード
+﻿@CLOTH_NAME_WEAPON_11
+RESULTS = 対思考戦車刀
 
-@CLOTH_SET_EFFECT_WEAPON_2(対象, 着脱 = 1)
+@CLOTH_SET_EFFECT_WEAPON_11(対象, 着脱 = 1)
 #DIM 対象
 #DIM 着脱
 
 IF 着脱 == 1
-	ABL:対象:攻撃力 =  80
+	ABL:対象:攻撃力 = 110
 	ABL:対象:防御力 =  10
-	ABL:対象:軽減値 =  80
-	ABL:対象:行動力 =  80
-	ABL:対象:敵視   = 130
+	ABL:対象:軽減値 = 150
+	ABL:対象:行動力 = 120
+	ABL:対象:敵視   = 190
 	ABL:対象:作戦   = 論理_高脅威
 ENDIF
 ;------------------------------------------
 ;●価格の取得
 ;------------------------------------------
-@GET_WEAPON_PRICE_2
-RETURN 120000
+@GET_WEAPON_PRICE_11
+RETURN 5000000
+
 ;------------------------------------------
 ;●装備制限の取得
 ;------------------------------------------
-@GET_WEAPON_LIMITED_2(ARG)
-
+@GET_WEAPON_LIMITED_11(ARG)
 SIF TALENT:ARG:戦闘機械 == 機械_球
 	RETURN 0
+SIF TALENT:ARG:戦闘機械 == 機械_車
+	RETURN 0
+SIF TALENT:ARG:体格 < 0 && ABL:ARG:白兵 < 110
+	RETURN 0
+
 RETURN 1
+
 ;------------------------------------------
 ;●規制ルールの取得(仮)
 ;規制_通常用 =   0
@@ -53,8 +59,8 @@ RETURN 1
 ;禁止_豊秋津 = 311
 ;禁止_王国   = 312
 ;------------------------------------------
-@GET_WEAPON_REGULATION_2
-RETURN 規制_護身用
+@GET_WEAPON_REGULATION_11
+RETURN 規制_規制品
 
 
 ;------------------------------------------
@@ -66,6 +72,6 @@ RETURN 規制_護身用
 ; 150 = 暗器の類、ビームソードもここ
 ; 200 = 素手、サイバーリム内蔵ウェポンは１５０（電子的に探せるため）
 ;------------------------------------------
-@GET_WEAPON_HIDDEN_2
-RETURN 160
+@GET_WEAPON_HIDDEN_11
+RETURN 0
 

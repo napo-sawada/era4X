@@ -1,5 +1,5 @@
 ﻿@CLOTH_NAME_WEAPON_6
-RESULTS = ヘビーマシンガン
+RESULTS = ライトマシンガン
 
 @CLOTH_SET_EFFECT_WEAPON_6(対象, 着脱 = 1)
 #DIM 対象
@@ -11,7 +11,7 @@ IF 着脱 == 1
 	ABL:対象:軽減値 =   0
 	ABL:対象:行動力 =  80
 	ABL:対象:敵視   = 180
-	ABL:対象:作戦   = 論理_高脅威
+	ABL:対象:作戦   = 論理_無作為
 ENDIF
 ;------------------------------------------
 ;●価格の取得
@@ -23,9 +23,11 @@ RETURN 650000
 ;------------------------------------------
 @GET_WEAPON_LIMITED_5(ARG)
 
-SIF TALENT:ARG:体格
-	RETURN 1
-RETURN 0
+SIF TALENT:ARG:戦闘機械 == 機械_球
+	RETURN 0
+SIF TALENT:ARG:体格 < 1
+	RETURN 0
+RETURN 1
 
 ;------------------------------------------
 ;●規制ルールの取得(仮)

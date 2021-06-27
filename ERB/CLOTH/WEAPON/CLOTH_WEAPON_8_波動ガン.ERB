@@ -24,6 +24,8 @@ RETURN 2100000
 ;------------------------------------------
 @GET_WEAPON_LIMITED_8(ARG)
 
+SIF TALENT:ARG:戦闘機械 == 機械_球
+	RETURN 1
 SIF TALENT:ARG:戦闘機械
 	RETURN 0
 RETURN 1

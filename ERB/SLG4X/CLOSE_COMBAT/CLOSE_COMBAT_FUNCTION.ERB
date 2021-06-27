@@ -184,9 +184,9 @@ ENDIF
 W_ACTIVE = ABL:ID:白兵 + (ABL:ID:白兵 * ABL:ID:行動力 / 100) - ABL:ID:白兵 / 2
 
 敵視_高脅威 = ABL:ID:白兵 * ABL:ID:敵視 / 100
-敵視_低脅威 = ABL:ID:白兵 * 100 / MAX(ABL:ID:敵視, 100)
+敵視_低脅威 = ABL:ID:敵視 * 100 / MAX(ABL:ID:白兵, 1)
 敵視_能力者 = ABL:ID:超能力 * ABL:ID:敵視 / 100
-敵視_低耐久 = MAXBASE:ID:体力 * ABL:ID:敵視 / 1000
+敵視_低耐久 = MAX(MAXBASE:ID:体力 / 10 - ABL:ID:敵視, 100)
 
 ;
 ;装備処理ココマデ
@@ -250,9 +250,9 @@ ELSE
 ENDIF
 
 敵視_高脅威 = 白兵 * 敵視 / 100
-敵視_低脅威 = 白兵 * 100 / 敵視
+敵視_低脅威 = 敵視 * 100 / 白兵
 敵視_能力者 = 超能力 * 敵視 / 100
-敵視_低耐久 = MAXHP * 敵視 / 1000
+敵視_低耐久 = MAX(MAXHP / 10 - 敵視, 100)
 
 MEM_LIST:IDX = %DIC_SET(MEM_LIST:IDX, "名前", CC_NAME)%
 MEM_LIST:IDX = %DIC_SET(MEM_LIST:IDX, "体力", TOSTR(HP))%

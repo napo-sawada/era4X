@@ -1391,7 +1391,7 @@ ELSE
 ENDIF
 
 ;-------------------------------------------------
-;ARG:0番のキャラが巨乳か爆乳か超乳か奇乳なら1を返す関数
+;ARG:0番のキャラが巨乳か爆乳なら1を返す関数
 ;-------------------------------------------------
 @IS_BOIN(ARG:0)
 #FUNCTION
@@ -1426,11 +1426,11 @@ RETURNF "不明"
 
 ;-------------------------------------------------
 ;バストサイズの数値を文字列に直す
-;-2:絶壁～4:奇乳
+;-2:絶壁～2:爆乳
 ;-------------------------------------------------
 @TOSTR_BUSTSIZE(ARG:0)
 #FUNCTIONS
-ARG:0 = MAX(-2, MIN(4, ARG:0))
+ARG:0 = MAX(-2, MIN(2, ARG:0))
 SELECTCASE ARG:0
 	CASE -2
 		RETURNF "絶壁"
@@ -1440,16 +1440,12 @@ SELECTCASE ARG:0
 		RETURNF "巨乳"
 	CASE 2
 		RETURNF "爆乳"
-	CASE 3
-		RETURNF "超乳"
-	CASE 4
-		RETURNF "奇乳"
 ENDSELECT
 RETURNF "並乳"
 
 ;-------------------------------------------------
 ;キャラARG:0のバストサイズを数値に変換する
-;-2:絶壁～4:奇乳
+;-2:絶壁～2:爆乳
 ;-------------------------------------------------
 @GET_BUSTSIZE(ARG:0)
 #FUNCTION
@@ -1459,12 +1455,12 @@ RETURNF TALENT:(ARG:0):バストサイズ
 
 ;-------------------------------------------------
 ;キャラARG:0のバストサイズをARG:1にする
-;-2:絶壁～4:奇乳
+;-2:絶壁～2:爆乳
 ;-------------------------------------------------
 @SET_BUSTSIZE(ARG:0, ARG:1)
 SIF IS_MALE(ARG:0)
 	RETURN
-SIF !INRANGE(ARG:1, -2, 4)
+SIF !INRANGE(ARG:1, -2, 2)
 	RETURN 
 TALENT:(ARG:0):バストサイズ = ARG:1
 CALL SET_BODYSIZE(ARG:0, POWER(2, サイズ_バスト) + POWER(2, サイズ_体重))
@@ -3026,6 +3022,16 @@ SELECTCASE 分類
 	CASE ランク_性知識
 		FOR LOCAL, ランク_S, ランク_無
 			SIF 値 >= ランク閾値:ランク_性知識:LOCAL
+				RETURNF ランク文字列:LOCAL
+		NEXT
+	CASE ランク_戦闘力
+		FOR LOCAL, ランク_S, ランク_無
+			SIF 値 >= ランク閾値:ランク_戦闘力:LOCAL
+				RETURNF ランク文字列:LOCAL
+		NEXT
+	CASE ランク_防御力
+		FOR LOCAL, ランク_S, ランク_無
+			SIF 値 >= ランク閾値:ランク_防御力:LOCAL
 				RETURNF ランク文字列:LOCAL
 		NEXT
 ENDSELECT

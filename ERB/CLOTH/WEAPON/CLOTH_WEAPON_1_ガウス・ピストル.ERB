@@ -30,9 +30,9 @@ RETURN 100000
 ;------------------------------------------
 @GET_WEAPON_LIMITED_1(ARG)
 
-SIF TALENT:ARG:戦闘機械
-	RETURN 0
-RETURN 1
+SIF !TALENT:ARG:戦闘機械 || TALENT:ARG:戦闘機械 == 機械_球 || TALENT:ARG:戦闘機械 == 機械_人
+	RETURN 1
+RETURN 0
 ;------------------------------------------
 ;●規制ルールの取得(仮)
 ;規制_通常用 =   0
