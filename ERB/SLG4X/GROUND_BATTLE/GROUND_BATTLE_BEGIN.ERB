@@ -44,4 +44,6 @@ IF PORTID == 2 && STAR_OWNER:PORTID == 国家ID_社会主義
     PRINTFORMW 作戦失敗だ……
     REL_LIKE_COUNTRY:国家ID_社会主義:国家ID_プレイヤー = -900
   ENDIF
+  QUEST_PROGRESS:34 = -1
+  CALL QUEST_RELEASE_POINT(34, レジスタンスアジト)
 ENDIF
