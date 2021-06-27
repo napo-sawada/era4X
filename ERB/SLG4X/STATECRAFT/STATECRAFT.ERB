@@ -635,7 +635,6 @@ FOR _SLOT_ID, 0, SC_最大建築スロット数
 NEXT
 SELECTCASE SC_TYPE
   CASE SC_税収, SC_軍事, SC_外交, SC_来客, SC_研究, SC_鉱物, SC_資源, SC_充足, SC_戦車, SC_航空機
-    SIF SC_TYPE == SC_航空機
     RETURN _基礎値 * _出力 / 100
   CASEELSE
     RETURN _基礎値
