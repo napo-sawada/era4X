@@ -1,0 +1,108 @@
+﻿;--------------------------
+; 遺棄された貨物船
+;--------------------------
+@INIT_ANOMALY_4
+#DIM TASK_COMPLETE
+#DIM SECTOR_ID
+#DIM POS_X
+#DIM POS_Y
+; 救難信号
+WHILE TASK_COMPLETE == 0
+	SECTOR_ID = RAND:MAX_SECTOR
+	POS_X = RAND:(MAP_WIDTH)
+	POS_Y = RAND:(MAP_HEIGHT)
+	SIF MAP:SECTOR_ID:POS_X:POS_Y != 明瞭
+		CONTINUE
+	MAP:SECTOR_ID:POS_X:POS_Y = ANOMALY
+	ANOMALY_MAP:SECTOR_ID:POS_X:POS_Y = 救難信号
+	CALL POS2ID(SECTOR_ID, POS_X, POS_Y)
+	ANOMALY_POSITIONID:4 = RESULT
+	TASK_COMPLETE = 1
+WEND
+ANOMALY_PROGRESS:4 = 1
+
+;--------------------------
+; ANOMALY本体
+;--------------------------
+@ANOMALY_BODY_救難信号
+#DIM ITER
+#DIM SHIP_ID
+#DIM SECTOR_ID
+#DIM X_POS
+#DIM Y_POS
+
+PRINTL 謎のコンテナが中に浮いている
+PRINTL 開けてみますか？
+CALL ASK_YN
+SIF RESULT == 1
+	RETURN
+
+SELECTCASE RAND:10
+	CASE 0
+		PRINTFORMW コンテナを開けると、中身は空だった……
+	CASE 1
+		PRINTFORMW コンテナを開けると、中には干からびた人間の死体が入っていた……
+	CASE 2
+		PRINTFORMW コンテナを開けると、中には武器が入っていた！
+		LOCAL = RAND:(武器ラインナップ)
+		HAVE_CLOTH:LOCAL ++
+		TRYCALLFORM CLOTH_NAME_WEAPON_{LOCAL}
+		PRINTFORMW %RESULTS%を手に入れた！
+	CASE 3
+		PRINTFORMW 中には少量のクレジットが入っていた
+		LOCAL = RAND:1000 + 1
+		PRINTFORMW ${LOCAL}手に入れた
+		MONEY += LOCAL
+	CASE 4
+		PRINTFORMW 中にはクレジットが入っていた!
+		LOCAL = RAND(1000, 10000)
+		PRINTFORMW ${LOCAL}手に入れた
+		MONEY += LOCAL
+	CASE 5
+		PRINTFORMW 中には大量のクレジットが入っていた!
+		LOCAL = RAND(10000, 100000)
+		PRINTFORMW ${LOCAL}手に入れた
+		MONEY += LOCAL
+	CASE 6
+		PRINTFORMW 中には山盛りのクレジットが入っていた!
+		LOCAL = RAND(1000000, 1200000)
+		PRINTFORMW ${LOCAL}手に入れた
+		MONEY += LOCAL
+	CASE 7
+		PRINTFORMW 中には兵士の装備が100セット入っていた
+		PRINTFORMW 個人では使い道がないが取っておこう
+		GB_充足:ID_プレイヤー += 100
+	CASE 8
+		PRINTFORMW 中には解体された航空機が1機入っていた
+		PRINTFORMW 個人では使い道がないが取っておこう
+		GB_充足:ID_プレイヤー += 1
+	CASE 9
+		PRINTFORMW 中には戦闘マシーンが入っていた。
+		PRINTFORMW 戦闘マシーンは%CALLNAME:MASTER%に襲い掛かってきた！
+		;白兵戦参加メンバーの初期化
+		CALL CC_INIT_MEMBER()
+		;攻撃側キャラクターの設定(最大6名)
+		CALL CC_ADDMOB("ATTACKER", "ボロボロの戦闘マシーン", 1000, 1000, 20)
+		;防御側キャラクターの設定(最大6名)
+		CALL CC_ADDCHARA("DEFENDER", MASTER)
+		;白兵戦イベント呼出
+		CALL CLOSE_COMBAT()
+		IF RESULT == 1
+			PRINTFORMW GAME OVER ...
+			INPUT
+			CLEARLINE 1
+		ENDIF
+		CALL CC_ADD_COMBAT_EXP(10)
+ENDSELECT
+
+
+CALL ID2POS(ANOMALY_POSITIONID:4)
+SECTOR_ID = RESULT:0
+X_POS = RESULT:1
+Y_POS = RESULT:2
+ANOMALY_MAP:SECTOR_ID:X_POS:Y_POS = %""%
+MAP:SECTOR_ID:X_POS:Y_POS = 明瞭
+
+CALL INIT_ANOMALY_4
+
+
