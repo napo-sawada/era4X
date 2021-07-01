@@ -72,6 +72,8 @@ FOR LOCAL, 1, CHARANUM
       CONTINUE
     SIF CONFIG:18 == 4 && GROUPMATCH(TALENT:LOCAL:性別, 1, 3, 4, 5) && GROUPMATCH(TALENT:対象:性別, 1, 3, 4, 5)
       CONTINUE
+    SIF REL_PROGRESS:LOCAL:対象 > 関係_知り合い
+      CONTINUE
     ペア:0:ペアID = LOCAL
     ペア:1:ペアID = 対象
     ペアID ++
