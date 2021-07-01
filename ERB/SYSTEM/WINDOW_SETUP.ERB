@@ -120,5 +120,17 @@ CALL WndMgr_Exist( 7 )
 SIF ! RESULT:0
 	CALL WndMgr_CreateWindow( nWndId:7, nLocX:7, nLocY:7, nWidth:7, nHeigth:7, nExFlag:7 )
 
+; ウィンドウ8の生成
+; 宇宙軍許容量
+	nWndId:8  = 8
+	nLocX:8   = 90
+	nLocY:8   = 0
+	nWidth:8  = 20
+	nHeigth:8 = 3
+	nExFlag:8 = 0x02
+CALL WndMgr_Exist( 8 )
+SIF ! RESULT:0
+	CALL WndMgr_CreateWindow( nWndId:8, nLocX:8, nLocY:8, nWidth:8, nHeigth:8, nExFlag:8 )
+
  ;;ウィンドウ初期設定ここまで
 ;--------------------------------

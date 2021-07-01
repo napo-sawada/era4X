@@ -15,7 +15,7 @@
 #DIM SHIP_ID
 #DIM Wnd0_FLAG		;window0 コントローラー表示するフラグ
 #DIM Wnd4_LINES = 0	;window4 MainInfo表示内容行数
-#DIM dynamic OPWnd , 10	;ウィンドウ群展開に使用
+#DIM DYNAMIC OPWnd , 10	;ウィンドウ群展開に使用
 #DIM WndCOUNT			;ウィンドウ群展開に使用
 
 ;;移動用宙域画面でも、あなたが船に乗ってない場合、コントローラ表示させない
@@ -49,11 +49,12 @@ CALL CREATE_WINDOW_SUBINFO(SELECTED)
 SIF SHIP_ID >= 0
 	CALL CREATE_WINDOW_SHIPINFO_MAIN(SHIP_ID)
 
+CALL DRAW_SPACE_FORCE_OCCUPANCY
 
 DRAWLINE
 ;;窓1：中央マップ部分 / 窓２:右側セクター全体マップ部分 / 窓３:右下情報枠 は常にある
-	OPWnd = 1, 2, 3
-	WndCOUNT = 3
+	OPWnd = 1, 2, 3, 8
+	WndCOUNT = 4
 	
 IF Wnd0_FLAG == 1	;窓０コントローラーあり
 	OPWnd:WndCOUNT = 0
@@ -709,3 +710,13 @@ FOR Y_POS, 1, MAP_HEIGHT
 	NEXT
 NEXT
 RETURNF 0
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;@SPACE_FORCE_OCCUPANCY(宇宙軍許容量)
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+@DRAW_SPACE_FORCE_OCCUPANCY
+#DIM windowID = 8
+
+CALL WndMgr_WindowTitle( windowID , "宇宙軍許容量" )
+
+CALL WndMgr_TextSet( windowID , 0, @"      {GET_CURRENT_OCCUPANCY_POINT()}/{GET_MAX_OCCUPANCY_POINT()}" )
