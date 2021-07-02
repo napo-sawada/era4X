@@ -1,0 +1,42 @@
+﻿;-----------------------------------
+;基本値計算に先んじて処理するもの
+;-----------------------------------
+@SKILL_0_PERSONAL_22_EXIST
+RETURN 1
+
+@SKILL_0_PERSONAL_22_NAME
+RESULTS = 魚雷専門
+
+;レベルは1-5まで
+@SKILL_0_PERSONAL_22_LEVEL
+RETURN 2
+
+@SKILL_0_PERSONAL_22_EXPLANATION
+RESULTS = 自艦の魚雷の命中率+20\%、与ダメージ+10\%
+
+;効果をここに記述
+@SKILL_0_PERSONAL_22_EFFECT(VALUE, TYPE, CLASS)
+#DIM VALUE
+#DIM TYPE
+#DIM CLASS
+#DIM STATUS, STATUS_LENGTH
+
+IF TYPE == TYPE_命中 && (WEAPON_TYPE == 魚雷)
+	TIMES VALUE, 1.20
+ELSEIF TYPE == TYPE_与ダメージ && (WEAPON_TYPE == 魚雷)
+	TIMES VALUE, 1.10
+ENDIF
+RETURN VALUE
+
+@SKILL_0_PERSONAL_22_RATE(発動者, 発動番号, 発動側, 発動勢力, 発動部隊, 対象勢力, 対象部隊)
+#DIM 発動者
+#DIM 発動番号
+#DIM スキル
+#DIMS ジャンル
+#DIM 発動側
+#DIM 発動勢力
+#DIM 発動部隊
+#DIM 対象側
+#DIM 対象勢力
+#DIM 対象部隊
+RETURN 1000

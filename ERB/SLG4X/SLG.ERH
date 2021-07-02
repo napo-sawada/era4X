@@ -190,7 +190,7 @@
 #DIM CONST 実体弾 = 0
 #DIM CONST レーザー = 1
 #DIM CONST ミサイル = 2
-#DIM CONST 戦闘機 = 3
+#DIM CONST 艦載機 = 3
 #DIM CONST 魚雷 = 4
 #DIM CONST ビーム = 5
 #DIM CONST 攻撃属性 = 6
@@ -323,7 +323,7 @@
 #DIM CONST ソート_実体弾 = 10
 #DIM CONST ソート_レーザー = 11
 #DIM CONST ソート_ミサイル = 12
-#DIM CONST ソート_戦闘機 = 13
+#DIM CONST ソート_艦載機 = 13
 #DIM CONST ソート_魚雷 = 14
 #DIM CONST ソート_ビーム = 15
 #DIM CONST ソート_対空 = 16
@@ -338,7 +338,7 @@
 #DIM CONST データ_実体弾 = 6
 #DIM CONST データ_レーザー = 7
 #DIM CONST データ_ミサイル = 8
-#DIM CONST データ_戦闘機 = 9
+#DIM CONST データ_艦載機 = 9
 #DIM CONST データ_魚雷 = 10
 #DIM CONST データ_ビーム = 11
 #DIM CONST データ_対空 = 12

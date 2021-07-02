@@ -1,0 +1,40 @@
+﻿;-----------------------------------
+;基本値計算に先んじて処理するもの
+;-----------------------------------
+@SKILL_0_PERSONAL_15_EXIST
+RETURN 1
+
+@SKILL_0_PERSONAL_15_NAME
+RESULTS = ハエ叩き
+
+;レベルは1-5まで
+@SKILL_0_PERSONAL_15_LEVEL
+RETURN 1
+
+@SKILL_0_PERSONAL_15_EXPLANATION
+RESULTS = 自艦の対空命中率と対空ダメージ+10\%
+
+;効果をここに記述
+@SKILL_0_PERSONAL_15_EFFECT(VALUE, TYPE, CLASS)
+#DIM VALUE
+#DIM TYPE
+#DIM CLASS
+IF TYPE == TYPE_対空命中
+	TIMES VALUE, 1.10
+ELSEIF TYPE == TYPE_対空ダメージ
+	TIMES VALUE, 1.10
+ENDIF
+RETURN VALUE
+
+@SKILL_0_PERSONAL_15_RATE(発動者, 発動番号, 発動側, 発動勢力, 発動部隊, 対象勢力, 対象部隊)
+#DIM 発動者
+#DIM 発動番号
+#DIM スキル
+#DIMS ジャンル
+#DIM 発動側
+#DIM 発動勢力
+#DIM 発動部隊
+#DIM 対象側
+#DIM 対象勢力
+#DIM 対象部隊
+RETURN 1000

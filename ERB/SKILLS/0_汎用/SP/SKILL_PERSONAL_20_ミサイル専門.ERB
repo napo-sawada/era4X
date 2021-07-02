@@ -1,0 +1,42 @@
+﻿;-----------------------------------
+;基本値計算に先んじて処理するもの
+;-----------------------------------
+@SKILL_0_PERSONAL_20_EXIST
+RETURN 1
+
+@SKILL_0_PERSONAL_20_NAME
+RESULTS = ミサイル専門
+
+;レベルは1-5まで
+@SKILL_0_PERSONAL_20_LEVEL
+RETURN 2
+
+@SKILL_0_PERSONAL_20_EXPLANATION
+RESULTS = 自艦のミサイルの命中率と与ダメージ+15\%
+
+;効果をここに記述
+@SKILL_0_PERSONAL_20_EFFECT(VALUE, TYPE, CLASS)
+#DIM VALUE
+#DIM TYPE
+#DIM CLASS
+#DIM STATUS, STATUS_LENGTH
+
+IF TYPE == TYPE_命中 && (WEAPON_TYPE == ミサイル)
+	TIMES VALUE, 1.15
+ELSEIF TYPE == TYPE_与ダメージ && (WEAPON_TYPE == ミサイル)
+	TIMES VALUE, 1.15
+ENDIF
+RETURN VALUE
+
+@SKILL_0_PERSONAL_20_RATE(発動者, 発動番号, 発動側, 発動勢力, 発動部隊, 対象勢力, 対象部隊)
+#DIM 発動者
+#DIM 発動番号
+#DIM スキル
+#DIMS ジャンル
+#DIM 発動側
+#DIM 発動勢力
+#DIM 発動部隊
+#DIM 対象側
+#DIM 対象勢力
+#DIM 対象部隊
+RETURN 1000

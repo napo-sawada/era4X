@@ -644,7 +644,7 @@ ELSEIF CURRENT_MODE == 16 && STAR_OWNER:PORTID == 国家ID_プレイヤー
   CALL SHIP_DESIGN
 ELSEIF CURRENT_MODE == 17 && STAR_OWNER:PORTID == 国家ID_プレイヤー
 	CALL STARCRAFT(PORTID)
-ELSEIF CURRENT_MODE == 18 && STAR_OWNER:PORTID == 国家ID_プレイヤー && IS_RELEASED_RESEARCH_MODULE(PORTID)
+	ELSEIF CURRENT_MODE == 18 && STAR_OWNER:PORTID == 国家ID_プレイヤー && IS_RELEASED_RESEARCH_MODULE(PORTID)
 	CALL RESOURCE_FINDER
 ENDIF
 
@@ -733,7 +733,7 @@ ENDIF
 
 #DIM PREVIOUS_LINECOUNT
 
-#DIM COLUMN_ORDER = データ_艦名, データ_艦種, データ_所属, データ_任務, データ_HP, データ_シールド, データ_実体弾, データ_レーザー, データ_ミサイル, データ_戦闘機, データ_魚雷, データ_ビーム, データ_対空, データ_回避
+#DIM COLUMN_ORDER = データ_艦名, データ_艦種, データ_所属, データ_任務, データ_HP, データ_シールド, データ_実体弾, データ_レーザー, データ_ミサイル, データ_艦載機, データ_魚雷, データ_ビーム, データ_対空, データ_回避
 #DIM DATA_WIDTH, 船舶一覧データ数 
 #DIM INDEX
 ;列幅
@@ -746,7 +746,7 @@ DATA_WIDTH:データ_シールド = 11
 DATA_WIDTH:データ_実体弾 = 4
 DATA_WIDTH:データ_レーザー = 4
 DATA_WIDTH:データ_ミサイル = 4
-DATA_WIDTH:データ_戦闘機 = 4
+DATA_WIDTH:データ_艦載機 = 4
 DATA_WIDTH:データ_魚雷 = 4
 DATA_WIDTH:データ_ビーム = 4
 DATA_WIDTH:データ_対空 = 4
@@ -952,8 +952,8 @@ FOR LOCAL, INDEX, VARSIZE("COLUMN_ORDER")
 			PRINTBUTTON "ﾚｰｻﾞｰ", 10000 + ソート_レーザー
 		CASE データ_ミサイル
 			PRINTBUTTON "ﾐｻｲﾙ", 10000 + ソート_ミサイル
-		CASE データ_戦闘機
-			PRINTBUTTON "航空", 10000 + ソート_戦闘機
+		CASE データ_艦載機
+			PRINTBUTTON "航空", 10000 + ソート_艦載機
 		CASE データ_魚雷
 			PRINTBUTTON "雷撃", 10000 + ソート_魚雷
 		CASE データ_ビーム
@@ -1026,8 +1026,8 @@ FOR LOCAL, INDEX, VARSIZE("COLUMN_ORDER")
 			COLUMN_DATA += @"{FIREPOWER_LIST:レーザー, 4, RIGHT}"
 		CASE データ_ミサイル
 			COLUMN_DATA += @"{FIREPOWER_LIST:ミサイル, 4, RIGHT}"
-		CASE データ_戦闘機
-			COLUMN_DATA += @"{FIREPOWER_LIST:戦闘機, 4, RIGHT}"
+		CASE データ_艦載機
+			COLUMN_DATA += @"{FIREPOWER_LIST:艦載機, 4, RIGHT}"
 		CASE データ_魚雷
 			COLUMN_DATA += @"{FIREPOWER_LIST:魚雷, 4, RIGHT}" 
 		CASE データ_ビーム
@@ -1098,9 +1098,9 @@ FOR LOCAL, 0, MAX_SHIP
 		CASE ソート_ミサイル
 			CALL GET_TOTAL_FIREPOWER(CURRENT_SHIP_LIST:LOCAL, FIREPOWER_LIST)
 			SORT_VALUE:LOCAL = FIREPOWER_LIST:ミサイル
-		CASE ソート_戦闘機
+		CASE ソート_艦載機
 			CALL GET_TOTAL_FIREPOWER(CURRENT_SHIP_LIST:LOCAL, FIREPOWER_LIST)
-			SORT_VALUE:LOCAL = FIREPOWER_LIST:戦闘機
+			SORT_VALUE:LOCAL = FIREPOWER_LIST:艦載機
 		CASE ソート_魚雷
 			CALL GET_TOTAL_FIREPOWER(CURRENT_SHIP_LIST:LOCAL, FIREPOWER_LIST)
 			SORT_VALUE:LOCAL = FIREPOWER_LIST:魚雷

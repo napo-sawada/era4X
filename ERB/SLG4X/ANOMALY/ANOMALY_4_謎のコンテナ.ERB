@@ -24,7 +24,7 @@ ANOMALY_PROGRESS:4 = 1
 ;--------------------------
 ; ANOMALY本体
 ;--------------------------
-@ANOMALY_BODY_救難信号
+@ANOMALY_BODY_謎のコンテナ
 #DIM ITER
 #DIM SHIP_ID
 #DIM SECTOR_ID
@@ -71,11 +71,11 @@ SELECTCASE RAND:10
 	CASE 7
 		PRINTFORMW 中には兵士の装備が100セット入っていた
 		PRINTFORMW 個人では使い道がないが取っておこう
-		GB_充足:ID_プレイヤー += 100
+		GB_充足:国家ID_プレイヤー += 100
 	CASE 8
 		PRINTFORMW 中には解体された航空機が1機入っていた
 		PRINTFORMW 個人では使い道がないが取っておこう
-		GB_充足:ID_プレイヤー += 1
+		GB_充足:国家ID_プレイヤー += 1
 	CASE 9
 		PRINTFORMW 中には戦闘マシーンが入っていた。
 		PRINTFORMW 戦闘マシーンは%CALLNAME:MASTER%に襲い掛かってきた！
