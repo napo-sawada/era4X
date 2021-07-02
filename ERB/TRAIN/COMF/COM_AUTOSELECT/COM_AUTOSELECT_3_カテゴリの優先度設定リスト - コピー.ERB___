@@ -579,6 +579,9 @@ ENDIF
 ;-------------------------------------------------
 ;## 不可
 ;-------------------------------------------------
+IF CHECK_SP_SADIST_CHARA(MAIN_PLAYER) && TALENT:MAIN_PLAYER:慰安モブ != 慰安_キャラ_露出狂
+	COM_AUTO_CATEGORY_PRIORITY:COM_AUTO_CATEGORY_NUM_露出する = -1
+ENDIF
 IF ABL:MAIN_PLAYER:倒錯度 < 300 || ABL:MAIN_PLAYER:主導度Ｕ >= -300
 	COM_AUTO_CATEGORY_PRIORITY:COM_AUTO_CATEGORY_NUM_露出する = -1
 ENDIF

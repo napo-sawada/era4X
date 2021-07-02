@@ -1,0 +1,128 @@
+﻿;--------------------------
+; クエスト名　とある宇宙船乗りの廃業
+; しゃせいかい入場パス入手クエスト
+;--------------------------
+@QUEST_DESCRIPTION_81
+PRINTFORML [クエスト概要]
+PRINTFORML
+PRINTFORML 宇宙港で、周囲の宇宙船乗りの様子をうかがっている挙動不審な男がいる
+PRINTFORML なにか、得になる話でも持っていればいいのだが……
+PRINTFORML 興味があれば、声をかけてみるのもいいだろう
+PRINTL
+
+;--------------------------
+; クエスト受注可能か
+;--------------------------
+@QUEST_ACCEPTABLE_81
+SIF QUEST_PROGRESS:81 > 1
+	RETURN 0
+
+CALL GET_STAR_ID_FROM_POS(CHARACTER_POSITION)
+SIF STAR_OWNER:RESULT != -1
+	RETURN 1
+RETURN 0
+
+;--------------------------
+; クエストの名前を返却
+;--------------------------
+@QUEST_NAME_81
+RESULTS = とある宇宙船乗りの廃業
+RETURN
+
+;--------------------------
+; クエスト本体
+;--------------------------
+@QUEST_BODY_81
+IF QUEST_PROGRESS:81 == 0
+	PRINTFORMW 「あんた…そう、そこのあんただ」
+	PRINTFORML 
+	PRINTFORMW %CALLNAME:MASTER%は、宇宙船乗りらしき男に声をかけられた
+	PRINTFORML 
+	PRINTFORMW 「あんた、宇宙船乗りだろう？オレもそうだった」
+	PRINTFORMW 「輸送船も、なけなしの金をはたいて買ったコルベットも、海賊に丸ごとやられちまってな」
+	PRINTFORMW 「もう、やっていける気がしなくなっちまった。オレは星に腰を下ろすよ」
+	PRINTFORML 
+	PRINTFORMW %CALLNAME:MASTER%は不審に思う。唐突な身の上話をされて、どうしろというのだ
+	PRINTFORML 
+	PRINTFORMW 「おおっと待ちなよ。あんたの言いたいことはよくわかる」
+	PRINTFORMW 「単刀直入に言うがな。俺は宇宙船乗りにとって、ある意味とてもありがたいブツを持ってる」
+	PRINTFORMW 「芸術に精を出す同業者の集いがあってな。星付きの宇宙港ならどこでもやってるはずだぜ」
+	PRINTFORML 
+	PRINTFORMW ……芸術？
+	PRINTFORMW なんだそれは。ありがたいとはどういうことだ？
+	PRINTFORML 
+	PRINTFORMW 「そいつは行ってのお楽しみと言わせてもらうぜ」
+	PRINTFORMW 「で、ブツっていうのは、そこに入るための入場パスなんだが」
+	PRINTFORMW 「$500000だ。言っておく…破格だぞ。新しいのはしばらく発行されねえからな。手に入れようがねえんだ」
+	PRINTFORMW 「俺としてはぜひ買ってほしいね。宇宙船乗りをやめるなら、俺にはもう行く資格のない場所だからな」
+	PRINTFORMW 「さあ、賢い買い物……する気はあるかい？」
+	PRINTFORML 
+	PRINTFORML （%ANAME(MASTER)%の現在の所持金：＄{MONEY}）
+	CALL ASK_MULTI("買う", "買わない")
+	SELECTCASE RESULT
+		CASE 0
+			SIF MONEY < 500000
+				RESULT = -1
+		CASE 1
+			RESULT = 1
+		CASEELSE
+	ENDSELECT
+
+	IF RESULT == -1
+		PRINTFORMW 所持金が足りないようだ……
+		RESULT = 1
+	ENDIF
+	
+	SELECTCASE RESULT
+		CASE 0
+			MONEY -= 500000
+			PRINTFORML 
+			PRINTFORMW 「毎度あり。あんた運がいいぜ」
+			PRINTFORMW 「じゃあな。俺はこの金で堅実な再出発をさせてもらうさ」
+			PRINTFORML 
+			CALL COLOR_PRINTW(@"――　裏施設「しゃせいかい」が解禁された", カラー_注意)
+			PRINTFORML 
+			QUEST_PROGRESS:81 = 2
+		CASE 1
+			PRINTFORML 
+			PRINTFORMW 「ま、安くはねえし。いっぺん考えるのもいいわな」
+			PRINTFORMW 「だが気をつけとけよ。いつ売れちまうかわからねえからよ」
+			PRINTFORML 
+			QUEST_PROGRESS:81 = 1
+	ENDSELECT
+ELSE
+	PRINTFORML 
+	PRINTFORMW 「おう、$500000ポッキリの入場パス……買う気になったかい？」
+	PRINTFORML
+	PRINTFORML （%ANAME(MASTER)%の現在の所持金：＄{MONEY}）
+	CALL ASK_MULTI("買う", "買わない")
+	SELECTCASE RESULT
+		CASE 0
+			SIF MONEY < 500000
+				RESULT = -1
+		CASE 1
+			RESULT = 1
+		CASEELSE
+	ENDSELECT
+
+	IF RESULT == -1
+		PRINTFORMW 所持金が足りないようだ……
+		RESULT = 1
+	ENDIF
+	
+	SELECTCASE RESULT
+		CASE 0
+			MONEY -= 500000
+			PRINTFORML 
+			PRINTFORMW 「毎度あり。あんた運がいいぜ」
+			PRINTFORMW 「じゃあな。俺はこの金で堅実な再出発をさせてもらうさ」
+			PRINTFORML 
+			CALL COLOR_PRINTW(@"――　裏施設「しゃせいかい」が解禁された", カラー_注意)
+			PRINTFORML 
+			QUEST_PROGRESS:81 = 2
+		CASE 1
+			PRINTFORML 
+			PRINTFORMW 「考え込んでる間に売れちまわねえといいな」
+			PRINTFORML 
+	ENDSELECT
+ENDIF

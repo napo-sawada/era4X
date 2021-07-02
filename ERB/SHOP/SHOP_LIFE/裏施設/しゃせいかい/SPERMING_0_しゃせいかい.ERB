@@ -1,0 +1,948 @@
+﻿;---------------------------
+; 説明
+;---------------------------
+@SPERMING_COMPETITION_0_DESCRIPTION
+PRINTFORML 
+PRINTFORML [しゃせいかい]
+PRINTFORML
+PRINTFORML 宇宙港は交流スペースの片隅で、しばしば一室を借り切って行われている催し。
+PRINTFORML
+PRINTFORML 日々、一歩間違えたら死ぬ生活を送る宇宙空間の船乗りたちが、
+PRINTFORML すさんでいく心に少しでもうるおいを持つべく、思い思いに精を出しているという。
+PRINTFORML ここでは常に被射体を募集している。興味があるなら行ってみるのもいいだろう……
+PRINTL 
+
+;--------------------------
+; 本体
+;--------------------------
+@SPERMING_COMPETITION_0_BODY(対象)
+#DIM 対象
+#DIM ITER
+
+PRINTFORML
+PRINTFORMW %ANAME(MASTER)%は入場パスに残されていたデータを元に、宇宙港のとある一角に向かった……
+PRINTFORML
+QUEST_対象 = 対象
+
+IF QUEST_PROGRESS:81 == 2
+    CALL SPERMING_COMPETITION_0_TALE_A
+    CALL SPERMING_COMPETITION_0_MOB_TO_MOBS
+ELSE
+    CALL SPERMING_COMPETITION_0_TALE_B
+ENDIF
+
+;-------------------------------------------------
+;導入(二回目以降)
+;-------------------------------------------------
+@SPERMING_COMPETITION_0_TALE_B
+PRINTFORML
+PRINTFORMW さて、どうする？
+PRINTFORML
+CALL ASK_MULTI("しゃせいの勉強を手伝う", @"%ANAME(QUEST_対象)%にしゃせいを学ばせる", @"%ANAME(QUEST_対象)%を被射体にさせる", @"%ANAME(MASTER)%自身が被射体になる", "しゃせいかいを見学する")
+SELECTCASE RESULT
+    CASE 0
+        PRINTFORMW %ANAME(MASTER)%は、有志のしゃせい勉強を手伝うことにした
+        PRINTFORML
+        PRINTFORMW 「オーケーだ、そこの男ども３人と一緒に、案内についていきな」
+        PRINTFORML
+        PRINTFORMW %ANAME(MASTER)%は案内に従い、しゃせいかい会場に通された
+        CALL SPERMING_LEARN_0_MOB_TO_MASTER
+    CASE 1
+        PRINTFORMW %ANAME(MASTER)%は、%ANAME(QUEST_対象)%にしゃせいを学ばせることにした
+        PRINTFORML
+        PRINTFORMW 「ありがてえ。案内された部屋で待たせといてくんな。教材は後から到着すっからよ」
+        PRINTFORML
+        PRINTFORMW %ANAME(QUEST_対象)%は案内に連れられ、しゃせいかい会場に向かった…
+        CALL SPERMING_LEARN_0_PARTNER_TO_MOBS
+    CASE 2
+        PRINTFORMW %ANAME(MASTER)%は%ANAME(QUEST_対象)%に被射体をさせることにした
+        PRINTFORML
+        PRINTFORMW 「ヘッヘ…イイねえ。捗るねえ！」
+        PRINTFORML
+        PRINTFORMW 「すぐに案内をやるぜ。合図が出たら会場に入って、後は流れで頼むわ」
+        PRINTFORML
+        PRINTFORMW %ANAME(QUEST_対象)%は合図を見て、しゃせいかい会場に入った
+        PRINTFORMW 中央にある寝台の周囲には、すでに男どもが準備万端で待っている……
+        PRINTFORML
+        PRINTFORMW %ANAME(QUEST_対象)%は、ゆっくりと着衣を外し、下着のみとなった
+        CALL SPERMING_COMPETITION_0_PARTNER_TO_MOBS
+    CASE 3
+        PRINTFORMW %ANAME(MASTER)%は自ら被射体に志願した
+        PRINTFORML
+        PRINTFORMW 「おう、よく言ったぜ！じゃ、すぐにでも段取りしねえとな」
+        PRINTFORML
+        PRINTFORMW 「指定の部屋で会場入りを待ってな。あとは好きにやれよ」
+        PRINTFORML
+        PRINTFORMW %ANAME(MASTER)%は準備が整ったのを知らされ、しゃせいかい会場に足を踏み入れる
+        PRINTFORMW 中央の寝台を取り巻く男どもが、始まりを今か今かと待ち受けていた
+        PRINTFORML
+        PRINTFORMW %ANAME(MASTER)%は、ゆっくりと着衣を外し、下着のみとなった
+        CALL SPERMING_COMPETITION_0_MASTER_TO_MOBS
+    CASE 4
+        PRINTFORMW %ANAME(MASTER)%は、しゃせいかいを見学することにした
+        PRINTFORML
+        PRINTFORMW 「おう、んなら会場に入ってな。ちょっとしたら始まっからよ」
+        PRINTFORML
+        PRINTFORMW %ANAME(QUEST_対象)%は案内に連れられ、しゃせいかい会場に向かった…
+        CALL SPERMING_COMPETITION_0_MOB_TO_MOBS
+    CASEELSE
+        CALL SPERMING_LEARN_0_MOB_TO_MASTER
+ENDSELECT
+
+;-------------------------------------------------
+;導入(初回)
+;-------------------------------------------------
+@SPERMING_COMPETITION_0_TALE_A
+PRINTFORMW 
+PRINTFORMW 「どうやら新顔のようだな。そのパスを持っているということは、ここに入る資格があるということだが…」
+PRINTFORML
+PRINTFORMW 薄暗い部屋に通された。少し先には何やら人が密集しているようだ…
+PRINTFORMW %ANAME(MASTER)%にわかるのは、何かが始まるという直前だということ
+PRINTFORML 
+PRINTFORMW 「知ってるかも知れないが説明しとこう。俺たちは『船乗り・しゃせいかい組合』だ」
+PRINTFORMW 「その名の通り、『しゃせいかい』をやっとるというわけよ」
+PRINTFORML 
+PRINTFORMW 「なにしろ、俺たちのような宇宙の船乗りはいつ粉みじんになって死ぬかもわからん身だからな」
+PRINTFORMW 「そんな毎日ですさんでいく心を、どっかで取り返さなきゃ立ち行かねぇ」
+PRINTFORML 
+PRINTFORMW 「同じように思ってたヤツらが、各地の宇宙港から誰が言うでもなく集まってよ」
+PRINTFORMW 「みんなで『芸術』に夢中になれる場を作ったってえわけだ」
+PRINTFORML 
+PRINTFORMW 「……お、『被射体』のお出ましみたいだぜ」
+PRINTFORML 
+PRINTFORMW …ふいに、部屋が明るくなった。
+PRINTFORML
+PRINTFORMW 同時に、奥から現れたのは……少女だ。
+PRINTFORML
+PRINTFORMW 少女は、部屋の中央にあった寝台に腰掛けると、
+PRINTFORMW まとっていた着衣を一枚ずつ脱ぎ捨て
+PRINTFORMW 下着に包まれたボディラインをさらした
+PRINTFORML 
+PRINTFORMW 「始まるぜ、『しゃせいかい』がな」
+PRINTFORMW 「今回はとりあえず見学しとけ。詳しくは終わった後で話してやるさ」
+PRINTFORML 
+PRINTFORMW それだけ言うと、説明してくれた男は部屋の中央に向かっていき
+PRINTFORMW ズボンを下して男根をさらけ出し
+PRINTFORMW 先の少女に向けたそれを、ゆっくりとしごき始めた…
+PRINTFORML
+PRINTFORMW 気が付けば、他の男たちも同じことをしている。
+PRINTFORML 
+PRINTFORMW 多数の獣じみた視線にさらされている少女は、
+PRINTFORMW それらから身を守ろうとするでもなく…
+PRINTFORMW むしろ下着姿の胸元や股を、すすんで彼らに見せつけているようだ
+PRINTFORML 
+PRINTFORML 
+PRINTFORMW … 
+PRINTFORMW ……
+PRINTFORMW ………
+PRINTFORML 
+PRINTFORMW ああ、なるほど
+PRINTFORML 
+SETCOLOR カラー_ピンク
+PRINTFORML しゃせいかい
+RESETCOLOR
+PRINTFORML 
+PRINTFORMW だ。
+PRINTFORML 
+PRINTFORML 男どものわずかな喘ぎ声が、空間を満たしつつあった……
+
+;-------------------------------------------------
+;MASTERがモブのしゃせい勉強を手伝う
+;-------------------------------------------------
+@SPERMING_LEARN_0_MOB_TO_MASTER
+#DIM 対象
+;調教の条件を設定
+CVARSET CFLAG, GETNUM(CFLAG, "慰安参加者") , 0
+CVARSET CFLAG, GETNUM(CFLAG, "調教参加フラグ") , 0
+CFLAG:MASTER:調教参加フラグ  = 1
+CFLAG:MASTER:慰安参加者 = 0
+CFLAG:MASTER:主導除外  = 1
+FLAG:調教モード = 7
+FLAG:閨逆調教 = 3
+FLAG:ウフフフラグ = 1
+TRAIN_PLACE = しゃせいかい会場
+
+;あなたのCOM_TENDENCYを一時退避
+CALL COMMON_SAVE_COM_TENDENCY(MASTER)
+VARSET COM_TENDENCY:MASTER:0, -1
+
+;モブキャラ生成
+CALL CREATE_RANDOM_CHARA(0, -1, 0)
+FLAG:汎用武将カウント --
+対象 = RESULT
+IF LOCAL == -1
+    RETURN -1
+ENDIF
+
+;モブキャラの取扱を設定
+CFLAG:対象:慰安参加者 = 1
+CFLAG:対象:慰安モブ = 1
+CFLAG:対象:調教参加フラグ  = 1
+
+;たまーに、どういう場所かわかってなくて来ちゃうヤツがいる
+IF RAND:20 != 20
+    CFLAG:対象:強制友好化 = 1
+ENDIF
+
+;モブキャラの性癖をセット
+VARSET COM_TENDENCY:対象:0, -1
+
+;モブキャラにプリセットを適用
+SELECTCASE RAND:3
+CASE 2
+    CALL SPERMING_COMPETITION_0_MOBSPACENAUTS_GIRL(対象)
+CASE 1
+    CALL SPERMING_COMPETITION_0_MOBPRECOCIOUS_GIRL(対象)
+CASE 0
+    CALL SPERMING_COMPETITION_0_MOBDAYLABOR_GIRL(対象)
+ENDSELECT
+
+COM_TENDENCY:対象:GETNUM(TRAINNAME, "手コキ") = 3
+COM_TENDENCY:対象:GETNUM(TRAINNAME, "フェラチオ") = 2
+COM_TENDENCY:対象:GETNUM(TRAINNAME, "パイズリ") = 2
+COM_TENDENCY:対象:GETNUM(TRAINNAME, "素股") = 3
+COM_TENDENCY:対象:GETNUM(TRAINNAME, "尻コキ") = 2
+COM_TENDENCY:対象:GETNUM(TRAINNAME, "髪コキ") = 2
+
+;竿二本追加。突っ立ってるだけマン
+CALL SPERMING_COMPETITION_0_MOBMEMBER_MAN
+CALL SPERMING_COMPETITION_0_MOBMEMBER_MAN
+CALL SPERMING_COMPETITION_0_MOBMEMBER_MAN
+
+CALL ADD_EVENTTRAIN_CALLEE("SPERMING_LEARN_0_MOB_TO_MASTER")
+CALL ADD_EVENTEND_CALLEE("SPERMING_LEARN_0_MOB_TO_MASTER")
+
+SHOP_TIME -- 
+CALL START_TRAIN_COMMON
+PRINTW
+
+@EVENTTRAIN_SPERMING_LEARN_0_MOB_TO_MASTER
+TFLAG:56 = 20
+
+@EVENTEND_SPERMING_LEARN_0_MOB_TO_MASTER
+;あなたのCOM_TENDENCYを戻す
+CALL COMMON_LOAD_COM_TENDENCY(MASTER)
+
+
+;-------------------------------------------------
+;イベント終了(初回)
+;-------------------------------------------------
+@SPERMING_COMPETITION_0_TALE_A_END
+PRINTFORML
+PRINTFORMW 「…というわけだねえ」
+PRINTFORML
+PRINTFORMW 周囲が落ち着いた頃、先に説明をくれた男が戻ってきた
+PRINTFORML
+PRINTFORMW 「俺はここの元締めなんだが、そのパスを持ったヤツになら、いつでもコイツを都合するぜ」
+PRINTFORMW 「もちろん、『被射体』の紹介も大歓迎だぜ。やってくれれば、それなりの金は出すからよ」
+PRINTFORMW 「あと、ここは『しゃせいかい』だからよ。『しゃせい』の勉強も受け付けてる」
+PRINTFORMW 「将来有望なヤツを育てるために、勉強に来たヤツにも金出してんのよ」
+PRINTFORMW 「俺が言うこっちゃねえが、『しゃせい』勉強すんならココほど安全な場所ねえと思うぜ」
+PRINTFORMW 「男から女へのおさわりは絶対に禁止しとるからな！『しゃせいかい』であって『こうびかい』じゃねえんだ！」
+PRINTFORML
+PRINTFORMW %ANAME(MASTER)%は、なんか熱く語ってる男を放置し、今日のところは帰途についた……
+QUEST_PROGRESS:81 = 3
+
+
+;-------------------------------------------------
+;パートナーがMASTERでしゃせい勉強
+;-------------------------------------------------
+@SPERMING_LEARN_0_PARTNER_TO_MASTER
+
+;調教の条件を設定
+CVARSET CFLAG, GETNUM(CFLAG, "慰安参加者") , 0
+CVARSET CFLAG, GETNUM(CFLAG, "調教参加フラグ") , 0
+CFLAG:QUEST_対象:調教参加フラグ  = 1
+CFLAG:QUEST_対象:慰安参加者 = 1
+CFLAG:MASTER:調教参加フラグ  = 1
+CFLAG:MASTER:慰安参加者 = 0
+CFLAG:MASTER:主導除外  = 1
+FLAG:調教モード = 7
+FLAG:閨逆調教 = 3
+FLAG:ウフフフラグ = 1
+TRAIN_PLACE = しゃせいかい会場
+
+;あなたのCOM_TENDENCYを一時退避
+CALL COMMON_SAVE_COM_TENDENCY(MASTER)
+VARSET COM_TENDENCY:MASTER:0, -1
+
+;QUEST_対象のCOM_TENDENCYを一時退避
+CALL COMMON_SAVE_COM_TENDENCY(QUEST_対象)
+VARSET COM_TENDENCY:QUEST_対象:0, -1
+
+COM_TENDENCY:QUEST_対象:GETNUM(TRAINNAME, "手コキ") = 3
+COM_TENDENCY:QUEST_対象:GETNUM(TRAINNAME, "フェラチオ") = 2
+COM_TENDENCY:QUEST_対象:GETNUM(TRAINNAME, "パイズリ") = 2
+COM_TENDENCY:QUEST_対象:GETNUM(TRAINNAME, "素股") = 3
+COM_TENDENCY:QUEST_対象:GETNUM(TRAINNAME, "尻コキ") = 2
+COM_TENDENCY:QUEST_対象:GETNUM(TRAINNAME, "髪コキ") = 2
+
+;竿追加。突っ立ってるだけマン
+CALL SPERMING_COMPETITION_0_MOBMEMBER_MAN
+CALL SPERMING_COMPETITION_0_MOBMEMBER_MAN
+CALL SPERMING_COMPETITION_0_MOBMEMBER_MAN
+
+CALL ADD_EVENTTRAIN_CALLEE("SPERMING_LEARN_0_PARTNER_TO_MASTER")
+CALL ADD_EVENTEND_CALLEE("SPERMING_LEARN_0_PARTNER_TO_MASTER")
+
+SHOP_TIME -- 
+CALL START_TRAIN_COMMON
+PRINTW
+
+@EVENTTRAIN_SPERMING_LEARN_0_PARTNER_TO_MASTER
+TFLAG:56 = 20
+
+@EVENTEND_SPERMING_LEARN_0_PARTNER_TO_MASTER
+#DIM ITER 
+;あなたのCOM_TENDENCYを戻す
+CALL COMMON_LOAD_COM_TENDENCY(MASTER)
+;QUEST_対象のCOM_TENDENCYをを戻す
+CALL COMMON_LOAD_COM_TENDENCY(QUEST_対象)
+
+PRINTFORML
+PRINTFORMW この分岐も入れたかったけど、パートナーの好感度を上下する状態での動作を達成できなかったため没
+PRINTFORML
+
+;-------------------------------------------------
+;パートナーがモブでしゃせい勉強
+;-------------------------------------------------
+@SPERMING_LEARN_0_PARTNER_TO_MOBS
+
+;調教の条件を設定
+CVARSET CFLAG, GETNUM(CFLAG, "慰安参加者") , 0
+CVARSET CFLAG, GETNUM(CFLAG, "調教参加フラグ") , 0
+CFLAG:QUEST_対象:慰安参加者  = 1
+CFLAG:QUEST_対象:調教参加フラグ  = 1
+FLAG:調教モード = 7
+FLAG:慰安モード = 3
+FLAG:ウフフフラグ = 1
+TRAIN_PLACE = しゃせいかい会場
+
+;QUEST_対象のCOM_TENDENCYを一時退避
+CALL COMMON_SAVE_COM_TENDENCY(QUEST_対象)
+
+;QUEST_対象の性癖をセット
+VARSET COM_TENDENCY:QUEST_対象:0, -1
+
+COM_TENDENCY:QUEST_対象:GETNUM(TRAINNAME, "手コキ") = 3
+COM_TENDENCY:QUEST_対象:GETNUM(TRAINNAME, "フェラチオ") = 2
+COM_TENDENCY:QUEST_対象:GETNUM(TRAINNAME, "パイズリ") = 2
+COM_TENDENCY:QUEST_対象:GETNUM(TRAINNAME, "素股") = 3
+COM_TENDENCY:QUEST_対象:GETNUM(TRAINNAME, "尻コキ") = 2
+COM_TENDENCY:QUEST_対象:GETNUM(TRAINNAME, "髪コキ") = 2
+
+;竿追加。突っ立ってるだけマン
+CALL SPERMING_COMPETITION_0_MOBMEMBER_MAN
+CALL SPERMING_COMPETITION_0_MOBMEMBER_MAN
+CALL SPERMING_COMPETITION_0_MOBMEMBER_MAN
+CALL SPERMING_COMPETITION_0_MOBMEMBER_MAN
+
+CALL ADD_EVENTTRAIN_CALLEE("SPERMING_LEARN_0_PARTNER_TO_MOBS")
+CALL ADD_EVENTEND_CALLEE("SPERMING_LEARN_0_PARTNER_TO_MOBS")
+
+SHOP_TIME -- 
+CALL START_TRAIN_COMMON
+PRINTW
+
+@EVENTTRAIN_SPERMING_LEARN_0_PARTNER_TO_MOBS
+TFLAG:56 = 20
+
+@EVENTEND_SPERMING_LEARN_0_PARTNER_TO_MOBS
+#DIM ITER 
+;QUEST_対象のCOM_TENDENCYをを戻す
+CALL COMMON_LOAD_COM_TENDENCY(QUEST_対象)
+
+PRINTFORML
+PRINTFORMW しゃせい学習の補助金（？）として$5000もらった（入場料は別途支給）
+PRINTFORML
+MONEY += 8000
+
+;-------------------------------------------------
+;パートナーがしゃせいかいの被射体になる
+;-------------------------------------------------
+@SPERMING_COMPETITION_0_PARTNER_TO_MOBS
+#DIM 対象
+#DIM ITER
+
+;調教の条件を設定
+CVARSET CFLAG, GETNUM(CFLAG, "慰安参加者") , 0
+CVARSET CFLAG, GETNUM(CFLAG, "調教参加フラグ") , 0
+CFLAG:QUEST_対象:調教参加フラグ  = 1
+CFLAG:QUEST_対象:主導除外  = 1 ;調教パートでプレイヤーを担当できなくなる
+FLAG:調教モード = 7
+FLAG:慰安モード = 3
+FLAG:ウフフフラグ = 1
+TRAIN_PLACE = しゃせいかい会場
+
+;QUEST_対象のCOM_TENDENCYを一時退避
+CALL COMMON_SAVE_COM_TENDENCY(QUEST_対象)
+
+;QUEST_対象の性癖をセット
+VARSET COM_TENDENCY:QUEST_対象:0, -1
+
+;モブキャラ生成
+CALL CREATE_RANDOM_CHARA(0, -1, 0)
+FLAG:汎用武将カウント --
+対象 = RESULT
+IF LOCAL == -1
+    RETURN -1
+ENDIF
+
+;モブキャラの取扱を設定
+CFLAG:対象:調教参加フラグ  = 1
+CFLAG:対象:慰安参加者 = 1
+CFLAG:対象:慰安モブ = 1
+CFLAG:対象:強制友好化 = 1
+
+;モブキャラの性癖をセット
+VARSET COM_TENDENCY:対象:0, -1
+COM_TENDENCY:対象:GETNUM(TRAINNAME, "Ｐ自慰") = 3
+
+;モブキャラにプリセットを適用
+CALL SPERMING_COMPETITION_0_MOB_MOBMENS(対象)
+
+CALL ADD_EVENTTRAIN_CALLEE("SPERMING_COMPETITION_0_PARTNER_TO_MOBS")
+CALL ADD_EVENTEND_CALLEE("SPERMING_COMPETITION_0_PARTNER_TO_MOBS")
+
+SHOP_TIME -- 
+CALL START_TRAIN_COMMON
+PRINTW
+
+@EVENTTRAIN_SPERMING_COMPETITION_0_PARTNER_TO_MOBS
+TFLAG:56 = 20
+
+@EVENTEND_SPERMING_COMPETITION_0_PARTNER_TO_MOBS
+;QUEST_対象のCOM_TENDENCYをを戻す
+CALL COMMON_LOAD_COM_TENDENCY(QUEST_対象)
+
+CALL PRINT_ADD_EXP(QUEST_対象, "露出経験値", 20)
+
+PRINTFORML
+PRINTFORMW しゃせいかいの報酬として$10000もらった（入場料は別途支給）
+PRINTFORML
+MONEY += 13000
+
+;-------------------------------------------------
+;しゃせいかいの様子を見学する
+;-------------------------------------------------
+@SPERMING_COMPETITION_0_MOB_TO_MOBS
+#DIM 対象
+#DIM 対象2
+#DIM ITER
+
+;調教の条件を設定
+CVARSET CFLAG, GETNUM(CFLAG, "慰安参加者") , 0
+CVARSET CFLAG, GETNUM(CFLAG, "調教参加フラグ") , 0
+FLAG:調教モード = 7
+FLAG:慰安モード = 3
+FLAG:ウフフフラグ = 1
+TRAIN_PLACE = しゃせいかい会場
+
+;男ども生成
+CALL CREATE_RANDOM_CHARA(0, -1, 0)
+FLAG:汎用武将カウント --
+対象 = RESULT
+IF LOCAL == -1
+    RETURN -1
+ENDIF
+
+;男どもの取扱を設定
+CFLAG:対象:調教参加フラグ  = 1
+CFLAG:対象:慰安参加者 = 1
+CFLAG:対象:慰安モブ = 1
+CFLAG:対象:強制友好化 = 1
+
+;男どもの性癖をセット
+VARSET COM_TENDENCY:対象:0, -1
+COM_TENDENCY:対象:GETNUM(TRAINNAME, "Ｐ自慰") = 3
+
+;男どもにプリセットを適用
+CALL SPERMING_COMPETITION_0_MOB_MOBMENS(対象)
+
+;被射体キャラ生成
+CALL CREATE_RANDOM_CHARA(0, -1, 0)
+FLAG:汎用武将カウント --
+対象2 = RESULT
+IF LOCAL == -1
+    RETURN -1
+ENDIF
+
+;モブキャラの取扱を設定
+CFLAG:対象2:調教参加フラグ  = 1
+CFLAG:対象2:慰安モブ = 1
+CFLAG:対象2:主導除外  = 1
+
+;たまーに、どういう場所かわかってなくて来ちゃうヤツがいる
+IF RAND:20 != 20
+    CFLAG:対象2:強制友好化 = 1
+ENDIF
+
+;初めての場合はちゃんとわかってるヤツが来る
+IF QUEST_PROGRESS:81 == 2
+    CFLAG:対象2:強制友好化 = 1
+ENDIF
+
+;モブキャラの性癖をセット
+VARSET COM_TENDENCY:対象2:0, -1
+
+;モブキャラにプリセットを適用
+SELECTCASE RAND:3
+CASE 2
+    CALL SPERMING_COMPETITION_0_MOBSPACENAUTS_GIRL(対象2)
+CASE 1
+    CALL SPERMING_COMPETITION_0_MOBPRECOCIOUS_GIRL(対象2)
+CASE 0
+    CALL SPERMING_COMPETITION_0_MOBDAYLABOR_GIRL(対象2)
+ENDSELECT
+
+CALL ADD_EVENTTRAIN_CALLEE("SPERMING_COMPETITION_0_MOB_TO_MOBS")
+CALL ADD_EVENTEND_CALLEE("SPERMING_COMPETITION_0_MOB_TO_MOBS")
+
+SHOP_TIME -- 
+CALL START_TRAIN_COMMON
+PRINTW
+
+@EVENTTRAIN_SPERMING_COMPETITION_0_MOB_TO_MOBS
+TFLAG:56 = 20
+
+@EVENTEND_SPERMING_COMPETITION_0_MOB_TO_MOBS
+IF QUEST_PROGRESS:81 == 2
+    CALL SPERMING_COMPETITION_0_TALE_A_END
+ENDIF
+
+;-------------------------------------------------
+;MASTERががしゃせいかいの被射体になる
+;-------------------------------------------------
+@SPERMING_COMPETITION_0_MASTER_TO_MOBS
+#DIM 対象
+#DIM ITER
+;調教の条件を設定
+CVARSET CFLAG, GETNUM(CFLAG, "慰安参加者") , 0
+CVARSET CFLAG, GETNUM(CFLAG, "調教参加フラグ") , 0
+CFLAG:MASTER:調教参加フラグ  = 1
+FLAG:調教モード = 7
+FLAG:慰安モード = 3
+FLAG:ウフフフラグ = 1
+TRAIN_PLACE = しゃせいかい会場
+
+;モブキャラ生成
+CALL CREATE_RANDOM_CHARA(0, -1, 0)
+FLAG:汎用武将カウント --
+対象 = RESULT
+IF LOCAL == -1
+    RETURN -1
+ENDIF
+
+;モブキャラの取扱を設定
+CFLAG:対象:調教参加フラグ  = 1
+CFLAG:対象:慰安参加者 = 1
+CFLAG:対象:慰安モブ = 1
+CFLAG:対象:強制友好化 = 1
+
+;モブキャラの性癖をセット
+VARSET COM_TENDENCY:対象:0, -1
+COM_TENDENCY:対象:GETNUM(TRAINNAME, "Ｐ自慰") = 3
+
+;モブキャラにプリセットを適用
+CALL SPERMING_COMPETITION_0_MOB_MOBMENS(対象)
+
+CALL ADD_EVENTTRAIN_CALLEE("SPERMING_COMPETITION_0_MASTER_TO_MOBS")
+CALL ADD_EVENTEND_CALLEE("SPERMING_COMPETITION_0_MASTER_TO_MOBS")
+
+SHOP_TIME -- 
+CALL START_TRAIN_COMMON
+PRINTW
+
+@EVENTTRAIN_SPERMING_COMPETITION_0_MASTER_TO_MOBS
+TFLAG:56 = 20
+
+@EVENTEND_SPERMING_COMPETITION_0_MASTER_TO_MOBS
+
+CALL PRINT_ADD_EXP(MASTER, "露出経験値", 20)
+
+PRINTFORML
+PRINTFORMW しゃせいかいの報酬として$10000もらった（入場料は別途支給）
+PRINTFORML
+MONEY += 13000
+
+;-------------------------------------------------
+;慰安モブの定義　宇宙船乗りの女
+;-------------------------------------------------
+@SPERMING_COMPETITION_0_MOBSPACENAUTS_GIRL(対象)
+#DIM 対象
+#DIMS 名前
+#DIM CONST 第三者に実行 = 2000
+名前 = 宇宙船乗りの女
+
+NO:対象 = GET_EMPTY_NO()
+NAME:対象 = %名前%
+CALLNAME:対象 = %名前%
+CSTR:対象:0 =
+CSTR:対象:1 =
+TALENT:対象:性別 = 1
+MAXBASE:対象:体力 = 99999999
+MAXBASE:対象:気力 = 99999999
+MAXBASE:対象:精神力 = 1500
+
+BASE:対象:体力 = MAXBASE:対象:体力
+BASE:対象:気力 = MAXBASE:対象:気力
+BASE:対象:精神力 = MAXBASE:対象:精神力
+ABL:対象:性知識 = 5
+ABL:対象:Ａ感 = RAND(5,10)
+ABL:対象:欲望 = RAND(4,20)
+ABL:対象:性技 = 5
+ABL:対象:性知識 = 5
+ABL:対象:奉仕 = 6
+ABL:対象:レズ = 3
+ABL:対象:精愛 = RAND(5,20)
+ABL:対象:主導度Ｕ = RAND(-600,600)
+ABL:対象:主導度Ｎ = RAND(-400,400)
+ABL:対象:倒錯度 = RAND(300,1000)
+
+TALENT:対象:目立ちたがり = 1
+TALENT:対象:陰毛現在値 = 陰毛_標準
+TALENT:対象:陰毛目標値 = 陰毛_標準
+TALENT:(対象):処女 = 0
+TALENT:(対象):キス未経験 = 0
+TALENT:(対象):童貞 = 0
+TALENT:(対象):アナル処女 = 0
+
+SEXUAL_EXPERIENCE:(対象):初体験_処女 = 不明
+SEXUAL_LAST_EXPERIENCE:(対象):初体験_処女 = 不明
+SEXUAL_EXPERIENCE:(対象):初体験_キス = 不明
+SEXUAL_LAST_EXPERIENCE:(対象):初体験_キス = 不明
+SEXUAL_EXPERIENCE:(対象):初体験_童貞 = 不明
+SEXUAL_LAST_EXPERIENCE:(対象):初体験_童貞 = 不明
+SEXUAL_EXPERIENCE:(対象):初体験_アナル処女 = 不明
+SEXUAL_LAST_EXPERIENCE:(対象):初体験_アナル処女 = 不明
+
+;-------------------------------------------------
+;慰安モブの定義　おマセ少女
+;-------------------------------------------------
+@SPERMING_COMPETITION_0_MOBPRECOCIOUS_GIRL(対象)
+#DIM 対象
+#DIMS 名前
+#DIM CONST 第三者に実行 = 2000
+名前 = おマセ少女
+
+NO:対象 = GET_EMPTY_NO()
+NAME:対象 = %名前%
+CALLNAME:対象 = %名前%
+CSTR:対象:0 =
+CSTR:対象:1 =
+TALENT:対象:性別 = 1
+MAXBASE:対象:体力 = 99999999
+MAXBASE:対象:気力 = 99999999
+MAXBASE:対象:精神力 = 1500
+
+BASE:対象:体力 = MAXBASE:対象:体力
+BASE:対象:気力 = MAXBASE:対象:気力
+BASE:対象:精神力 = MAXBASE:対象:精神力
+ABL:対象:Ａ感 = RAND(5,10)
+ABL:対象:性知識 = 5
+ABL:対象:奉仕 = 6
+ABL:対象:欲望 = RAND:10
+ABL:対象:性技 = RAND:5
+ABL:対象:性交 = RAND:2
+ABL:対象:精愛 = RAND:10
+ABL:対象:主導度Ｕ = RAND(100,500)
+ABL:対象:主導度Ｎ = RAND(200,800)
+ABL:対象:倒錯度 = RAND(50,400)
+
+TALENT:対象:好奇心 = 1
+TALENT:対象:生意気 = 1
+TALENT:対象:陰毛現在値 = 陰毛_つるつる
+TALENT:対象:陰毛目標値 = 陰毛_つるつる
+TALENT:(対象):処女 = 1
+TALENT:(対象):キス未経験 = 1
+TALENT:(対象):童貞 = 1
+TALENT:(対象):アナル処女 = 0
+
+SEXUAL_EXPERIENCE:(対象):初体験_処女 = ----
+SEXUAL_LAST_EXPERIENCE:(対象):初体験_処女 = ----
+SEXUAL_EXPERIENCE:(対象):初体験_キス = ----
+SEXUAL_LAST_EXPERIENCE:(対象):初体験_キス = ----
+SEXUAL_EXPERIENCE:(対象):初体験_童貞 = ----
+SEXUAL_LAST_EXPERIENCE:(対象):初体験_童貞 = ----
+SEXUAL_EXPERIENCE:(対象):初体験_アナル処女 = 不明
+SEXUAL_LAST_EXPERIENCE:(対象):初体験_アナル処女 = 不明
+
+
+;-------------------------------------------------
+;慰安モブの定義　アルバイト娘
+;-------------------------------------------------
+@SPERMING_COMPETITION_0_MOBDAYLABOR_GIRL(対象)
+#DIM 対象
+#DIMS 名前
+#DIM CONST 第三者に実行 = 2000
+名前 = アルバイト娘
+
+NO:対象 = GET_EMPTY_NO()
+NAME:対象 = %名前%
+CALLNAME:対象 = %名前%
+CSTR:対象:0 =
+CSTR:対象:1 =
+TALENT:対象:性別 = 1
+MAXBASE:対象:体力 = 99999999
+MAXBASE:対象:気力 = 99999999
+MAXBASE:対象:精神力 = 1500
+
+BASE:対象:体力 = MAXBASE:対象:体力
+BASE:対象:気力 = MAXBASE:対象:気力
+BASE:対象:精神力 = MAXBASE:対象:精神力
+ABL:対象:性知識 = 5
+ABL:対象:Ａ感 = RAND(0,2)
+ABL:対象:欲望 = RAND(0,10)
+ABL:対象:性技 = RAND(0,5)
+ABL:対象:性知識 = RAND(1,5)
+ABL:対象:奉仕 = RAND(1,5)
+ABL:対象:精愛 = RAND(0,10)
+ABL:対象:主導度Ｕ = RAND(-300,300)
+ABL:対象:主導度Ｎ = RAND(-500,500)
+ABL:対象:倒錯度 = RAND(-1000,1000)
+
+TALENT:対象:楽観的 = 1
+TALENT:対象:陰毛現在値 = 陰毛_標準
+TALENT:対象:陰毛目標値 = 陰毛_標準
+TALENT:(対象):処女 = 1
+TALENT:(対象):キス未経験 = 0
+TALENT:(対象):童貞 = 1
+TALENT:(対象):アナル処女 = 0
+
+SEXUAL_EXPERIENCE:(対象):初体験_処女 = ----
+SEXUAL_LAST_EXPERIENCE:(対象):初体験_処女 = ----
+SEXUAL_EXPERIENCE:(対象):初体験_キス = 不明
+SEXUAL_LAST_EXPERIENCE:(対象):初体験_キス = 不明
+SEXUAL_EXPERIENCE:(対象):初体験_童貞 = ----
+SEXUAL_LAST_EXPERIENCE:(対象):初体験_童貞 = ----
+SEXUAL_EXPERIENCE:(対象):初体験_アナル処女 = 不明
+SEXUAL_LAST_EXPERIENCE:(対象):初体験_アナル処女 = 不明
+
+
+;-------------------------------------------------
+;慰安モブの定義　男ども
+;-------------------------------------------------
+@SPERMING_COMPETITION_0_MOB_MOBMENS(対象)
+#DIM 対象
+
+NO:対象 = GET_EMPTY_NO()
+NAME:対象 = 男ども
+CALLNAME:対象 = 男ども
+CSTR:対象:0 =
+CSTR:対象:1 =
+TALENT:対象:性別 = 0
+MAXBASE:対象:体力 = 99999999
+MAXBASE:対象:気力 = 99999999
+MAXBASE:対象:精神力 = 1500
+BASE:対象:体力 = MAXBASE:対象:体力
+BASE:対象:気力 = MAXBASE:対象:気力
+BASE:対象:精神力 = MAXBASE:対象:精神力
+ABL:対象:性知識 = 5
+ABL:対象:Ｃ感 = 5
+ABL:対象:Ｖ感 = 3
+ABL:対象:Ａ感 = 3
+ABL:対象:Ｂ感 = 3
+ABL:対象:Ｍ感 = 5
+ABL:対象:欲望 = 50
+ABL:対象:性技 = 5
+ABL:対象:性知識 = 5
+ABL:対象:奉仕 = 1
+ABL:対象:性交 = 15
+ABL:対象:レズ = 0
+ABL:対象:精愛 = 3
+ABL:対象:露出 = 15
+ABL:対象:自慰 = 30
+ABL:対象:射精 = 15
+ABL:対象:排泄 = 3
+ABL:対象:サド = 5
+ABL:対象:主導度Ｕ = -1000
+ABL:対象:主導度Ｎ = 1000
+ABL:対象:倒錯度 = 1000
+EXP:対象:絶頂経験 = 500
+ABL:対象:白兵 = 60
+ABL:対象:操艦 = 30
+ABL:対象:知略 = 30
+ABL:対象:政治 = 30
+ABL:対象:料理 = 10
+ABL:対象:肝臓 = 3
+
+SETBIT SEXUAL_PREFERENCE:対象:0, 性的嗜好_露出したい
+
+TALENT:対象:好奇心 = 1
+TALENT:対象:恥薄い = 1
+TALENT:対象:目立ちたがり = 1
+TALENT:対象:中毒しやすい = 1
+TALENT:対象:解放 = 1
+TALENT:対象:絶倫 = 1
+TALENT:対象:陰毛現在値 = 陰毛_標準
+TALENT:対象:陰毛目標値 = 陰毛_標準
+TALENT:対象:Ｖ締まり = GET_DEFAULT_TIGHTNESS("普通")
+TALENT:対象:Ａ締まり = GET_DEFAULT_TIGHTNESS("普通")
+TALENT:(対象):処女 = 0
+TALENT:(対象):キス未経験 = 0
+TALENT:(対象):童貞 = 0
+TALENT:(対象):アナル処女 = 1
+SEXUAL_EXPERIENCE:(対象):初体験_処女 = 不明
+SEXUAL_LAST_EXPERIENCE:(対象):初体験_処女 = 不明
+SEXUAL_EXPERIENCE:(対象):初体験_キス = 不明
+SEXUAL_LAST_EXPERIENCE:(対象):初体験_キス = 不明
+SEXUAL_EXPERIENCE:(対象):初体験_童貞 = 不明
+SEXUAL_LAST_EXPERIENCE:(対象):初体験_童貞 = 不明
+SEXUAL_EXPERIENCE:(対象):初体験_アナル処女 = ----
+SEXUAL_LAST_EXPERIENCE:(対象):初体験_アナル処女 = ----
+
+
+;-------------------------------------------------
+;慰安モブの定義　会員の男
+;-------------------------------------------------
+@SPERMING_COMPETITION_0_MOBMEMBER_MAN
+#DIM 対象
+
+;モブキャラ生成
+CALL CREATE_RANDOM_CHARA(0, -1, 0)
+FLAG:汎用武将カウント --
+対象 = RESULT
+IF LOCAL == -1
+    RETURN -1
+ENDIF
+
+;モブキャラの取扱を設定
+CFLAG:対象:調教参加フラグ  = 1
+CFLAG:対象:慰安モブ = 1
+CFLAG:対象:主導除外  = 1
+CFLAG:対象:強制友好化 = 1
+
+;モブキャラの性癖をセット
+VARSET COM_TENDENCY:対象:0, -1
+
+NO:対象 = GET_EMPTY_NO()
+NAME:対象 = 会員の男
+CALLNAME:対象 = 会員の男
+CSTR:対象:0 =
+CSTR:対象:1 =
+TALENT:対象:性別 = 0
+MAXBASE:対象:体力 = 99999999
+MAXBASE:対象:気力 = 99999999
+MAXBASE:対象:精神力 = 1500
+BASE:対象:体力 = MAXBASE:対象:体力
+BASE:対象:気力 = MAXBASE:対象:気力
+BASE:対象:精神力 = MAXBASE:対象:精神力
+ABL:対象:性知識 = 5
+ABL:対象:Ｃ感 = RAND(3,8)
+ABL:対象:Ｖ感 = 3
+ABL:対象:Ａ感 = 3
+ABL:対象:Ｂ感 = 3
+ABL:対象:Ｍ感 = 5
+ABL:対象:欲望 = RAND(3,20)
+ABL:対象:性技 = 5
+ABL:対象:性知識 = 5
+ABL:対象:奉仕 = 1
+ABL:対象:性交 = 15
+ABL:対象:レズ = 0
+ABL:対象:精愛 = 3
+ABL:対象:露出 = 5
+ABL:対象:自慰 = RAND(3,20)
+ABL:対象:射精 = RAND(1,20)
+ABL:対象:排泄 = 3
+
+SETBIT SEXUAL_PREFERENCE:対象:0, 性的嗜好_露出したい
+
+TALENT:対象:恥薄い = 1
+TALENT:対象:中毒しやすい = 1
+TALENT:対象:解放 = 1
+TALENT:対象:絶倫 = 1
+TALENT:対象:陰毛現在値 = 陰毛_標準
+TALENT:対象:陰毛目標値 = 陰毛_標準
+TALENT:対象:Ｖ締まり = GET_DEFAULT_TIGHTNESS("普通")
+TALENT:対象:Ａ締まり = GET_DEFAULT_TIGHTNESS("普通")
+TALENT:(対象):処女 = 0
+TALENT:(対象):キス未経験 = 0
+TALENT:(対象):童貞 = 0
+TALENT:(対象):アナル処女 = 1
+SEXUAL_EXPERIENCE:(対象):初体験_処女 = 不明
+SEXUAL_LAST_EXPERIENCE:(対象):初体験_処女 = 不明
+SEXUAL_EXPERIENCE:(対象):初体験_キス = 不明
+SEXUAL_LAST_EXPERIENCE:(対象):初体験_キス = 不明
+SEXUAL_EXPERIENCE:(対象):初体験_童貞 = 不明
+SEXUAL_LAST_EXPERIENCE:(対象):初体験_童貞 = 不明
+SEXUAL_EXPERIENCE:(対象):初体験_アナル処女 = ----
+SEXUAL_LAST_EXPERIENCE:(対象):初体験_アナル処女 = ----
+
+
+;-------------------------------------------------
+;慰安モブの定義　会員の男
+;-------------------------------------------------
+@SPERMING_COMPETITION_0_MOBMEMBER_MAN_DO
+#DIM 対象
+
+;モブキャラ生成
+CALL CREATE_RANDOM_CHARA(0, -1, 0)
+FLAG:汎用武将カウント --
+対象 = RESULT
+IF LOCAL == -1
+    RETURN -1
+ENDIF
+
+;モブキャラの取扱を設定
+CFLAG:対象:調教参加フラグ  = 1
+CFLAG:対象:慰安参加者  = 1
+CFLAG:対象:主導除外  = 1
+CFLAG:対象:強制友好化 = 1
+
+;モブキャラの性癖をセット
+VARSET COM_TENDENCY:対象:0, -1
+
+NO:対象 = GET_EMPTY_NO()
+NAME:対象 = 会員の男
+CALLNAME:対象 = 会員の男
+CSTR:対象:0 =
+CSTR:対象:1 =
+TALENT:対象:性別 = 0
+MAXBASE:対象:体力 = 99999999
+MAXBASE:対象:気力 = 99999999
+MAXBASE:対象:精神力 = 1500
+BASE:対象:体力 = MAXBASE:対象:体力
+BASE:対象:気力 = MAXBASE:対象:気力
+BASE:対象:精神力 = MAXBASE:対象:精神力
+ABL:対象:性知識 = 5
+ABL:対象:Ｃ感 = RAND(3,8)
+ABL:対象:Ｖ感 = 3
+ABL:対象:Ａ感 = 3
+ABL:対象:Ｂ感 = 3
+ABL:対象:Ｍ感 = 5
+ABL:対象:欲望 = RAND(3,20)
+ABL:対象:性技 = 5
+ABL:対象:性知識 = 5
+ABL:対象:奉仕 = 1
+ABL:対象:性交 = 15
+ABL:対象:レズ = 0
+ABL:対象:精愛 = 3
+ABL:対象:露出 = 5
+ABL:対象:自慰 = RAND(3,20)
+ABL:対象:射精 = RAND(1,20)
+ABL:対象:排泄 = 3
+
+SETBIT SEXUAL_PREFERENCE:対象:0, 性的嗜好_露出したい
+
+TALENT:対象:恥薄い = 1
+TALENT:対象:中毒しやすい = 1
+TALENT:対象:解放 = 1
+TALENT:対象:絶倫 = 1
+TALENT:対象:陰毛現在値 = 陰毛_標準
+TALENT:対象:陰毛目標値 = 陰毛_標準
+TALENT:対象:Ｖ締まり = GET_DEFAULT_TIGHTNESS("普通")
+TALENT:対象:Ａ締まり = GET_DEFAULT_TIGHTNESS("普通")
+TALENT:(対象):処女 = 0
+TALENT:(対象):キス未経験 = 0
+TALENT:(対象):童貞 = 0
+TALENT:(対象):アナル処女 = 1
+SEXUAL_EXPERIENCE:(対象):初体験_処女 = 不明
+SEXUAL_LAST_EXPERIENCE:(対象):初体験_処女 = 不明
+SEXUAL_EXPERIENCE:(対象):初体験_キス = 不明
+SEXUAL_LAST_EXPERIENCE:(対象):初体験_キス = 不明
+SEXUAL_EXPERIENCE:(対象):初体験_童貞 = 不明
+SEXUAL_LAST_EXPERIENCE:(対象):初体験_童貞 = 不明
+SEXUAL_EXPERIENCE:(対象):初体験_アナル処女 = ----
+SEXUAL_LAST_EXPERIENCE:(対象):初体験_アナル処女 = ----
+
+
