@@ -1589,7 +1589,8 @@ CALL DOCK_REPAIR
 LOCAL = GET_SPACE_FORCE_OCCUPANCY_PENALTY()
 IF LOCAL > 0
 	MONEY -= LOCAL
-	PRINTFORMW 宇宙軍許容量を超えたため、ペナルティとして%TOSTR(LOCAL, "$###,###")%払いました
+	PRINTFORML 宇宙軍許容量を超えたため、ペナルティとして%TOSTR(LOCAL, "$###,###")%払いました
+	PRINTFORMW （※宇宙軍許容量を増やすためには宇宙港スロットへの宇宙軍基地の設置、研究投資によるアップグレードが必要だ）
 ENDIF
 
 ;; クエスト地点であればイベント呼び出し
