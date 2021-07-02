@@ -5,9 +5,16 @@
 ;--------------------------
 @QUEST_DESCRIPTION_42
 PRINTFORML [クエスト概要]
-PRINTFORML 静流の話では近頃、強力なリーダーに率いられた海賊集団が暴れ回っているらしい。
-PRINTFORML 軍部に行けば詳しい話が聞けるかも知れない。
-PRINTFORML 
+SELECTCASE QUEST_PROGRESS:42
+	CASE 1
+		PRINTFORML 静流の話では近頃、海賊の小集団が輸送艦を襲っているらしい。
+		PRINTFORML 軍部に行けば詳しい話が聞けるかも知れない。
+		PRINTFORML 
+	CASE 2
+		PRINTFORML 静流の話では近頃、強力なリーダーに率いられた海賊集団が暴れ回っているらしい。
+		PRINTFORML 軍部に行けば詳しい話が聞けるかも知れない。
+		PRINTFORML 
+ENDSELECT
 RETURN
 ;--------------------------
 ; クエスト受注可能か
@@ -21,7 +28,12 @@ RETURN 1
 ; クエストの名前を返却
 ;--------------------------
 @QUEST_NAME_42
-RESULTS = 海賊集団の討伐依頼
+SELECTCASE QUEST_PROGRESS:42
+	CASE 1 TO 2
+		RESULTS = 海賊小集団の討伐依頼
+	CASE 3 TO 4
+		RESULTS = 海賊集団の討伐依頼
+ENDSELECT
 RETURN
 
 ;--------------------------
@@ -35,41 +47,39 @@ RETURN
 
 IF QUEST_PROGRESS:42 == 1
 	PRINTFORMW %CALLNAME:MASTER%が軍部を訪ねると、皇国の高級軍人らしき男が現れた。
-	PRINTFORML 「ああ、丁度良いところに来てくれた。彼女から聞いたかも知れないが、少し、頼みたいことがあってね」
+	PRINTFORML 「ああ、丁度良いところに来てくれた。少し、頼みたいことがあってね」
 	PRINTFORML 口にされるのは静流から聞いた通りの内容であった。
-	PRINTFORMW リーダーに率いられた海賊集団の被害に悩まされているらしい。
+	PRINTFORML 足が速く、小回りの利く海賊の小集団。
+	PRINTFORML 軍の識別コードを読まれて逃げられることもあり、手を焼いているらしい。
+	PRINTFORMW だからこそ君は丁度良かったのだと彼は告げる。
 	PRINTFORML
-	PRINTFORML 護衛のない輸送船狙いではなく、船団狙いの中規模集団。
-	PRINTFORML 軍の識別コードを読まれて逃げられるばかりで、随分と手を焼いているらしい。
-	PRINTFORMW 是非に君の力を借りたかったのだと彼は告げる。
-	PRINTFORML
-	PRINTFORML 「ただ、どうにも敵は船団を襲うためのグループ。普通の海賊より規模が大きい」
-	PRINTFORMW 確認されているのはコルベット十隻、フリゲート一隻。中々の相手である。
+	PRINTFORML 「ただ、どうにも敵は普通の海賊と比べて少し数が大きい」
+	PRINTFORMW 確認されているのはコルベット五隻と海賊にしては装備の良いフリゲートが一隻。中々の相手である。
 	PRINTFORML 「危険もあるだろう。戦力に不安があれば断ってくれて構わない」
-	PRINTFORMW 報酬は$750,000を出してくれるらしいが……。
+	PRINTFORMW 報酬は$250,000を出してくれるらしいが……。
 	PRINTFORML
 	PRINTFORMW 「どうだろう？」
-	$INPUT_LOOP
+	PRINTFORML
 	PRINTBUTTON "[0] はい", 0
 	PRINTBUTTON "[1] いいえ", 1
 	INPUT
 	IF RESULT == 0
 		PRINTFORMW 「それは良かった。襲撃地点の座標を送っておく」
-		PRINTFORMW 「$750,000の報奨を用意しておこう、武運を祈る」
+		PRINTFORMW 「$250,000の報奨を用意しておこう、武運を祈る」
 		PRINTFORMW 海賊集団の討伐任務を引き受けた。
 		QUEST_PROGRESS:42 = 2
 		CALL ID2POS(CHARACTER_POSITION)
 		SECTOR_ID = RESULT:0
 		CALL POS2ID(SECTOR_ID, 7, 3)
 		POSID = RESULT
-		FOR SHIP_ID, 0, 10
+		FOR SHIP_ID, 0, 5
 			CALL INIT_PRESET_SHIP(10, POSID, 汎用コルベット, "海賊コルベット", 汎用コルベット)
 		NEXT
 		FOR SHIP_ID, 0, 1
 			CALL INIT_PRESET_SHIP(10, POSID, 汎用フリゲート, "海賊フリゲート", 汎用フリゲート)
-			SHIP_EQUIP:主砲:0:RESULT = 2
-			SHIP_EQUIP:副砲:0:RESULT = 8
+			SHIP_EQUIP:主砲:0:RESULT = 4
 			SHIP_EQUIP:シールド:0:RESULT = 6
+			QUEST_FLAG_SHIP_ID:42 = RESULT
 		NEXT
 		
 	ELSEIF RESULT == 1
@@ -79,8 +89,57 @@ IF QUEST_PROGRESS:42 == 1
 		PRINTFORML 
 		PRINTFORMW 後日、皇国の特務艦隊に海賊集団は壊滅させられたらしい。
 		QUEST_PROGRESS:42 = 0
-	ELSE
-		GOTO INPUT_LOOP
+	ENDIF
+ELSEIF QUEST_PROGRESS:42 == 3
+	PRINTFORMW %CALLNAME:MASTER%が軍部を訪ねると、皇国の高級軍人らしき男が現れた。
+	PRINTFORML 「ああ、丁度良いところに来てくれた。彼女から聞いたかも知れないが、少し、頼みたいことがあってね」
+	PRINTFORML 口にされるのは静流から聞いた通りの内容であった。
+	PRINTFORMW リーダーに率いられた海賊集団の被害に悩まされているらしい。
+	PRINTFORML
+	PRINTFORML 護衛のない輸送船狙いではなく、船団狙いの中規模集団。
+	PRINTFORML 軍の識別コードを読まれて逃げられるばかりで、随分と手を焼いているらしい。
+	PRINTFORMW 是非に君の力を借りたかったのだと彼は告げる。
+	PRINTFORML
+	PRINTFORML 「ただ、どうにも敵は船団を襲うためのグループ。普通の海賊より規模が大きい」
+	PRINTFORMW 確認されているのはコルベット十隻、フリゲート二隻。中々の相手である。
+	PRINTFORML 「危険もあるだろう。戦力に不安があれば断ってくれて構わない」
+	PRINTFORMW 報酬は$750,000を出してくれるらしいが……。
+	PRINTFORML
+	PRINTFORMW 「どうだろう？」
+	PRINTFORML
+	PRINTBUTTON "[0] はい", 0
+	PRINTBUTTON "[1] いいえ", 1
+	INPUT
+	IF RESULT == 0
+		PRINTFORMW 「それは良かった。襲撃地点の座標を送っておく」
+		PRINTFORMW 「$750,000の報奨を用意しておこう、武運を祈る」
+		PRINTFORMW 海賊集団の討伐任務を引き受けた。
+		QUEST_PROGRESS:42 = 4
+		CALL ID2POS(CHARACTER_POSITION)
+		SECTOR_ID = RESULT:0
+		CALL POS2ID(SECTOR_ID, 7, 3)
+		POSID = RESULT
+		FOR SHIP_ID, 0, 10
+			CALL INIT_PRESET_SHIP(10, POSID, 汎用コルベット, "海賊コルベット", 汎用コルベット)
+			SHIP_EQUIP:主砲:0:RESULT = 2
+			SHIP_EQUIP:副砲:0:RESULT = 2
+			SHIP_EQUIP:シールド:0:RESULT = 5
+		NEXT
+		FOR SHIP_ID, 0, 2
+			CALL INIT_PRESET_SHIP(10, POSID, 汎用フリゲート, "海賊フリゲート", 汎用フリゲート)
+			SHIP_EQUIP:主砲:0:RESULT = 6
+			SHIP_EQUIP:副砲:0:RESULT = 5
+			SHIP_EQUIP:シールド:0:RESULT = 6
+			QUEST_FLAG_SHIP_ID:42 = RESULT
+		NEXT
+		
+	ELSEIF RESULT == 1
+		PRINTFORMW 「まぁ、危険な依頼だ。リスクとリターンを考えるのは当然のこと……君がそういうなら仕方ない」
+		PRINTFORMW 男は残念そうに言って嘆息した。
+		PRINTFORMW 「元々我々の仕事。仕方ない……色々と考えてみよう」
+		PRINTFORML 
+		PRINTFORMW 後日、皇国の特務艦隊に海賊集団は壊滅させられたらしい。
+		QUEST_PROGRESS:42 = 0
 	ENDIF
 ELSE
 	IS_COMPLETE = 1
@@ -92,12 +151,21 @@ ELSE
 	IF IS_COMPLETE == 0
 		PRINTFORMW 「賊の討伐は任せたぞ」
 	ELSE
-		PRINTFORMW 「討伐に成功したか。では報酬を送金しておくとしよう」
-		PRINTFORMW 「かくして連中も、父祖たちと同じく時の流れに飲み込まれた。敵ながら哀れなものよ」
-		PRINTFORMW 海賊集団の討伐に成功したことで、報酬$750,000を手に入れた。
-		MONEY += 750000
-		MONEY:国家ID_豊秋津皇国 -= 750000
+		IF QUEST_PROGRESS:42 == 2
+			PRINTFORMW 「討伐に成功したか。では報酬を送金しておくとしよう」
+			PRINTFORMW 「かくして連中も、父祖たちと同じく時の流れに飲み込まれた。敵ながら哀れなものよ」
+			PRINTFORMW 海賊小集団の討伐に成功したことで、報酬$250,000を手に入れた。
+			MONEY += 250000
+			MONEY:国家ID_豊秋津皇国 -= 250000
+			REL_LIKE_COUNTRY:国家ID_豊秋津皇国:国家ID_プレイヤー = LIMIT(REL_LIKE_COUNTRY:国家ID_豊秋津皇国:国家ID_プレイヤー + 25, -1000, 1000)
+		ELSEIF QUEST_PROGRESS:42 == 4
+			PRINTFORMW 「討伐に成功したか。では報酬を送金しておくとしよう」
+			PRINTFORMW 「かくして連中も、父祖たちと同じく時の流れに飲み込まれた。敵ながら哀れなものよ」
+			PRINTFORMW 海賊集団の討伐に成功したことで、報酬$750,000を手に入れた。
+			MONEY += 750000
+			MONEY:国家ID_豊秋津皇国 -= 750000
+			REL_LIKE_COUNTRY:国家ID_豊秋津皇国:国家ID_プレイヤー = LIMIT(REL_LIKE_COUNTRY:国家ID_豊秋津皇国:国家ID_プレイヤー + 50, -1000, 1000)
+		ENDIF
 		QUEST_PROGRESS:42 = 0
-		REL_LIKE_COUNTRY:国家ID_豊秋津皇国:国家ID_プレイヤー = LIMIT(REL_LIKE_COUNTRY:国家ID_豊秋津皇国:国家ID_プレイヤー + 50, -1000, 1000)
 	ENDIF
 ENDIF

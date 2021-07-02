@@ -5,9 +5,16 @@
 ;--------------------------
 @QUEST_DESCRIPTION_41
 PRINTFORML [クエスト概要]
-PRINTFORML 静流の話では近頃、バクシン党の拠点の一つが見つかったと聞いた。
-PRINTFORML 軍部に行けば詳しい話が聞けるかも知れない。
-PRINTFORML 
+SELECTCASE QUEST_PROGRESS:41
+	CASE 1
+		PRINTFORML 静流の話では近頃、バクシン党に動きがあるらしい。
+		PRINTFORML 軍部に行けば詳しい話が聞けるかも知れない。
+		PRINTFORML 
+	CASE 2
+		PRINTFORML 静流の話では近頃、バクシン党の拠点の一つが見つかったと聞いた。
+		PRINTFORML 軍部に行けば詳しい話が聞けるかも知れない。
+		PRINTFORML 
+ENDSELECT
 RETURN
 ;--------------------------
 ; クエスト受注可能か
@@ -21,7 +28,12 @@ RETURN 1
 ; クエストの名前を返却
 ;--------------------------
 @QUEST_NAME_41
-RESULTS = バクシン党の拠点制圧
+SELECTCASE QUEST_PROGRESS:41
+	CASE 1 TO 2
+		RESULTS = バクシン党狩りの依頼
+	CASE 3 TO 4
+		RESULTS = バクシン党の拠点制圧
+ENDSELECT
 RETURN
 
 ;--------------------------
@@ -35,7 +47,57 @@ RETURN
 
 IF QUEST_PROGRESS:41 == 1
 	PRINTFORMW %CALLNAME:MASTER%が軍部を訪ねると、皇国の高級軍人らしき男が現れた。
-	PRINTFORML 「ああ、丁度良いところに来てくれた。彼女から聞いたかも知れないが、少し、頼みたいことがあってね」
+	PRINTFORML 「ああ、丁度良いところに来てくれた。少し、頼みたいことがあってね」
+	PRINTFORML 口にされるのは静流から聞いた通りの内容であった。
+	PRINTFORMW 近頃バクシン党の動きが活発であるという。
+	PRINTFORML しかし元武士の多いバクシン党――軍にも協力者がいるため、軍を動かせば逃げ出される。
+	PRINTFORML 追い払うことは出来ても殲滅出来ないのが現状であった。
+	PRINTFORMW だからこそ君は丁度良かったのだと彼は告げる。
+	PRINTFORML
+	PRINTFORML 「ただ、どうにも敵は旧式とは言え、それなりに数だけはいるようだ」
+	PRINTFORMW 旧式の機動歩兵とはいえ十機ほど確認されており、加えてフリゲートが二隻、それなりの相手である。
+	PRINTFORML 「多少の危険もあるだろう。戦力に不安があれば断ってくれて構わない」
+	PRINTFORMW 報酬は$250,000を出してくれるらしいが……。
+	PRINTFORML
+	PRINTFORMW 「どうだろう？」
+	PRINTFORML
+	PRINTBUTTON "[0] はい", 0
+	PRINTBUTTON "[1] いいえ", 1
+	INPUT
+	IF RESULT == 0
+		PRINTFORMW 「よろしい。すぐに出没地点の座標を送ろう」
+		PRINTFORMW 「$250,000の報奨を用意しておこう、武運を祈る」
+		PRINTFORMW バクシン党狩りを引き受けた。
+		QUEST_PROGRESS:41 = 2
+		CALL ID2POS(CHARACTER_POSITION)
+		SECTOR_ID = RESULT:0
+		CALL POS2ID(SECTOR_ID, 12, 12)
+		POSID = RESULT
+		FOR SHIP_ID, 0, 9
+			CALL INIT_PRESET_SHIP(10, POSID, 天狗級機動武者, "天狗級機動武者", 天狗級機動武者)
+		NEXT
+		FOR SHIP_ID, 0, 2
+			CALL INIT_PRESET_SHIP(10, POSID, 汎用フリゲート, "開陽丸級電磁甲艦", 汎用フリゲート)
+		NEXT
+		FOR SHIP_ID, 0, 1
+			CALL INIT_PRESET_SHIP(10, POSID, 天狗級機動武者, "天狗級機動武者『烏天狗』", 天狗級機動武者)
+			SHIP_EQUIP:副砲:0:RESULT = 60
+			SHIP_EQUIP:装甲:0:RESULT = 30
+			SHIP_EQUIP:オプション:0:RESULT = 6
+			QUEST_FLAG_SHIP_ID:41 = RESULT
+		NEXT
+		
+	ELSEIF RESULT == 1
+		PRINTFORMW 「まぁ、危険な依頼だ。リスクとリターンを考えるのは当然のこと……君がそういうなら仕方ない」
+		PRINTFORMW 男は残念そうに言って嘆息した。
+		PRINTFORMW 「元々我々の仕事。仕方ない……色々と考えてみよう」
+		PRINTFORML 
+		PRINTFORMW 後日、皇国の特務艦隊による強襲でバクシン党の動きは落ち着いたらしい。
+		QUEST_PROGRESS:41 = 0
+	ENDIF
+ELSEIF QUEST_PROGRESS:41 == 3
+	PRINTFORMW %CALLNAME:MASTER%が軍部を訪ねると、武士らしき獣尾人――高級軍人らしき男が現れた。
+	PRINTFORML 「ああ、丁度良いところに来てくれた。もしかすると既に彼女から聞いたかも知れないが、少し、頼みたいことがあってね」
 	PRINTFORML 口にされるのは静流から聞いた通りの内容であった。
 	PRINTFORMW バクシン党の秘密拠点の一つがアステロイドベルトのデブリに見つかったらしい。
 	PRINTFORML
@@ -44,36 +106,42 @@ IF QUEST_PROGRESS:41 == 1
 	PRINTFORMW 是非に君の力を借りたかったのだと彼は告げる。
 	PRINTFORML
 	PRINTFORML 「ただ、どうにも敵は旧式とは言え、大所帯のようだ」
-	PRINTFORMW 確認されているのは旧式の機動歩兵が十五機ほど、フリゲート五隻。中々の相手である。
+	PRINTFORML 確認されているのは改良された大型機動歩兵が十三機ほど、フリゲート五隻。中々の相手である。
+	PRINTFORMW しかも、内の一機には改良型の機動武者が一機確認されているという。
 	PRINTFORML 「危険もあるだろう。戦力に不安があれば断ってくれて構わない」
 	PRINTFORMW 報酬は$750,000を出してくれるらしいが……。
 	PRINTFORML
 	PRINTFORMW 「どうだろう？」
-	$INPUT_LOOP
+	PRINTFORML
 	PRINTBUTTON "[0] はい", 0
 	PRINTBUTTON "[1] いいえ", 1
 	INPUT
 	IF RESULT == 0
-		PRINTFORMW 「よろしい。現在、このセクター内のアステロイドベルトに連中は屯しておる」
+		PRINTFORMW 「ありがとう。現在、このセクター内のアステロイドベルトに連中は屯しておる」
 		PRINTFORMW 「$750,000の報奨を用意しておこう、武運を祈る」
 		PRINTFORMW バクシン党の拠点制圧を引き受けた。
-		QUEST_PROGRESS:41 = 2
+		QUEST_PROGRESS:41 = 4
 		CALL ID2POS(CHARACTER_POSITION)
 		SECTOR_ID = RESULT:0
 		CALL POS2ID(SECTOR_ID, 12, 12)
 		POSID = RESULT
-		FOR SHIP_ID, 0, 14
+		FOR SHIP_ID, 0, 12
 			CALL INIT_PRESET_SHIP(10, POSID, 天狗級機動武者, "天狗級機動武者", 天狗級機動武者)
+			SHIP_EQUIP:主砲:0:RESULT = 60
+			SHIP_EQUIP:副砲:0:RESULT = 2
 		NEXT
 		FOR SHIP_ID, 0, 5
 			CALL INIT_PRESET_SHIP(10, POSID, 汎用フリゲート, "開陽丸級電磁甲艦", 汎用フリゲート)
+			SHIP_EQUIP:主砲:0:RESULT = 4
 		NEXT
 		FOR SHIP_ID, 0, 1
 			CALL INIT_PRESET_SHIP(10, POSID, 朱雀級機動武者, "天狗級機動武者『大天狗』", 朱雀級機動武者)
-			SHIP_EQUIP:副砲:0:RESULT = 29
+			SHIP_EQUIP:主砲:0:RESULT = 61
+			SHIP_EQUIP:副砲:0:RESULT = 2
 			SHIP_EQUIP:シールド:0:RESULT = 5
 			SHIP_EQUIP:シールド:1:RESULT = 5
 			SHIP_EQUIP:オプション:0:RESULT = 6
+			QUEST_FLAG_SHIP_ID:41 = RESULT
 		NEXT
 		
 	ELSEIF RESULT == 1
@@ -83,8 +151,6 @@ IF QUEST_PROGRESS:41 == 1
 		PRINTFORML 
 		PRINTFORMW 後日、皇国の特務艦隊に拠点は制圧されたらしい。
 		QUEST_PROGRESS:41 = 0
-	ELSE
-		GOTO INPUT_LOOP
 	ENDIF
 ELSE
 	IS_COMPLETE = 1
@@ -96,12 +162,22 @@ ELSE
 	IF IS_COMPLETE == 0
 		PRINTFORMW 「賊の討伐は任せたぞ」
 	ELSE
-		PRINTFORMW 「討伐に成功したか。では報酬を送金しておくとしよう」
-		PRINTFORMW 「かくして連中も、父祖たちと同じく時の流れに飲み込まれた。敵ながら哀れなものよ」
-		PRINTFORMW バクシン党の討伐に成功したことで、報酬$750,000を手に入れた。
-		MONEY += 750000
-		MONEY:国家ID_豊秋津皇国 -= 750000
-		QUEST_PROGRESS:41 = 0
-		REL_LIKE_COUNTRY:国家ID_豊秋津皇国:国家ID_プレイヤー = LIMIT(REL_LIKE_COUNTRY:国家ID_豊秋津皇国:国家ID_プレイヤー + 75, -1000, 1000)
+		IF QUEST_PROGRESS:41 == 2
+			PRINTFORMW 「討伐に成功したか。では報酬を送金しておくとしよう」
+			PRINTFORMW 「かくして連中も、父祖たちと同じく時の流れに飲み込まれた。敵ながら哀れなものよ」
+			PRINTFORMW バクシン党の討伐に成功したことで、報酬$250,000を手に入れた。
+			MONEY += 250000
+			MONEY:国家ID_豊秋津皇国 -= 250000
+			QUEST_PROGRESS:41 = 0
+			REL_LIKE_COUNTRY:国家ID_豊秋津皇国:国家ID_プレイヤー = LIMIT(REL_LIKE_COUNTRY:国家ID_豊秋津皇国:国家ID_プレイヤー + 25, -1000, 1000)
+		ELSEIF QUEST_PROGRESS:41 == 4
+			PRINTFORMW 「討伐に成功したか。では報酬を送金しておくとしよう」
+			PRINTFORMW 「かくして連中も、父祖たちと同じく時の流れに飲み込まれた。敵ながら哀れなものよ」
+			PRINTFORMW バクシン党の討伐に成功したことで、報酬$750,000を手に入れた。
+			MONEY += 750000
+			MONEY:国家ID_豊秋津皇国 -= 750000
+			QUEST_PROGRESS:41 = 0
+			REL_LIKE_COUNTRY:国家ID_豊秋津皇国:国家ID_プレイヤー = LIMIT(REL_LIKE_COUNTRY:国家ID_豊秋津皇国:国家ID_プレイヤー + 75, -1000, 1000)
+		ENDIF
 	ENDIF
 ENDIF

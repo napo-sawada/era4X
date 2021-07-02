@@ -811,33 +811,8 @@ SELECTCASE QUEST_PROGRESS:QUEST_ID
 						PRINTFORML 
 						PRINTFORMW 「お仕事……そうですね」
 						PRINTFORMW どうにも思い当たるものがあったようだ。
-							SELECTCASE RAND:3
-							CASE 0
-								PRINTFORML
-								PRINTFORMW 「そういえば、バクシン党の拠点の一つが見つかったという話をお聞きしました」
-								PRINTFORML アステロイドベルトのデブリを拠点にしているらしい。
-								PRINTFORML 宙賊のように動いている小規模部隊ではなく、拠点となればそれなりの戦力だろう。
-								PRINTFORML 元武士の多いバクシン党――軍を動かせば逃げ出されるため手をこまねいているのが現状だという。
-								PRINTFORMW 「静流に聞かせたということは、間接的な旦那様への依頼かも知れません」
-								PRINTFORMW 軍部に行けば詳しい内容を聞けるかも知れない。
-								QUEST_PROGRESS:41 = 1
-							CASE 1
-								PRINTFORML
-								PRINTFORMW 「少し大きな宙賊のグループが近頃暴れ回っているのだとか」
-								PRINTFORML 護衛のない輸送船狙いではなく、船団狙いの中規模集団。
-								PRINTFORML 軍の識別コードを読まれて逃げられることもあり、手を焼いているらしい。
-								PRINTFORMW 「静流に聞かせたということは、間接的な旦那様への依頼……ということかも知れません」
-								PRINTFORMW 軍部に行けば詳しい内容を聞けるかも知れない。
-								QUEST_PROGRESS:42 = 1
-							CASE 2
-								PRINTFORML
-								PRINTFORMW 「お仕事……ではないのですが、どうも、時代錯誤な辻斬りが近頃流行っているのだとか」
-								PRINTFORML 人通りのない夜の街、一人の相手を狙って真剣勝負を強制するのだという。
-								PRINTFORML それは確かに時代錯誤甚だしい。
-								PRINTFORMW 「ちょっと怖い話ですね。他の者にも夜は出歩かないよう口にしているのですが」
-								PRINTFORMW 夜出歩く際はお気を付け下さいませ、と静流は口にした。
-								QUEST_PROGRESS:43 = 1
-							ENDSELECT
+						PRINTFORML
+							CALL OSHIGOTO_SHIZURU_1
 						PRINTFORML 
 						PRINTFORML 思いつくのはそれくらいですね、と彼女はしばらく考え込み、微笑む。
 						PRINTFORML 「いえ、それと、もう一つ……これは、静流からの依頼なのですが」
@@ -1035,33 +1010,8 @@ SELECTCASE QUEST_PROGRESS:QUEST_ID
 						PRINTFORML 
 						PRINTFORMW 「お仕事……そうですね」
 						PRINTFORMW どうにも思い当たるものがあったようだ。
-							SELECTCASE RAND:3
-							CASE 0
-								PRINTFORML
-								PRINTFORMW 「そういえば、バクシン党の拠点の一つが見つかったという話をお聞きしました」
-								PRINTFORML アステロイドベルトのデブリを拠点にしているらしい。
-								PRINTFORML 宙賊のように動いている小規模部隊ではなく、拠点となればそれなりの戦力だろう。
-								PRINTFORML 元武士の多いバクシン党――軍を動かせば逃げ出されるため手をこまねいているのが現状だという。
-								PRINTFORMW 「わたしに聞かせたということは、間接的な依頼と言えるのかも知れません」
-								PRINTFORMW 軍部に行けば詳しい内容を聞けるかも知れない。
-								QUEST_PROGRESS:41 = 1
-							CASE 1
-								PRINTFORML
-								PRINTFORMW 「少し大きな宙賊のグループが近頃暴れ回っているのだとか」
-								PRINTFORML 護衛のない輸送船狙いではなく、船団狙いの中規模集団。
-								PRINTFORML 軍の識別コードを読まれて逃げられることもあり、手を焼いているらしい。
-								PRINTFORMW 「わたしに聞かせたということは、間接的な依頼……ということかも知れません」
-								PRINTFORMW 軍部に行けば詳しい内容を聞けるかも知れない。
-								QUEST_PROGRESS:42 = 1
-							CASE 2
-								PRINTFORML
-								PRINTFORMW 「お仕事……ではないのですが、どうも、時代錯誤な辻斬りが近頃流行っているのだとか」
-								PRINTFORML 人通りのない夜の街、一人の相手を狙って真剣勝負を強制するのだという。
-								PRINTFORML それは確かに時代錯誤甚だしい。
-								PRINTFORMW 「ちょっと怖い話ですね。他の者にも夜は出歩かないよう口にしているのですが」
-								PRINTFORMW 夜出歩く際はお気を付け下さいませ、と静流は口にした。
-								QUEST_PROGRESS:43 = 1
-							ENDSELECT
+						PRINTFORML
+							CALL OSHIGOTO_SHIZURU_1
 						PRINTFORML 
 						PRINTFORMW 思いつくのはそれくらいですね、と彼女はしばらく考え込み、微笑む。
 					ELSE
@@ -1428,6 +1378,110 @@ SELECTCASE QUEST_PROGRESS:QUEST_ID
 					PRINTFORML
 				ENDIF
 ;――――――――――――――――――――――――――――――――――――――――――――――――
+@OSHIGOTO_SHIZURU_1
+;派生クエスト系
+;――――――――――――――――――――――――――――――――――――――――――――――――
+#DIM SHIP_ID
+	LOCAL = 0
+	LOCAL:1 = 0
+	FOR SHIP_ID, 0, MAX_SHIP
+		SIF SHIP_COUNTRY:SHIP_ID != 国家ID_プレイヤー || SHIP_POSITION:SHIP_ID != CHARACTER_POSITION
+			CONTINUE
+		SIF GROUPMATCH(SHIP_CATEGORY:SHIP_ID, 輸送船, 作業船, 調査船)
+			CONTINUE
+		LOCAL ++
+		SIF GROUPMATCH(SHIP_CATEGORY:SHIP_ID, 駆逐艦, 巡洋艦, 戦艦, 空母)
+			LOCAL:1 ++
+	NEXT
+	IF LOCAL < 10 && !LOCAL:1
+	;徴税構文流用しました……。
+		SELECTCASE RAND:3
+			CASE 0
+				PRINTFORMW 「そういえば、バクシン党が近頃動き回っているという話を小耳に」
+				PRINTFORML アステロイドベルトのデブリを拠点にしている、元武士達の反体制派テロリスト。
+				PRINTFORML 普段は宙賊のように動いている集団だが、軍部にもシンパがいるらしい。
+				PRINTFORML そのため、軍を動かせばその情報をすぐさま入手し蜘蛛の子散らして逃げ出してしまう。
+				PRINTFORML バクシン党には手を焼いている、ということは知っていた。
+				IF TALENT:MASTER:性別 > 0
+					PRINTFORMW 「どうにも、%CALLNAME:MASTER%様のように小回りの利く外部戦力を探しているようですね」
+				ELSE
+					PRINTFORMW 「どうにも、旦那様のように小回りの利く外部戦力を探しているようですね」
+				ENDIF
+				PRINTFORMW 軍部に行けば詳しい内容を聞けるかも知れない。
+				QUEST_PROGRESS:41 = 1
+			CASE 1
+				PRINTFORMW 「宙賊のグループが近頃、輸送船を襲っているのだとか」
+				PRINTFORML 足が速く、小回りの利く小集団。
+				PRINTFORML 軍の識別コードを読まれて逃げられることもあり、手を焼いているらしい。
+				IF TALENT:MASTER:性別 > 0
+					PRINTFORMW 「%CALLNAME:MASTER%様のように小回りの利く戦力をお持ちの方を求めているようですね」
+				ELSE
+					PRINTFORMW 「旦那様のように小回りの利く戦力をお持ちの方を求めているようですね」
+				ENDIF
+				PRINTFORMW 軍部に行けば詳しい内容を聞けるかも知れない。
+				QUEST_PROGRESS:42 = 1
+			CASE 2
+				PRINTFORMW 「お仕事……ではないのですが、どうも、時代錯誤な辻斬りが近頃流行っているのだとか」
+				PRINTFORML 人通りのない夜の街、一人の相手を狙って真剣勝負を強制するのだという。
+				PRINTFORML それは確かに時代錯誤甚だしい。
+				PRINTFORMW 「ちょっと怖い話ですね。他の者にも夜は出歩かないよう口にしているのですが」
+				PRINTFORMW 夜出歩く際はお気を付け下さいませ、と静流は口にした。
+				QUEST_PROGRESS:43 = 1
+			ENDSELECT
+	ELSE
+	;その内上級に派生させたい。
+		SELECTCASE RAND:3
+			CASE 0
+				PRINTFORMW 「そういえば、バクシン党の拠点が一つ見つかったという話をお聞きしました」
+				PRINTFORML アステロイドベルトのデブリにある活動拠点の一つが見つかったらしい。
+				PRINTFORML 宙賊のように動いている小規模部隊ではなく、拠点となればそれなりの戦力だろう。
+				PRINTFORML 元武士の多いバクシン党――軍を動かせば逃げ出されるため手をこまねいているのが現状だという。
+				IF TALENT:MASTER:性別 > 0
+					PRINTFORMW 「わたしに聞かせたということは、間接的な依頼と言えるのかも知れません」
+				ELSE
+					PRINTFORMW 「静流に聞かせたということは、間接的な旦那様への依頼と言えるのかも知れません」
+				ENDIF
+				PRINTFORMW 軍部に行けば詳しい内容を聞けるかも知れない。
+				QUEST_PROGRESS:41 = 3
+			CASE 1
+				PRINTFORMW 「少し大きな宙賊のグループが近頃暴れ回っているのだとか」
+				PRINTFORML 護衛のない輸送船狙いではなく、船団狙いの中規模集団。
+				PRINTFORML 軍の識別コードを読まれて逃げられることもあり、手を焼いているらしい。
+				IF TALENT:MASTER:性別 > 0
+					PRINTFORMW 「わたしに聞かせたということは、間接的な依頼……ということかも知れません」
+				ELSE
+					PRINTFORMW 「静流に聞かせたということは、間接的な旦那様への依頼……ということかも知れません」
+				ENDIF
+				PRINTFORMW 軍部に行けば詳しい内容を聞けるかも知れない。
+				QUEST_PROGRESS:42 = 3
+			CASE 2
+				PRINTFORML
+				PRINTFORMW 「お仕事……ではないのですが、どうも、時代錯誤な辻斬りが近頃流行っているのだとか」
+				PRINTFORML 人通りのない夜の街、一人の相手を狙って真剣勝負を強制するのだという。
+				PRINTFORML それは確かに時代錯誤甚だしい。
+				PRINTFORMW 「ちょっと怖い話ですね。他の者にも夜は出歩かないよう口にしているのですが」
+				PRINTFORMW 夜出歩く際はお気を付け下さいませ、と静流は口にした。
+				QUEST_PROGRESS:43 = 1
+				;分岐は考え中……。バランスは難しい。
+;				IF REL_LIKE_COUNTRY:国家ID_豊秋津皇国:国家ID_プレイヤー > 600 && RAND:100 > 70 && ABL:MASTER:白兵 > 90
+;					PRINTFORML そして続けるように、懸念はそれだけではないのだとも。
+;					IF TALENT:MASTER:性別 > 0
+;						PRINTFORMW 「%CALLNAME:MASTER%様は皇国においても名の通った方……良からぬ輩が現れないとも限りません」
+;						PRINTFORML 名の売れたよそ者を快く思わぬ者もいる、ということを言いたいのだろう。
+;						PRINTFORML 肝に銘じておこうと答えると静流は頷き、無茶はなさいませんように、と指を立てた。
+;						PRINTFORMW 「お体は一つ……%CALLNAME:MASTER%様に限って万が一も無いとは思いますが、危険は避けてご自愛下さいませ」
+;					ELSE
+;						PRINTFORMW 「旦那様は皇国においても名の通った方……良からぬ輩が現れないとも限りません」
+;						PRINTFORML 名の売れたよそ者を快く思わぬ者もいる、ということを言いたいのだろう。
+;						PRINTFORML 肝に銘じておこうと答えると静流は頷き、めっですよ、と指を立てた。
+;						PRINTFORMW 「旦那様に限って万が一もないとは思いますが、くれぐれもお気をつけを」
+;						PRINTFORMW 愛らしい所作とは裏腹、冗談を感じさせない目で静流は続けた。
+;					ENDIF
+;						QUEST_PROGRESS:43 = 2
+;				ENDIF
+			ENDSELECT
+		ENDIF
+;――――――――――――――――――――――――――――――――――――――――――――――――
 @MILIOTA_SHIZURU_1
 ;皇国軍関係
 ;――――――――――――――――――――――――――――――――――――――――――――――――
@@ -1617,7 +1671,7 @@ SELECTCASE QUEST_PROGRESS:QUEST_ID
 					PRINTFORML その後、スラスターに頼らない、人工筋肉による姿勢制御がＦＣＳ予測を困難にさせるという利点が見つかると、
 					PRINTFORML 本来はおまけであった宙間戦闘能力の強化を図り再設計。
 					PRINTFORML 更なる大型化とシールドの搭載によって、戦闘艦クラスの戦闘能力を手にするに至った。
-					PRINTFORMW それが朱雀級鎧武者と呼ばれる機体であるらしい。
+					PRINTFORMW それが朱雀級機動武者と呼ばれる機体であるらしい。
 					PRINTFORML
 					PRINTFORMW 「バクシン党が使う天狗級はメック改修型の旧式機動武者……今では設計からもう別物ですね」
 					PRINTFORML
@@ -1672,15 +1726,15 @@ SELECTCASE QUEST_PROGRESS:QUEST_ID
 			INPUT
 				IF RESULT == 0
 					PRINTFORML
-					PRINTFORMW 「銀河人民統一連邦は最大の敵対国である民主主義国家、ＵＳＦとの戦いに主眼を置いているようですね」
+					PRINTFORMW 「銀河人民統一連邦は最大の敵対国である民主主義国家、ＵＳＯＦとの戦いに主眼を置いているようですね」
 					PRINTFORML 
-					PRINTFORML ＵＳＦはシールド艦を盾とし、ミサイルによる飽和攻撃を主体とする。
+					PRINTFORML ＵＳＯＦはシールド艦を盾とし、ミサイルによる飽和攻撃を主体とする。
 					PRINTFORML 統一連邦の戦闘ドクトリンはそれに合わせたものであると静流は語る。
 					PRINTFORML 純粋な鉄量による弾幕形成――鉄のカーテンによって艦載機、誘導兵器を遮断し、強固なる敵前衛のシールド艦を鉄屑に。
 					PRINTFORML 大型艦ではなく小型艦を中心にしているのは、誘導兵器による集中砲火を避けるためだろう。
 					PRINTFORMW 徹底したリスク分散によって艦隊システムの冗長性を高く保ち、泥沼の消耗戦へと相手を引きずり込むことに主眼が置かれている。
 					PRINTFORML
-					PRINTFORMW 「ＵＳＦの艦隊は基本的に、高性能な代わりに高コスト……削り合いに持ち込まれた時点で敗北でしょう」
+					PRINTFORMW 「ＵＳＯＦの艦隊は基本的に、高性能な代わりに高コスト……削り合いに持ち込まれた時点で敗北でしょう」
 					PRINTFORML 技術的な優越だけが勝敗を決めるものではない。
 					PRINTFORML 強力なミサイル、艦載機は戦いを有利にはするが、大事なのは費用が結果に見合うかどうか。
 					PRINTFORMW 大型艦を撃沈できれば大金星だが、ほとんどを弾幕で射耗させられ、撃沈出来るのが小型艦というのでは割に合わない。
@@ -1722,7 +1776,7 @@ SELECTCASE QUEST_PROGRESS:QUEST_ID
 					GOTO INPUT_LOOP
 				ELSEIF RESULT == 2
 					PRINTFORML
-					PRINTFORMW 「民主主義国家として、民衆メディアの力が強いＵＳＦでは人的損耗を強く恐れる傾向があるようですね」
+					PRINTFORMW 「民主主義国家として、民衆メディアの力が強いＵＳＯＦでは人的損耗を強く恐れる傾向があるようですね」
 					PRINTFORML 
 					PRINTFORML 大型のシールド艦を前面に押し出して盾に、小型艦がミサイル打撃群を形成。
 					PRINTFORML 病的なまでミサイル飽和攻撃によって、有無を言わさず敵艦隊を沈黙させるのが彼らの戦い方なのだと静流は告げる。
