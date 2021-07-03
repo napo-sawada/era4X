@@ -1581,3 +1581,18 @@ FOR LOCAL, 0, STAR_PORT_SLOT_NUM
 NEXT
 
 RETURNF ITER
+
+;-------------------------------------
+; 宇宙軍基地が設置されているか
+;-------------------------------------
+@IS_RELEASED_SPACE_FORCE_BASE_MODULE(STAR_ID)
+#FUNCTION
+#DIM STAR_ID
+#DIM DYNAMIC ITER
+
+FOR LOCAL, 0, STAR_PORT_SLOT_NUM
+    SIF STAR_PORT_SLOT:STAR_ID:LOCAL == 宇宙軍基地
+        ITER ++
+NEXT
+
+RETURNF ITER
