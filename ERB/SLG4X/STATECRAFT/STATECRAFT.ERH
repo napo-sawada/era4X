@@ -6,6 +6,9 @@
 #DIM SAVEDATA GB_戦闘員, 星系数
 #DIM SAVEDATA GB_非戦闘員, 星系数
 
+;星によらない装備の備蓄
+#DIM SAVEDATA GB_予備充足, MAX_COUNTRY
+
 #DIM CONST SC_最大建築スロット数 = 20
 #DIM CONST SC_最大都市数 = 10
 #DIM CONST SC_空きスロット = 0

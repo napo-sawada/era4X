@@ -39,6 +39,7 @@
 #DIM CONST セクサロイド = 54
 #DIM CONST プラモデル = 55
 #DIM CONST ビームセイバー = 56
+#DIM CONST 充足 = 60
 #DIM CONST TIER1小型汎用コイルガン = 201
 #DIM CONST TIER1中型汎用コイルガン = 202
 #DIM CONST TIER1大型汎用コイルガン = 203

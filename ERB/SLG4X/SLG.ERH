@@ -269,7 +269,7 @@
 ;-------------------------
 ; SLG ITEMS
 ;-------------------------
-#DIM CONST ITEM_LENGTH = 60
+#DIM CONST ITEM_LENGTH = 61
 #DIM SAVEDATA SLG_ITEM, MAX_COUNTRY, 100
 
 ;ショップの表示行数
@@ -318,6 +318,7 @@
 #DIM CONST 白兵訓練所 = 9
 #DIM CONST 宇宙軍基地 = 10
 #DIM CONST 資源探索モジュール = 11
+#DIM CONST 工廠 = 12
 
 #DIM SAVEDATA SORTKEY = 0
 #DIM SAVEDATA DESC_SORT = 0
