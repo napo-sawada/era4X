@@ -1,0 +1,42 @@
+﻿;-----------------------------------
+; メインウェポン
+;-----------------------------------
+@GET_MAIN_WEAPON_NAME_194
+RESULTS = いか墨
+
+@GET_MAIN_WEAPON_STATUS_194(STATUS)
+#DIM REF STATUS
+
+STATUS:DAMAGE = 1000
+STATUS:FIRE_RATE = 1
+STATUS:HIT_RATE = 45
+STATUS:FIRE_RANGE = 3
+STATUS:SIZE = 2
+STATUS:WEAPON_TYPE = ビーム
+STATUS:PRICE = 20000
+
+;-----------------------------------
+; メインウェポンの説明
+;-----------------------------------
+@GET_MAIN_WEAPON_DESCRIPTION_194
+#DIM STATUS, STATUS_LENGTH
+
+CALL GET_MAIN_WEAPON_STATUS_194(STATUS)
+CALL GET_MAIN_WEAPON_NAME_194
+PRINTFORML %RESULTS%
+PRINTFORML 威力の高い生体粒子加速砲。射程は長く当たると痛いが速度は遅めなため回避しやすい。
+PRINTFORML ダメージ  : {STATUS:DAMAGE}
+PRINTFORML 射撃レート: {STATUS:FIRE_RATE}発/ターン
+PRINTFORML 命中率    : {STATUS:HIT_RATE}
+PRINTFORML 有効距離  : {STATUS:FIRE_RANGE}
+PRINTFORML サイズ    : {STATUS:SIZE}
+
+;-----------------------------------
+; メインウェポンの資材
+;-----------------------------------
+@GET_MAIN_WEAPON_RESOURCE_194(USE_RESOURCE)
+#DIM REF USE_RESOURCE
+
+
+@IS_SALE_MAIN_WEAPON_194
+RETURN 0

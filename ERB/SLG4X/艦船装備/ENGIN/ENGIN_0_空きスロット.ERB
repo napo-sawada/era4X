@@ -1,0 +1,35 @@
+﻿;-----------------------------------
+; エンジン
+;-----------------------------------
+@GET_ENGIN_NAME_0
+RESULTS = 空きスロット
+
+@GET_ENGIN_STATUS_0(STATUS)
+#DIM REF STATUS
+
+STATUS:SPEED = 1
+STATUS:AVOID = 0
+STATUS:SIZE = 1
+STATUS:PRICE = 10000
+
+;-----------------------------------
+; エンジンの説明
+;-----------------------------------
+@GET_ENGIN_DESCRIPTION_0(STATUS)
+#DIM STATUS, STATUS_LENGTH
+
+CALL GET_ENGIN_STATUS_0(STATUS)
+CALL GET_ENGIN_NAME_0
+PRINTFORML %RESULTS%
+PRINTFORML スピード  : {STATUS:SPEED}
+PRINTFORML 回避      : {STATUS:AVOID}
+PRINTFORML サイズ    : {STATUS:SIZE}
+
+;-----------------------------------
+; エンジンの資材
+;-----------------------------------
+@GET_ENGIN_RESOURCE_0(USE_RESOURCE)
+#DIM REF USE_RESOURCE
+
+USE_RESOURCE:耐熱合金 = 2
+USE_RESOURCE:ジェットガス = 2

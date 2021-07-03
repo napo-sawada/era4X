@@ -1,0 +1,30 @@
+﻿;-----------------------------------
+; コンピューター
+;-----------------------------------
+@GET_COMPUTER_NAME_0
+RESULTS = 空きスロット
+
+@GET_COMPUTER_STATUS_0(STATUS)
+#DIM REF STATUS
+
+STATUS:AVOID = 0
+STATUS:PRICE = 10000
+
+;-----------------------------------
+; コンピューターの説明
+;-----------------------------------
+@GET_COMPUTER_DESCRIPTION_0(STATUS)
+#DIM STATUS, STATUS_LENGTH
+
+CALL GET_COMPUTER_STATUS_0(STATUS)
+CALL GET_COMPUTER_NAME_0
+PRINTFORML %RESULTS%
+PRINTFORML 回避    : {STATUS:AVOID}
+
+;-----------------------------------
+; AIの資材
+;-----------------------------------
+@GET_COMPUTER_RESOURCE_0(USE_RESOURCE)
+#DIM REF USE_RESOURCE
+
+USE_RESOURCE:超電導回路 = 2

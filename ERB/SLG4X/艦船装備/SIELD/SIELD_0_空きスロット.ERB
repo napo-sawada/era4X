@@ -1,0 +1,35 @@
+﻿;-----------------------------------
+; シールド
+;-----------------------------------
+@GET_SIELD_NAME_0
+RESULTS = 空きスロット
+
+@GET_SIELD_STATUS_0(STATUS)
+#DIM REF STATUS
+
+STATUS:SIELD = 0
+STATUS:SIELD_RECOVER = 0
+STATUS:SIZE = 1
+STATUS:PRICE = 10000
+
+;-----------------------------------
+; シールドの説明
+;-----------------------------------
+@GET_SIELD_DESCRIPTION_0
+#DIM STATUS, STATUS_LENGTH
+
+CALL GET_SIELD_STATUS_0(STATUS)
+CALL GET_SIELD_NAME_0
+PRINTFORML %RESULTS%
+PRINTFORML シールド    : {STATUS:SIELD}
+PRINTFORML シールド回復: {STATUS:SIELD_RECOVER}/ターン
+PRINTFORML サイズ      : {STATUS:SIZE}
+
+;-----------------------------------
+; シールドの資材
+;-----------------------------------
+@GET_SIELD_RESOURCE_0(USE_RESOURCE)
+#DIM REF USE_RESOURCE
+
+USE_RESOURCE:シールド発生装置 = 3
+

@@ -1,0 +1,30 @@
+﻿;-----------------------------------
+; センサー
+;-----------------------------------
+@GET_SENSOR_NAME_0
+RESULTS = 空きスロット
+
+@GET_SENSOR_STATUS_0(STATUS)
+#DIM REF STATUS
+
+STATUS:SENSOR = 1
+STATUS:PRICE = 10000
+
+;-----------------------------------
+; センサーの説明
+;-----------------------------------
+@GET_SENSOR_DESCRIPTION_0(STATUS)
+#DIM STATUS, STATUS_LENGTH
+CALL GET_SENSOR_STATUS_0(STATUS)
+CALL GET_SENSOR_NAME_0
+PRINTFORML %RESULTS%
+PRINTFORML センサー範囲: {STATUS:SENSOR}
+
+;-----------------------------------
+; センサーの資材
+;-----------------------------------
+@GET_SENSOR_RESOURCE_0(USE_RESOURCE)
+#DIM REF USE_RESOURCE
+
+USE_RESOURCE:タイラーセンサー = 3
+

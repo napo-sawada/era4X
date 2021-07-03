@@ -1,0 +1,43 @@
+﻿;-----------------------------------
+; サブウェポン
+;-----------------------------------
+@GET_SUB_WEAPON_NAME_92
+RESULTS = かにばさみ
+
+@GET_SUB_WEAPON_STATUS_92(STATUS)
+#DIM REF STATUS
+
+STATUS:DAMAGE = 600
+STATUS:FIRE_RATE = 1
+STATUS:ANTI_AIR = 0
+STATUS:HIT_RATE = 95
+STATUS:FIRE_RANGE = 1
+STATUS:SIZE = 3
+STATUS:WEAPON_TYPE = 実体弾
+STATUS:PRICE = 4000
+
+;-----------------------------------
+; サブウェポンの説明
+;-----------------------------------
+@GET_SUB_WEAPON_DESCRIPTION_92
+#DIM STATUS, STATUS_LENGTH
+
+CALL GET_SUB_WEAPON_STATUS_92(STATUS)
+CALL GET_SUB_WEAPON_NAME_92
+PRINTFORML %RESULTS%
+PRINTFORML 戦闘船を容易く切断する危険なハサミ。身が詰まっていて美味しい部位でもある。
+PRINTFORML ダメージ  : {STATUS:DAMAGE}
+PRINTFORML 射撃レート: {STATUS:FIRE_RATE}発/ターン
+PRINTFORML 対空攻撃力: {STATUS:ANTI_AIR}
+PRINTFORML 命中率    : {STATUS:HIT_RATE}
+PRINTFORML 有効距離  : {STATUS:FIRE_RANGE}
+PRINTFORML サイズ    : {STATUS:SIZE}
+
+;-----------------------------------
+; サブウェポンの資材
+;-----------------------------------
+@GET_SUB_WEAPON_RESOURCE_92(USE_RESOURCE)
+#DIM REF USE_RESOURCE
+
+@IS_SALE_SUB_WEAPON_92
+RETURN 0
