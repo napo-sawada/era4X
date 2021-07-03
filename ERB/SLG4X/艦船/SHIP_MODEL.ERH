@@ -49,6 +49,7 @@
 #DIM CONST 千鳥級戦闘艇 = 48
 #DIM CONST バルキリー級戦闘艇 = 49
 #DIM CONST 改ダモクレス級戦闘艇 = 50
+#DIM CONST ウィッカーマン戦列甲冑 = 51
 #DIM CONST オクスタン級生体艦 = 52
 #DIM CONST ケンツバ級生体艦 = 53
 #DIM CONST バイシザー強襲生体艦 = 54
