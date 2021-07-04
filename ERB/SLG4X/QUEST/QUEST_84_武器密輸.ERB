@@ -1,0 +1,217 @@
+﻿;--------------------------
+; !!武器密輸と 84を好きな番号に変える！!
+; 武器密輸
+; ここにクエストの説明
+;--------------------------
+
+
+;--------------------------
+; クエスト受注可能か
+;--------------------------
+@QUEST_ACCEPTABLE_84
+SIF QUEST_PROGRESS:84 == 1
+	RETURN 0
+RETURN 1
+
+;--------------------------
+; クエストの名前を返却
+;--------------------------
+@QUEST_NAME_84
+RESULTS = 武器密輸
+RETURN
+
+
+;--------------------------
+; マップでの表示を設定する
+; @QUEST_SET_TILE_  : マップ上対象地点にマークを出す。
+; @QUEST_MAP_INFO_  : 右下小窓にメッセージを出す
+; 引数１： ARG:0 SS84YY　座標データ　マップ上でクリックされた座標。表示条件分岐に。
+;--------------------------
+;;;マップ画面上での表示。 隠したかったら関数コメントアウトか RETURN 0
+;;;色を替えたかったらSETCOLORしておけば後の処理で色反映します
+@QUEST_SET_TILE_84 (ARG:0 )
+	RESULTS '= "！"
+	SETCOLOR 0xFFFF00
+RETURN 1
+
+;;;右下小窓に出す。隠したければ関数コメントアウトか RETURN 0
+@QUEST_MAP_INFO_84 (ARG:0 )
+		RESULTS:0 '= ""
+		RESULTS:1 '= "取引ポイント"
+		RESULTS:2 '= ""
+		RESULTS:3 '= ""
+		RESULTS:4 '= ""
+RETURN 1
+
+;-----------------------
+; マップ上からQUEST_BODYを実行する処理
+; @QUEST_SHOW_COMMAND_x : ここで指定した文字列のコマンドを現地で表示する
+; 　　　　　　　　　　 ：(調査する||捜索する||採集する||待ち伏せする||挑戦する)といったフレーバー
+; @QUEST_PLACE_CHECK_x ： 設定マスを踏んだら呼び出される。不要ならば消すか無処理で返す
+;--------------------------
+@QUEST_SHOW_COMMAND_84 ()
+	RESULTS '= "取引を行う"
+RETURN 1
+
+@QUEST_REACH_PLACE_84 ()
+; CALL QUEST_BODY_84
+RETURN
+
+;--------------------------
+; クエスト本体
+;--------------------------
+@QUEST_BODY_84
+#DIM CONST QUEST_ID = 84
+#DIM SELECTED, MAX_CHARA_NUM
+#DIM FIRST_LINE
+#DIM SELECTED_COUNT
+#DIM CONST NEED_NUM = 500
+#DIM SECTOR_ID
+#DIM X_POS
+#DIM Y_POS
+
+LOCAL:1 = 0
+FOR LOCAL, 0, MAX_SHIP
+	IF SHIP_POSITION:LOCAL == CHARACTER_POSITION && SHIP_COUNTRY:LOCAL == 国家ID_プレイヤー && SHIP_CATEGORY:LOCAL == 輸送船
+		LOCAL:1 += GET_CARGO_ITEM_NUM(LOCAL, 充足)
+	ENDIF
+NEXT
+IF LOCAL:1 < NEED_NUM
+	PRINTFORML 必要な武器の数が足りない
+	RETURN
+ENDIF
+
+CALL ID2POS(CHARACTER_POSITION)
+SECTOR_ID = RESULT
+Y_POS = RESULT:2
+X_POS = RESULT:1
+IF QUESTMAP:SECTOR_ID:X_POS:Y_POS == QUEST_ID
+	PRINTFORML 相手の艦隊旗艦であるフリゲートに乗り込むと、早速歩兵武器を輸送した
+	SELECTCASE RAND:3
+		CASE 0, 1
+			PRINTFORML 支払いを求めると、相手は素直に金を支払い、何事もなく仕事は完了した
+			MONEY += 1000 * NEED_NUM
+			PRINTFORMW 所持金 +$500,000
+		CASE 2
+			PRINTFORML 支払いを求めると、相手はにやにやしながら麻袋を押し付けてきた
+			PRINTFORMW 中を見ると、麻薬の束が山になっている
+			PRINTL
+			PRINTFORML どうやらひと暴れしないといけないようだ
+			FIRST_LINE = LINECOUNT
+			PRINTL メンバーを選択してください(最大6名)
+			SETCOLOR 0X666666
+			CUSTOMDRAWLINE =
+			RESETCOLOR
+			$INPUT_LOOP
+			SELECTED_COUNT = 0
+			FOR LOCAL, 0, CHARANUM
+				SIF CFLAG:LOCAL:所属 != CFLAG:MASTER:所属
+					CONTINUE
+				SIF SELECTED:LOCAL
+					SELECTED_COUNT ++
+			NEXT
+			FOR LOCAL, 0, CHARANUM
+				SIF CFLAG:LOCAL:所属 != CFLAG:MASTER:所属
+					CONTINUE
+				IF SELECTED:LOCAL
+					SETCOLOR 0X00FF00
+					PRINTBUTTON @"[{LOCAL}] %CALLNAME:LOCAL% - 白兵: {ABL:LOCAL:白兵}", LOCAL
+					PRINTL
+				ELSEIF !SELECTED:LOCAL && SELECTED_COUNT < 6
+					PRINTBUTTON @"[{LOCAL}] %CALLNAME:LOCAL% - 白兵: {ABL:LOCAL:白兵}", LOCAL
+					PRINTL
+				ELSE
+					PRINTFORML [{LOCAL}] %CALLNAME:LOCAL% - 白兵: {ABL:LOCAL:白兵}
+				ENDIF
+				RESETCOLOR
+			NEXT
+			SETCOLOR 0X666666
+			CUSTOMDRAWLINE =
+			RESETCOLOR
+			FINDELEMENT SELECTED, 1
+			IF RESULT == -1
+				PRINT [決定]
+			ELSE
+				PRINTBUTTON "[決定]", CHARANUM
+			ENDIF
+			PRINT 　
+			PRINTBUTTON "[キャンセル]", CHARANUM + 1
+			INPUT
+			IF RESULT == CHARANUM
+				CALL COMBAT84(SELECTED)
+				PRINTFORML 仕事は失敗だ。増援がくる前に艦に戻り、艦隊戦へ移行しよう
+				CALL INIT_PRESET_SHIP(10, CHARACTER_POSITION, 汎用コルベット, "海賊船", 汎用コルベット)
+				CALL INIT_PRESET_SHIP(10, CHARACTER_POSITION, 汎用コルベット, "海賊船", 汎用コルベット)
+				CALL INIT_PRESET_SHIP(10, CHARACTER_POSITION, 汎用コルベット, "海賊船", 汎用コルベット)
+				CALL INIT_PRESET_SHIP(10, CHARACTER_POSITION, 汎用フリゲート, "海賊船旗艦", 汎用フリゲート)
+				CALL COMBAT(CHARACTER_POSITION)
+				CALL QUEST_RELEASE_POINT(QUEST_ID, CHARACTER_POSITION:MASTER)
+				QUEST_PROGRESS:QUEST_ID = 0
+				QUEST_84_受注回数++
+				RETURN
+			ENDIF
+			SIF RESULT == CHARANUM + 1
+				RETURN
+			IF RESULT < 0 || RESULT >= CHARANUM || CFLAG:RESULT:所属 != CFLAG:MASTER:所属
+				CLEARLINE LINECOUNT - FIRST_LINE
+				GOTO INPUT_LOOP
+			ENDIF
+			IF SELECTED:RESULT
+				SELECTED:RESULT = 0
+			ELSEIF SELECTED_COUNT < 6
+				SELECTED:RESULT = 1
+			ENDIF
+			CLEARLINE LINECOUNT - FIRST_LINE
+			GOTO INPUT_LOOP
+	ENDSELECT
+	LOCAL:1 = NEED_NUM
+	FOR LOCAL, 0, MAX_SHIP
+		LOCAL:1 -= UNLOAD_FROM_SHIP(LOCAL, 充足, LOCAL:1)
+		SIF LOCAL:1 == 0
+			BREAK 
+	NEXT
+	CALL QUEST_RELEASE_POINT(QUEST_ID, CHARACTER_POSITION:MASTER)
+	QUEST_PROGRESS:QUEST_ID = 0
+	QUEST_84_受注回数++
+ELSE
+	PRINTFORML 歩兵武器を500セット用意して指定の場所に輸送する。それが今回のミッションだ
+	PRINTFORML 相手が支払いを渋る場合は、白兵による武力行使も考慮しなくてはいけない
+	PRINTFORML 受注しますか?
+	CALL ASK_YN
+	SIF RESULT
+		RETURN
+	LOCAL = 1
+	WHILE LOCAL
+		;; 関数つかって適当に。 指定セクター内　6:ちょっと外より を抽選
+		CALL QUEST_SET_RANDPOINT(QUEST_ID, SECTOR_ID, 6 )
+		IF RESULT >= 0
+			X_POS = (RESULT / 100) %100
+			Y_POS = RESULT %100
+			CLEARMAP:SECTOR_ID:X_POS:Y_POS = 1		;;明瞭化おまけ
+			LOCAL --
+		ENDIF
+	WEND
+	QUEST_PROGRESS:QUEST_ID = 1
+ENDIF
+
+@COMBAT84(SELECTED)
+#DIM REF SELECTED, 0
+
+
+;白兵戦参加メンバーの初期化
+CALL CC_INIT()
+;攻撃側キャラクターの設定(最大6名)
+FOR LOCAL, 0, CHARANUM
+	SIF SELECTED:LOCAL
+		CALL CC_ADDCHARA("ATTACKER", LOCAL)
+NEXT
+CALL CC_ADDMOB("DEFENDER", "宙族1", 1600, 1600, 60)
+CALL CC_ADDMOB("DEFENDER", "宙族2", 1600, 1600, 60)
+CALL CC_ADDMOB("DEFENDER", "宙族3", 1600, 1600, 60)
+CALL CC_ADDMOB("DEFENDER", "宙族4", 1600, 1600, 60)
+;白兵戦イベント呼出
+CALL CLOSE_COMBAT()
+SIF RESULT == 2
+	PRINTL ゲームオーバー
+CALL CC_ADD_COMBAT_EXP(10)
+RETURN
