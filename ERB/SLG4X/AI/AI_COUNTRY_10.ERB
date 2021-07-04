@@ -1,0 +1,81 @@
+﻿;--------------------------
+; AI ACTION 海賊
+;--------------------------
+@SLG_AI_ACTION_10
+#DIM CONST 合流発生率 = 50 ;千分率
+#DIM CONST 航路妨害発生率 = 10 ;千分率
+#DIM CONST 合流発生閾値 = 15
+#DIM CONST 航路妨害派遣艦隊数 = 6
+#DIM DYNAMIC SECTOR_ID
+#DIM DYNAMIC SHIP_ID
+#DIMS DYNAMIC _LIST_RAIDERS_FLEET
+#DIM DYNAMIC TARGET_SECTOR_ID
+#DIM DYNAMIC TARGET_POSID
+#DIM DYNAMIC 封鎖対象POSXY
+#DIM DYNAMIC セクター内艦船数
+
+;SLG_EVENT_2で設定した合流ポイントに基づく移動ポイントの設定
+FOR SECTOR_ID, 0, MAX_SECTOR
+    ;セクター内の艦船数を数える
+    セクター内艦船数 = 0
+    FOR SHIP_ID, 0, MAX_SHIP
+        IF SECTOR_ID == SHIP_POSITION:SHIP_ID / 10000 && SHIP_IDENTIFICATION_FLAG:SHIP_ID == 艦船識別子_自然生成海賊
+            セクター内艦船数 ++ 
+        ENDIF
+    NEXT
+	;合流地点の設定
+    IF セクター内艦船数 > 合流発生閾値 && RAND(0, 1000) < 合流発生率
+        IF 自然生成海賊合流POSID:SECTOR_ID == -1
+            CALL SLG_EVENT_2_GET_RANDPOS(SECTOR_ID, RAND(0, 3))
+            IF RESULT != -1
+                自然生成海賊合流POSID:SECTOR_ID = RESULT
+            ENDIF
+        ENDIF
+	;合流した海賊が撃破されたとみなして合流地点を再設定可能に
+    ELSEIF セクター内艦船数 < 合流発生閾値 && 自然生成海賊合流POSID:SECTOR_ID == -2
+        自然生成海賊合流POSID:SECTOR_ID = -1
+    ENDIF
+    ;合流地点が設定されている場合の処理
+    IF 自然生成海賊合流POSID:SECTOR_ID >= 0
+        FOR SHIP_ID, 0, MAX_SHIP
+            IF SHIP_IDENTIFICATION_FLAG:SHIP_ID == 艦船識別子_自然生成海賊 && SHIP_POSITION:SHIP_ID / 10000 == SECTOR_ID && SHIP_MISSION:SHIP_ID != 移動
+                ;合流ポイントに移動させる
+                MOVING_POS:SHIP_ID = 自然生成海賊合流POSID:SECTOR_ID
+                SHIP_MISSION:SHIP_ID = 移動
+            ENDIF
+        NEXT
+        自然生成海賊合流POSID:SECTOR_ID = -2
+    ELSEIF 自然生成海賊合流POSID:SECTOR_ID == -2 && RAND(0, 1000) < 航路妨害発生率 && CONFIG:320 == 0
+        FOR SHIP_ID, 0, MAX_SHIP
+            IF SHIP_IDENTIFICATION_FLAG:SHIP_ID == 艦船識別子_自然生成海賊 && SHIP_POSITION:SHIP_ID / 10000 == SECTOR_ID && SHIP_MISSION:SHIP_ID != 移動
+                _LIST_RAIDERS_FLEET = %LIST_ADD(_LIST_RAIDERS_FLEET, TOSTR(SHIP_ID))%
+            ENDIF
+        NEXT
+        IF LIST_COUNT(_LIST_RAIDERS_FLEET) >= 航路妨害派遣艦隊数
+            ;座標直打ちなので余計な処理がない分軽いのは間違いないけれど
+            ;ワープゲートが無い座標の前で出待ちしたり惑星に突っ込んだりもする。ちょっとかっこ悪い
+            SELECTCASE RAND(0, 3)
+                CASE 0 
+                    封鎖対象POSXY = 0207
+                CASE 1
+                    封鎖対象POSXY = 0702
+                CASE 2
+                    封鎖対象POSXY = 1207
+                CASE 3
+                    封鎖対象POSXY = 0712
+            ENDSELECT
+            FOR LOCAL:0, 0, 航路妨害派遣艦隊数
+                SHIP_ID = TOINT(LIST_GET(_LIST_RAIDERS_FLEET, LOCAL:0))
+            ;移動先を求めるのは一度だけでよい
+                IF LOCAL:0 == 0
+                    CALL NEAREST_STAR(SHIP_POSITION:SHIP_ID)
+                    TARGET_SECTOR_ID = RESULT / 10000
+                    TARGET_POSID = TARGET_SECTOR_ID * 10000 + 封鎖対象POSXY
+                ENDIF
+                MOVING_POS:SHIP_ID = TARGET_POSID
+                SHIP_MISSION:SHIP_ID = 移動
+            NEXT
+        ENDIF
+    ENDIF
+    _LIST_RAIDERS_FLEET '= ""
+NEXT

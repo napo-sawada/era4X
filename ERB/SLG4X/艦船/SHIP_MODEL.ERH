@@ -54,6 +54,8 @@
 #DIM CONST ケンツバ級生体艦 = 53
 #DIM CONST バイシザー強襲生体艦 = 54
 #DIM CONST 生体巡洋艦 = 55
+#DIM CONST ブリストル級巡洋戦艦 = 60
+#DIM CONST センチュリオン機動歩兵 = 61
 #DIM CONST 黄金三叉龍王 = 90
 #DIM CONST 宇宙ひらめ = 91
 #DIM CONST 天狗級機動武者 = 92

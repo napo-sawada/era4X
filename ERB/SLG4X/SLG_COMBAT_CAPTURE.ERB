@@ -49,6 +49,7 @@ CALL COMBAT_CAPTURE_BOARDING_COMBAT(参加メンバーリスト, TARGET_SHIP_ID)
 ;白兵戦勝利
 IF RESULT == 1
 	SHIP_COUNTRY:TARGET_SHIP_ID = 国家ID_プレイヤー
+	CALL CLEAR_SHIP_FLAG(TARGET_SHIP_ID)
 	PRINTFORML %ANAME(TOINT(LIST_GET(参加メンバーリスト:0)), LIST_COUNT(参加メンバーリスト))%は防衛戦力を排除し、艦内の制圧に成功した
 	CALLF FuncTagSetText_Print(@"@C:{カラー_オレンジ}@%SHIP_NAME:TARGET_SHIP_ID%@/C@を鹵獲した！", 1)
 	WAIT

@@ -42,8 +42,9 @@
 #DIM CONST 敵軍 = 102
 
 ; 船
-;※SHIP_IDと紐づける配列データを追加した場合、併せて以下の処理も修正してください
-; SHIP.ERB    @@RETIRE_BROKEN_SHIP  … 艦船データの除去処理。設定したデータの初期化が必要
+;※SHIP_IDと紐づける配列データを追加した場合、併せて以下の処理も適宜修正してください
+; SHIP.ERB    @RETIRE_BROKEN_SHIP  … 艦船データの除去処理。設定したデータの初期化が必要
+;             @CLEAR_SHIP_FLAG(SHIP_ID)　…移動情報などのフラグのクリア処理
 ; lib_MAP.ERB @SWAP_SHIPDATA        … 艦船データ入替処理
 #DIM CONST MAX_SHIP = 1500
 #DIM SAVEDATA SHIP_CATEGORY, MAX_SHIP
@@ -84,7 +85,6 @@
 #DIM CONST 採掘 = 4
 #DIM CONST 交易 = 5
 #DIM CONST 輸送 = 6
-
 
 ; 艦隊
 #DIM CONST MAX_FREET = 40
@@ -183,6 +183,7 @@
 ; 戦闘系
 #DIM COMMANDER, 2
 #DIMS BATTLEFIELD_NAME
+#DIM COMBAT_UI_DISPLAY_LOG
 
 ; 戦闘系(ヒットタイプ)
 #DIM CONST 命中 = 0
@@ -247,7 +248,9 @@
 #DIM CONST 進撃 = 2
 #DIM CONST 退却 = 3
 
+;; SLG_EVENT_2_モブ艦隊生成.ERBにて使用
 ; 自然湧きした海賊を合流させるためのポイント指定
+; -1,初期値 -2,合流が実行された状態。当該セクターの海賊が閾値を下回ったら-1に遷移
 #DIM SAVEDATA 自然生成海賊合流POSID, MAX_SECTOR
 
 ; 勢力-採掘

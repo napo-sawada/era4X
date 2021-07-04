@@ -789,6 +789,23 @@ FOR ITER, 0, MAX_SHIP
 NEXT
 
 ;----------------------------
+; 船を転籍させる場合などに残っていると不都合なデータを
+; クリアする
+;----------------------------
+@CLEAR_SHIP_FLAG(SHIP_ID)
+#DIM SHIP_ID
+SHIP_MISSION:SHIP_ID = 0
+MOVING_POS:SHIP_ID = 0
+FROM_POS:SHIP_ID = 0
+SHIP_IDENTIFICATION_FLAG:SHIP_ID = 0
+;クリア対象艦を追従している艦からも追従情報をクリアする
+FOR LOCAL, 0, MAX_SHIP
+	IF SHIP_FOLLOW:LOCAL == SHIP_ID
+		SHIP_FOLLOW:LOCAL = 0
+		SHIP_MISSION:LOCAL = 0
+	ENDIF
+NEXT
+;----------------------------
 ; 艦船の耐久が減っているか判定
 ; 戻り値 INT 0減っていない 1減っている
 ;----------------------------
