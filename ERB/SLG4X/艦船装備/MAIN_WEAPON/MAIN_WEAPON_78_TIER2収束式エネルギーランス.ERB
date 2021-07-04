@@ -1,10 +1,10 @@
 ﻿;-----------------------------------
 ; メインウェポン
 ;-----------------------------------
-@GET_MAIN_WEAPON_NAME_61
-RESULTS = TIER2高密度エネルギーブレード
+@GET_MAIN_WEAPON_NAME_78
+RESULTS = TIER2収束式エネルギーランス
 
-@GET_MAIN_WEAPON_STATUS_61(STATUS)
+@GET_MAIN_WEAPON_STATUS_78(STATUS)
 #DIM REF STATUS
 
 STATUS:DAMAGE = 1600
@@ -12,32 +12,31 @@ STATUS:FIRE_RATE = 1
 STATUS:HIT_RATE = 35
 STATUS:FIRE_RANGE = 1
 STATUS:SIZE = 1
-STATUS:WEAPON_TYPE = ビーム
+STATUS:WEAPON_TYPE = 実体弾
 STATUS:PRICE = 60000
 
 ;-----------------------------------
 ; メインウェポンの説明
 ;-----------------------------------
-@GET_MAIN_WEAPON_DESCRIPTION_61
+@GET_MAIN_WEAPON_DESCRIPTION_78
 #DIM STATUS, STATUS_LENGTH
 
-CALL GET_MAIN_WEAPON_STATUS_61(STATUS)
-CALL GET_MAIN_WEAPON_NAME_61
+CALL GET_MAIN_WEAPON_STATUS_78(STATUS)
+CALL GET_MAIN_WEAPON_NAME_78
 PRINTFORML %RESULTS%
-PRINTFORML シールド形成機能を応用した、エネルギーブレードの展開機構。
-PRINTFORML ブレード状に展開する高密度エネルギーフィールドは干渉時の切断能力に優れ、大型艦に対しても致命的な損傷を与える威力を誇る。
-PRINTFORML ただし敵機に対し接触寸前、すれ違い様に使用する関係上、取り扱いが非常に難しい。
+PRINTFORML 目覚ましい進歩を見せる、強固な船体シールドの突破を目的に開発されたエネルギーランスの展開機構。
+PRINTFORML 局所的に超高密度化した変形シールドを形成、敵シールドを一点突破し、敵本体部に対し致命的な損害を与える。
+PRINTFORML 収束率の調整によるシールド突撃も可能であり、絶大な威力を有するものの、敵機への接触を前提とした兵器のため、取り扱いが非常に難しい。
 PRINTFORML 多くの発展技術が組み込まれたミドルスペックモデルであり、出力向上、効率化が図られている。
 PRINTFORML ダメージ  : {STATUS:DAMAGE}
 PRINTFORML 射撃レート: {STATUS:FIRE_RATE}発/ターン
 PRINTFORML 命中率    : {STATUS:HIT_RATE}
 PRINTFORML 有効距離  : {STATUS:FIRE_RANGE}
 PRINTFORML サイズ    : {STATUS:SIZE}
-
 ;-----------------------------------
 ; メインウェポンの資材
 ;-----------------------------------
-@GET_MAIN_WEAPON_RESOURCE_61(USE_RESOURCE)
+@GET_MAIN_WEAPON_RESOURCE_78(USE_RESOURCE)
 #DIM REF USE_RESOURCE
 
 USE_RESOURCE:武装合金 = 3

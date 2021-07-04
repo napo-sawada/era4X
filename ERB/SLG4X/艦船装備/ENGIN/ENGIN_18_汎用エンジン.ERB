@@ -1,0 +1,37 @@
+﻿;-----------------------------------
+; エンジン
+;-----------------------------------
+@GET_ENGIN_NAME_18
+RESULTS = 汎用エンジン
+
+@GET_ENGIN_STATUS_18(STATUS)
+#DIM REF STATUS
+
+STATUS:SPEED = 1
+STATUS:SIZE = 1
+STATUS:PRICE = 5000
+
+;-----------------------------------
+; エンジンの説明
+;-----------------------------------
+@GET_ENGIN_DESCRIPTION_18(STATUS)
+#DIM STATUS, STATUS_LENGTH
+
+CALL GET_ENGIN_STATUS_18(STATUS)
+CALL GET_ENGIN_NAME_18
+PRINTFORML %RESULTS%
+PRINTFORML 星間航行を行う艦船に搭載される汎用ジェネレーター。
+PRINTFORML 多くの民間船に搭載されており、必要最小限の機能に留めたシンプルな構造は信頼性が高く、非常に安価。
+PRINTFORML 民間モデルとして人気が高く、世界各国で類似モデルが量産されている。
+PRINTFORML スピード  : {STATUS:SPEED}
+PRINTFORML 回避      : {STATUS:AVOID}
+PRINTFORML サイズ    : {STATUS:SIZE}
+
+;-----------------------------------
+; エンジンの資材
+;-----------------------------------
+@GET_ENGIN_RESOURCE_18(USE_RESOURCE)
+#DIM REF USE_RESOURCE
+
+USE_RESOURCE:耐熱合金 = 1
+USE_RESOURCE:ジェットガス = 1

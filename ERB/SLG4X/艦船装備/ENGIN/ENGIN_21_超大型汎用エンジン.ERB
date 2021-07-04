@@ -1,0 +1,39 @@
+﻿;-----------------------------------
+; エンジン
+;-----------------------------------
+@GET_ENGIN_NAME_21
+RESULTS = 超大型高速エンジン
+
+@GET_ENGIN_STATUS_21(STATUS)
+#DIM REF STATUS
+
+STATUS:SPEED = 1
+STATUS:SIZE = 4
+STATUS:PRICE = 40000
+
+;-----------------------------------
+; エンジンの説明
+;-----------------------------------
+@GET_ENGIN_DESCRIPTION_21(STATUS)
+#DIM STATUS, STATUS_LENGTH
+
+CALL GET_ENGIN_STATUS_21(STATUS)
+CALL GET_ENGIN_NAME_21
+PRINTFORML %RESULTS%
+PRINTFORML 星間航行を行う艦船に搭載されている超大型汎用ジェネレーター。
+PRINTFORML エンジンというよりエンジンに転用された発電施設であり、資源衛星や植民船クラスの大質量を推進させるに十分な出力を確保している。
+PRINTFORML 植民船においては降下後、コロニーにおける発電施設として運用できるよう構造は必要最低限、拡張性が非常に高い。
+PRINTFORML その運用目的もあって、多くの場合税制面で大きく優遇されている。
+;値段に対する帳尻合わせなフレーバーではあるが、いっそ無駄に高くしても良さそう？
+PRINTFORML スピード  : {STATUS:SPEED}
+PRINTFORML 回避      : {STATUS:AVOID}
+PRINTFORML サイズ    : {STATUS:SIZE}
+
+;-----------------------------------
+; エンジンの資材
+;-----------------------------------
+@GET_ENGIN_RESOURCE_21(USE_RESOURCE)
+#DIM REF USE_RESOURCE
+
+USE_RESOURCE:耐熱合金 = 128
+USE_RESOURCE:ジェットガス = 128

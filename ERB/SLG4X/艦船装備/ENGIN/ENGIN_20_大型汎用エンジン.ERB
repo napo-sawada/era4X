@@ -1,0 +1,37 @@
+﻿;-----------------------------------
+; エンジン
+;-----------------------------------
+@GET_ENGIN_NAME_20
+RESULTS = 大型汎用エンジン
+
+@GET_ENGIN_STATUS_20(STATUS)
+#DIM REF STATUS
+
+STATUS:SPEED = 1
+STATUS:SIZE = 3
+STATUS:PRICE = 20000
+
+;-----------------------------------
+; エンジンの説明
+;-----------------------------------
+@GET_ENGIN_DESCRIPTION_20(STATUS)
+#DIM STATUS, STATUS_LENGTH
+
+CALL GET_ENGIN_STATUS_20(STATUS)
+CALL GET_ENGIN_NAME_20
+PRINTFORML %RESULTS%
+PRINTFORML 星間航行を行う艦船に搭載されている大型汎用ジェネレーター。
+PRINTFORML 小型資源衛星などの大質量を推進させるに十分な出力を確保しつつ、必要最小限の機能に留めたシンプルな構造は信頼性が非常に高い。
+PRINTFORML ジェネレーターとしては非常に古い規格で、都市発電用からの転用であるが、コストパフォーマンスに優れている。
+PRINTFORML スピード  : {STATUS:SPEED}
+PRINTFORML 回避      : {STATUS:AVOID}
+PRINTFORML サイズ    : {STATUS:SIZE}
+
+;-----------------------------------
+; エンジンの資材
+;-----------------------------------
+@GET_ENGIN_RESOURCE_20(USE_RESOURCE)
+#DIM REF USE_RESOURCE
+
+USE_RESOURCE:耐熱合金 = 4
+USE_RESOURCE:ジェットガス = 4
