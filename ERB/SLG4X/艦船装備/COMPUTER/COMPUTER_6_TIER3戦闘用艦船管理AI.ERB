@@ -1,0 +1,36 @@
+﻿;-----------------------------------
+; コンピューター
+;-----------------------------------
+@GET_COMPUTER_NAME_6
+RESULTS = TIER3戦闘用艦船管理AI
+
+@GET_COMPUTER_STATUS_6(STATUS)
+#DIM REF STATUS
+
+STATUS:AVOID = 10
+
+STATUS:PRICE = 400000
+
+;-----------------------------------
+; コンピューターの説明
+;-----------------------------------
+@GET_COMPUTER_DESCRIPTION_6(STATUS)
+#DIM STATUS, STATUS_LENGTH
+
+CALL GET_COMPUTER_STATUS_6(STATUS)
+CALL GET_COMPUTER_NAME_6
+PRINTFORML %RESULTS%
+;サイズ分けがない関係上、中途半端なものを作る意味がなさそう。
+PRINTFORML 戦闘艦艇用に特別な改良の施された最新式の管理ＡＩ。
+PRINTFORML 各部センサー系の増設を伴うハード一体型のシステム構築が前提となるが、戦闘中の予測精度は汎用艦船ＡＩを大きく凌ぐ。
+PRINTFORML 性質上コストが非常に高く、主に大型艦への搭載が想定されている。
+PRINTFORML 回避    : {STATUS:AVOID}
+
+;-----------------------------------
+; AIの資材
+;-----------------------------------
+@GET_COMPUTER_RESOURCE_6(USE_RESOURCE)
+#DIM REF USE_RESOURCE
+
+USE_RESOURCE:超電導回路 = 40
+USE_RESOURCE:タイラーセンサー = 40
