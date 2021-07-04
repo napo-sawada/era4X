@@ -56,3 +56,9 @@
 #DIM CONST デイリー_ジャンル_外交  = 3
 #DIM CONST デイリー_ジャンル_特殊勢力 = 4
 #DIM CONST デイリー_ジャンル_その他 = 5
+
+;-------------------------------
+; デイリー管理用変数
+;-------------------------------
+#DIM SAVEDATA DAILY_PROGRESS_MOSER
+#DIM SAVEDATA DAILY_MOSER_COMPLETE_DATE

@@ -1,0 +1,1208 @@
+﻿;---------------------
+;基本的な発生確率(1000分率 100で10%)
+;これにコンフィグ項目の発生頻度がかけられるので、必ずしもこの通りにはならない
+;---------------------
+@EVENT_DAILY_MOSER_SHOKAI_RATE()
+RETURN 1000
+
+
+;---------------------
+;確率以外の発生判定
+;〇期以降になると発生するとか、デイリー側で利用している変数が-1だったら起こさない　みたいなはじき方をするときに使う
+;---------------------
+@EVENT_DAILY_MOSER_SHOKAI_DECISION()
+SIF DAILY_MOSER_COMPLETE_DATE + 10 > DAY
+  RETURN 0
+RETURN 1
+
+;---------------------
+;ジャンル
+;コンフィグ設定で使用
+;---------------------
+@EVENT_DAILY_MOSER_SHOKAI_GENRE()
+RETURN デイリー_ジャンル_エロ
+
+;---------------------
+;イベントの進行度合いに応じてイベント名を変更したい場合に利用
+;変更する必要がない場合、この関数は不要
+;---------------------
+@EVENT_DAILY_MOSER_SHOKAI_NAME()
+SELECTCASE DAILY_PROGRESS_MOSER
+  CASE 0, 1
+    RESULTS = モーサー商会その1
+  CASE 2, 3
+    RESULTS = モーサー商会その2
+  CASE 4
+    RESULTS = モーサー商会その3
+  CASE 5
+    RESULTS = 企業連合の大いなる影
+  CASE 6
+    RESULTS = ゴミ箱の住人たち
+  CASE 7
+    RESULTS = 『報』
+  CASE 8
+    RESULTS = 愛情の報酬
+ENDSELECT
+
+
+;---------------------
+;本体
+;イベントが発生した場合は1、発生しなかった場合は0を返す
+;発生しなかったというのは例えば、特定条件を満たすキャラからランダムに一人選ぶデイリーで、そもそもその条件を満たすキャラが一人もいないみたいなとき
+;旧仕様で作ったことある人向けにいうと「旧仕様のデイリー本体冒頭で-1を返すような状況」
+;---------------------
+@EVENT_DAILY_MOSER_SHOKAI()
+IF DAILY_PROGRESS_MOSER == 0
+  PRINTFORML %CALLNAME:MASTER%がブリッジで作業をしていると、近距離にいる他所の船団から通信が入った。
+  PRINTFORML データベースから識別番号を照会すると、どうやら【モーサー商会】という交易会社の所有船のようだった。
+  PRINTFORMW 直接他船と商売をする場合、海賊と見分けるために公的機関への登録が義務付けられているのだ。
+  PRINTL
+  PRINTFORML 身元を確かめた%CALLNAME:MASTER%が通信に応答すると、モニターに若い少女が映った。
+  PRINTFORML いきなり映像通信なのは珍しい。
+  PRINTFORML 年頃はおそらく20ぐらい、金色の髪を肩口まで伸ばし、エメラルド色のタレ目、そして左目の泣きぼくろが愛らしい娘だ。
+  PRINTFORMW 普通にしてるのに地味な色気がある、と%CALLNAME:MASTER%はなんとなく思った。
+  PRINTL
+  PRINTFORMW 回線が開いたので、画面の向こうで少女がにっこりと笑みを浮かべる。
+  PRINTL
+  PRINTFORML 『あ、どうもはじめまして～。わたしはモーサー商会の代表で、ロアニャ・モーサーと申します。
+  PRINTFORMW 　こうしてお目にかかれて光栄です～』
+  PRINTL
+  PRINTFORML ロアニャと名乗った少女は、代表という割には威厳のない、ややのんびりとした喋り方だった。
+  PRINTFORMW %CALLNAME:MASTER%も軽く自己紹介して「用件は？」と問うと、
+  PRINTL 
+  PRINTFORML 『はい～。実はおトクな品物がありましてぇ、よろしければ船長様にお話を聞いていただけないかと～』
+  PRINTFORML まあ商会の代表なのだから当たり前の話だ。どんな物があるんだと、%CALLNAME:MASTER%は続けて聞く。
+  PRINTFORMW 『本日はですねぇ、こんなものはいかがでしょうか～？』
+  CALL SHOW_MOSER_SHOP1
+  RETURN 1
+
+ELSEIF DAILY_PROGRESS_MOSER == 1
+  PRINTFORML コールがあったので%CALLNAME:MASTER%が通信を確認すると、以前に出会ったモーサー商会からだった。
+  PRINTFORMW 画面にロアニャが現れて、にこやかに告げる。
+  PRINTL
+  PRINTFORML 『こんにちはぁ船長様、またお会いしましたね。モーサー商会のロアニャです。
+  PRINTFORMW オススメの商品があるのですが……いかがでしょう～？』
+  PRINTL
+  PRINTFORML そう言ってリストを提示する。
+  CALL SHOW_MOSER_SHOP1
+  RETURN 1
+
+ELSEIF DAILY_PROGRESS_MOSER == 2
+  PRINTFORML 自室で%CALLNAME:MASTER%がのんびりしていると、モーサー商会から通信が入っているとクルーに告げられた。
+  PRINTFORMW すぐに繋いでもらうと、商会のトップであるロアニャの姿が映った。
+  PRINTL
+  PRINTFORML 『船長様、この間は取引ありがとうございます～。お近くにいるのを知って、また連絡させていただきました～』
+  PRINTFORMW 彼女は朗らかな笑顔を浮かべており、前に言っていたモットーの【信頼と笑顔】の後者をよく守っているようだ。
+  PRINTL
+  PRINTFORML 『よろしければお時間をいただけますでしょうか？』
+  PRINTFORMW %CALLNAME:MASTER%が「構わない」と返答すると、ロアニャも嬉しそうに頷いた。
+  PRINTL
+  PRINTFORML 『ありがとうございます～。以前もでしたが、船長様は即断即決で助かります。
+  PRINTFORML 父の代はそうでもなかったのですが、なぜかわたしが代表になってからは、商談より雑談をされたがるお客様が多くてぇ……。
+  PRINTFORMW 少しぐらいならともかく、なんてことない商談に30分も1時間も取られちゃうと～……』
+  PRINTL
+  PRINTFORML 眉を下げて困ったように言うロアニャに、%CALLNAME:MASTER%は苦笑いをした。
+  PRINTFORML 彼女の愛らしさを考えれば、どうにかしてお近づきになりたいと思う輩は多いだろうと察せられたからだ。
+  PRINTFORMW 「大変だな」と%CALLNAME:MASTER%は慰めた。
+  PRINTL
+  PRINTFORML 『……あっ、申し訳ありません！　ついうっかり、愚痴を言ってしまってぇ。
+  PRINTFORMW 船長様は不思議と話しやすい雰囲気があって、なんだか――……』
+  PRINTL
+  PRINTFORML 言いかけて、ロアニャはそこで言葉を止めてしまった。%CALLNAME:MASTER%が不思議に思ってると、
+  PRINTFORML 『い、いえいえっ、何でもありません。では、こちらが本日のリストになります、あははぁ……』
+  PRINTFORMW ロアニャは誤魔化すように笑って、商品一覧を提示した。
+  CALL SHOW_MOSER_SHOP2
+  RETURN 1
+
+ELSEIF DAILY_PROGRESS_MOSER == 3
+  PRINTFORML 同じ宙域にモーサー商会の艦隊がいるようだ。
+  PRINTFORML 『船長様、こんにちは～。モーサー商会です。お値打ちの商品を取り揃えてございますよ～』
+  PRINTFORML ロアニャから通信が飛んできた。
+  PRINTFORMW %CALLNAME:MASTER%は軽く挨拶をして本題へと入った。
+  CALL SHOW_MOSER_SHOP2
+  RETURN 1
+ELSEIF DAILY_PROGRESS_MOSER == 4
+  PRINTFORML あれから%CALLNAME:MASTER%は幾度となくモーサー商会と取引をし、お得意様と呼べる頻度でやり取りをするようになった。
+  PRINTFORMW けれど増えたのは商売回数だけではない。個人的な会話もだった。
+  PRINTL
+  PRINTFORML 「実はこないだ寄った星の動物園で、レッドリストにも載っている北銀河オオシロウサギを見たんですよ～。
+　PRINTFORMW おっきい体で白くてモコモコしてて、顔はふてぶてしいのにとっても可愛くてぇ――」
+  PRINTL
+  PRINTFORMW なんてことはない会話や、
+  PRINTL
+  PRINTFORML 「取り扱う商品を増やしたいと思うんですけど～、船長様ならこの中でどれが欲しいでしょうか？
+  PRINTFORML みんなに意見を募ったんですが、キレイに割れてしまって困ってるんですよぉ。
+  PRINTFORMW 値段が値段だけに全部！　とはいかないので～」
+  PRINTL
+  PRINTFORMW 商売に関すること、
+  PRINTL
+  PRINTFORML 「……というわけで、二人がとっても険悪になっちゃってるんです……。
+  PRINTFORMW 早く仲直りしてもらうにはどうすればいいんでしょうか～……もとは仲がいい二人なので見ているのが辛くて」
+  PRINTL
+  PRINTFORML 果ては商会の部下の話まで、色々なことを話す間柄になっていた。
+  PRINTFORMW 中には外部の人間が聞くべきではない（聞いてはいけない）類の話もあったが、%CALLNAME:MASTER%はできるだけ真摯に対応した。
+  PRINTL
+  PRINTFORML ……2度目の商談の後、調べてわかったことであるが。
+  PRINTFORML モーサー商会は企業連合でも中堅に位置する古い会社で、先代代表のロアニャの父は、1年ほど前に事故で亡くなっている。
+  PRINTFORML 若くして商会を背負うことになったロアニャの心労はいかほどか。
+  PRINTFORMW 事情を知った%CALLNAME:MASTER%が親身になるのも当然であった。
+  PRINTL
+  PRINTFORML そしてある日。
+  PRINTFORML %CALLNAME:MASTER%は補給のために近くの星に降り立った。
+  PRINTFORMW 留守番を引き受けて、クルーたちが遊びや買い物に行くのを見送り、さて一休み……と考えていたところ。
+  PRINTL
+  PRINTFORML 「……えっ、船長様？」
+  PRINTFORMW 背後からそんな声がかけられて、%CALLNAME:MASTER%は振り向く。
+  PRINTL
+  PRINTFORML 「やっぱり！　船長様でしたぁ」
+  PRINTFORMW そこには近頃見慣れてきた顔、ロアニャの姿が。
+  PRINTL
+  PRINTFORML 「奇遇ですね～、なんだか嬉しいですぅ。船長様は補給ですか？」
+  PRINTFORMW 彼女は笑顔で歩み寄ってくる。
+  PRINTL
+  PRINTFORML 映像通信では肩までしか映らないので、そういう意味ではロアニャの姿を見るのは初めてだった。
+  PRINTFORML 企業の代表だけあって、ビジネスにふさわしい女性用スーツ（若干の着られてる感）に身を包んでいる。
+  PRINTFORML 思ったよりも小柄であったが、どちらかというと童顔な彼女のイメージにはあっていた。
+  PRINTFORMW ……が、一つだけ思いもよらなかった箇所が。
+  PRINTL
+  PRINTFORMW ――でかすぎる。なんだあの胸部の大山脈は。
+  PRINTL
+  PRINTFORML ゆっくり歩いているだけなのに、ぷるんぷるんと激しく自己主張をしてくる。
+  PRINTFORML シャツはパツパツ、上着のボタンは物理的に留めるのが難しそうである。
+  PRINTFORMW もちろん下着はつけているのだろうが、その程度ではまったく抑えが効かないじゃじゃ馬っぷりだ。
+  PRINTL
+  PRINTFORML すごい。そんな言葉しか出てこないほどに。
+  PRINTFORMW いきなり圧倒的なモノを目の当たりにした%CALLNAME:MASTER%も動揺を隠せない。
+  PRINTL
+  PRINTFORML 「あっ、申し訳ありません。こうして直接お会いするのは初めてなのに、急に声をかけたら驚いてしまいますよねぇ。
+  PRINTFORMW 改めまして～、ロアニャ・モーサーですぅ」
+  PRINTL
+  PRINTFORML ロアニャがお辞儀をすると、また双丘がたぷんと震える。
+  PRINTFORMW なんとか我に返った%CALLNAME:MASTER%は、同じように一礼した。
+  PRINTL
+  PRINTFORMW 「はわ～……」
+  PRINTL
+  PRINTFORML なぜかロアニャは呆けたようにこちらを見つめて、不思議な感嘆を漏らした。
+  PRINTFORMW さっき変な目で見ていたことがバレたのだろうか、と内心ヒヤヒヤしていたが、
+  PRINTL
+  PRINTFORML 「……思っていた通りの方で安心しましたぁ。
+  PRINTFORMW モニター越しじゃなく、顔を合わせないとわからないことって、やっぱりありますから～」
+  PRINTL
+  PRINTFORML またもよくわからないが好印象だったらしい。
+  PRINTFORMW ともあれ立ち話もなんだと、%CALLNAME:MASTER%は自分の船にロアニャを誘った。
+  PRINTL
+  PRINTFORMW お茶の用意をして応接室に落ち着く。
+  PRINTL
+  PRINTFORML 「美味しそうなお菓子ですね、いただきます～。んぅ～……皇国のアンコ餅ですね、あまーい?
+  PRINTFORML あの国はお菓子だけじゃなくて食事も美味しいんですよねぇ。
+  PRINTFORMW 食べることにかけて、情熱があるというか～……わかります？」
+  PRINTL
+  PRINTFORMW わかる、と幾度も%CALLNAME:MASTER%は頷いた。
+  PRINTL
+  PRINTFORML 「こういうお仕事をしていると、自然と食べ歩きみたいな趣味ができてしまって～。
+　PRINTFORMW 各星の名物を探すのが密かな楽しみなんですぅ」
+  PRINTL
+  PRINTFORML 宇宙をさまよって、あちこちで仕事（意味深）をしているのは%CALLNAME:MASTER%も同じだ。
+  PRINTFORML そういった方面にも一家言ある。
+  PRINTFORMW つい先日行った人気店の話を振ると、
+  PRINTL
+  PRINTFORML 「えっ、あそこに行ったんですか！？　わぁ、いいなぁ～。
+  PRINTFORML いつか行ってみたいって思っていても、定休日だったり時間外だったりでご縁がなくてぇ。
+  PRINTFORMW それでどうでした？　実際のお味の方は？　噂通りでしたかぁ？」
+  PRINTL
+  PRINTFORML すごい勢いで食いついてきた。
+  PRINTFORML どうやら彼女は食べることが好きらしい。
+  PRINTFORMW なるほど……と、%CALLNAME:MASTER%は胸元の成果物に目を落とし、一人で納得した。
+  PRINTL
+  PRINTFORMW それをきっかけに、話はどんどん弾んだ。
+  PRINTL
+  PRINTFORML 「うんうん、わかりますよぉ。インテリアは結構好みがあるので揉めますよね～。
+  PRINTFORML 個人の部屋なら自由にできますが、ロビーや休憩所みたいな不特定多数が使う場所は……ねぇ？
+  PRINTFORMW ホントはピンクを基調にしたかったんですけど、商会のみんなに却下されて悲しかったですよ～……」
+  PRINTL
+  PRINTFORML 「あのチップスの新味出てるの知ってましたか～？　カレースライム味とかいうキワモノなんですけど。
+  PRINTFORML 地域限定の少数生産でなかなか手に入らなくってぇ。買えないと余計に食べたくなるぅ～……。
+  PRINTFORML え……いま買い置きがある？　そ、それはぜひ食べてみたいですっ！
+  PRINTFORMW ……本当にいいんですか？　ありがとうございます！　わぁ、嬉しいなぁ～?」
+  PRINTL
+  PRINTFORML 「もちろん見ましたよ～。かっこいいですよね～、あの格闘シーン。
+  PRINTFORML ああいう映画を見た後って、不思議と自分でもできそうな気がしてくるんですよねぇ、特にVR映画は。
+  PRINTFORMW えいっ、とおっ、やあっ！　……って。あっ、いま笑った、笑いましたね！？　もうっ」
+  PRINTL
+  PRINTFORML その中で気づいたことだが、今日のロアニャは通信の時より年相応の振る舞いが多いように見える。
+  PRINTFORMW それを指摘すると、ロアニャはカアッと顔を赤らめた。
+  PRINTL
+  PRINTFORML 「ご、ごめんなさい！　今はプライベートなので、つい気を抜いてしまってぇ……。
+  PRINTFORMW あのぉ、やっぱりご不快でしたか……？」
+  PRINTL
+  PRINTFORMW %CALLNAME:MASTER%が「今の方がずっといい」と言うと、ロアニャはふんわりとはにかんだ。
+  PRINTL
+  PRINTFORML 「……ありがとうございます。そう言ってもらえて、とっても安心しました……。
+　PRINTFORML 普段はあんまり、商会のみんなの前で力を抜いたりすることもできなくって……。
+　PRINTFORMW 信頼してないわけじゃないです、でもやっぱりわたしは……代表ですからぁ」
+  PRINTL
+  PRINTFORML ロアニャにとっては、親しんだ相手でも立場は上司と部下である。
+  PRINTFORMW 疲れや弱みを見せるわけにはいかないという切実な事情があるのだろう。
+  PRINTL
+  PRINTFORML 我が身に置き換えると、奴隷に弱いところを見せられない気持ちは十分理解できる。
+  PRINTFORMW なので%CALLNAME:MASTER%は、困ったら自分になんでも相談して欲しいと告げた。
+  PRINTL 
+  PRINTFORMW 「いいのでしょうか……そこまで甘えてしまっても……」
+  PRINTL
+  PRINTFORML むしろどんどん甘えてくれると嬉しい。
+  PRINTFORMW そう言うと彼女はくすくすと笑った。
+  PRINTL
+  PRINTFORMW 「はいっ。それじゃあ～……さっそく甘えさせてもらいますね?」
+  PRINTL
+  PRINTFORML ロアニャは席を立った。
+  PRINTFORML 何をするのかと思えば、こちらのすぐ隣席に移ってきた。
+  PRINTFORMW そしてピッタリと肩をくっつけて、もたれかかって来る。
+  PRINTL
+  PRINTFORMW 「あはっ?　えへへ～?」
+  PRINTL
+  PRINTFORML もう見るからにニコニコとしている。
+  PRINTFORML その眩しい笑顔に、%CALLNAME:MASTER%も下心より前に優しい気持ちが湧き上がってくる。
+  PRINTFORMW なので、思わず奴隷を可愛がるように頬を撫でてしまったのも仕方ないことだ。
+  PRINTL
+  PRINTFORMW やった後に、しまったと思った。
+  PRINTFORML 
+  PRINTFORMW 「ん……」
+  PRINTFORML 
+  PRINTFORML ……が、ロアニャはピクッと一瞬反応しただけで、何も言わないし拒絶もしなかった。
+  PRINTFORML %CALLNAME:MASTER%は輪郭やあごに指を這わせたり、泣きぼくろもさすってみたりする。
+  PRINTFORMW 彼女はくすぐったそうな吐息を漏らす。
+  PRINTFORML 
+  PRINTFORMW 「ふふっ……こういう風にされてると、なんだか猫ちゃんになった気分です～」
+  PRINTFORML 
+  PRINTFORMW そんなことを言うので、猫ではなく犬みたいに可愛がってやった。
+  PRINTFORML 
+  PRINTFORML 「きゃ～?　そんなにワシワシされたら髪がぐちゃぐちゃになっちゃいますよぉ?
+  PRINTFORMW 　ちゃんと責任もって戻してくださいよ～??」
+  PRINTFORML 
+  PRINTFORML ロアニャの声は甘えるように喜んでいた。
+  PRINTFORML 一通りじゃれ終えたところで、%CALLNAME:MASTER%は前から疑問だったことを聞いてみた。
+  PRINTFORMW 「ロアニャが不思議と自分に好意的だったのは何故か」という謎だ。
+  PRINTFORML 
+  PRINTFORMW 「……」
+  PRINTFORML 
+  PRINTFORMW ロアニャはちょっと迷っているような表情を見せる。
+  PRINTFORML 
+  PRINTFORMW 「言っても笑いませんかぁ……？」
+  PRINTFORML 
+  PRINTFORMW 努力はする、そう返した。
+  PRINTFORML 
+  PRINTFORML 「うーん、まぁいいですよ～わかりましたぁ。
+  PRINTFORMW 実はですね…………」
+  PRINTFORML 
+  PRINTFORMW ごくり、と無意識につばを飲む。
+  PRINTFORML 
+  PRINTFORMW 「…………お兄ちゃんみたいだなぁって」
+  PRINTFORML 
+  PRINTFORML %CALLNAME:MASTER%は悩んだ。どう受け止めるべきかと。
+  PRINTFORML 以前調べたところ、家族構成は一人娘だったはずだが……。
+  PRINTFORMW 彼女も言葉足らずだと気づいて、続けて言い足した。
+  PRINTFORML 
+  PRINTFORML 「いえ、わたしは一人っ子でキョウダイはいないんですけど、そういうのに憧れはあってぇ。
+  PRINTFORML 　両親が健在だった頃はいっつも宇宙を飛び回ってて、お手伝いさんが面倒を見ててくれたんですが～、
+  PRINTFORMW 　やっぱり寂しくって、よくキョウダイがいたらって想像してたんです」
+  PRINTFORML 
+  PRINTFORMW 昔を思い出したのか、ロアニャは寂しそうな表情を見せる。
+  PRINTFORML 
+  PRINTFORML 「仲のいい友達はキョウダイを『ウザい』って言ったりしてたけど、わたしは……すごく羨ましかったです。
+  PRINTFORML 　一緒に遊んだり喧嘩したり、ご飯食べたりお風呂入ったりできる家族が、いつもすぐ側にいるのが～……。
+  PRINTFORMW 　だからでしょうか？　船長様を最初に見た時に『想像とピッタリ』って思ったら、なんだか親近感が湧いちゃって……えへへぇ」
+  PRINTFORML 
+  PRINTFORML 聞いてみればなんてことはない理由だった。
+  PRINTFORML だがロアニャにとっては大事なこと。
+  PRINTFORMW もちろん、それを相手に聞かせるということも含めてだ。
+  PRINTFORML 
+  PRINTFORML %CALLNAME:MASTER%はロアニャの頭を抱きしめた。
+  PRINTFORMW そして愛情を込めて撫でた。
+  PRINTFORML 
+  PRINTFORMW 「……??」
+  PRINTFORML 
+  PRINTFORML 彼女はもっと頭をこすりつけてきた。
+  PRINTFORML それからは会話はなかった。
+  PRINTFORMW クルーたちが戻ってくるまでの間、そこには穏やかな空気が流れていただけだった。
+  DAILY_PROGRESS_MOSER = 5
+  DAILY_MOSER_COMPLETE_DATE = DAY
+ELSEIF DAILY_PROGRESS_MOSER == 5
+  PRINTFORML ロアニャとは前にも増して親密になった。
+  PRINTFORML 今や、寄港先を事前に教えてもらい、予定が合えば一緒に遊びに行ったりするほどの仲だ。
+  PRINTFORMW 時々たわむれに手をつないだり腕を組んだりして、周囲からはロアニャの言っていたキョウダイのように見えたはずだ。
+;なに？どう見てもキョウダイじゃなくてカップル？逆に考えるんだ「キョウダイでカップルの方がエッチだ」と考えるんだ。
+  PRINTFORML 
+  PRINTFORMW そしてある日のこと。
+  PRINTFORML 
+  PRINTFORMW 『お話したいことがあります。下記の場所まで来てください、お願いします』
+  PRINTFORML 
+  PRINTFORML ロアニャから送られてきた文章の内容は、それだけだった。
+  PRINTFORML いつもの挨拶もなければ雑談の一つもない。
+  PRINTFORMW これはただ事ではない。%CALLNAME:MASTER%は直感した。
+  PRINTFORML 
+  PRINTFORML すぐに%CALLNAME:MASTER%は、単独で指定された地点に向かった。
+  PRINTFORML そこはある星系の市民公園だった。港でもなければ店でもない。
+  PRINTFORML 開けた場所で、子供はボール遊びをしたり、ウォーキングしている老夫婦がいたりと至って普通だ。
+  PRINTFORMW こういう場所をあえて選んだのは……もしかしたら、盗聴の危険などを嫌ってのことだろうか。
+  PRINTFORML 
+  PRINTFORMW 「……」
+  PRINTFORML 
+  PRINTFORML そんな中で、一人ベンチに座ったままうつむいているロアニャの姿は、場にそぐわないものだった。
+  PRINTFORMW %CALLNAME:MASTER%が声をかけると、彼女は顔を上げたが、
+  PRINTFORML 
+  PRINTFORMW 「船長様……」
+  PRINTFORML 
+  PRINTFORML 青い顔をして、いつもの朗らかさを忘れてしまったように沈みきっていた。
+  PRINTFORMW 驚いて「どうしたんだ」と隣に座って尋ねる。
+  PRINTFORML 
+  PRINTFORMW 「わたし……とんでもないことに……」
+  PRINTFORML 
+  PRINTFORML 震えるロアニャの手を握ってやり、ゆっくりでいい、と告げる。
+  PRINTFORML それでやや落ち着いたらしい。
+  PRINTFORMW ポツポツと彼女が語った内容をまとめると、こういうことだ。
+  PRINTFORML 
+  PRINTFORML まず前提として、企業連合における政府というものは、基本的にはハリボテだ。
+  PRINTFORML 集まった企業群のため、国家という体を為しておくためのわかりやすい象徴と言ってもいい。
+  PRINTFORML 
+  PRINTFORML だが無論、一定の権力がある。
+  PRINTFORMW 中でも軍権はシビリアンコントロール下ではあるものの、火薬庫のような近隣国に対応するため非常に強いものである。
+;勝手に企業が軍隊まがいの私兵を持ってそうでもありますが、
+;他国だけでなくそれに対応するためにも公権力が強い軍隊持ってても不思議じゃないよねーということで。言うこと聞かせるには力。
+  PRINTFORML 
+  PRINTFORMW ロアニャは、そんな軍部に太いパイプ……親しくしている人がいるという。
+  PRINTFORML 
+  PRINTFORML 「今の軍長官……わたしは小さい頃から知ってるのでおじさんって呼んでるんですけど、
+  PRINTFORML 　おじさんは、わたしの父と学生時代から無二の親友だったんです。
+  PRINTFORMW 　それで昔から家同士の付き合いがあって、父が亡くなった後は特に、仕事も含めて色々と気にかけてくれていたんです」
+;そのうち軍のおじさんの娘達とか出てくるかも。
+  PRINTFORML 
+  PRINTFORMW なるほど、と%CALLNAME:MASTER%は頷いた。早くも話が読めてきた。
+  PRINTFORML 
+  PRINTFORML 「そんな関係が、外からは余計に親密に見えたんだと思います。
+  PRINTFORMW 　だからうちみたいな大した規模じゃない商会にそんな話を持ち込んできたんでしょう……」
+  PRINTFORML 
+  PRINTFORML ロアニャが珍しく本社でデスクワークをしていると、来客があった。
+  PRINTFORML それが有名な民間向け兵器企業の会長だというから、彼女は驚いた。
+  PRINTFORMW 全く面識もないのに不思議なことだったが、まさか門前払いにするわけにもいかず、自分のオフィスへと通した。
+  PRINTFORML 
+  PRINTFORML 「最初は……身なりの良い普通の中年のおじさんに見えたんですけど、同時に……なんだか嫌な感じもしてぇ……。
+  PRINTFORMW 　軽い挨拶や雑談の後、その会長さんは急にこんなことを言い出したんです……」
+  PRINTFORML 
+  PRINTFORMW ――この星系を牛耳ってみたいと思わないか？
+  PRINTFORML 
+  PRINTFORML 「……もちろん、冗談だと思いました。ですから、そんな大それたこと、考えたことも無いですって答えました。
+  PRINTFORMW 　ですが……」
+  PRINTFORML 
+  PRINTFORMW ――冗談ではないよ、我々ならそれができるのだ。そのためには君の力が必要なのだ。
+  PRINTFORML 
+  PRINTFORMW 「……そしたら会長さんは、自分たちの同盟……不正なカルテルの話を、わたしにし始めたんです」
+  PRINTFORML 
+  PRINTFORML ――この国の兵器産業をうまく支配できれば、軍部をも支配できる。それができるだけの財と力を持った仲間が集っている。
+  PRINTFORML ――だがそれを行使するには、取っ掛かりが必要だ。君は、今の軍長官と非常に親密な関係だと聞いている。
+  PRINTFORMW ――君ならば彼を説得できるだろう？
+  PRINTFORML 
+  PRINTFORML 「背筋が凍る思いがしました……。会長さんは笑顔でしたが、目が少しも笑っていなかった……。
+  PRINTFORMW 　”逆らえばただでは済まさない”と言うように……」
+  PRINTFORML 
+  PRINTFORML 先にも言ったように、軍部の権限は強い。不正カルテルの連中はそこに食い込みたいのだ。
+  PRINTFORML 兵器産業を支配下に収めることで軍を言いなりにし、実質的に我が武力として裏から政府を操る腹積もりだ。
+  PRINTFORMW ありあまる富を手にしても満腹を覚えず、次には権力という果実に食らいつく。
+  PRINTFORML 
+  PRINTFORMW 人間、どこまでも貪欲だ。%CALLNAME:MASTER%もある種の同類なので理解できなくはない。
+  PRINTFORML 
+  PRINTFORML 「でもわたし、勇気を出して断りました。
+  PRINTFORML 　そんなことには絶対協力できません、うちの商会はお金や権力のためだけに存在してるものじゃない！　って。
+  PRINTFORMW 　そうしたら……」
+  PRINTFORML 
+  PRINTFORML ――そうかね。では、これで失礼させてもらうよ。わかってもらえなくて残念だ。
+  PRINTFORML ――少し話は変わるが……商売において、不運というものは突然やってくるものだ。抗えない大きな不運がね。
+  PRINTFORMW ――明日からの君が、そうならないように祈っているよ。それでも『もし困ったら』連絡をしてくれ。
+  PRINTFORML 
+  PRINTFORML そんな捨て台詞を残して去っていったという。
+  PRINTFORML 明らかな脅迫だ。
+  PRINTFORMW しかも『もし困ったら』などと、降伏の道を仄めかしているのがなお悪辣だ。
+  PRINTFORML 
+  PRINTFORML 「……本当に次の日から……お仕事がうまく行かなくなったんです。
+  PRINTFORMW 　いきなり仕入れが滞ったり、契約を突然打ち切られたり……入っていた商談予定もほとんどキャンセルされました」
+  PRINTFORML 
+  PRINTFORML 相手は国を我が物にしようと考えている連中だ。
+  PRINTFORMW 規模がそこそこの業者の一つなど、手を回して妨害するなど容易いことだろう。
+  PRINTFORML 
+  PRINTFORML 「それだけならまだ良かったんです。それならどこまで行っても、うちだけの問題でしたから……。
+  PRINTFORML 　でもぉ……古くからお付き合いのある運送業種さんが、得体の知れない賊に襲われて……。
+  PRINTFORML 　船をボロボロにされた挙げ句に積荷を奪われ、『二度とモーサー商会に関わるな』と言われたそうです……。
+  PRINTFORMW 　わ、わたしのせいで……ぐすっ、ぐす……」
+  PRINTFORML 
+  PRINTFORMW 震えるロアニャの頭を抱きしめて、何度も優しく撫でてやった。
+  PRINTFORML 
+  PRINTFORML 「お父さんはもういないし、証拠もないからおじさんにも相談できない……部下も不安にさせたくない……。
+  PRINTFORMW 　もう、わたし……船長様に頼るしか……ひっく、ひっく……！」
+  PRINTFORML 
+  PRINTFORML %CALLNAME:MASTER%は激しい怒りを覚えた。
+  PRINTFORML 密かに心に誓った。――奴らを死ぬより後悔させてやると。
+  PRINTFORML それでもあえて、ロアニャには笑って言った。
+  PRINTFORMW 「自分がなんとかする。長くても半月以内に片付けてやる」と。
+  PRINTFORML 
+  PRINTFORMW ロアニャは胸に顔をうずめたまま、しっかりと頷いた。
+  PRINTFORML 
+  PRINTFORMW 「待ってます。船長様、信じてますから……」
+  DAILY_PROGRESS_MOSER = 6
+  DAILY_MOSER_COMPLETE_DATE = DAY
+ELSEIF DAILY_PROGRESS_MOSER == 6
+  PRINTFORML モーサー商会への様々な妨害工作。間違いなく談合の誘いを蹴った意趣返しだ。
+  PRINTFORML 相手は強大だがやりようはある。蛇の道は蛇、裏稼業には裏稼業の強いツテがある。
+  PRINTFORMW %CALLNAME:MASTER%は知人の力を借りるべく、小型艇に乗ってとある場所を訪れた。
+  PRINTFORML 
+  PRINTFORML ――【デブリ・トラッシュ】。
+  PRINTFORML 細かく言えば、多くの人が正式名称として認識しているのは【スペースデブリ・トラッシュカン】である。
+  PRINTFORML 意味はそのまま「宇宙ゴミのゴミ箱」だ。
+  PRINTFORMW だが長いので大抵は略してデブリ・トラッシュと呼ばれる。
+  PRINTFORML 
+  PRINTFORML 惑星が多い銀河の北部ではなく、南部の空白宙域にひっそりと隠されている個人コロニーのような港だ。
+  PRINTFORML この隠された港の歴史はそれなりに古い。
+  PRINTFORMW 真偽は別として、聞くところによると。
+  PRINTFORML 
+  PRINTFORML 数十年前に何かをやらかして追放されたメカニックの夫婦が、この場所を見つけたのが最初らしい。
+  PRINTFORMW 空気のない宇宙でも流れのようなものはあるらしく、そこには宇宙船の残骸などがたくさん流れ着いていた。
+  PRINTFORML 
+  PRINTFORML 行く宛のない夫婦は、そんなスペースデブリを使って自船を改造し、巨大な家のように増築し始めた。
+  PRINTFORML やがてそこをたまたま見つけた同じような境遇の者が、自分も住まわせて欲しいと頼んできた。
+  PRINTFORMW 人恋しかったメカニック夫婦は喜んで許可したという。
+  PRINTFORML 
+  PRINTFORML そういった者が一人増え二人増え、やがて何十人もの人間が住むほどの大きさになった頃には、
+  PRINTFORMW 存在を知る者達にはもう今の名前で呼ばれるようになっていたようだ。
+  PRINTFORML 
+  PRINTFORML 現在では常時数百人が滞在し、そのほとんどが宇宙のはみ出し者で構成されている。
+  PRINTFORMW それでもここは平和だ。下手な町とは比べ物にならないほどに。
+  PRINTFORML 
+  PRINTFORML 彼らは彼らの楽園を守るために『絶対平和』を掲げて、港内での揉め事を徹底的に避けているからだ。
+  PRINTFORML 時には「どうしてもやりたいなら外で殺し合え」というスタンスで当事者たちを放り出すことまでする。
+  PRINTFORMW ……長くなったが、ここはそんな場所である。
+  PRINTFORML 
+  PRINTFORML 
+  PRINTFORML 
+  PRINTFORML %CALLNAME:MASTER%が入港しようとすると、船が火器管制レーダーにロックオンされたことを示すアラームが鳴り響いた。
+  PRINTFORMW と同時に、錆のある老人の声で突然通信が入る。
+  PRINTFORML 
+  PRINTFORML 『ここに入りたけりゃ合言葉を言え。間違えりゃズドンだぜ。
+  PRINTFORMW 　この世で一番のクソッタレは？』
+  $INPUT_LOOP
+  PRINTBUTTON "[0] 酒を楽しく飲めない奴", 0
+  PRINTBUTTON "[1] 聖人気取りの禁欲主義者", 1
+  PRINTBUTTON "[2] そんなもん知るかボケ", 2
+;選択肢1　酒を楽しく飲めない奴
+;選択肢2　聖人気取りの禁欲主義者
+;選択肢3　そんなもん知るかボケ
+;何を選んでも特に意味がないお遊びです
+  INPUT
+;選択肢1
+  IF RESULT == 0
+    PRINTFORML 『ああそうだ。とにかく量を呑めばいっぱしの酒呑みだと思ってるクソッタレや、
+    PRINTFORML 呑めねぇ奴に無理やり呑まそうとするクソッタレはクソの中のクソだ。
+    PRINTFORMW 久しぶりじゃねぇか、%CALLNAME:MASTER%』
+  ELSEIF RESULT == 1
+;選択肢2
+    PRINTFORML 『わかってるじゃねぇか。戦と酒と女、そして賭け事。
+    PRINTFORML どれかを否定すりゃ人間そのものを否定するクソッタレだ。
+    PRINTFORMW 変わってなくて安心したぜ、%CALLNAME:MASTER%』
+  ELSEIF RESULT == 2
+;選択肢3
+    PRINTFORML 『ふははは！　この状況で怯まずに憎まれ口たたくたぁ、相変わらず肝が据わってやがる。
+    PRINTFORML クソ度胸は健在だな、%CALLNAME:MASTER%』
+  ELSE
+    GOTO INPUT_LOOP
+  ENDIF
+;いずれを選んでも以下へ続く
+  PRINTFORML ……そもそもここへ問題なく入るために特殊な認識装置を積んでるのに、敵と誤認する理由がない。
+  PRINTFORMW つまり完全な茶番だ。
+  PRINTFORML 
+  PRINTFORML 警報が消えて、%CALLNAME:MASTER%は港に降り立った。
+  PRINTFORMW 出迎えてくれたのは先程の悪ふざけの犯人、ここの警備主任であるオズモンドという老兵だ。
+  PRINTFORML 
+  PRINTFORML 頭髪はなくなってヒゲも真っ白な年配だが、背筋はしゃきっと伸びており、腕や足は丸太のように太い。
+  PRINTFORMW 黄色いジャケットと、右目に付けている金色眼帯は彼のトレードマークでもある。
+;ついでにいうと宇宙船も金色や黄色系統で塗ってた。暴れてた時代の通り名は『ゴールデン・オズモンド』。
+  PRINTFORML 
+  PRINTFORMW 「よう。今日はただ遊びに来たってわけじゃねぇんだろう」
+  PRINTFORML 
+  PRINTFORMW クソジジイを促しながら、軽く事情を説明する。
+  PRINTFORML 
+  PRINTFORML 「……ほう。あのクソ企業連合のクソッタレどもがなぁ。
+  PRINTFORMW 　で、それを調べるためにワシの力も借りたいってぇわけか」
+  PRINTFORML 
+  PRINTFORML %CALLNAME:MASTER%はそうだと頷いて、「詳しい話は飲みながら話そう」と目的地のバーへと入っていく。
+  PRINTFORMW 【PlayDumb】と看板が掲げられた酒場は盛況だった。
+;play dumb　――意味　とぼける、知らんぷりする。「ここで見聞きしたことを持ち出すな」ということ。本文中に書く必要もないのでここで
+  PRINTFORML 
+  PRINTFORML 人種は雑多で騒がしさこそあるが、誰も暴れたりせず比較的行儀よく好きな時間を過ごしている。
+  PRINTFORMW 中には見知った奴隷商人の顔などもあったが、目礼だけの軽い挨拶にとどめておく。
+  PRINTFORML 
+  PRINTFORMW 「……いらっしゃい。ご注文は」
+  PRINTFORML 
+  PRINTFORMW カウンターに座ると、身の丈2メートルを超えるゴリラの混じった屈強な亜人種……店のマスターが静かに問いかけてくる。
+;ゴリラパワー、キンジラレタチカラ。人には言えない生い立ちの元特殊部隊の元暗殺者。先代に拾われて店を譲り受けた。現状使う予定のない設定。
+  PRINTFORML 
+  PRINTFORML 「いつものをボトルのままくれぃ。ワシのがまだ置いてあっただろう。
+  PRINTFORMW 　それから氷とグラス、つまみもな」
+  PRINTFORML 
+  PRINTFORMW 用意された酒で%CALLNAME:MASTER%たちは乾杯した。
+  PRINTFORML 
+  PRINTFORML 「かぁ～！　この灼ける喉越しがたまらんっ。これこそワシらの燃料だ。なぁ？
+  PRINTFORMW さて……アルコールで舌が回るようになったし、話の続きでも始めるとするか」
+  PRINTFORML 
+  PRINTFORML そうしたいところだが、もう一人呼んでいた人物が来ていない。
+  PRINTFORMW カウンター席で待ち合わせと伝えたはずだが……と考えていると。
+  PRINTFORML 
+  PRINTFORMW 「ご、ごめん！　うっかり寝坊した……！」
+  PRINTFORML 
+  PRINTFORML ピンク髪のツインテール少女が慌ただしく入店してきた。
+  PRINTFORML そのままの勢いで少女は%CALLNAME:MASTER%の隣に滑り込むように座る。
+  PRINTFORMW 彼女は走ってきた勢いで乱れたパーカージャケットやアクセサリを整えながら言った。
+  PRINTFORML 
+  PRINTFORMW 「……ギリギリセーフ！　よね？」
+  PRINTFORML 
+  PRINTFORMW 「アウトだ。約束の時間ぐれぇ守れクソガキ」
+  PRINTFORML 
+  PRINTFORMW 「ぐっ……クソガキって呼ばないでよクソジジィ！」
+  PRINTFORML 
+  PRINTFORML 「ふはは！　そういうのは出るとこ出てから言いやがれ。真っ平らのまな板がよ。
+  PRINTFORMW 　それに寝坊したって割にはバッチリ格好がキマってんじゃねぇか、えぇ？」
+  PRINTFORML 
+  PRINTFORMW 「～～～っ！　ぶっ殺す！！！」
+  PRINTFORML 
+  PRINTFORML 二人は%CALLNAME:MASTER%を挟んで喧嘩を始める。
+  PRINTFORML いつものことと言えばいつものことだが、話が進まないので強引に打ち切らせた。
+  PRINTFORMW 形式的には親子なのだから仲良くしろ……と思ったがこれも一応親愛の証なのだろう。
+  PRINTFORML 
+  PRINTFORMW 気を取り直して、%CALLNAME:MASTER%は二人に詳しい事情を説明する。
+  PRINTFORML 
+  PRINTFORMW 「なーるほどねぇ、不正な独占カルテルか。外の世界はあいかわらず面倒なことしてんのね」
+  PRINTFORML 
+  PRINTFORMW 右耳にいくつもしたピアスをいじりながら、彼女は言葉通り面倒くさそうに言った。
+  PRINTFORML 
+  PRINTFORMW 「で、あーしはハッキングして裏取引の証拠を抑えろってのね」
+  PRINTFORML 
+  PRINTFORMW 「頼めるか」と%CALLNAME:MASTER%が彼女の目を見つめると、何故か顔を真っ赤にして、
+  PRINTFORML 
+  PRINTFORML 「どっ、どーしてもあーしの力が必要ってんなら手伝ってあげるわよ。
+  PRINTFORMW 　このウィザードハッカーのオズ様がね！」
+  PRINTFORML 
+  PRINTFORML オズは起伏のない平原のような胸を、精一杯張った。
+  PRINTFORMW ……最近ロアニャを見慣れたせいか、より平坦に見える。
+;彼女の胸元には山も谷も72もありません。くっ。
+;オズ。16歳ぐらい。オズモンドに拾われたから適当に名付けられた。髪は染めていて元は茶色。右耳にしているピアスは昔にあなたから貰ったもの。癖でよく触る。
+;右耳以外（左耳にはしていない）には、舌とおへそにピアスをしてる。スプリットタン（先が二股に別れた舌）にするかどうか悩み中。プレイ的な理由で。
+
+  PRINTFORMW 「あ、なんでか今すーごくイラッと来たんだけど」
+  PRINTFORML 
+  PRINTFORMW 気のせいだろう。そう誤魔化した。
+  PRINTFORML 
+  PRINTFORML 「じゃあワシは汚い仕事をやってそうな傭兵仲間を当たればいいんだな。
+  PRINTFORMW 　なぁに、一発か二発手痛いのをぶち込んでやりゃぁ、どんな秘密だって喋りたくなるだろうぜ」
+  PRINTFORML 
+  PRINTFORMW 「野蛮ねー……もっとスマートにできないの？」
+  PRINTFORML 
+  PRINTFORMW 「世の中の仕組みで一番わかりやすいのが力なんだよ、クソガキ」
+  PRINTFORML 
+  PRINTFORMW そんな表に出せないような話を、マスターは目の前で聞いていても、
+  PRINTFORML 
+  PRINTFORMW 「……」
+  PRINTFORML 
+  PRINTFORML 何も知らない顔をして黙々とグラスを磨いていた。
+  PRINTFORMW その日は結局久しぶりに会った二人と一緒に、バーで終日くだを巻いていた。
+  PRINTFORML 
+  PRINTFORMW ……翌日のキツイ二日酔いは言うまでもなかった。
+  DAILY_PROGRESS_MOSER = 7
+  DAILY_MOSER_COMPLETE_DATE = DAY
+ELSEIF DAILY_PROGRESS_MOSER == 7
+  PRINTFORML 結論から言えば、彼らに依頼して3日ばかりで証拠は山と集まった。
+  PRINTFORMW オズ曰く……
+  PRINTFORML 
+  PRINTFORML 『あれねー……最初あーしは罠かと思ったわ。だってさ、市販のウォールソフト、そんで8文字パスワードの会長個人の端末に、
+  PRINTFORML 　不正の証拠がクソみたいに詰まってんだもん。今回の件だけじゃなく、今までやってきたいろーんな悪事のね。
+  PRINTFORML 　そんな情報が、厳重なセキュリティはおろか、物理的に隔離すらされてないの。
+  PRINTFORMW 　ハッキング実作業5分、内容の精査に3日よ？　もうアホらしいのなんのって……今まで抜かれなかったのが逆に奇跡よ』
+  PRINTFORML 
+  PRINTFORMW そしてオズモンドの方も、
+  PRINTFORML 
+  PRINTFORML 『ああ、企業連合に汚い仕事で使われてる奴っていやぁ、すぐ目処がついてな。
+  PRINTFORML 　主犯を吐かせようと思ったら船で逃げやがったから、腹が立ってコクピットだけ残してバラバラにしてやったんだ。
+  PRINTFORML 　そしたら命乞いしながら全部キレイにゲロったぜ。あの時のクソッタレなツラは、ふははっ、傑作だった！
+  PRINTFORMW 　今は仲間のクソともどもふん縛って、部下にしっかり見張らせてあらぁな』
+  PRINTFORML 
+  PRINTFORML やはりあっさりと証人を抑えていた。
+  PRINTFORML となればこちらもさっさとケリをつけよう。
+  PRINTFORMW 二人に報酬を振り込んだ後、%CALLNAME:MASTER%はある組織とコンタクトを取った。
+  PRINTFORML 
+  PRINTFORML 
+  PRINTFORML 
+  PRINTFORMW 数日後。
+  PRINTFORML 
+  PRINTFORML 企業連合の星系では、上を下への大騒ぎとなっていた。
+  PRINTFORML 国家基盤を揺るがすほどの複数大企業の計画が、世間へと明らかになっていたからだ。
+  PRINTFORMW 報道各社は、確たる証拠と証人が【企業監察局】の手にあること、関係各社の主要人物が逮捕されたことを幾度も報じた。
+;企業監察局（きぎょうかんさつきょく）。企業連合ではやはり金の力が強いので、汚職を避けるため警察とは別に警察権を持った対企業組織があるかも……というイメージ
+
+  PRINTFORML その中にはもちろん、ロアニャを脅迫していたゲスの名前もあったのは言うまでもない。
+  PRINTFORMW %CALLNAME:MASTER%はその男の逮捕の瞬間を、現地で確認していた。
+  PRINTFORML 
+  PRINTFORML 彼とそのお仲間は、裁判前ではあるが……全財産の没収、そして死刑が既に確定している。
+  PRINTFORML ある種の国家転覆を図ったのだから、事態が大きすぎて賄賂などもはや通用しない。
+  PRINTFORMW 全てを失った彼らは、死よりも深い絶望を味わっているだろう。
+  PRINTFORML 
+  PRINTFORMW 離れた場所から、物々しい護送車の中に押し込まれていく罪人を眺めていると、
+  PRINTFORML 
+  PRINTFORMW 「いやぁ、助かりましたよ。実に助かりました」
+  PRINTFORML 
+  PRINTFORML いつの間にか隣に立っていたのは、目を覆うほど前髪を伸ばしっぱなしにした女だった。
+  PRINTFORML 後ろ毛を大きな三編みにしている、スラッとした長身の若い女性だが、髪で目が見えないため美人かどうかはわからない。
+  PRINTFORMW だが%CALLNAME:MASTER%は熟練のカンで、彼女が美女なのをなんとなく察していた。
+  PRINTFORML 
+  PRINTFORML スーツの襟元には、企業監察局の職員であることを示す双眼鏡モチーフのバッジが光っている。
+  PRINTFORMW つい先日、取引のために会ったばかりの女だ。
+  PRINTFORML 
+  PRINTFORML 「あなたの”善意”で国家の驚異を未然に防げました。
+  PRINTFORMW 　おかげで私は今夜も枕を高くして眠れます、お礼を言いますよ……”人買いキャプテン”さん」
+  PRINTFORML 
+  PRINTFORML 彼女は口元にヘラヘラした笑みを浮かべて、感謝してるのかしてないのかわからない微妙な謝意を告げる。
+  PRINTFORML 当たり前のように裏稼業を知っていることに、%CALLNAME:MASTER%は驚いたが、
+  PRINTFORMW 証拠や証人の引き渡しで接触している以上、有能な人間なら調べるのは不可能ではない。
+  PRINTFORML 
+  PRINTFORML 「それにしても恐ろしい、本当、恐ろしいことです。我々の膝下であんな企みが行われていたなんて。
+  PRINTFORMW 　私は何も知りませんでしたよ、ええ」
+  PRINTFORML 
+  PRINTFORML 両手を上げて彼女はおどけて見せた。いちいちどこか白々しい。
+  PRINTFORML こちらの身元をあっさり調べられるほどの能力がある。証拠がないまでも、この件も内偵を進めていたのでは？
+  PRINTFORMW %CALLNAME:MASTER%は尋ねた。「知っていたのか」と。
+  PRINTFORML 
+  PRINTFORML 「さて？　今となってはどうでもいいことじゃないですか。そう、どうでもいいことです。
+  PRINTFORML 　彼らは悪事を働き、相応の”報い”を受けた。それだけの話ですから。
+  PRINTFORMW 　そんなことよりも私は……あなたの方に大いに興味があります」
+  PRINTFORML 
+  PRINTFORMW 彼女は（おそらく）じぃーっとこちらを観察するような視線を向ける。
+  PRINTFORML 
+  PRINTFORML 「私はただの平監察官です。ええ、今はただの平監察官でしかないです。
+  PRINTFORML 　けれど将来までもそのままで居たいとは思っていないのですよ。
+  PRINTFORML 　先日たまたまあなたからの”報せ”を私が受け取ったため、今回の手柄の一部を受け持つことができました。
+  PRINTFORMW 　出世は確実でしょう」
+  PRINTFORML 
+  PRINTFORMW おめでとうと、どうでも良さそうに言ってやった。
+  PRINTFORML 
+  PRINTFORML 「ありがとうございます。あなたは私にとって幸運の天使でしたよ。
+  PRINTFORML 　常に出世のしっぽを探していた私に舞い降りた、無二の幸運です。
+  PRINTFORML 　ですから、これからも良い付き合いをしたいと考えています。
+  PRINTFORMW 　ああ、そういえばまだ正式に名乗っていませんでしたね。挨拶は重要ですから」
+  PRINTFORML 
+  PRINTFORML 「私はトリアナ。トリアナ・アンセスです。
+  PRINTFORML 　あなたが私によくしてくださるなら、相応の見返りもご用意しますよ。
+  PRINTFORMW 　役人に懇意の知り合いがいて、損にはならないでしょう？　ええ、損はさせませんとも」
+;20前半。トリアナは企業連合の有名企業の社長の娘。しかし愛人ゆえ認知されず母は一人で彼女を育てた。そういう経緯で父を、そして企業というものに歪んだ恨みを持っている。
+;そのため企業を取り締まる企業監察局へと入ったが、そこで強いものを権力で叩き潰す喜びという、サディスティックな遊びを覚えてしまう。SにもMにもなれる素養アリ。
+;現場主義なのもあり格闘が強い他、銃の扱いがずば抜けて上手い。前髪で顔を隠したり、地味めな三編みにしているのは男よけのためにわざと。
+  PRINTFORML 
+  PRINTFORML 確かにその通りだ。
+  PRINTFORMW 覚えておくと言うと、トリアナは口元にニンマリと笑顔を作った。
+  PRINTFORML 
+  PRINTFORML 「では私もこれから忙しいので、本日はこれで失礼します。
+  PRINTFORML 　あなた向きの面白い話があればまた”ご報告”します。
+  PRINTFORMW 　それでは……」
+  PRINTFORML 
+  PRINTFORML 奇妙な役人だ……。
+  PRINTFORMW 彼女が去ったのを見届けてから、%CALLNAME:MASTER%はロアニャと連絡を取った。
+  DAILY_PROGRESS_MOSER = 8
+  DAILY_MOSER_COMPLETE_DATE = DAY
+ELSEIF DAILY_PROGRESS_MOSER == 8
+  PRINTFORMW 「――船長様ぁ！」
+  PRINTFORML 
+  PRINTFORML こちらの姿を見るなり、ロアニャは胸の中に飛び込んできた。
+  PRINTFORML 柔らかい衝撃をしっかりと受け止める。
+  PRINTFORMW 彼女はその豊満な体をぎゅーっと力いっぱい押し付けてくる。
+  PRINTFORML 
+  PRINTFORML 「全部ニュースで見ました。よかった、よかったです……。
+  PRINTFORML 　船長様が信じて待てと言ってくれましたが、それでも毎日不安で押しつぶされそうで……。
+  PRINTFORMW 　でもその分、安心したら胸がぎゅうっと一杯になってぇ……わたしぃ……」
+  PRINTFORML 
+  PRINTFORML 「もう安心だ」と%CALLNAME:MASTER%は彼女の背をポンポンと叩いた。
+  PRINTFORML やがてすすり泣く声が聞こえてきた。
+  PRINTFORMW ますます強くしがみつくロアニャが泣き止むまで、あやすように優しく抱きしめ続けた。
+  PRINTFORML 
+  PRINTFORML 「……あ、あのぉ、もう大丈夫です。ありがとうございました……。
+  PRINTFORMW 　またいっぱい泣いちゃったぁ、はずかしい～……」
+  PRINTFORML 
+  PRINTFORML おそらく数分そのままでいたが、落ち着いたロアニャがやっと顔を上げる。
+  PRINTFORMW まだうっすらと流れている涙を指で拭ってやる。
+  PRINTFORML 
+  PRINTFORMW 「あっ……ふふ、ちょっとくすぐったいですぅ……?」
+  PRINTFORML 
+  PRINTFORML やっといつもの笑みを見せてくれた。
+  PRINTFORML 晴れ晴れとした愛らしい笑顔だ。
+  PRINTFORMW %CALLNAME:MASTER%もさすがにそれにはムラっと来た。
+  PRINTFORML 
+  PRINTFORML ただでさえ柔らかい体で抱きつかれるやら、いい匂いがするやらで、我慢をしていたのだ。
+  PRINTFORML ……自然と大きくなったモノを責められないだろう。
+  ;生えてる場合はこれでいいけど、ない場合はどうするべきか。乳首？
+  PRINTFORML 
+  PRINTFORML 「……？　あれぇ、なんだかわたしの体に硬いものが……あっ?
+  PRINTFORMW 　これって……もしかして……??」
+  PRINTFORML 
+  PRINTFORML ロアニャも察したらしい。
+  PRINTFORML 彼女は沸騰したように、一瞬で耳まで真っ赤にしてしまう。
+  PRINTFORML かわいい。が気まずい。
+  PRINTFORMW そのまま少しの間、二人は無言だった。
+  PRINTFORML 
+  PRINTFORMW 「……ぃ、です、よ……」
+  PRINTFORML 
+  PRINTFORMW しかしロアニャが沈黙を破る。
+  PRINTFORML 
+  PRINTFORML 「船長様なら、いいですよ……。
+  PRINTFORMW 　硬くなってるのって、その……わたしのことが欲しいってぇ、思ってくれてるん、ですよね……？?」
+  PRINTFORML 
+  PRINTFORMW もうヤケだとばかりに言った。「魅力的なロアニャが悪い」と。
+  PRINTFORML 
+  PRINTFORMW 「～～～??」
+  PRINTFORML 
+  PRINTFORML まだ赤くなれるのかと思うほど、彼女の頬は朱に染まる。
+  PRINTFORML それを隠すように、また%CALLNAME:MASTER%の胸元に顔をうずめてしまう。
+  PRINTFORMW そのまま、ロアニャはこう言った。
+  PRINTFORML 
+  PRINTFORML 「わ、わたしのために頑張ってくれた船長様には、”報酬”が必要だと思うんですぅ……。
+  PRINTFORMW 　ですから、わたしがその報酬……です?　受け取ってくれますか？?」
+  PRINTFORML 
+  PRINTFORMW その瞬間、%CALLNAME:MASTER%はロアニャのあごを上げて、唇を奪っていた。
+  PRINTFORML 
+  PRINTFORMW 「ん、んむぅ……?」
+  PRINTFORML 
+  PRINTFORML 体を寄せるようにしながら、背や尻をまさぐる。
+  PRINTFORML 圧倒的な胸ほどではないが、お尻も手のひらにむっちりと余るほどの手触りだ。
+  PRINTFORMW 彼女の驚きで固まった薄い唇を割って、舌を侵入させると、
+  PRINTFORML 
+  PRINTFORMW 「っ……！？　んふぁ、んんっ……?　ちゅぷ、れろぉ……んちゅぅ……?」
+  PRINTFORML 
+  PRINTFORML 最初こそ戸惑いを見せたものの、ロアニャの舌は恐る恐るだがそれに応えた。
+  PRINTFORML くちゅくちゅと互いの舌と唾液が混ざり合う音が響く。
+  PRINTFORMW 彼女の息が切れそうになったのに気づいて一度口を離すと、そこから銀色の糸が伸びていた。
+  PRINTFORML 
+  PRINTFORML 「はぁ、はぁ……。ひどいれすよ……こんなえっちなキスするなんてぇ……?
+  PRINTFORMW 　わたし、キスぅ……はじめてだったのにぃ……???」
+  PRINTFORML 
+  PRINTFORML ロアニャはとろけた桃色の唇から、うっすらよだれをこぼしながら、そんな抗議をしてきた。
+  PRINTFORMW すまないと謝りながら、%CALLNAME:MASTER%はそれをキスで舐め取る。
+  PRINTFORML 
+  PRINTFORMW 「はぁ……ん?」
+  PRINTFORML 
+  PRINTFORML 刺激が強かったのか、それだけで彼女は腰砕けになりそうになっていた。
+  PRINTFORMW %CALLNAME:MASTER%の欲望はピークに達しようとしていた。
+  PRINTFORML 
+  PRINTFORMW 「あっ……船長様ぁ……?」
+  PRINTFORML 
+  PRINTFORMW 半ば彼女を抱えるように引っ張って、目についたビジネスホテルへと飛び込んでいた。
+  PRINTFORML 
+  PRINTFORML たった1、2分のチェックイン手続きが何十倍にも感じた。
+  PRINTFORMW 部屋に入るなり、ロアニャを抱えてベッドに倒れ込んだ。
+  PRINTFORML 
+  PRINTFORMW 「ちゅ、ちゅぅ、くちゅ……んん、ぁむ、ちゅうぅぅ……?」
+  PRINTFORML 
+  PRINTFORMW それと同時に情熱的に口づけをする。
+  PRINTFORML 
+  PRINTFORML 「ふぁ……ちゅる、ちゅぷ……くちゅ、れる、れるぁ……?
+  PRINTFORMW 　はあっ、はぁっ……キス、すごいですぅ……?　もっとしてくださぁい……??」
+  PRINTFORML 
+  PRINTFORML 唇と唇、舌と舌が触れ合うたびに、敏感な彼女は快感に小さく震える。
+  PRINTFORMW 美しい碧色のタレ目は、刺激によって涙で潤んでいた。
+  PRINTFORML 
+  PRINTFORML キスを続けながら、%CALLNAME:MASTER%は彼女のシャツのボタンを開ける。
+  PRINTFORML 薄い桃色のレースブラに包まれた大きな膨らみと、興奮で紅くなった白い肌があらわになる。
+  PRINTFORML フロントホックだったので簡単に外すことができた。
+  PRINTFORMW ロアニャの双丘は、拘束を解かれたことを喜ぶように、ぷるんと大きく跳ねる。
+  PRINTFORML 
+  PRINTFORML まん丸い大きなおっぱいの真ん中で、薄ピンクの乳首がツンと起っている。
+  PRINTFORMW 乳輪はサイズが大きめでぷっくりと盛り上がっている、いわゆるパフィーニップルだ。
+  PRINTFORML 
+  PRINTFORMW %CALLNAME:MASTER%はその魅力的な膨らみを、ゆっくりと手のひらで包んだ。
+  PRINTFORML 
+  PRINTFORMW 「んちゅ、んっ、あっ……おっぱい……ああっ?」
+  PRINTFORML 
+  PRINTFORML むにゅぅぅ、っという音が鳴ったかと思うほどの柔らかさが、%CALLNAME:MASTER%の指を包んだ。
+  PRINTFORML 簡単に指がめり込むのに、離すとすぐに戻るほどの弾力もある。
+  PRINTFORMW その感触に夢中になり、幾度も2つの山を揉みしだく。
+  PRINTFORML 
+  PRINTFORML 「あっ、やあっ、そんなぁ……そんなに揉みくちゃにされたらぁ～……んぅ?
+  PRINTFORMW 　おっぱい、熱くなってぇ……はぁっ、あうっ?」
+  PRINTFORML 
+  PRINTFORML ロアニャは背を浮かせるほど感じている。かなり敏感らしい。
+  PRINTFORMW 自由自在に形が変わる乳房を、やや力を入れるように軽く握ってみる。
+  PRINTFORML 
+  PRINTFORMW 「んひぃ！　ひあっ、やっ……だめぇ?　おっぱいが潰れ……ひぅぅ?」
+  PRINTFORML 
+  PRINTFORML 痛がるどころか、艷やかな嬌声を上げる。
+  PRINTFORMW 軽いマゾの気もあるのかも知れない。
+  PRINTFORML 
+  PRINTFORML 「んっ、はっ、あん……んぅ……！
+  PRINTFORMW 　そんなにいっぱいしちゃったらぁ、頭がふわぁって……??」
+  PRINTFORML 
+  PRINTFORML 不意に勃起した乳首を摘むと、ビクンと跳ねた。
+  PRINTFORMW そのまま指先でコリコリとしごく。
+  PRINTFORML 
+  PRINTFORML 「あっ、あぁぁ～?　ダメ、ダメですぅ??
+  PRINTFORMW 　ビリビリ来てっ、やぁ、ああん、も、う……イッ、くぅぅぅ……！??」
+  PRINTFORML 
+  PRINTFORML それだけで体をのけぞらせて、ロアニャは絶頂してしまった。
+  PRINTFORMW 下半身に目を向けると、まだ触れもしてないショーツが、スカートの下でグチャグチャに濡れていた。
+  PRINTFORML 
+  PRINTFORML 「ふぁぁ、はぁー……はぁー……?
+  PRINTFORMW 　……ん、あ……船長様ぁ……何を……？」
+  PRINTFORML 
+  PRINTFORML 朦朧としているロアニャのお尻と足を持ち上げ、ブラとおそろいの下着を脱がせる。
+  PRINTFORML 最初に見えたのは綺麗な縦スジ。閉じられた秘裂だ。
+  PRINTFORMW その狭い隙間から、トロトロと粘り気のある液体が溢れてくる。
+  PRINTFORML 
+  PRINTFORMW 「ゃん?　ふわぁ……」
+  PRINTFORML 
+  PRINTFORML そこを指で広げてみると、くすみのないピンク色の粘膜が見えた。
+  PRINTFORML 小さな膣口には未経験であることを示す処女膜がある。
+  PRINTFORMW 愛液でてらてらと光るそこは、清らかな乙女の美しさと成熟した女の淫靡さを併せ持つ。
+  PRINTFORML 
+  PRINTFORMW 「は、恥ずかしい、ですぅ……」
+  PRINTFORML 
+  PRINTFORML そう言いながらも、ロアニャは隠しはしない。
+  PRINTFORML 見られていることを意識したせいで、彼女の膣口がヒクヒクと動く。
+  PRINTFORMW クリトリスはやや皮を被っていて、わずかに先端だけが顔を出していた。
+  PRINTFORML 
+  PRINTFORML 右手の人差し指で、とろけた膣口に優しく触れる。
+  PRINTFORML そこは熱を持っていて、触れた指先を飲み込むような柔らかさがあった。
+  PRINTFORML 軽くいじると、また奥からねばっこい液体がじんわり溢れ出してくる。
+  PRINTFORMW これ以上の愛撫は必要なさそうだった。
+  PRINTFORML 
+  PRINTFORMW 「あ……」
+  PRINTFORML 
+  PRINTFORMW %CALLNAME:MASTER%がロアニャの足を持ち上げて、いきり立った男性器を処女穴にあてがうと、
+  PRINTFORML 
+  PRINTFORML 「右手、握っていてください……。恋人みたいに、指を絡めて……。
+  PRINTFORMW 　そうすれば痛くても、きっと我慢できます、からぁ」
+  PRINTFORML 
+  PRINTFORMW 言われたとおり、彼女の右手を取って恋人繋ぎにする。
+  PRINTFORML 
+  PRINTFORML 「これ……えへへ、素敵ですね～。手だけじゃなくて心まであったかいです……?
+  PRINTFORMW 　あの、わたしが痛がっても、ちゃんと最後まで……してくださいね？」
+  PRINTFORML 
+  PRINTFORML 頷いて……ほんの少しの抵抗を突き破った。
+  PRINTFORML すると愛液に混じって、つぅーっと赤いものが流れ落ちる。
+  PRINTFORMW 亀頭がずぶずぶと、狭くざらついた膣壁を広げるように奥へと進んでいく。
+  PRINTFORML 
+  PRINTFORMW 「っ……んぐ、はぁ……」
+  PRINTFORML 
+  PRINTFORML ロアニャは歯を食いしばって破瓜の痛みと悲鳴をこらえている。
+  PRINTFORML 握りあった手にも力が入っていた。
+  PRINTFORML ロアニャの膣中は体型と同じく肉厚で、処女特有のキツさもあるが、包み込むようにペニスを最奥まで飲み込んでしまう。
+  PRINTFORMW 熱くとろけるようにぬめった膣壁が、きゅっきゅと亀頭から根本までを刺激する。
+  PRINTFORML 
+  PRINTFORMW 「ふぅ……ぐ、はぁーっ……はっ……」
+  PRINTFORML 
+  PRINTFORML 彼女が痛みを堪えるため深く呼吸をするたびに、狭まったりうごめいたりして、それだけでも気持ちいい。
+  PRINTFORMW 更に快感を求めて動きたくなるが、ロアニャの一番大きな痛みの波が治まるのを静かに待った。
+  PRINTFORML 
+  PRINTFORML 「船長様……ありがとうございます、もう大丈夫ですからぁ……。
+  PRINTFORMW 　えへへ、本当に船長様と一つに……?　私の中、いちばん奥まで船長様がいるの……ちゃんと感じますよ～……?」
+  PRINTFORML 
+  PRINTFORML 彼女が空いている方の手で下腹部を撫でさする。
+  PRINTFORMW その指先の感触がペニスにも感じられて無意識に震えた。
+  PRINTFORML 
+  PRINTFORMW 「わたしの想いが報われて、すごく嬉しいですぅ……??」
+  PRINTFORML 
+  PRINTFORML 涙を流しながら微笑むロアニャの唇に、何度もキスをする。
+  PRINTFORML 舐めたり吸い付いたり、舌同士をこすり合わせたりと、口でのまぐわいを繰り返す。
+  PRINTFORMW 彼女はタレ目を更にとろんとさせて、その心地よい快感に浸りきっている。
+  PRINTFORML 
+  PRINTFORML 「ちゅぅ、ちゅっ、はむ、じゅる……?　ちゅむ、れろ、れろれる……んんっ?
+  PRINTFORMW 　はぁ……んっ、ちゅ、ちゅっちゅっ、れるぅ……ふぁ??」
+  PRINTFORML 
+  PRINTFORML 唇での淫らな遊びをしている間に、ロアニャの痛みはほとんど無くなったようだった。
+  PRINTFORMW むしろオスからの刺激を欲しがるみたいに、膣中のヒダがうねりを繰り返している。
+  PRINTFORML 
+  PRINTFORMW 動くことを伝えて、ゆっくりと腰を動かし始める。
+  PRINTFORML 
+  PRINTFORML 「んっ、んんっ……?　あっ?　さ、さっきまでは痛かったのにぃ……あんっ?
+  PRINTFORMW 　今はなんだかピリッて、気持ちいっ、のがぁ……?」
+  PRINTFORML 
+  PRINTFORML 十分な準備と愛液のおかげで、初めての性行為にも関わらずロアニャは快感すら感じている。
+  PRINTFORMW 敏感な体といい、もともと素質があったのだろう。
+  PRINTFORML 
+  PRINTFORML 「あっ、ああっ……船長様ぁ?　これっ、す、ごい……のぉ?
+  PRINTFORMW 　船長様のおっきくて硬いのがぁ……ふあぁ?　わたしの、気持ちいいところ、ゴシゴシこすってぇ……?」
+  PRINTFORML 
+  PRINTFORMW 初めての快感に震えるロアニャに、%CALLNAME:MASTER%はあることを耳打ちする。
+  PRINTFORML 
+  PRINTFORML 「えっ……？　そ、そんなぁ……?　そんな恥ずかしいこと、い、言うんですかぁ……？?
+  PRINTFORMW 　うぅ、わかりました……。わ、わたしの…………、ぉ……こ……」
+  PRINTFORML 
+  PRINTFORMW %CALLNAME:MASTER%は「聞こえないからもっと大きな声で」と意地悪く言う。
+  PRINTFORML 
+  PRINTFORML 「うぅ～?　わ、わたしの……おまんこぉ?　おまんこを、船長様のおちんぽでぇ?
+  PRINTFORML 　も、もっといっぱい気持ちよくしてくださいぃ……！?
+  PRINTFORMW 　……言っちゃったぁ?　すごく恥ずかしい～……」
+  PRINTFORML 
+  PRINTFORMW 左手だけでなんとか顔を隠そうとするロアニャが最高に可愛くてエロかった。
+  PRINTFORML 
+  PRINTFORMW 「ひぃあ！？?　せ、船長様、そんなに急に……あっ、はあっ?」
+  PRINTFORML 
+  PRINTFORML %CALLNAME:MASTER%は自由な右手で、ロアニャの体を抱え込むと、本格的に腰を打ち付ける。
+  PRINTFORMW ピストンで互いの体が当たるたびに、彼女の豊満な胸と尻が衝撃でたぷんと波打つ。
+  PRINTFORML 
+  PRINTFORML 結合部からは赤と白が混じった愛液が、泡立つほどの粘りをもってシーツを濡らしている。
+  PRINTFORML ほぐれ始めた膣肉は、ペニス全体を舐め回すように絡みついてくる。
+  PRINTFORMW 何も知らなかった少女の膣は、短時間で女として情愛を伝える淫らな膣に変わっている。
+  PRINTFORML 
+  PRINTFORML 「ひぅ?　んぁ?　せんちょ、さまぁ?　あっ、ん、ああっ……だいしゅき?
+  PRINTFORMW 　ほんとうに、だいすきっ、ですぅ??」
+  PRINTFORML 
+  PRINTFORML 快楽の味を知って受け入れ始めたメス。
+  PRINTFORML その乱れた姿を見てますます興奮が高まり、動きも自然と早くなっていく。
+  PRINTFORMW あまり長くは持ちそうになかった。
+  PRINTFORML 
+  PRINTFORML 「キスっ、キスしてぇ?　お口でも、おまんこでもぉ……船長様とつながっていたいのぉ?
+  PRINTFORMW 　あむ、んっ、ぢゅ、ちゅぅ～……?　れるれろ、れちゅ、んぁっ?　ちゅむ、ちゅっ、ちゅっ……??」
+  PRINTFORML 
+  PRINTFORML 甘える声でロアニャは、上でも下でも貪るように求めてくる。
+  PRINTFORMW 体中を使って愛情を伝えるように。
+  PRINTFORML 
+  PRINTFORML 「ふわぁ、あっ、すごいっ?　んぅ、あっ、おまんこの一番奥ぅ?　やっ、あ?
+  PRINTFORMW 　すごいのがクるぅ??　船長様わたし、ふあっ……もう、もうっ??」
+  PRINTFORML 
+  PRINTFORML 奥が一番感じるらしく、膣とは少し感触の違った場所、子宮口に近い場所を幾度も亀頭で突き上げる。
+  PRINTFORMW そのたびに溜まらないというような、甲高い嬌声が上がる。
+  PRINTFORML 
+  PRINTFORML %CALLNAME:MASTER%も竿の奥から登ってくるものを感じて、もっと激しくロアニャのおまんこを攻め立てた。
+  PRINTFORML 汗だくになって抱き合う二人は、本能に従って最高の絶頂を迎えようとする。
+  PRINTFORMW 自然とロアニャの足は、%CALLNAME:MASTER%の腰を抱えるようにすがりついてきた。
+  PRINTFORML 
+  PRINTFORML 「はあっ、んちゅ、ちゅぱ……あっ、くぅん、船長様っ、船長様っ?
+  PRINTFORMW 　このまま、わたしの中でぇ?　いっぱい、出してください……！??」
+  PRINTFORML 
+  PRINTFORML 「ちゅぅ、ちゅっ、はっ、んっ、うあっ、ああっ?
+  PRINTFORML 　ぃあっ、あっ、あっ……?　イクぅ?　船長様も、一緒、にぃ?　イってぇ??
+  PRINTFORMW 　う、ああっ、イクイク、もうイっ…………あああぁぁぁ――――～～～～～～???」
+  PRINTFORML 
+  PRINTFORML ロアニャが絶頂して、キュウっと膣が締め付けられる。
+  PRINTFORML 亀頭を子宮口に押し付けて、大量の白濁液をロアニャの一番大事な場所に吐き出した。
+  PRINTFORMW 一瞬頭が真っ白になるほど、一気にドクドクと流し込んでいく。
+  PRINTFORML 
+  PRINTFORML 「ふぁ、あ……んっ……あぁ、おなか……あつい……?　たくさん……出てるぅ……?
+  PRINTFORMW 　どぴゅどぴゅ……ってぇ、おく、まで……?」
+  PRINTFORML 
+  PRINTFORML 熱い迸りを受けるたびに、彼女の体がピクピクッと小刻みに震える。
+  PRINTFORML ロアニャのおまんこは、もっと精子を催促するように、緩やかにうねってペニスに刺激を与え続けてきた。
+  PRINTFORMW その快感で、竿の奥に残っていたわずかな精液まで、残らず彼女の膣中へ吐き出してしまう。
+  PRINTFORML 
+  PRINTFORMW やっと長い射精を終えて、半ダチのモノを抜き取ると、ゴポリ……と音を立てて大量の白濁液がこぼれてきた。
+  PRINTFORML 
+  PRINTFORML 「はぁ……はぁ……。船長様……いっぱい、出してくれて……嬉しいです～……?
+  PRINTFORMW 　わたしでいっぱい、気持ちよくなってくれて……ロアニャ、幸せです……??」
+  PRINTFORML 
+  PRINTFORMW それを見て、恍惚としながらもロアニャは満足気に微笑んだのだった。
+  PRINTFORML 
+  PRINTFORMW 「……うぅ～、船長様のけだもの……。初めてのわたしを、あんなにするなんて～……」
+  PRINTFORML 
+  PRINTFORML コトが終わった後。
+  PRINTFORML ロアニャはシーツで顔を半分隠しながら、%CALLNAME:MASTER%をそう罵ってきた。
+  PRINTFORML それでも体をぴったりくっつけて、離れようとはしない。
+  PRINTFORMW 嫌だったか、と聞く。答えはわかりきってるが。
+  PRINTFORML 
+  PRINTFORMW 「……すごく……気持ちよかったです。とってもステキでした……」
+  PRINTFORML 
+  PRINTFORML 恥ずかしながらも彼女は正直に答えた。
+  PRINTFORMW シーツを奪い取って、その赤い顔にキスをした。
+  PRINTFORML 
+  PRINTFORMW 「ちゅ……?　もうっ、キスでなんて誤魔化されてあげないんですから。……えへへぇ」
+  PRINTFORML 
+  PRINTFORML 言葉とは裏腹に笑顔が浮かんでいた。
+  PRINTFORMW 行為の後の甘い痺れが残ったまま、ロアニャとイチャイチャしていた。
+  PRINTFORML 
+  PRINTFORML 「あんっ?　おっぱいまだ敏感ですからぁ……?
+  PRINTFORMW 　船長様ったらすぐおイタして、本当にエッチなんですから～」
+  PRINTFORML 
+  PRINTFORML 「……あの、船長様。もう一度、言わせてください。
+  PRINTFORML 　わたしを助けてくれて、そしてわたしをこんなに愛してくれて……本当に、ありがとうございます。
+  PRINTFORMW 　これからも～、よろしくお願いしますね。……私の大好きな船長様??」
+  PRINTFORML 
+  PRINTFORMW 心配事がなくなり、心も体も満たされたロアニャの表情は、本当に美しくて愛らしかった。
+  PRINTFORML 
+  DAILY_PROGRESS_MOSER = 9
+  DAILY_MOSER_COMPLETE_DATE = DAY
+ENDIF
+
+@SHOW_MOSER_SHOP1
+LOCAL:1 = 0
+FOR LOCAL, 0, MAX_SHIP
+  SIF SHIP_COUNTRY:LOCAL != 国家ID_プレイヤー || SHIP_POSITION:LOCAL != CHARACTER_POSITION || SHIP_CATEGORY:LOCAL != 輸送船
+    CONTINUE
+  CALL GET_VACANT_CARGO_SIZE(LOCAL)
+  LOCAL:1 += RESULT
+NEXT
+
+$INPUT_LOOP
+
+SETCOLOR 0X666666
+CUSTOMDRAWLINE ///
+RESETCOLOR
+
+PRINTL
+IF RESULT:1 >= 100
+  PRINTBUTTON "[オーネスワイン100セット $45,000]", 0
+ELSE
+  PRINT [オーネスワイン100セット $40,000] - 輸送できない!
+ENDIF
+PRINTL
+PRINTBUTTON "[粗製ワイン10本, $9,500]", 1
+PRINTL
+PRINTBUTTON "[買わない]", 2
+PRINTL
+SETCOLOR 0X666666
+CUSTOMDRAWLINE ///
+RESETCOLOR
+INPUT
+
+IF (RESULT == 0 && RESULT:1 >= 100) || RESULT == 1
+  PRINTFORML 安さに不安を覚えながらも興味本位で振り込みを済ませると、無人運搬機が速やかに商品を送って来る。
+  PRINTFORML クルーに確認させると、モノは確かであることがわかった。
+  PRINTFORMW 安物買いの銭失いではなく、単に良心的価格だったようだ。
+  PRINTL
+  PRINTFORML 『お買い上げ、ありがとうございます～。わがモーサー商会のモットーは【信頼と笑顔】なんです。
+　PRINTFORMW 信頼に基づく取引と、双方満足の笑顔、という意味なんです～。どうぞ今後ともモーサー商会をご贔屓にぃ』
+  PRINTL
+  PRINTFORML %CALLNAME:MASTER%が「こちらこそ」と謝意を伝えると、ロアニャは微笑んで会釈をしてから通信を切った。
+  PRINTFORMW お得な買い物だった。モーサー商会とロアニャ……覚えておこう。
+  DAILY_PROGRESS_MOSER = 2
+  DAILY_MOSER_COMPLETE_DATE = DAY
+  IF RESULT == 0
+    LOCAL:1 = 100
+    FOR LOCAL, 0, MAX_SHIP
+      SIF RESULT == 0
+        BREAK
+      SIF SHIP_POSITION:LOCAL != CHARACTER_POSITION
+        CONTINUE
+      SIF SHIP_COUNTRY:LOCAL != 国家ID_プレイヤー
+        CONTINUE
+      SIF SHIP_CATEGORY:LOCAL != 輸送船
+        CONTINUE
+      CALL LOAD_TO_SHIP(LOCAL, オーネスワイン, LOCAL:1)
+      LOCAL:1 = RESULT
+    NEXT
+    MONEY -= 45000
+  ELSEIF RESULT == 1
+    ITEM:粗製ワイン += 10
+    MONEY -= 9500
+  ENDIF
+  RETURN
+ELSE
+  PRINTFORML %CALLNAME:MASTER%は「今は必要ない」と伝えた。
+  PRINTFORML 『そうですかぁ。それでは、またの機会によろしくお願いします～』
+  PRINTFORML 断られるのも慣れているのだろう。さして気にした様子もなく、ロアニャは笑顔のまま通信を切った。
+  PRINTFORMW また出会う機会があるかも知れない。
+  DAILY_PROGRESS_MOSER = 1
+  DAILY_MOSER_COMPLETE_DATE = DAY
+  RETURN
+ENDIF
+GOTO INPUT_LOOP
+
+@SHOW_MOSER_SHOP2()
+LOCAL:1 = 0
+FOR LOCAL, 0, MAX_SHIP
+  SIF SHIP_COUNTRY:LOCAL != 国家ID_プレイヤー || SHIP_POSITION:LOCAL != CHARACTER_POSITION || SHIP_CATEGORY:LOCAL != 輸送船
+    CONTINUE
+  CALL GET_VACANT_CARGO_SIZE(LOCAL)
+  LOCAL:1 += RESULT
+NEXT
+
+$INPUT_LOOP
+
+SETCOLOR 0X666666
+CUSTOMDRAWLINE ///
+RESETCOLOR
+
+PRINTL
+IF RESULT:1 >= 200
+  PRINTBUTTON "[トルス酒200セット $80,000]", 0
+ELSE
+  PRINT [トルス酒200セット $80,000] - 輸送できない!
+ENDIF
+PRINTL
+PRINTBUTTON "[アストロ・フィズ10本, $12,000]", 1
+PRINTL
+PRINTBUTTON "[買わない]", 2
+PRINTL
+SETCOLOR 0X666666
+CUSTOMDRAWLINE ///
+RESETCOLOR
+INPUT
+
+IF (RESULT == 0 && RESULT:1 >= 200) || RESULT == 1
+  PRINTFORML 『はい、お買い上げありがとうございます～。すぐに商品を配送しますねぇ』
+  PRINTFORML 購入手続きを終えると、前回と同じように無人機で運ばれてきた荷物をクルーにチェックさせる。
+  PRINTFORMW 問題がないことを確認した%CALLNAME:MASTER%は、ふと思いついて、クルーに一つ指示を出した。
+  PRINTL
+  PRINTFORML 『それでは今回の取引も……あら？　すみません、少々お待ちください～』
+  PRINTFORMW 向こう側で部下から報告を受けたロアニャが、しばし画面からフェードアウトする。
+  PRINTL
+  PRINTFORMW 『……お待たせしました。あのぉ、帰ってきた無人機にお酒が入っていたと報告を受けたのですが～……これは船長様が？』
+  PRINTL
+  PRINTFORML %CALLNAME:MASTER%は、そうだと肯定する。
+  PRINTFORML 以前立ち寄った星で珍しいお酒が手に入ったので、そのうちの一箱を贈り物として入れたのだと。
+  PRINTFORMW 「それでも飲んで息抜きをしてくれ」と言うと、
+  PRINTL
+  SIF DAILY_PROGRESS_MOSER == 2
+    PRINTFORML 『さっきあんなことを言ってしまったので、お気遣いくださったのですね。本当に……ありがとうございます』
+  SIF DAILY_PROGRESS_MOSER == 3
+    PRINTFORML 『わたしが以前あんなことを言ったのを覚えていて、お気遣いくださったのですね。本当に……ありがとうございます』
+  PRINTFORMW ロアニャは今までとは少し違った、ふわりと優しい微笑みを見せてくれた。
+  PRINTL
+  PRINTFORML 『やっぱり船長様は――』
+  PRINTFORMW 彼女が何かつぶやいたが、最後の方は声が小さすぎて聞き取れなかった。
+  PRINTL
+  PRINTFORML 『そうだ！』
+  PRINTFORMW と思ったら、急に大声と共に両手を叩いたので、%CALLNAME:MASTER%はビクッとする。
+  PRINTL 
+  PRINTFORML 『もしよろしかったら、連絡先を受け取ってもらえませんかぁ？
+  PRINTFORML 普通なら連絡先は商会への回線をお伝えするのですが、船長様にはわたしの個人回線を知っておいてもらえたら便利かなぁと……。
+  PRINTFORMW あ、いえっ。わたしへ直接伝えていただければスムーズに取引が行くということであって、他意はそのぉ、なくって～……』
+  PRINTL
+  PRINTFORML こちらを伺うように、上目遣いでもじもじするロアニャ。
+  PRINTFORML 理由はよくわからないが、彼女に気に入られたようだ。
+  PRINTFORMW 「ぜひ教えてくれ」と言うと、ロアニャは目を輝かせた。
+  PRINTL
+  PRINTFORML 『はいっ、ではすぐ送信しますね。えっとぉ～』
+  PRINTFORMW うきうきと端末を操作する彼女の姿を、%CALLNAME:MASTER%は微笑ましく見守るのだった。
+  PRINTL 
+  DAILY_PROGRESS_MOSER = 4
+  DAILY_MOSER_COMPLETE_DATE = DAY
+  IF RESULT == 0
+    LOCAL:1 = 200
+    FOR LOCAL, 0, MAX_SHIP
+      SIF RESULT == 0
+        BREAK
+      SIF SHIP_POSITION:LOCAL != CHARACTER_POSITION
+        CONTINUE
+      SIF SHIP_COUNTRY:LOCAL != 国家ID_プレイヤー
+        CONTINUE
+      SIF SHIP_CATEGORY:LOCAL != 輸送船
+        CONTINUE
+      CALL LOAD_TO_SHIP(LOCAL, トルス酒, LOCAL:1)
+      LOCAL:1 = RESULT
+    NEXT
+    MONEY -= 80000
+  ELSEIF RESULT == 1
+    ITEM:アストロ・フィズ += 20
+    MONEY -= 12000
+  ENDIF
+  RETURN
+ELSE
+  PRINTFORML 『あ……そうですか～。それでは、また次の機会にお願いしますねぇ……』
+  PRINTFORML ロアニャは笑顔ではあったが、声音には少しの悲しさが見て取れた。
+  PRINTFORMW それに気づいた%CALLNAME:MASTER%は「また良いものがあったらお願いする」とフォローを入れた。
+  PRINTL
+  PRINTFORML 『はいっ、ありがとうございます～。その時はできるだけ早くお知らせしますね～』
+  PRINTFORML いつもの調子に戻ったロアニャと別れの挨拶をして、その日の通信は終わった。
+  DAILY_PROGRESS_MOSER = 3
+  DAILY_MOSER_COMPLETE_DATE = DAY
+  RETURN
+ENDIF
+GOTO INPUT_LOOP
