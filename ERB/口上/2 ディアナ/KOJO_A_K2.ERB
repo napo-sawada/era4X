@@ -212,21 +212,18 @@ IF CFLAG:201 < 5 && TALENT:合意
 	IF !(TCVAR:51 || TCVAR:52 || TCVAR:53)
 		;初めてセックスをしたときに恋慕かどうか。思いつかなければ一緒でよい
 		IF TALENT:恋慕
-			PRINTFORMW 行為を終えたあなたと%ANAME(TARGET)%はベッドの上で息を切らしながら見つめ合っていた。
-			PRINTFORMW %ANAME(TARGET)%はそっと%ANAME(MASTER)%の胸元にくっ付きながら喋る。
+			PRINTFORMW 行為を終えた%ANAME(MASTER)%と%ANAME(TARGET)%はベッドの上で息を切らしながら見つめ合っていた。
 			PRINTFORMW 
-			PRINTFORMW 「%ANAME(MASTER)%………抱きしめて……くらないか？」
+			PRINTFORMW 「%ANAME(MASTER)%………抱きしめて」
 			PRINTFORMW 
-			PRINTFORMW %ANAME(MASTER)%はゆっくり頷いて%ANAME(TARGET)%を抱きしめた。
-			PRINTFORMW %ANAME(TARGET)%は幸せそうな顔をして目を閉じ。
+			PRINTFORMW %ANAME(MASTER)%に抱きしめられた%ANAME(TARGET)%は幸せそうな顔をして目を閉じた。
 			PRINTFORMW 
-			PRINTFORMW 「%ANAME(MASTER)%の事を好きになれて本当に…本当に…よかった」
-			PRINTFORMW 「こんな女性らしくない……戦う事しか出来ない私を愛してくれて…ありがとう」
+			PRINTFORMW 「貴方と初めて抱き合った今夜だけは…」
+			PRINTFORMW 「聖堂騎士としての私やカタリナ様の事をすべて忘れて…ただの一人の女として貴方に愛されたい…」
 			PRINTFORMW 
-			PRINTFORMW 「……ねぇ……%ANAME(MASTER)%…ここまま、ずっと私を抱きしめていて……」
-			PRINTFORMW 「……今夜は…この幸せな気持ちのまま……貴方の胸の中で眠るの………」
+			PRINTFORMW 「……ねぇ……%ANAME(MASTER)%…このまま、ずっと私を抱きしめていてね……」
+			PRINTFORMW 「……今夜は…この幸せな気持ちのまま……%ANAME(MASTER)%の胸の中で眠るの………」
 			PRINTFORMW 
-			PRINTFORMW と呟いて%ANAME(TARGET)%は眠りについた。
 			PRINTFORMW %ANAME(TARGET)%の幸せそうな表情を記憶に残し%ANAME(MASTER)%も眠りについた。
 		ELSE
 			;PRINTFORMW 
