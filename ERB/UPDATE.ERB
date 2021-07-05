@@ -51,6 +51,10 @@ IF COUNTRY_NAME:国家ID_レジスタンス == "緑の海賊団"
 	REL_LIKE_COUNTRY:国家ID_レジスタンス:国家ID_民主主義 = 1000; 支援を受けている
 	REL_LIKE_COUNTRY:国家ID_民主主義:国家ID_レジスタンス = 1000; 支援している
 ENDIF
+; 青野商業連合
+IF COUNTRY_NAME:国家ID_慈悲の宙族団 == "青の商業連合"
+	COUNTRY_NAME:国家ID_慈悲の宙族団 = 慈悲の宙族団
+ENDIF
 
 SIF COUNTRY_NAME:国家ID_社会主義 == "社会主義国家"
 	COUNTRY_NAME:国家ID_社会主義 = 銀河人民統一連邦

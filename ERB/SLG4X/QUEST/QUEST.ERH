@@ -70,3 +70,6 @@
 
 ;84 武器密輸
 #DIM SAVEDATA QUEST_84_受注回数
+
+;85 宙族からのお誘い
+#DIM SAVEDATA BLOCK_ASSULT

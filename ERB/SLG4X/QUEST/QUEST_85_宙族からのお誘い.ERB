@@ -1,0 +1,166 @@
+﻿;--------------------------
+; !!海賊からのと 85を好きな番号に変える！!
+; 海賊からのお誘い
+; ここにクエストの説明
+;--------------------------
+
+
+;--------------------------
+; クエスト受注可能か
+;--------------------------
+@QUEST_ACCEPTABLE_85
+RETURN !QUEST_PROGRESS:85 && QUEST_84_受注回数 >= 10
+
+;--------------------------
+; クエストの名前を返却
+;--------------------------
+@QUEST_NAME_85
+RESULTS = 宙族からのお誘い
+RETURN
+
+
+;--------------------------
+; マップでの表示を設定する
+; @QUEST_SET_TILE_  : マップ上対象地点にマークを出す。
+; @QUEST_MAP_INFO_  : 右下小窓にメッセージを出す
+; 引数１： ARG:0 SS85YY　座標データ　マップ上でクリックされた座標。表示条件分岐に。
+;--------------------------
+;;;マップ画面上での表示。 隠したかったら関数コメントアウトか RETURN 0
+;;;色を替えたかったらSETCOLORしておけば後の処理で色反映します
+@QUEST_SET_TILE_85 (ARG:0 )
+	RESULTS '= "賊"
+	SETCOLOR 0xFFFF00
+RETURN 1
+
+;;;右下小窓に出す。隠したければ関数コメントアウトか RETURN 0
+@QUEST_MAP_INFO_85 (ARG:0 )
+		RESULTS:0 '= ""
+		RESULTS:1 '= "宙族アジト"
+		RESULTS:2 '= ""
+		RESULTS:3 '= ""
+		RESULTS:4 '= ""
+RETURN 1
+
+;-----------------------
+; マップ上からQUEST_BODYを実行する処理
+; @QUEST_SHOW_COMMAND_x : ここで指定した文字列のコマンドを現地で表示する
+; 　　　　　　　　　　 ：(調査する||捜索する||採集する||待ち伏せする||挑戦する)といったフレーバー
+; @QUEST_PLACE_CHECK_x ： 設定マスを踏んだら呼び出される。不要ならば消すか無処理で返す
+;--------------------------
+@QUEST_SHOW_COMMAND_85 ()
+	RESULTS '= "宙族のアジト"
+RETURN 1
+
+@QUEST_REACH_PLACE_85 ()
+; CALL QUEST_BODY_85
+RETURN
+
+;--------------------------
+; クエスト本体
+;--------------------------
+@QUEST_BODY_85
+#DIM CONST QUEST_ID = 85
+#DIM _SHIP_ID
+#DIM SECTOR_ID
+#DIM X_POS
+#DIM Y_POS
+
+CALL ID2POS(CHARACTER_POSITION)
+SECTOR_ID = RESULT
+Y_POS = RESULT:2
+X_POS = RESULT:1
+
+SELECTCASE QUEST_PROGRESS:QUEST_ID
+	CASE 0
+		PRINTFORML 「最近ギルドを通さずに商売しているやつっていうのはお前か」
+		PRINTFORML %CALLNAME:MASTER%が宇宙港で艦の整備をしていると、一人のサイボーグが話しかけてきた
+		PRINTFORMW 流線型の高性能アームスーツに身を包んでいる高級サイボーグだ。しかしどう見ても反社会的な雰囲気を漂わせている
+		PRINTL
+		PRINTFORML 「隠しても無駄だ。いいか、これからは仕事をしたいならここを通せ。そうでなければ我々、慈悲の宙族団が相手をすることになる」
+		PRINTFORML そういうと座標データを渡してくるサイボーグ。驚くことにこの星系内の座標だ
+		PRINTFORMW %CALLNAME:MASTER%が受け取ったのを確認すると、サイボーグは何も言わずその場を去っていった
+		LOCAL = 1
+		WHILE LOCAL
+			;; 関数つかって適当に。 指定セクター内　6:ちょっと外より を抽選
+			CALL QUEST_SET_RANDPOINT(QUEST_ID, SECTOR_ID, 6 )
+			IF RESULT >= 0
+				X_POS = (RESULT / 100) %100
+				Y_POS = RESULT %100
+				CLEARMAP:SECTOR_ID:X_POS:Y_POS = 1		;;明瞭化おまけ
+				LOCAL --
+			ENDIF
+		WEND
+		QUEST_PROGRESS:QUEST_ID = 1
+	CASE 1
+		$INPUT_LOOP
+		PRINTL
+		PRINTFORML ■クエストボード
+		PRINTBUTTON "[歩兵装備(充足)の手配] - 求)充足x10,000 出)$7,500,000", 0
+		PRINTL
+		PRINTL
+		PRINTBUTTON "[宇宙軍補充] - 求)汎用コルベット 出)$1,000,000", 1
+		PRINTL
+		PRINTL
+		IF !BLOCK_ASSULT
+			PRINTBUTTON "[海賊の襲撃をやめさせる] - 求)1,000,000", 2
+			PRINTL
+			PRINTL
+		ENDIF
+		SETCOLOR 0X666666
+		CUSTOMDRAWLINE ///
+		RESETCOLOR
+		PRINTBUTTON "[戻る]", 9
+		INPUT
+		IF RESULT == 0 && GB_予備充足:国家ID_プレイヤー > 10000
+			PRINTFORML 充足を10,000売りますか？
+			CALL ASK_YN
+			SIF RESULT
+				GOTO INPUT_LOOP
+			GB_予備充足:国家ID_プレイヤー -= 10000
+			GB_予備充足:国家ID_慈悲の宙族団 += 10000
+			MONEY += 7500000
+			MONEY:国家ID_慈悲の宙族団 -=7500000
+			PRINTFORMW 充足を10,000売り、$7,500,000入手しました
+			GOTO INPUT_LOOP
+		ELSEIF RESULT == 1
+			$INPUT_LOOP2
+			FOR _SHIP_ID, 0, MAX_SHIP
+				IF SHIP_COUNTRY:_SHIP_ID == 国家ID_プレイヤー && SHIP_MODEL:_SHIP_ID == 汎用コルベット
+					PRINTBUTTON @"[{_SHIP_ID}] %SHIP_NAME:_SHIP_ID%", _SHIP_ID
+					PRINTL
+				ENDIF
+			NEXT
+			PRINTBUTTON @"[{MAX_SHIP}] 戻る", MAX_SHIP
+			PRINTL
+			INPUT
+			_SHIP_ID = RESULT
+			IF _SHIP_ID == MAX_SHIP
+				GOTO INPUT_LOOP
+			ELSEIF _SHIP_ID >= 0 && _SHIP_ID < MAX_SHIP && SHIP_COUNTRY:_SHIP_ID == 国家ID_プレイヤー && SHIP_MODEL:_SHIP_ID == 汎用コルベット
+				PRINTFORML %SHIP_NAME:_SHIP_ID%を売りますか？
+				CALL ASK_YN
+				SIF RESULT
+					GOTO INPUT_LOOP2
+				SHIP_POSITION:_SHIP_ID = CHARACTER_POSITION
+				SHIP_COUNTRY:_SHIP_ID = 国家ID_慈悲の宙族団
+				MONEY += 1000000
+				MONEY:国家ID_慈悲の宙族団 -= 1000000
+				PRINTFORMW %SHIP_NAME:_SHIP_ID%を売りました
+			ENDIF
+			GOTO INPUT_LOOP
+		ELSEIF RESULT == 2 && MONEY > 1000000
+			PRINTFORML 宙族の襲撃をやめさせますか？
+			CALL ASK_YN
+			SIF RESULT
+				GOTO INPUT_LOOP
+			BLOCK_ASSULT = 1
+			MONEY -= 1000000
+			MONEY:国家ID_慈悲の宙族団 += 1000000
+			GOTO INPUT_LOOP
+		ELSEIF RESULT == 9
+			RETURN
+		ELSE
+			GOTO INPUT_LOOP
+		ENDIF
+ENDSELECT
+

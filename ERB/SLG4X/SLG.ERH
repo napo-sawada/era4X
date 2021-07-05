@@ -231,7 +231,7 @@
 #DIM CONST 国家ID_アレス宗教 = 5
 #DIM CONST 国家ID_機械文明 = 6
 #DIM CONST 国家ID_レジスタンス = 7
-#DIM CONST 国家ID_青の商業連合 = 8
+#DIM CONST 国家ID_慈悲の宙族団 = 8
 #DIM CONST 国家ID_赤の傭兵集団 = 9
 #DIM CONST 国家ID_一般海賊 = 10
 #DIM CONST 国家ID_豊秋津皇国 = 11
