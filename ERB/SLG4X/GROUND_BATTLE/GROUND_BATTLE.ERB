@@ -507,7 +507,7 @@ GOTO INPUT_LOOP
 FINDELEMENT 師団所属, -1
 IF RESULT == -1
   ID = 0
-ELSEIF RESULT == 最大師団数/2
+ELSEIF RESULT > 最大師団数/2 && 師団所属:0 == _陣営
   PRINTFORMW これ以上師団を作成できません(師団数制限)
   RETURN -1
 ELSE
@@ -562,7 +562,7 @@ GB_COST:(師団所属:_師団ID) += _COST
 #DIM _陣営
 #DIM _戦線
 #DIM _前線
-#DIM _COUNTER
+#DIM DYNAMIC _COUNTER
 #DIM REF ユニット概要一覧, 0, 0, 0
 
 IF _COUNTER == 0

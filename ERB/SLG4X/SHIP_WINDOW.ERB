@@ -120,7 +120,8 @@ MESSAGE:0 '= RESULTS:0
 CALL WndMgr_TextAdd( windowID, 1, @"@C:{色:0}@%MESSAGE:0%@/C@")
 
 CALL WndMgr_TextSet( windowID, 2, @"SHILD @C:{色:1}@{SP, 5, RIGHT} /{MAX_SP, 5, RIGHT}@/C@ ")
-BARSTR SP, MAX_SP , 5
+SIF MAX_SP
+	BARSTR SP, MAX_SP , 5
 MESSAGE:0 '= RESULTS:0
 CALL WndMgr_TextAdd( windowID, 2, @"@C:{色:1}@%MESSAGE:0%@/C@")
 

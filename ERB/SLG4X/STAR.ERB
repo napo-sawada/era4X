@@ -147,7 +147,7 @@ ELSE
                         ENDIF
                         CALL GET_SHOP_ITEM_PRICE(_STAR_ID, , LOCAL)
                         MONEY:(STAR_OWNER:STAR_ID) -= RESULT * _購入数
-                        MONEY:(STAR_OWNER:_STAR_ID) += RESULT) * _購入数
+                        MONEY:(STAR_OWNER:_STAR_ID) += RESULT * _購入数
                         CALL PRINT_ADD_EXP(SHOP_IN_CHARGE:_STAR_ID, EXPNAME:(GET_EXP(GETNUM(ABL, "知略"))), 5, 1)
                         REL_LIKE_COUNTRY:(STAR_OWNER:STAR_ID):(STAR_OWNER:_STAR_ID) = LIMIT(REL_LIKE_COUNTRY:(STAR_OWNER:STAR_ID):(STAR_OWNER:_STAR_ID) + 1 , -1000, 1000)
                     ENDIF
