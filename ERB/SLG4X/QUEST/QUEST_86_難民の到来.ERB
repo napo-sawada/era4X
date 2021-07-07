@@ -1,0 +1,49 @@
+﻿;--------------------------
+; !!難民の到来と 86を好きな番号に変える！!
+; 難民の到来
+; ここにクエストの説明
+;--------------------------
+
+
+;--------------------------
+; クエスト受注可能か
+;--------------------------
+@QUEST_ACCEPTABLE_86
+SIF QUEST_PROGRESS:86 == 1
+	RETURN 0
+FOR LOCAL, 0, 星系数
+	SIF STAR_OWNER:LOCAL == 国家ID_プレイヤー
+		RETURN 1
+NEXT
+RETURN 0
+
+;--------------------------
+; クエストの名前を返却
+;--------------------------
+@QUEST_NAME_86
+RESULTS = 難民の到来
+RETURN
+
+;--------------------------
+; クエスト本体
+;--------------------------
+@QUEST_BODY_86
+
+PRINTFORML 現在全宇宙には2億人の難民が発生しているらしい
+PRINTFORML その2億人が、新たに台頭してきた%CALLNAME:MASTER%の星を目指しているというのだ
+PRINTFORML 受け入れますか?(コストが$1,000,000,000かかります)
+CALL ASK_YN
+IF RESULT
+	PRINTFORMW 追い返しました
+	RETURN
+ENDIF
+FOR LOCAL, 0, 星系数
+	IF STAR_OWNER:LOCAL == 国家ID_プレイヤー
+		GB_非戦闘員:LOCAL += 200000000
+		MONEY:国家ID_プレイヤー -= 1000000000
+		PRINTFORML %STAR_NAME:LOCAL%に2億人を受け入れました
+		QUEST_PROGRESS:86 = 1
+		BREAK
+	ENDIF
+NEXT
+
