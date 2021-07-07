@@ -9,8 +9,15 @@
 ; クエスト受注可能か
 ;--------------------------
 @QUEST_ACCEPTABLE_32
-SIF QUEST_PROGRESS:32 >= 4
+SIF QUEST_PROGRESS:32 >= 5
 	RETURN 0
+IF QUEST_PROGRESS:32 == 4
+	FOR LOCAL, 0, MAX_PORT
+		SIF PORT_OWNER:LOCAL == 国家ID_プレイヤー
+			RETURN 1
+	NEXT
+	RETURN 0
+ENDIF
 RETURN 1
 
 ;--------------------------
@@ -24,6 +31,8 @@ SELECTCASE QUEST_PROGRESS:32
 		RESULTS = チュートリアル2
 	CASE 3
 		RESULTS = チュートリアル3
+	CASE 4
+		PESULTS = チュートリアル4
 ENDSELECT
 RETURN
 
@@ -225,6 +234,19 @@ SELECTCASE QUEST_PROGRESS:QUEST_ID
 			PRINTFORMW 「それは残念 です。また聞きにきてください」
 			RETURN
 		ENDIF
+	CASE 4
+		PRINTFORML 「こんにちは あなたもついに 宇宙港を手に入れたそうですね」
+		PRINTFORML %CALLNAME:MASTER%が宇宙港を歩いていると、例の思考戦車が話しかけてきた。フロッピーディスクを大量に抱えているが、何に使うつもりなのか
+		PRINTFORMW 「素晴らしい提案があります 宇宙港で 売店を運営しましょう」
+		PRINTL
+		PRINTFORML 「売店は素材や資源を販売することで お金を手に入れる施設です 販売員の知力で売値は変わります」
+		PRINTFORML 「おいしいのは 買ってくれた国の好感度が上がることです」
+		PRINTFORMW 「しかも 売る国を制限することもできるので　特定の国と仲良くすることもできます」
+		PRINTL
+		PRINTFORML 「お勧めする商品は 貴金属鉱石です どこの国でも枯渇していますから これを販売することでその国の装備更新を助けることができます」
+		PRINTFORML 「戦争を仕掛けるつもりの国には売らないよう 気をつけてください」
+		PRINTFORMW 「それではまた」
+		QUEST_PROGRESS:QUEST_ID = 5
 ENDSELECT
 
 

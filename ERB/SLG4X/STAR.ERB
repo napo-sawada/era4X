@@ -131,6 +131,8 @@ ELSE
                 FOR _STAR_ID, 0, 星系数
                     SIF SALE_TARGET:(STAR_OWNER:STAR_ID):(GET_SHOP_ID(_STAR_ID, )) == 0
                         CONTINUE
+                    SIF REL_LIKE_COUNTRY:(STAR_OWNER:STAR_ID):(STAR_OWNER:_STAR_ID) <= -1000
+                        CONTINUE
                     _店在庫 = GET_SHOP_ITEM_NUM(_STAR_ID, , LOCAL)
                     IF _店在庫
                         _購入数 = MIN(_必要資源数, _店在庫)
@@ -148,6 +150,8 @@ ELSE
                 NEXT
                 FOR _PORT_ID, 0, MAX_PORT
                     SIF SALE_TARGET:(STAR_OWNER:STAR_ID):(GET_SHOP_ID(, _PORT_ID)) == 0
+                        CONTINUE
+                    SIF REL_LIKE_COUNTRY:(STAR_OWNER:STAR_ID):(PORT_OWNER:_PORT_ID <= -1000
                         CONTINUE
                     _店在庫 = GET_SHOP_ITEM_NUM(, _PORT_ID, LOCAL)
                     IF _店在庫
