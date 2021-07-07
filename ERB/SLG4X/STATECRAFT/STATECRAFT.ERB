@@ -56,7 +56,7 @@ IF _人口 == 0
 ELSE
   PRINTFORML 住人 %TOSTR(RESULT, "###,###")%人 非住居所持者: %LOCALS%人 全体の{RESULT:2 * 100 / RESULT}\%
 ENDIF
-CALL GET_FOOD_PRODUCTION(STAR_ID, _CURRENT_CITY) 
+CALL SHARE_FOOD(STAR_ID)
 _NUM食糧生産量 = RESULT
 IF RESULT == 0
   _食糧生産量 = 0
@@ -106,7 +106,7 @@ ENDIF
 PRINTFORML  食糧消費量: %TOSTR(_人口 * SC_食糧消費量:(SC_食糧消費設定:STAR_ID:_CURRENT_CITY) / 100, "###,###")%
 
 ; 民需の需要を満たしているか
-CALL GET_TOTAL_CITY_OUTPUT(STAR_ID, _CURRENT_CITY, SC_民需)
+CALL SHARE_MINJU(STAR_ID)
 IF _人口 != 0
   PRINTFORML 民需需要補填率: {RESULT * 100 / _人口 * 100 / SC_民需消費量:(SC_民需消費設定:STAR_ID:_CURRENT_CITY)}\%
 ENDIF
@@ -146,6 +146,21 @@ PRINTFORML 軍人: %TOSTR(GB_戦闘員:STAR_ID, "###,###")%人 非戦闘員: %TO
 PRINTFORML 充足: %TOSTR(GB_充足:STAR_ID, "###,###")% コスト: %TOSTR(MIN(GB_戦闘員:STAR_ID, GB_充足:STAR_ID), "###,###")%
 PRINTFORML 戦車: %TOSTR(GB_戦車:STAR_ID, "###,###")%台, 航空機: %TOSTR(GB_航空機:STAR_ID, "###,###")%機
 
+PRINTL
+PRINTL ■外交情報(星全体情報)
+CALL GET_DIPLOMACY_POWER(STAR_ID)
+PRINTFORML 外交力: {RESULT}
+FOR LOCAL, 2, MAX_COUNTRY
+  IF SC_外交設定:STAR_ID:LOCAL
+    SETCOLOR 0X00FF00
+    PRINTBUTTON @"[%COUNTRY_NAME:LOCAL%]", LOCAL * 10000
+    RESETCOLOR
+  ELSE
+    PRINTBUTTON @"[%COUNTRY_NAME:LOCAL%]", LOCAL * 10000
+  ENDIF
+NEXT
+PRINTL
+PRINTL
 SETCOLOR 0X666666
 DRAWLINE
 RESETCOLOR
@@ -212,6 +227,18 @@ ELSEIF _入力値 == -7
   SC_民需消費設定:STAR_ID:_CURRENT_CITY = 2
 ELSEIF _入力値 == -999
   RETURN
+ELSEIF _入力値 >= 10000
+  IF !SC_外交設定:STAR_ID:(_入力値 / 10000)
+    LOCAL:1 = 0
+    FOR LOCAL, 2, MAX_COUNTRY
+      SIF SC_外交設定:STAR_ID:LOCAL
+        LOCAL:1 ++
+    NEXT
+    CALL GET_DIPLOMACY_POWER(STAR_ID)
+    SIF LOCAL:1 >= RESULT
+      GOTO INPUT_LOOP
+  ENDIF
+  SC_外交設定:STAR_ID:(_入力値 / 10000) = !SC_外交設定:STAR_ID:(_入力値 / 10000)
 ENDIF
 GOTO INPUT_LOOP
 
@@ -274,6 +301,23 @@ PRINTBUTTON "[戻る]", -1
 INPUT
 IF RESULT >= 0 && RESULT < SC_建築物種類
   SC_建造物:STAR_ID:CITY_ID:SLOT_ID = RESULT
+  CALL GET_DIPLOMACY_POWER(STAR_ID)
+  LOCAL:1 = 0
+  FOR LOCAL, 2, MAX_COUNTRY
+    SIF SC_外交設定:STAR_ID:LOCAL
+      LOCAL:1 ++
+  NEXT
+  IF LOCAL:1 > RESULT
+    LOCAL:2 = LOCAL:1 - RESULT
+    FOR LOCAL, 2, MAX_COUNTRY
+      IF SC_外交設定:STAR_ID:LOCAL
+        SC_外交設定:STAR_ID:LOCAL = 0
+        LOCAL:2--
+        SIF LOCAL:2 == 0
+          BREAK
+      ENDIF
+    NEXT
+  ENDIF
 ELSEIF RESULT == -1
   RETURN
 ELSE
@@ -382,8 +426,8 @@ ENDIF
 #DIM _都市
 
 IF STAR_ID == 2
-  GB_戦闘員:STAR_ID = R戦闘員
-  GB_非戦闘員:STAR_ID = R非戦闘員
+  GB_戦闘員:STAR_ID = GB_戦闘員:STAR_ID > 0 ? GB_戦闘員:STAR_ID # R戦闘員
+  GB_非戦闘員:STAR_ID = GB_非戦闘員:STAR_ID > 0 ? GB_非戦闘員:STAR_ID # R非戦闘員
 ENDIF
 _人数 = GB_戦闘員:STAR_ID + GB_非戦闘員:STAR_ID
 IF _人数 == 0
@@ -550,9 +594,8 @@ RETURN SUMARRAY(RESULT)
 #DIM _高級住宅
 #DIM _低級住宅
 
-;食料自給率からアウトプットの基礎値を出力
-CALL GET_FOOD_PRODUCTION(STAR_ID, CITY_ID)
 ; 娯楽食糧の割合分アプトプットの出力を上昇
+CALL SHARE_FOOD(STAR_ID)
 _食糧生産量 = RESULT
 _娯楽食糧 = RESULT:1
 CALL GET_CITY_RESIDENT(STAR_ID, CITY_ID)
@@ -578,7 +621,7 @@ ELSEIF SC_食糧消費設定:STAR_ID:CITY_ID == 2
 ENDIF
 
 ;民需が満たされていない場合、満たされていない分マイナス
-CALL GET_MINJU_PRODUCTION(STAR_ID, CITY_ID)
+CALL SHARE_MINJU(STAR_ID)
 SIF _人口 > RESULT
   _OUTPUT -= (_人口 - RESULT) / 2
 ;民需の消費量から出力変動
@@ -639,3 +682,52 @@ SELECTCASE SC_TYPE
   CASEELSE
     RETURN _基礎値
 ENDSELECT
+
+;-----------------------------------
+; 都市間で融通できるものを融通する
+;-----------------------------------
+@SHARE_FOOD(STAR_ID)
+#DIM STAR_ID
+#DIM _解放都市数
+#DIM DYNAMIC _食糧生産量
+
+_解放都市数 = GET_RELEASED_CITY_NUM(STAR_ID)
+FOR LOCAL, 0, _解放都市数
+  CALL GET_FOOD_PRODUCTION(STAR_ID, LOCAL)
+  _食糧生産量 += RESULT
+NEXT
+
+RETURN _食糧生産量 / _解放都市数
+
+@SHARE_MINJU(STAR_ID)
+#DIM STAR_ID
+#DIM _解放都市数
+#DIM DYNAMIC _民需生産量
+
+_解放都市数 = GET_RELEASED_CITY_NUM(STAR_ID)
+FOR LOCAL, 0, _解放都市数
+  CALL GET_MINJU_PRODUCTION(STAR_ID, LOCAL)
+  _民需生産量 += RESULT
+NEXT
+
+RETURN _民需生産量 / _解放都市数
+
+;-----------------------------------
+; 外交
+;-----------------------------------
+@GET_DIPLOMACY_POWER(STAR_ID)
+#DIM STAR_ID
+#DIM _解放都市数
+#DIM _区画
+#DIM DYNAMIC _外交力
+#DIM _建造物効果, SC_効果種類
+
+_解放都市数 = GET_RELEASED_CITY_NUM(STAR_ID)
+FOR LOCAL, 0, _解放都市数
+  FOR _区画, 0, SC_最大建築スロット数
+    VARSET _建造物効果, 0
+    TRYCALLFORM BUILDINGS_EFFECT_{SC_建造物:STAR_ID:LOCAL:_区画}(_建造物効果)
+    _外交力 += _建造物効果:SC_外交
+  NEXT
+NEXT
+RETURN _外交力

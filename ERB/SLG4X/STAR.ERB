@@ -119,6 +119,10 @@ IF STAR_OWNER:STAR_ID == 国家ID_プレイヤー
         CALL GET_CITY_RESIDENT(STAR_ID, _CITY_ID)
         LOCAL = RESULT * SC_食糧消費量:(SC_食糧消費設定:STAR_ID:_CITY_ID) / 100
     NEXT
+    FOR LOCAL, 2, MAX_COUNTRY
+        SIF SC_外交設定:STAR_ID:LOCAL
+            REL_LIKE_COUNTRY:(LOCAL):国家ID_プレイヤー = LIMIT(REL_LIKE_COUNTRY:(LOCAL):国家ID_プレイヤー + 1, -1000, 1000)
+    NEXT
 ELSE
     ; 規定値以下なら地上から採掘
     FOR LOCAL, 0, ITEM_LENGTH

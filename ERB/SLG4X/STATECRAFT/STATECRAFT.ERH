@@ -68,3 +68,4 @@
 #DIM SAVEDATA SC_食糧備蓄設定, 星系数, SC_最大都市数
 #DIM SAVEDATA SC_食糧消費設定, 星系数, SC_最大都市数
 #DIM SAVEDATA SC_民需消費設定, 星系数, SC_最大都市数
+#DIM SAVEDATA SC_外交設定, 星系数, MAX_COUNTRY
