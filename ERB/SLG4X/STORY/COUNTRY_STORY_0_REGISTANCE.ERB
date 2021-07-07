@@ -430,7 +430,19 @@ GOTO INPUT_LOOP
 SIF QUEST_PROGRESS:34 < 3
   RETURN
 
+; 内定が完遂してしまったら
 内偵進捗 += 内偵効率
+IF 内定進捗 >= 内偵完了
+  SETCOLOR 0XFF0000
+  PRINTFORMW レジスタンスで暗躍しているのが%CALLNAME:MASTER%だと銀河人民統一連邦にばれた！
+  PRINTFORMW これより%CALLNAME:MASTER%勢力は銀河人民統一連邦と戦争状態になります
+  REL_LIKE_COUNTRY:国家ID_社会主義:国家ID_プレイヤー = -1000
+  WAITANYKEY
+  RESETCOLOR
+ENDIF
+
+
+
 R_RESEARCH_DATE += 1
 
 LOCAL:1 = 0
