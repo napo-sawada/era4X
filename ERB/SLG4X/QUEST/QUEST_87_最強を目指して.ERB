@@ -1,0 +1,331 @@
+﻿;--------------------------
+; !!地上最強の男と 87を好きな番号に変える！!
+; 地上最強の男
+; ここにクエストの説明
+;--------------------------
+
+
+;--------------------------
+; クエスト受注可能か
+;--------------------------
+@QUEST_ACCEPTABLE_87
+SIF QUEST_PROGRESS:87 == 0
+	RETURN 1
+CALL GET_STAR_ID_FROM_POS(CHARACTER_POSITION)
+SIF RESULT == 3 && QUEST_PROGRESS:87 == 1
+	RETURN 1
+SIF BATTLE_POINT < 500000 && QUEST_PROGRESS:87 == 2
+	RETURN 1
+SIF QUEST_PROGRESS:87 == 3 && RESULT == 10
+	RETURN 1
+SIF QUEST_PROGRESS:87 == 4
+	RETURN 1
+SIF QUEST_PROGRESS:87 == 5 && RESULT == 11
+	RETURN 1
+SIF QUEST_PROGRESS:87 == 6 && RESULT == 11
+	RETURN 1
+SIF QUEST_PROGRESS:87 == 8
+	RETURN 1
+RETURN 0
+;--------------------------
+; クエストの名前を返却
+;--------------------------
+@QUEST_NAME_87
+RESULTS = 宇宙最強の男
+SIF QUEST_PROGRESS:87 == 3
+	RESULTS = グンマー上陸
+SIF QUEST_PROGRESS:87 == 4
+	RESULTS = 極寒サバイバル
+SIF QUEST_PROGRESS:87 == 5
+	RESULTS = 最強騎士トーナメント
+SIF QUEST_PROGRESS:87 == 6
+	RESULTS = 刺客
+RETURN
+
+;--------------------------
+; クエスト本体
+;--------------------------
+@QUEST_BODY_87
+#DIM CONST QUEST_ID = 87
+
+SELECTCASE QUEST_PROGRESS:QUEST_ID
+	CASE 0
+		PRINTFORML 宇宙港を歩いていた%CALLNAME:MASTER%は、目の前を歩いていた大男が何かを落としたのを見つけた
+		PRINTFORML カードか何かのようだ。%CALLNAME:MASTER%はそれを拾うと、大男に声をかけ渡そうとする
+		PRINTFORMW しかし
+		PRINTL
+		PRINTFORML 「ああ、やるよ。俺にはもういらないものだからな」
+		PRINTFORML 「そいつを持って企業連合のビリアンの首都にあるグラップラービルっていうビルに行ってみな」
+		PRINTFORMW 「じゃあな」
+		PRINTL
+		PRINTFORML 大男はそれだけいうと、歩き去っていった
+		QUEST_PROGRESS:QUEST_ID ++
+	CASE 1
+		PRINTFORML ビリアンの首都・グラップラービルに%CALLNAME:MASTER%はやってきていた。
+		PRINTFORML 受付で大男がにもらったカードを見せると、受付は驚いた顔を見せながらも地下に案内してくれた
+		PRINTFORMW そこでは……
+		PRINTL
+		PRINTFORML 熱気！歓声！殴り合う男、女、サイボーグ、思考戦車！
+		PRINTFORML ありとあらゆるもの達がサシの戦いを行っていた
+		PRINTFORMW 中には敗北し陵辱されている女の姿も見える
+		PRINTL
+		PRINTFORML 「ここはなんでもありの総合格闘場でございます」
+		PRINTFORML 「ルール、いえ、目的はただ一つ。宇宙最強を目指すことだけ」
+		PRINTFORMW 「お客様はランクEからの参戦になります。闘う覚悟ができたらお声がください」
+		PRINTL
+		PRINTFORMW 裏施設、地下闘技場が解放された！
+		PRINTL
+		QUEST_PROGRESS:QUEST_ID ++
+	CASE 2
+		PRINTFORML このままでは……このままでは宇宙最強になれない
+		PRINTFORML 最強になるには、最強を知らなければならない
+		PRINTFORMW %CALLNAME:MASTER%は決心した
+		PRINTL
+		PRINTFORML 最強の民族が住う土地、グンマーへ行くことに
+		QUEST_PROGRESS:QUEST_ID ++
+	CASE 3
+		PRINTFORML %CALLNAME:MASTER%はネオ・オオエドシティからバスを乗り継ぎグンマーにたどり着いた
+		PRINTFORML 同乗者は都会からの観光帰りらしきグンマー県民だけ。当然だ。まともな神経の持ち主ならグンマーになど行こうとしないだろう
+		PRINTFORMW しかし%CALLNAME:MASTER%の精神状態はまともとは言えなかった
+		PRINTL
+		PRINTFORML 最強
+		PRINTFORML その二文字が脳裏にこびり付き、離れないのだ
+		PRINTFORMW そのためになら、どんな自己犠牲も厭わない。そのつもりでここまで来ていた
+		PRINTL
+		PRINTFORML バスをおり、県境の検問を訪れる
+		PRINTFORML 特段の理由がない限り中に入れることはできないらしい
+		PRINTFORMW 理由ならある。とっておきの理由が
+		PRINTL
+		PRINTFORMW %CALLNAME:MASTER%は武器を引き抜き、叫んだ
+		PRINTFORMW 「道場破りに参った！」
+		;白兵戦参加メンバーの初期化
+		CALL CC_INIT_MEMBER()
+		;攻撃側キャラクターの設定(最大6名)
+		CALL CC_ADDCHARA("ATTACKER", MASTER)
+		;防御側キャラクターの設定(最大6名)
+		CALL CC_ADDMOB("DEFENDER", "国境警備兵1", 2000, 2000, 100)
+		CALL CC_ADDMOB("DEFENDER", "国境警備兵2", 2000, 2000, 100)
+		;白兵戦イベント呼出
+		CALL CLOSE_COMBAT()
+		SIF RESULT == 2
+			CALL GAME_OVER_87
+		CALL CC_ADD_COMBAT_EXP(30)
+		PRINTFORML 国境警備兵を倒すと、俄然力が湧いてくるのを感じた。いくらでも戦える。そんな感じだ
+		PRINTFORMW その気持ちに応えるように、奥から騒ぎを聞きつけた腰蓑装備のグンマー県民達がやってきた！
+		FOR LOCAL, 0, 10
+			;白兵戦参加メンバーの初期化
+			CALL CC_INIT_MEMBER()
+			;攻撃側キャラクターの設定(最大6名)
+			CALL CC_ADDCHARA("ATTACKER", MASTER)
+			;防御側キャラクターの設定(最大6名)
+			CALL CC_ADDMOB("DEFENDER", "グンマー県民1", 2000, 2000, 95)
+			CALL CC_ADDMOB("DEFENDER", "グンマー県民2", 2000, 2000, 95)
+			;白兵戦イベント呼出
+			CALL CLOSE_COMBAT()
+			SIF RESULT == 2
+				CALL GAME_OVER_87
+			CALL CC_ADD_COMBAT_EXP(28)
+		NEXT
+		PRINTFORML 「グンマーの者でないのが残念な実力だ」
+		PRINTFORML 雑兵を倒し切ると、奥から羽飾りのついたフェイスマスクをつけた、幹部らしき男が現れた
+		PRINTFORMW 「貴様、我々の地を荒らし何を求める」
+		PRINTL
+		PRINTFORML 最強 その二文字だけだ
+		PRINTFORML 「妄執に取り憑かれた鬼子か。哀れ、私自ら解釈して進ぜよう」
+		PRINTFORMW 男はそういうと、バンブー・ランスを構え、襲いかかってきた！
+		;白兵戦参加メンバーの初期化
+		CALL CC_INIT_MEMBER()
+		;攻撃側キャラクターの設定(最大6名)
+		CALL CC_ADDCHARA("ATTACKER", MASTER)
+		;防御側キャラクターの設定(最大6名)
+		CALL CC_ADDMOB("DEFENDER", "グンマー師範", 3000, 3000, 150)
+		;白兵戦イベント呼出
+		CALL CLOSE_COMBAT()
+		SIF RESULT == 2
+			CALL GAME_OVER_87
+		CALL CC_ADD_COMBAT_EXP(40)
+		PRINTFORML 「不覚……この私を退けるか……」
+		PRINTFORML 「しかし貴様はまだグンマーの真の恐ろしさを知らない。なぜ我々がネオ・サイタマと台頭に渡り合えているか」
+		PRINTFORMW 「そう、精鋭グンマー兵だ。彼らがいる限り、グンマーは決して負けぬ」
+		PRINTL
+		PRINTFORML その声に呼応するように、奥から先ほどの雑兵とは明らかに雰囲気の違う一段がやってきた。
+		PRINTFORMW あれを倒せば、何かを掴めるかもしれない……
+		FOR LOCAL, 0, 10
+			;白兵戦参加メンバーの初期化
+			CALL CC_INIT_MEMBER()
+			;攻撃側キャラクターの設定(最大6名)
+			CALL CC_ADDCHARA("ATTACKER", MASTER)
+			;防御側キャラクターの設定(最大6名)
+			CALL CC_ADDMOB("DEFENDER", "精鋭グンマー兵", 4000, 4000, 150)
+			;白兵戦イベント呼出
+			CALL CLOSE_COMBAT()
+			SIF RESULT == 2
+				CALL GAME_OVER_87
+			CALL CC_ADD_COMBAT_EXP(40)
+		NEXT
+		PRINTFORML 「強き者よ。これを」
+		PRINTFORML 膝立ちで意識をギリギリ保っていた兵が、懐から何かを取り出して渡してきた
+		PRINTFORMW グンマー名物、こんにゃくだ
+		PRINTL
+		PRINTFORML 「ひとまずそれを食べ、一息着こうではないか」
+		PRINTFORML %CALLNAME:MASTER%は言われた通り生暖かいこんにゃくを頬張り、一息つく
+		PRINTFORMW 美味しい普通のこんにゃくだった
+		PRINTL
+		PRINTFORML 「貴様の求める最強、個の強さはここにはない」
+		PRINTFORML 「あれば我々はとっくにネオ・サイタマとの戦いに勝っている」
+		PRINTFORMW 「ただ、連戦で少しは体力が上がっただろう」
+		PRINTL
+		PRINTFORMW 「結局地道にやるしかない。頑張れ、強き者よ」
+		PRINTW ………………
+		PRINTW …………
+		PRINTW ……
+		MAXBASE:MASTER:体力 += 100
+		QUEST_PROGRESS:QUEST_ID ++
+	CASE 4
+		PRINTFORML 星の寒冷部
+		PRINTFORML %CALLNAME:MASTER%はそこにいた
+		PRINTFORMW 対峙するのは熊
+		PRINTL
+		;白兵戦参加メンバーの初期化
+		CALL CC_INIT_MEMBER()
+		;攻撃側キャラクターの設定(最大6名)
+		CALL CC_ADDCHARA("ATTACKER", MASTER)
+		;防御側キャラクターの設定(最大6名)
+		CALL CC_ADDMOB("DEFENDER", "熊", 8000, 8000, 50)
+		;白兵戦イベント呼出
+		CALL CLOSE_COMBAT()
+		SIF RESULT == 2
+			CALL GAME_OVER_87
+		CALL CC_ADD_COMBAT_EXP(80)
+		PRINTFORML 大地に倒れる熊
+		PRINTFORMW 今日の夕食は決まった
+		PRINTL
+		PRINTFORML 簡易キャンプで熊のスープと熊の焼肉を食べていると、周囲に気配を感じた
+		PRINTFORML 狼だ。匂いにつられてやってきた餓狼が群れをなしてやってきたようだ
+		PRINTFORMW %CALLNAME:MASTER%は立ち上がると、武器を構えた
+		;白兵戦参加メンバーの初期化
+		CALL CC_INIT_MEMBER()
+		;攻撃側キャラクターの設定(最大6名)
+		CALL CC_ADDCHARA("ATTACKER", MASTER)
+		;防御側キャラクターの設定(最大6名)
+		CALL CC_ADDMOB("DEFENDER", "狼1", 800, 1000, 40)
+		CALL CC_ADDMOB("DEFENDER", "狼2", 800, 1000, 40)
+		CALL CC_ADDMOB("DEFENDER", "狼3", 800, 1000, 40)
+		CALL CC_ADDMOB("DEFENDER", "狼4", 800, 1000, 40)
+		CALL CC_ADDMOB("DEFENDER", "狼5", 800, 1000, 40)
+		CALL CC_ADDMOB("DEFENDER", "狼6", 800, 1000, 40)
+		;白兵戦イベント呼出
+		CALL CLOSE_COMBAT()
+		SIF RESULT == 2
+			CALL GAME_OVER_87
+		CALL CC_ADD_COMBAT_EXP(60)
+		PRINTFORML 仕方ないとは言え、無駄な殺生をしてしまった
+		PRINTFORML 穴を堀り、中に狼の死骸を埋める
+		PRINTFORMW 一仕事終えると、%CALLNAME:MASTER%は食事に戻った
+		PRINTL
+		PRINTFORMW 熊の肉で体に力が漲ってきたような気がする
+		PRINTFORMW 体力 + 50
+		PRINTFORMW ……なんとなくだが、次は王国にでも行くか
+		MAXBASE:MASTER:体力 += 50
+		QUEST_PROGRESS:QUEST_ID ++
+	CASE 5
+		PRINTFORML %CALLNAME:MASTER%はたまたま開催されていた、王国の由緒ある最強騎士決定トーナメントに参加することにした
+		PRINTFORML 止めは刺さない。不意打ちはしない。それだけがルールらしい
+		PRINTFORMW 優勝者には騎士の称号と、副賞の賞金$1,000,000が送られる
+		PRINTL
+		PRINTFORML もはやどちらにも興味はない。興味があるのは戦いだけだ
+		PRINTFORMW %CALLNAME:MASTER%は控室で、まだかまだかと自分の出番を待っていた
+		PRINTL
+		PRINTFORML だが待ちに待った試合は、一回戦も二回戦も三回戦も、ちょっとこづいただけで勝ててしまった
+		PRINTFORML %CALLNAME:MASTER%は絶望した。これは%CALLNAME:MASTER%が求める戦いではなかった
+		PRINTFORMW しかも決勝の相手は%CALLNAME:MASTER%の強さを前に逃げ出してしまったらしい
+		PRINTL
+		PRINTFORML 埋め合わせとして正騎士が出てきたのだが、%CALLNAME:MASTER%はそれすらも簡単に倒してしまった
+		PRINTFORML それがまずかったらしい。どうもこの由緒あるトーナメントの名に泥を塗ってしまったようなのだ
+		PRINTFORMW 大会運営はなんとしても%CALLNAME:MASTER%を倒すべく、もはや騎士とは呼べない奴らを駆り出してきた
+		PRINTW ………………
+		PRINTW …………
+		PRINTW ……
+		;白兵戦参加メンバーの初期化
+		CALL CC_INIT_MEMBER()
+		;攻撃側キャラクターの設定(最大6名)
+		CALL CC_ADDCHARA("ATTACKER", MASTER)
+		;防御側キャラクターの設定(最大6名)
+		CALL CC_ADDMOB("DEFENDER", "サイボーグナイト", 3000, 3000, 100)
+		;白兵戦イベント呼出
+		CALL CLOSE_COMBAT()
+		SIF RESULT == 2
+			CALL GAME_OVER_87
+		CALL CC_ADD_COMBAT_EXP(20)
+		PRINTW ………………
+		PRINTW …………
+		PRINTW ……
+		;白兵戦参加メンバーの初期化
+		CALL CC_INIT_MEMBER()
+		;攻撃側キャラクターの設定(最大6名)
+		CALL CC_ADDCHARA("ATTACKER", MASTER)
+		;防御側キャラクターの設定(最大6名)
+		CALL CC_ADDMOB("DEFENDER", "メックナイト", 4000, 4000, 100)
+		;白兵戦イベント呼出
+		CALL CLOSE_COMBAT()
+		SIF RESULT == 2
+			CALL GAME_OVER_87
+		CALL CC_ADD_COMBAT_EXP(30)
+		PRINTW ………………
+		PRINTW …………
+		PRINTW ……
+		;白兵戦参加メンバーの初期化
+		CALL CC_INIT_MEMBER()
+		;攻撃側キャラクターの設定(最大6名)
+		CALL CC_ADDCHARA("ATTACKER", MASTER)
+		;防御側キャラクターの設定(最大6名)
+		CALL CC_ADDMOB("DEFENDER", "騎士戦車", 8000, 8000, 100)
+		;白兵戦イベント呼出
+		CALL CLOSE_COMBAT()
+		SIF RESULT == 2
+			CALL GAME_OVER_87
+		CALL CC_ADD_COMBAT_EXP(60)
+		PRINTFORML 現れる敵のことごとくを倒した%CALLNAME:MASTER%はその場を後にした
+		PRINTFORMW これ以上ここで得られるものはないだろう
+		MAXBASE:MASTER:体力 += 50
+		QUEST_PROGRESS:QUEST_ID ++
+	CASE 6
+		PRINTFORML 王国を歩いていると、%CALLNAME:MASTER%はつけられているのを感じた
+		PRINTFORML あえて裏路地に移動すると、追跡者はこれ幸いと姿を見せてきた
+		PRINTFORMW 軍用サイボーグだ。相手は問答無用で%CALLNAME:MASTER%に襲いかかってきた
+		PRINTL
+		;白兵戦参加メンバーの初期化
+		CALL CC_INIT_MEMBER()
+		;攻撃側キャラクターの設定(最大6名)
+		CALL CC_ADDCHARA("ATTACKER", MASTER)
+		;防御側キャラクターの設定(最大6名)
+		CALL CC_ADDMOB("DEFENDER", "軍用サイボーグ", 6000, 6000, 150)
+		;白兵戦イベント呼出
+		CALL CLOSE_COMBAT()
+		SIF RESULT == 2
+			CALL GAME_OVER_87
+		CALL CC_ADD_COMBAT_EXP(60)
+		QUEST_PROGRESS:QUEST_ID ++
+		PRINTFORML 動けなくなったサイボーグに話を聞くと、前に参加した騎士トーナメントの主催者が差金らしい
+		PRINTFORMW 全く厄介なものに参加してしまったものだ
+		QUEST_PROGRESS:QUEST_ID ++
+	CASE 8
+		PRINTFORML 「おい、お前」
+		PRINTFORML 宇宙港を歩いていると、不意に声をかけられた。見れば、%CALLNAME:MASTER%に地下闘技場への案内状をくれた宇宙最強の男だった
+		PRINTFORMW 「お前に負けから、もう宇宙最強は名乗れないな」
+		PRINTL
+		PRINTFORML 「まさかあんなところで出会った奴が、俺のライバルになるとは思わなかった」
+		PRINTFORML 「今度は俺がチャレンジャーだ。これからも頼むぜ。それじゃあな」
+		PRINTFORMW 宇宙最強の男は握手を求めることもなく、手を振ってその場を後にした……
+		PRINTL
+		PRINTFORMW ようやく、%CALLNAME:MASTER%の中で執念のように燃え盛っていた最強への渇望が、ゆっくりと消え去っていくのを感じた
+		PRINTFORMW 残ったのは、よくわからない感情だけだった……
+		QUEST_PROGRESS:QUEST_ID = 10
+ENDSELECT
+
+
+@GAME_OVER_87
+PRINTFORML %CALLNAME:MASTER%は最強の妄執に取り憑かれたまま、息絶えた
+PRINTFORMW GAMEOVER...
+INPUT
+CLEARLINE 1
