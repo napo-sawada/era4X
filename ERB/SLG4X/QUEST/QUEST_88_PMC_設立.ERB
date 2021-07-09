@@ -1,0 +1,86 @@
+﻿;--------------------------
+; !!PMC_設立と 88を好きな番号に変える！!
+; PMC_設立
+; ここにクエストの説明
+;--------------------------
+
+
+;--------------------------
+; クエスト受注可能か
+;--------------------------
+@QUEST_ACCEPTABLE_88
+RETURN 1
+
+;--------------------------
+; クエストの名前を返却
+;--------------------------
+@QUEST_NAME_88
+SELECTCASE QUEST_PROGRESS:88
+	CASE 0
+		RESULTS = PMC_設立
+	CASE 1
+		RESULTS = PMCの仕事
+ENDSELECT
+RETURN
+
+;--------------------------
+; クエスト本体
+;--------------------------
+@QUEST_BODY_88
+#DIM CONST QUEST_ID = 88
+
+SELECTCASE QUEST_PROGRESS:QUEST_ID
+	CASE 0
+		PRINTFORML 宇宙で仕事を探していた%CALLNAME:MASTER%は、PMC（個人戦争屋）の需要が高いことに気がついた
+		PRINTFORMW どこの星でも、紛争地地帯が存在するのだ
+		PRINTL
+		PRINTFORML 大体の国が貧民と裕福な連中の戦いだ
+		PRINTFORML 皇国だけグンマーとネオ・サイタマの規模の違う戦いを繰り広げているが……
+		PRINTFORMW それはさておき、金を設けるならPMCを設立するのもいいかもしれない
+		PRINTL
+		PRINTFORML とりあえず仲間を集めて白兵能力を鍛えよう。戦車を開発するのもいいかもしれない
+		PRINTFORML 忘れてはいけないのが武器を集めることだ
+		PRINTFORMW 事前準備ができたら、実際に仕事を受けてみよう
+		QUEST_PROGRESS:QUEST_ID = 1
+	CASE 1
+		CALL PMC_QUEST_LIST
+ENDSELECT
+
+;--------------------------
+; クエスト一覧
+;--------------------------
+@PMC_QUEST_LIST
+#DIM _入力値
+
+$INPUT_LOOP
+SETCOLOR 0X666666
+CUSTOMDRAWLINE ///
+RESETCOLOR
+PRINTFORML クエスト一覧
+SETCOLOR 0X666666
+CUSTOMDRAWLINE ///
+RESETCOLOR
+FOR LOCAL, 0, MAX_PMC_QUEST
+	TRYCCALLFORM PMC_QUEST_ACCEPTABLE_{LOCAL}
+		IF RESULT == 1
+			TRYCALLFORM PMC_QUEST_NAME_{LOCAL}
+			PRINTBUTTON @"%RESULTS, 30, LEFT%", LOCAL
+			PRINTL
+		ENDIF
+	CATCH
+		CONTINUE
+	ENDCATCH
+NEXT
+PRINTBUTTON "[戻る]", MAX_PMC_QUEST
+INPUT
+_入力値 = RESULT
+IF RESULT == MAX_PMC_QUEST
+	RETURN
+ELSEIF RESULT >= 0 && RESULT < MAX_PMC_QUEST
+	TRYCALLFORM PMC_QUEST_ACCEPTABLE_{RESULT}
+	IF RESULT == 1
+		TRYCALLFORM PMC_QUEST_BODY_{_入力値}
+		RETURN
+	ENDIF
+ENDIF
+GOTO INPUT_LOOP

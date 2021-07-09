@@ -1,0 +1,217 @@
+﻿;----------------------------
+; 第十一都市防衛線
+;----------------------------
+
+;----------------------------
+; 受注可能か
+;----------------------------
+@PMC_QUEST_ACCEPTABLE_0
+CALL GET_STAR_ID_FROM_POS(CHARACTER_POSITION)
+RETURN RESULT == 5 && STAR_OWNER:5 == 国家ID_民主主義
+
+;----------------------------
+; クエスト名
+;----------------------------
+@PMC_QUEST_NAME_0
+RESULTS = 第十一都市防衛線(難易度1~)
+RETURN
+
+;----------------------------
+; クエスト本体
+;----------------------------
+@PMC_QUEST_BODY_0
+#DIM _BATTLE_UNIT_ID
+#DIM DYNAMIC _RETIER
+#DIM DYNAMIC _SCORE
+#DIM DYNAMIC _LINE_CHAN
+#DIMS _DIC, MAX_PMC_UNIT, MAX_PMC_UNIT_MEMBER
+#DIM _EXP
+
+FOR LOCAL, 0, MAX_PMC_UNIT
+  VARSET _DIC:LOCAL:0, "-1"
+NEXT
+
+PRINTFORML ブリーフィングを受けますか？
+CALL ASK_YN
+SIF !RESULT
+  CALL PMC_QUEST_BRIEFING_0
+CALL PMC_EDIT_UNIT
+
+PRINTFORML 現場では既に銃声が鳴り響いていた
+PRINTFORML 実体弾、レーザー兵器、小型ミサイル、ありとあらゆる弾が飛び交い、互いの土地を、建物を、人を破壊していく
+PRINTFORMW %CALLNAME:MASTER%達は戦える限り戦い、好きなタイミングで撤退することができる
+PRINTL
+PRINTFORML しかし戦闘のスコアは記録され、それにより報酬が支払われることも忘れてはいけない
+PRINTFORMW これは戦争であると同時に商売なのだ
+PRINTL ………………
+PRINTL …………
+PRINTL ……
+CALL SELECT_PMC_BATTLE_UNIT
+_BATTLE_UNIT_ID = RESULT
+IF _BATTLE_UNIT_ID == -1
+  PRINTFORMW 戦闘に参加できるユニットがいない
+  PRINTFORMW ユニットを編成してから再度クエストを受けよう
+  RETURN
+ENDIF
+
+WHILE !_RETIER
+  ;白兵戦参加メンバーの初期化
+  CALL CC_INIT()
+  ;前の戦いの記録が残っていたら上書き
+  IF _DIC:_BATTLE_UNIT_ID:0 != "-1" && _LINE_CHAN == 1
+    FOR LOCAL, 0, FINDELEMENT(CC_DEFENDER_LIST, "-1")
+      CC_DEFENDER_LIST:LOCAL = %DIC_SET(CC_DEFENDER_LIST:LOCAL, "体力", DIC_GET(_DIC:_BATTLE_UNIT_ID:LOCAL, "体力"))%
+      CC_DEFENDER_LIST:LOCAL = %DIC_SET(CC_DEFENDER_LIST:LOCAL, "状態", "待機")%
+    NEXT
+  ELSE
+    FOR LOCAL, 0, CHARANUM
+      SIF UNIT_ID:LOCAL == _BATTLE_UNIT_ID
+        CALL CC_ADDCHARA("DEFENDER", LOCAL)
+    NEXT
+    IF _DIC:_BATTLE_UNIT_ID:0 != "-1"
+      FOR LOCAL, 0, FINDELEMENT(CC_DEFENDER_LIST, "-1")
+        CC_DEFENDER_LIST:LOCAL = %DIC_SET(CC_DEFENDER_LIST:LOCAL, "体力", DIC_GET(_DIC:_BATTLE_UNIT_ID:LOCAL, "体力"))%
+        CC_DEFENDER_LIST:LOCAL = %DIC_SET(CC_DEFENDER_LIST:LOCAL, "状態", "待機")%
+      NEXT
+    ENDIF 
+  ENDIF
+  IF _SCORE < 100000
+    SELECTCASE RAND:1
+      CASE 0
+        CALL CC_ADDMOB("ATTACKER", "民兵1", 1000, 1000, 40)
+        CALL CC_ADDMOB("ATTACKER", "民兵2", 1000, 1000, 40)
+        CALL CC_ADDMOB("ATTACKER", "民兵3", 1000, 1000, 40)
+        CALL CC_ADDMOB("ATTACKER", "民兵4", 1000, 1000, 40)
+        CALL CC_ADDMOB("ATTACKER", "民兵5", 1000, 1000, 40)
+        CALL CC_ADDMOB("ATTACKER", "民兵6", 1000, 1000, 40)
+        _EXP = 6
+        _SCORE += POWER(40, 2) * 6
+    ENDSELECT
+  ELSEIF _SCORE < 1000000
+    SELECTCASE RAND:3
+      CASE 0, 1
+        CALL CC_ADDMOB("ATTACKER", "民兵1", 1000, 1000, 40)
+        CALL CC_ADDMOB("ATTACKER", "民兵2", 1000, 1000, 40)
+        CALL CC_ADDMOB("ATTACKER", "民兵3", 1000, 1000, 40)
+        CALL CC_ADDMOB("ATTACKER", "民兵4", 1000, 1000, 40)
+        CALL CC_ADDMOB("ATTACKER", "民兵5", 1000, 1000, 40)
+        CALL CC_ADDMOB("ATTACKER", "民兵6", 1000, 1000, 40)
+        _EXP = 6
+        _SCORE += POWER(40, 2) * 6
+      CASE 2
+        CALL CC_ADDMOB("ATTACKER", "PMC1", 2000, 2000, 60)
+        CALL CC_ADDMOB("ATTACKER", "PMC2", 2000, 2000, 60)
+        CALL CC_ADDMOB("ATTACKER", "PMC3", 2000, 2000, 60)
+        CALL CC_ADDMOB("ATTACKER", "PMC4", 2000, 2000, 60)
+        CALL CC_ADDMOB("ATTACKER", "PMC5", 2000, 2000, 60)
+        CALL CC_ADDMOB("ATTACKER", "PMC6", 2000, 2000, 60)
+        _EXP = 12
+        _SCORE += POWER(60, 2) * 6
+    ENDSELECT
+  ELSE
+    SELECTCASE RAND:10
+      CASE 0 TO 5
+        CALL CC_ADDMOB("ATTACKER", "民兵1", 1000, 1000, 40)
+        CALL CC_ADDMOB("ATTACKER", "民兵2", 1000, 1000, 40)
+        CALL CC_ADDMOB("ATTACKER", "民兵3", 1000, 1000, 40)
+        CALL CC_ADDMOB("ATTACKER", "民兵4", 1000, 1000, 40)
+        CALL CC_ADDMOB("ATTACKER", "民兵5", 1000, 1000, 40)
+        CALL CC_ADDMOB("ATTACKER", "民兵6", 1000, 1000, 40)
+        _EXP = 6
+        _SCORE += POWER(40, 2) * 6
+      CASE 6 TO 7
+        CALL CC_ADDMOB("ATTACKER", "PMC1", 2000, 2000, 60)
+        CALL CC_ADDMOB("ATTACKER", "PMC2", 2000, 2000, 60)
+        CALL CC_ADDMOB("ATTACKER", "PMC3", 2000, 2000, 60)
+        CALL CC_ADDMOB("ATTACKER", "PMC4", 2000, 2000, 60)
+        CALL CC_ADDMOB("ATTACKER", "PMC5", 2000, 2000, 60)
+        CALL CC_ADDMOB("ATTACKER", "PMC6", 2000, 2000, 60)
+        _EXP = 12
+        _SCORE += POWER(60, 2) * 6
+      CASE 8
+        CALL CC_ADDMOB("ATTACKER", "PMC1", 2000, 2000, 60)
+        CALL CC_ADDMOB("ATTACKER", "PMC2", 2000, 2000, 60)
+        CALL CC_ADDMOB("ATTACKER", "PMC3", 2000, 2000, 60)
+        CALL CC_ADDMOB("ATTACKER", "PMC4", 2000, 2000, 60)
+        CALL CC_ADDMOB("ATTACKER", "パワードスーツ1", 4000, 4000, 80)
+        CALL CC_ADDMOB("ATTACKER", "パワードスーツ2", 4000, 4000, 80)
+        _EXP = 16
+        _SCORE += POWER(60, 2) * 4 + POWER(80 + 40, 2) * 2
+      CASE 9
+        CALL CC_ADDMOB("ATTACKER", "戦闘用アンドロイド", 3000, 3000, 90)
+        CALL CC_ADDMOB("ATTACKER", "戦闘用アンドロイド", 3000, 3000, 90)
+        CALL CC_ADDMOB("ATTACKER", "戦闘用アンドロイド", 3000, 3000, 90)
+        CALL CC_ADDMOB("ATTACKER", "戦闘用アンドロイド", 3000, 3000, 90)
+        _EXP = 16
+        _SCORE += POWER(90 + 30, 2) * 4
+    ENDSELECT
+  ENDIF
+  ;白兵戦イベント呼出
+  CALL CLOSE_COMBAT()
+  SIF RESULT == 1
+    CALL GAMEOVER_46
+  CALL CC_ADD_COMBAT_EXP(_EXP)
+  FOR LOCAL, 0, FINDELEMENT(CC_DEFENDER_LIST, "-1")
+    _DIC:_BATTLE_UNIT_ID:LOCAL = %CC_DEFENDER_LIST:LOCAL%
+  NEXT
+
+  DRAWLINE
+  PRINTBUTTON "[連戦]", 0
+  PRINTBUTTON "[チーム変更]", 1
+  PRINTBUTTON "[撤退]", 3
+  PRINTL
+  DRAWLINE
+  INPUT
+  _LINE_CHAN = 0
+  IF RESULT == 0
+    ;連戦フラグオン
+    CALL CC_SET_FLAG(LINE_CHAN, "2")
+    _LINE_CHAN = 1
+  ELSEIF RESULT == 1
+    CALL SELECT_PMC_BATTLE_UNIT
+    _BATTLE_UNIT_ID = RESULT
+  ELSE
+    _RETIER = 1
+  ENDIF
+WEND
+DRAWLINE
+IF _SCORE == 0
+  LOCALS = $0
+ELSE
+  LOCALS = %TOSTR(_SCORE, "$###,###")%
+ENDIF
+PRINTFORMW 報酬として%LOCALS%手に入れた。
+MONEY += _SCORE
+DAY ++
+
+;----------------------------
+; クエスト説明
+;----------------------------
+@PMC_QUEST_BRIEFING_0
+SETCOLOR 0X666666
+CUSTOMDRAWLINE ///
+RESETCOLOR
+PRINTFORML 今回のミッションはUSFの第一惑星アースで行われる
+PRINTFORML アースではかねてより人口増加が問題になっており、増加しすぎた人間が集まって独自の都市を形成している
+PRINTFORMW それが通称第十一都市だ
+PRINTL
+PRINTFORML 第十一都市は社会不安の原因になりつつも、増加した人口の受け口として一定の機能をしており、政府は黙認している状況だった
+PRINTFORML ところがブルジョア層の過激な因子が第十一都市の撤去を求め、反第十一都市のグループを結成
+PRINTFORMW 野党勢力と企業連合の戦争屋がこれに乗っかり、過激な選民思想の武装勢力が出来上がってしまう
+PRINTL
+PRINTFORML 彼らは自身のことを国民の盾・アンキレーと名乗り、第十一都市への侵攻を開始した
+PRINTFORML 政府はこれらを排除したいが、軍関係者や政府要人の関係者が多数混じっており、正規軍では手を出すに出せない状況だ
+PRINTFORMW さらに政府軍が動くと内戦が勃発しているようなイメージを内外に与えてしまい、選挙に影響が出てしまうという政治的問題も孕んでいる
+PRINTL
+PRINTFORML そこで政府は特殊部隊を使った極秘作戦を展開。殺してはまずい要人を片っ端から拉致した
+PRINTFORML さらに正規軍は使わず、国内外のPMCを雇い、第十一都市の防衛に配備することにした
+PRINTFORMW それこそが今回のミッションだ。第十一都市をアンキレーの連中から防衛せよ
+PRINTL
+PRINTFORML アンキレーの構成員は大半が武器を持った素人だが、時折企業連合の戦争屋が混じっている
+PRINTFORML 大型戦闘車両の姿は確認できていないが、パワードスーツ、戦闘用アンドロイドなどが時折混じっているので注意しろ
+PRINTFORMW 作戦概要は以上だ。
+SETCOLOR 0X666666
+CUSTOMDRAWLINE ///
+RESETCOLOR
+
+

@@ -1,0 +1,188 @@
+﻿;----------------------------
+; 報復作戦
+;----------------------------
+
+;----------------------------
+; 受注可能か
+;----------------------------
+@PMC_QUEST_ACCEPTABLE_1
+CALL GET_STAR_ID_FROM_POS(CHARACTER_POSITION)
+RETURN RESULT != -1 && STAR_OWNER:RESULT == 国家ID_企業連合
+
+;----------------------------
+; クエスト名
+;----------------------------
+@PMC_QUEST_NAME_1
+RESULTS = 報復作戦(難易度3~)
+RETURN
+
+;----------------------------
+; クエスト本体
+;----------------------------
+@PMC_QUEST_BODY_1
+#DIM _BATTLE_UNIT_ID
+#DIM DYNAMIC _RETIER
+#DIM DYNAMIC _SCORE
+#DIM DYNAMIC _LINE_CHAN
+#DIMS _DIC, MAX_PMC_UNIT, MAX_PMC_UNIT_MEMBER
+#DIM _EXP
+#DIM DYNAMIC _MESSAGE
+
+FOR LOCAL, 0, MAX_PMC_UNIT
+  VARSET _DIC:LOCAL:0, "-1"
+NEXT
+
+PRINTFORML ブリーフィングを受けますか？
+CALL ASK_YN
+SIF !RESULT
+  CALL PMC_QUEST_BRIEFING_1
+CALL PMC_EDIT_UNIT
+
+PRINTFORML 光学迷彩で現場に突入した%CALLNAME:MASTER%の部隊を待ち構えていたのは、いくつかのパワードスーツと思考戦車、そしてまるで戦時のように慌ただしく動き回る兵士たちだった
+PRINTFORML どうやら同時多発的に実行されている今回の作戦で自分たちが標的にされていることを悟り、急いで迎撃の準備をしているのだろう
+PRINTFORMW %CALLNAME:MASTER%達は準備が整う前の敵に襲いかかった
+PRINTL ………………
+PRINTL …………
+PRINTL ……
+CALL SELECT_PMC_BATTLE_UNIT
+_BATTLE_UNIT_ID = RESULT
+IF _BATTLE_UNIT_ID == -1
+  PRINTFORMW 戦闘に参加できるユニットがいない
+  PRINTFORMW ユニットを編成してから再度クエストを受けよう
+  RETURN
+ENDIF
+
+WHILE !_RETIER
+  ;白兵戦参加メンバーの初期化
+  CALL CC_INIT()
+  ;前の戦いの記録が残っていたら上書き
+  IF _DIC:_BATTLE_UNIT_ID:0 != "-1" && _LINE_CHAN == 1
+    FOR LOCAL, 0, FINDELEMENT(CC_ATTACKER_LIST, "-1")
+      CC_ATTACKER_LIST:LOCAL = %DIC_SET(CC_ATTACKER_LIST:LOCAL, "体力", DIC_GET(_DIC:_BATTLE_UNIT_ID:LOCAL, "体力"))%
+      CC_ATTACKER_LIST:LOCAL = %DIC_SET(CC_ATTACKER_LIST:LOCAL, "状態", "待機")%
+    NEXT
+  ELSE
+    FOR LOCAL, 0, CHARANUM
+      SIF UNIT_ID:LOCAL == _BATTLE_UNIT_ID
+        CALL CC_ADDCHARA("ATTACKER", LOCAL)
+    NEXT
+    IF _DIC:_BATTLE_UNIT_ID:0 != "-1"
+      FOR LOCAL, 0, FINDELEMENT(CC_ATTACKER_LIST, "-1")
+        CC_ATTACKER_LIST:LOCAL = %DIC_SET(CC_ATTACKER_LIST:LOCAL, "体力", DIC_GET(_DIC:_BATTLE_UNIT_ID:LOCAL, "体力"))%
+        CC_ATTACKER_LIST:LOCAL = %DIC_SET(CC_ATTACKER_LIST:LOCAL, "状態", "待機")%
+      NEXT
+    ENDIF 
+  ENDIF
+  IF _SCORE < 100000
+    CALL CC_ADDMOB("DEFENDER", "PMC1", 2000, 2000, 60)
+    CALL CC_ADDMOB("DEFENDER", "PMC2", 2000, 2000, 60)
+    CALL CC_ADDMOB("DEFENDER", "PMC3", 2000, 2000, 60)
+    CALL CC_ADDMOB("DEFENDER", "PMC4", 2000, 2000, 60)
+    CALL CC_ADDMOB("DEFENDER", "PMC5", 2000, 2000, 60)
+    CALL CC_ADDMOB("DEFENDER", "PMC6", 2000, 2000, 60)
+    _EXP = 12
+    _SCORE += POWER(60, 2) * 6
+  ELSE
+    SELECTCASE RAND:5
+      CASE 0, 1
+        CALL CC_ADDMOB("DEFENDER", "PMC1", 2000, 2000, 60)
+        CALL CC_ADDMOB("DEFENDER", "PMC2", 2000, 2000, 60)
+        CALL CC_ADDMOB("DEFENDER", "PMC3", 2000, 2000, 60)
+        CALL CC_ADDMOB("DEFENDER", "PMC4", 2000, 2000, 60)
+        CALL CC_ADDMOB("DEFENDER", "PMC5", 2000, 2000, 60)
+        CALL CC_ADDMOB("DEFENDER", "PMC6", 2000, 2000, 60)
+        _EXP = 12
+        _SCORE += POWER(60, 2) * 6
+      CASE 2
+        CALL CC_ADDMOB("DEFENDER", "エルシー重工V8思考戦車1", 8000, 8000, 90)
+        CALL CC_ADDMOB("DEFENDER", "エルシー重工V8思考戦車2", 8000, 8000, 90)
+        CALL CC_ADDMOB("DEFENDER", "エルシー重工V8思考戦車3", 8000, 8000, 90)
+        _EXP = 12
+        _SCORE += POWER(90 + 80, 2) * 3
+      CASE 3
+        CALL CC_ADDMOB("DEFENDER", "PMC1", 2000, 2000, 60)
+        CALL CC_ADDMOB("DEFENDER", "PMC2", 2000, 2000, 60)
+        CALL CC_ADDMOB("DEFENDER", "PMC3", 2000, 2000, 60)
+        CALL CC_ADDMOB("DEFENDER", "PMC4", 2000, 2000, 60)
+        CALL CC_ADDMOB("DEFENDER", "パワードスーツ1", 4000, 4000, 80)
+        CALL CC_ADDMOB("DEFENDER", "パワードスーツ2", 4000, 4000, 80)
+        _EXP = 16
+        _SCORE += POWER(60, 2) * 4 + POWER(80 + 40, 2) * 2
+      CASE 4
+        CALL CC_ADDMOB("DEFENDER", "戦闘用アンドロイド1", 3000, 3000, 90)
+        CALL CC_ADDMOB("DEFENDER", "戦闘用アンドロイド2", 3000, 3000, 90)
+        CALL CC_ADDMOB("DEFENDER", "戦闘用アンドロイド3", 3000, 3000, 90)
+        CALL CC_ADDMOB("DEFENDER", "戦闘用アンドロイド4", 3000, 3000, 90)
+        CALL CC_ADDMOB("DEFENDER", "戦闘用アンドロイド5", 3000, 3000, 90)
+        CALL CC_ADDMOB("DEFENDER", "戦闘用アンドロイド6", 3000, 3000, 90)
+        _EXP = 16
+        _SCORE += POWER(90 + 30, 2) * 4
+    ENDSELECT
+  ENDIF
+  ;白兵戦イベント呼出
+  CALL CLOSE_COMBAT()
+  SIF RESULT == 2
+    CALL GAMEOVER_46
+  CALL CC_ADD_COMBAT_EXP(_EXP)
+  FOR LOCAL, 0, FINDELEMENT(CC_ATTACKER_LIST, "-1")
+    _DIC:_BATTLE_UNIT_ID:LOCAL = %CC_ATTACKER_LIST:LOCAL%
+  NEXT
+
+  IF _SCORE > 100000 && !_MESSAGE
+    PRINTFORMW 敵の準備が整ったようだ！
+    _MESSAGE = 1
+  ENDIF
+  DRAWLINE
+  PRINTBUTTON "[連戦]", 0
+  PRINTBUTTON "[チーム変更]", 1
+  PRINTBUTTON "[撤退]", 3
+  PRINTL
+  DRAWLINE
+  INPUT
+  _LINE_CHAN = 0
+  IF RESULT == 0
+    ;連戦フラグオン
+    CALL CC_SET_FLAG(LINE_CHAN, "1")
+    _LINE_CHAN = 1
+  ELSEIF RESULT == 1
+    CALL SELECT_PMC_BATTLE_UNIT
+    _BATTLE_UNIT_ID = RESULT
+  ELSE
+    _RETIER = 1
+  ENDIF
+WEND
+DRAWLINE
+IF _SCORE == 0
+  LOCALS = $0
+ELSE
+  LOCALS = %TOSTR(_SCORE, "$###,###")%
+ENDIF
+IF _SCORE > 300000
+  PRINTFORML 作戦大成功だ
+  PRINTFORMW 壊滅的な被害を与えることに成功した
+  PRINTFORMW 報酬として%LOCALS%手に入れた。さらにボーナスとして$1,000,000手に入れた
+  MONEY += (_SCORE + 1000000)
+ELSE
+  PRINTFORMW 報酬として%LOCALS%手に入れた。
+  MONEY += _SCORE
+ENDIF
+DAY ++
+
+;----------------------------
+; クエスト説明
+;----------------------------
+@PMC_QUEST_BRIEFING_1
+SETCOLOR 0X666666
+CUSTOMDRAWLINE ///
+RESETCOLOR
+PRINTFORML USFのアースのアンキレーに参加する企業連合のPMCに対し、報復作戦が実行されることが決定した
+PRINTFORML 万が一にでもUSF正規兵の死体を残すわけにはいかないので、PMCに作戦は一任される
+PRINTFORMW 秘密裏かつ断続的にPMCの拠点、物資集積所、協賛企業などを襲撃せよ
+PRINTL
+PRINTFORML 敵の拠点襲撃に際し、アームスーツ、思考戦車、戦闘アンドロイドなどで構成された部隊が応戦してくることが予想される
+PRINTFORMW 並の練度の兵士では相手にならないため、精鋭部隊を持って対応されたし
+SETCOLOR 0X666666
+CUSTOMDRAWLINE ///
+RESETCOLOR
+
+

@@ -73,3 +73,6 @@
 
 ;85 宙族からのお誘い
 #DIM SAVEDATA BLOCK_ASSULT
+
+;88 PMC_設立
+#DIM SAVEDATA PMC_名声
