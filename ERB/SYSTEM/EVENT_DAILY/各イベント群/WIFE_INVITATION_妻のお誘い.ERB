@@ -2,25 +2,24 @@
 ;基本的な発生確率(1000分率 100で10%)
 ;これにコンフィグ項目の発生頻度がかけられるので、必ずしもこの通りにはならない
 ;---------------------
-@EVENT_DAILY_VIGIL_RATE()
-RETURN 150
+@EVENT_DAILY_WIFE_INVITATION_RATE()
+RETURN 100
 
 
 ;---------------------
 ;確率以外の発生判定
 ;〇期以降になると発生するとか、デイリー側で利用している変数が-1だったら起こさない　みたいなはじき方をするときに使う
 ;---------------------
-@EVENT_DAILY_VIGIL_DECISION()
+@EVENT_DAILY_WIFE_INVITATION_DECISION()
 SIF IS_FEMALE(MASTER)
 	RETURN 0
-CALL GET_STAR_ID_FROM_POS(CHARACTER_POSITION)
 RETURN DAY >= 10
 
 ;---------------------
 ;ジャンル
 ;コンフィグ設定で使用
 ;---------------------
-@EVENT_DAILY_VIGIL_GENRE()
+@EVENT_DAILY_WIFE_INVITATION_GENRE()
 RETURN デイリー_ジャンル_エロ
 
 ;---------------------
@@ -28,12 +27,8 @@ RETURN デイリー_ジャンル_エロ
 ;他の関数は必須だが、これだけはなくてもよい　というかパフォーマンスへ影響するので不要なら作ってはならない
 ;対象が存在せずデイリーを開始できない場合は0を返すことでデイリーの発生をキャンセルする
 ;---------------------
-@EVENT_DAILY_VIGIL_SETTARGET()
+@EVENT_DAILY_WIFE_INVITATION_SETTARGET()
 
-SIF !IS_SP_COUNTRY(CFLAG:MASTER:所属)
-	RETURN 0
-
-;男で、主人公と同勢力で、捕虜でなく死亡もしていないキャラから対象をランダム選出(好感度と従属度が高いキャラの方が選ばれやすい)
 FOR LOCAL, 0, CHARANUM
 	IF TALENT:LOCAL:正妻 || TALENT:LOCAL:妾
 		DAILY_TARGET:DAILY_TARGET_NUM = LOCAL
@@ -53,7 +48,7 @@ RETURN 1
 ;発生しなかったというのは例えば、特定条件を満たすキャラからランダムに一人選ぶデイリーで、そもそもその条件を満たすキャラが一人もいないみたいなとき
 ;旧仕様で作ったことある人向けにいうと「旧仕様のデイリー本体冒頭で-1を返すような状況」
 ;---------------------
-@EVENT_DAILY_VIGIL()
+@EVENT_DAILY_WIFE_INVITATION()
 #DIM 対象
 
 対象 = DAILY_TARGET:(RAND:DAILY_TARGET_NUM)
@@ -105,6 +100,7 @@ SELECTCASE RAND:7
 ENDSELECT
 
 CALL FUCK_MAKELOVE(対象, GET_ID(MASTER), @"%ANAME(MASTER)%の唇", ANAME(MASTER))
+CALL FUCK(MASTER, "性技, 性交, Ｃ, 射精, Ｖ挿入", "童貞喪失, キス喪失", 0, @"%ANAME(対象)%の唇", "", @"%ANAME(対象)%の膣", "和姦")
 CFLAG:対象:好感度 += 500 - RAND:200
 CFLAG:対象:支配度 += 500 - RAND:200
 RETURN 1
