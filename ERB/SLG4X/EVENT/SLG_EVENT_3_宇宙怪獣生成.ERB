@@ -1,0 +1,390 @@
+﻿;---------------------------
+; 宇宙怪獣の生成
+; 惑星が無く、宇宙港もないセクターにランダムで宇宙怪獣の小～中の群れを出現させる
+;---------------------------
+@IS_HAPPEN_SLG_EVENT_3
+IF DAY % 30 == 0
+	RETURN 1
+ELSE
+	RETURN 0
+ENDIF
+
+@SLG_EVENT_MAIN_3
+#DIM DYNAMIC 戦力係数
+#DIM DYNAMIC セクター内宇宙怪獣数
+#DIM DYNAMIC SECTOR_ID
+#DIM DYNAMIC SHIP_ID
+#DIM DYNAMIC PORT_ID
+#DIM DYNAMIC POS_ID
+#DIM DYNAMIC FLG_SKIP
+#DIM DYNAMIC 宇宙怪獣生成数
+#DIM CONST セクター内宇宙怪獣出現上限 = 40
+#DIM CONST 宇宙怪獣生成上限 = 500
+#DIM CONST 宇宙怪獣生成確率 = 150 ;千分率
+#DIM SHIP_MODEL_ID
+
+
+TRYCALLFORM GET_SHIP_STATUS_{SHIP_MODEL_ID}
+
+TRYCALLFORM GET_SHIP_RESOURCE_{SHIP_MODEL_ID}
+
+
+FOR LOCAL, 0 ,MAX_SHIP
+	IF SHIP_COUNTRY:LOCAL == 国家ID_プレイヤー
+		SELECTCASE SHIP_CATEGORY:LOCAL
+			CASE コルベット
+				戦力係数 += 1
+			CASE フリゲート
+				戦力係数 += 3
+			CASE 駆逐艦
+				戦力係数 += 5
+			CASE 巡洋艦
+				戦力係数 += 7
+			CASE 戦艦, 空母
+				戦力係数 += 9
+			CASEELSE
+		ENDSELECT
+	ENDIF
+NEXT
+
+FOR LOCAL, 0 ,MAX_SHIP
+	IF SHIP_COUNTRY:LOCAL == 国家ID_一般海賊
+		宇宙怪獣生成数 ++
+	ENDIF
+NEXT
+SIF 宇宙怪獣生成数 > 宇宙怪獣生成上限
+	RETURN
+
+FOR SECTOR_ID, 0, MAX_SECTOR
+	SIF RAND(0, 1000) >= 宇宙怪獣生成確率
+		CONTINUE
+	;星系港と宇宙港のあるセクターではモブは生成しない
+	FOR PORT_ID, 0, 星系数
+		IF 星系座標ID:PORT_ID / 10000 == SECTOR_ID || PORT_POSITION_ID:PORT_ID / 10000 == SECTOR_ID
+			FLG_SKIP = 1
+			BREAK
+		ENDIF
+	NEXT
+	IF FLG_SKIP == 1
+		FLG_SKIP = 0
+		CONTINUE
+	ENDIF
+	セクター内宇宙怪獣数 = 0
+	FOR SHIP_ID, 0, MAX_SHIP
+		IF SECTOR_ID == SHIP_POSITION:SHIP_ID / 10000
+			セクター内宇宙怪獣数 ++ 
+		ENDIF
+	NEXT
+	SIF セクター内宇宙怪獣数 > セクター内宇宙怪獣出現上限
+		CONTINUE
+	CALL SLG_EVENT_3_GET_RANDPOS(SECTOR_ID, RAND(4, 6))
+	SIF RESULT == -1
+		CONTINUE
+	POS_ID = RESULT
+	{
+		SELECTCASE IFRAND(
+			"1",1,
+			"2",戦力係数 > 10,
+			"3",戦力係数 > 20,
+			"D1,4",戦力係数 > 40,
+			"D1TO2,5",戦力係数 > 60
+			)
+	}
+	CASE 1
+		SELECTCASE RAND:100
+		CASE 0 TO 70
+			FOR LOCAL, 0, RAND(1, 5)
+				;コルベット
+				LOCALS =宇宙ししゃも
+				CALL INIT_PRESET_SHIP(国家ID_一般海賊,POS_ID, 宇宙ししゃも,LOCALS,宇宙ししゃも)
+			NEXT
+		CASE 70 TO 95
+			FOR LOCAL, 0, RAND(1, 5)
+				;コルベット
+				LOCALS =宇宙しゃこ
+				CALL INIT_PRESET_SHIP(国家ID_一般海賊,POS_ID, 宇宙しゃこ,LOCALS, 宇宙しゃこ)
+			NEXT
+		CASE 96 TO 99
+			FOR LOCAL, 0, RAND(1, 5)
+				;フリゲート
+				LOCALS =宇宙巨大スライム
+				CALL INIT_PRESET_SHIP(国家ID_一般海賊,POS_ID,宇宙巨大スライム,LOCALS, 宇宙巨大スライム)
+			NEXT
+			ENDSELECT
+	CASE 2
+		SELECTCASE RAND:100
+		CASE 0 TO 14
+			FOR LOCAL, 0, RAND(1, 10)
+				;コルベット
+				LOCALS =宇宙ししゃも
+				CALL INIT_PRESET_SHIP(国家ID_一般海賊,POS_ID, 宇宙ししゃも,LOCALS,宇宙ししゃも)
+			NEXT
+		CASE 14 TO 29
+			FOR LOCAL, 0, RAND(1, 5)
+				;コルベット
+				LOCALS =宇宙しゃこ
+				CALL INIT_PRESET_SHIP(国家ID_一般海賊,POS_ID,宇宙しゃこ,LOCALS,宇宙しゃこ)
+			NEXT
+		CASE 30 TO 69
+			FOR LOCAL, 0, RAND(1, 5)
+				;フリゲート
+				LOCALS =宇宙巨大スライム
+				CALL INIT_PRESET_SHIP(国家ID_一般海賊,POS_ID, 宇宙巨大スライム,LOCALS, 宇宙巨大スライム)
+			NEXT
+		CASE 70 TO 84
+			FOR LOCAL, 0, RAND(1, 3)
+				;駆逐艦
+				LOCALS =宇宙たこ
+				CALL INIT_PRESET_SHIP(国家ID_一般海賊,POS_ID, 宇宙たこ,LOCALS, 宇宙たこ)
+			NEXT
+		CASE 85 TO 99
+			FOR LOCAL, 0, RAND(1, 3)
+				;駆逐艦
+				LOCALS =宇宙まぐろ
+				CALL INIT_PRESET_SHIP(国家ID_一般海賊,POS_ID, 宇宙まぐろ,LOCALS, 宇宙まぐろ)
+			NEXT
+			ENDSELECT
+	CASE 3
+		SELECTCASE RAND:100
+		CASE 0 TO 4
+			FOR LOCAL, 0, RAND(9, 20)
+				;コルベット
+				LOCALS =宇宙ししゃも
+				CALL INIT_PRESET_SHIP(国家ID_一般海賊,POS_ID, 宇宙ししゃも,LOCALS,宇宙ししゃも)
+			NEXT
+		CASE 4 TO 9
+			FOR LOCAL, 0, RAND(3, 10)
+				;コルベット
+				LOCALS =宇宙しゃこ
+				CALL INIT_PRESET_SHIP(国家ID_一般海賊,POS_ID,宇宙しゃこ,LOCALS,宇宙しゃこ)
+			NEXT
+		CASE 10 TO 29
+			FOR LOCAL, 0, RAND(3, 10)
+				;フリゲート
+				LOCALS =宇宙巨大スライム
+				CALL INIT_PRESET_SHIP(国家ID_一般海賊,POS_ID,宇宙巨大スライム,LOCALS, 宇宙巨大スライム)
+			NEXT
+		CASE 30 TO 59
+			FOR LOCAL, 0, RAND(1, 4)
+				;駆逐艦
+				LOCALS =宇宙たこ
+				CALL INIT_PRESET_SHIP(国家ID_一般海賊,POS_ID,宇宙たこ,LOCALS,宇宙たこ)
+			NEXT
+			FOR LOCAL, 0, RAND(0, 6)
+				;コルベット
+				LOCALS =宇宙しゃこ
+				CALL INIT_PRESET_SHIP(国家ID_一般海賊,POS_ID, 宇宙しゃこ,LOCALS,宇宙しゃこ)
+			NEXT
+		CASE 60 TO 89
+			FOR LOCAL, 0, RAND(1, 4)
+				;駆逐艦
+				LOCALS =宇宙まぐろ
+				CALL INIT_PRESET_SHIP(国家ID_一般海賊,POS_ID, 宇宙まぐろ,LOCALS,宇宙まぐろ)
+			NEXT
+			FOR LOCAL, 0, RAND(0, 10)
+				;コルベット
+				LOCALS =宇宙ししゃも
+				CALL INIT_PRESET_SHIP(国家ID_一般海賊,POS_ID,宇宙ししゃも,LOCALS, 宇宙ししゃも)
+			NEXT
+		CASE 90 TO 99
+			FOR LOCAL, 0, RAND(1, 3)
+				;巡洋艦
+				LOCALS =宇宙いか
+				CALL INIT_PRESET_SHIP(国家ID_一般海賊,POS_ID, 宇宙いか,LOCALS, 宇宙いか)
+			NEXT
+			FOR LOCAL, 0, RAND(0, 6)
+				;フリゲート
+				LOCALS =宇宙巨大スライム
+				CALL INIT_PRESET_SHIP(国家ID_一般海賊,POS_ID, 宇宙巨大スライム,LOCALS, 宇宙巨大スライム)
+			NEXT
+			ENDSELECT
+	CASE 4
+				SELECTCASE RAND:100
+		CASE 0 TO 4
+			FOR LOCAL, 0, RAND(9, 20)
+				;コルベット
+				LOCALS =宇宙ししゃも
+				CALL INIT_PRESET_SHIP(国家ID_一般海賊,POS_ID, 宇宙ししゃも,LOCALS,宇宙ししゃも)
+			NEXT
+		CASE 5 TO 9
+			FOR LOCAL, 0, RAND(1, 6)
+				;コルベット
+				LOCALS =宇宙しゃこ
+				CALL INIT_PRESET_SHIP(国家ID_一般海賊,POS_ID,宇宙しゃこ,LOCALS,宇宙しゃこ)
+			NEXT
+			FOR LOCAL, 0, RAND(1, 6)
+				;フリゲート
+				LOCALS =宇宙巨大スライム
+				CALL INIT_PRESET_SHIP(国家ID_一般海賊,POS_ID, 宇宙巨大スライム,LOCALS, 宇宙巨大スライム)
+			NEXT
+		CASE 10 TO 49
+			FOR LOCAL, 0, RAND(1, 4)
+				;駆逐艦
+				LOCALS =宇宙たこ
+				CALL INIT_PRESET_SHIP(国家ID_一般海賊,POS_ID, 宇宙たこ,LOCALS,宇宙たこ)
+			NEXT
+			FOR LOCAL, 0, RAND(0, 6)
+				;コルベット
+				LOCALS =宇宙しゃこ
+				CALL INIT_PRESET_SHIP(国家ID_一般海賊,POS_ID, 宇宙しゃこ,LOCALS,宇宙しゃこ)
+			NEXT
+			FOR LOCAL, 0, RAND(0, 6)
+				;フリゲート
+				LOCALS =宇宙巨大スライム
+				CALL INIT_PRESET_SHIP(国家ID_一般海賊,POS_ID, 宇宙巨大スライム,LOCALS, 宇宙巨大スライム)
+			NEXT
+		CASE 50 TO 79
+			FOR LOCAL, 0, RAND(1, 6)
+				;駆逐艦
+				LOCALS =宇宙まぐろ
+				CALL INIT_PRESET_SHIP(国家ID_一般海賊,POS_ID, 宇宙まぐろ,LOCALS, 宇宙まぐろ)
+			NEXT
+			FOR LOCAL, 0, RAND(0, 10)
+				;コルベット
+				LOCALS =宇宙ししゃも
+				CALL INIT_PRESET_SHIP(国家ID_一般海賊,POS_ID, 宇宙ししゃも,LOCALS, 宇宙ししゃも)
+			NEXT
+		CASE 85 TO 99
+			FOR LOCAL, 0, RAND(1, 3)
+				;巡洋艦
+				LOCALS =宇宙いか
+				CALL INIT_PRESET_SHIP(国家ID_一般海賊,POS_ID, 宇宙いか,LOCALS, 宇宙いか)
+			NEXT
+			FOR LOCAL, 0, RAND(1, 6)
+				;駆逐艦
+				LOCALS =宇宙たこ
+				CALL INIT_PRESET_SHIP(国家ID_一般海賊,POS_ID, 宇宙たこ,LOCALS, 宇宙たこ)
+			NEXT
+			ENDSELECT
+	CASE 5
+		SELECTCASE RAND:100
+		CASE 0 TO 9
+			FOR LOCAL, 0, RAND(18, 40)
+				;コルベット
+				LOCALS =宇宙ししゃも
+				CALL INIT_PRESET_SHIP(国家ID_一般海賊,POS_ID, 宇宙ししゃも,LOCALS, 宇宙ししゃも)
+			NEXT
+		CASE 10 TO 49
+			FOR LOCAL, 0, RAND(0, 2)
+				;戦艦
+				LOCALS =宇宙かに
+				CALL INIT_PRESET_SHIP(国家ID_一般海賊,POS_ID, 宇宙かに,LOCALS,宇宙かに)
+			NEXT
+			FOR LOCAL, 0, RAND(1, 3)
+				;巡洋艦
+				LOCALS =宇宙いか
+				CALL INIT_PRESET_SHIP(国家ID_一般海賊,POS_ID, 宇宙いか,LOCALS, 宇宙いか)
+			NEXT
+			FOR LOCAL, 0, RAND(0, 5)
+				;駆逐艦
+				LOCALS =宇宙たこ
+				CALL INIT_PRESET_SHIP(国家ID_一般海賊,POS_ID, 宇宙たこ,LOCALS, 宇宙たこ)
+			NEXT
+			FOR LOCAL, 0, RAND(0, 6)
+				;コルベット
+				LOCALS =宇宙しゃこ
+				CALL INIT_PRESET_SHIP(国家ID_一般海賊,POS_ID,宇宙しゃこ,LOCALS, 宇宙しゃこ)
+			NEXT
+			FOR LOCAL, 0, RAND(0, 6)
+				;フリゲート
+				LOCALS =宇宙巨大スライム
+				CALL INIT_PRESET_SHIP(国家ID_一般海賊,POS_ID, 宇宙巨大スライム,LOCALS,宇宙巨大スライム)
+			NEXT
+		CASE 50 TO 89
+			FOR LOCAL, 0, RAND(0, 2)
+				;空母
+				LOCALS =宇宙ひらめ
+				CALL INIT_PRESET_SHIP(国家ID_一般海賊,POS_ID, 宇宙ひらめ,LOCALS, 宇宙ひらめ)
+			NEXT
+			FOR LOCAL, 0, RAND(0, 5)
+				;巡洋艦
+				LOCALS =宇宙いか
+				CALL INIT_PRESET_SHIP(国家ID_一般海賊,POS_ID, 宇宙いか,LOCALS, 宇宙いか)
+			NEXT
+			FOR LOCAL, 0, RAND(1, 9)
+				;駆逐艦
+				LOCALS =宇宙まぐろ
+				CALL INIT_PRESET_SHIP(国家ID_一般海賊,POS_ID, 宇宙まぐろ,LOCALS, 宇宙まぐろ)
+			NEXT
+			FOR LOCAL, 0, RAND(0, 20)
+				;コルベット
+				LOCALS =宇宙ししゃも
+				CALL INIT_PRESET_SHIP(国家ID_一般海賊,POS_ID, 宇宙ししゃも,LOCALS, 宇宙ししゃも)
+			NEXT
+		CASE 90 TO 99
+			FOR LOCAL, 0, RAND(0, 1)
+				;戦艦
+				LOCALS =宇宙まんぼう
+				CALL INIT_PRESET_SHIP(国家ID_一般海賊,POS_ID, 宇宙まんぼう,LOCALS,宇宙まんぼう)
+			NEXT
+			FOR LOCAL, 0, RAND(0, 2)
+				;戦艦
+				LOCALS =宇宙かに
+				CALL INIT_PRESET_SHIP(国家ID_一般海賊,POS_ID,宇宙かに,LOCALS,宇宙かに)
+			NEXT
+			FOR LOCAL, 0, RAND(0, 2)
+				;空母
+				LOCALS =宇宙ひらめ
+				CALL INIT_PRESET_SHIP(国家ID_一般海賊,POS_ID, 宇宙ひらめ,LOCALS,宇宙ひらめ)
+			NEXT
+			FOR LOCAL, 0, RAND(0, 6)
+				;巡洋艦
+				LOCALS =宇宙いか
+				CALL INIT_PRESET_SHIP(国家ID_一般海賊,POS_ID, 宇宙いか,LOCALS, 宇宙いか)
+			NEXT
+			FOR LOCAL, 0, RAND(1, 9)
+				;駆逐艦
+				LOCALS =宇宙たこ
+				CALL INIT_PRESET_SHIP(国家ID_一般海賊,POS_ID, 宇宙たこ,LOCALS,宇宙たこ)
+			NEXT
+			FOR LOCAL, 0, RAND(0, 9)
+				;駆逐艦
+				LOCALS =宇宙まぐろ
+				CALL INIT_PRESET_SHIP(国家ID_一般海賊,POS_ID, 宇宙まぐろ,LOCALS, 宇宙まぐろ)
+			NEXT
+			FOR LOCAL, 0, RAND(0, 10)
+				;コルベット
+				LOCALS =宇宙しゃこ
+				CALL INIT_PRESET_SHIP(国家ID_一般海賊,POS_ID,宇宙しゃこ,LOCALS, 宇宙しゃこ)
+			NEXT
+			FOR LOCAL, 0, RAND(0, 10)
+				;フリゲート
+				LOCALS =宇宙巨大スライム
+				CALL INIT_PRESET_SHIP(国家ID_一般海賊,POS_ID, 宇宙巨大スライム,LOCALS,宇宙巨大スライム)
+			NEXT
+				FOR LOCAL, 0, RAND(0, 30)
+				;コルベット
+				LOCALS =宇宙ししゃも
+				CALL INIT_PRESET_SHIP(国家ID_一般海賊,POS_ID, 宇宙ししゃも,LOCALS,宇宙ししゃも)
+			NEXT
+	ENDSELECT
+	
+	ENDSELECT
+
+
+NEXT
+;-------------------------------------------------
+; 指定セクターの任意地点を選定
+; SECTOR_ID: 選定対象のSECTOR_ID
+; ARG:1		 中心点(7,7)からの距離。最大9
+; RESUTL:0 POS_ID
+; 100回抽選しても生成できない場合 -1
+; ※マップ上に何もない場所(無OR明瞭)を選定しているが艦隊とはバッティングし得る
+;-------------------------------------------------
+@SLG_EVENT_3_GET_RANDPOS(SECTOR_ID, ARG:1 = 0 )
+#DIM POS_ID
+#DIM SECTOR_ID
+#DIM X_POS
+#DIM Y_POS
+
+FOR LOCAL , 1 , 100
+	CALL RAND_CHOICE_XY( MAP_WIDTH, (ARG:1))
+	X_POS = RESULT:0
+	Y_POS = RESULT:1	
+	IF MAP:SECTOR_ID:X_POS:Y_POS == 無 || MAP:SECTOR_ID:X_POS:Y_POS == 明瞭
+		POS_ID = SECTOR_ID * 10000 + X_POS * 100 + Y_POS
+		RETURN POS_ID
+	ENDIF
+NEXT
+
+RETURN -1

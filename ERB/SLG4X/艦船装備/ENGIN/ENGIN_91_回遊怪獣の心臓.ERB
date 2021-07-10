@@ -1,0 +1,36 @@
+﻿;-----------------------------------
+; エンジン
+;-----------------------------------
+@GET_ENGIN_NAME_91
+RESULTS = 回遊怪獣の心臓
+
+@GET_ENGIN_STATUS_91(STATUS)
+#DIM REF STATUS
+
+STATUS:SPEED = 2
+STATUS:AVOID = 10
+STATUS:SIZE = 4
+STATUS:PRICE = 9999999
+
+;-----------------------------------
+; エンジンの説明
+;-----------------------------------
+@GET_ENGIN_DESCRIPTION_91(STATUS)
+#DIM STATUS, STATUS_LENGTH
+
+CALL GET_ENGIN_STATUS_91(STATUS)
+CALL GET_ENGIN_NAME_91
+PRINTFORML %RESULTS%
+PRINTFORML スピード  : {STATUS:SPEED}
+PRINTFORML 回避      : {STATUS:AVOID}
+PRINTFORML サイズ    : {STATUS:SIZE}
+
+;-----------------------------------
+; エンジンの資材
+;-----------------------------------
+@GET_ENGIN_RESOURCE_91(USE_RESOURCE)
+#DIM REF USE_RESOURCE
+
+
+@IS_SALE_ENGIN_91
+RETURN 0

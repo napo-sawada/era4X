@@ -1,0 +1,81 @@
+﻿;--------------------------
+; !!クエスト名と 83を好きな番号に変える！!
+; 宇宙まぐろ漁参加依頼
+;--------------------------
+
+;--------------------------
+; クエスト受注可能か
+;--------------------------
+@QUEST_ACCEPTABLE_83
+SIF QUEST_COMPLETE_DATE:83 == 0 || DAY - QUEST_COMPLETE_DATE:83 > 10
+	RETURN 1
+RETURN 0
+
+;--------------------------
+; クエストの名前を返却
+;--------------------------
+@QUEST_NAME_83
+RESULTS = 宇宙まぐろ漁参加依頼
+RETURN
+
+;--------------------------
+; クエスト本体
+;--------------------------
+@QUEST_BODY_83
+#DIM SECTOR_ID
+#DIM IS_COMPLETE
+#DIM SHIP_ID
+
+IF QUEST_PROGRESS:83 == 0
+	PRINTFORML 「お前、戦闘艦を持ってるか？」
+	PRINTFORML %CALLNAME:MASTER%は漁師らしき男に話しかけられた
+	$INPUT_LOOP
+	PRINTBUTTON "[0] はい", 0
+	PRINTBUTTON "[1] いいえ", 1
+	INPUT
+	IF RESULT == 0
+		PRINTFORML 「よし、ちょうどいい。このセクターに宇宙まぐろの群れが通るんだが
+		PRINTFORML 戦闘漁船の数が足りないんだ、まぐろ漁を手伝ってくれ
+		PRINTFORMW $100,000出す。頼んだぞ！」
+		PRINTFORMW 無理やり宇宙まぐろ漁参加依頼を受けさせられてしまった
+		PRINTFORML 「仕留めたまぐろは俺たちが回収して専用工船で加工するが
+		PRINTFORMW 生け捕りにした分は好きにしていいぞ」
+		QUEST_PROGRESS:83 = 1
+		CALL ID2POS(CHARACTER_POSITION)
+		SECTOR_ID = RESULT:0
+		CALL POS2ID(SECTOR_ID, 9, 9)
+		LOCAL = RESULT
+		CALL INIT_PRESET_SHIP(10, LOCAL, 宇宙まぐろ, "宇宙まぐろ", 宇宙まぐろ)
+		CALL INIT_PRESET_SHIP(10, LOCAL, 宇宙まぐろ, "宇宙まぐろ", 宇宙まぐろ)
+		CALL INIT_PRESET_SHIP(10, LOCAL, 宇宙まぐろ, "宇宙まぐろ", 宇宙まぐろ)
+		QUEST_FLAG_SHIP_ID:83= RESULT
+		CALL INIT_PRESET_SHIP(10, LOCAL, 宇宙まぐろ, "宇宙まぐろ", 宇宙まぐろ)
+		CALL INIT_PRESET_SHIP(10, LOCAL, 宇宙まぐろ, "宇宙まぐろ", 宇宙まぐろ)
+		CALL INIT_PRESET_SHIP(10, LOCAL, 宇宙まぐろ, "宇宙まぐろ", 宇宙まぐろ)
+		CALL INIT_PRESET_SHIP(10, LOCAL, 宇宙まぐろ, "宇宙まぐろ", 宇宙まぐろ)
+	ELSEIF RESULT == 1
+		PRINTFORMW 「そうか、ならいいんだ……」
+	ELSE
+		GOTO INPUT_LOOP
+	ENDIF
+ELSE
+	IS_COMPLETE = 0
+	CALL ID2POS(CHARACTER_POSITION)
+	CALL POS2ID(RESULT:0, 9, 9)
+	SIF SHIP_COUNTRY:(QUEST_FLAG_SHIP_ID:83) != 国家ID_一般海賊 || SHIP_POSITION:(QUEST_FLAG_SHIP_ID:83) != RESULT
+		IS_COMPLETE = 1
+	IF IS_COMPLETE == 0
+		PRINTFORMW 「群れがセクターから離れる前にさあいくぞ！」
+	ELSE
+		PRINTFORML 「大漁だ！助かったよ
+		PRINTFORML これが報酬だ。俺はみんなに報告してくるよ」
+		PRINTFORMW 男は%CALLNAME:MASTER%に報酬の$100,000を押し付けると、足早に去って行った
+		MONEY += 100000
+		QUEST_PROGRESS:83 = 0
+		QUEST_COMPLETE_DATE = DAY
+		CALL GET_STAR_ID_FROM_POS(CHARACTER_POSITION)
+		SIF RESULT >= 0 
+			REL_LIKE_COUNTRY:(STAR_OWNER:RESULT):国家ID_プレイヤー += 2
+	ENDIF
+ENDIF
+

@@ -1,0 +1,43 @@
+﻿;-----------------------------------
+; メインウェポン
+;-----------------------------------
+@GET_MAIN_WEAPON_NAME_197
+RESULTS = まんぼう巨大ビーム
+
+@GET_MAIN_WEAPON_STATUS_197(STATUS)
+#DIM REF STATUS
+
+STATUS:DAMAGE = 6000
+STATUS:FIRE_RATE = 1
+STATUS:HIT_RATE = 20
+STATUS:FIRE_RANGE = 4
+STATUS:SIZE = 4
+STATUS:WEAPON_TYPE = ビーム
+STATUS:PRICE = 640000
+; SIZE5実装時変更予定
+;-----------------------------------
+; メインウェポンの説明
+;-----------------------------------
+@GET_MAIN_WEAPON_DESCRIPTION_197
+#DIM STATUS, STATUS_LENGTH
+
+CALL GET_MAIN_WEAPON_STATUS_197(STATUS)
+CALL GET_MAIN_WEAPON_NAME_197
+PRINTFORML %RESULTS%
+PRINTFORML 恐るべき威力の巨大生体粒子加速砲。
+PRINTFORML 減衰せずに長距離目標に届くが精度と速度はいまいちなので回避しやすい。
+PRINTFORML ダメージ  : {STATUS:DAMAGE}
+PRINTFORML 射撃レート: {STATUS:FIRE_RATE}発/ターン
+PRINTFORML 命中率    : {STATUS:HIT_RATE}
+PRINTFORML 有効距離  : {STATUS:FIRE_RANGE}
+PRINTFORML サイズ    : {STATUS:SIZE}
+
+;-----------------------------------
+; メインウェポンの資材
+;-----------------------------------
+@GET_MAIN_WEAPON_RESOURCE_197(USE_RESOURCE)
+#DIM REF USE_RESOURCE
+
+USE_RESOURCE:武装合金 = 640
+USE_RESOURCE:耐熱合金 = 160
+USE_RESOURCE:武装制御機器 = 320
