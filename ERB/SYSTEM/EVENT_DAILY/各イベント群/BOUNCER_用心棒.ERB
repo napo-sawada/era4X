@@ -11,7 +11,8 @@ RETURN 20
 ;〇期以降になると発生するとか、デイリー側で利用している変数が-1だったら起こさない　みたいなはじき方をするときに使う
 ;---------------------
 @EVENT_DAILY_BOUNCER_DECISION()
-SIF !MOORING(MASTER)
+CALL GET_STAR_ID_FROM_POS(CHARACTER_POSITION)
+SIF RESULT == -1
 	RETURN 0
 RETURN DAY >= 10
 

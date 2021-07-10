@@ -13,7 +13,9 @@ SIF DVAR:金貸し_発生フラグ == -1
 
 SIF DAY < 15
 	RETURN 0
-
+CALL GET_STAR_ID_FROM_POS(CHARACTER_POSITION)
+SIF RESULT == -1
+	RETURN 0
 ;返済期限がある（借りている）または現在額がある（返済中）ならスキップ
 SIF !(DVAR:金貸し_返済期限 == 0 && DVAR:金貸し_残り融資額 == 0) 
 	RETURN 0
@@ -45,7 +47,7 @@ IF DVAR:金貸し_返済期限 == 0 && DVAR:金貸し_残り融資額 == 0 && DV
 	返済期限 = RAND(5, 10)
 	融資額 = MONEY / 10 + GET_SUM_ECONOMY(CFLAG:MASTER:所属) * (ABL:MASTER:白兵 + ABL:MASTER:操艦 + ABL:MASTER:知略 + ABL:MASTER:政治 + 100) / 40000 * (返済期限)
 	返済額 = 融資額 * 12 / 10
-	PRINTFORMW %ANAME(MASTER)%が仕事をしていると、侍従が来客を告げた
+	PRINTFORMW %ANAME(MASTER)%が仕事をしていると、侍従アンドロイドが来客を告げた
 	PRINTFORMW なんでも「恰幅の良い人の良さそうな中年が来た」のだそうだ
 	PRINTFORMW 何の用かと訝りながら、%ANAME(MASTER)%は、会うことにしてみた
 	PRINTFORML ・

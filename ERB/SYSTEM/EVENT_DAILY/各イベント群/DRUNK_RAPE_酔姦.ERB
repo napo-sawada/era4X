@@ -13,7 +13,8 @@ RETURN 25
 @EVENT_DAILY_DRUNK_RAPE_DECISION()
 SIF !HAS_PENIS(MASTER)
 	RETURN 0
-SIF !MOORING(MASTER)
+CALL GET_STAR_ID_FROM_POS(CHARACTER_POSITION)
+SIF RESULT == -1
 	RETURN 0
 SIF DAY < 10
 	RETURN 0
@@ -59,20 +60,10 @@ RETURN デイリー_ジャンル_エロ
 @EVENT_DAILY_DRUNK_RAPE()
 #DIM 対象
 
-
-IF GET_COUNTRY_BOSS(CFLAG:MASTER:所属) == MASTER
-	PRINTFORMW 部下から近々、宴が開かれることを聞かされた
-	PRINTFORMW 様々な国から多くの人々がやってくる、中々盛大な宴らしい
-	PRINTFORMW 息抜きに行ってみたらどうかと言われた
-	DVAR:睡姦_発生フラグ = 1
-ELSEIF DVAR:睡姦_発生フラグ == 0
-	PRINTFORMW %ANAME(GET_COUNTRY_BOSS(CFLAG:MASTER:所属))%から近々、宴が開かれることを聞かされた
-	PRINTFORMW 様々な国から多くの人々がやってくる、中々盛大な宴らしい
-	PRINTFORMW 息抜きに行ってみないかと言われた
-	DVAR:睡姦_発生フラグ = 1
-ELSE
-	PRINTFORMW 再び宴が開かれるらしい
-ENDIF
+PRINTFORMW 知り合いから宴が開かれることを聞かされた
+PRINTFORMW 様々な国から多くの人々がやってくる、中々盛大な宴らしい
+PRINTFORMW 息抜きに行ってみたらどうかと言われた
+DVAR:睡姦_発生フラグ = 1
 
 PRINTFORMW どうしようか
 CALL ASK_YN("出席する", "やめておく")
@@ -98,8 +89,8 @@ PRINTFORML ・
 PRINTFORML ・
 PRINTFORML ・
 PRINTFORMW 想像以上に賑やかな宴だ
-PRINTFORMW 人間だけでなく様々な種族の者たちがやってきている
-PRINTFORMW しかし皆この時ばかりは種族や所属を忘れて大いに騒いでいる
+PRINTFORMW 政治の馬になりがちな大きな宴も、この宴はその限りではなかった
+PRINTFORMW 所属を忘れ皆純粋に宴を楽しんでいる
 PRINTFORMW 熱気に当てられ、%ANAME(MASTER)%も程よく酔ってきた
 PRINTFORMW そんな時、一人佇む女性を見つけた、%ANAME(対象)%だ
 IF CFLAG:対象:好感度 < 0

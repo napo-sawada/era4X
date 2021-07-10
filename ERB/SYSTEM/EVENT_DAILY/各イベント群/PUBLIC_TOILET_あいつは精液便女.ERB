@@ -11,6 +11,9 @@ RETURN 1000
 ;〇期以降になると発生するとか、デイリー側で利用している変数が-1だったら起こさない　みたいなはじき方をするときに使う
 ;---------------------
 @EVENT_DAILY_PUBLIC_TOILET_DECISION()
+CALL GET_STAR_ID_FROM_POS(CHARACTER_POSITION)
+SIF RESULT == -1
+	RETURN 0
 RETURN 1
 
 ;---------------------

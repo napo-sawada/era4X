@@ -11,6 +11,9 @@ RETURN 1000
 ;〇期以降になると発生するとか、デイリー側で利用している変数が-1だったら起こさない　みたいなはじき方をするときに使う
 ;---------------------
 @EVENT_DAILY_HYPNOTISM_SLAVE_AFTER_DECISION()
+CALL GET_STAR_ID_FROM_POS(CHARACTER_POSITION)
+SIF RESULT == -1
+	RETURN 0
 RETURN 1
 
 ;---------------------
@@ -127,7 +130,7 @@ FOR LOCAL, 0, DAILY_TARGET_NUM
 							PRINTFORML 刺激的な関係を求めていた%ANAME(対象)%には不満だったが仕方ないので適当に付き合う事にした
 							PRINTFORMW しかし彼の巧みな話術にすっかりほだされた%ANAME(対象)%はホテルに誘われると嬉しそうに頷いた
 						CASE 4
-							PRINTFORML 街中では珍しい事に妖怪を見かけた%ANAME(対象)%は試しに話しかけてみた
+							PRINTFORML 街中では珍しい事に戦闘用アンドロイドを見かけた%ANAME(対象)%は試しに話しかけてみた
 							PRINTFORML 話をしていると彼の視線が胸や女性器に集中しているの察した%ANAME(対象)%はホテルに誘ってみた
 							PRINTFORMW 彼は肉欲丸出しの返事をすると%ANAME(対象)%の腕を強引に引いてホテルへ向かった
 					ENDSELECT
@@ -166,11 +169,11 @@ FOR LOCAL, 0, DAILY_TARGET_NUM
 					ENDSELECT
 					CALL FUCK(対象, "欲望, 欲望, 奉仕, 奉仕, 精愛, 性技, 性交, Ｃ, Ｖ, Ｂ, Ｍ, Ａ, キス, 口淫, Ｖ性交, Ａ性交", "処女喪失, 膣内射精, 口内射精, Ａ処女喪失, 腸内射精, CFLAG減少", GET_SPERM_ID("行きずりの男"), @"行きずりの男の\@RAND:2 ? ペニス # 唇\@", @"", "行きずりの男", "強姦")
 				CASE 2
-					PRINTFORMW %ANAME(対象)%は無警戒に妖怪の縄張りをうろついている
+					PRINTFORMW %ANAME(対象)%は無警戒にチンピラの縄張りをうろついている
 					PRINTFORML 
 					SELECTCASE RAND:5
 						CASE 0
-							PRINTFORML 武器も持たない%ANAME(対象)%を野良妖怪が見逃すはずもなくすぐに捕まってしまった
+							PRINTFORML 武器も持たない%ANAME(対象)%を野良チンピラが見逃すはずもなくすぐに捕まってしまった
 							PRINTFORMW %ANAME(対象)%は抵抗のポーズを見せつつも何をされるのか期待しつつねぐらへと連れて行かれた
 						CASE 1
 							PRINTFORML 歩き疲れた%ANAME(対象)%が洞窟で一休みしているとそこの主である牛鬼に見つかった
@@ -179,7 +182,7 @@ FOR LOCAL, 0, DAILY_TARGET_NUM
 							PRINTFORML すると巨躯の鬼が立ちふさがり、%ANAME(対象)%に殺されるか従うか選べと脅してきた
 							PRINTFORMW %ANAME(対象)%は従えばどうなってしまうのかと想像しキュンと下腹部を疼かせながら小さく頷いた
 						CASE 3
-							PRINTFORML 当然すぐに妖怪に見つかった%ANAME(対象)%は抵抗も空しく捕まって犯されてしまった
+							PRINTFORML 当然すぐにチンピラに見つかった%ANAME(対象)%は抵抗も空しく捕まって犯されてしまった
 							PRINTFORMW 彼は%ANAME(対象)%のハメ心地を気に入った様で、ヒョイと担ぎ上げるとねぐらへと拉致していった
 						CASE 4
 							PRINTFORML 山道を歩いていると突然突風が吹き%ANAME(対象)%の身体がふわりと宙に浮いた
@@ -189,10 +192,10 @@ FOR LOCAL, 0, DAILY_TARGET_NUM
 					PRINTFORML 
 					SELECTCASE RAND:5
 						CASE 0
-							PRINTFORML 妖怪のねぐらに連れ込まれた%ANAME(対象)%は昼夜を問わず休む事無く犯され続けた
+							PRINTFORML チンピラのねぐらに連れ込まれた%ANAME(対象)%は昼夜を問わず休む事無く犯され続けた
 							PRINTFORMW そのあまりにも暴力的なセックスに耐えきれるはずもなく、狂ったようにイかされまくった
 						CASE 1
-							PRINTFORML 妖怪に気に入られ花嫁認定された%ANAME(対象)%はそれから連日連夜犯されまくっている
+							PRINTFORML チンピラに気に入られ花嫁認定された%ANAME(対象)%はそれから連日連夜犯されまくっている
 							PRINTFORML 圧倒的なスタミナで毎回足腰立たなくなるまで犯される為逃げる事も出来ずされるがままだ
 							PRINTFORMW しかしその表情に苦痛や恐怖はなく至上の幸福を受け入れる雌のモノになっていた
 						CASE 2
@@ -205,7 +208,7 @@ FOR LOCAL, 0, DAILY_TARGET_NUM
 						CASE 4
 							PRINTFORML ねぐらに連れ去られた%ANAME(対象)%は彼の圧倒的な獣欲で犯され獣の様にヨガり狂う
 							PRINTFORML 一突き毎に脳天まで貫かれる様な衝撃で強引に子宮が降りてきて孕む準備をしていく
-							PRINTFORMW 妖怪特有の特濃精液を大量に注がれた%ANAME(対象)%は下腹部をぽっこり膨らませながらアクメした
+							PRINTFORMW チンピラ特有の特濃精液を大量に注がれた%ANAME(対象)%は下腹部をぽっこり膨らませながらアクメした
 					ENDSELECT
 					PRINTFORML 
 					SELECTCASE RAND:5
@@ -214,7 +217,7 @@ FOR LOCAL, 0, DAILY_TARGET_NUM
 						CASE 1
 							PRINTFORMW %ANAME(対象)%はイキ殺される寸前に何とか隙をついて逃げだせた
 						CASE 2
-							PRINTFORMW 数日後、妖怪は退治され%ANAME(対象)%は壊れる寸前に助け出された
+							PRINTFORMW 数日後、チンピラは退治され%ANAME(対象)%は壊れる寸前に助け出された
 						CASE 3
 							PRINTFORMW たっぷり%ANAME(対象)%を犯した彼が寝ている隙に何とか逃げ出した
 						CASE 4
@@ -238,7 +241,7 @@ FOR LOCAL, 0, DAILY_TARGET_NUM
 							PRINTFORML 初老の浮浪者を見つけた%ANAME(対象)%は彼に犯される事を想像して舌なめずりをし声をかけた
 							PRINTFORMW 彼は戸惑っていたが身体を擦りつけて誘うと股間を膨らませながらテントに連れ込まれた
 						CASE 4
-							PRINTFORML スラムに住み着いている妖怪を見つけた%ANAME(対象)%は口封じの為に拉致されてしまった
+							PRINTFORML スラムに住み着いているチンピラを見つけた%ANAME(対象)%は口封じの為に拉致されてしまった
 							PRINTFORMW しかし%ANAME(対象)%が服をはだけさせ「良い事」に誘うと彼は一瞬葛藤した後押し倒してきた
 					ENDSELECT
 					PRINTFORML 
@@ -491,10 +494,10 @@ FOR LOCAL, 0, DAILY_TARGET_NUM
 					PRINTFORML 全身に絶え間なく襲い掛かる快楽の波に%ANAME(対象)%はもはや演技も忘れ、カメラの前で本気アクメを晒し続けた
 					PRINTFORMW 彼のペニスとテクにメロメロとなった%ANAME(対象)%は撮影後にホテルに誘い、夜通したっぷりと愛してもらった
 				CASE 7
-					PRINTFORML %ANAME(対象)%は巨躯の妖怪に激しく抱かれてヨガリながらあられもない台詞を口走っている
-					PRINTFORML 妖怪に攫われた村娘の設定の%ANAME(対象)%だが、巨大な一物の一突きでイかされ既にそれどころではなくなっている
+					PRINTFORML %ANAME(対象)%は巨躯のチンピラに激しく抱かれてヨガリながらあられもない台詞を口走っている
+					PRINTFORML チンピラに攫われた村娘の設定の%ANAME(対象)%だが、巨大な一物の一突きでイかされ既にそれどころではなくなっている
 					PRINTFORML 思考を真っ白に染めて下品な言葉を並べる%ANAME(対象)%の姿を周囲は迫真の演技だと思いながら撮影は続行された
-					PRINTFORMW 撮影後%ANAME(対象)%の様子を気遣ってきた竿役の妖怪に対しプライベートで犯してほしいと連絡先を交換した
+					PRINTFORMW 撮影後%ANAME(対象)%の様子を気遣ってきた竿役のチンピラに対しプライベートで犯してほしいと連絡先を交換した
 				CASE 8
 					PRINTFORML メイドに扮した%ANAME(対象)%がご主人様役の男優に跪いてご奉仕している
 					PRINTFORML なぜかしっくりくる設定に熱が入った%ANAME(対象)%は、愛おしそうにチンポを見つめながらねっとりと舌を這わせる

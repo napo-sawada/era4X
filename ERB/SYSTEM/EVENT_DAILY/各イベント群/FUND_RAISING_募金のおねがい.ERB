@@ -11,6 +11,9 @@ RETURN (30 + INRANGE(DVAR:募金_抱いた回数, 0, 10) * 7)
 @EVENT_DAILY_FUND_RAISING_DECISION()
 SIF DAY < 10
 	RETURN 0
+CALL GET_STAR_ID_FROM_POS(CHARACTER_POSITION)
+SIF RESULT == -1
+	RETURN 0
 ;資金が50000以上の場合
 SIF MONEY < 50000
 	RETURN 0
@@ -36,7 +39,7 @@ SIF DVAR:募金_抱いた回数 > 0
 	募金額 = 募金額 / DVAR:募金_抱いた回数
 ;初遭遇
 IF DVAR:募金_発生フラグ == 0
-	PRINTFORMW 仕事をしていると部下が来客を告げた
+	PRINTFORMW 仕事をしていると来客がきた
 	PRINTFORMW 何やら市民団体の者らしいが
 	PRINTFORMW 丁度仕事も一段落している、会うことにした
 	PRINTFORML 
@@ -49,7 +52,7 @@ IF DVAR:募金_発生フラグ == 0
 	PRINTFORMW 娘をソファに座らせ、要件を聞くことにした
 	PRINTFORML 
 	PRINTFORML 「えっと、私達は、恵まれない子供達の為に活動している団体の者です」
-	PRINTFORMW 「最近の幻想郷の乱れにより、多くの子供達が酷い目にあっています」
+	PRINTFORMW 「最近の治世の乱れにより、多くの子供達が酷い目にあっています」
 	PRINTFORML 「それで、私達の団体も一生懸命活動しているのですが……」
 	PRINTFORMW 「少々活動資金が心もとなくなってきているのです。元々、皆さんの善意により成り立っている活動ですので……」
 	PRINTFORML 

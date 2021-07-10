@@ -12,6 +12,9 @@ SIF DVAR:新興宗教_発生フラグ < 0
 	RETURN 0
 SIF DVAR:新興宗教_潜入中キャラID
 	RETURN 0
+CALL GET_STAR_ID_FROM_POS(CHARACTER_POSITION)
+SIF RESULT == -1
+	RETURN 0
 RETURN 7 <= DAY
 
 ;---------------------

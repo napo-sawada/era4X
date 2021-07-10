@@ -14,7 +14,9 @@ SIF DVAR:催眠お仕事_状態管理フラグ != 0
 	RETURN 0
 SIF GETBIT(TALENT:MASTER:デイリー系, 素質_デイリー_催眠奴隷) && CFLAG:MASTER:所属 == 0
 	RETURN 0
-
+CALL GET_STAR_ID_FROM_POS(CHARACTER_POSITION)
+SIF RESULT == -1
+	RETURN 0
 RETURN 1
 
 ;---------------------

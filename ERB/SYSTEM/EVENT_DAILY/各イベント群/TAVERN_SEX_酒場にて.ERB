@@ -11,6 +11,9 @@ RETURN 20
 ;〇期以降になると発生するとか、デイリー側で利用している変数が-1だったら起こさない　みたいなはじき方をするときに使う
 ;---------------------
 @EVENT_DAILY_TAVERN_SEX_DECISION()
+CALL GET_STAR_ID_FROM_POS(CHARACTER_POSITION)
+SIF RESULT == -1
+	RETURN 0
 RETURN DAY >= 10
 
 ;---------------------
@@ -32,8 +35,7 @@ RETURN デイリー_ジャンル_エロ
 #DIM 対象
 #DIM 請求額
 
-PRINTFORMW 領民の声を直接聞くためにお忍びで酒場に行ってみよう
-PRINTFORMW 誰に行かせようか？
+PRINTFORMW この辺りの情報を収集するために誰かを酒場に遣わせようと考えた
 
 CALL SINGLE_DRAWLINE
 CALL SELECT_CHARA_LIST_SLG()
@@ -55,24 +57,11 @@ PRINTFORML
 ;酒場に行ったのが男性もしくは
 IF IS_MALE(対象)
 	PRINTFORML %ANAME(対象)%は酒場で客と意気投合した
-	PRINTFORMW 中々有意義なお忍びだった
+	PRINTFORMW 中々有意義だった
 	;ちょっとお酒に強くなる（肝臓経験値1～5）
 	EXP:対象:肝臓経験値 += RAND:3 + RAND:3 + 1
 	CALL TRAIN_AUTO_ABLUP(対象, 0)
 	;時々請求書が回ってくる、仕方ないね
-	IF !RAND:5
-		PRINTFORML ……
-		PRINTFORML …
-		IF 対象 == MASTER
-			PRINTFORMW なお、経費で落ちなかった模様
-		ELSE
-			PRINTFORMW どうしてこっちに請求書が回ってきているのかな？
-		ENDIF
-		;所持金の3～7%なんて良心的な飲み代です
-		請求額 = MONEY * RAND(3, 7) / 100
-		PRINTFORMW 仕方ないので、{請求額, 6}を支払った。
-		MONEY -= 請求額
-	ENDIF
 	RETURN 1
 ENDIF
 

@@ -15,7 +15,9 @@ SIF DVAR:触手トレーナー_発生フラグ == -1
 	RETURN 0
 SIF !ITEM:触手部屋
 	RETURN 0
-
+CALL GET_STAR_ID_FROM_POS(CHARACTER_POSITION)
+SIF RESULT == -1
+	RETURN 0
 RETURN DAY >= 15
 
 ;---------------------

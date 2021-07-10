@@ -11,7 +11,9 @@ RETURN 30
 
 SIF DVAR:マセガキ_発生フラグ != 0
 	RETURN 0
-
+CALL GET_STAR_ID_FROM_POS(CHARACTER_POSITION)
+SIF RESULT == -1
+	RETURN 0
 RETURN 1
 
 ;---------------------
