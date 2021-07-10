@@ -1,0 +1,110 @@
+﻿;---------------------
+;基本的な発生確率(1000分率 100で10%)
+;これにコンフィグ項目の発生頻度がかけられるので、必ずしもこの通りにはならない
+;---------------------
+@EVENT_DAILY_VIGIL_RATE()
+RETURN 150
+
+
+;---------------------
+;確率以外の発生判定
+;〇期以降になると発生するとか、デイリー側で利用している変数が-1だったら起こさない　みたいなはじき方をするときに使う
+;---------------------
+@EVENT_DAILY_VIGIL_DECISION()
+SIF IS_FEMALE(MASTER)
+	RETURN 0
+CALL GET_STAR_ID_FROM_POS(CHARACTER_POSITION)
+RETURN DAY >= 10
+
+;---------------------
+;ジャンル
+;コンフィグ設定で使用
+;---------------------
+@EVENT_DAILY_VIGIL_GENRE()
+RETURN デイリー_ジャンル_エロ
+
+;---------------------
+;特定の条件を満たすキャラをランダムに選択する場合に利用
+;他の関数は必須だが、これだけはなくてもよい　というかパフォーマンスへ影響するので不要なら作ってはならない
+;対象が存在せずデイリーを開始できない場合は0を返すことでデイリーの発生をキャンセルする
+;---------------------
+@EVENT_DAILY_VIGIL_SETTARGET()
+
+SIF !IS_SP_COUNTRY(CFLAG:MASTER:所属)
+	RETURN 0
+
+;男で、主人公と同勢力で、捕虜でなく死亡もしていないキャラから対象をランダム選出(好感度と従属度が高いキャラの方が選ばれやすい)
+FOR LOCAL, 0, CHARANUM
+	IF TALENT:LOCAL:正妻 || TALENT:LOCAL:妾
+		DAILY_TARGET:DAILY_TARGET_NUM = LOCAL
+		DAILY_TARGET_NUM ++
+	ENDIF
+NEXT
+
+SIF DAILY_TARGET_NUM < 1
+	RETURN 0
+
+RETURN 1
+
+
+;---------------------
+;本体
+;イベントが発生した場合は1、発生しなかった場合は0を返す
+;発生しなかったというのは例えば、特定条件を満たすキャラからランダムに一人選ぶデイリーで、そもそもその条件を満たすキャラが一人もいないみたいなとき
+;旧仕様で作ったことある人向けにいうと「旧仕様のデイリー本体冒頭で-1を返すような状況」
+;---------------------
+@EVENT_DAILY_VIGIL()
+#DIM 対象
+
+対象 = DAILY_TARGET:(RAND:DAILY_TARGET_NUM)
+
+PRINTFORML 自室のベッドでうとうとしていると、薄着の%ANAME(対象)%がのしかかってきた
+PRINTFORMW どうしよう？
+CALL ASK_YN("抱く", "やんわり押し返す")
+IF RESULT
+	PRINTFORMW %ANAME(対象)%はめげることなく%ANAME(MASTER)%をベッドの端に追いやると、抱き枕にして先に眠ってしまった
+	RETURN 1
+ENDIF
+
+SELECTCASE RAND:7
+	CASE 0
+		PRINTFORML %ANAME(対象)%は愛する%ANAME(MASTER)%のペニスを丁寧にしゃぶっている
+		PRINTFORML 持てる技量の全てを持って奉仕し、手では玉袋を丁寧に愛撫し、射精を促す
+		PRINTFORML たまらず放たれた精液を口いっぱいに頬張ると、嫌がることなく嚥下する
+		PRINTFORMW %ANAME(対象)%は%ANAME(MASTER)%の回復を待ってから、%STR_BODY("膣", 対象)%で復活したペニスを咥え込んだ
+	CASE 1
+		PRINTFORML 騎乗位で%ANAME(MASTER)%を咥え込んだ%ANAME(対象)%は味わうようにゆっくりと腰を上下左右に動かす
+		PRINTFORML きゅうきゅうと締め付ける%STR_BODY("膣", 対象)%に思わず顔を歪める%ANAME(MASTER)%
+		PRINTFORML その様子に%ANAME(対象)%はうっとりとした表情で、%ANAME(対象)%を真綿で締め上げるように時間をかけて絶頂へ導く
+		PRINTFORMW 遂に%ANAME(MASTER)%が限界を迎えて射精すると%ANAME(対象は)%は熱い迸りの感触に淫靡な笑みを浮かべて甘い吐息を吐いた
+	CASE 2
+		PRINTFORML %ANAME(対象)%は%ANAME(MASTER)%を裸にすると、愛おしそうに愛撫しながらキスの雨を降らせた
+		PRINTFORML 首筋や手の甲、鎖骨の辺りなど、ふとした時に見えるところにマーキングするようにキスマークをつけていく
+		PRINTFORML さらには%ANAME(MASTER)%の頭を抱き締めると、耳元で愛の言葉を囁き続けた
+		PRINTFORMW 独占欲に囚われた%ANAME(対象)%は、その後動けなくなるまで%ANAME(MASTER)%を攻め続け、%ANAME(MASTER)%の肉布団になって眠りについた	
+	CASE 3
+		PRINTFORML %ANAME(対象)%と%ANAME(MASTER)%は裸でじゃれあいながらキスマークを付け合う
+		PRINTFORML たっぷりと前戯を楽しむと、%ANAME(対象)%は四つん這いになって%STR_BODY("尻", 対象)%を%ANAME(MASTER)%に向けて振って見せる
+		PRINTFORML 挑発に乗った%ANAME(MASTER)%は%ANAME(対象)%を後ろから掴むと、たっぷり濡れた割れ目にペニスを突き込んだ
+		PRINTFORMW %ANAME(対象)%は歓喜の声を上げ、ピストンの度に%STR_BODY("胸", 対象)%を震わして喜んだ
+	CASE 4
+		PRINTFORML %ANAME(MASTER)%は%ANAME(対象)%の股に頭を突っ込み、%STR_BODY("クリ", 対象)%を熱心に責め立てた
+		PRINTFORML 物理的な快楽と愛する者からの奉仕という二重の喜びに、%ANAME(対象)%ははしたなく喘ぎ声をもらしながらあい液を垂れ流している
+		PRINTFORML 喜びで心が溢れた%ANAME(MASTER)%は早く挿れてと懇願するが、じらされなかなか入れてもらえない
+		PRINTFORMW %ANAME(対象)%は遂には泣きながら淫語を交えて挿入を懇願し、それが叶うと同時に深い絶頂に叩き込まれた
+	CASE 5
+		PRINTFORML 発情した雌の匂いを放つ%ANAME(対象)%にあてられて、%ANAME(MASTER)%も一匹の雄と化して猛然と%ANAME(対象)%に襲いかかった
+		PRINTFORML 組み敷き、服をはぎ、%STR_BODY("胸", 対象)%にしゃぶりつきながら雌穴を猛然と男根で突き上げる
+		PRINTFORML 理性を失った野生動物のようなセックスに、二人は我を忘れて声を上げて楽しみ、互いの体を貪りあった
+		PRINTFORMW 行為が終わった頃には二人とも疲れ果て、抱きしめ合いながら結合したまま眠りこけてしまった
+	CASE 6
+		PRINTFORML %ANAME(MASTER)%は愛をささやきながら%ANAME(対象)%の弱いところを徹底的に愛撫した
+		PRINTFORML %ANAME(対象)%は喜びと羞恥と快楽で目を白黒させながら、打ち上げられた魚のようにビクビクと全身をひくつかせている
+		PRINTFORML 割れ目からは愛液がとめどなく溢れ、シーツを汚していく。そこに潮も加わり、水たまりが出来上がってしまった
+		PRINTFORMW 結局愛撫だけで体力の大半を持っていかれた%ANAME(対象)%は、最後には時折ひくつくだけの肉オナホと化してしまっていた
+ENDSELECT
+
+CALL FUCK_MAKELOVE(対象, GET_ID(MASTER), @"%ANAME(MASTER)%の唇", ANAME(MASTER))
+CFLAG:対象:好感度 += 500 - RAND:200
+CFLAG:対象:支配度 += 500 - RAND:200
+RETURN 1
