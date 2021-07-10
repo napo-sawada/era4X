@@ -1,0 +1,45 @@
+﻿;-----------------------------------
+; メインウェポン
+;-----------------------------------
+@GET_MAIN_WEAPON_NAME_190
+RESULTS = TIER3ハンティングロッド
+
+@GET_MAIN_WEAPON_STATUS_190(STATUS)
+#DIM REF STATUS
+
+STATUS:DAMAGE = 60
+STATUS:FIRE_RATE = 7
+STATUS:HIT_RATE = 80
+STATUS:FIRE_RANGE = 2
+STATUS:SIZE = 1
+STATUS:WEAPON_TYPE =  ビーム
+STATUS:PRICE = 40000
+
+;-----------------------------------
+; メインウェポンの説明
+;-----------------------------------
+@GET_MAIN_WEAPON_DESCRIPTION_190
+#DIM STATUS, STATUS_LENGTH
+
+CALL GET_MAIN_WEAPON_STATUS_190(STATUS)
+CALL GET_MAIN_WEAPON_NAME_190
+PRINTFORML %RESULTS%
+PRINTFORML 対象に引っ掛ける拘引具付きワイヤーと巻き取り機構付きの竿からなる漁具。
+PRINTFORML 獲物となる宇宙怪獣とまともに引き合いすると負けてしまうため
+PRINTFORML 電撃でショックを与える機能を内蔵している。
+PRINTFORML 熟練漁師は巻き取り機構を利用し戦闘時の高速移動手段としても用いている。
+PRINTFORML ダメージ  : {STATUS:DAMAGE}
+PRINTFORML 射撃レート: {STATUS:FIRE_RATE}発/ターン
+PRINTFORML 命中率    : {STATUS:HIT_RATE}
+PRINTFORML 有効距離  : {STATUS:FIRE_RANGE}
+PRINTFORML サイズ    : {STATUS:SIZE}
+
+;-----------------------------------
+; メインウェポンの資材
+;-----------------------------------
+@GET_MAIN_WEAPON_RESOURCE_190(USE_RESOURCE)
+#DIM REF USE_RESOURCE
+
+USE_RESOURCE:武装合金 = 4
+USE_RESOURCE:耐熱合金 = 4
+USE_RESOURCE:武装制御機器 = 4

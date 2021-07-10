@@ -1,0 +1,116 @@
+﻿;-------------------------------------------------
+;COMBAT_IS_SHIP_FISHERMAN
+;生け捕り可能な艦船はこの関数内のリストで定義
+;SHIP_ID が鹵獲可能な艦船である場合1を返す
+;-------------------------------------------------
+@COMBAT_IS_SHIP_FISHERMAN(SHIP_ID)
+#DIM SHIP_ID
+
+;クエスト指定のイベント艦は鹵獲不可
+FOR LOCAL, 0, QUEST_LENGTH
+	SIF SHIP_ID == QUEST_FLAG_SHIP_ID:LOCAL
+		RETURN 0
+NEXT
+
+;生け捕り可能な宇宙怪獣リスト
+SELECTCASE SHIP_COUNTRY:SHIP_ID
+	CASE 国家ID_一般海賊
+		{
+			IF
+				SHIP_MODEL:SHIP_ID == 宇宙ししゃも
+				|| SHIP_MODEL:SHIP_ID == 宇宙しゃこ
+				|| SHIP_MODEL:SHIP_ID == 宇宙巨大スライム
+				|| SHIP_MODEL:SHIP_ID == 宇宙たこ
+				|| SHIP_MODEL:SHIP_ID == 宇宙まぐろ
+				|| SHIP_MODEL:SHIP_ID == 宇宙いか
+				|| SHIP_MODEL:SHIP_ID == 宇宙かに
+				|| SHIP_MODEL:SHIP_ID == 宇宙まんぼう
+				|| SHIP_MODEL:SHIP_ID == 宇宙ひらめ
+		}
+			RETURN 1
+		ELSE
+			RETURN 0
+		ENDIF
+	
+ENDSELECT
+
+RETURN 0
+
+;-------------------------------------------------
+;COMBAT_FISHERMAN_SET_MOB
+;生け捕り対象のSHIP_IDから白兵戦の防衛側として配置するモブを設定
+;-------------------------------------------------
+@COMBAT_FISHERMAN_SET_MOB(SHIP_ID)
+#DIM SHIP_ID
+#DIMS DYNAMIC NAME_LIST, MAX_NAME_LIST, SHIP_CATEGORY_COUNT, MAX_RANDOM_NAME
+#DIMS DYNAMIC 勢力詳細分類
+
+
+SELECTCASE SHIP_COUNTRY:SHIP_ID
+	CASE 国家ID_一般海賊
+		SELECTCASE SHIP_MODEL:SHIP_ID
+				CASE 宇宙ししゃも
+					CALL CC_ADDMOB("DEFENDER", "設置目標", 1000, 1000, 10, 50)
+					CALL CC_ADDMOB("DEFENDER", "宇宙あにさきす", 1500, 1500, 30, 40)
+					CALL CC_ADDMOB("ATTACKER", "投網搭載型無人漁業支援機", 4000, 4000, 40, 60)
+				CASE 宇宙しゃこ
+					CALL CC_ADDMOB("DEFENDER", "設置目標", 1000, 1000, 10, 50)
+					CALL CC_ADDMOB("DEFENDER", "宇宙こがに", 3000, 3000, 50, 60)
+					CALL CC_ADDMOB("ATTACKER", "打ち込み銛搭載型無人漁業支援機", 4000, 4000, 100, 0)
+				CASE 宇宙巨大スライム
+					CALL CC_ADDMOB("DEFENDER", "設置目標", 1500, 1500, 20, 60)
+					CALL CC_ADDMOB("DEFENDER", "宇宙スライム", 2000, 2000, 40, 50)
+					CALL CC_ADDMOB("DEFENDER", "宇宙スライム", 2000, 2000, 40, 50)
+					CALL CC_ADDMOB("DEFENDER", "宇宙スライム", 2000, 2000, 40, 50)
+					CALL CC_ADDMOB("DEFENDER", "宇宙スライム", 2000, 2000, 40, 50)
+					CALL CC_ADDMOB("DEFENDER", "宇宙スライム", 2000, 2000, 40, 50)
+					CALL CC_ADDMOB("ATTACKER", "漁網搭載型無人漁業支援機", 4000, 4000, 40, 60)
+				CASE 宇宙たこ
+					CALL CC_ADDMOB("DEFENDER", "設置目標", 2000, 2000, 30, 70)
+					CALL CC_ADDMOB("DEFENDER", "宇宙ふじつぼ", 4000, 4000, 65, 90)
+					CALL CC_ADDMOB("DEFENDER", "宇宙こがに", 2000, 2000, 40, 50)
+					CALL CC_ADDMOB("ATTACKER", "打ち込み銛載型無人漁業支援機", 4000, 4000, 80, 20)
+				CASE 宇宙まぐろ
+					CALL CC_ADDMOB("DEFENDER", "設置目標", 3000, 3000, 40, 80)
+					CALL CC_ADDMOB("DEFENDER", "宇宙こばんざめ", 7000, 7000, 120, 50)
+					CALL CC_ADDMOB("ATTACKER", "拘引具載型無人漁業支援機", 4000, 4000, 60, 40)
+				CASE 宇宙いか
+					CALL CC_ADDMOB("DEFENDER", "設置目標", 3000, 3000, 40, 80)
+					CALL CC_ADDMOB("DEFENDER", "宇宙あにさきす", 1500, 1500, 30, 40)
+					CALL CC_ADDMOB("DEFENDER", "宇宙あにさきす", 1500, 1500, 30, 40)
+					CALL CC_ADDMOB("DEFENDER", "宇宙あにさきす", 1500, 1500, 30, 40)
+					CALL CC_ADDMOB("DEFENDER", "宇宙あにさきす", 1500, 1500, 30, 40)
+					CALL CC_ADDMOB("DEFENDER", "宇宙あにさきす", 1500, 1500, 30, 40)
+					CALL CC_ADDMOB("ATTACKER", "投網搭載型無人漁業支援機", 4000, 4000, 40, 60)
+				CASE 宇宙かに
+				CALL CC_ADDMOB("DEFENDER", "設置目標", 4000, 4000, 60, 90)
+					CALL CC_ADDMOB("DEFENDER", "宇宙ふじつぼ", 4000, 4000, 65, 90)
+					CALL CC_ADDMOB("DEFENDER", "宇宙ふじつぼ", 4000, 4000, 65, 90)
+					CALL CC_ADDMOB("DEFENDER", "宇宙こがに", 3000, 3000, 50, 60)
+					CALL CC_ADDMOB("DEFENDER", "宇宙こがに", 3000, 3000, 50, 60)
+					CALL CC_ADDMOB("DEFENDER", "宇宙こがに", 3000, 3000, 50, 60)
+					CALL CC_ADDMOB("ATTACKER", "大型打ち込み銛搭載型無人漁業支援機", 4000, 4000, 100, 0)
+				CASE 宇宙まんぼう
+					CALL CC_ADDMOB("DEFENDER", "設置目標", 4000, 4000, 60, 90)
+					CALL CC_ADDMOB("DEFENDER", "宇宙こばんざめ", 7000, 7000, 120, 50)
+					CALL CC_ADDMOB("DEFENDER", "宇宙こばんざめ", 7000, 7000, 120, 50)
+					CALL CC_ADDMOB("DEFENDER", "宇宙あにさきす", 1500, 1500, 30, 40)
+					CALL CC_ADDMOB("DEFENDER", "宇宙あにさきす", 1500, 1500, 30, 40)
+					CALL CC_ADDMOB("DEFENDER", "宇宙あにさきす", 1500, 1500, 30, 40)
+					CALL CC_ADDMOB("ATTACKER", "拘引具載型無人漁業支援機", 4000, 4000, 40, 60)
+				CASE 宇宙ひらめ
+					CALL CC_ADDMOB("DEFENDER", "設置目標", 4000, 4000, 60, 90)
+					CALL CC_ADDMOB("DEFENDER", "宇宙おたまじゃくし", 3000, 3000, 80, 40)
+					CALL CC_ADDMOB("DEFENDER", "宇宙おたまじゃくし", 3000, 3000, 80, 40)
+					CALL CC_ADDMOB("DEFENDER", "宇宙おたまじゃくし", 3000, 3000, 80, 40)
+					CALL CC_ADDMOB("DEFENDER", "宇宙あにさきす", 1500, 1500, 30, 40)
+					CALL CC_ADDMOB("DEFENDER", "宇宙あにさきす", 1500, 1500, 30, 40)
+					CALL CC_ADDMOB("ATTACKER", "投網搭載型無人漁業支援機", 4000, 4000, 40, 60)
+				CASEELSE
+					CALL CC_ADDMOB("DEFENDER", "設置目的点", 2000, 2000, 40, 50)
+					CALL CC_ADDMOB("DEFENDER", "設置目的点", 2000, 2000, 40, 50)
+			ENDSELECT
+	CASEELSE
+ENDSELECT
+
+RETURN

@@ -1,0 +1,50 @@
+﻿;-----------------------------------
+; オプション
+;-----------------------------------
+@GET_OPTION_NAME_10
+RESULTS = 漁船用総合漁業システム
+@GET_OPTION_TYPE_10
+RESULTS '= "FISHERMAN_POD"
+
+@GET_OPTION_STATUS_10(STATUS)
+#DIM REF STATUS
+
+STATUS:PRICE = 500000
+
+;-----------------------------------
+; オプションの説明
+;-----------------------------------
+@GET_OPTION_DESCRIPTION_10(STATUS)
+#DIM STATUS, STATUS_LENGTH
+CALL GET_OPTION_STATUS_10(STATUS)
+CALL GET_OPTION_NAME_10
+PRINTFORML %RESULTS%
+PRINTFORML 宇宙漁船に標準搭載されている総合漁業システム。
+PRINTFORML 獲物の表面に拘引具を外れないようにクルーが直接設置する事で生きたまま無力化出来る装置を搭載している。
+PRINTFORML 拘引装置以外にも各クルー用の漁業用パワードスーツや様々な対象に対応する専用漁具、無人漁業支援機を含む総合漁業システム。
+PRINTFORML ※戦闘勝利時に低確率で敵宇宙怪獣への生け捕り漁の実行が可能となる。
+PRINTFORML ※漁船用総合漁業システムを装備漁船に、クルーが同乗している必要がある。
+
+;-----------------------------------
+; オプションの資材
+;-----------------------------------
+@GET_OPTION_RESOURCE_10(USE_RESOURCE)
+#DIM REF USE_RESOURCE
+
+USE_RESOURCE:武装合金 = 10
+USE_RESOURCE:装甲合金 = 10
+USE_RESOURCE:シールド発生装置 = 10
+USE_RESOURCE:武装制御機器 = 10
+USE_RESOURCE:合金加工剤 = 10
+USE_RESOURCE:耐熱合金 = 10
+USE_RESOURCE:超電導回路 = 10
+USE_RESOURCE:タイラーセンサー = 10
+
+SIF RESULT == -1
+  RETURN 0
+ ;非売品漁船に初期搭載のみ
+SIF STAR_OWNER:RESULT != 国家ID_一般海賊
+  RETURN 0
+SIF REL_LIKE_COUNTRY:(STAR_OWNER:RESULT):国家ID_プレイヤー < 10000
+  RETURN 0
+RETURN 1

@@ -25,7 +25,11 @@ IF GROUPMATCH(ゲームモード, 0, 1, 2, 4)
 	SHIP_EQUIP:オプション:0:RESULT = 1
 	BOARDING_SHIP_ID = RESULT
 ENDIF
-
+IF GROUPMATCH(ゲームモード, 5)
+	CALL INIT_PRESET_SHIP(国家ID_プレイヤー, CHARACTER_POSITION, 河童級機動漁師,河童級機動漁師『磯天狗』, 河童級機動漁師)
+	CALL INIT_PRESET_SHIP(国家ID_プレイヤー, CHARACTER_POSITION, 標準型武装漁船,わんぱく水産丸, 標準型武装漁船)
+	BOARDING_SHIP_ID = RESULT
+ENDIF
 
 CALL INIT_ANOMALY
 CALL INIT_MINING_POINT
@@ -476,6 +480,32 @@ WHILE ITER < 70
 	NEXT
 WEND
 ITER = 0
+WHILE ITER < 50
+	FOR SECTOR_ID, 0, MAX_SECTOR
+		FOR Y_POS, 0, Y座標分割数 - 1
+			FOR X_POS, 0, X座標分割数 - 1
+				IF ITER < 50 && RAND(50 - ITER) == 0 && MAP:SECTOR_ID:(X_POS * 5 + 3):(Y_POS * 5 + 3) != 0
+				;星系港と宇宙港のあるセクターでは生成しない
+				FOR PORT_ID, 0, 星系数
+				IF 星系座標ID:PORT_ID / 10000 == SECTOR_ID || PORT_POSITION_ID:PORT_ID / 10000 == SECTOR_ID
+					FLG_SKIP = 1
+					BREAK
+				ENDIF
+			NEXT
+			IF FLG_SKIP == 1
+				FLG_SKIP = 0
+				CONTINUE
+			ENDIF
+					CALL POS2ID(SECTOR_ID, 5, 14)
+					LOCALS = 宇宙しゃこ
+					CALL INIT_PRESET_SHIP(国家ID_一般海賊, RESULT, 宇宙しゃこ, LOCALS, 宇宙しゃこ)
+					ITER ++
+				ENDIF
+			NEXT
+		NEXT
+	NEXT
+WEND
+ITER = 0
 WHILE ITER < 70
 	FOR SECTOR_ID, 0, MAX_SECTOR
 		FOR Y_POS, 0, Y座標分割数 - 1
@@ -528,6 +558,32 @@ WHILE ITER < 30
 	NEXT
 WEND
 ITER = 0
+WHILE ITER < 30
+	FOR SECTOR_ID, 0, MAX_SECTOR
+		FOR Y_POS, 0, Y座標分割数 - 1
+			FOR X_POS, 0, X座標分割数 - 1
+				IF ITER < 30 && RAND(30 - ITER) == 0 && MAP:SECTOR_ID:(X_POS * 5 + 3):(Y_POS * 5 + 3) != 0
+				;星系港と宇宙港のあるセクターでは生成しない
+				FOR PORT_ID, 0, 星系数
+				IF 星系座標ID:PORT_ID / 10000 == SECTOR_ID || PORT_POSITION_ID:PORT_ID / 10000 == SECTOR_ID
+					FLG_SKIP = 1
+					BREAK
+				ENDIF
+			NEXT
+			IF FLG_SKIP == 1
+				FLG_SKIP = 0
+				CONTINUE
+			ENDIF
+					CALL POS2ID(SECTOR_ID, 5, 3)
+					LOCALS = 宇宙まぐろ
+					CALL INIT_PRESET_SHIP(国家ID_一般海賊, RESULT, 宇宙まぐろ, LOCALS, 宇宙まぐろ)
+					ITER ++
+				ENDIF
+			NEXT
+		NEXT
+	NEXT
+WEND
+ITER = 0
 WHILE ITER < 10
 	FOR SECTOR_ID, 0, MAX_SECTOR
 		FOR Y_POS, 0, Y座標分割数 - 1
@@ -573,6 +629,32 @@ WHILE ITER < 10
 					CALL POS2ID(SECTOR_ID, 1, 13)
 					LOCALS = 宇宙ひらめ
 					CALL INIT_PRESET_SHIP(国家ID_一般海賊, RESULT, 宇宙ひらめ, LOCALS, 宇宙ひらめ)
+					ITER ++
+				ENDIF
+			NEXT
+		NEXT
+	NEXT
+WEND
+ITER = 0
+WHILE ITER < 5
+	FOR SECTOR_ID, 0, MAX_SECTOR
+		FOR Y_POS, 0, Y座標分割数 - 1
+			FOR X_POS, 0, X座標分割数 - 1
+				IF ITER < 5 && RAND(5 - ITER) == 0 && MAP:SECTOR_ID:(X_POS * 5 + 3):(Y_POS * 5 + 3) != 0
+				;星系港と宇宙港のあるセクターでは生成しない
+				FOR PORT_ID, 0, 星系数
+				IF 星系座標ID:PORT_ID / 10000 == SECTOR_ID || PORT_POSITION_ID:PORT_ID / 10000 == SECTOR_ID
+					FLG_SKIP = 1
+					BREAK
+				ENDIF
+			NEXT
+			IF FLG_SKIP == 1
+				FLG_SKIP = 0
+				CONTINUE
+			ENDIF
+					CALL POS2ID(SECTOR_ID, 8, 6)
+					LOCALS = 宇宙まんぼう
+					CALL INIT_PRESET_SHIP(国家ID_一般海賊, RESULT, 宇宙まんぼう, LOCALS, 宇宙まんぼう)
 					ITER ++
 				ENDIF
 			NEXT

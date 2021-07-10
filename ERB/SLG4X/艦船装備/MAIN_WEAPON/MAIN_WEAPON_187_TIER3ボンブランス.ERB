@@ -1,0 +1,46 @@
+﻿;-----------------------------------
+; メインウェポン
+;-----------------------------------
+@GET_MAIN_WEAPON_NAME_187
+RESULTS = TIER3ボンブランス
+
+@GET_MAIN_WEAPON_STATUS_187(STATUS)
+#DIM REF STATUS
+
+STATUS:DAMAGE = 4200
+STATUS:FIRE_RATE = 1
+STATUS:HIT_RATE = 35
+STATUS:FIRE_RANGE = 1
+STATUS:SIZE = 1
+STATUS:WEAPON_TYPE = 魚雷
+STATUS:PRICE = 120000
+
+;-----------------------------------
+; メインウェポンの説明
+;-----------------------------------
+@GET_MAIN_WEAPON_DESCRIPTION_187
+#DIM STATUS, STATUS_LENGTH
+
+CALL GET_MAIN_WEAPON_STATUS_187(STATUS)
+CALL GET_MAIN_WEAPON_NAME_187
+PRINTFORML %RESULTS%
+PRINTFORML 炸裂銛を射出する漁具。
+PRINTFORML 高速で射出された銛が外皮の守りを一点突破、内部で炸裂し獲物を仕留める。
+PRINTFORML 威力は高いが誘導機能などない直射型の漁具のため、命中させるには熟練の技が必要とされる。
+PRINTFORML 最新技術が惜しみなく注ぎ込まれたハイスペックモデルであり、大幅な貫通力の向上が図られている。
+PRINTFORML ダメージ  : {STATUS:DAMAGE}
+PRINTFORML 射撃レート: {STATUS:FIRE_RATE}発/ターン
+PRINTFORML 命中率    : {STATUS:HIT_RATE}
+PRINTFORML 有効距離  : {STATUS:FIRE_RANGE}
+PRINTFORML サイズ    : {STATUS:SIZE}
+
+;-----------------------------------
+; メインウェポンの資材
+;-----------------------------------
+@GET_MAIN_WEAPON_RESOURCE_187(USE_RESOURCE)
+#DIM REF USE_RESOURCE
+
+USE_RESOURCE:武装合金 = 12
+USE_RESOURCE:重装甲合金 = 4
+USE_RESOURCE:耐熱合金 = 8
+USE_RESOURCE:武装制御機器 = 8

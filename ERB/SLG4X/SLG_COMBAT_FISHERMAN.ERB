@@ -1,0 +1,153 @@
+﻿;-------------------------------------------------
+;COMBAT_FISHERMAN_EVENT
+;鹵獲イベントの処理本体
+;-------------------------------------------------
+@COMBAT_SHIP_FISHERMAN_EVENT(TARGET_SHIP_ID)
+#DIM TARGET_SHIP_ID
+#DIM DYNAMIC SHIP_ID
+#DIM DYNAMIC CHARA_ID
+#DIMS DYNAMIC 直接設置参加候補ID
+#DIMS DYNAMIC 参加メンバーリスト, CC_MAX_MEMBER_NUM / 2
+
+;直接設置に参加可能な条件を満たしているメンバーを候補としてリストに追加
+FOR SHIP_ID, 0, MAX_SHIP
+	IF SHIP_POSITION:SHIP_ID == SHIP_POSITION:TARGET_SHIP_ID && SHIP_COUNTRY:SHIP_ID == 国家ID_プレイヤー
+		FOR LOCAL, 0, MAX_SLOT
+			VARSET RESULTS
+			TRYCALLFORM GET_OPTION_TYPE_{SHIP_EQUIP:オプション:LOCAL:SHIP_ID}
+			IF RESULTS == "FISHERMAN_POD"
+				FOR CHARA_ID, 0, CHARANUM
+					SIF RIDING_WITH:CHARA_ID == SHIP_ID
+						直接設置参加候補ID = %LIST_ADD(直接設置参加候補ID, TOSTR(CHARA_ID))%
+				NEXT
+				BREAK
+			ENDIF
+		NEXT
+	ENDIF
+NEXT
+;直接設置に参加可能なメンバーがいない
+SIF LIST_COUNT(直接設置参加候補ID) == 0
+	RETURN
+;直接設置に参加可能なメンバーがいる
+PRINTL
+CALLF FuncTagSetText_Print(@"戦闘により衰弱した%GET_TYPE_NAME(SHIP_CATEGORY:(TARGET_SHIP_ID))%、@C:{カラー_オレンジ}@%SHIP_NAME:TARGET_SHIP_ID%@/C@が戦闘宙域を離脱しようとしている", 1)
+PRINTFORML 拘引式漁具を直接設置して、生け捕りするチャンスだ
+CALL ASK_YN("生け捕りを試みる", "放っておく")
+IF RESULT == 1
+	PRINTFORMW %SHIP_NAME:TARGET_SHIP_ID%の生け捕りは中止された
+	RETURN
+ENDIF
+
+CALL COMBAT_FISHERMAN_SELECT_BOARDING_MEMBER(直接設置参加候補ID, 参加メンバーリスト)
+IF RESULT == 0
+	PRINTFORMW %SHIP_NAME:TARGET_SHIP_ID%の生け捕りは中止され%GET_TYPE_NAME(SHIP_CATEGORY:(TARGET_SHIP_ID))%、@C:{カラー_オレンジ}@%SHIP_NAME:TARGET_SHIP_ID%@/C@は宇宙に帰っていった
+	RETURN
+ENDIF 
+
+PRINTFORMW %SHIP_NAME:TARGET_SHIP_ID%への生け捕りが開始された！
+CALL COMBAT_FISHERMAN_BOARDING_COMBAT(参加メンバーリスト, TARGET_SHIP_ID)
+;白兵戦勝利
+IF RESULT == 1
+	SHIP_COUNTRY:TARGET_SHIP_ID = 国家ID_プレイヤー
+	CALL CLEAR_SHIP_FLAG(TARGET_SHIP_ID)
+	PRINTFORML %ANAME(TOINT(LIST_GET(参加メンバーリスト:0)), LIST_COUNT(参加メンバーリスト))%は捕縛用拘引具を目的位置に設置し、生け捕りに成功した
+	CALLF FuncTagSetText_Print(@"@C:{カラー_オレンジ}@%SHIP_NAME:TARGET_SHIP_ID%@/C@を生け捕りした！", 1)
+	WAIT
+;白兵戦敗北
+ELSE 
+	PRINTFORML 熾烈な抵抗の前に、%ANAME(TOINT(LIST_GET(参加メンバーリスト:0)), LIST_COUNT(参加メンバーリスト))%は撤退せざるをえなかった
+	PRINTFORMW %SHIP_NAME:TARGET_SHIP_ID%は目的位置に設置出来ず捕縛用拘引具は振り払われ失敗に終わった……
+ENDIF
+
+;-------------------------------------------------
+;COMBAT_FISHERMAN_BOARDING_COMBAT
+;白兵戦イベントの実行
+;-------------------------------------------------
+@COMBAT_FISHERMAN_BOARDING_COMBAT(参加メンバーリスト, TARGET_SHIP_ID)
+#DIMS REF 参加メンバーリスト
+#DIM DYNAMIC JUDGE
+#DIM TARGET_SHIP_ID
+
+CALL CC_INIT_MEMBER()
+FOR LOCAL, 0, LIST_COUNT(参加メンバーリスト)
+	CALL CC_ADDCHARA("ATTACKER", TOINT(LIST_GET(参加メンバーリスト, LOCAL)))
+NEXT
+CALL COMBAT_FISHERMAN_SET_MOB(TARGET_SHIP_ID)
+CALL CLOSE_COMBAT()
+JUDGE = RESULT
+PRINTL
+CALL CC_ADD_COMBAT_EXP(10)
+CALL CC_INIT_MEMBER()
+PRINTL
+RETURN JUDGE
+
+;-------------------------------------------------
+;COMBAT_FISHERMAN_SELECT_BOARDING_MEMBER
+;直接設置に参加可能なメンバーを一覧化し、プレイヤーに参加対象を決定させる
+;-------------------------------------------------
+@COMBAT_FISHERMAN_SELECT_BOARDING_MEMBER(直接設置参加候補ID, 参加メンバーリスト)
+#DIMS REF 参加メンバーリスト
+#DIMS 直接設置参加候補ID
+#DIMS 候補リスト, MAX_CHARANUM
+#DIM DYNAMIC PRINTED_LINECOUNT
+#DIM DYNAMIC ID
+#DIM CONST 最大選択可能数 = 5
+#DIM DYNAMIC 選択数
+PRINTL
+FOR LOCAL, 0, LIST_COUNT(直接設置参加候補ID)
+	ID = TOINT(LIST_GET(直接設置参加候補ID, LOCAL))
+	候補リスト:LOCAL = %DIC_SET(候補リスト:LOCAL, "名前", @"%ANAME(ID)%")%
+	候補リスト:LOCAL = %DIC_SET(候補リスト:LOCAL, "体力", TOSTR(BASE:ID:体力))%
+	候補リスト:LOCAL = %DIC_SET(候補リスト:LOCAL, "最大体力", TOSTR(MAXBASE:ID:体力))%
+	候補リスト:LOCAL = %DIC_SET(候補リスト:LOCAL, "白兵", TOSTR(ABL:ID:白兵))%
+	候補リスト:LOCAL = %DIC_SET(候補リスト:LOCAL, "キャラID", TOSTR(ID))%
+	候補リスト:LOCAL = %DIC_SET(候補リスト:LOCAL, "選択", "0")%
+NEXT
+PRINTFORML 以下のメンバーから最大5名までを選択し、直接設置に参加させることが可能です
+DRAWLINE
+PRINTED_LINECOUNT = LINECOUNT
+DRAWLINE
+CALL ARRAYSORT_DIC(候補リスト:LOCAL, "白兵", 1)
+WHILE 1
+	CLEARLINE LINECOUNT - PRINTED_LINECOUNT
+	;候補選択一覧の表示
+	;-------------------------------------------------
+	FOR LOCAL, 0, LIST_COUNT(直接設置参加候補ID)
+		LOCALS = %FuncTagSetText_ShapeSize(@"%DIC_GET(候補リスト:LOCAL, "名前")%", 15, 1, 0)%
+		LOCALS += FuncTagSetText_ShapeSize(@"白兵:%DIC_GET(候補リスト:LOCAL, "白兵")%", 10, 1, 0)
+		LOCALS += FuncTagSetText_ShapeSize(@"体力:(%DIC_GET(候補リスト:LOCAL, "体力")% / %DIC_GET(候補リスト:LOCAL, "最大体力")%)", 30, 1, 0)
+		IF DIC_GET(候補リスト:LOCAL, "選択") == "0"
+			CALLF FuncTagSetText_Print(@"@B:{LOCAL}@%LOCALS%@/B@", 0x05)
+		ELSE
+			CALLF FuncTagSetText_Print(@"@C:{カラー_黄緑}@@B:{LOCAL}@%LOCALS%@/B@@/C@", 0x05)
+		ENDIF
+	NEXT
+	DRAWLINE
+	CALLF FuncTagSetText_Print(@"@B:100@[決定]@/B@      @B:101@[中止]@/B@", 0x05)
+	;入力受付
+	;-------------------------------------------------
+	INPUT
+	IF RESULT >= 0 && RESULT < LIST_COUNT(直接設置参加候補ID)
+		IF DIC_GET(候補リスト:RESULT, "選択") == "0" && 選択数 < 最大選択可能数
+			候補リスト:RESULT = %DIC_SET(候補リスト:RESULT, "選択", "1")%
+			選択数 ++
+		ELSEIF DIC_GET(候補リスト:RESULT, "選択") == "1"
+			候補リスト:RESULT = %DIC_SET(候補リスト:RESULT, "選択", "0")%
+			選択数 --
+		ENDIF
+	;決定
+	ELSEIF RESULT == 100
+		IF 選択数 != 0
+			FOR LOCAL, 0, LIST_COUNT(直接設置参加候補ID)
+				SIF DIC_GET(候補リスト:LOCAL, "選択") == "1"
+					参加メンバーリスト = %LIST_ADD(参加メンバーリスト, DIC_GET(候補リスト:LOCAL, "キャラID"))%
+			NEXT
+			RETURN 1
+		ELSE
+			PRINTFORMW メンバーが選択されていません
+		ENDIF
+	;中止
+	ELSEIF RESULT == 101
+		RETURN 0
+	ENDIF
+WEND
