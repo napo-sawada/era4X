@@ -1,0 +1,245 @@
+﻿;---------------------
+;基本的な発生確率(1000分率 100で10%)
+;これにコンフィグ項目の発生頻度がかけられるので、必ずしもこの通りにはならない
+;---------------------
+@EVENT_DAILY_NEWS_PAPER_RATE()
+RETURN 100
+
+
+;---------------------
+;確率以外の発生判定
+;〇期以降になると発生するとか、デイリー側で利用している変数が-1だったら起こさない　みたいなはじき方をするときに使う
+;---------------------
+@EVENT_DAILY_NEWS_PAPER_DECISION()
+CALL GET_STAR_ID_FROM_POS(CHARACTER_POSITION)
+SIF RESULT == -1
+  RETURN 0
+RETURN 1
+
+;---------------------
+;ジャンル
+;コンフィグ設定で使用
+;---------------------
+@EVENT_DAILY_NEWS_PAPER_GENRE()
+RETURN デイリー_ジャンル_その他
+
+
+;---------------------
+;本体
+;イベントが発生した場合は1、発生しなかった場合は0を返す
+;発生しなかったというのは例えば、特定条件を満たすキャラからランダムに一人選ぶデイリーで、そもそもその条件を満たすキャラが一人もいないみたいなとき
+;旧仕様で作ったことある人向けにいうと「旧仕様のデイリー本体冒頭で-1を返すような状況」
+;---------------------
+@EVENT_DAILY_NEWS_PAPER()
+#DIM STAR_ID
+
+PRINTFORMW 朝、%CALLNAME:MASTER%は飲み物片手に新聞を読んでいた
+CALL GET_STAR_ID_FROM_POS(CHARACTER_POSITION)
+STAR_ID = RESULT
+SELECTCASE STAR_OWNER:STAR_ID
+  CASE 国家ID_プレイヤー
+    SELECTCASE RAND:5
+      CASE 0
+        CALL PRINT_NEWSPAPER_HEADER("宇宙防衛軍の構築急がれる")
+        PRINTFORML 新体制派の侵攻軍により旧S03防衛部隊が壊滅
+        PRINTFORML 新体制では駐在する防衛軍を用いておらず、主力艦隊による機動防御戦法がしばらくは取られると思われる
+        PRINTFORML しかし銀河人民統一連邦による奪回作戦が実行される可能性も高く、侵攻に即応できる宇宙防衛軍の構築が望ましい
+        PRINTL
+        PRINTFORML また、今回の戦いにより小型艦と実体弾主体の対ミサイル戦術がUSF以外の軍に効果的でないことが証明された
+        PRINTFORML 新たに設立される防衛軍には、抑止力の意味も込めて戦艦ないし空母などの大型艦の建造が望まれる
+        PRINTFORML しかし今回の戦争により国家財政は厳しく、宇宙防衛軍の設立当初から大型艦を配備できるかは難しいところであると専門家は睨んでいる
+      CASE 1
+        CALL PRINT_NEWSPAPER_HEADER("解放戦争により大都市破壊")
+        PRINTFORML 解放戦争により6つの大都市全てで激しい戦闘が繰り広げられた
+        PRINTFORML その結果あらゆる施設が破壊され更地と化した
+        PRINTFORML スラム街すら破壊され、文字通り何もない状況になった
+        PRINTFORML 
+        PRINTFORML 新政権による速やかな都市再建が行われない限り、数億人が住居を失ったままのどころか生命の危機に陥ることになる
+        PRINTFORML 現在、戦場とならなかった小都市に人口が密集し食糧難が発生しているためだ
+        PRINTFORML 早くも新政権の腕の見せ所である
+      CASE 2
+        CALL PRINT_NEWSPAPER_HEADER("社会体制に大きな変化なし")
+        PRINTFORML 解放戦争により政権の顔ぶれが一新されたが、社会体制に大きな変化はないというのが新政府の見解だ
+        PRINTFORML 税率、社会問題、山積する問題については引き続き対応していくものの、ひとまずは都市の再建から着手していくという
+        PRINTFORML 一部市民からはいぜんより大変なことになるのではないかと不安の声が出ており、その声にどう対応するかが新政府の腕の見せ所となりそうだ
+      CASE 3
+        CALL PRINT_NEWSPAPER_HEADER("旧体制派 次々逮捕")
+        PRINTFORML 旧体制派の人間の汚職が次々と判明し、市民の怒りに火を注いでいる
+        PRINTFORML その結果、市民の協力を得た新政府直属の特務部隊が次々と旧体制派を逮捕、政治犯収容所送りにしている
+        PRINTFORML すでに政治犯収容所は満員となっており、どれだけの人間が不正を行ってきたのか、数えるだけでもおぞましい状況だ
+      CASE 4
+        CALL PRINT_NEWSPAPER_HEADER("旧体制の政治犯 解放される")
+        PRINTFORML 旧体制派によって囚われていた政治犯が次々と解放されている
+        PRINTFORML 歴史家、教師、政治家などの知識層が多く含まれ、新しい国の形成を強力にバックアップしてくれると期待されている
+    ENDSELECT
+  CASE 国家ID_社会主義
+    SELECTCASE RAND:5
+      CASE 0
+        CALL PRINT_NEWSPAPER_HEADER("惑星防衛部隊 大型艦配備急がれる")
+        PRINTFORML 昨今の他国の侵攻計画によると、大型艦を主軸にしたドクトリンが多く散見される
+        PRINTFORML 現状の小型艦主体の我国の防衛部隊ではそのようなドクトリンに対し苦戦することが確実であると専門家は見ている
+        PRINTFORML だが我国は現在第三惑星の開発に莫大な投資を行っており、宇宙軍に資金を回せていないのが現状だ
+        PRINTFORML この隙を他国に狙われないことを願うばかりである
+      CASE 1
+        CALL PRINT_NEWSPAPER_HEADER("全宇宙ホバーレース 目指せ万年新居脱却")
+        PRINTFORML ホバーレースは我が国でも人気のスポーツだが、全宇宙ホバーレースの場では一度も優勝したことがない
+        PRINTFORML 何度も監督を入れ替え挑戦してきたが、万年二位という結果に終わっている
+        PRINTFORML しかし今年は一味違う。国からの補助金も昨年度の二倍、メンバーも二倍という我が国らしい物量で責める作戦に出たのだ
+        PRINTFORML 今年こそ優勝旗を主星に持ち帰ってきて欲しいものである
+      CASE 2
+        CALL PRINT_NEWSPAPER_HEADER("スラムの問題")
+        PRINTFORML かねてよりスラムの問題が顕著かしてきた我銀河人民統一連邦
+        PRINTFORML ついに主星の首都にまでスラムができてしまうという状況に陥っている
+        PRINTFORML 問題の原因は農村部で法律に違反した人口増加作画取られ、大量の認知されない子供たちが都市にまで溢れていることだ
+        PRINTFORML 人民には法律に従い、人口増加を押さえる努力がより一層求められる
+      CASE 3
+        CALL PRINT_NEWSPAPER_HEADER("人民軍一部蜂起")
+        PRINTFORML S02で人民軍の一部が蜂起し、第二都市の第三区画を占拠した
+        PRINTFORML このエリアはかつて処刑場が存在し、反体制派の兵士を処刑してきた歴史がある
+        PRINTFORML 今回このエリアが選挙されたことにも何か関係があるのだろうか
+        PRINTFORML なお、現在歩兵と戦車の混合部隊が都市を包囲し、蜂起を起こした兵士に投降を呼びかけている
+      CASE 4
+        CALL PRINT_NEWSPAPER_HEADER("レジスタンスの情報提供を")
+        PRINTFORML 祖国に対する裏切り者、レジスタンスの活動が活発化している
+        PRINTFORML 有力な情報提供者には報奨金として$5,000を出すことが決まった
+        PRINTFORML 怪しい行動をする人物を見かけた場合はお近くの人民警察まで
+    ENDSELECT
+  CASE 国家ID_企業連合
+    SELECTCASE RAND:3
+      CASE 0
+        CALL PRINT_NEWSPAPER_HEADER("夢を掴んだ男")
+        PRINTFORML エイツー・ペルシウス氏は企業連合で夢を掴んだ一人だ
+        PRINTFORML 貧民の生まれでありながら地道に努力を重ね、飲料品を扱う企業に入社
+        PRINTFORML そこで頭角を表し軍資金を稼いだのち、独立してエイツー・ドンリクを設立した
+        PRINTFORML 今やエイツー・ドリンクは軍用艦の命名権まで持つ大企業に成長し、氏の成功譚は100DLを超えるベストセラーとなっている
+      CASE 1
+        CALL PRINT_NEWSPAPER_HEADER("離反する部隊にどう対処するか")
+        PRINTFORML 我軍部では海賊あるいは企業家と共謀し、艦を持ち去り離反する事件が相次いでいる
+        PRINTFORML 我が国の悪しき風習として金さえ積めば手に入らないものはなく、軍の情報も外に漏れているのが一因とされている
+        PRINTFORML しかし第一は軍の規律向上が第一で、これには軍部に一層の努力が求められる
+      CASE 2
+        CALL PRINT_NEWSPAPER_HEADER("高税率維持を決定した企業連")
+        PRINTFORML 我が国の最大意思決定機関である企業連は、引き続き高税率を維持していくことを表明した
+        PRINTFORML これは各所で発生する貧民層に対する対応のための資金だというが、市民からの反発は必死である
+        PRINTFORML そもそも高税率こそが貧民発生の原因だと指摘する専門家も少なくなく、また決済の透明性がないことからも市民は企業連への不信感を募らせている
+    ENDSELECT
+  CASE 国家ID_民主主義
+    SELECTCASE RAND:3
+      CASE 0
+        CALL PRINT_NEWSPAPER_HEADER("膨張する軍費")
+        PRINTFORML 宇宙軍にて空母打撃軍を要する我が国のドクトリンは特徴的だ
+        PRINTFORML 空母が前線にて攻撃を受付、後方の艦がミサイルで敵を撃滅するというドクトリンである
+        PRINTFORML しかし訓練においてもメンテナンスに金のかかる空母にダメージが入りやすいため、軍費が膨張しているのだ
+        PRINTFORML 一部実戦訓練を取りやめシミュレーターによる訓練に切り替えるなど対策を行っているが、焼け石に水の状態だ
+      CASE 1
+        CALL PRINT_NEWSPAPER_HEADER("第十一都市で暴動")
+        PRINTFORML アースの貧民街、通称第十一都市で暴動が発生した
+        PRINTFORML 暴動を起こしたものたちは最低限の生活の保証を要求している
+        PRINTFORML 生活の保護を与えるには市民権が必要だが、貧民層の住人の大半は正式な出生届を出されておらず市民権を持っていない
+        PRINTFORML 脈絡と続いてきた難民問題が顕著化したものでもある
+      CASE 2
+        CALL PRINT_NEWSPAPER_HEADER("エデンで暴動")
+        PRINTFORML 土地の利権問題を争い、エデンで暴動が発生している
+        PRINTFORML 争っているのは、開拓初期から第八都市周辺の開拓に従事してきた市民と、第八都市の建造にやってきた後発の市民たちだ
+        PRINTFORML 近年両者の間で貧富の差が拡大し、また土地の所有権を巡って対立が激化していた
+        PRINTFORML それがついに爆発し暴動に至ったのだ
+        PRINTFORML 現地当局は暴動が治るまで第八都市に近づかないよう、市民に警告を出している
+    ENDSELECT
+  CASE 国家ID_アレス宗教
+    SELECTCASE RAND:3
+      CASE 0
+        CALL PRINT_NEWSPAPER_HEADER("えせ宗教で信徒から金を巻き上げた男を逮捕")
+        PRINTFORML 新たな宗教を創設し自身が創始者となることで信徒から金を巻き上げていた男が逮捕された
+        PRINTFORML 男は人生のパートナーが亡くなり心が弱っている人たちに積極的に声をかけ信徒にしたてていた
+        PRINTFORML 被害総額は$1,000,000を超え、老後の蓄えを丸々取られた人もいた
+        PRINTFORML 警察当局は、迷いが生じた時はアレス神にお伺いを立てるか、信頼できる人に相談して欲しいと話している
+      CASE 1
+        CALL PRINT_NEWSPAPER_HEADER("淫行により教会関係者を逮捕。店となった教会を撤去へ")
+        PRINTFORML 教会と偽り風俗を営業していた第三都市の第一セクションに存在する店が摘発された
+        PRINTFORML 店は表向き宿舎付きの敬虔な信徒の集う教会として認知されていた
+        PRINTFORML その実は懺悔室で風俗嬢を指名し宿舎で行為に及ぶ、風俗店だったのだ
+        PRINTFORML 警察当局は、法律で禁止されている風俗店の情報を手に入れた方は速やかに警察まで情報提供して欲しいと告げている
+      CASE 2
+        CALL PRINT_NEWSPAPER_HEADER("宗教代表による意思決定会議、難航")
+        PRINTFORML 年に4回行われる国家の意思決定会である、意思決定会議
+        PRINTFORML だが今年は、参加する各宗教の代表者の意見をまとめきれずに難航している
+        PRINTFORML 聖女のバックで黒い金の動きがあったことや、聖騎士団による淫行の発覚などにより議長であるアレス教の発言力が弱まったことが原因とされている
+        PRINTFORML これを機に議長の座を奪いたい各宗教が議論を難航させ、収集がついていない状況だ
+    ENDSELECT
+  CASE 国家ID_機械文明
+    SELECTCASE RAND:3
+      CASE 0
+        CALL PRINT_NEWSPAPER_HEADER("不満は溜めずに近くの役所にて相談を")
+        PRINTFORML 日常生活に不満を抱えていませんか？そんな方はお近くの役所にて相談を
+        PRINTFORML マザーに集積された人間では処理不可能な量の情報から、あなたに最適な解決法をマザーが提供いたします
+        PRINTFORML 不満は健康に害をなします。自分一人でため込まずにマザーに相談しましょう
+      CASE 1
+        CALL PRINT_NEWSPAPER_HEADER("人口抑制政策が実施中")
+        PRINTFORML 現在人口抑制制作が実施中です
+        PRINTFORML 性行為を行う場合は必ず避妊をいたしましょう
+        PRINTFORML 性欲を満たしたいだけの場合は、セクサロイドの貸し出しも行っております
+        PRINTFORML 第九都市の整備が完成するまでの辛抱です。国民一段となって協力していきましょう
+      CASE 2
+        CALL PRINT_NEWSPAPER_HEADER("超完全食完成-刑務所にて配給予定")
+        PRINTFORML 生存に必要な全ての栄養を一口で取れる超完全食が完成した
+        PRINTFORML しかしその味の評価は最低より少しマシという程度のもので、一般向けに配布するのは難しそうだ
+        PRINTFORML そこで刑務所にて経費削減のため、この超完全食を配布されることが決まった
+        PRINTFORML この超完全食の味を知りたくなければ悪いことをしてはいけないというのが、開発局局長の言葉だ
+    ENDSELECT
+  CASE 国家ID_豊秋津皇国
+    SELECTCASE RAND:4
+      CASE 0
+        CALL PRINT_NEWSPAPER_HEADER("電脳怪人・村雨 逆賊か義賊か")
+        PRINTFORML 政府高官の口座から違法にキャッシュを引き出し貧困層に施すハッカー、通称電脳怪人村雨の犯罪が頻発している
+        PRINTFORML 被害を受けた政府高官への怨恨か、それとも貧困層に対する施しが目的なのか
+        PRINTFORML その目的はわからないものの、重大な犯罪として警察は犯人の追跡を進めている
+      CASE 1
+        CALL PRINT_NEWSPAPER_HEADER("将軍 天皇に謁見")
+        PRINTFORML 宇宙軍の総司令を務める将軍が、天皇陛下に謁見した
+        PRINTFORML その理由は明らかにされていないが、何かしらの政治的根回しが目的とされている
+        PRINTFORML 現在一星しか所有していない我が国はより強力な宇宙軍を求めており、そのための布石ではないかと専門家は睨んでいる
+      CASE 2
+        CALL PRINT_NEWSPAPER_HEADER("メイドカフェに偽装した風俗店急増")
+        PRINTFORML オオエド・シティでは現在メイドカフェに偽装した風俗店が急増している
+        PRINTFORML その背景には従来のメイドカフェの需要が低迷し、運営に行き詰まった店が苦肉の策として風俗店の二枚看板で運営しているパターンが多いのだという
+        PRINTFORML そのような店を発見した場合は最寄りの警察に通報して欲しいと警察は言っている
+      CASE 3
+        CALL PRINT_NEWSPAPER_HEADER("グンマー ネオ・サイタマ県境紛争激化")
+        PRINTFORML かねてより領土紛争を起こしていたグンマーとネオ・サイタマの県境紛争が激化している
+        PRINTFORML 現在はグンマーが押しておりネオ・サイタマ軍が押されているが、ネオ・サイタマ軍は飛空挺とニンジャを組み合わせた後方連絡線への攻撃を慣行
+        PRINTFORML グンマーは戦線を伸ばしたくても背後の脅威に対応するため、思うように前進できないでいる
+    ENDSELECT
+  CASE 国家ID_ハールバルズ
+    SELECTCASE RAND:3
+      CASE 0
+        CALL PRINT_NEWSPAPER_HEADER("農奴の反乱激化")
+        PRINTFORML 農奴の反乱が激化している
+        PRINTFORML 第二惑星開発のための費用を徴収された農奴が反乱を起こし、現在第一惑星では食料自給率が100\%を切る大問題が発生している
+        PRINTFORML 農林水産局は食糧消費を浪費から通常に切り替えるよう一般市民や貴族に要求しているが、それによる反発も大きく、政府にとって悩ましい状況が続いている
+      CASE 1
+        CALL PRINT_NEWSPAPER_HEADER("宇宙軍防衛部隊の強化急がれる")
+        PRINTFORML 現在我国の宇宙軍防衛部隊と、仮想敵とされる豊秋津皇国の仮想戦闘シミュレーションにおいて、ほぼ100\%の確率で防衛軍が撃破されることが判明した
+        PRINTFORML 宇宙防衛軍のドクトリンは防御偏重だが、その実は攻撃に転じられるだけの並走を持った艦を開発できる余力がないのが問題である
+        PRINTFORML 第二惑星の開発が完了し次第防衛部隊の強化に当たると国防軍は発表しているが、その前に豊秋津皇国が攻めてくるに違いないと専門家は警告している
+      CASE 2
+        CALL PRINT_NEWSPAPER_HEADER("農奴の扱いにUSFが講義")
+        PRINTFORML 我国で伝統的に扱われている農奴に対し、USFが公式に抗議の声明を発表している
+        PRINTFORML 中身のないポピュリズムに染まった軽い意見で真に受けるだけ無駄な声明だが、国力の差を考えると無視することもできない
+        PRINTFORML USFとの関係が悪化すれば貿易による利益が減少する可能性も考えられ、政府は慎重な対応を求められることとなる
+    ENDSELECT
+ENDSELECT
+
+
+
+RETURN 1
+
+@PRINT_NEWSPAPER_HEADER(TITLE)
+#DIMS TITLE
+SETCOLOR 0X6666666
+CUSTOMDRAWLINE ///
+RESETCOLOR
+PRINTFORML %TITLE%
+SETCOLOR 0X6666666
+CUSTOMDRAWLINE ///
+RESETCOLOR
+
