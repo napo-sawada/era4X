@@ -11,6 +11,10 @@
 @QUEST_ACCEPTABLE_57
 SIF CHARACTER_POSITION != レジスタンスアジト
 	RETURN 0
+SIF QUEST_PROGRESS:57 == 5
+	RETURN 0
+SIF QUEST_PROGRESS:57 == 4 && GB_非戦闘員:2 <= 1000000
+	RETURN 0
 RETURN QUEST_PROGRESS:34 >= 3
 
 ;--------------------------
@@ -131,11 +135,41 @@ SELECTCASE QUEST_PROGRESS:QUEST_ID
 		QUEST_PROGRESS:QUEST_ID = 3
 	CASE 3
 		PRINTFORML 「申し訳ないが我々には宇宙戦力が足りない。はっきり言ってパトロンがいない限りお前の艦隊だけでS03の防衛艦隊を撃破してもらうことになるだろう」
-		RETURN
 		PRINTFORML 「その代わり地上戦で役に立てるよう、新しいパトロンを見つけてきた」
 		PRINTFORMW 「そのパトロンの効果で、秘密工場を建てられることになった。お前はどこに立てるのがいいと思う？」
 		PRINTL
 		CALL BUILD_SECRET_FACTORY_47(0)
-		PRINTFORML 「そうか、わかった」
-		RETURN
+		PRINTFORML 「そうか、わかった。参考にさせてもらおう」
+		QUEST_PROGRESS:QUEST_ID = 4
+	CASE 4
+		PRINTFORML 「そういえばお前には世話になっているのに、全然俺たちのことを話していなかったな」
+		PRINTFORML 「こんな身元不明の奴らを無償で助けてくれるなんて、変なやつだよ」
+		PRINTFORMW 「せっかくだし、昔話でもさせてくれ」
+		PRINTL
+		PRINTFORML 「俺と、俺の友人だったレフという男は元々銀河人民統一連邦の軍人だった」
+		PRINTFORML 「どちらも大隊指揮を任せられる上級将校だったのだが、銀河人民連邦の現状を憂いてもいた」
+		PRINTFORMW 「貧困、差別、横領、犯罪率、何をとってもライバルであるUSFの足元にも及ぼないほど悪い」
+		PRINTL
+		PRINTFORML 「俺とレフは出世し、軍の内部から軍を変え、そして政治の世界に出てこの国を変えようと誓い合った」
+		PRINTFORML 「今思えば若気の至りさ。でも俺たちは本気だった」
+		PRINTFORML 「だがその話はどこからかねじ曲がって伝わり、俺たちは上層部から査問を受けることになった」
+		PRINTFORMW 「国家転覆を狙っているんじゃないか、と」
+		PRINTL
+		PRINTFORML 「もちろん俺たちにそんなつもりはなかった。むしろ国をよくしたい一心だった。だがその思いは上層部に伝わらなかった」
+		PRINTFORML 「俺とレフは二等兵に降格、二度と出世はできないだろうと釘を刺された。まあ、銃殺されなかっただけマシだがな」
+		PRINTFORMW 「俺もレフも納得は行かなかった。だがどうしようもなかった。酒浸りになり将来を嘆くしかやれることはなかった」
+		PRINTL
+		PRINTFORML 「だがレフは俺より馬鹿で勇敢な男だった。密かにレジスタンスを結成したんだ。それがこのレジスタンスの前身だよ」
+		PRINTFORML 「何度か悪さをしていた木端役人をこらしめたところで、レフは捕まった。その報を聞いたとき、俺は急いで奴の家に走った」
+		PRINTFORMW 「国家反逆罪は家族もろとも銃殺だ。俺は急いでレフの妹、エカを連れてこの星を後にした」
+		PRINTL
+		PRINTFORML 「そのあとはまあ長いから割愛するが、小惑星帯の影に宇宙港を立てるくらいにはレジスタンスの勢力はデカくなった」
+		PRINTFORML 「だが何度目かのS03での作戦中に俺の居場所が憲兵にバレて、追われることになった。自分の艦も徴発されてしまって万事急須だったところで助けてくれたのがお前というわけだ」
+		PRINTFORMW 「……ああ、早く作戦を成功させてレフの墓を立ててやりたいよ」
+		PRINTL
+		PRINTFORML 「まあそういうわけだ。今度はお前の話を聞かせてくれよ。何ならお前の方が突飛な人生を送っていそうだからな……」
+		PRINTW ………………
+		PRINTW …………
+		PRINTW ……
+		QUEST_PROGRESS:QUEST_ID = 5
 ENDSELECT
