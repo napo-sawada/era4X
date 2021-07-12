@@ -1,4 +1,4 @@
-﻿#DIM CONST SHIP_CLASS_TOTAL_COUNT = 99
+﻿#DIM CONST SHIP_CLASS_TOTAL_COUNT = 199
 #DIM CONST 汎用調査船 = 1
 #DIM CONST 汎用コルベット = 2
 #DIM CONST 汎用フリゲート = 3
@@ -69,4 +69,9 @@
 #DIM CONST 宇宙まんぼう = 96
 #DIM CONST 宇宙まぐろ = 97
 #DIM CONST 宇宙しゃこ = 98
+
+#DIM CONST アーラ級コルベット = 110
+#DIM CONST シーナ級駆逐艦 = 111
+#DIM CONST マルタ級巡洋戦艦 = 112
+#DIM CONST TS重工コルベット = 113
 
