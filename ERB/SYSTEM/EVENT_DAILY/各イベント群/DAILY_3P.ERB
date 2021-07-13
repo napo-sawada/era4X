@@ -1,0 +1,98 @@
+﻿;---------------------
+;基本的な発生確率(1000分率 100で10%)
+;これにコンフィグ項目の発生頻度がかけられるので、必ずしもこの通りにはならない
+;---------------------
+@EVENT_DAILY_3P_RATE()
+RETURN 70
+
+
+;---------------------
+;確率以外の発生判定
+;〇期以降になると発生するとか、デイリー側で利用している変数が-1だったら起こさない　みたいなはじき方をするときに使う
+;---------------------
+@EVENT_DAILY_3P_DECISION()
+RETURN 1
+
+;---------------------
+;ジャンル
+;コンフィグ設定で使用
+;---------------------
+@EVENT_DAILY_3P_GENRE()
+RETURN デイリー_ジャンル_エロ
+
+;---------------------
+;特定の条件を満たすキャラをランダムに選択する場合に利用
+;他の関数は必須だが、これだけはなくてもよい　というかパフォーマンスへ影響するので不要なら作ってはならない
+;対象が存在せずデイリーを開始できない場合は0を返すことでデイリーの発生をキャンセルする
+;---------------------
+@EVENT_DAILY_3P_SETTARGET()
+#DIM DYNAMIC 嫁の数
+
+FOR LOCAL, 0, CHARANUM
+  IF (TALENT:LOCAL:正妻 || TALENT:LOCAL:妾) && IS_FEMALE(LOCAL)
+    IF TALENT:LOCAL:性別 == 2
+      DAILY_TARGET:DAILY_TARGET_NUM = LOCAL
+      DAILY_TARGET_NUM ++
+    ENDIF
+    嫁の数 ++
+  ENDIF
+NEXT
+SIF 嫁の数 < 2
+  RETURN 0
+RETURN 1
+
+
+;---------------------
+;本体
+;イベントが発生した場合は1、発生しなかった場合は0を返す
+;発生しなかったというのは例えば、特定条件を満たすキャラからランダムに一人選ぶデイリーで、そもそもその条件を満たすキャラが一人もいないみたいなとき
+;旧仕様で作ったことある人向けにいうと「旧仕様のデイリー本体冒頭で-1を返すような状況」
+;---------------------
+@EVENT_DAILY_3P()
+#DIM 対象
+#DIM DYNAMIC 嫁
+
+対象 = DAILY_TARGET:(RAND:DAILY_TARGET_NUM)
+
+; 乱暴！
+WHILE !嫁
+  LOCAL = RAND:CHARANUM
+  SIF LOCAL != 対象 && (TALENT:LOCAL:正妻 || TALENT:LOCAL:妾) && IS_FEMALE(LOCAL)
+    嫁 = LOCAL
+WEND
+
+SELECTCASE RAND:3
+  CASE 0
+    PRINTFORML %ANAME(MASTER)%はベッドの上で%ANAME(嫁)%の服をはぎ取ると、%ANAME(対象)%と共にむしゃぶりついた
+    PRINTFORML 二人がかりで全身を愛撫すると、敏感に体を震わせる%ANAME(嫁)%
+    PRINTFORML あっという間に垂れ流された愛液を掬ってアナルに塗りたくると、%ANAME(対象)%と共に前後からねじ込む
+    PRINTFORML きつく締め付けてくるヴァギナとアナルの感触を、%ANAME(対象)%と%ANAME(MASTER)%はしっかり堪能して腰を振る
+    PRINTFORML 前後の穴を圧迫された%ANAME(嫁)%はひいひい喚いていたのも束の間、胎内に射精されるや大きな嬌声を上げて全身を痙攣させた
+    PRINTFORML その後、%ANAME(MASTER)%と%ANAME(対象)%が立たなくなるまで、何時間も前後の穴を犯され続けた
+    PRINTFORMW その結果、%ANAME(嫁)%は前後の穴がぽっかり空いて、アヘ顔を晒しながら気絶してしまった
+  CASE 1
+    PRINTFORML %ANAME(嫁)%は%ANAME(対象)%と真夜中の裏路地で、四つん這いになっていた
+    PRINTFORML 首輪をつけられ、アナルに犬の尻尾を模したおもちゃを入れられた二人は%ANAME(MASTER)%の命令を待っている
+    PRINTFORML %ANAME(MASTER)%が%ANAME(対象)%に%ANAME(嫁)%を犯すように命令すると、%ANAME(対象)%は嬉しそうにワンと鳴いた
+    PRINTFORML %ANAME(対象)%は%ANAME(嫁)%の膣にペニスを突き刺し、子宮口を執拗に小突いて排卵を促す
+    PRINTFORML %ANAME(嫁)%は顔を真っ赤にして快感に耐えていたが、やがて犬のようにハアハア舌を突き出して荒い吐息で喘ぎ出す
+    PRINTFORML そして%ANAME(対象)%が射精して%ANAME(嫁)%の子宮に精液が注がれると、%ANAME(嫁)%は歓喜の鳴き声を上げた
+    PRINTFORMW 二人の交尾は%ANAME(対象)%の精巣が空っぽになるまで続けられ、辺りには%ANAME(嫁)%の潮やら小便が撒き散らされていた
+  CASE 2
+    PRINTFORML %ANAME(嫁)%と%ANAME(対象)%に風呂場に連れて行かれた%ANAME(MASTER)%は、念入りに身体中を洗われていた
+    IF GET_INMOU_LEVEL(対象) >= 1 && RAND:2
+			LOCALS:0 = %LOCALS:0%%SPLIT_R("毛の茂った：ふさふさの")%
+		ELSEIF GET_INMOU_LEVEL(対象) == -2 && RAND:2
+			LOCALS:0 = %LOCALS:0%%SPLIT_R("つるつるの：童女のような")%
+		ENDIF
+    PRINTFORML %ANAME(嫁)%は愛おしげに%STR_BODY("胸", 嫁)%で%ANAME(MASTER)%の腕を擦り、%ANAME(対象)%は%LOCALS:0%股で%ANAME(MASTER)%の太腿を擦っている
+    PRINTFORML 存分に二人の奉仕を満喫した%ANAME(MASTER)%は、今度は二人の膣穴を隅々まで指で綺麗に洗ってやった
+    PRINTFORML 特に感じるポイントを念入りに洗ってやると、%ANAME(嫁)%はよがり声を上げ%ANAME(対象)%はふたなりペニスの先から我慢汁をだらだら垂れ流して喜ぶ
+    PRINTFORML 何度もイかせているうちに我慢できなくなった二人は、肉棒で奥まで洗ってくださいと愛液でピカピカに輝く膣を開いておねだりしてきた……
+    PRINTFORMW その後三人で代わる代わる交わり、風呂場には長いこと女の嬌声が響き続けた
+ENDSELECT
+LOCALS = %ANAME(対象)%の唇
+CALL FUCK_MAKELOVE(嫁, 対象, LOCALS, ANAME(対象))
+
+
+RETURN 1
