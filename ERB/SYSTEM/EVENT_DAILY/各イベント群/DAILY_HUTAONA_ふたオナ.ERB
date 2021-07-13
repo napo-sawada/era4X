@@ -26,13 +26,14 @@ RETURN デイリー_ジャンル_エロ
 ;対象が存在せずデイリーを開始できない場合は0を返すことでデイリーの発生をキャンセルする
 ;---------------------
 @EVENT_DAILY_HUTAONA_SETTARGET()
+DAILY_TARGET_NUM = 0
 FOR LOCAL, 0, CHARANUM
   IF TALENT:LOCAL:恋人 && TALENT:LOCAL:性別 == 2
 		DAILY_TARGET:DAILY_TARGET_NUM = LOCAL
 		DAILY_TARGET_NUM ++
 	ENDIF
 NEXT
-RETURN 1
+RETURN DAILY_TARGET_NUM
 
 
 ;---------------------
