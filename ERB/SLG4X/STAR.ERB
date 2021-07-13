@@ -74,6 +74,14 @@ IF STAR_OWNER:STAR_ID == 国家ID_プレイヤー
         ELSEIF RESULTS:0 == "資源"
             CALL ADD_RESOURCE(星系座標ID:STAR_ID, STAR_OWNER:STAR_ID, _ITEM_ID, _総算出物一覧:SC_資源 * ONE_WEEK)
         ENDIF
+        _必要資源数 = GET_RESOURCE_NUM(星系座標ID:STAR_ID, STAR_OWNER:STAR_ID, _ITEM_ID)
+        IF RESULTS:0 == "資源" && _必要資源数 < STOCK_TARGET
+            _必要資源数 = STOCK_TARGET - _必要資源数
+            IF _必要資源数 > 0
+                CALL BUY_SPACE_SHOP(STAR_ID, _ITEM_ID, _必要資源数)
+            ENDIF
+        ENDIF
+
     NEXT
     ; 税収
     IF MONEY:国家ID_プレイヤー > 0
@@ -132,46 +140,7 @@ ELSE
             CALL ADD_RESOURCE(星系座標ID:STAR_ID, STAR_OWNER:STAR_ID, LOCAL, 資源生産量)
             _必要資源数 = STOCK_TARGET - _必要資源数 - 資源生産量
             IF _必要資源数 > 0
-                FOR _STAR_ID, 0, 星系数
-                    SIF SALE_TARGET:(STAR_OWNER:STAR_ID):(GET_SHOP_ID(_STAR_ID, )) == 0
-                        CONTINUE
-                    SIF REL_LIKE_COUNTRY:(STAR_OWNER:STAR_ID):(STAR_OWNER:_STAR_ID) <= -1000
-                        CONTINUE
-                    _店在庫 = GET_SHOP_ITEM_NUM(_STAR_ID, , LOCAL)
-                    IF _店在庫
-                        _購入数 = MIN(_必要資源数, _店在庫)
-                        IF AUTO_SALE:_STAR_ID
-                            CALLF REMOVE_RESOURCE(星系座標ID:_STAR_ID, STAR_OWNER:_STAR_ID, LOCAL, _購入数)
-                        ELSE
-                            SHOP_ITEMS:LOCAL:_STAR_ID -= _購入数
-                        ENDIF
-                        CALL GET_SHOP_ITEM_PRICE(_STAR_ID, , LOCAL)
-                        MONEY:(STAR_OWNER:STAR_ID) -= RESULT * _購入数
-                        MONEY:(STAR_OWNER:_STAR_ID) += RESULT * _購入数
-                        CALL PRINT_ADD_EXP(SHOP_IN_CHARGE:_STAR_ID, EXPNAME:(GET_EXP(GETNUM(ABL, "知略"))), 5, 1)
-                        REL_LIKE_COUNTRY:(STAR_OWNER:STAR_ID):(STAR_OWNER:_STAR_ID) = LIMIT(REL_LIKE_COUNTRY:(STAR_OWNER:STAR_ID):(STAR_OWNER:_STAR_ID) + 1 , -1000, 1000)
-                    ENDIF
-                NEXT
-                FOR _PORT_ID, 0, MAX_PORT
-                    SIF SALE_TARGET:(STAR_OWNER:STAR_ID):(GET_SHOP_ID(, _PORT_ID)) == 0
-                        CONTINUE
-                    SIF REL_LIKE_COUNTRY:(STAR_OWNER:STAR_ID):(PORT_OWNER:_PORT_ID) <= -1000
-                        CONTINUE
-                    _店在庫 = GET_SHOP_ITEM_NUM(, _PORT_ID, LOCAL)
-                    IF _店在庫
-                        _購入数 = MIN(_必要資源数, _店在庫)
-                        IF AUTO_SALE:(GET_SHOP_ID(, _PORT_ID))
-                            CALLF REMOVE_RESOURCE(PORT_POSITION_ID:_PORT_ID, PORT_OWNER:_PORT_ID, LOCAL, _購入数)
-                        ELSE
-                            SHOP_ITEMS:LOCAL:(GET_SHOP_ID(, _PORT_ID)) -= _購入数
-                        ENDIF
-                        CALL GET_SHOP_ITEM_PRICE(, _PORT_ID, LOCAL)
-                        MONEY:(STAR_OWNER:STAR_ID) -= RESULT * _購入数
-                        MONEY:(PORT_OWNER:_PORT_ID) += RESULT * _購入数
-                        CALL PRINT_ADD_EXP(SHOP_IN_CHARGE:(_PORT_ID + 星系数), EXPNAME:(GET_EXP(GETNUM(ABL, "知略"))), 5, 1)
-                        REL_LIKE_COUNTRY:(STAR_OWNER:STAR_ID):(PORT_OWNER:_PORT_ID) = LIMIT(REL_LIKE_COUNTRY:(STAR_OWNER:STAR_ID):(PORT_OWNER:_PORT_ID) + 1 , -1000, 1000)
-                    ENDIF
-                NEXT
+                CALL BUY_SPACE_SHOP(STAR_ID, LOCAL, _必要資源数)
             ENDIF
         ENDIF
     NEXT
