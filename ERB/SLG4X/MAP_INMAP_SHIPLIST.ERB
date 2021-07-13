@@ -117,22 +117,10 @@ WHILE 1
 	;;艦船数とフィルター内容から必要なページ数を算出
 	;-------------------------------------------------
 	VARSET LOCAL
-	FOR LOCAL, 0, LIST_COUNT(所有船リスト)
-		SIF FILTER_LIST:TOINT(DIC_GET(艦船データ:LOCAL, "艦種")) == 0
-			CONTINUE
-		LOCAL:1 ++
-	NEXT
-	IF LOCAL:1 > MAX_NUM_LIST
-		MAX_PAGE = LOCAL:1 / MAX_NUM_LIST
-	ELSE
-		MAX_PAGE = 0
-	ENDIF
+	MAX_PAGE = LIST_COUNT(所有船リスト) / MAX_NUM_LIST
 	;;艦船一覧出力
 	;-------------------------------------------------
-	FOR SHIPLIST_IDX, PAGE * MAX_NUM_LIST, LIST_COUNT(所有船リスト)
-		;表示可能領域を超える場合は出力を止める
-		SIF SHIPLIST_IDX > MAX_NUM_LIST
-			BREAK
+	FOR SHIPLIST_IDX, PAGE * MAX_NUM_LIST, MIN((PAGE + 1) * MAX_NUM_LIST, LIST_COUNT(所有船リスト))
 		;フィルター対象の艦種は出力を省略
 		SIF FILTER_LIST:TOINT(DIC_GET(艦船データ:SHIPLIST_IDX, "艦種")) == 0
 			CONTINUE
