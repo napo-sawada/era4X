@@ -69,9 +69,16 @@
 #DIM CONST 宇宙まんぼう = 96
 #DIM CONST 宇宙まぐろ = 97
 #DIM CONST 宇宙しゃこ = 98
+#DIM CONST 古代のタイタン = 99
+#DIM CONST 古代のフリゲート = 100
 
 #DIM CONST アーラ級コルベット = 110
 #DIM CONST シーナ級駆逐艦 = 111
 #DIM CONST マルタ級巡洋戦艦 = 112
 #DIM CONST TS重工コルベット = 113
+#DIM CONST TS重工フリゲート = 114
+#DIM CONST ガリレオ級駆逐艦 = 115
+#DIM CONST ダヴィンチ級巡洋艦 = 116
+#DIM CONST アインシュタイン級砲艦 = 117
+#DIM CONST エジソン級軽空母 = 118
 
