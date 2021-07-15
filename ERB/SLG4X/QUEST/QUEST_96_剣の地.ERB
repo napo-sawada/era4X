@@ -1,0 +1,832 @@
+﻿;--------------------------
+; !!地上最強の男と 96を好きな番号に変える！!
+; グンマー
+; ここにクエストの説明
+;--------------------------
+
+
+;--------------------------
+; クエスト受注可能か
+;--------------------------
+@QUEST_ACCEPTABLE_96
+CALL GET_STAR_ID_FROM_POS(CHARACTER_POSITION)
+SIF STAR_OWNER:RESULT != 国家ID_豊秋津皇国
+	RETURN 0
+SIF QUEST_PROGRESS:96 < 1
+	RETURN 0
+SIF QUEST_PROGRESS:96 > 2
+	RETURN 0
+RETURN 1
+;--------------------------
+; クエストの名前を返却
+;--------------------------
+@QUEST_NAME_96
+RESULTS = 剣の地
+RETURN
+
+;--------------------------
+; クエスト本体
+;--------------------------
+@QUEST_BODY_96
+#DIM QUEST_ID = 96
+SELECTCASE QUEST_PROGRESS:QUEST_ID
+;――――――――――――――――――――――――――――――――――――――――――――――――
+	CASE 1
+;――――――――――――――――――――――――――――――――――――――――――――――――
+		PRINTFORMW グンマーという未開人達の土地。
+		PRINTFORML 目的となる場所はこの土地の奥深い森の中に存在するのだという。
+		PRINTFORML メックや戦車、現代火器に対して弓と槍で拮抗する超人達の住処。
+		PRINTFORMW 彼らは常軌を逸する戦闘能力を持つ戦闘民族である。恐らく正面突破は大きな苦難を伴うだろう。
+		PRINTFORML 
+		PRINTFORMW %CALLNAME:MASTER%は――
+		PRINTFORML
+			PRINTBUTTON "[0] 堂々たる正面突破にて目的の場所へ行く。", 0
+			PRINTFORML
+			PRINTBUTTON "[1] まだその時ではないと考えた。", 1
+			INPUT
+				IF RESULT == 0
+					PRINTFORML いかなる障害が立ち塞がろうと、それを切り抜けるだけの力があり、仲間がいる。
+					PRINTFORML 所詮は蛮族、未開人。%CALLNAME:MASTER%の相手ではないだろう。
+					PRINTFORMW %CALLNAME:MASTER%は勝利を盗まない。
+					PRINTFORMW いついかなる時であろうと、どんな強敵だろうと、正々堂々打ち破ってこその英雄であった。
+					PRINTFORML 
+					PRINTFORMW そう考えると、%CALLNAME:MASTER%は皇国からグンマー国境へと足を踏み入れた。
+					CALL ORE_KOSO_GUNMA_0
+				ELSEIF RESULT == 1
+					PRINTFORMW まだその時ではない。
+					PRINTFORML 未開の蛮族とはいえ、相手の領域――そして曲がりなりにも一国家が相手。
+					PRINTFORML どれほどの装備、強さがあったとて限界もあるだろう。
+					PRINTFORMW 人は無限に戦えるものではない。
+					PRINTFORML 
+					PRINTFORMW まずは相手と己を知ること――重要なのは彼らに勝つことではない。
+					PRINTFORML 目的地へ足を踏み入れること、それさえ許されれば良いのだ。
+					PRINTFORML 咲耶はどうにも世情に疎く、この点では頼りにならないが――ふと兎耳を思い浮かべる。
+					PRINTFORMW 皇国に住む静流ならばあるいは、彼らのことについても知っているかも知れない。
+				ELSE
+					PRINTFORMW まだその時ではない。
+					PRINTFORML 未開の蛮族とはいえ、相手の領域――そして曲がりなりにも一国家が相手。
+					PRINTFORML どれほどの装備、強さがあったとて限界もあるだろう。
+					PRINTFORMW 人は無限に戦えるものではない。
+					PRINTFORML 
+					PRINTFORMW まずは相手と己を知ること――重要なのは彼らに勝つことではない。
+					PRINTFORML 目的地へ足を踏み入れること、それさえ許されれば良いのだ。
+					PRINTFORML 咲耶はどうにも世情に疎く、この点では頼りにならないが――ふと兎耳を思い浮かべる。
+					PRINTFORMW 皇国に住む静流ならばあるいは、彼らのことについても知っているかも知れない。
+				ENDIF
+;――――――――――――――――――――――――――――――――――――――――――――――――
+	CASE 2
+;――――――――――――――――――――――――――――――――――――――――――――――――
+		PRINTFORMW グンマーという未開人達の土地。
+		PRINTFORML 目的となる場所はこの土地の奥深い森の中に存在するのだという。
+		PRINTFORML メックや戦車、現代火器に対して弓と槍で拮抗する超人達の住処。
+		PRINTFORMW 彼らは常軌を逸する戦闘能力を持つ戦闘民族である。恐らく正面突破は大きな苦難を伴うだろう。
+		PRINTFORML 
+		PRINTFORMW %CALLNAME:MASTER%は――
+		PRINTFORML
+			PRINTBUTTON "[0] 堂々たる正面突破にて目的の場所へ行く。", 0
+			PRINTFORML
+			PRINTBUTTON "[1] まだ準備が出来ていない。", 1
+			PRINTFORML
+			PRINTBUTTON "[2] 静流に任せよう、と結論を出した。（※-1,000,000cr）", 2
+			;その内ライブで成否判定とかさせたい。
+			INPUT
+				IF RESULT == 0
+					PRINTFORML いかなる障害が立ち塞がろうと、それを切り抜けるだけの力があり、仲間がいる。
+					PRINTFORML 所詮は蛮族、未開人。%CALLNAME:MASTER%の相手ではないだろう。
+					PRINTFORMW %CALLNAME:MASTER%は勝利を盗まない。
+					PRINTFORMW いついかなる時であろうと、どんな強敵だろうと、正々堂々打ち破ってこその英雄であった。
+					PRINTFORML 
+					PRINTFORMW そう考えると、%CALLNAME:MASTER%は皇国を出ると、グンマー国境へと足を踏み入れた。
+					CALL ORE_KOSO_GUNMA_0
+				ELSEIF RESULT == 1
+					PRINTFORMW まだ準備は出来ていない。
+					PRINTFORML どういう状況でも対処出来るよう、装備は吟味しておく必要があるだろう。
+					PRINTFORML 慎重に慎重を重ねても、十分なほどの時間があった。
+					PRINTFORMW ひとまず、装備を確認しようと%CALLNAME:MASTER%は思い直した。
+				ELSEIF RESULT == 2
+					IF MONEY < 1000000
+						PRINTFORMW だが、そのためには貢ぎ物の酒、レンタルステージ代も合わせ、１００万クレジット必要だ。
+						PRINTFORMW まずはそのための資金を稼がなければならないだろう。
+						RETURN
+					ENDIF
+					MONEY -= 1000000
+					SETCOLOR 0xDF7401
+					PRINTFORMW 「……はい。お任せ下さい」
+					PRINTFORML 同行してきた静流は、やや緊張した様子で耳をぴくぴくさせつつ頷く。
+					PRINTFORML 歌と踊りは万国共通の文化――そしてグンマー人はお祭り好きな民族。
+					PRINTFORMW 戦うのではなく、歌と踊りで交流し、彼らから門戸を開かせるという作戦。
+					PRINTFORML 
+					PRINTFORMW グンマーは野蛮人と言われているが、科学技術を嫌うだけ。
+					PRINTFORML 実際の所、好戦的、という訳ではないらしく、皇国人でも交流し、歓迎される人間はいるらしい。
+					PRINTFORML 武士の一部も武者修行の一環として、彼らの地に滞在しているものもあるという。
+					PRINTFORMW 好意に対しては好意で迎えるさっぱりとした文化を持つ者達がグンマーなのだと彼女は言った。
+					PRINTFORML 
+					PRINTFORMW 「友好の印――お酒も十分に用意してきましたし、ひとまず歓迎はしてもらえるでしょう」
+					PRINTFORML 問題は歌と踊りであったが、大丈夫です、と彼女は答える。
+					PRINTFORMW 「念願のアイドルデビュ――い、いえ、習い事の舞踊も発揮出来るというもの。気力は十分です」
+					PRINTFORMW 近頃のアイドル文化とやらを軽く勉強していた甲斐もありました、などと言葉尻に付け加える。
+					PRINTFORML 武家の娘にも関わらず、重度のアイドルオタク、子供の頃はアイドルが夢であったという静流。
+					PRINTFORMW 見せてもらった限り、現役アイドルと比べても十分見応えのあるパフォーマンスが出来ることは確か。
+					PRINTFORMW それに加え最新型の移動式ステージも用意してある。準備は万全と言って良い。
+					PRINTFORML 
+					IF TALENT:MASTER:性別 > 0
+						PRINTFORMW 「ですが、ステージ外のことはお任せしますね」
+					ELSE
+						PRINTFORMW 「ですが、静流は旦那様のアイドルですので、ちゃんとお守り下さいね」
+					ENDIF
+					PRINTFORML 問題は酒を飲み、盛り上がったグンマー達がステージの邪魔をしないかどうか。
+					PRINTFORMW それに関しては%CALLNAME:MASTER%が上手く守ってやる必要があるだろう。
+					CALL GUNMA_MO_NIKKORI_1
+				ELSE
+					PRINTFORMW まだ準備は出来ていない。
+					PRINTFORML どういう状況でも対処出来るよう、装備は吟味しておく必要があるだろう。
+					PRINTFORML 慎重に慎重を重ねても、十分なほどの時間があった。
+					PRINTFORMW ひとまず、装備を確認しようと%CALLNAME:MASTER%は思い直した。
+				ENDIF
+ENDSELECT
+RESETCOLOR
+;――――――――――――――――――――――――――――――――――――――――――――――――
+@ORE_KOSO_GUNMA_0
+;準備
+;――――――――――――――――――――――――――――――――――――――――――――――――
+#DIM SELECTED, MAX_CHARA_NUM
+#DIM FIRST_LINE
+#DIM SELECTED_COUNT
+
+FIRST_LINE = LINECOUNT
+PRINTL メンバーを選択してください(最大6名)
+SETCOLOR 0X666666
+CUSTOMDRAWLINE =
+RESETCOLOR
+$INPUT_LOOP
+SELECTED_COUNT = 0
+FOR LOCAL, 0, CHARANUM
+	SIF CFLAG:LOCAL:所属 != CFLAG:MASTER:所属
+		CONTINUE
+	SIF SELECTED:LOCAL
+		SELECTED_COUNT ++
+NEXT
+FOR LOCAL, 0, CHARANUM
+	SIF CFLAG:LOCAL:所属 != CFLAG:MASTER:所属
+		CONTINUE
+	IF SELECTED:LOCAL
+		SETCOLOR 0X00FF00
+		PRINTBUTTON @"[{LOCAL}] %CALLNAME:LOCAL% - 白兵: {ABL:LOCAL:白兵}", LOCAL
+		PRINTL
+	ELSEIF !SELECTED:LOCAL && SELECTED_COUNT < 6
+		PRINTBUTTON @"[{LOCAL}] %CALLNAME:LOCAL% - 白兵: {ABL:LOCAL:白兵}", LOCAL
+		PRINTL
+	ELSE
+		PRINTFORML [{LOCAL}] %CALLNAME:LOCAL% - 白兵: {ABL:LOCAL:白兵}
+	ENDIF
+	RESETCOLOR
+NEXT
+SETCOLOR 0X666666
+CUSTOMDRAWLINE =
+RESETCOLOR
+FINDELEMENT SELECTED, 1
+IF RESULT == -1
+	PRINT [決定]
+ELSE
+	PRINTBUTTON "[決定]", CHARANUM
+ENDIF
+PRINT 　
+PRINTBUTTON "[キャンセル]", CHARANUM + 1
+INPUT
+IF RESULT == CHARANUM
+	CALL ORE_KOSO_GUNMA_1(SELECTED)
+	RETURN
+ENDIF
+SIF RESULT == CHARANUM + 1
+	RETURN
+IF RESULT < 0 || RESULT >= CHARANUM || CFLAG:RESULT:所属 != CFLAG:MASTER:所属
+	CLEARLINE LINECOUNT - FIRST_LINE
+	GOTO INPUT_LOOP
+ENDIF
+IF SELECTED:RESULT
+	SELECTED:RESULT = 0
+ELSEIF SELECTED_COUNT < 6
+	SELECTED:RESULT = 1
+ENDIF
+CLEARLINE LINECOUNT - FIRST_LINE
+GOTO INPUT_LOOP
+;――――――――――――――――――――――――――――――――――――――――――――――――
+@ORE_KOSO_GUNMA_1(SELECTED)
+;真正面突破。
+;――――――――――――――――――――――――――――――――――――――――――――――――
+#DIM REF SELECTED, 0
+
+PRINTFORMW  ………………
+PRINTFORMW  …………
+PRINTFORMW  ……
+PRINTFORMW 事前情報から警備の手薄な場所を調べたはずだが、グンマー国境警備兵がそこには五人。
+PRINTFORMW 彼らはこちらから漂う剣呑な気配からバンブーランスとバンブーボウを手に戦闘態勢に入っていた。
+PRINTFORMW ここまで来れば後には退けない。
+PRINTFORMW %CALLNAME:MASTER%は騒ぎが大きくなる前に、彼らの方へと踏み込んだ！
+;白兵戦参加メンバーの初期化
+CALL CC_INIT()
+;攻撃側キャラクターの設定(最大6名)
+FOR LOCAL, 0, CHARANUM
+SIF SELECTED:LOCAL
+CALL CC_ADDCHARA("ATTACKER", LOCAL)
+NEXT
+CALL CC_ADDMOB("DEFENDER", "グンマー国境警備兵1", 2000, 2000, 100)
+CALL CC_ADDMOB("DEFENDER", "グンマー国境警備兵2", 2000, 2000, 100)
+CALL CC_ADDMOB("DEFENDER", "グンマー国境警備兵3", 2000, 2000, 100)
+CALL CC_ADDMOB("DEFENDER", "グンマー国境警備兵4", 2000, 2000, 100)
+CALL CC_ADDMOB("DEFENDER", "グンマー門番", 3000, 2500, 120)
+;連戦フラグオン
+CALL CC_SET_FLAG(LINE_CHAN, "1")
+;白兵戦イベント呼出
+CALL CLOSE_COMBAT()
+IF RESULT == 2
+	CALL GAME_OVER_96_1
+	RETURN
+ENDIF
+CALL CC_ADD_COMBAT_EXP(75)
+
+PRINTFORMW  ………………
+PRINTFORMW  …………
+PRINTFORMW  ……
+PRINTFORMW 国境警備兵とはいえあの戦力。
+PRINTFORMW グンマーは噂に違わぬ戦闘民族であることは確かだろう。
+PRINTFORMW 流石に真正面突破は厳しいのではないか――脳裏に若干の不安がよぎる。
+PRINTFORML
+		PRINTBUTTON "[0] 見通しが甘かった。撤退しよう。", 0
+		PRINTFORML
+		PRINTBUTTON "[1] 苦難を真っ向から打ち破ることが英雄の所業。", 1
+		;体力の高いカスタムキャラマシマシなら可能程度。普通は相当キツいはず。
+		INPUT
+			IF RESULT == 0
+				PRINTFORML 
+				PRINTFORMW 時に撤退を決断出来るのも勇気の一つ。
+				PRINTFORML 熱くなっていた頭を水筒の水で冷やすと、%CALLNAME:MASTER%は決断する。
+				PRINTFORML ここは一度出直そう。
+				PRINTFORMW 改めてそう考えると、騒ぎが大きくならない内に踵を返した。
+				PRINTFORML 
+				PRINTFORMW まだ、他にやりようがあるかも知れない。
+				IF QUEST_PROGRESS:96 == 1
+					PRINTFORMW 皇国に詳しい静流ならば、妙案が思いつくだろうか……？
+				ENDIF
+			ELSEIF RESULT == 1
+				PRINTFORML 
+				PRINTFORMW 弱気になる必要などない、と%CALLNAME:MASTER%は頷く。
+				PRINTFORML 確かに彼らは中々の武勇を持つようだが、しかし%CALLNAME:MASTER%ほどではない。
+				PRINTFORML それに何もグンマーという民族を根絶やしに目的にしている訳ではないのだ。
+				PRINTFORMW 障害となる相手だけを倒していけばそれで良い。
+				PRINTFORML 
+				PRINTFORMW 何よりも正面突破、直進する利点は時間にある。
+				PRINTFORML 迂回し、あるいは歩みを緩めては敵も集まってくるだろう。
+				PRINTFORML 彼らが%CALLNAME:MASTER%の動きに組織的反応を見せる前に、目的地へ到達するのが最善。
+				PRINTFORMW つまりは最速で最短距離を駆けることこそ正攻法。
+				PRINTFORML 
+				PRINTFORMW %CALLNAME:MASTER%はそう考えると、グンマーの密林を駆けていく。
+				PRINTFORMW  ………………
+				PRINTFORMW  …………
+				PRINTFORMW  ……
+				PRINTFORMW 狩りの途中のグンマー達と遭遇した！
+				;白兵戦参加メンバーの初期化
+				CALL CC_INIT()
+				CALL CC_ADDMOB("DEFENDER", "グンマー狩人1", 2000, 2000, 95)
+				CALL CC_ADDMOB("DEFENDER", "グンマー狩人2", 2000, 2000, 95)
+				CALL CC_ADDMOB("DEFENDER", "グンマー狩人3", 2000, 2000, 95)
+				CALL CC_ADDMOB("DEFENDER", "グンマー少年狩人", 1500, 1800, 75)
+				CALL CC_ADDMOB("DEFENDER", "グンマー女狩人", 1500, 2000, 110)
+				CALL CC_ADDMOB("DEFENDER", "熟練グンマー狩人", 2500, 2000, 130)
+				;連戦フラグオン
+				CALL CC_SET_FLAG(LINE_CHAN, "1")
+				;白兵戦イベント呼出
+				CALL CLOSE_COMBAT()
+				IF RESULT == 2
+					CALL GAME_OVER_96_1
+					RETURN
+				ENDIF
+				CALL CC_ADD_COMBAT_EXP(75)
+				PRINTFORML ただの狩人とは思えない腰蓑姿の男達を退けるも、彼らの一人が笛の音を鳴らす。
+				PRINTFORMW どこからともなく奇声が発され、森が一気に殺気が帯びる。
+				PRINTFORMW 「異国人……グンマーノ地ヲ荒ラシタ罪、身ヲ以テ知ルガイイ……」
+				PRINTFORMW そして意識を失う寸前、男はそんな言葉を残した。
+				PRINTFORML 
+				PRINTFORML 知るものか、とそのまま駆け出し、先へ。
+				PRINTFORML いかにグンマーとは言え、流石に最短距離を走るこちらを追い切れないのだろう。
+				PRINTFORMW やはりこの選択は間違いではなかった。
+				PRINTFORMW  ………………
+				PRINTFORMW  …………
+				PRINTFORMW  ……
+				PRINTFORML そうして目的の座標に。森を抜けた岸壁――そこには不自然な人工の扉が鎮座していた。
+				PRINTFORMW 恐らくそこから岸壁の内側へと入っていくのだろう。
+				PRINTFORML 
+				PRINTFORMW ただ、問題はそこにはグンマーのものらしき祭壇などが存在していること。
+				PRINTFORMW そして、こちらを背を向けて立つ、巨人のような男の存在。
+				PRINTFORML 
+				PRINTFORMW 「この神聖なる地に、これほど堂々と攻め入った者はお前達が初めてだ」
+				PRINTFORML 筋骨隆々な体を覆うは、腰蓑にマント。黄金に輝く夥しい羽根飾りを頭に着けていた。
+				PRINTFORMW 手に持つは黒光りするバンブーランスらしきもの。
+				PRINTFORMW 鼻から上を覆う仮面――そこから覗く眼光はおよそ人のものとは思えない。
+				PRINTFORML 
+				PRINTFORMW 「我はグンマー四柱が一人、竹槍王。偶然この地を訪れておったが、滾るではないか」
+				PRINTFORMW 男がバンブーランスの尻で石畳を叩く――鋼のような硬質な音。
+				PRINTFORMW 現れるのは側近か。二人のグンマーもまた、並のグンマーではない。
+				PRINTFORML 
+				PRINTFORMW 「何を理由にこの聖地に踏み入れようとしているのか……それはどうでも良い」
+				PRINTFORMW 男はバンブーランスを構えると、%CALLNAME:MASTER%を仮面越しに睨む。
+				PRINTFORMW 「ただ、武を持って挑まれたなら武を返すまで。言葉は不要……押し通ってみせよ！」
+				PRINTFORML 
+				PRINTFORMW ――竹槍王と遭遇した！
+				;白兵戦参加メンバーの初期化
+				CALL CC_INIT()
+				CALL CC_ADDMOB("DEFENDER", "グンマー四柱『竹槍王』", 6000, 6000, 170)
+				CALL CC_ADDMOB("DEFENDER", "精鋭グンマー兵", 4000, 4000, 150)
+				CALL CC_ADDMOB("DEFENDER", "精鋭グンマー兵", 4000, 4000, 150)
+				;連戦フラグオン
+				CALL CC_SET_FLAG(LINE_CHAN, "1")
+				;白兵戦イベント呼出
+				CALL CLOSE_COMBAT()
+				IF RESULT == 2
+					PRINTFORMW 「わしの勝ちだ。万全の状態ではないとは言え、しかし勝負とはそういうもの」
+					PRINTFORMW 言い残すことはあるか、と尋ねる竹槍王に、%CALLNAME:MASTER%は首を振る。
+					PRINTFORMW どうであれ、負けは負け――%CALLNAME:MASTER%が弱かった、それだけのこと。
+					PRINTFORML 
+					PRINTFORMW 「……見よ、これが勇者というもの。死の間際まで堂々としておる」
+					PRINTFORML いつの間にか集まっていたらしいグンマー達に告げると、竹槍王は槍を掲げる。
+					PRINTFORMW 「死なすには惜しい。わしはこの勇者に再戦の機会を与えてやりたいと思う。どうだ！？」
+					PRINTFORML グンマー達は竹槍王の言葉に歓声を上げた。
+					PRINTFORMW 奇声を発して竹槍王の慈悲を讃え、敗者である%CALLNAME:MASTER%さえを讃える。
+					PRINTFORML 
+					PRINTFORMW 「戦いの中、お前の覚悟はよく分かった。相応の事情があるのだろう」
+					PRINTFORML %CALLNAME:MASTER%が見上げると、竹槍王は頷く。
+					PRINTFORML 
+					PRINTFORMW 「グンマーは勇者に敬意を表する。……誰か、この者達を手当てしてやれ」
+					PRINTFORMW よく分からないが、命を救われたらしい。
+				ELSE
+					;カスタムキャラを使わないと普通は体力的に無理だが、今後装備が強くなっていくならあり得る？
+					PRINTFORMW 「ぐ、ぬ……」
+					PRINTFORMW 尋常ならざる強敵であったが、しかしこちらが一歩上回った。
+					PRINTFORML しかしこちらも満身創痍――周囲には他のグンマー達の気配もあった。
+					PRINTFORMW 戦いに時間を掛けすぎたのだ。
+					PRINTFORML 
+					PRINTFORMW 流石に、万事休すといったところ。
+					PRINTFORMW このまま死ぬ前に、何人を倒せるか。そのことに思考を巡らせる。
+					PRINTFORMW 周囲の森の中からは殺気立った無数のグンマー達が姿を現していく。
+					PRINTFORML 
+					PRINTFORMW 「っ、ならん！　わしにこれ以上恥を掻かせる気か！！」
+					PRINTFORML 声を張り上げ立ち上がったのは竹槍王。
+					PRINTFORML 殺気立っていた周囲のグンマー達に一喝すると、%CALLNAME:MASTER%達を庇うように腕を伸ばす。
+					PRINTFORMW 「この者達は正々堂々、この竹槍王に打ち勝った勇者……これ以降の手出しは許さん」
+					PRINTFORMW 下がれ、との大音声にグンマー達は怯み、怪訝な%CALLNAME:MASTER%に竹槍王は告げる。
+					PRINTFORML 
+					PRINTFORMW 「わしに勝った以上、お前達は自由だ。……目的があるのだろう？　行くが良い」
+					PRINTFORMW よく分からないが、命を救われたらしい。
+					CALL CC_ADD_COMBAT_EXP(90)
+				ENDIF
+				QUEST_PROGRESS:96 = 3
+				CALL TURUGI_NO_CHI
+			ELSE
+				PRINTFORML 
+				PRINTFORMW 時に撤退を決断出来るのも勇気の一つ。
+				PRINTFORML 熱くなっていた頭を水筒の水で冷やすと、%CALLNAME:MASTER%は決断する。
+				PRINTFORML ここは一度出直そう。
+				PRINTFORMW 改めてそう考えると、騒ぎが大きくならない内に踵を返した。
+				PRINTFORML 
+				PRINTFORMW まだ、他にやりようがあるかも知れない。
+				IF QUEST_PROGRESS:96 == 1
+					PRINTFORMW 皇国に詳しい静流ならば、妙案が思いつくだろうか……？
+				ENDIF
+			ENDIF
+;――――――――――――――――――――――――――――――――――――――――――――――――
+@GUNMA_MO_NIKKORI_1
+;ギャラクシーアイドル静流さん。
+;――――――――――――――――――――――――――――――――――――――――――――――――
+#DIM DYNAMIC JUDGE
+SETCOLOR 0xDF7401
+PRINTFORMW  ………………
+PRINTFORMW  …………
+PRINTFORMW  ……
+PRINTFORML 
+PRINTFORMW 国境に訪れると、腰蓑にバンブーランスを手にした屈強なグンマー人が誰何する。
+PRINTFORML 交流を兼ねた遺跡調査である、そう堂々と目的を告げ、積み荷を隅々まで調べてもらう。
+PRINTFORML トラックの搬入には難色を示したものの、酒や嗜好品の数々を見て、彼らは笑みを浮かべる。
+PRINTFORMW 事前に手紙を出しておいたのも良かったのだろう。
+PRINTFORML 
+PRINTFORMW 静流と顔を見合わせながらそのまま先に。
+PRINTFORML 彼らを警戒させないように進んでいき、集落の一つに訪れる。
+PRINTFORML この辺りに住むグンマー人を纏める長老がいるらしい。
+PRINTFORMW 広場に車を止め、一際大きな高床式住居を訪れると、屈強な老人が顔を出した。
+PRINTFORML 
+PRINTFORMW 「皇国で巫女をしている静流と申します、長老さま。ここにある信仰の地に――」
+PRINTFORML 真実を交えつつも、嘘八百。
+PRINTFORML 目的地となる施設がかつての信仰の地なのだと語り、是非とも舞いを奉納させて欲しい。
+PRINTFORMW その礼として、多くの貢ぎ物を持ってきたのだと平身低頭。
+PRINTFORML 
+PRINTFORMW 突如現れた素性の分からぬ集団に、はいそうですか、などと言うものだろうか。
+PRINTFORMW そう考えていたが、あっさりと彼は笑顔で頷いた。
+PRINTFORML 
+PRINTFORMW どうにも屈強な民族ではあるが、随分純真なお人好しばかりであるというのは本当らしい。
+PRINTFORML 気位の高い武士達との相性は極端に悪いだけ。
+PRINTFORMW 礼儀を尽くせば受け入れる心優しき強き民――百聞は一見にしかずである。
+PRINTFORML 
+PRINTFORMW  ………………
+PRINTFORMW  …………
+PRINTFORMW  ……
+PRINTFORML 
+PRINTFORMW そうして夜、目的の施設――岸壁の扉の前に%CALLNAME:MASTER%は舞台を用意し、彼らの歓待を受ける。
+PRINTFORML 裸に近いグンマーの男女達が%CALLNAME:MASTER%達の持ってきた酒や、狩りの獲物を飲み食い騒いでいた。
+PRINTFORML 場も温まった所だろう。
+PRINTFORMW 奉納舞踊をお見せしたい、と長老に告げると、彼は鷹揚に頷く。
+PRINTFORML 
+PRINTFORMW %CALLNAME:MASTER%が合図を送ると、舞台を覆っていた大きな幕が外され、煌びやかなライト。
+PRINTFORMW 爆音のミュージックと共にステージに現れるのは、扇とマイクを手にした兎――静流である。
+PRINTFORML 
+CALL COLOR_PRINTW("「グンマーの皆っ、よろしくぴょん！　ラブリーアイドルうさうさしずるんの奉納ライブに来てくれてどうもありがとう！」", 0xF5A9F2)
+SETCOLOR 0xDF7401
+PRINTFORML 
+PRINTFORMW 巫女服ベースな衣装でくるりと回り、初っぱなから中々パンチのある前口上であった。
+PRINTFORML 
+CALL COLOR_PRINTW("「奉納の舞いの前にっ、まずは皆にっ、しずるんからのプレゼント！　ぎゃらくしぃらびっとすてーじ☆　始まるよー！！」", 0xF5A9F2)
+SETCOLOR 0xDF7401
+PRINTFORML 
+PRINTFORMW 一人ノリノリな兎を前に、流石のグンマー達も唖然としていた。
+PRINTFORMW かなりキツい空気であったが、彼女がこちらに向けるウインクの合図に%CALLNAME:MASTER%は声を張り上げる。
+PRINTFORMW 仲間達も同様――徹するは謎のアイドル、うさうさしずるん親衛隊。
+PRINTFORMW %CALLNAME:MASTER%達の熱烈なラブコールと拍手を見た彼らは疎らな拍手を送り始めた。
+PRINTFORML 
+PRINTFORMW 羞恥心のネジが飛んでいるのか、あるいは夢のステージライブのせいか。
+PRINTFORMW 伸びのある美声とダンスのキレ――聴衆の反応とは裏腹に、緊張を滲ませないフルアクセル。
+PRINTFORMW 最新式のレンタルステージによる音源や立体投影演出の力もあり、徐々にグンマーは夢中になっていく。
+PRINTFORML 
+PRINTFORMW 最新鋭のステージ演出を利用しながらも、ハイレベルな歌とダンス。
+PRINTFORMW 気の抜けるマイクからは想像を絶する、一流アイドルの姿。
+PRINTFORMW 三曲目が終わる頃には完全にグンマー達の興味を引きつけ、静流はアウェイの空気をものにしていた。
+PRINTFORML 
+PRINTFORMW 少し運命が異なれば、ギャラクティック・ブロードウェイで歌っていたのかも知れない。
+PRINTFORMW そう思わせる熱演――まさに今ここでは、彼女こそがギャラクシーアイドル。
+PRINTFORMW グンマー達の視線の全てを集めていた。
+PRINTFORML 
+CALL COLOR_PRINTW("「皆盛り上がってきたかなー？　次はしずるんと一緒に手を振ってみよっかっ！　こーやって――」", 0xF5A9F2)
+SETCOLOR 0xDF7401
+PRINTFORMW 静流がそうやってマイクパフォーマンスをしていると、目に映ったのはステージに近づこうとする男達。
+PRINTFORML 
+PRINTFORMW ――静流は仕事をこなした。しかし、この作戦の大きな問題はここにあった。
+PRINTFORMW アイドルにはお触り厳禁――再三注意したにも関わらず、酔いのせいか理性を失ったグンマー達。
+PRINTFORMW 彼らをアイドル、うさうさしずるんに近づけさせないことが%CALLNAME:MASTER%達の役目。
+PRINTFORML 
+PRINTFORMW しかし静流希望のこの広いステージ――押し寄せるグンマーから一人が守れる範囲には限界がある。
+PRINTFORMW ほとんど全自動とはいえステージの照明や音響操作にも気を配らなければならず、応援も欠かせない。
+PRINTFORMW ステージ正面の防衛は%CALLNAME:MASTER%一人の手に任されていた。
+PRINTFORML 
+PRINTFORMW ――折角盛り上がってきた静流のライブを邪魔させる訳にはいかない。
+PRINTFORMW %CALLNAME:MASTER%はステージの下でサイリウムを振りながら、彼らの前に立ちはだかった。
+RESETCOLOR
+	;白兵戦参加メンバーの初期化
+	CALL CC_INIT()
+	CALL CC_ADDCHARA("ATTACKER", MASTER)
+	CALL CC_ADDMOB("DEFENDER", "お触りグンマー1", 1000, 1000, 55)
+	CALL CC_ADDMOB("DEFENDER", "お触りグンマー2", 1000, 1000, 55)
+	;連戦フラグオン
+	CALL CC_SET_FLAG(LINE_CHAN, "1")
+	;白兵戦イベント呼出
+	CALL CLOSE_COMBAT()
+	IF JUDGE == 2
+		CALL GAME_OVER_96_2
+		RETURN
+	ELSE
+	CALL CC_ADD_COMBAT_EXP(20)
+		SETCOLOR 0xDF7401
+		PRINTFORML 
+		PRINTFORMW 酔っ払っているだけ。あちらもこちらを殺しに来ている訳でもない。
+		PRINTFORML しかし相手はグンマー人。
+		PRINTFORML 苦労はしながらも何とか無力化し、周囲の様子を窺う。
+		PRINTFORMW 幸いなことに、この戦いもグンマー達はステージ演出か何かだと勘違いし、盛り上がっているらしい。
+		PRINTFORML 
+		CALL COLOR_PRINTW("「盛り上がってもアイドルにはお触り厳禁っ、悪い子はめーっしちゃうぞ☆」", 0xF5A9F2)
+		SETCOLOR 0xDF7401
+		PRINTFORMW 注意しているのか煽っているのか、静流は聴衆に呼びかける。
+		IF TALENT:MASTER:性別 == 0
+			PRINTFORMW そして旦那様は例外ですと言わんばかりに、こっそり静流はウインクをした。
+			PRINTFORMW 後で躾けてやろうと心に決める。。
+		ENDIF
+		PRINTFORML 
+		CALL COLOR_PRINTW("「そろそろ中盤、次は雰囲気をがらっと変えて、ポップでキュートなの歌っちゃおうかな☆」", 0xF5A9F2)
+		SETCOLOR 0xDF7401
+		PRINTFORMW みんなも一緒にうさぴょんジャンプをお願いね☆　とぴょんぴょん跳ねる静流の尻に魅了されてか。
+		PRINTFORMW 先ほど以上にお触り勢は増えていく。
+		PRINTFORML 
+		PRINTFORMW これを一人で防ぎきる事が出来るか――そう考えていると群衆の中から飛び出してきたのは二人の男。
+		PRINTFORML 先ほど、ステージ上から静流が投げたサイリウムを受け取った男達であった。
+		PRINTFORML 
+		PRINTFORMW 「これほど見事な『あいどるすてーじ』なるもの、グンマーとして邪魔はさせん」
+		PRINTFORMW 「グンマートシテ同胞達ノ非礼ヲ詫ビヨウ。脇ハ任セルトイイ」
+		PRINTFORML 
+		PRINTFORMW 二人のグンマーはグンマー流のサイリウムパフォーマンスを行ないながら近づいて来る。
+		PRINTFORMW その屈強さ、動きのキレ――実に心強い味方であった。
+		PRINTFORML 
+		PRINTFORMW %CALLNAME:MASTER%もまたサイリウムパフォーマンスを行ないながら、彼らの前に立ちはだかった。
+		RESETCOLOR
+			;白兵戦参加メンバーの初期化
+			CALL CC_INIT()
+			CALL CC_ADDMOB("ATTACKER", "グンマーしずるん親衛隊1", 3000, 2500, 100)
+			CALL CC_ADDMOB("ATTACKER", "グンマーしずるん親衛隊2", 3000, 2500, 100)
+			CALL CC_ADDMOB("DEFENDER", "お触りグンマー3", 1000, 1000, 55)
+			CALL CC_ADDMOB("DEFENDER", "お触りグンマー4", 1000, 1000, 55)
+			CALL CC_ADDMOB("DEFENDER", "お触りグンマー5", 1000, 1000, 55)
+			CALL CC_ADDMOB("DEFENDER", "お触りグンマー6", 1000, 1000, 55)
+			CALL CC_ADDMOB("DEFENDER", "エロガキグンマー1", 800, 1000, 35)
+			CALL CC_ADDMOB("DEFENDER", "エロガキグンマー2", 800, 1000, 35)
+			;連戦フラグオン
+			CALL CC_SET_FLAG(LINE_CHAN, "1")
+			;白兵戦イベント呼出
+			CALL CLOSE_COMBAT()
+			IF JUDGE == 2
+				CALL GAME_OVER_96_2
+				RETURN
+			ELSE
+				CALL CC_ADD_COMBAT_EXP(40)
+				SETCOLOR 0xDF7401
+				PRINTFORML 
+				PRINTFORMW 人数は多く、精強なグンマー人
+				PRINTFORMW しかしグンマー紳士達――しずるん親衛隊の助力もあり、お触り勢を無力化する
+				PRINTFORMW サイリウムを手に持ちパフォーマンスに見せかけながら、%CALLNAME:MASTER%は男達と頷き合う。
+				PRINTFORML 
+				CALL COLOR_PRINTW("「はぁ、はぁ……皆の熱気もあって、暑くなってきちゃったねっ☆」", 0xF5A9F2)
+				SETCOLOR 0xDF7401
+				PRINTFORML セットリストは十曲目――そろそろクライマックス。
+				PRINTFORMW 静流は顎先から汗の雫を垂らしつつ、巫女服衣装に手を掛ける。
+				PRINTFORML 
+				CALL COLOR_PRINTW("「気付けばライブも終わりの時間っ。こんな衣装を脱ぎ捨てて、全力を出し切っちゃおうかな☆」", 0xF5A9F2)
+				SETCOLOR 0xDF7401
+				PRINTFORML ラブリーボイスを響かせながら、マイクを聴衆に向けて煽る。
+				PRINTFORMW もはや『しずるん親衛隊』となったグンマーの男達は咆吼のような声を上げていた。
+				PRINTFORML 
+				PRINTFORML それを見た静流は紐を解き、くるりと一回転。
+				PRINTFORMW 巫女服を脱ぎ捨て現れるのは露出の多いバニースーツ風ドレス。
+				PRINTFORMW 男達から大歓声が上がる。
+				PRINTFORML
+				CALL COLOR_PRINTW("「続けざまに三曲行くよっ！　うさうさしずるんのラストスパート、ついてきてねっ☆」", 0xF5A9F2)
+				SETCOLOR 0xDF7401
+				PRINTFORML 
+				PRINTFORML ラブリーキュートな音楽から一転、激しい音が鳴り響く。
+				PRINTFORMW 聴衆の理性、最後の防壁を崩すようなタイラントステップ。
+				PRINTFORMW クールから始まり、キュート、パッション。
+				PRINTFORMW この短い時間で変幻自在のライブ構成――まさに彼女はアイドルマスター。
+				PRINTFORMW 単なるアイドルオタクとは馬鹿に出来ない、凄まじい熱量のパフォーマンスであった。
+				PRINTFORML 
+				PRINTFORMW がらりと変わった空気と衣装。理性さえを失ったお触り勢が迫ってくる。
+				PRINTFORML しかし、グンマー出身のしずるん親衛隊も数を増し、場は拮抗していた。
+				PRINTFORMW もはや問題はあるまい――そう思ったのもつかの間、%CALLNAME:MASTER%の目の前で親衛隊がはじけ飛んだ。
+				PRINTFORMW 
+				PRINTFORML ――それはまさにモンスター。
+				PRINTFORMW 男達でも一際大きなグンマーが、血走った目をステージ上に向け、のそのそと歩いてくる。
+				PRINTFORMW そして彼に従うように、屈強なグンマーが迫り来る。
+				PRINTFORMW 並のグンマー人を弾き飛ばす豪腕――恐らく、グンマーでも有数の猛者であった。
+				PRINTFORML 
+				PRINTFORMW 万事休すか――そう思った%CALLNAME:MASTER%の隣に現れるのは巨人。
+				PRINTFORML 
+				PRINTFORML 「偶然訪れた場で、かような宴……期待はしておらんかったが、中々どうして」
+				PRINTFORMW 筋骨隆々な体を覆うは、腰蓑にマント。頭に被るは黄金に輝く夥しい羽根飾り。
+				PRINTFORMW 鼻から上を仮面で覆う大男は、安心せよ、と%CALLNAME:MASTER%に告げる。
+				PRINTFORML 
+				PRINTFORMW 「我はグンマー四柱が一人、竹槍王。お前達には良いものを見せてもらった」
+				PRINTFORML サイリウムを黒光りするバンブーランスの両端に挿しながら、竹槍王はステージに目をやる。
+				PRINTFORMW 「礼には礼を持って返すがグンマーの習わし。彼らの無作法を詫びよう」
+				PRINTFORML 
+				PRINTFORMW よく分からないが、この男や新たな親衛隊達も味方になってくれるらしい。
+				PRINTFORMW 男が出したサイリウムに、己のサイリウムを打ち合わせる。
+				PRINTFORML 
+				CALL COLOR_PRINTW("「皆も一緒に、思いっきり暴れちゃおー☆　せーのっ☆」", 0xF5A9F2)
+				SETCOLOR 0xDF7401
+				PRINTFORMW 静流が激しいドラムビートに合わせたヘッドバンギングを繰り出し、グンマー達がそれに倣う。
+				PRINTFORML その狂気に身を投じるように『竹槍王』もまさかのヘドバン１６連打。
+				PRINTFORML 
+				PRINTFORML 頭の重りをものともせず――身分はどうあれ、今はしずるん親衛隊。
+				PRINTFORMW 今や、正面から迫るグンマー達さえ小さく見えた。
+				PRINTFORML 
+				PRINTFORMW %CALLNAME:MASTER%もまた音楽に合わせヘッドバンギングを繰り出しながら、男の前に立ちはだかった。
+				RESETCOLOR
+					;白兵戦参加メンバーの初期化
+					CALL CC_INIT()
+					CALL CC_ADDMOB("ATTACKER", "グンマー四柱『竹槍王』", 6000, 6000, 170)
+					CALL CC_ADDMOB("ATTACKER", "グンマーしずるん親衛隊3", 3000, 2500, 100)
+					CALL CC_ADDMOB("ATTACKER", "グンマーしずるん親衛隊4", 3000, 2500, 100)
+					CALL CC_ADDMOB("DEFENDER", "お触り精鋭グンマー", 4000, 4000, 120)
+					CALL CC_ADDMOB("DEFENDER", "玄人お触りグンマー", 2500, 1000, 100)
+					CALL CC_ADDMOB("DEFENDER", "お触りグンマー戦士1", 2000, 1000, 80)
+					CALL CC_ADDMOB("DEFENDER", "お触りグンマー戦士2", 2000, 1000, 80)
+					CALL CC_ADDMOB("DEFENDER", "熱狂するお触りグンマー", 1500, 1000, 55)
+					CALL CC_ADDMOB("DEFENDER", "隙を狙うエロガキグンマー", 1000, 1000, 45)
+					;連戦フラグオン
+					CALL CC_SET_FLAG(LINE_CHAN, "1")
+					;白兵戦イベント呼出
+					CALL CLOSE_COMBAT()
+					IF JUDGE == 2
+						CALL GAME_OVER_96_2
+						RETURN
+					ELSE
+					CALL CC_ADD_COMBAT_EXP(40)
+						SETCOLOR 0xDF7401
+						PRINTFORML 
+						PRINTFORMW 酒に酔い、半ば理性を失った獣。
+						PRINTFORMW しかし戦友となったグンマー達との連携により、その進行を粉砕する。
+						PRINTFORMW 他のグンマーも彼が無力化された姿を見た後はステージに近づこうとはない。
+						PRINTFORMW ラストソングが終わり、静流が奥へ引っ込んだことも理由だろう。
+						PRINTFORMW しばらく、響き渡る歓声とアンコールが続く。
+						PRINTFORML 
+						CALL COLOR_PRINTW("「皆、ありがとう……っ、実は事情があって、ステージに立つのはこれが初めてだったの……」", 0xF5A9F2)
+						SETCOLOR 0xDF7401
+						PRINTFORML しばらくしてアンコールで再登場したらしい静流が感極まった様子。
+						PRINTFORMW 身の上話を語る静流に共感したのか、目を潤ませるグンマー達もちらほら見える。
+						PRINTFORMW よほど本気でアイドルを目指していたらしい。熱の籠もったマイクであった。
+						PRINTFORML 
+						PRINTFORMW 何はともあれ、感動ムード。
+						PRINTFORML ここからは最後のアンコール。お触り勢はもう出てこないだろう。
+						PRINTFORMW 静流に目を向けると彼女は頷き、マイクを続ける。
+						PRINTFORML 
+						PRINTFORMW 「……何やら事情がありそうだな」
+						PRINTFORML 話しかけてきた竹槍王に頷くと、安心せよ、と彼は告げる。
+						PRINTFORML 
+						PRINTFORMW 「肩を並べて戦えば友……お前がどういう人間かは分かった。行くが良い」
+						PRINTFORML あの娘の舞台はわしが責任を持って守ろう、とステージを見上げて彼は告げる。
+						PRINTFORMW この男が言うならどうやら問題はなさそうだ。
+						PRINTFORML 
+						PRINTFORMW アンコールのアップテンポな曲に合わせ、彼らの意識の間を抜けるように目的地、岸壁にある扉へ向かった。
+						QUEST_PROGRESS:96 = 4
+						CALL TURUGI_NO_CHI
+					ENDIF ;三戦目
+			ENDIF ;二戦目
+	ENDIF ;一戦目
+RESETCOLOR
+;――――――――――――――――――――――――――――――――――――――――――――――――
+@TURUGI_NO_CHI
+;クリア
+;――――――――――――――――――――――――――――――――――――――――――――――――
+PRINTFORMW  ………………
+PRINTFORMW  …………
+PRINTFORMW  ……
+PRINTFORML 
+SETCOLOR 0xBE81F7
+PRINTFORMW 道中色々と問題はあったものの、そこからは順調だった。
+PRINTFORMW 恐らくは%CALLNAME:MASTER%の持つ鍵に反応したのだろう。
+PRINTFORML 扉は何事もなく開き、%CALLNAME:MASTER%を招き入れた。
+PRINTFORML 中は他に比べPSI粒子に満ちており、不思議な感覚があった。
+PRINTFORML いくつかの部屋に分かれており、そこには旧き大国由来の品物が多く置かれている。
+PRINTFORMW 値打ちものは報酬としてもらえることになっていた。
+PRINTFORML 
+PRINTFORMW ある程度目星を付けながら奥へ進み、そこにあるのはここのコントロールセンターか。
+PRINTFORML 無数の操作デバイスが設置されており、奥には強いPSIエネルギーを内包する巨大な柱のようなもの。
+PRINTFORML 何かの受信、あるいは送信装置か――分からなかったが、少なくとも目的物はこれだろう。
+PRINTFORMW デバイスは%CALLNAME:MASTER%が近づくと勝手に動き出し、台座のようなものが浮き上がってくる。
+PRINTFORML 
+PRINTFORMW %CALLNAME:MASTER%は剣の形をしたサイオニックインターフェイスを展開。
+PRINTFORMW その台座の穴へと差し込むと、音声メッセージが響き渡る。
+PRINTFORML 
+PRINTFORMW 『サブマスターとして承認されました。サイオニックビーコンのアイドリングを開始します』
+PRINTFORML 
+PRINTFORMW そして音声と共に、奥にある巨大な柱が回転を始める。
+PRINTFORML この装置は一体何なのだろうか――デバイスに触れ、データバンクへのアクセスを試みた。
+PRINTFORMW 以外にも素直にアクセス許可が出され、データを軽く閲覧する。
+PRINTFORML 
+PRINTFORMW どうにもこれは惑星上の生物が持つPSIエネルギーに干渉するための装置の一部であるらしい。
+PRINTFORMW 当時は実験体であるこの惑星の生物にPSIを利用して精神までを管理しており、これはそのシステムの一つ。
+PRINTFORMW 書かれている内容はあまりに高度で、斜め読みで理解出来る部分は少ない。
+PRINTFORML 
+PRINTFORMW ただ、概ね咲耶が語っていたとおり。
+PRINTFORMW 事実として、ここに由来する人類種の起源は旧大国時代の実験動物。
+PRINTFORMW 次世代の新人類を生み出すための失敗作であったらしい。
+PRINTFORML 
+PRINTFORMW 最も更新が新しい部分を探すと、日誌のようなものだろう。
+PRINTFORMW 恐らくは建国帝が残したと思われるボイスデータが存在していた。
+PRINTFORML 
+PRINTFORMW 『争いも遠く昔のこと――地上もある程度落ち着き、多少の小競り合いこそあれど平和に向かっている』
+PRINTFORMW 『ようやく手にした自由。これからは差別され、家畜のように扱われることもない』
+PRINTFORMW 『そのことが何よりも嬉しく思う。我々は自由なのだ』
+PRINTFORML 
+PRINTFORMW 『この先についての不安がない訳ではないが、私は神ではなく人として彼らと生きたい』
+PRINTFORMW 『それを思えば、いつまでもこうした装置に頼る訳にはいかないだろう』
+PRINTFORMW 『破壊ではなく休止を決断したのは、問題解決の可能性を潰してしまうことを懸念して』
+PRINTFORMW 『再びこれを使わなければならない状況にならないことを祈っている』
+PRINTFORML 
+PRINTFORMW 簡素なメッセージであったが、別なメッセージを読む前にデータバンクから追い出される。
+PRINTFORMW アイドリング状態になったことでセキュリティが働いたのだろうか？
+PRINTFORMW 妙な違和感を覚えたが、ひとまずは目的を達成した。
+PRINTFORMW 咲耶に報告するとしよう。
+PRINTFORML 
+PRINTFORMW  ………………
+PRINTFORMW  …………
+PRINTFORMW  ……
+PRINTFORML 
+PRINTFORMW 「ありがとうございます。活性化したのが伝わりました」
+PRINTFORML その晩、かくりよにて咲耶に報告すると、大変な仕事を労われた後、そうして頭を下げられた。
+PRINTFORML 言葉通り、彼女が生じさせた剣型サイオニックインターフェイスは更に輝きを増している。
+PRINTFORMW 凄まじい圧迫感に気圧されると、慌てたように彼女はそれを消失させる。
+PRINTFORML 
+PRINTFORML 「……あれが何か、そうですね……」
+PRINTFORML あれは何なのかと尋ねると、帝のサイオニック能力を高めるためのブースターだと答えた。
+PRINTFORMW 彼女の持つ三種のサイオニックインターフェイスと連動しているらしい。
+PRINTFORML 
+PRINTFORMW 「ただ、他の二つを稼働させなければ完全な起動は出来ないようですけれど……」
+PRINTFORML 完全な起動、と繰り返すと、彼女は頷く。
+PRINTFORML 「完全起動すれば、このかくりよを通じて、豊饒の地周辺の精神的支配を行えるほどの力だと」
+PRINTFORMW その言葉に眉を顰めると、もちろんそこまでは、と彼女は首を振る。
+PRINTFORML 
+PRINTFORML 「もちろん人の心を操るだなんて、大それた事は。わたくしがそれを使って行ないたいのは念話程度ですね」
+PRINTFORML 貴族によって封じられている言葉を伝えるための手段が欲しい、そう咲耶は告げる。
+PRINTFORML 「実際にそれを使うのすら最終手段……欲しいのはあくまで、貴族達と対等に立つための力ですから」
+PRINTFORML 苦笑する彼女には悪意が微塵も感じられない。
+PRINTFORMW とはいえ力は人を変えるもの――そうした不安を述べると、彼女は頷く。
+PRINTFORML 
+PRINTFORMW 「仰る通りかも知れません。現状を変えたいにしても、あまりに大きな力ではあります」
+PRINTFORML 彼女は素直に頷くと、%CALLNAME:MASTER%を見つめる。
+PRINTFORML 「一応……保険は。護身用、と称しましたが、ナナツサヤは最後の鍵でもあるのです」
+PRINTFORML 少なくとも、そうした力を実際に行使するには、最後の鍵としてナナツサヤが必要であるらしい。
+PRINTFORMW 「お渡ししたのは……もしわたくしが誤った道を進もうとした時、止めて頂くため」
+PRINTFORML 随分と信頼されてしまっているようだ、と告げると、彼女はくすりと微笑んだ。
+PRINTFORMW 「わたくしは……これが導きと思いましたから。重い責任をお預けしたこと、お許し下さい」
+PRINTFORMW ただ選択は自由です、と彼女は告げる。
+PRINTFORML 
+PRINTFORMW 「危険だとお思いなら、止める権利もまたそこに。……それも踏まえて、お預けしたものですから」
+PRINTFORMW %CALLNAME:MASTER%に重責を預けたことには文句を言わさぬつもりらしい。
+PRINTFORMW 少女に見えても帝は帝ということだろう。
+PRINTFORML 
+PRINTFORMW 旧時代の遺跡から入手した物品は状態も良く、$20,000,000になったようだ。
+MONEY += 20000000
+QUEST_PROGRESS:97 = 1
+IF TALENT:MASTER:性別 == 0 && QUEST_PROGRESS:96 == 4
+	PRINTFORML 
+	PRINTFORMW  ………………
+	PRINTFORMW  …………
+	PRINTFORMW  ……
+	PRINTFORML 
+	RESETCOLOR
+	SETCOLOR 0xF5A9F2
+	PRINTFORMW 「あっ♥　旦那様っ♥　激しいのは♥　今の静流はアイドルなので……っ♥♥♥」
+	PRINTFORML その後は仕事の疲れを発散させるべく、翌日はアイドル衣装を着せた静流を犯した。
+	PRINTFORML 初ライブの熱が醒めやらないらしい静流は大いに乱れ、男根をぎちぎちと締め上げる。
+	PRINTFORML 
+	PRINTFORMW 「らめっ♥　だめですっ♥　こんな所♥　ファンの人達に見られたら……っ♥♥♥」
+	PRINTFORML バニードレスをはだけさせられながら、静流は後ろから犯され腰を振る。
+	PRINTFORMW 何かが少し違えばスター街道を歩いていたかも知れない残念なアイドル、うさうさしずるん。
+	PRINTFORMW そのステージ上の姿を思い出しながら、%CALLNAME:MASTER%は荒々しく腰を豊かな尻に打ち付けた。
+	CALL FUCK(MASTER, "性技, 性交, Ｃ, 射精", "童貞喪失, キス喪失, Ｖ挿入", 0, "静流の唇", "", "静流の膣", "和姦")
+	CALL FUCK(MASTER, "性技, 性交, Ｃ, 射精", "童貞喪失, キス喪失, Ｖ挿入", 0, "静流の唇", "", "静流の膣", "和姦")
+ENDIF
+RESETCOLOR
+;――――――――――――――――――――――――――――――――――――――――――――――――
+@GAME_OVER_96_1
+;グンマーに散る
+;――――――――――――――――――――――――――――――――――――――――――――――――
+PRINTFORML %CALLNAME:MASTER%はグンマーとの戦いの最中、息絶えた。
+PRINTFORML その後、%CALLNAME:MASTER%の噂を聞いたものはいない。
+PRINTFORML 
+PRINTFORMW  ………………
+PRINTFORMW  …………
+PRINTFORMW  ……
+PRINTFORML 
+;おお、勇者よ。しんでしまうとはなさけない。
+SETCOLOR 0xF5A9F2
+IF TALENT:MASTER:性別 == 0
+	PRINTFORMW 「んんっ♥　ぁは♥　旦那様、ようやく起きたんですね……♥♥♥」
+	PRINTFORML 
+	PRINTFORMW 呆然とする%CALLNAME:MASTER%をよそに、上に跨がりゆるゆると腰を使う静流が告げる。
+	PRINTFORML 
+	PRINTFORMW 「何だかうなされていたので……♥　静流が♥　元気づけてあげようと思って……♥♥♥」
+	PRINTFORML なるほど……夢――非常にリアルな夢ではあったが、そうなのか。
+	PRINTFORMW 「んっ♥　今、すっごく硬く……♥　今朝は一段とすごいです……♥♥」
+	PRINTFORMW 夢の中とは言え、死を経験したせいで滾っているのだろう。
+	PRINTFORML 
+	PRINTFORMW ひとまずこの熱を吐き出してから夢については考えるとしよう。
+	PRINTFORML 「きゃ♥　旦那様……っ♥」
+	PRINTFORMW 身を起こすとそのまま、静流の膣内で男根を扱き始めた。
+	CALL FUCK(MASTER, "性技, 性交, Ｃ, 射精", "童貞喪失, キス喪失, Ｖ挿入", 0, "静流の唇", "", "静流の膣", "和姦")
+ELSE
+	PRINTFORMW 「――様、大丈夫ですか……？」
+	PRINTFORML 
+	PRINTFORMW 体を揺すられる感触で目を覚ますと、それを見た静流がほっと一息をつく。
+	PRINTFORMW どうにもうなされていたらしい。
+	PRINTFORML 
+	PRINTFORMW 「何か悪い夢でも……？」
+	PRINTFORML 彼女の言葉に夢の内容を思い出しつつ、大丈夫だと頷く。
+	PRINTFORML 予知夢か何かだろうか――ともあれ、短絡的な決断をしたもの。
+	PRINTFORMW グンマーの領域――あの場所の攻略には多少の準備が必要だろう。
+ENDIF
+RESETCOLOR
+;――――――――――――――――――――――――――――――――――――――――――――――――
+@GAME_OVER_96_2
+;グンマーに散る
+;――――――――――――――――――――――――――――――――――――――――――――――――
+PRINTFORML %CALLNAME:MASTER%はグンマーとの戦いの最中、運悪く後頭部を打ち息絶えた。
+PRINTFORML アイドルをお触りから守るために戦った彼は、グンマーにおいては紳士の鑑として長らく語られることとなる。
+PRINTFORML 
+PRINTFORMW  ………………
+PRINTFORMW  …………
+PRINTFORMW  ……
+PRINTFORML 
+;よほどあなたが弱い場合を除けばあんまりないはず。
+SETCOLOR 0xBE81F7
+PRINTFORMW 「どうでしたか、まれびとさま」
+PRINTFORML 上手く出来たなら良いのですが、と咲耶は告げ、混乱しながら周囲を見渡す。
+PRINTFORMW 霧深い森の中――ここはかくりよであった。
+PRINTFORML 
+PRINTFORMW 「未来の可能性を読み、誰かに伝えるというのは初めてで……上手く行きましたか？」
+PRINTFORML そう、出発を前に、未来の可能性をお見せしたい、と彼女に言われたのだったか。
+PRINTFORML 上手く行ったと伝えると、彼女はほっとしたように頷く。
+PRINTFORMW 「良かったです。くれぐれもお気を付けて……お命はどんな勇者も一つだけでございますゆえ」
+RESETCOLOR

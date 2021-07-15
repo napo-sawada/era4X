@@ -1,0 +1,1132 @@
+﻿;--------------------------
+; !!クエスト名と 95を好きな番号に変える！!
+; 神と人
+; 最終的に特別な武器、機体が手に入る。
+; 皇国の帝と仲良し（意味深）になれる。
+;--------------------------
+@QUEST_DESCRIPTION_95
+PRINTFORML [クエスト概要]
+SELECTCASE QUEST_PROGRESS:95
+CASE 0
+	PRINTFORML 静流の家を訪ね、泊まった日のこと。
+	PRINTFORML %CALLNAME:MASTER%は夢の中である少女と出会う。
+	PRINTFORML
+	CALL COLOR_PRINTL(" 独自設定を伴う皇国クエストです。異なる設定の帝関連クエストとは排他関係にあります。", カラー_注意)
+CASE 1
+	PRINTFORML 静流から新年祭に誘われている。
+	PRINTFORML 皇国の帝が舞いを披露するというが――。
+	PRINTFORML
+CASE 2
+	PRINTFORML 夢の中で出会った少女――咲耶が皇国の帝であった。
+	PRINTFORML ひとまずは、彼女からもう一度話を聞こう
+	PRINTFORML
+CASE 3
+	PRINTFORML 半ば軟禁状態の咲耶は貴族達に対抗しうる力を欲している。
+	PRINTFORML 彼女の依頼を受けるならば、もう一度会いに行くべきだろう。
+	PRINTFORML
+CASE 4
+	PRINTFORML 今日はかくりよにいる咲耶に会いに行ってみようか。
+	PRINTFORML 
+	CALL COLOR_PRINTL(" 制作途中につき、剣の地以降はまだ実装されていません。", カラー_注意)
+ENDSELECT
+RETURN
+;--------------------------
+; クエスト受注可能か
+;--------------------------
+@QUEST_ACCEPTABLE_95
+SIF REL_LIKE_COUNTRY:国家ID_豊秋津皇国:国家ID_プレイヤー < 600
+	RETURN 0
+SIF QUEST_PROGRESS:40 != 5
+	RETURN 0
+CALL GET_STAR_ID_FROM_POS(CHARACTER_POSITION)
+SIF STAR_OWNER:RESULT != 国家ID_豊秋津皇国
+	RETURN 0
+SIF QUEST_COMPLETE_DATE:95 + 1 > DAY
+  	RETURN 0
+SIF TALENT:MASTER:超能力者 == 0
+  	RETURN 0
+RETURN 1
+
+;--------------------------
+; クエストの名前を返却
+;--------------------------
+@QUEST_NAME_95
+SELECTCASE QUEST_PROGRESS:95
+	CASE 0
+		RESULTS = 夢の中の少女
+	CASE 1
+		RESULTS = 新年祭
+	CASE 2 TO 4
+		RESULTS = 皇国の帝
+	CASE 5
+		RESULTS = 皇国の友人
+	CASE 6
+		RESULTS = 皇国の現地妻
+	CASE 10 TO 12
+		RESULTS = 皇国の友人
+ENDSELECT
+RETURN
+
+
+;--------------------------
+; クエスト本体
+;--------------------------
+@QUEST_BODY_95
+#DIM QUEST_ID = 95
+SELECTCASE QUEST_PROGRESS:QUEST_ID
+;――――――――――――――――――――――――――――――――――――――――――――――――――――――――
+	CASE 0
+;――――――――――――――――――――――――――――――――――――――――――――――――――――――――
+SETCOLOR 0xBE81F7
+		PRINTFORML いつものように皇国にある立花家――静流の所に泊まった夜のこと。
+		PRINTFORML 気付けば%CALLNAME:MASTER%は霧深い森の中にあった。
+		PRINTFORMW 普通であればただの夢と、翌朝には忘れてしまう場所であったが、そこが単なる夢では無いとすぐに気付く。
+		PRINTFORML
+		IF ABL:MASTER:超能力 >= 60
+			PRINTFORML 強力なサイオニックの使い手である%CALLNAME:MASTER%には、ここが精神世界の一種であると理解できていた。
+			PRINTFORMW シュラウドと呼ばれる異空間――解明されきらぬ神秘の世界。
+		ELSE
+			PRINTFORML %CALLNAME:MASTER%に備わる第六感というべきものがそう訴えていた。
+			PRINTFORMW 他人の体内に入り込んだかのような重圧感を強く感じる。
+		ENDIF
+		PRINTFORML
+		PRINTFORML 森に響く鈴の音に招かれるよう歩いて行くと、そこにいたのは一人の少女。
+		PRINTFORML 紅白の巫女衣装に、長い黒髪――獣尾人か、犬のような耳と長い尻尾を生やしていた。
+		PRINTFORML 少女はくるくると、剣の柄尻にぶら下がる、鈴の音響かせ剣舞を踊る。
+		PRINTFORML 左の手には鏡を持ち、首飾りには勾玉が。
+		PRINTFORMW 神秘的というよりもはや神々しく、踊る風すらが輝いていた。
+		PRINTFORML
+		PRINTFORMW 「……？　まぁ、珍しいこと……」
+		PRINTFORMW 見入っていると舞いを止め、少女は不意にこちらを向いた。
+		PRINTFORMW ただでさえ、圧倒されるような気配――声を聞き、視線を向けられるだけで、異様な重圧がその身に掛かる。
+		PRINTFORML
+		PRINTFORMW どうあれ、超越的な存在であることは間違いないだろう。
+		PRINTFORMW 異様なほどの重圧は眼前に立つだけで、無意識に平伏を強要されるほどの力があった。
+		IF ABL:MASTER:超能力 > 69
+			PRINTFORML %CALLNAME:MASTER%ほどの強力なサイオニック能力者に取ってさえ、常軌を逸した力。
+		ELSE
+			PRINTFORML %CALLNAME:MASTER%の存在など、一息でバラバラにされてしまうほどの力。
+		ENDIF
+		PRINTFORML 「……これは失礼を」
+		PRINTFORML 少女が剣と鏡、そして勾玉を消失させると、途端にそれも和らいだ。
+		PRINTFORMW それでもなお漂う気配は尋常のものでは無かったが、少なくとも苦痛となるほどでは無い。。
+		PRINTFORML
+		PRINTFORML 「意識を保った方がいらっしゃるのは稀なことで……つい気付かず」
+		IF ABL:MASTER:超能力 > 69
+			PRINTFORML お強い方なのですね、と%CALLNAME:MASTER%を見て告げる。
+		ELSE
+			PRINTFORML 霊脈の繋がりが良かったのでしょうか、と%CALLNAME:MASTER%と見て告げる。
+		ENDIF
+		PRINTFORMW 「近頃迷い込まれるのは兎の方くらいだったのですけれど……」
+		PRINTFORML 
+		PRINTFORMW くすくすと笑い、目を細める。
+		PRINTFORMW そしてふわりと浮かぶように近づいて、すんすんと匂いを嗅ぐような仕草を取る
+		PRINTFORMW 「縁の繋がりを感じますね。お知り合いでしょうか？」
+		PRINTFORML 恐らく静流のことだろうか。嘘を吐いても仕方が無い。
+		PRINTFORMW 頷くと少女は微笑みを浮かべた。
+		PRINTFORML
+		PRINTFORMW 「初めまして、まれびとさま。わたくしは咲耶と申すもの……以後お見知りおきを」
+		PRINTFORML 彼女の言葉に応じるように名を告げようとすると、咲耶と名乗った少女は制止し、首を振る。
+		PRINTFORML 「ここはかくりよ……名が魂を示す場所。お気持ちは嬉しいですが、不用意に名を口にされぬ方が良いでしょう」
+		PRINTFORMW 良からぬ存在もあります故、と咲耶は続けた。
+		PRINTFORML
+		PRINTFORMW 「かくりよとは何だ、と問われると難しいですね。霊力に魔力、超能力、同じ力でも無数の呼び名はあるでしょう？」
+		PRINTFORML %CALLNAME:MASTER%の疑問に、そうした力でのみ繋がる場所の一つなのだと咲耶は答えた。
+		PRINTFORML 「物理で解き明かされつつある世界と、異なる領域……辿り着けない地平。そのほんの片隅です」
+		PRINTFORMW 感覚を研ぎ澄ませると、周囲に満ちる力の波がさざ波のように%CALLNAME:MASTER%に触れる。
+		PRINTFORMW 少なくとも、彼女がこの空間の主と言える存在なのだろう。
+		PRINTFORMW 穏やかなこの世界で、彼女の存在感だけが非常に強い輝きを放っていた。
+		PRINTFORML
+		PRINTFORMW 「皇国の方……という訳ではなさそうですね」
+		IF TALENT:MASTER:動物耳 == 1 && TALENT:MASTER:しっぽ == 1
+			PRINTFORMW 雰囲気が異なります、と%CALLNAME:MASTER%の耳と尻尾を眺めながら告げる
+		ELSE
+			PRINTFORMW 大地に根を下ろす方ではなさそうです、と%CALLNAME:MASTER%を眺めて彼女は告げる。
+		ENDIF
+		PRINTFORML 
+		PRINTFORML 「大いなる導きか……どうあれこれは、大きな縁の一つであるように思えます」
+		PRINTFORMW それから耳をぴくぴくと動かして、嬉しそうに微笑んだ。
+		PRINTFORML
+		PRINTFORMW 「色々とお話したいところではありますが……そうも行かぬご様子」
+		PRINTFORML そして続けられた言葉と共に、どこかへ引き寄せられるような感覚を%CALLNAME:MASTER%は覚えた。
+		PRINTFORML 「……またの逢瀬を楽しみにしております、まれびとさま」
+		PRINTFORMW その力は徐々に強まり、勢いよく――
+		PRINTFORML
+		PRINTFORML
+		PRINTFORML
+		PRINTFORML
+		PRINTFORML
+		PRINTFORML
+		RESETCOLOR
+		SETCOLOR 0xDF7401
+			IF TALENT:MASTER:性別 > 0
+				PRINTFORMW 「……ですよ。朝ですよ、朝食のお時間です」
+				PRINTFORML 体を揺すられる感触と共に目覚めた%CALLNAME:MASTER%は、布団の感触と静流の姿を見て、現実か、と理解する。
+				PRINTFORML 「どうされましたか？　随分と深く寝入っていたようですが……」
+				PRINTFORMW いや、と言いかけ、尋ねてみる。
+				PRINTFORML
+				PRINTFORMW 「夢……そうですね、森の中を彷徨う夢を時折。あまり良くは覚えておりませんが……それくらいでしょうか？」
+				PRINTFORML 兎の方、というのはやはり静流なのだろう。
+				PRINTFORML 妙な夢でも御覧になったのですか？　と尋ねる静流に頷き、少し、と答えた。
+				PRINTFORMW 心配する静流に大丈夫だと答えながら、そのまま身を起こすと朝食を取った。
+			ELSE
+				PRINTFORMW 「っ……だんなさま♥　あ♥　出て……♥♥♥」
+				PRINTFORML びゅるっ、と射精の感覚と共に目覚めた%CALLNAME:MASTER%は、布団の感触と自分に跨がる静流の姿を見て、呆然とする。
+				PRINTFORML 「何……だなんて♥　旦那様が中々起きて下さらなかったですから、気持ち良くお目覚め頂こうと……♥」
+				PRINTFORMW 熱く蕩けた肉襞が蠢き、精液を吐き出す男根を絞り、年中排卵している子宮口を吸い付かせる。
+				PRINTFORMW 先ほど見ていた夢――いや、夢では無いが、その落差に%CALLNAME:MASTER%の思考は半ば止まっていた。
+				PRINTFORML
+				PRINTFORMW 「……♥　すごい量、今日もお元気ですね旦那さ――ひっ♥　だめっ♥　いきなりそんな……♥♥♥」
+				PRINTFORML この淫乱兎のせいで偶然繋がったらしい、あの空間から現実に引き戻されることになったのか。
+				PRINTFORML 考えると妙に腹立たしく、腰を掴むと乱暴に突き上げた。
+				PRINTFORMW そのまま抜かずにもう一度、苛立ちを精液として吐き出し、落ち着くまでにはもうしばらく。
+				PRINTFORML
+				PRINTFORMW 「……変わった、ぁっ♥　ゆ、夢で、っ♥　ございますか……？」
+				PRINTFORML そうだと四つん這いになった静流の大きな尻を叩きつつ、兎の方、という彼女の言葉を思い出して尋ねる。
+				PRINTFORMW 「そうっ、ですね……森の中を彷徨う、不思議な夢を……ぁん♥　旦那様♥　お話しできませんから……♥♥♥」
+				PRINTFORMW ぎゅうぎゅうと締め付け悦ぶ穴を使いつつ、やはり静流のことだったのだろう、と%CALLNAME:MASTER%は確信した。
+				PRINTFORMW 兎の兎尾人はそこら中にいる、という訳ではなかったし、静流は感覚に鋭い方――ＰＳＩの素養がある。
+				PRINTFORML
+				PRINTFORMW 「……あっ♥　だめ♥　旦那様っ♥　はげしすぎて――っ♥　またイキそ……っ♥♥♥」
+				PRINTFORML ひとまず腹が減ったと腰を振る。静流の家に泊まると自分が動物になったようだった。
+				PRINTFORML 食う寝るヤると、この家には何もかもが揃いすぎている。
+				PRINTFORMW 射精した後の落ち着いた頭で考えようと、静流の尻に腰を荒々しく打ち付けた。
+				CALL FUCK(MASTER, "性技, 性交, Ｃ, 射精", "童貞喪失, キス喪失, Ｖ挿入", 0, "静流の唇", "", "静流の膣", "和姦")
+			ENDIF
+				PRINTFORML 
+				PRINTFORMW 精神的異空間への接続は%CALLNAME:MASTER%の感覚を大きく開花させたようだ。
+				PRINTFORML 
+					IF ABL:MASTER:超能力 >= 60
+						CALL PRINT_ADD_EXP(MASTER, "超能力経験値", RAND:50)
+					ELSEIF ABL:MASTER:超能力 >= 30
+						CALL PRINT_ADD_EXP(MASTER, "超能力経験値", RAND:50 + 50)
+					ELSE
+						CALL PRINT_ADD_EXP(MASTER, "超能力経験値", RAND:50 + 150)
+					ENDIF
+				;見た目はともかく超能力は必要経験五倍なので問題ないはず。300与えて0から20相当。
+				QUEST_PROGRESS:95 = 1
+				QUEST_PROGRESS:QUEST_ID = 1
+				QUEST_COMPLETE_DATE:QUEST_ID = DAY
+RESETCOLOR 
+;――――――――――――――――――――――――――――――――――――――――――――――――――――――――
+	CASE 1
+;――――――――――――――――――――――――――――――――――――――――――――――――――――――――
+SETCOLOR 0xBE81F7
+		PRINTFORML
+		PRINTFORMW 人が重力から解放され、宇宙を駆けるようになってなお、未知が存在しなくなった訳ではない。
+		PRINTFORMW それはこの世界にある未知の一つであった。
+		PRINTFORML 
+		PRINTFORMW あの世界で彼女と出会ってから調べ直し、理解出来たことは理解出来ないこと。
+		PRINTFORML シュラウド。生物に宿るサイオニック体でのみ足を踏み入れることが許されるPSIエネルギーに満ちた場所。
+		PRINTFORMW 大いなるヴェールの向こう側――シュラウドとはそういう場所を示す言葉であった。
+		PRINTFORML 
+		PRINTFORMW 「まれびとさまは探究心が豊かでございますね」
+		PRINTFORML あれから何度か、咲耶のところを訪れた。
+		PRINTFORML 偶然訪れたことがあれば、意識的に訪れたこともある。
+		PRINTFORMW 今では豊饒の地の周辺にいれば、自由にここへと訪れることが出来た。
+		PRINTFORMW 一度訪れたことで縁が繋がったのだと彼女は告げ、%CALLNAME:MASTER%の来訪を歓迎する。
+		PRINTFORML
+		PRINTFORMW 「けれど、あまり深入りは。ここは神と称され信仰された存在達の世界でもありますから」
+		PRINTFORML シュラウドの深奥には神に等しい存在さえが眠っていると、いくつかの記録に語られていた。
+		PRINTFORML 眉唾ものの話ではあったが、事実としてそのように強大な力を持つサイオニック存在が潜んでいると彼女は告げる。
+		PRINTFORMW 彼女曰く、この不可思議な場所ですら薄皮一枚を捲った程度の表層で、本当のシュラウドと呼べるものではないらしい。
+		PRINTFORML 
+		PRINTFORMW 神秘に満ちた、神さえ住まう異空間。
+		PRINTFORMW 超能力という存在を知らなければ一笑に付す内容だろう。科学の時代に何を言っているのかと。
+		PRINTFORMW けれどあいにく、%CALLNAME:MASTER%は笑われる側――神秘というべき力を宿す超能力者であった。
+		PRINTFORMW 感覚として理解出来る%CALLNAME:MASTER%は彼女の言葉を笑うことは出来ない。
+		PRINTFORML 
+		PRINTFORMW 「まれびとさま、今日も宇宙の話をして頂けませんか？」
+		PRINTFORML 彼女は己についての話をしたがらず、%CALLNAME:MASTER%の話ばかりをせがんだ。
+		PRINTFORML 一度の逢瀬で許されるのは、精々質問一つ――それが終われば彼女の時間。
+		PRINTFORMW 彼女は目をキラキラとさせながら、宇宙を駆ける%CALLNAME:MASTER%の話を楽しそうに聞いていく。
+		PRINTFORML 
+		IF ABL:MASTER:話術 >= 70
+				PRINTFORML %CALLNAME:MASTER%は時に脚色しながら、そんな彼女を楽しませた。
+				PRINTFORMW 少なくとも話の聞き手としてはこれ以上なく、どんな話も興味深そうに耳を傾け続きを促す。
+			ELSE
+				PRINTFORML 生まれてこの方、話が上手い方ではなかったが、それでも十分に楽しめているらしい。
+				PRINTFORMW 実に興味深そうに、楽しそうに話を聞く者で、自分が話し上手になったのではないかと錯覚を覚える。
+			ENDIF
+		PRINTFORMW 彼女とそうして話をし、今日はどうして皇国を訪れたのかという話に。
+		PRINTFORML 
+		PRINTFORMW 「まれびとさまも新年祭にいらっしゃるんですね」
+		PRINTFORML 頷きながら、まれびとさまも、ということはそっちも来るのかと尋ねた。
+		PRINTFORMW 「ええ、新年祭には。一番の行事でございますし」
+		PRINTFORMW 咲耶の仕草は一つ一つが洗練されている。恐らくは皇国でも高貴な生まれなのだろう。
+		PRINTFORMW 静流に誘われたのもあるが、新年祭に顔を出そうと考えた理由もそこにあった。
+		PRINTFORMW 現実の彼女もそこに参加している可能性は十分にある。
+		PRINTFORML
+		PRINTFORMW 「……では、もしかするとお会い出来るかも知れませんね」
+		PRINTFORML 会ってくれるのか、と尋ねると、彼女は頷き、苦笑する。
+		PRINTFORMW 「声を掛けることは難しいかも知れませんけれど……もちろん。わたくしもあちらで、お会いしてみたいですし」
+		PRINTFORMW 家の都合ということだろう。深くは詮索しなかった。
+		PRINTFORML 
+		PRINTFORMW 「それはそれで、少し寂しいところもありますけれど」
+		PRINTFORML 何が寂しいのかと聞き返すと、彼女は首を左右に振り、また苦笑する。
+		PRINTFORMW 「素性も知らぬ者同士……夢の如き世界で逢瀬を重ねるという関係は、何とも風情がありますもの」
+		PRINTFORMW それが少し寂しいのだと告げ、それ以上言葉を重ねることはなく。
+		PRINTFORML
+		PRINTFORML
+		PRINTFORML
+		PRINTFORML
+		PRINTFORMW 
+		RESETCOLOR
+		SETCOLOR 0xDF7401
+		PRINTFORMW 「ふふ、御覧になったことが無いということですし、楽しみです。本当に素晴らしいものですよ」
+		PRINTFORML 朝食を終えて、昼には外に。
+		PRINTFORMW いつもに比べて豪勢な、おせちなるもので腹を満たし――今日は皇国歴の節目となる新年。
+		PRINTFORMW そしてそれを祝う祭りの日。
+		PRINTFORML
+		PRINTFORMW 「帝様が舞われる姿は見応えがあるものでございますし」
+		PRINTFORML 新年には皇国の帝が人前で舞いを踊り、祝詞を捧げるのだという。
+		PRINTFORML 皇国においては神の如く扱われる帝――人前に姿を現すことなど滅多に無く、%CALLNAME:MASTER%にも多少の興味はあった。
+		PRINTFORMW 武家である立花家当主、静流は近い席でそれを見られるようで、%CALLNAME:MASTER%の同席も許されたらしい。
+		PRINTFORMW 珍しいことではあったが、皇国には貢献し、武士の象徴的な兵器の一つ――機動武者の購入さえ認められた身。
+		PRINTFORMW 静流との一件での評価もあって、許しを得られたのはそこが大きいだろう、と静流は言っていた。
+		PRINTFORML 
+		PRINTFORMW 雲一つ無い快晴――非常に大きな舞台が皇居前の広場に設置され、警備の武士達と笛や太鼓を持った楽士達。
+		PRINTFORMW 右を見ても左を見ても獣尾人ばかりであった。
+		PRINTFORML いつにも増して華やかな着物に身を包む、隣の静流と同様――皆それなりに着飾っていた。
+			IF TALENT:MASTER:動物耳 == 1 && TALENT:MASTER:しっぽ == 1
+				PRINTFORMW %CALLNAME:MASTER%がそうでなければ、間違いなく浮いていただろう。
+			ELSE
+				PRINTFORMW %CALLNAME:MASTER%を知る武士達は挨拶をしてくれたものの、ほとんどが怪訝顔。
+				PRINTFORMW あるいはあからさまな侮蔑の目で%CALLNAME:MASTER%を見ていた。
+			ENDIF
+		PRINTFORML 
+		PRINTFORMW しばらくすると貴族だろう、随分と偉そうな獣尾人が挨拶を行う。
+		PRINTFORML 決して非礼の無いように、声を発さず邪魔をせぬようにと繰り返し、下がっていく。
+		PRINTFORMW 鳴り響く笛の音色はそのすぐ後。
+		PRINTFORML
+		PRINTFORMW 荘厳であり優美な音色ながら、少しもの悲しい響き。
+		PRINTFORML それに聞き惚れながら、舞台の上に現れた少女の姿に目を見開く。
+		PRINTFORMW 目抜き穴もない面には太陽を示すのだろうシンボルが描かれ、顔の全てを覆っていた。
+		PRINTFORMW しかし、それでも一目にそれが、『彼女』であると確信する。
+		PRINTFORML
+		RESETCOLOR
+		SETCOLOR 0xBE81F7
+		PRINTFORMW 犬の耳と尾、手に持つ剣と手鏡、首から提げた勾玉と紅白の巫女装束。
+		PRINTFORML 視界を封じられているにも関わらず、不思議とあちらも%CALLNAME:MASTER%を認識したように顔を向けた。
+		PRINTFORMW そして微笑む姿さえ、仮面越しに透けて見える。
+		PRINTFORML 
+		PRINTFORMW 薄らと、可能性の一つとして考えていた事ではある。
+		PRINTFORML 高貴な生まれ。ほんの表層とは言え、あのような世界に平然と足を踏み入れ過ごす強力なサイオニック能力者。
+		PRINTFORML ここに来てもそれらしき姿がどこにも見当たらず、そして帝の舞いが近づくにつれてそれは一層強まった。
+		PRINTFORMW 初めて出会った時の彼女――その舞いを思い浮かべてしまったからだ。
+		PRINTFORMW 驚くべき場面であったが、動揺はそれほど大きなものではなかった。
+		PRINTFORML  
+		PRINTFORMW 面を隔てた視線の交わりも一瞬のこと。
+		PRINTFORMW 少女は今朝見せたものと同じように、鈴の音響かせ剣舞を踊る。
+		PRINTFORMW 時に鋭く荒々しく、時に緩やかな水の流れのように緩急を付けた舞い。
+		PRINTFORMW 見えない圧力と共に、少女の周囲には光――完全に制御された、強力なサイオニックが渦巻いていた。
+		PRINTFORML
+		PRINTFORMW しかし不思議と、あの空間で見たときほどのものではない。
+		PRINTFORML 魂を押しつぶされそうな気配はなく――その理由は何かと探れば、彼女が手に持つ飾りだろう。
+		PRINTFORML 恐怖さえ引き起こすような、あの気配は存在しなかった。
+		PRINTFORMW あの空間で彼女が見せたそれと瓜二つでありながら、目の前で舞う彼女が手にするものとは全く違う。
+		PRINTFORML 
+		PRINTFORMW 呆けている間に随分と時間が経ったのか。
+		PRINTFORML 古色の響きが漂う祝詞を響かせ、彼女の舞いは終わりの気配。
+		PRINTFORML 去り際に面越しに一瞥を送りながら、少女は歩き去って行く。
+		PRINTFORMW どうかなさいましたか、と問いかける静流にも気付かず、%CALLNAME:MASTER%はしばらく考え込んだ。
+		PRINTFORML 
+		PRINTFORML
+		PRINTFORMW 強力なサイオニックとの接触は%CALLNAME:MASTER%に影響を与えたようだ。
+		PRINTFORML
+			IF ABL:MASTER:超能力 >= 60
+				CALL PRINT_ADD_EXP(MASTER, "超能力経験値", RAND:25)
+			ELSEIF ABL:MASTER:超能力 >= 30
+				CALL PRINT_ADD_EXP(MASTER, "超能力経験値", RAND:50)
+			ELSE
+				CALL PRINT_ADD_EXP(MASTER, "超能力経験値", RAND:50 + 25)
+			ENDIF
+		QUEST_PROGRESS:QUEST_ID = 2
+		QUEST_COMPLETE_DATE:QUEST_ID = DAY
+RESETCOLOR 
+;――――――――――――――――――――――――――――――――――――――――――――――――――――――――
+	CASE 2
+;――――――――――――――――――――――――――――――――――――――――――――――――――――――――
+SETCOLOR 0xBE81F7
+		PRINTFORML
+		PRINTFORMW 霧深い森の中で、再び咲耶と顔を合わせる。
+		PRINTFORMW 「これまで通りで構いませんよ」
+		PRINTFORML 相手は帝。さて、どうした態度で接するべきか――考え込む%CALLNAME:MASTER%に対し咲耶は苦笑した。
+		PRINTFORMW 「帝とは言え人の子。生まれがそうであっただけのことです」
+		PRINTFORML そうは言うが、相手は皇国において崇拝される、神に等しき支配者である。
+		PRINTFORMW 流石に町娘に対するような気安さで話しかけるには多少の抵抗くらいはあった。
+		PRINTFORML 
+		PRINTFORMW ただ、その本人が言うのならそれで良いのだろう。
+		PRINTFORML 頷くと、以前と変わらぬ言葉を用いる。どちらにせよ、他人もいない。
+		PRINTFORMW 咲耶はその様子を見て、ほっとしたように息を吐く。
+		PRINTFORML 
+		PRINTFORMW 「実は以前から……まれびとさまがどのような方か、わたくしの方は見当が。当たっていたようですね」
+		PRINTFORML それから彼女は楽しそうに口にする。
+			IF REL_LIKE_COUNTRY:国家ID_豊秋津皇国:国家ID_プレイヤー > 999
+				PRINTFORMW 皇国の最新鋭戦艦、大和の購入さえ許される皇国外の人間。
+			ELSE
+				PRINTFORMW 武士の象徴、機動武者の購入を許される皇国外の人間。
+			ENDIF
+		PRINTFORMW そうした話は彼女の耳にも届いており、それが%CALLNAME:MASTER%ではないかと考えていたらしい。
+		PRINTFORML
+		PRINTFORMW 「やはりこれは導きであると……わたくしが願っていたのは、まさにあなたのような方」
+		PRINTFORML 皇国外の人間でありながら、皇国に通じ、武士達からの信頼をも勝ち得た、皇国を知るもの。
+		PRINTFORMW そして国家という枠に縛られない、宇宙を駆ける自由な存在。
+		PRINTFORMW そんな存在を待っていたのだと、彼女は続ける。
+		PRINTFORML
+		PRINTFORMW 「……実は、お願いしたいことがあるのです」
+		PRINTFORML いつもと比べ、彼女には若干の緊張を感じていた。
+		PRINTFORML 頷くと咲耶は落ち着きなく、耳をぴくぴくさせて尻尾を揺らす。
+		PRINTFORML 「この国の未来のため……そのための、お願いです」
+		PRINTFORMW 彼女は真剣な目で%CALLNAME:MASTER%を見つめ、話を促されると語り始める。
+		PRINTFORML 
+		PRINTFORMW 「帝とは名ばかり。……わたくしは政治から遠ざけられ、半ば軟禁された状態にあります」
+		PRINTFORML 彼女曰く、皇国の帝はそういう存在として、随分と前からそういう扱いであったらしい。
+		PRINTFORML 政治は枢密院の貴族が支配しており、混乱を生むと発言することも、話し合いに参加することも許されない。
+		PRINTFORMW 帝とは国家としてのシステムなのだと咲耶は言った。
+		PRINTFORML 
+		PRINTFORMW 「求められたことだけを行うプログラムのような……帝とはそのような存在です」
+		PRINTFORML 帝の言葉は半ば、貴族達の言葉。求められた時のみ、求められた言葉だけを口にする。
+		PRINTFORMW それ以上の言葉を発することも、行動を起こすことも出来ないよう、全てを監視されているのだという。
+		PRINTFORML 
+		PRINTFORML それで国が良い方向に進むのであればそれでも良い、と彼女は続ける。
+		PRINTFORML 長い人生をそのように過ごし、捧げることも我慢が出来ると。
+		PRINTFORMW 「けれど……ここで感じる多くのものを眺める限り、とてもそうだとは思えません」
+		PRINTFORMW 溜息を吐くように周囲の霧深い森を見渡し、咲耶はこの広場の中央、大きな岩へと腰掛けた。
+		PRINTFORML
+		PRINTFORMW 「このかくりよは、皇国そのもの……言わば皇国に住む者たちの思念が形作る場所と言われています」
+		PRINTFORML 集合無意識によって形作られる異空間――この世界の裏側には、そうしたものがいくつも存在するらしい。
+		PRINTFORML その一つがこの『かくりよ』であると彼女は告げる。
+			IF ABL:MASTER:超能力 >= 20
+				PRINTFORMW 底知れぬ概念であるが、ＰＳＩに関して多少の見識がある%CALLNAME:MASTER%には素直に納得が出来た。
+			ELSE
+				PRINTFORMW 直感的なものであったが、不思議と%CALLNAME:MASTER%にも頷けるものがあった。
+			ENDIF
+		PRINTFORML
+		PRINTFORMW 「皇国が建国がされた頃は、ここも暗く霧深い森ではなく、希望の光に溢れた美しい場所であったと聞きます」
+		PRINTFORML 旧き大国――かつて銀河を支配したとされる言い伝えられる超文明。
+		PRINTFORML 皇国はその崩壊と共に生まれた国家の一つであったらしい。
+		PRINTFORMW 「被差別階級にあった獣尾人達が団結し……誰もが絶対的な指導者たる帝と未来へ希望を抱いていたのだと」
+		PRINTFORML 被差別階級という言葉に反応すると、咲耶は尋ねた。
+		PRINTFORMW 「獣尾人について、どこまでご存じで？」
+		PRINTFORMW それほど詳しいわけでは無い、と前置いて、%CALLNAME:MASTER%は口を開く。
+		PRINTFORML
+		PRINTFORMW 獣の因子を取り込んだ遺伝子改良――それによって生み出された超人種。
+		PRINTFORMW 身体能力、感覚に優れ、ＰＳＩ素養の高いものも多く、一般人類と比べて平均的な能力で優れた存在。
+		PRINTFORMW 能力的違いはそのようなもので、その由来については多くの学説が存在する。
+		PRINTFORMW 超人作成を目的に改良された新人類であったとか、あるいは特徴的な容姿を持たせた愛玩奴隷であったとか。
+		PRINTFORMW 少なくとも一般的な知識の上ではその程度であった。 
+		PRINTFORML 
+		PRINTFORMW 「どちらも正解と言えるでしょう。わたくしも全てを知る訳ではありませんけれど……」
+		PRINTFORML 超人作成を目的に研究され、改良された人類であることは間違いない、と彼女は告げる。
+		PRINTFORML しかし、それは失敗であったのだとも。
+		PRINTFORMW 「優れた知覚や身体能力はおまけ――本当の目的は格段に高いＰＳＩ適正を持つ新人種の作成であったのだとか」
+		PRINTFORMW ＰＳＩ素養が高い、程度ではなく、ＰＳＩを生まれながら自在に操る生命体。
+		PRINTFORML ＰＳＩ能力の科学的、安定的な行使を可能とする、標準化されたサイオニックを手にした新人類。
+		PRINTFORML 宇宙との広大な空間と世界の深奥を解き明かす力を秘めた、次世代種族。
+		PRINTFORMW 獣尾人はその研究過程に生まれた産物であったそうだと咲耶は告げる。
+		PRINTFORML
+		PRINTFORMW 「ただ、ご存じの通り、獣尾人は優れていても、超越的というほどの力は持ちませんでした」
+		PRINTFORML 中途半端に獣の混じっただけの、失敗作の亜人種。
+		PRINTFORML 奴隷のように扱われていたことは確かなのだと咲耶は続けた。
+		PRINTFORMW 「ただ、その中にも彼らの要求するような、非常に強力なサイオニック能力を有する個体が現れました」
+		PRINTFORMW それが帝――皇国を生み出した咲耶の祖先。
+		PRINTFORML 
+		PRINTFORMW 「世界の深奥に足を踏み入れた選ばれしもの――建国帝は想像を絶する力を持っていたのだと記されています」
+		PRINTFORML 特例的に重用されていた彼は、同族達の扱いに心を痛め、立ち上がり、反乱軍を組織。
+		PRINTFORML 彼に率いられた獣尾人達の活躍が、旧き大国を崩壊させる一因になったという。
+		PRINTFORMW 「ただ、それも史実の上では――真実がどのようなものであったのかは分かりませんけれど」
+		PRINTFORMW おとぎ話とでも聞いて下さい、と咲耶は苦笑する。
+		PRINTFORML 
+		PRINTFORMW どうあれ人々を救い、独立を勝ち取り、皇国を樹立した英雄。
+		PRINTFORML 今の自分の在り方は、そんな偉大な祖先に申し訳ないのだと彼女は語る。
+		PRINTFORMW 「……この国の現状、わたくしの姿を見て、悲しんでおられるのではないかと思うのです」
+		PRINTFORMW だからこそ、現状を変えたい――咲耶は真剣な顔でそう告げる。
+		PRINTFORML 
+		PRINTFORMW 「今に大きな問題はなくともいずれ……この国は崩壊へと近づいていくでしょう」
+		PRINTFORML 現状でもその兆候があると彼女は語る。
+		PRINTFORML 既得権益を守ることだけに力を注ぐ貴族達や、腐敗した貴族の打倒を大義名分に、世を乱す武士達。
+		PRINTFORMW そのような人間ばかりではないが、いずれそうした流れも強まるのだと。
+		PRINTFORML 
+		PRINTFORMW 「そのためには大きな力が必要なのです。……それも、建国帝に匹敵するような」
+		PRINTFORML 咲耶は強力なサイオニックであるが、地力で軟禁状態から脱することは難しい。
+		PRINTFORML 同じ皇国人――例えば武士の力を借りるにしても、パワーバランスが崩れ、国に大きな混乱を生じさせる。
+		PRINTFORML 望ましいのは咲耶が独力で、貴族達との関係を対等、あるいはそれ以上に持って行く手段だという。
+		PRINTFORMW 「かつて建国帝は、その力を増幅させる三つのものを持っていたと言われています」
+		PRINTFORMW もうお見せしましたね、と虚空から剣と鏡、勾玉を生じさせ、宙に浮かべる。
+		PRINTFORML 
+		PRINTFORMW 「これは鍵のようなもの……先日舞台で披露したのは形を模しただけのレプリカです」
+		PRINTFORML 強力な建国帝のサイオニックによって、この空間でデータ化された暗号鍵の一種。
+		PRINTFORML かつて建国帝は自身の力を三つに分けて、何かを封印したのだという。
+		PRINTFORMW 「世界を統べるほどの力……と言われていますが、恐らくは何らかのＰＳＩエネルギー増幅施設でしょう」
+		PRINTFORMW 一つは地表に、一つはアステロイドベルト、一つは星系外のどこかに存在しているそうだ。
+		PRINTFORML 
+		PRINTFORMW 「地表にあるものは皇国の管轄外にある危険な土地。他にもこの仕事には多くの危険があるかも知れません」
+		PRINTFORML 非常に危険で、難しい依頼であると彼女は告げる。
+		PRINTFORML 確かに、所在の分かる二つはまだともかく――残りの一つは分からないと来た。
+		PRINTFORML 未知の外宇宙にでも存在していたならもはや達成さえ不可能だろう。
+		PRINTFORMW 「それでも……わたくしに協力して頂けるというのであれば、またここに」
+		PRINTFORMW 然るべき後、それに見合った、可能な限りの謝礼を用意する、と彼女は続けた。
+		PRINTFORML 
+		PRINTFORMW 「ただ、あちらでは自由のない身……すぐに、とも、必ずとも言えません」
+		PRINTFORML 無理にとは言えませんけれど、と彼女は目を伏せ、それから近づくと%CALLNAME:MASTER%を見つめる。
+		PRINTFORMW 「……ただ、ご一考頂ければ幸いです」
+		PRINTFORMW そして、懇願するように彼女は告げた。
+		PRINTFORML
+		PRINTFORML
+		PRINTFORML
+		PRINTFORML
+		PRINTFORML
+		PRINTFORML
+		RESETCOLOR
+		SETCOLOR 0xDF7401
+			IF TALENT:MASTER:性別 > 0
+				PRINTFORMW 「……どうかなさいましたか？」
+				PRINTFORML そうして目覚めた%CALLNAME:MASTER%は、何でもない、と静流に答えながら、咲耶の言葉を考え込む。
+				PRINTFORML すぐさま利益に変わるようなものではなく、時間が掛かり、危険ばかりが多い依頼。
+				PRINTFORMW こちらを騙す目的もないのだろうが、あまりにリスクとリターンが合っていないように思えた。
+				PRINTFORMW 一つしかない命を賭けることになると考えれば、どうするかはよく考えるべきだろう。
+			ELSE
+				PRINTFORMW 「あぁ♥だんなさま♥　あさから♥　はげし……♥♥♥」
+				PRINTFORML 例の如く男根を咥え込んでいた静流を突き上げながら、咲耶の言葉を考え込む。
+				PRINTFORML すぐさま利益に変わるようなものではなく、時間が掛かり、危険ばかりが多い依頼。
+				PRINTFORMW こちらを騙す目的もないのだろうが、あまりにリスクとリターンが合っていないように思えた。
+				PRINTFORMW 一つしかない命を賭けることになると考えれば、どうするかはよく考えるべきだろう。
+				PRINTFORML
+				PRINTFORMW 「……だめっ♥　だめですっ♥　あさなのにっ♥　また……っ♥♥♥」
+				PRINTFORMW 射精した後の落ち着いた頭で考えよう。
+				PRINTFORMW そんなことを考えつつ静流の腰を掴むと、荒々しく男根を突き上げた。
+				CALL FUCK(MASTER, "性技, 性交, Ｃ, 射精", "童貞喪失, キス喪失, Ｖ挿入", 0, "静流の唇", "", "静流の膣", "和姦")
+			ENDIF
+		CALL OMEZAME_ANATA_1
+		QUEST_PROGRESS:QUEST_ID = 3
+		QUEST_COMPLETE_DATE:QUEST_ID = DAY
+RESETCOLOR 
+;――――――――――――――――――――――――――――――――――――――――――――――――――――――――
+	CASE 3
+;――――――――――――――――――――――――――――――――――――――――――――――――――――――――
+SETCOLOR 0xBE81F7
+		PRINTFORML
+		PRINTFORMW 霧深い森の中――再び%CALLNAME:MASTER%はかくりよに訪れる。
+		PRINTFORMW 導かれるように進んでいけば、舞を踊る咲耶の姿。
+		PRINTFORMW ぴくり、と犬のような耳を跳ねさせると彼女はこちらに向き直り、深々と頭を下げた。
+			IF QUEST_COMPLETE_DATE:95 + 95 < DAY
+				PRINTFORML 「もう来ては下さらないのではないかと……ありがとうございます」
+			ELSE
+				PRINTFORML 「ありがとうございます。……来て下さったのですね」
+			ENDIF
+		PRINTFORMW そして喜びを示すように、黒い尻尾を左右に振る。
+		PRINTFORML 
+		PRINTFORMW 先日の依頼を引き受けることに決めたと告げると、彼女はもう一度感謝を述べた。
+		PRINTFORML そしてまずは説明ですね、と続ける。
+		PRINTFORMW 「内の二つについては場所に関して見当が……しかし一つは場所も何も」
+		PRINTFORMW ある程度まで近づけば分かるらしいが、宇宙は広大。簡単に見つかるとは限らない。
+		PRINTFORML 
+		PRINTFORMW 「意図して封印され、鍵の残されたもの……まさか外宇宙の彼方、ということはないはずです」
+		PRINTFORML 彼女の持つ『鍵』の一つ、鏡は少なくとも、それが既知の宇宙にあることを示しているのだという。
+		PRINTFORMW 「……すみません。近づけば反応があるはずなのですが」
+		PRINTFORMW 気の遠くなるような仕事になるかも知れないが、こうして受けた以上、努力はするつもりだ。
+		PRINTFORMW そう告げると彼女は再び頭を下げた。
+		PRINTFORML 
+		PRINTFORMW 「残りの二つ……一つは地上にあることが分かります。ただ……」
+		PRINTFORMW 歯切れの悪い言葉に首を傾げると、咲耶は告げる。
+		PRINTFORMW 「その土地は皇国のものではなく、先住民族が支配しているのです」
+		PRINTFORMW この惑星の先住民族――何でも、獣尾人の前に次世代種族として研究されていた人種であるらしい。
+		PRINTFORML 
+		PRINTFORMW グンマーという名はもちろん%CALLNAME:MASTER%も知っている。
+		PRINTFORML この宇宙開拓時代に槍と弓を手にする野蛮な未開人として、皇国人からは恐れられ、嫌われていた。
+		PRINTFORML そんな彼らの特徴は異様な身体能力の高さ。
+		PRINTFORML 銃器で武装し、戦車とメックを走らせ、航空爆撃を行なう現代軍に対し、引けを取らぬ白兵能力。
+		PRINTFORMW 奥深い森林に身を隠し、岩盤を掘り抜きシェルターを作る彼らに対しては皇国も手を焼いていた。
+		PRINTFORML 
+		;HALO感
+		PRINTFORMW まさか土地のために、自分の星で地表をガラス化させるような大規模爆撃をしていては本末転倒である。
+		PRINTFORML コストとリターンを鑑みて現在は放置されているようで、実質的な休戦状態。
+		PRINTFORMW 刺激しないよう、立ち入り禁止区域として皇国では指定されていると聞く。
+		PRINTFORML 
+		PRINTFORMW 「彼の地の戦士達はそのままの状態で、強化インプラントが施された獣尾人にさえ匹敵するとか」
+		PRINTFORML 決して暴力で挑むべきではない相手だと彼女は口にした。
+		PRINTFORMW 「なるべく彼らを刺激しないよう……決して無理はなさらないでください」
+		PRINTFORMW そして咲耶は心配そうに見つめる。
+		PRINTFORML 
+		PRINTFORMW 「こちらから依頼したものとはいえ、ご自身の安全を一番に。難しければ、無理をなさらず」
+		PRINTFORMW その時は自分も諦める、と彼女は続けた。
+		PRINTFORML 
+		PRINTFORMW 「もう一つは……どうにも、かつての軍事拠点であった場所のようです」
+		PRINTFORML この星系の外周部に存在する、秘匿された軍事要塞。
+		PRINTFORML 表向き知られておらず、咲耶も『鍵』となる鏡に残されたデータから読み取ったものらしい。
+		PRINTFORMW 「随分前に、調査船が消息不明となったと言われている座標――その近くですね」
+		PRINTFORML その後の調査でも、度重なる通信機器の故障、調査船が消失する魔の宙域。
+		PRINTFORML 未知の次元の歪みが存在するという考えられたようで、再調査は見送られているらしい。
+		PRINTFORML 
+		PRINTFORMW 「消息不明となった調査船は恐らく撃墜されたもの……通信機器の故障も何かしらの干渉でしょう」
+		PRINTFORML つまりは、今なお施設は生きている、ということだ。
+		PRINTFORMW 「当時の技術水準は今なお計り知れないものがあります。大きな危険があることは間違いありません」
+		PRINTFORML これに関しても先と同様だと彼女は告げる。
+		PRINTFORMW 「ご自身の身の安全を第一にお考えください。そもそも個人に頼むには、あまりに難しい依頼ですから」
+		PRINTFORMW %CALLNAME:MASTER%が言うなら諦められる、と咲耶は続けた。
+		PRINTFORML 
+		PRINTFORMW 「ひとまず……お話しすることはそのくらいでしょう。……少し、失礼しますね」
+		PRINTFORMW 咲耶はこちらに近づくと、その指先で%CALLNAME:MASTER%の額に触れる。
+		PRINTFORMW PSIエネルギーが迸り、彼女の体を通って、指先から額、%CALLNAME:MASTER%の体の中へ。
+		PRINTFORMW 「鍵のコピーをお渡ししました。残る三つ目もこれで、近づけば感じ取る事が出来るはずです」
+		PRINTFORML 
+		PRINTFORML 試しにと念じてみると、虚空から生じたのは剣と鏡、そして勾玉。
+		PRINTFORML 彼女が持っていたそれと比べれば力が弱いが、少なくとも機能上の問題はないのだろう。
+		PRINTFORML 実に古風な形状ではあるが、非常に高度なサイオニックインターフェイス。
+		PRINTFORMW その内部には暗号化された膨大なデータが組み込まれているのを感じる。
+		PRINTFORML 
+		PRINTFORMW 「施設はこれがあれば、問題なく起動操作を行えるはずです」
+		PRINTFORMW それから、と彼女は告げ、両手の上に不可思議な剣を生じさせる。
+		PRINTFORML 
+		PRINTFORMW 「ナナツサヤ――霊力で出来た剣の一種。本来帝が護身用として隠し持つものの一つです」
+		PRINTFORML PSIエネルギーで構成された強力な非実体剣。刀身が左右に枝分かれするような奇妙な形状であった。
+		PRINTFORML 強大な力を放つそれは、%CALLNAME:MASTER%に手渡された瞬間、その圧力がやや弱まる。
+		PRINTFORMW 持ち手の力によって形成されるサイオニックウェポンの一種であるらしい。
+			IF ABL:MASTER:超能力 >= 80
+				PRINTFORML しかしそれでも十分過ぎるほどの力が宿っていることは分かる。
+				PRINTFORMW %CALLNAME:MASTER%ほどの能力者であれば、十分に使いこなすことが出来るだろう。
+			ELSEIF ABL:MASTER:超能力 >= 40
+				PRINTFORML しかしそれでも武器として十分な力が宿っていることは分かる。
+				PRINTFORMW %CALLNAME:MASTER%であれば、問題なく使いこなすことが出来るだろう。
+			ELSE	
+				PRINTFORML 今の%CALLNAME:MASTER%では本来の力を発揮させることは難しそうだ。
+				PRINTFORMW しかし、いついかなる時でも取り出せる武器として、利便性は悪くはない。
+				PRINTFORMW 強力な超能力者に持たせるというのもありだろう。
+			ENDIF
+		PRINTFORML 
+		PRINTFORMW 「使わずに済むことが一番とはいえ、危険は付き纏うもの。どうか、お持ちになってください」
+		PRINTFORML ありがたく、と受け取ると、少しの間それを眺める。
+		PRINTFORML 単なる非実体剣というより、そういう形をしたPSIブースター。
+		PRINTFORML 護身用という通り、身体能力を強化し、身を守るためのPSIフィールドを展開できるらしい。
+		PRINTFORMW ただ、ひとたび展開すれば敵の注目を集める武器ではある。使い方は考えるべきだろう。
+		PRINTFORML 
+		PRINTFORMW 「いえ、わたくしは……自衛が必要な状況ではありませんし、別なものもいくつかありますから」
+		PRINTFORML 咲耶はいいのか、と尋ねると、返ってきたのはそのような言葉。
+		PRINTFORML 確かに――彼女ほどのサイオニックとなれば、並の危険は退けられることは確かだろう。
+		PRINTFORMW 「……危険な依頼。それに先んじた報酬の一つとしてお受け取り下さい」
+		PRINTFORMW %CALLNAME:MASTER%は頷くと、ナナツサヤを消失させる。
+		PRINTFORML 
+		PRINTFORMW 「ひとまず、簡単な依頼についての説明はそれくらいでしょう」
+		PRINTFORML 詳細の方はまた後日ですね、彼女は続けた。
+		PRINTFORMW 確かに、では今から――というにはあまりに無謀だろう。相応の準備が必要であった。
+		PRINTFORMW 「無理を言っているのは分かっております。けれど……どうか、よろしくお願いします」
+		PRINTFORMW 深々と頭を下げる彼女を眺めながら、%CALLNAME:MASTER%は依頼達成に必要なものを計算し始めた。
+		PRINTFORML 
+		HAVE_CLOTH:90 ++
+		PRINTFORMW ――%CALLNAME:MASTER%はサイオニックブレード、ナナツサヤを手に入れた。
+		CALL OMEZAME_SAKUYA_1
+		QUEST_PROGRESS:QUEST_ID = 4
+		QUEST_PROGRESS:96 = 1
+		QUEST_COMPLETE_DATE:QUEST_ID = DAY
+RESETCOLOR 
+;――――――――――――――――――――――――――――――――――――――――――――――――――――――――
+	;
+	CASE 4
+;――――――――――――――――――――――――――――――――――――――――――――――――――――――――
+SETCOLOR 0xBE81F7
+		PRINTFORML 
+		PRINTFORML 「ようこそいらっしゃいました、まれびとさま」
+		PRINTFORMW かくりよを訪れると、いつものようにそこにいた咲耶は頭を下げて微笑んだ。
+		PRINTFORML 
+			SELECTCASE RAND:4
+			CASE 0
+			PRINTFORML 「今日は……依頼の件ではなさそうですね」
+			CASE 1
+			PRINTFORML 「出来ればあちらでもお会い出来れば良いのですが……」
+			CASE 2
+			PRINTFORML 「ご足労おかけします」
+			CASE 3
+			PRINTFORML 「ふふ、丁度、いらっしゃる気がしておりました」
+			ENDSELECT
+		PRINTFORMW 霧深い森の中にあって、彼女の笑顔だけが目映い。
+		PRINTFORML 今日は――
+		PRINTFORML
+			PRINTBUTTON "[0] 咲耶と話をしに来た。", 0
+			PRINTFORML
+			PRINTBUTTON "[1] PSI能力を磨きに来た。", 1
+			INPUT
+				IF RESULT == 0
+					PRINTFORML 
+					PRINTFORMW 「お話……でございますか？」
+					PRINTFORML 咲耶は何やら嬉しそうに尻尾を振り、犬のような耳をぴくぴくとさせる。
+					PRINTFORMW もしかしなくとも話相手には飢えているのかも知れない。
+					PRINTFORML 
+					CALL NANINANI_SAKUYA_1
+				ELSEIF RESULT == 1
+					PRINTFORML 
+					PRINTFORMW 「もちろん、わたくしでお役に立てるのであれば」
+					PRINTFORML PSI能力を磨きに来たと告げると、咲耶は非常に張り切っている。
+					PRINTFORMW 腰の軽い帝もいたもの――帝が退屈なのか、あるいは何もさせてもらえないのか。
+					PRINTFORML
+					CALL SAKUYA_TO_ISSYO_1
+				ENDIF
+		IF TALENT:MASTER:性別 == 0 && RAND:100 <= 30
+			CALL SHIZURU_NI_OKKI_1
+		ENDIF
+		QUEST_PROGRESS:QUEST_ID = 4
+		QUEST_COMPLETE_DATE:QUEST_ID = DAY
+		
+ENDSELECT
+RESETCOLOR
+;――――――――――――――――――――――――――――――――――――――――――――――――
+@NANINANI_SAKUYA_1
+;会話系
+;――――――――――――――――――――――――――――――――――――――――――――――――
+	$INPUT_LOOP
+	SETCOLOR 0xBE81F7
+	DRAWLINE
+		PRINTBUTTON "[0] PSIについて", 0
+		PRINTL
+		PRINTBUTTON "[1] かくりよについて", 1
+		PRINTL
+		PRINTBUTTON "[2] 豊穣の地について", 2
+		;PRINTL
+		;PRINTBUTTON "[3] 未定", 3
+		;PRINTL
+		;PRINTBUTTON "[4] 未定", 4
+		;PRINTL
+		;PRINTBUTTON "[5] 未定", 5
+		;PRINTL
+		;PRINTBUTTON "[6] 未定", 6
+		;PRINTL
+		;PRINTBUTTON "[7] 未定", 7
+		;PRINTL
+		;PRINTBUTTON "[8] 未定", 8
+		PRINTL
+		PRINTBUTTON "[9] 戻る", 9
+			INPUT
+				IF RESULT == 0
+					PRINTFORMW 「霊力、魔力、超能力……現代では一般的にPSIと表現されていますね」
+					PRINTFORML 
+					PRINTFORML 多少の知識はあるものの、改めて聞くのも悪くない。
+					PRINTFORML 思いついて尋ねてみると咲耶は喜んで説明し始める。
+					PRINTFORMW 皇国では霊力、あるいは呪力と呼ばれる事も多いらしい。
+					PRINTFORML 
+					PRINTFORMW 「理論に基づく安定したPSI、もしくはその使い手をサイオニックと呼ぶことも多いです」
+					PRINTFORML ただ、呼び名が違うだけで全て本質的には同じ力なのだと咲耶は告げる。
+					PRINTFORML PSI粒子というべき、一般的な機械では検知されない未知のエネルギー。
+					PRINTFORMW このPSI粒子に精神波によってリンクし、これを操作することで超常的な力を発する。
+					PRINTFORML 
+					PRINTFORMW 「ただ、これもあくまでわたくしの知識と実体験に基づくものですので、話半分に」
+					PRINTFORML 別な手段は存在するのかも知れません、と彼女は曖昧に答えた。
+					PRINTFORML 旧き大国の時代にはこれを観測し、機械的に増幅させる手段も存在していたらしい。
+					PRINTFORMW 現在その多くはロストテクノロジーとして扱われており、完全な再現には到っていない。
+					PRINTFORML 
+					PRINTFORMW 「この力はどうにも、異次元に由来するエネルギーだと言われています」
+					PRINTFORML 世界の裏側に存在する、大いなる精神的異空間。
+					PRINTFORML かくりよの存在するような世界――その更に深い所に、PSIの根源がある。
+					PRINTFORMW 少なくともそういう見方が当時も強かったのだと彼女は言った。
+					PRINTFORML そうした記録が残っているのか、と尋ねると、彼女は頷く。
+					PRINTFORMW そして宙空にPSI粒子で構成されたディスプレイを浮かべる。
+					PRINTFORML 
+					PRINTFORMW 「この世界にもデータバンクのようなものが存在し、様々な記録が残っていますので」
+					PRINTFORML 彼女の知識の大半は、このかくりよで手に入れたものだという。
+					PRINTFORML 子供の頃からかくりよに通じ、過ごした彼女に取ってはここが図書館のようなもの。
+					PRINTFORMW それでも見切れないほどのデータが眠っている、と彼女は告げる。
+					PRINTFORML 
+					PRINTFORMW 「掘り出すのも大変で……多分まだ、１％も把握は出来ていないのですけれど」
+					PRINTFORML 現実の記憶媒体に残されるデータと違い、他の記憶媒体に転送出来ない。
+					PRINTFORML 閲覧の容易さという意味では随分と難儀なものらしい。
+					PRINTFORML 脳髄に差し込んだチップによって一瞬でデータ学習を終えられるインプラントも存在する。
+					PRINTFORMW しかし、この世界はその点随分なアナログだった。
+					PRINTFORML 
+					PRINTFORMW 「安定しているとは言え、あちらに比べれば不安定な世界。壊れたデータも多いですし」
+					PRINTFORML 利便性を考えれば、どう考えても現状、優れているのはあちら。
+					PRINTFORMW しかしその分、ここにはあちらにもない情報が眠っている可能性はあるだろう。
+					PRINTFORML 
+					PRINTFORMW 「そういう意味では一長一短ですね。ただ……」
+					PRINTFORML 言いかけた言葉に首を傾げると、彼女は真面目な顔をして告げる。
+					PRINTFORMW 「こちらでの記録閲覧に慣れていると、機械操作が不得手になる、という問題もあるような気がします」
+					PRINTFORML 聞いた事のない問題であった。
+					PRINTFORMW 「生物本来が持つPSIと人工物である機械は元より相反するもの……恐らくその影響でしょう」
+					PRINTFORMW 以前読んだ記録はこのことを指していたのでしょう、と彼女は真剣な顔である。
+					PRINTFORML 
+					PRINTFORML ただ、聞くところによると、咲耶はあちらで様々な機械を壊してばかりらしい。
+					PRINTFORMW 最初は真面目な顔をして聞いていたものだが、内容を聞いている内に段々と呆れてくる。
+					PRINTFORML 
+					PRINTFORML 仕組みもよく分かっていないデバイスの改良と称し、ハードをPSIで弄り破損させた。
+					PRINTFORML PSIで情報収集出来ないかとネットワークに介入、広域障害を引き起こした。
+					PRINTFORML 電力を上げれば性能が上がると勘違いし、回路をショートさせた。
+					PRINTFORML 良くも悪くも遊びが大きく自由度の高い、この世界でのやり方をあちらでも行なおうとしたらしい。
+					PRINTFORML 天才的発想――あるいは、単純に致命的な機械音痴。
+					PRINTFORMW そうした自業自得の数々で、機械に対し異様な苦手意識があるらしい。
+					PRINTFORML 
+					PRINTFORMW 「き、機械音痴という訳では……た、ただ、触っている内に、勝手に……」
+					PRINTFORML 突っ込むべきか迷いつつも指摘すると、顔を真っ赤にして否定した。
+					PRINTFORMW 「さ、サイオニックインターフェイスに対応していなかったのが問題で……」
+					PRINTFORMW ロストテクノロジーを口にしながら、咲耶はため息をつく。
+					PRINTFORMW それはそれで一般人には扱えまい。
+					PRINTFORML 
+					PRINTFORMW その後もしばらく、咲耶は言い訳を口にしつつ、解説を続けた。
+					CALL HITOIKI_SAKUYA_1
+					GOTO INPUT_LOOP
+				ELSEIF RESULT == 1
+					PRINTFORMW 「天界や霊界、あるいはシュラウド――精神的異空間の表層にあるのがこの世界です」
+					PRINTFORML 
+					PRINTFORMW PSIエネルギーに満ちあふれた、世界の裏側に存在する世界。
+					PRINTFORML その深奥には未知の異次元生物や、神と称されるほどのサイオニック存在が潜むという。
+					PRINTFORMW 『かくりよ』はそのほんの表層、現実の世界に非常に近い場所らしい。
+					PRINTFORML 
+					PRINTFORMW 「これより深い場所についてはわたくしも良くは」
+					PRINTFORML 規格外とも言えるサイオニックである咲耶でさえ、足を踏み入れるのは恐ろしい場所。
+					PRINTFORML 旧き大国はかつて、その深奥を探るべく多くの研究を重ねていたらしい。
+					PRINTFORML それが大きな問題を引き起こし、崩壊の切っ掛けの一つとなったのではないか。
+					PRINTFORMW 咲耶はそうも続ける。
+					PRINTFORML 
+					PRINTFORMW 「得体が知れない場所……我々からすれば高次元の存在達の世界です」
+					PRINTFORML 本の住人が本の綴り手に会いに行くようなもの。
+					PRINTFORMW 銀河を支配した大帝国の終焉の理由としてはあり得るものだと咲耶は言った。
+					PRINTFORML 
+					PRINTFORMW 「このかくりよからであっても、より深い場所からは様々な存在を感じます」
+					PRINTFORML 咲耶ですら一息でかき消されてしまいそうな、圧力を遠く感じる日もあるという。
+					PRINTFORML 「少なくともわたくしは、これより深くに潜ろうという気にはなりませんね」
+					PRINTFORMW そう言って苦笑した。
+					PRINTFORML 
+					PRINTFORMW 「この世界でさえわたくしの作ったものではありませんし」
+					PRINTFORML 皇国――この星系に住まう者達が無意識に形作った、表層世界。
+					PRINTFORMW 素養があるものは夢の中で、気付かず訪れることもあるくらいに%CALLNAME:MASTER%達の世界に近い。
+					PRINTFORMW 彼女が自由に行き来出来るのもそれ故であるらしい。
+					PRINTFORML 
+					PRINTFORMW 「それに、本当のそういう場所に行こうと思えば、わたくし一人では難しいでしょう」
+					PRINTFORML 数十人、数百人規模のサイオニックを集めれば向かうことが出来るかも知れない。
+					;stellaris的シュラウド。
+					PRINTFORML ここを足がかりにすればもう少し容易に行ける――その程度。
+					PRINTFORMW 世界の深淵はそういう場所であるという。
+					PRINTFORML 
+					PRINTFORMW 「皇国が存在する前には何らかの手段があったのかも知れませんけれど……」
+					PRINTFORMW その辺りはよく分かっていません、と咲耶は苦笑した。
+					CALL HITOIKI_SAKUYA_1
+					GOTO INPUT_LOOP
+				ELSEIF RESULT == 2
+					PRINTFORMW 「次世代種族達の牧場にして実験場……最も近しい言い方はそうなるでしょう」
+					PRINTFORML 
+					PRINTFORMW あまり好ましくはない言い方ですが、彼女は悲しげに目を伏せた。
+					PRINTFORML 旧き大国が生み出そうとした次世代種族――新人類。
+					PRINTFORMW その実験体の檻として与えられたのがこの惑星であったのだという。
+					PRINTFORML 
+					PRINTFORMW 「彼らは遺伝子改良の果て、何かしらの限界に行き着いたのだと記録されています」
+					PRINTFORML 旧き大国の支配種族――当時は他の人類と自らを区別し、エルフと自称していたらしい。
+					PRINTFORML 遺伝子改良を繰り返し、超人的な身体能力と不老不死に等しい肉体。
+					PRINTFORMW そして技術と高い頭脳を有した、まさに完全無欠の人類種。
+					PRINTFORML 
+					PRINTFORMW 「記録にさえ、諸説あるようで……その実態はよく分かっていません」
+					PRINTFORML 致命的な遺伝子欠陥により繁殖が困難になった。
+					PRINTFORML 特有の遺伝病に冒された。
+					PRINTFORML 遺伝子改良ベースとしての限界を迎えた。
+					PRINTFORMW いくつか例を挙げながら、咲耶は続ける。
+					PRINTFORML 
+					PRINTFORMW 「ただ、そうして生み出されたのがこの地に住む二種族であることは確かです」
+					PRINTFORML 規格外とも言える、超人的な肉体を有するグンマー人。
+					PRINTFORML PSIへの適正を高めるべく、獣の因子を混ぜ込んだ獣尾人。
+					PRINTFORMW 目的としたのは何か――それはともかく、この星はそのための星。
+					PRINTFORML 
+					PRINTFORMW 惑星丸々一つを実験場にしてしまえるかつての時代は中々想像もつかない。
+					PRINTFORMW それほど都合良く星もある訳ではない。テラフォーミング技術も今より進んでいたのだろう。
+					PRINTFORML
+					PRINTFORMW 「今の領有権争いもそこからのもので……いずれ、どうにかそれも解決したいです」
+					PRINTFORML 実験体達は何も知らされず、自分達が実験体であることも知らずに惑星で文明を築いた。
+					PRINTFORML その時から獣尾人と、前世代のグンマー達は小競り合いを繰り返していたらしい。
+					PRINTFORML そしてある日降り立った建国帝は神の如く獣尾人達を纏め上げ、旧き大国に反逆。
+					PRINTFORMW 結果的に彼らだけが著しい技術発展をし、今のような関係になって行ったそうだ。 
+					PRINTFORML 
+					PRINTFORML 武家や貴族という権力構造もその時代からのものであるという。
+					PRINTFORML 惑星の覇権を弓と槍で争っていた時代から突如、宇宙戦争である。
+					PRINTFORMW 彼らの受けたその衝撃は筆舌に尽くしがたいものであっただろう。
+					PRINTFORML 
+					PRINTFORMW 今なお帝が信仰の対象となり、当時の構造が残っている理由も分かるというもの。
+					PRINTFORMW 遺伝子レベルでその衝撃が刻まれているのかも知れない。
+					CALL HITOIKI_SAKUYA_1
+					GOTO INPUT_LOOP
+				ELSEIF RESULT == 9
+					PRINTFORML
+				ELSE
+					GOTO INPUT_LOOP
+				ENDIF
+RESETCOLOR 
+;――――――――――――――――――――――――――――――――――――――――――――――――
+@SAKUYA_TO_ISSYO_1
+;超能力開発
+;――――――――――――――――――――――――――――――――――――――――――――――――
+SETCOLOR 0xBE81F7
+	PRINTFORMW ともあれ、そうして彼女の特訓が始まった。
+	IF RAND:95 <= 5
+	;クリティカル
+		SELECTCASE RAND:4
+				CASE 0
+					PRINTFORML
+					PRINTFORMW 「イメージするのは白波立たぬ水面です」
+					PRINTFORML 力を磨くには精神修養が良いのだと彼女は告げ、%CALLNAME:MASTER%に瞑想を命じる。
+					PRINTFORML イメージされた水面に波紋が広がる――咲耶がPSI粒子を僅かに動かすのを感じ取る。
+					PRINTFORML そうして視覚に頼らない感覚を磨くと、格段に集中力が増していく――
+				CASE 1
+					PRINTFORML
+					PRINTFORMW 「そうです、芽吹かせるイメージを」
+					PRINTFORML かくりよの全てはPSI粒子で構成されたもの。
+					PRINTFORML 強い意思の力によって自在に変化させることが出来るらしい。
+					PRINTFORML 種から芽吹かせ、花の蕾を開花させることで、PSIへの感覚が研ぎ澄まされていく――
+				CASE 2
+					PRINTFORML
+					PRINTFORMW 「全は一、一は全……世界を形作るのは物質ではなく認識です」
+					PRINTFORML サイオニック能力者のイメージは全てに影響するのだと彼女は告げ、様々なものを創造させる。
+					PRINTFORML 剣から壺、あるいは船まで――ハリボテの虚像とはいえ、それを生み出す訓練は実に難しい
+					PRINTFORML 無から有を生み出す訓練は%CALLNAME:MASTER%の力を引き出していく――
+				CASE 3
+					PRINTFORML
+					PRINTFORMW 「そうです、この力に抗い前へ」
+					PRINTFORML 強力なPSIエネルギーの圧力によって、咲耶は%CALLNAME:MASTER%の動きを封じる。
+					PRINTFORML 咲耶ほどのサイオニックを相手に抵抗出来れば、並のサイオニックなど相手になるまい。
+					PRINTFORML その圧力を意思によってねじ伏せ、%CALLNAME:MASTER%は一歩一歩前へと進んでいく――
+		ENDSELECT
+		CALL OMEZAME_SAKUYA_1
+	ELSEIF RAND:95 <= 95
+		SELECTCASE RAND:10
+				CASE 0
+					PRINTFORML
+					PRINTFORMW 「苦痛の中で感覚を研ぎ澄ませること……滝行はこうした鍛錬に適しています」
+					PRINTFORML %CALLNAME:MASTER%は咲耶の生み出した滝に打たれ続けた。
+					PRINTFORML サイオニック体での滝行は、気を抜けばすぐさま肉体へと戻されてしまうだろう。
+					PRINTFORML %CALLNAME:MASTER%は自分の意思を強く保ち、滝行に耐えた。
+				CASE 1
+					PRINTFORML
+					PRINTFORMW 「目隠しをしながらでも、意識を研ぎ澄ませれば大丈夫です」
+					PRINTFORML %CALLNAME:MASTER%は目隠しをしながら森の中を歩かされた。
+					PRINTFORML 彼女の言うとおり、意識を集中すれば周囲に何があるかが分かってくる。
+					PRINTFORML %CALLNAME:MASTER%は咲耶の指示のまま、森を歩き続けた。
+				CASE 2
+					PRINTFORML
+					PRINTFORMW 「重要なのは、霊体――サイオニック体に慣れることです」
+					PRINTFORML %CALLNAME:MASTER%は咲耶に舞を教えられていた。
+					PRINTFORML サイオニック体を自在に動かせることは、能力の強化に繋がるらしい。
+					PRINTFORML 細かな動きを見てもらいながら、%CALLNAME:MASTER%は踊り続けた。
+				CASE 3
+					PRINTFORML
+					PRINTFORMW 「どうでしょう？　美味しいでしょうか……？」
+					PRINTFORML %CALLNAME:MASTER%は彼女の作った料理を食べさせられ続けた。
+					PRINTFORML 肉体と同様の水準までサイオニック体の感覚を研ぎ澄ませることが目的だという。
+					PRINTFORML ただ、絶妙に美味しいとも不味いとも言えない料理を食べ続けるのは中々の苦行である。
+					PRINTFORML 
+					PRINTFORML 本当にこれは修行なのか――にこにこと嬉しそうな彼女を見ると口にするのもはばかられる。
+					PRINTFORML 一応、料理にはPSIエネルギーを取り込ませるという意味合いもあるらしい。
+					PRINTFORMW 仕方なく、美味しいと繰り返しながら%CALLNAME:MASTER%は料理を食べ続けた。
+				CASE 4
+					PRINTFORML
+					PRINTFORMW 「そうです、牛です。ふふ、では次は……」
+					PRINTFORML 後ろを歩く動物を見ずに当てる、という特訓が続けられていた。
+					PRINTFORML 視覚に頼らず、咲耶が生み出した虚像の動物たちを当てていく。
+					PRINTFORML 知らない動物が多々出てくることを除けば、実にためになる訓練だった。
+				CASE 5
+					PRINTFORML
+					PRINTFORMW 「卵を掴むような繊細さと重量物を持ち上げる力の両立も訓練の一つです」
+					PRINTFORML 咲耶が生み出した非常に重い卵をPSIエネルギーを用いて動かす訓練。
+					PRINTFORML 力を入れれば割れ、足りなければ動かない。
+					PRINTFORML 非常に高度なものであるが、特訓としては非常にためになるものであった。
+				CASE 6
+					PRINTFORML
+					PRINTFORMW 「要点はPSI粒子を感じ、それを操ることでしょうか」
+					PRINTFORML 咲耶は知識と経験から、PSIに関する基本知識から応用までを語る。
+					PRINTFORML 中々に奥深い内容。
+					PRINTFORML 難しいものであったが、非常にためになるものであった。
+				CASE 7
+					PRINTFORML
+					PRINTFORMW 「さぁ、わたくしが何を考えているか、お当て下さい」
+					PRINTFORML 精神防壁を展開した咲耶から、その思考を読み取る。
+					PRINTFORML セキュリティプログラムをクラッキングするような高度な作業。
+					PRINTFORML 絶妙な難易度調整もあり、少しずつであったが理屈を理解出来るようになっていく。
+				CASE 8
+					PRINTFORML
+					PRINTFORMW 「心を冷静に保つことが何よりも重要です」
+					PRINTFORML 高度なPSI操作には、相応の集中力が必要になる。
+					PRINTFORML 微妙な感情さえもが影響するPSI粒子を扱うには、落ち着いた精神が必要。
+					PRINTFORML %CALLNAME:MASTER%は言われるがまま座禅を組み、瞑想を行なった。
+				CASE 9
+					PRINTFORML
+					PRINTFORMW 「いけませんよ、何をされても集中です」
+					PRINTFORML 高度なPSI操作には、相応の集中力が必要になる。
+					PRINTFORML 座禅をしながら悪戯をされるという拷問に耐えながら、心身を統一する。
+					PRINTFORML 顔をくすぐってくる尻尾の感触に気が散ったが、必死で堪え座禅を続けた。
+					PRINTFORML 楽しげな咲耶の様子――修行というより遊ばれているのではなかろうか。
+		ENDSELECT
+		CALL OMEZAME_SAKUYA_2
+		ELSE
+		;ファンブル
+			SELECTCASE RAND:3
+				CASE 0
+					PRINTFORML
+					PRINTFORMW 「ふふ、次はわたくしの番でございますね」
+					PRINTFORML どこかから取り出した将棋盤にて、将棋崩しを行なっていた。
+					PRINTFORML サイオニック体での繊細な動きは感覚を研ぎ澄ませる――とのことである。
+					PRINTFORML しかし、どこからどう見ても楽しんでいるようにしか見えなかった。
+				CASE 1
+					PRINTFORML
+					PRINTFORMW 「……それで、どうなったのでしょう？」
+					PRINTFORML PSI講義の最中、つい口にした言葉から興味を持ったのだろう。
+					PRINTFORML いつの間にか特訓から、%CALLNAME:MASTER%の冒険譚へと話が移る。
+					PRINTFORML 完全に脱線してしまったことに気付いていたが、聞き手としては素晴らしい。
+					PRINTFORML もはや特訓を諦め、彼女を楽しませることにした。
+				CASE 2
+					PRINTFORML
+					PRINTFORMW 「ふふ、中々お上手ですね」
+					PRINTFORML PSI能力を高める特訓――それは蹴鞠であった。
+					PRINTFORML サイオニック体で体を動かすのは大事なことだというのは理解出来る。
+					PRINTFORML とはいえ、どこからどう見ても咲耶は楽しんでいるようにしか見えない。
+					PRINTFORML 本当にこれは特訓になるのだろうか――疑問を振り払い、彼女に付き合い続けた。
+			ENDSELECT
+		CALL OMEZAME_SAKUYA_3
+		ENDIF
+RESETCOLOR 
+;――――――――――――――――――――――――――――――――――――――――――――――――
+@HITOIKI_SAKUYA_1
+;
+;――――――――――――――――――――――――――――――――――――――――――――――――
+SETCOLOR 0xBE81F7
+			PRINTFORML
+			PRINTFORML
+			SELECTCASE RAND:7
+				CASE 0
+					PRINTFORMW 「こんなところですね」
+					PRINTFORMW 話に一区切りつくと、咲耶はどこかから急須を取り出し、お茶を淹れ始めた。
+				CASE 1
+					PRINTFORMW 「……大体こんなところでしょうか」
+					PRINTFORMW 話に一区切りつくと、咲耶は微笑んだ。
+				CASE 2
+					PRINTFORMW 「他に聞きたいことはありますか？」
+					PRINTFORMW 話に一区切りつくと、咲耶は尻尾をふりふりしている。
+				CASE 3
+					PRINTFORMW 「……何かをお話するのは楽しいですね」
+					PRINTFORMW 話に一区切りつくと、咲耶は楽しそうに微笑んだ。
+				CASE 4
+					PRINTFORMW 「他に何かご質問は？」
+					PRINTFORMW 話に一区切りつくと、咲耶は窺うように上目遣いで見てくる。
+				CASE 5
+					PRINTFORMW 「お餅、お食べになりますか？」
+					PRINTFORMW 話に一区切りつくと、咲耶は謎の餅を取り出した。
+				CASE 6
+					PRINTFORMW 「知識は外に出して初めて……何かを語るのは難しいものですね」
+					PRINTFORMW 話に一区切りつくと、咲耶はしみじみと言った。
+			ENDSELECT
+RESETCOLOR 
+;――――――――――――――――――――――――――――――――――――――――――――――――
+@OMEZAME_ANATA_1
+;必要経験五倍なので、全体的にちょっと大きめ。
+;強力なサイオニックとの接触処理。
+;――――――――――――――――――――――――――――――――――――――――――――――――
+SETCOLOR 0xBE81F7
+			PRINTFORML
+			PRINTFORMW 強力なサイオニックとの接触は%CALLNAME:MASTER%に大きな影響を与えたようだ。
+			PRINTFORML
+			IF ABL:MASTER:超能力 >= 60
+				CALL PRINT_ADD_EXP(MASTER, "超能力経験値", RAND:15)
+			ELSEIF ABL:MASTER:超能力 >= 30
+				CALL PRINT_ADD_EXP(MASTER, "超能力経験値", RAND:30)
+			ELSE
+				CALL PRINT_ADD_EXP(MASTER, "超能力経験値", RAND:30 + 10)
+			ENDIF
+RESETCOLOR 
+;――――――――――――――――――――――――――――――――――――――――――――――――
+@OMEZAME_SAKUYA_1
+;大成功。
+;――――――――――――――――――――――――――――――――――――――――――――――――
+SETCOLOR 0xBE81F7
+			PRINTFORML
+			PRINTFORMW 強力なサイオニックとの特訓は%CALLNAME:MASTER%の潜在能力を引き上げたようだ。
+			PRINTFORML
+			IF ABL:MASTER:超能力 >= 100
+				CALL PRINT_ADD_EXP(MASTER, "超能力経験値", RAND:30 + 20)
+			ELSEIF ABL:MASTER:超能力 >= 60
+				CALL PRINT_ADD_EXP(MASTER, "超能力経験値", RAND:40 + 20)
+			ELSE
+				CALL PRINT_ADD_EXP(MASTER, "超能力経験値", RAND:50 + 30)
+			ENDIF
+RESETCOLOR 
+;――――――――――――――――――――――――――――――――――――――――――――――――
+@OMEZAME_SAKUYA_2
+;成功。
+;――――――――――――――――――――――――――――――――――――――――――――――――
+SETCOLOR 0xBE81F7
+			PRINTFORML
+			PRINTFORMW 強力なサイオニックとの特訓は%CALLNAME:MASTER%の力を磨いたようだ。
+			PRINTFORML
+			IF ABL:MASTER:超能力 >= 100
+				CALL PRINT_ADD_EXP(MASTER, "超能力経験値", RAND:15 + 10)
+			ELSEIF ABL:MASTER:超能力 >= 60
+				CALL PRINT_ADD_EXP(MASTER, "超能力経験値", RAND:20 + 10)
+			ELSE
+				CALL PRINT_ADD_EXP(MASTER, "超能力経験値", RAND:25 + 15)
+			ENDIF
+RESETCOLOR 
+;――――――――――――――――――――――――――――――――――――――――――――――――
+@OMEZAME_SAKUYA_3
+;失敗。
+;――――――――――――――――――――――――――――――――――――――――――――――――
+SETCOLOR 0xBE81F7
+			PRINTFORML
+			PRINTFORMW 特訓に意味があったのかは分からない。
+			PRINTFORMW だが、強力なサイオニックとの触れあいは%CALLNAME:MASTER%の力に影響を与えたようだ。
+			PRINTFORML
+				CALL PRINT_ADD_EXP(MASTER, "超能力経験値", RAND:10)
+RESETCOLOR 
+;――――――――――――――――――――――――――――――――――――――――――――――――
+@SHIZURU_NI_OKKI_1
+;静流に起こされた。
+;――――――――――――――――――――――――――――――――――――――――――――――――
+SETCOLOR 0xBE81F7
+			SELECTCASE RAND:5
+				CASE 0
+					PRINTFORMW 「あら、呼ばれておられるようですね」
+				CASE 1
+					PRINTFORMW 「……？　あちらで呼ばれているようです」
+				CASE 2
+					PRINTFORMW 「それでですね……あ、今日はこれまででしょうか」
+				CASE 3
+					PRINTFORMW 「――ですから……ぁ、今日は終わりのようですね」
+				CASE 4
+					PRINTFORMW 「ここからが重要なのですけれど……ふふ、またの機会ですね」
+			ENDSELECT
+			PRINTFORML 咲耶との会話の途中。
+			PRINTFORML そんな声と共に、どこかへ引き寄せられるような感覚を%CALLNAME:MASTER%は覚えた。
+			PRINTFORML 「……またの逢瀬を楽しみにしておりますね、まれびとさま」
+			PRINTFORMW その力は徐々に強まり、勢いよく――
+			PRINTFORML 
+			PRINTFORMW  ………………
+			PRINTFORMW  …………
+			PRINTFORMW  ……
+			PRINTFORML 
+			SELECTCASE RAND:7
+				CASE 0
+					PRINTFORML 「ん♥　旦那様♥　朝でございますよ……♥」
+					PRINTFORMW 微妙なタイミングで引き戻されると、静流が口で男根をしゃぶっていた。
+				CASE 1
+					PRINTFORML 「旦那様♥　旦那様♥　だんなさま……♥♥♥」
+					PRINTFORMW 微妙なタイミングで引き戻されると、静流が腰の上に跨がっていた。
+				CASE 2
+					PRINTFORML 「ん♥　ん♥　寝ていて大丈夫ですからね……♥」
+					PRINTFORMW 微妙なタイミングで引き戻されると、静流がねっとりと腰を使っていた。
+				CASE 3
+					PRINTFORML 「朝から♥　旦那様♥　硬いですよぅ……♥」
+					PRINTFORMW 微妙なタイミングで引き戻されると、静流が男根を締め付けていた。
+				CASE 4
+					PRINTFORML 「すき♥　すき♥　旦那様♥　好きです……♥♥♥」
+					PRINTFORMW 微妙なタイミングで引き戻されると、静流が腰を振っていた。
+				CASE 5
+					PRINTFORML 「朝から♥　はしたない妻で♥　ごめんなさい……♥」
+					PRINTFORMW 微妙なタイミングで引き戻されると、静流が腰を揺すっていた。
+				CASE 6
+					PRINTFORML 「ふふ♥　ぴくぴくしてかわいい……♥」
+					PRINTFORMW 微妙なタイミングで引き戻されると、静流が男根を胸で挟み込んでいた。
+			ENDSELECT
+			PRINTFORML 
+			SELECTCASE RAND:5
+				CASE 0
+					PRINTFORMW 重要な話の途中で起こされた%CALLNAME:MASTER%は淫乱兎を犯してやった。
+				CASE 1
+					PRINTFORMW 無理矢理目覚めさせられた苛立ちに、朝から静流を犯し抜いた。
+				CASE 2
+					PRINTFORMW 咲耶との会話を中断させられた苛立ちを、静流に償わせた。
+				CASE 3
+					PRINTFORMW 意図しない目覚めの責任を取らせるため、たっぷりと静流にお仕置きした。
+				CASE 4
+					PRINTFORMW %CALLNAME:MASTER%は無言で静流の腰を掴み、男根を突き立てた。
+			ENDSELECT
+			CALL FUCK(MASTER, "性技, 性交, Ｃ, 射精", "童貞喪失, キス喪失, Ｖ挿入", 0, "静流の唇", "", "静流の膣", "和姦")
+RESETCOLOR 

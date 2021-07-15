@@ -26,14 +26,14 @@ CASE 3
 CASE 4
 	PRINTFORML 少し暇も出来た、静流の所に顔を出してやろうか。
 	PRINTFORML
-CASE 5
+CASE 5 TO 9
 	PRINTFORML 少し暇も出来た。
 	PRINTFORML 皇国の現地妻――静流の所に顔を出してやるのも悪くない。
 	PRINTFORML
 CASE 10
 	PRINTFORML 少し暇も出来た、静流の所に顔を出してやろうか。
 	PRINTFORML
-CASE 11
+CASE 11 TO 12
 	PRINTFORML 少し暇も出来た。
 	PRINTFORML 皇国の友人――静流の所に顔を出してやるのも悪くない。
 	PRINTFORML
@@ -78,6 +78,7 @@ SELECTCASE QUEST_PROGRESS:QUEST_ID
 ;――――――――――――――――――――――――――――――――――――――――――――――――――――――――
 	CASE 0
 ;――――――――――――――――――――――――――――――――――――――――――――――――――――――――
+SETCOLOR 0xDF7401
 		PRINTFORML ちょっとした用事の途中、%CALLNAME:MASTER%が街中を歩いていると、一人の少女が囲まれている所を目にする。
 		PRINTFORML 囲まれているのは白い長髪をした兎の獣尾人――皇国では珍しくない亜人種族。
 		PRINTFORMW 囲んでいる三人組も兎ではないが同様の獣尾人で、帯刀しているところを見るに武士階級の人間だろう。
@@ -124,9 +125,11 @@ SELECTCASE QUEST_PROGRESS:QUEST_ID
 		ELSE
 			GOTO INPUT_LOOP
 		ENDIF
+RESETCOLOR 
 ;――――――――――――――――――――――――――――――――――――――――――――――――――――――――
 	CASE 1
 ;――――――――――――――――――――――――――――――――――――――――――――――――――――――――
+SETCOLOR 0xDF7401
 		PRINTFORML
 		PRINTFORML 後日、少女から教えてもらった住所を尋ねると、中々の門構え。
 		PRINTFORML どこをどう見ても武家屋敷であった。
@@ -205,9 +208,11 @@ SELECTCASE QUEST_PROGRESS:QUEST_ID
 			ELSE
 				GOTO INPUT_LOOP
 		ENDIF
+RESETCOLOR 
 ;――――――――――――――――――――――――――――――――――――――――――――――――――――――――
 	CASE 2
 ;――――――――――――――――――――――――――――――――――――――――――――――――――――――――
+SETCOLOR 0xDF7401
 		PRINTFORML
 		PRINTFORML 色々と調べてみたところ、男の家は中々の名家であるらしい。
 		PRINTFORML ただ、嫡男であるあの男はどうにも無能なようで、優秀な次男との間で対立があった。
@@ -341,9 +346,11 @@ SELECTCASE QUEST_PROGRESS:QUEST_ID
 		PRINTFORMW ただ、事件は事件。事情聴取はしばらく継続し結局静流とは会えず仕舞いであった。
 			QUEST_PROGRESS:QUEST_ID = 3
 			QUEST_COMPLETE_DATE:QUEST_ID = DAY
+RESETCOLOR 
 ;――――――――――――――――――――――――――――――――――――――――――――――――――――――――
 	CASE 3
 ;――――――――――――――――――――――――――――――――――――――――――――――――――――――――
+SETCOLOR 0xDF7401
 		REL_LIKE_COUNTRY:国家ID_豊秋津皇国:国家ID_プレイヤー += 100
 		PRINTFORML
 			SIF QUEST_COMPLETE_DATE:40 + 100 < DAY
@@ -629,11 +636,12 @@ SELECTCASE QUEST_PROGRESS:QUEST_ID
 								ENDIF
 				ENDIF
 		ENDIF
-		
+RESETCOLOR 
 ;――――――――――――――――――――――――――――――――――――――――――――――――――――――――
 	;男あなたの現地妻ルート。基本的に更新のメインで想定は身持ちの堅い純愛現地妻系。
 	CASE 4
 ;――――――――――――――――――――――――――――――――――――――――――――――――――――――――
+SETCOLOR 0xDF7401
 		PRINTFORML 「お帰りなさいませ、旦那様」
 		PRINTFORMW %CALLNAME:MASTER%が立花家の門戸を潜ると、玄関で三つ指を突き、静流が頭を下げて出迎えた。
 		PRINTFORML 下女は荷物を受け取り、静流は%CALLNAME:MASTER%の手を引いた。
@@ -716,10 +724,295 @@ SELECTCASE QUEST_PROGRESS:QUEST_ID
 		CALL FUCK(MASTER, "性技, 性交, Ｃ, 射精", "童貞喪失, キス喪失, Ｖ挿入", 0, "静流の唇", "", "静流の膣", "和姦")
 		QUEST_PROGRESS:40 = 5
 		QUEST_COMPLETE_DATE:QUEST_ID = DAY
-		
+RESETCOLOR 
 ;――――――――――――――――――――――――――――――――――――――――――――――――――――――――
 	CASE 5
 ;――――――――――――――――――――――――――――――――――――――――――――――――――――――――
+SETCOLOR 0xDF7401
+	IF QUEST_PROGRESS:95 > 3
+		IF QUEST_PROGRESS:95 == 4
+			PRINTFORML 
+			PRINTFORMW かくりよに接続する度、大体静流に跨がられて起こされることになる。
+			PRINTFORML そろそろ静流には話しておくべきだろう。
+			PRINTFORML 口が軽い女ではないし、%CALLNAME:MASTER%の不利益になるようなことはしない。
+			PRINTFORMW そう考えて、改まって二人きりで話をする。
+			PRINTFORML 
+			PRINTFORMW 「……なるほど、道理で。近頃旦那様の様子がおかしいと感じていました」
+			PRINTFORML 本当にそう感じていたのか、と尋ねると、静流は頷く。
+			PRINTFORML 「じ、実は、寝言で他の女性の名前を……もしや帝さまは、咲耶さまと？」
+			PRINTFORML 頷くと、そういうことでしたか、とほっと胸を撫で下ろす。
+			PRINTFORMW 他に皇国で良い女が出来たのではないか――静流は気が気でなかったらしい。
+			PRINTFORML 
+			PRINTFORMW 「宇宙を駆ける旦那様が多くの女性をお抱きになることは仕方ないことと」
+			PRINTFORML とはいえ同じ皇国で女がいるとなると嫉妬するのだと静流は告げる。
+			PRINTFORMW どうにも、それもあって近頃は毎回のように男根を咥え込んで起こしていたようだ。
+			PRINTFORML 
+			PRINTFORMW 「とはいえ、お相手が帝さまとなれば……静流としても喜ばしいところ」
+			PRINTFORML 静流の目に狂いはありませんでしたと笑みを浮かべ、%CALLNAME:MASTER%を見つめる。
+			PRINTFORMW 深い愛情と強い執着に満ちた赤い瞳。
+			PRINTFORML 
+			PRINTFORMW 「静流は、旦那様こそいずれ皇国を支配される方だと思っておりましたから……♥」
+			PRINTFORML 
+			PRINTFORMW 囁くような声音は冗談を滲ませない、真剣な色を帯びていた。
+			PRINTFORMW 「獣尾人は強い獣の本性を宿すもの。……強い牡には惹かれるのです」
+			PRINTFORMW きっと帝さまもそれを感じておられるはず、と身を寄せ、耳元で囁く。
+			PRINTFORML 
+			PRINTFORMW 「静流がはっきりと理解したのは旦那様に抱かれて。その時、己が牝だと理解しました」
+			PRINTFORML 肌をなぞるように、指先を%CALLNAME:MASTER%の腕に滑らせる。
+			PRINTFORMW 「今は無自覚なのかも……けれどきっと、帝さまも静流と同じです」
+			PRINTFORML 確信を持って告げる静流を見返すと、当たらずとも遠からずだと彼女は答えた。
+			PRINTFORMW 「帝さまは直感だと仰ったでしょう？　静流が旦那様に口にしたように」
+			PRINTFORMW 静流は楽しそうに肩を揺らして笑う。
+			IF QUEST_PROGRESS:96 == 1
+				PRINTFORML 
+				PRINTFORMW 「まぁ、静流が正しいかどうかはいずれお分かりになります。それより、依頼ですね」
+				PRINTFORML 話を変えるようにお茶を淹れ直し、静流はデバイスを起動する。
+				PRINTFORMW 宙空に浮かぶ画面に表示させるのはこの星の地図。
+				PRINTFORML 
+				PRINTFORMW 「グンマー達の居住区に目的の施設があるというお話。中々大変な場所ですね」
+				PRINTFORML %CALLNAME:MASTER%が告げた座標からすぐさま場所を特定すると、詳細な地図へ。
+				PRINTFORML 色事の最中はまさに兎の静流であるが、意外なほど頭が切れる。
+				PRINTFORMW こうした仕事に関しても手際が良かった。
+				PRINTFORML 
+				PRINTFORMW 「国境から遠く離れた場所という訳ではありませんが……手段は考える必要がありますね」
+				PRINTFORML グンマー人――精強な民族として知られる野蛮人。
+				PRINTFORML 一般的にはそのように扱われているが、実際の所はそうではない、と彼女は告げる。
+				PRINTFORML 
+				PRINTFORMW 「一部の武士は武者修行に……部族によりますが、意外と閉鎖的な社会ではありません」
+				PRINTFORML どうにも、礼儀を持った客人に対しては礼儀で迎える文化らしい。
+				PRINTFORML 皇国との長い対立は、気位が高く強硬な貴族や武家の態度にも大きな理由があるという。
+				PRINTFORMW 少なくとも、礼儀を持って個人として向かうなら邪険にされることはない、と彼女は告げる。
+				PRINTFORML 
+				PRINTFORMW 「贈りものの類は大変喜ばれるそうで……特にお酒は人気なようですね」
+				PRINTFORML お祭り好きの文化でもあるらしく、彼らの娯楽の主体は戦いと宴。
+				PRINTFORML 娯楽のない土地――酒に酔い踊ることは彼らの大きな楽しみなのだろう。
+				PRINTFORMW 大量の美酒を用意していけば間違いなく、受け入れてもらえると静流は告げる。
+				PRINTFORML 
+				PRINTFORMW 「逆に、決して戦いは挑まぬ方が良いでしょう。現代兵器すら打ち負かすのが彼らです」
+				PRINTFORML 超人的な身体能力、そして鍛え抜かれた技。
+				PRINTFORML グンマー達は歩くより先にバンブーランスを手に取ると言われる戦士達。
+				PRINTFORMW グンマーでもトップクラスの戦士だと思っていた相手が、ただの狩人だった。
+				PRINTFORMW 戦争中のそんな馬鹿げた話が精強な武士達に語られるほど、彼らの層は厚い。
+				PRINTFORML 
+				PRINTFORMW 「出来る限り、警戒させず、好意的に……目的達成の手段は一つと静流は考えます」
+				PRINTFORML 何か策があるのか？　そう尋ねると静流は頷く。
+				PRINTFORMW 「交友を深める万国共通の文化とは何か、旦那様もよくご存じでしょう」
+				PRINTFORML 首を傾げる%CALLNAME:MASTER%に気付かず、静流は一人で目を閉じ頷く。
+				PRINTFORML 
+				PRINTFORMW 「万国共通の文化とは歌と踊り……つまりはアイドルステージです」
+				PRINTFORML 
+				PRINTFORML アイドル、と聞き返すと彼女は頷く。
+				PRINTFORML 
+				PRINTFORMW 「そう、歌と踊りによって心を解きほぐし、気持ちを一つに……それがアイドルというもの」
+				PRINTFORMW 「僭越ながらここは、歌と踊りに心得のある静流が旦那様のために一肌脱ぎましょう」
+				PRINTFORMW 「アイドルと言えば軽薄な文化ではありますが、お国のためとなれば是非もなし」
+				PRINTFORMW 「武家の静流がかような軽薄な衣装を身につけ踊るというのは若干の問題も――」
+				PRINTFORMW 「ですがこれもお国のため、旦那様のため。静流が彼らの心を解きほぐ――」
+				PRINTFORMW 「実は勉強のために衣装もこっそり購入して押し入れにしまっていて――」
+				PRINTFORMW 「曲は何が良いでしょう？　やはり流行のラブリーポップが――」
+				PRINTFORMW 「移動式のレンタルステージというものがあるそうで――」
+				PRINTFORML 
+				PRINTFORML 
+				PRINTFORML 
+				PRINTFORMW そう言えば静流は重度のアイドルオタクであるといつぞや聞かされた覚えがある。
+				PRINTFORMW 武家の女子がアイドルなどと、と父に叱られ諦めたようだが、子供の頃の夢はアイドル。
+				PRINTFORMW いささか不安が残るが、彼女に任せてみるというのも一つの手であろう。
+				PRINTFORMW ある程度の金は掛かるだろうが、やってみる価値はあった。
+				;PRINTFORML 
+				;PRINTFORMW あるいは信頼出来るアイドルに任せてみるかだが、さて。
+				;ライブに派生させられたらいいけれど、難しいので現状静流オンリーステージ。
+				PRINTFORML 
+				PRINTFORMW ※――剣の地において、静流が協力してくれるようになりました。
+				QUEST_PROGRESS:96 = 2
+				QUEST_PROGRESS:40 = 6
+				QUEST_COMPLETE_DATE:QUEST_ID = DAY
+			ELSE
+				PRINTFORMW 「まぁ、静流が正しいかどうかはいずれお分かりになりますよ」
+				PRINTFORML 
+				PRINTFORMW 話を変えるようにお茶を淹れ直し、静流は尋ねた。
+				PRINTFORMW 「今日いらっしゃった用件はこれだけでしょうか？　それとも別にも何か？」
+				PRINTFORMW 静流に会いに来て下さった、ということでも構いませんがと彼女は微笑む。
+				QUEST_PROGRESS:40 = 6
+				PRINTFORML 
+				PRINTFORMW PRINTFORMW 今日は――
+					PRINTFORML
+					PRINTBUTTON "[0] 何か仕事になりそうな話はないか聞きに来た。", 0
+					PRINTFORML
+					PRINTBUTTON "[1] 静流と話をしに来た。", 1
+					PRINTFORML
+					PRINTBUTTON "[2] 静流を抱きに来た。", 2
+						INPUT
+						IF RESULT == 0
+							;前回訪問から二十日経ってないと何もない。
+							IF QUEST_COMPLETE_DATE:40 + 20 < DAY
+								PRINTFORML 
+								PRINTFORMW 「お仕事……そうですね」
+								PRINTFORMW どうにも思い当たるものがあったようだ。
+								PRINTFORML
+									CALL OSHIGOTO_SHIZURU_1
+								PRINTFORML 
+								PRINTFORML 思いつくのはそれくらいですね、と彼女はしばらく考え込み、微笑む。
+								PRINTFORML 「いえ、それと、もう一つ……これは、静流からの依頼なのですが」
+								PRINTFORMW 期待を声と顔に滲ませながら、静流は身を寄せた。
+							ELSE
+								PRINTFORMW 「今のところは思いつくものが……ああ、いえ、一つ、思い出しました」
+								PRINTFORML 何かと尋ねると、静流は身を寄せ、乳房を%CALLNAME:MASTER%に押しつける。
+								PRINTFORML 
+								PRINTFORML 「……静流への、種付け依頼だとか」
+								PRINTFORMW 媚びた声音で、いかがでしょう、と囁いた。
+								CALL FUCK(MASTER, "性技, 性交, Ｃ, 射精", "童貞喪失, キス喪失, Ｖ挿入", 0, "静流の唇", "", "静流の膣", "和姦")
+							ENDIF
+						ELSEIF RESULT == 1
+							PRINTFORML
+							PRINTFORML 「ふふ、こうして旦那様とならどのようなお話でも」
+							PRINTFORMW 静流は嬉しそうに微笑んでいる
+							CALL NANINANI_SHIZURU_1
+							PRINTFORML
+							PRINTFORML
+							PRINTFORML
+							PRINTFORML
+							PRINTFORML 「お話はひとまずこれくらいでございましょうか」
+							PRINTFORMW 静流の距離は随分と近く、先ほどから%CALLNAME:MASTER%の太ももを撫でていた。
+							PRINTFORML 目には明らかな期待の色が浮かんでおり、媚びるように%CALLNAME:MASTER%に続ける。
+							PRINTFORML
+							PRINTFORML 「旦那様、静流のことは、もっと知りたくはありませんか？」
+							PRINTFORMW 静流の囁くような声が、熱と共に%CALLNAME:MASTER%の耳朶を震わせる。
+						
+						ELSEIF RESULT == 2
+							PRINTFORML 「……まぁ」
+							PRINTFORML まだ日も高いですよ、と口にしながらも、静流は途端に興奮を滲ませた。
+							PRINTFORML 
+							RESETCOLOR
+							SETCOLOR 0xF5A9F2
+							PRINTFORMW 「でも、旦那様が仰るなら、静流はいつでも、ご奉仕させて頂きます」
+							PRINTFORML
+							PRINTFORML すりすりと身を寄せながら、%CALLNAME:MASTER%の股間に触れてゆっくり撫でる。
+							PRINTFORML そして男根を露出させると愛おしげに、陰嚢から亀頭までを繰り返し口付け、咥え込んだ。
+							PRINTFORMW けれどもどこか、焦らすような意図が感じられ、その証拠に四つん這いになった尻が誘うように揺れている。
+							CALL FUCK(MASTER, "性技, 性交, Ｃ, 射精", "童貞喪失, キス喪失, Ｖ挿入", 0, "静流の唇", "", "静流の膣", "和姦")
+						ENDIF
+				PRINTFORML 
+				PRINTFORML 
+				PRINTFORML 
+				PRINTFORML 
+				PRINTFORML 
+				PRINTFORML 
+				PRINTFORML 
+				PRINTFORML 
+					CALL INRAN_USAGI_1
+					QUEST_PROGRESS:40 = 5
+					QUEST_COMPLETE_DATE:QUEST_ID = DAY
+			ENDIF
+		ELSEIF QUEST_PROGRESS:95 == 5
+			PRINTFORML 
+			PRINTFORMW かくりよに接続する度、大体静流に跨がられて起こされることになる。
+			PRINTFORML そろそろ静流には話しておくべきだろう。
+			PRINTFORML 口が軽い女ではないし、%CALLNAME:MASTER%の不利益になるようなことはしない。
+			PRINTFORMW そう考えて、改まって二人きりで話をする。
+			PRINTFORML 
+			PRINTFORMW 「……なるほど、道理で。近頃旦那様の様子がおかしいと感じていました」
+			PRINTFORML 本当にそう感じていたのか、と尋ねると、静流は頷く。
+			PRINTFORML 「じ、実は、寝言で他の女性の名前を……もしや帝さまは、咲耶さまと？」
+			PRINTFORML 頷くと、そういうことでしたか、とほっと胸を撫で下ろす。
+			PRINTFORMW 他に皇国で良い女が出来たのではないか――静流は気が気でなかったらしい。
+			PRINTFORML 
+			PRINTFORMW 「宇宙を駆ける旦那様が多くの女性をお抱きになることは仕方ないことと」
+			PRINTFORML とはいえ同じ皇国で女がいるとなると嫉妬するのだと静流は告げる。
+			PRINTFORMW どうにも、それもあって近頃は毎回のように男根を咥え込んで起こしていたようだ。
+			PRINTFORML 
+			PRINTFORMW 「とはいえ、お相手が帝さまとなれば……静流としても喜ばしいところ」
+			PRINTFORML 静流の目に狂いはありませんでしたと笑みを浮かべ、%CALLNAME:MASTER%を見つめる。
+			PRINTFORMW 深い愛情と強い執着に満ちた赤い瞳。
+			PRINTFORML 
+			PRINTFORMW 「……静流は、旦那様こそいずれ皇国を支配される方だと思っておりましたから」
+			PRINTFORML 
+			PRINTFORMW 囁くような声音は冗談を滲ませない、真剣な色を帯びていた。
+			PRINTFORMW 「獣尾人は強い獣の本性を宿すもの。……強い牡には惹かれるのです」
+			PRINTFORMW きっと帝さまもそれを感じておられるはず、と身を寄せ、耳元で囁く。
+			PRINTFORML 
+			PRINTFORMW 「静流がはっきりと理解したのは旦那様に抱かれて。その時、己が牝だと理解しました」
+			PRINTFORML 肌をなぞるように、指先を%CALLNAME:MASTER%の腕に滑らせる。
+			PRINTFORMW 「今は無自覚なのかも……けれどきっと、帝さまも静流と同じです」
+			PRINTFORML 確信を持って告げる静流を見返すと、当たらずとも遠からずだと彼女は答えた。
+			PRINTFORMW 「帝さまは直感だと仰ったでしょう？　静流が旦那様に口にしたように」
+			PRINTFORMW 静流は楽しそうに肩を揺らして笑う。
+			PRINTFORMW 「まぁ、静流が正しいかどうかはいずれお分かりになりますよ」
+				PRINTFORML 
+				PRINTFORMW 話を変えるようにお茶を淹れ直し、静流は尋ねた。
+				PRINTFORMW 「今日いらっしゃった用件はこれだけでしょうか？　それとも別にも何か？」
+				PRINTFORMW 静流に会いに来て下さった、ということでも構いませんがと彼女は微笑む。
+				QUEST_PROGRESS:40 = 6
+				PRINTFORML 
+				PRINTFORMW PRINTFORMW 今日は――
+					PRINTFORML
+					PRINTBUTTON "[0] 何か仕事になりそうな話はないか聞きに来た。", 0
+					PRINTFORML
+					PRINTBUTTON "[1] 静流と話をしに来た。", 1
+					PRINTFORML
+					PRINTBUTTON "[2] 静流を抱きに来た。", 2
+						INPUT
+						IF RESULT == 0
+							;前回訪問から二十日経ってないと何もない。
+							IF QUEST_COMPLETE_DATE:40 + 20 < DAY
+								PRINTFORML 
+								PRINTFORMW 「お仕事……そうですね」
+								PRINTFORMW どうにも思い当たるものがあったようだ。
+								PRINTFORML
+									CALL OSHIGOTO_SHIZURU_1
+								PRINTFORML 
+								PRINTFORML 思いつくのはそれくらいですね、と彼女はしばらく考え込み、微笑む。
+								PRINTFORML 「いえ、それと、もう一つ……これは、静流からの依頼なのですが」
+								PRINTFORMW 期待を声と顔に滲ませながら、静流は身を寄せた。
+							ELSE
+								PRINTFORMW 「今のところは思いつくものが……ああ、いえ、一つ、思い出しました」
+								PRINTFORML 何かと尋ねると、静流は身を寄せ、乳房を%CALLNAME:MASTER%に押しつける。
+								PRINTFORML 
+								PRINTFORML 「……静流への、種付け依頼だとか」
+								PRINTFORMW 媚びた声音で、いかがでしょう、と囁いた。
+								CALL FUCK(MASTER, "性技, 性交, Ｃ, 射精", "童貞喪失, キス喪失, Ｖ挿入", 0, "静流の唇", "", "静流の膣", "和姦")
+							ENDIF
+						ELSEIF RESULT == 1
+							PRINTFORML
+							PRINTFORML 「ふふ、こうして旦那様とならどのようなお話でも」
+							PRINTFORMW 静流は嬉しそうに微笑んでいる
+							CALL NANINANI_SHIZURU_1
+							PRINTFORML
+							PRINTFORML
+							PRINTFORML
+							PRINTFORML
+							PRINTFORML 「お話はひとまずこれくらいでございましょうか」
+							PRINTFORMW 静流の距離は随分と近く、先ほどから%CALLNAME:MASTER%の太ももを撫でていた。
+							PRINTFORML 目には明らかな期待の色が浮かんでおり、媚びるように%CALLNAME:MASTER%に続ける。
+							PRINTFORML
+							PRINTFORML 「旦那様、静流のことは、もっと知りたくはありませんか？」
+							PRINTFORMW 静流の囁くような声が、熱と共に%CALLNAME:MASTER%の耳朶を震わせる。
+						
+						ELSEIF RESULT == 2
+							PRINTFORML 「……まぁ」
+							PRINTFORML まだ日も高いですよ、と口にしながらも、静流は途端に興奮を滲ませた。
+							PRINTFORML 
+							RESETCOLOR
+							SETCOLOR 0xF5A9F2
+							PRINTFORMW 「でも、旦那様が仰るなら、静流はいつでも、ご奉仕させて頂きます」
+							PRINTFORML
+							PRINTFORML すりすりと身を寄せながら、%CALLNAME:MASTER%の股間に触れてゆっくり撫でる。
+							PRINTFORML そして男根を露出させると愛おしげに、陰嚢から亀頭までを繰り返し口付け、咥え込んだ。
+							PRINTFORMW けれどもどこか、焦らすような意図が感じられ、その証拠に四つん這いになった尻が誘うように揺れている。
+							CALL FUCK(MASTER, "性技, 性交, Ｃ, 射精", "童貞喪失, キス喪失, Ｖ挿入", 0, "静流の唇", "", "静流の膣", "和姦")
+						ENDIF
+				PRINTFORML 
+				PRINTFORML 
+				PRINTFORML 
+				PRINTFORML 
+				PRINTFORML 
+				PRINTFORML 
+				PRINTFORML 
+				PRINTFORML 
+					CALL INRAN_USAGI_1
+					QUEST_PROGRESS:40 = 6
+					QUEST_COMPLETE_DATE:QUEST_ID = DAY
+		ENDIF
+	ELSE
 		PRINTFORML 「お帰りなさいませ、旦那様」
 		PRINTFORMW %CALLNAME:MASTER%が立花家の門戸を潜ると、玄関で三つ指を突き、静流が頭を下げて出迎えた。
 		IF QUEST_COMPLETE_DATE:40 + 10 < DAY
@@ -820,6 +1113,7 @@ SELECTCASE QUEST_PROGRESS:QUEST_ID
 					ELSE
 						PRINTFORMW 「今のところは思いつくものが……ああ、いえ、一つ、思い出しました」
 						PRINTFORML 何かと尋ねると、静流は身を寄せ、乳房を%CALLNAME:MASTER%に押しつける。
+						PRINTFORML 
 						PRINTFORML 「……静流への、種付け依頼だとか」
 						PRINTFORMW 媚びた声音で、いかがでしょう、と囁いた。
 						CALL FUCK(MASTER, "性技, 性交, Ｃ, 射精", "童貞喪失, キス喪失, Ｖ挿入", 0, "静流の唇", "", "静流の膣", "和姦")
@@ -843,6 +1137,9 @@ SELECTCASE QUEST_PROGRESS:QUEST_ID
 				ELSEIF RESULT == 2
 					PRINTFORML 「……まぁ」
 					PRINTFORML まだ日も高いですよ、と口にしながらも、静流は途端に興奮を滲ませた。
+					PRINTFORML 
+					RESETCOLOR
+					SETCOLOR 0xF5A9F2
 					PRINTFORMW 「でも、旦那様が仰るなら、静流はいつでも、ご奉仕させて頂きます」
 					PRINTFORML
 					PRINTFORML すりすりと身を寄せながら、%CALLNAME:MASTER%の股間に触れてゆっくり撫でる。
@@ -859,13 +1156,141 @@ SELECTCASE QUEST_PROGRESS:QUEST_ID
 		PRINTFORML 
 		PRINTFORML 
 			CALL INRAN_USAGI_1
-					QUEST_PROGRESS:40 = 5
-					QUEST_COMPLETE_DATE:QUEST_ID = DAY
-					
+			QUEST_PROGRESS:40 = 5
+			QUEST_COMPLETE_DATE:QUEST_ID = DAY
+	ENDIF
+RESETCOLOR 
+;――――――――――――――――――――――――――――――――――――――――――――――――――――――――
+	;咲耶公認後
+	CASE 6
+;――――――――――――――――――――――――――――――――――――――――――――――――――――――――
+SETCOLOR 0xDF7401
+		PRINTFORML 「お帰りなさいませ、旦那様」
+		PRINTFORMW %CALLNAME:MASTER%が立花家の門戸を潜ると、玄関で三つ指を突き、静流が頭を下げて出迎えた。
+		IF QUEST_COMPLETE_DATE:40 + 10 < DAY
+			SELECTCASE RAND:4
+			CASE 0
+			PRINTFORML 「お荷物をお持ちしますね」
+			CASE 1
+			PRINTFORML 「長旅ご苦労様です。今日はごゆっくりなさってください」
+			CASE 2
+			PRINTFORML 「今回はどこまで行ってらっしゃったのですか？」
+			CASE 3
+			PRINTFORML 「ふふ、旦那様が恋しくなった頃合いでございました」
+			ENDSELECT
+		ELSE
+			SELECTCASE RAND:4
+			CASE 0
+			PRINTFORML 「お早いお帰りでございますね」
+			CASE 1
+			PRINTFORML 「ふふ、こんなすぐ会いに来て下さるだなんて」
+			CASE 2
+			PRINTFORML 「今はこの辺りでお仕事をなさっているのですね」
+			CASE 3
+			PRINTFORML 「ふふ、丁度今朝、旦那様の夢を見ておりました」
+			ENDSELECT
+		ENDIF
+		PRINTFORMW そう言いながら、嬉しそうに静流は微笑み手を引いた。
+		PRINTFORML 
+		PRINTFORML いつものように居間に案内され、茶と菓子を口にし、静流は隣でニコニコと。
+			SELECTCASE RAND:4
+				CASE 0
+					PRINTFORML 「今日は帝様に会いに来たのでしょうか？」
+					PRINTFORMW それからじーっとこちらを見つめながら尋ねた。
+					PRINTFORMW 皇国人としてか、それとも女としてか、咲耶のことが気になるらしい。
+				CASE 1
+					PRINTFORML 「帝様のご依頼、どのような感じですか？」
+					PRINTFORMW 静流は気になるのか、そう尋ねる。
+					PRINTFORMW %CALLNAME:MASTER%は軽く、その進捗についてを語った。
+				CASE 2
+					PRINTFORML 「必要なことがあれば言ってくださいね。出来る限りの協力はしますから」
+					PRINTFORMW 咲耶の依頼についてだろう。
+					PRINTFORMW なにかあれば頼む、と%CALLNAME:MASTER%は頷いた。
+				CASE 3
+					PRINTFORML 「そう言えば、近頃このような噂を」
+					PRINTFORMW 咲耶の依頼に関係するかも知れないと、ちょっとした情報を静流は語る。
+					PRINTFORMW %CALLNAME:MASTER%のために彼女も色々探っているようだ。
+			ENDSELECT
+		PRINTFORML 
+		PRINTFORML 咲耶についてを気にしつつも、とはいえ来てくれたことがよほど嬉しいのだろう。
+		PRINTFORMW 幸せそうに耳をぴくぴくさせる彼女の様子を見ながら、今日訪れた理由を彼女に伝える。
+		PRINTFORMW 今日は――
+			PRINTFORML
+			PRINTBUTTON "[0] 何か仕事になりそうな話はないか聞きに来た。", 0
+			PRINTFORML
+			PRINTBUTTON "[1] 静流と話をしに来た。", 1
+			PRINTFORML
+			PRINTBUTTON "[2] 静流を抱きに来た。", 2
+				INPUT
+				IF RESULT == 0
+					;前回訪問から二十日経ってないと何もない。
+					IF QUEST_COMPLETE_DATE:40 + 20 < DAY
+						PRINTFORML 
+						PRINTFORMW 「そうですね、帝様のご依頼とはいえ、そればかりに関わる訳にもいかないでしょうし」
+						PRINTFORMW ここは内助の功というものですね、と静流は頷く。
+						PRINTFORMW 「直接お仕事に繋がるかはともかく、いくつかお話は」
+						PRINTFORML
+							CALL OSHIGOTO_SHIZURU_1
+						PRINTFORML 
+						PRINTFORML 思いつくのはそれくらいですね、と彼女はしばらく考え込み、微笑む。
+						PRINTFORML 「いえ、それと、もう一つ……これは、静流からの依頼なのですが」
+						RESETCOLOR
+						SETCOLOR 0xF5A9F2
+						PRINTFORMW 期待を声と顔に滲ませながら、静流は身を寄せた。
+					ELSE
+						PRINTFORMW 「今のところは思いつくものが……ああ、いえ、一つ、思い出しました」
+						PRINTFORML 何かと尋ねると、静流は身を寄せ、乳房を%CALLNAME:MASTER%に押しつける。
+						PRINTFORML 
+						PRINTFORML 「……静流への、種付け依頼だとか」
+						PRINTFORMW 媚びた声音で、いかがでしょう、と囁いた。
+						CALL FUCK(MASTER, "性技, 性交, Ｃ, 射精", "童貞喪失, キス喪失, Ｖ挿入", 0, "静流の唇", "", "静流の膣", "和姦")
+					ENDIF
+				ELSEIF RESULT == 1
+					PRINTFORML
+					PRINTFORML 「ふふ、こうして旦那様とならどのようなお話でも」
+					PRINTFORMW 静流は嬉しそうに微笑んでいる
+					CALL NANINANI_SHIZURU_1
+					PRINTFORML
+					PRINTFORML
+					PRINTFORML
+					PRINTFORML
+					PRINTFORML 「お話はひとまずこれくらいでございましょうか」
+					PRINTFORMW 静流の距離は随分と近く、先ほどから%CALLNAME:MASTER%の太ももを撫でていた。
+					PRINTFORML 目には明らかな期待の色が浮かんでおり、媚びるように%CALLNAME:MASTER%に続ける。
+					PRINTFORML
+					PRINTFORML 「旦那様、静流のことは、もっと知りたくはありませんか？」
+					PRINTFORMW 静流の囁くような声が、熱と共に%CALLNAME:MASTER%の耳朶を震わせる。
+				
+				ELSEIF RESULT == 2
+					PRINTFORML 「……まぁ」
+					PRINTFORML まだ日も高いですよ、と口にしながらも、静流は途端に興奮を滲ませた。
+					PRINTFORML 
+					RESETCOLOR
+					SETCOLOR 0xF5A9F2
+					PRINTFORMW 「でも、旦那様が仰るなら、静流はいつでも、ご奉仕させて頂きます」
+					PRINTFORML
+					PRINTFORML すりすりと身を寄せながら、%CALLNAME:MASTER%の股間に触れてゆっくり撫でる。
+					PRINTFORML そして男根を露出させると愛おしげに、陰嚢から亀頭までを繰り返し口付け、咥え込んだ。
+					PRINTFORMW けれどもどこか、焦らすような意図が感じられ、その証拠に四つん這いになった尻が誘うように揺れている。
+					CALL FUCK(MASTER, "性技, 性交, Ｃ, 射精", "童貞喪失, キス喪失, Ｖ挿入", 0, "静流の唇", "", "静流の膣", "和姦")
+				ENDIF
+		PRINTFORML 
+		PRINTFORML 
+		PRINTFORML 
+		PRINTFORML 
+		PRINTFORML 
+		PRINTFORML 
+		PRINTFORML 
+		PRINTFORML 
+			CALL INRAN_USAGI_2
+			QUEST_PROGRESS:40 = 6
+			QUEST_COMPLETE_DATE:QUEST_ID = DAY
+RESETCOLOR 
 ;――――――――――――――――――――――――――――――――――――――――――――――――――――――――
 	;男あなた以外の友人ルート。基本的にやっつけなオミット版なので、女あなたメインの方のera的な加筆は大歓迎です。
 	CASE 10
 ;――――――――――――――――――――――――――――――――――――――――――――――――――――――――
+SETCOLOR 0xDF7401
 		PRINTFORML 「いらっしゃいませ、ようこそお越し下さいました」
 		PRINTFORMW %CALLNAME:MASTER%が立花家の門戸を潜ると、玄関で出迎えた静流が頭を下げた。
 		PRINTFORML 下女は荷物を受け取り、静流は%CALLNAME:MASTER%を先導する。
@@ -915,10 +1340,11 @@ SELECTCASE QUEST_PROGRESS:QUEST_ID
 		PRINTFORMW %CALLNAME:MASTER%に皇国の友人が出来たようだ
 		QUEST_PROGRESS:40 = 11
 		QUEST_COMPLETE_DATE:QUEST_ID = DAY
-
+RESETCOLOR 
 ;――――――――――――――――――――――――――――――――――――――――――――――――――――――――
 	CASE 11
 ;――――――――――――――――――――――――――――――――――――――――――――――――――――――――
+SETCOLOR 0xDF7401
 		PRINTFORML 「いらっしゃいませ、お待ちしておりました」
 		PRINTFORMW %CALLNAME:MASTER%が立花家の門戸を潜ると、玄関で静流が頭を下げて出迎えた。
 		IF QUEST_COMPLETE_DATE:40 + 10 < DAY
@@ -1056,11 +1482,13 @@ SELECTCASE QUEST_PROGRESS:QUEST_ID
 					QUEST_COMPLETE_DATE:QUEST_ID = DAY
 			
 	ENDSELECT
+RESETCOLOR 
 ;――――――――――――――――――――――――――――――――――――――――――――――――
 @NANINANI_SHIZURU_1
 ;会話系
 ;――――――――――――――――――――――――――――――――――――――――――――――――
 	$INPUT_LOOP
+	SETCOLOR 0xDF7401
 	DRAWLINE
 		PRINTBUTTON "[0] 皇国という国について", 0
 		PRINTL
@@ -1074,7 +1502,7 @@ SELECTCASE QUEST_PROGRESS:QUEST_ID
 		PRINTL
 		PRINTBUTTON "[5] 艦船装備について", 5
 		;PRINTL
-		;PRINTBUTTON "[6] 未定", 6
+		;PRINTBUTTON "[6] 咲耶について", 6
 		PRINTL
 		PRINTBUTTON "[7] 皇国の現在について", 7
 		PRINTL
@@ -1258,12 +1686,13 @@ SELECTCASE QUEST_PROGRESS:QUEST_ID
 				ELSE
 					GOTO INPUT_LOOP
 				ENDIF
-
+RESETCOLOR 
 ;――――――――――――――――――――――――――――――――――――――――――――――――
 @NANINANI_SHIZURU_2
 ;風の噂
 ;――――――――――――――――――――――――――――――――――――――――――――――――
 	$INPUT_LOOP
+	SETCOLOR 0xDF7401
 	DRAWLINE
 	IF QUEST_PROGRESS:34 == 0
 		PRINTBUTTON "[0] 統一連邦の反政府組織", 0
@@ -1383,6 +1812,7 @@ SELECTCASE QUEST_PROGRESS:QUEST_ID
 				ELSE
 					PRINTFORML
 				ENDIF
+RESETCOLOR 
 ;――――――――――――――――――――――――――――――――――――――――――――――――
 @OSHIGOTO_SHIZURU_1
 ;派生クエスト系
@@ -1401,6 +1831,7 @@ SELECTCASE QUEST_PROGRESS:QUEST_ID
 	NEXT
 	IF LOCAL < 10 && !LOCAL:1
 	;徴税構文流用しました……。
+	SETCOLOR 0xDF7401
 		SELECTCASE RAND:3
 			CASE 0
 				PRINTFORMW 「そういえば、バクシン党が近頃動き回っているという話を小耳に」
@@ -1487,11 +1918,13 @@ SELECTCASE QUEST_PROGRESS:QUEST_ID
 ;				ENDIF
 			ENDSELECT
 		ENDIF
+RESETCOLOR 
 ;――――――――――――――――――――――――――――――――――――――――――――――――
 @MILIOTA_SHIZURU_1
 ;皇国軍関係
 ;――――――――――――――――――――――――――――――――――――――――――――――――
 	$INPUT_LOOP
+	SETCOLOR 0xDF7401
 	DRAWLINE
 		PRINTBUTTON "[0] 皇国軍の戦術", 0
 		PRINTL
@@ -1704,11 +2137,13 @@ SELECTCASE QUEST_PROGRESS:QUEST_ID
 				ELSE
 					PRINTFORML
 				ENDIF
+RESETCOLOR 
 ;――――――――――――――――――――――――――――――――――――――――――――――――
 @MILIOTA_SHIZURU_2
 ;他国軍関係
 ;――――――――――――――――――――――――――――――――――――――――――――――――
 	$INPUT_LOOP
+	SETCOLOR 0xDF7401
 	DRAWLINE
 		PRINTBUTTON "[0] 銀河人民統一連邦", 0
 		PRINTL
@@ -1904,11 +2339,13 @@ SELECTCASE QUEST_PROGRESS:QUEST_ID
 				ELSE
 					PRINTFORML
 				ENDIF
+RESETCOLOR 
 ;――――――――――――――――――――――――――――――――――――――――――――――――
 @MILIOTA_SHIZURU_3
 ;装備属性なんかの解説。静流さん超オタク。
 ;――――――――――――――――――――――――――――――――――――――――――――――――
 	$INPUT_LOOP
+	SETCOLOR 0xDF7401
 	DRAWLINE
 		PRINTBUTTON "[0] 実体兵器", 0
 		PRINTL
@@ -2088,10 +2525,12 @@ SELECTCASE QUEST_PROGRESS:QUEST_ID
 				ELSE
 					PRINTFORML
 				ENDIF
+RESETCOLOR 
 ;――――――――――――――――――――――――――――――――――――――――――――――――――――――――
 @INRAN_USAGI_1
 ;気が向いたら複数作って方向性を持たしたい
 ;――――――――――――――――――――――――――――――――――――――――――――――――――――――――
+	SETCOLOR 0xF5A9F2
 			SELECTCASE RAND:10
 				CASE 0
 					PRINTFORML
@@ -2108,7 +2547,7 @@ SELECTCASE QUEST_PROGRESS:QUEST_ID
 					PRINTFORML 高い場所から降りてこられなくなった静流は声にならない悲鳴を上げて、這うように逃げようとしていた。
 					PRINTFORML その度腰を強引に掴んで引き寄せ、根元まで串刺しに。まともに呼吸も出来ない静流を犯す。
 					PRINTFORMW 牝穴に欲しくて我慢が出来なかったのか、奉仕をさせて見れば焦らしてばかり。
-					PRINTFORMW 淫乱兎へのお仕置きは、そのまま朝まで泊まることはなかった。
+					PRINTFORMW 淫乱兎へのお仕置きは、そのまま朝まで止まることはなかった。
 				CASE 2
 					PRINTFORML
 					PRINTFORMW 「あぁ……♥　んっ♥♥　はずかしい♥　のに……♥」
@@ -2175,11 +2614,119 @@ SELECTCASE QUEST_PROGRESS:QUEST_ID
 					PRINTFORMW 静流のプライバシーを丸裸にしながら、%CALLNAME:MASTER%は言葉で静流をなじり続けた。
 			ENDSELECT
 			CALL FUCK(MASTER, "性技, 性交, Ｃ, 射精", "童貞喪失, キス喪失, Ｖ挿入", 0, "静流の唇", "", "静流の膣", "和姦")
-
+RESETCOLOR 
+;――――――――――――――――――――――――――――――――――――――――――――――――――――――――
+@INRAN_USAGI_2
+;咲耶攻略中
+;――――――――――――――――――――――――――――――――――――――――――――――――――――――――
+	SETCOLOR 0xF5A9F2
+			SELECTCASE RAND:12
+				CASE 0
+					PRINTFORML
+					PRINTFORMW 「あ♥　んっ♥♥　だめ♥　また♥　またキちゃっ、……♥♥♥」
+					PRINTFORML 淫乱兎の腰を後ろから掴むと、乱暴に男根を突き上げ続ける。
+					PRINTFORML 性処理穴としては最高水準、少々乱暴に使ったところで文句どころか悦び鳴いた。
+					PRINTFORML 自分の快楽だけを考えたレイプまがいの挿入であっても、すぐにそれに順応する。
+					PRINTFORMW 普段は清楚な振りをしている癖にどこまでも淫乱なマゾ兎。
+					PRINTFORMW 尻を叩くと悲鳴のような甘い快楽の鳴き声を響かせ、翌朝までそのまま静流の体を貪った。
+				CASE 1
+					PRINTFORML
+					PRINTFORMW 「っ♥　ぁっ♥　――っ♥　っ……♥♥　ひ……♥♥　しんじゃ……♥♥♥」
+					PRINTFORML 絶頂している静流の体に遠慮なく腰を打ち付け続ける。
+					PRINTFORML 高い場所から降りてこられなくなった静流は声にならない悲鳴を上げて、這うように逃げようとしていた。
+					PRINTFORML その度腰を強引に掴んで引き寄せ、根元まで串刺しに。まともに呼吸も出来ない静流を犯す。
+					PRINTFORMW 牝穴に欲しくて我慢が出来なかったのか、奉仕をさせて見れば焦らしてばかり。
+					PRINTFORMW 淫乱兎へのお仕置きは、そのまま朝まで泊まることはなかった。
+				CASE 2
+					PRINTFORML
+					PRINTFORMW 「あぁ……♥　んっ♥♥　はずかしい♥　のに……♥」
+					PRINTFORML 後ろから貫いたまま動きを止め、気持ち良くするように命じる。
+					PRINTFORML 最初はいつも恥ずかしがりながらも、淫乱兎。我慢が出来なくなると自分から大きな尻を叩き付ける。
+					PRINTFORML 動きが悪いと尻を叩き、その度ぎちぎちと締め付けながら、はい♥　と甘い声で答える。
+					PRINTFORMW 尻を叩かれるためにわざと下手なフリをしているんじゃないか。
+					PRINTFORMW 尋ねる言葉に違います、などと首を振りながらも、静流は尻を叩かれ続けた。
+				CASE 3
+					PRINTFORML
+					PRINTFORMW 「ん♥　だいすき♥♥　だんなさま♥　もっと♥　ちゅーしてくださ、む……♥♥♥」
+					PRINTFORML 激しいセックスから、向かい合っての交わりに。
+					PRINTFORML 静流は汗ばんだ体中を擦りつけるように全身を使い、飽きることなく口付けを。
+					PRINTFORML ぬこぬこと蜜穴で男根を扱きながら、動きはゆったりと味わうよう。
+					PRINTFORMW その目は依存めいた愛情に濁り、蕩けきっていた。。
+					PRINTFORMW 腰を揺すってやると、ひゃん♥　と可愛らしい声で鳴き、眠りにつくまでそのまま彼女の奉仕を受けた。
+				CASE 4
+					PRINTFORML
+					PRINTFORMW 「うぅ……っ♥　いじわるですっ♥　花にばっかりするなんて――♥　っあ♥　あ♥　あ♥　　……っ♥♥♥」
+					PRINTFORML 姉妹のように育ったらしい下女の花を四つん這いにさせ、二人並べて犯してやる。
+					PRINTFORML 処女であった可愛らしい花も、静流の痴態を見せられる日々に欲求不満。
+					PRINTFORML 一度犯してからは従順に、%CALLNAME:MASTER%の女として悦んで股を開くようになった。
+					PRINTFORMW 幼なじみと犯されるのは燃え上がるのか、二人はまるで競うように体の全てで奉仕する。
+					PRINTFORMW 先に花が限界を迎えると、静流は%CALLNAME:MASTER%を取られないようにか目一杯男根を締め付けた
+				CASE 5
+					PRINTFORML
+					PRINTFORMW 「ん♥　今日は……♥　しずるがごほーし……♥　しますからね……♥♥♥」
+					PRINTFORML 動いちゃだめです、などと言いながら、静流は上に跨がりゆっくりと腰を揺する。
+					PRINTFORML これはこれで中々気持ちの良いものだが、少し物足りない動き。
+					PRINTFORML わざとなのだろう。静流はご奉仕などと言いながら挑発的にこちらを見ていた。
+					PRINTFORMW お仕置きされるためのわざとらしい焦らしプレイ。
+					PRINTFORMW 後で解放するためのフラストレーションを募らせながら、しばらく静流の『ご奉仕』を受けてやった。
+				CASE 6
+					PRINTFORML
+					PRINTFORMW 「旦那様……♥　んっ♥♥　そろそろ♥　我慢出来なくて……♥」
+					PRINTFORML あえて夜まで抱いてやらず、そして夜になっても焦らしプレイ。
+					PRINTFORML 今日はじっくりと楽しもう、と口にした通り、繋がってキスをする以外をしていない。
+					PRINTFORML しかし牝穴で咥え込まされたまま動けないようにされていると、益々感覚が鋭くなるらしい。
+					PRINTFORMW 腰を掴んで動きを止めているにもせがむようにうねうねと肉襞が蠢き、子宮口が切なげに吸い付く。
+					PRINTFORMW 一時間そうした後、荒々しく腰を叩き付けて冒してやると、焦らされ切った静流は狂ったように乱れた。
+				CASE 7
+					PRINTFORML
+					PRINTFORMW 「だめ♥　旦那様♥　せめてお屋敷♥　お屋敷に……っ♥♥♥」
+					PRINTFORML 夜になると後ろから犯したまま屋敷中を四つん這いで歩かせ、散歩を行なう。
+					PRINTFORML 裸で庭に出されると気が気でないのか声を抑えながらも必死で許して欲しいと懇願した。
+					PRINTFORML しかしそれに反して牝穴はどうしようもないほど興奮でうねり、蜜は足元を滑らせるほど。
+					PRINTFORMW 上手に奉仕出来たら許してやる、と告げると興奮と怯えの混じった様子で腰を揺する。
+					PRINTFORMW 結局%CALLNAME:MASTER%をイかせるまでに静流は五回以上、野外での絶頂を味わわされた。
+				CASE 8
+					PRINTFORML
+					PRINTFORMW 「っ♥　だめっ♥　抜いちゃだめっ♥　っ……♥　うー……♥　だんなさま……っ♥♥♥」
+					PRINTFORML 先ほどからわざと外出しを繰り返していた。
+					PRINTFORML 体に精液を掛けられる度、中出し絶頂を奪われた静流は不満げにこちらを睨む。
+					PRINTFORML しかし、少しやり過ぎたのか。
+					PRINTFORMW 静流は中に出してもらえない事で本気で泣き出してしまったらしい。
+					PRINTFORMW その後は耳元で彼女の望む言葉を繰り返しながら、朝までラブラブセックスに付き合わされた。
+				CASE 9
+					PRINTFORML
+					PRINTFORMW 「んぅ♥　ぁっ♥　旦那様の種付け穴♥　一杯見て下さ、んんっ♥♥♥」
+					PRINTFORML 十回イクまで入れない、という条件でいつもしているオナニーをさせていた。
+					PRINTFORML セックスよりもオナニーは随分恥ずかしいらしく、いつも最初は嫌がるもの。
+					PRINTFORML しかし二、三回イキ始めると我慢出来ずに勝手におねだりを始めるのが彼女の常。
+					PRINTFORMW いつもはどんなことを考えているのか、どういうことがされたいのか。。
+					PRINTFORMW 静流のプライバシーを丸裸にしながら、%CALLNAME:MASTER%は言葉で静流をなじり続けた。
+				CASE 10
+					PRINTFORML
+					PRINTFORMW 「今日は♥　帝様のところにっ♥　行かせてあげないんですから……っ♥♥♥」
+					PRINTFORML 焦らしプレイをし過ぎて怒らせてしまったらしい。
+					PRINTFORML 静流は火がついたように%CALLNAME:MASTER%の体を押さえつけ、腰を打ち付ける。
+					PRINTFORMW 「どうしても行きたいなら♥　ちゃんと静流を満足させてからですよ……っ♥♥♥」
+					PRINTFORMW 可愛がってもらうための挑発だと分かっていたが、言わせ放題では男の沽券に関わる。
+					PRINTFORMW その日は静流が泣きを入れるまで、荒々しくその体を犯してやった。
+				CASE 11
+					PRINTFORML
+					PRINTFORMW 「犬の獣尾人は♥　本能的に♥　上下関係を意識しちゃうそうです……♥」
+					PRINTFORML 犬は自分より上と認めてしまった相手には絶対服従であるらしい。
+					PRINTFORMW 「ですから帝様も……♥　一回旦那様に犯されちゃったら大変です……♥♥♥」。
+					PRINTFORML 咲耶が犬の獣尾人と聞いて、静流はこうして交わりながら、その性的な弱味についてを語る。
+					PRINTFORMW つい咲耶を意識して男根を硬くすると、咥え込んだ膣肉を嫉妬混じりに締め付けた。
+					PRINTFORML 「駄目ですよ旦那様♥　帝様に対して不埒なことを考えては……♥」
+					PRINTFORMW まるでそうすることを煽るように言いながら、静流は欲情に目を濁らせる。
+					PRINTFORMW 本当に静流は%CALLNAME:MASTER%を皇国の支配者にしたいらしい。
+			ENDSELECT
+			CALL FUCK(MASTER, "性技, 性交, Ｃ, 射精", "童貞喪失, キス喪失, Ｖ挿入", 0, "静流の唇", "", "静流の膣", "和姦")
+RESETCOLOR 
 ;――――――――――――――――――――――――――――――――――――――――――――――――
 @HITOIKI_SHIZURU_1
 ;
 ;――――――――――――――――――――――――――――――――――――――――――――――――
+SETCOLOR 0xDF7401
 			PRINTFORML
 			PRINTFORML
 			SELECTCASE RAND:7
@@ -2205,3 +2752,4 @@ SELECTCASE QUEST_PROGRESS:QUEST_ID
 					PRINTFORMW 「ひとまずこのくらいでしょうか」
 					PRINTFORMW 話に一区切りつくと、彼女は%CALLNAME:MASTER%の様子を窺った。
 			ENDSELECT
+RESETCOLOR 
