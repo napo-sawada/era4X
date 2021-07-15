@@ -338,8 +338,6 @@ PRINTFORML
 				CALL CC_ADDMOB("DEFENDER", "グンマー四柱『竹槍王』", 6000, 6000, 170)
 				CALL CC_ADDMOB("DEFENDER", "精鋭グンマー兵", 4000, 4000, 150)
 				CALL CC_ADDMOB("DEFENDER", "精鋭グンマー兵", 4000, 4000, 150)
-				;連戦フラグオン
-				CALL CC_SET_FLAG(LINE_CHAN, "1")
 				;白兵戦イベント呼出
 				CALL CLOSE_COMBAT()
 				IF RESULT == 2
