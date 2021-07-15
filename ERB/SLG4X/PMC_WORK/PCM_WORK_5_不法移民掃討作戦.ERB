@@ -1,0 +1,181 @@
+﻿;----------------------------
+; 報復作戦
+;----------------------------
+
+;----------------------------
+; 受注可能か
+;----------------------------
+@PMC_QUEST_ACCEPTABLE_5
+CALL GET_STAR_ID_FROM_POS(CHARACTER_POSITION)
+RETURN RESULT == 8 && STAR_OWNER:RESULT == 国家ID_アレス宗教 && !SPAWN_ZOMBIE
+
+;----------------------------
+; クエスト名
+;----------------------------
+@PMC_QUEST_NAME_5
+RESULTS = 不法移民掃討作戦(難易度2~良心の呵責に注意)
+RETURN
+
+;----------------------------
+; クエスト本体
+;----------------------------
+@PMC_QUEST_BODY_5
+#DIM _BATTLE_UNIT_ID
+#DIM DYNAMIC _RETIER
+#DIM DYNAMIC _SCORE
+#DIM DYNAMIC _LINE_CHAN
+#DIMS _DIC, MAX_PMC_UNIT, MAX_PMC_UNIT_MEMBER
+#DIM _EXP
+#DIM DYNAMIC _MESSAGE
+
+FOR LOCAL, 0, MAX_PMC_UNIT
+  VARSET _DIC:LOCAL:0, "-1"
+NEXT
+
+PRINTFORML ブリーフィングを受けますか？
+CALL ASK_YN
+SIF !RESULT
+  CALL PMC_QUEST_BRIEFING_5
+CALL PMC_EDIT_UNIT
+
+PRINTFORML 不法移民とは名ばかりの現地民達を軒並み虐殺するのが今回のミッションだ
+PRINTFORML 自爆、銃撃、トラップなどによる些細な反撃はあるだろうが、ほとんどは逃げるばかりの人間を撃つダックハントだ
+PRINTFORMW そこに規律などなく、女は犯された挙句に銃殺、男と子供は容赦無く銃殺されている
+PRINTL
+PRINTFORML %CALLNAME:MASTER%の部隊もこのカオスに混じって死体の山を築かなくてはならない
+PRINTFORMW 政府軍がやりたがらない汚い仕事にしても、特に最悪の仕事だ
+PRINTL ………………
+PRINTL …………
+PRINTL ……
+CALL SELECT_PMC_BATTLE_UNIT
+_BATTLE_UNIT_ID = RESULT
+IF _BATTLE_UNIT_ID == -1
+  PRINTFORMW 戦闘に参加できるユニットがいない
+  PRINTFORMW ユニットを編成してから再度クエストを受けよう
+  RETURN
+ENDIF
+
+WHILE !_RETIER
+  ;白兵戦参加メンバーの初期化
+  CALL CC_INIT()
+  ;前の戦いの記録が残っていたら上書き
+  IF _DIC:_BATTLE_UNIT_ID:0 != "-1" && _LINE_CHAN == 1
+    FOR LOCAL, 0, FINDELEMENT(CC_ATTACKER_LIST, "-1")
+      CC_ATTACKER_LIST:LOCAL = %DIC_SET(CC_ATTACKER_LIST:LOCAL, "体力", DIC_GET(_DIC:_BATTLE_UNIT_ID:LOCAL, "体力"))%
+      CC_ATTACKER_LIST:LOCAL = %DIC_SET(CC_ATTACKER_LIST:LOCAL, "状態", "待機")%
+    NEXT
+  ELSE
+    FOR LOCAL, 0, CHARANUM
+      SIF UNIT_ID:LOCAL == _BATTLE_UNIT_ID
+        CALL CC_ADDCHARA("ATTACKER", LOCAL)
+    NEXT
+    IF _DIC:_BATTLE_UNIT_ID:0 != "-1"
+      FOR LOCAL, 0, FINDELEMENT(CC_ATTACKER_LIST, "-1")
+        CC_ATTACKER_LIST:LOCAL = %DIC_SET(CC_ATTACKER_LIST:LOCAL, "体力", DIC_GET(_DIC:_BATTLE_UNIT_ID:LOCAL, "体力"))%
+        CC_ATTACKER_LIST:LOCAL = %DIC_SET(CC_ATTACKER_LIST:LOCAL, "状態", "待機")%
+      NEXT
+    ENDIF 
+  ENDIF
+  IF _SCORE < 30000
+    SELECTCASE RAND:3
+      CASE 0
+        CALL CC_ADDMOB("DEFENDER", "人の盾1", 100, 100, 1)
+        CALL CC_ADDMOB("DEFENDER", "人の盾2", 100, 100, 1)
+        CALL CC_ADDMOB("DEFENDER", "民兵1", 2000, 2000, 40)
+        CALL CC_ADDMOB("DEFENDER", "民兵2", 2000, 2000, 40)
+        _EXP = 8
+        _SCORE += POWER(40, 2) * 2
+      CASE 1
+        CALL CC_ADDMOB("DEFENDER", "投擲兵1", 100, 100, 1)
+        CALL CC_ADDMOB("DEFENDER", "投擲兵2", 100, 100, 1)
+        CALL CC_ADDMOB("DEFENDER", "民兵1", 2000, 2000, 40)
+        CALL CC_ADDMOB("DEFENDER", "民兵2", 2000, 2000, 40)
+        _EXP = 8
+        _SCORE += POWER(40, 2) * 2
+      CASE 2
+        CALL CC_ADDMOB("DEFENDER", "少年兵1", 1000, 1000, 20)
+        CALL CC_ADDMOB("DEFENDER", "少年兵2", 1000, 1000, 20)
+        CALL CC_ADDMOB("DEFENDER", "民兵1", 2000, 2000, 40)
+        CALL CC_ADDMOB("DEFENDER", "民兵2", 2000, 2000, 40)
+        _EXP = 12
+        _SCORE += POWER(40, 2) * 2
+    ENDSELECT
+  ELSE
+    CALL CC_ADDMOB("DEFENDER", "ゾンビ兵1", 3000, 3000, 10)
+    CALL CC_ADDMOB("DEFENDER", "ゾンビ兵2", 3000, 3000, 10)
+    CALL CC_ADDMOB("DEFENDER", "ゾンビ兵3", 3000, 3000, 10)
+    CALL CC_ADDMOB("DEFENDER", "ゾンビ兵4", 3000, 3000, 10)
+    CALL CC_ADDMOB("DEFENDER", "ゾンビ兵5", 3000, 3000, 10)
+    CALL CC_ADDMOB("DEFENDER", "ミュータント", 10000, 10000, 15)
+    _EXP = 12
+    _SCORE += POWER(10, 2) * 6
+  ENDIF
+  ;白兵戦イベント呼出
+  CALL CLOSE_COMBAT()
+  SIF RESULT == 2
+    CALL GAMEOVER_46
+  CALL CC_ADD_COMBAT_EXP(_EXP)
+  FOR LOCAL, 0, FINDELEMENT(CC_ATTACKER_LIST, "-1")
+    _DIC:_BATTLE_UNIT_ID:LOCAL = %CC_ATTACKER_LIST:LOCAL%
+  NEXT
+
+  IF _SCORE >= 30000 && !_MESSAGE
+    PRINTFORML 『司令部から各部隊へ。死体に増殖性ナノマシンを注入した通称ゾンビ兵の出現を確認』
+    PRINTFORML 『また、死体同士が融合してミュータントに変化する現象も確認』
+    PRINTFORMW 『直ちに撤退を開始してください。繰り返します。直ちに撤退を開始してください』
+    WAITANYKEY
+    _MESSAGE = 1
+    SPAWN_ZOMBIE = 1
+  ENDIF
+
+  DRAWLINE
+  PRINTBUTTON "[連戦]", 0
+  PRINTBUTTON "[チーム変更]", 1
+  PRINTBUTTON "[撤退]", 3
+  PRINTL
+  DRAWLINE
+  INPUT
+  _LINE_CHAN = 0
+  IF RESULT == 0
+    ;連戦フラグオン
+    CALL CC_SET_FLAG(LINE_CHAN, "1")
+    _LINE_CHAN = 1
+  ELSEIF RESULT == 1
+    CALL SELECT_PMC_BATTLE_UNIT
+    _BATTLE_UNIT_ID = RESULT
+  ELSE
+    _RETIER = 1
+  ENDIF
+WEND
+DRAWLINE
+IF _SCORE == 0
+  LOCALS = $0
+ELSE
+  LOCALS = %TOSTR(_SCORE, "$###,###")%
+ENDIF
+PRINTFORMW 報酬として%LOCALS%手に入れた。
+MONEY += _SCORE
+DAY ++
+
+;----------------------------
+; クエスト説明
+;----------------------------
+@PMC_QUEST_BRIEFING_5
+SETCOLOR 0X666666
+CUSTOMDRAWLINE ///
+RESETCOLOR
+PRINTFORML アレス宗教国家の主星第九都市の開発は過激派の宗教勢力の抵抗により遅々として遅れている
+PRINTFORML 過激派は彼らの第九都市における独自自治を要求しており、それを到底承認できない統一宗教側と敵対している
+PRINTFORMW 交渉は困難を極め、その結果過激派は物理的に排斥することに決定された
+PRINTL
+PRINTFORML 宙族から武器を手に入れた過激派勢力は頑強な抵抗を続け、政府軍は手を焼いている
+PRINTFORMW しかしこのまま戦闘が長引けば第九都市の開発計画に遅れが生じ、無駄な資金流出が発生するとして、政府はPMCの導入を決定した
+PRINTL
+PRINTFORML PMCの目的は打球都市建設予定地を不法占拠している武装勢力キャンプの掃討作戦
+PRINTFORML また、事前に出された一般人退避命令の結果、現地に存在する女子供を含めた人間は全て敵対勢力として認め、発砲することが許可されている
+PRINTFORMW PMCは彼らによる自爆攻撃にも注意されたし
+SETCOLOR 0X666666
+CUSTOMDRAWLINE ///
+RESETCOLOR
+
+

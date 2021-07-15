@@ -1,0 +1,372 @@
+﻿;--------------------------
+; !!クエスト名と 89を好きな番号に変える！!
+; クエスト名
+; ここにクエストの説明
+;--------------------------
+
+
+;--------------------------
+; クエスト受注可能か
+;--------------------------
+@QUEST_ACCEPTABLE_89
+#DIM DYNAMIC ITER
+SIF QUEST_PROGRESS:89 == 5
+	RETURN 0
+SIF QUEST_PROGRESS:89 == 2
+	RETURN 0
+SIF QUEST_PROGRESS:89 == 3
+	RETURN 1
+IF QUEST_PROGRESS:89 == 1
+	FOR LOCAL, 0, MAX_SHIP
+		SIF SHIP_COUNTRY:LOCAL == 国家ID_企業連合
+			ITER ++
+	NEXT
+	RETURN ITER < 10
+ENDIF
+IF QUEST_PROGRESS:89 == 4
+	FOR LOCAL, 0, MAX_SHIP
+		SIF SHIP_COUNTRY:LOCAL == 国家ID_アレス宗教
+			ITER ++
+	NEXT
+	RETURN ITER < 10
+ENDIF
+RETURN QUEST_PROGRESS:89 == 0 && CAPTURE_DOCTOR && GET_CURRENT_OCCUPANCY_POINT() >= 10
+
+;--------------------------
+; クエストの名前を返却
+;--------------------------
+@QUEST_NAME_89
+RESULTS = 報復戦争
+RETURN
+
+;--------------------------
+; クエスト本体
+;--------------------------
+@QUEST_BODY_89
+#DIM CONST QUEST_ID = 89
+
+SELECTCASE QUEST_PROGRESS:QUEST_ID
+	CASE 0
+		PRINTFORML 宗教国家高官に呼び出された%CALLNAME:MASTER%は、豪華な部屋に招き入れられた
+		PRINTFORML 正装のチュニックを纏った聖騎士達がずらりと並び、厳戒態勢が取られている
+		PRINTFORMW やがてやってきた白髪の年老いた政府高官は、%CALLNAME:MASTER%と握手をすると、早速話を開始した
+		PRINTL
+		PRINTFORML 「第九都市開発現場での活躍、この老体の耳にも届いております。誠にありがとうございました」
+		PRINTFORML 「そしてゾンビ事件の重要参考人である博士の捕獲、感謝しても仕切れません」
+		PRINTFORMW 「さらには我らが国の防衛軍に匹敵する宇宙軍を保有するとの噂も耳にしております」
+		PRINTL
+		PRINTFORML 高官はそこで水を飲んで一息つく
+		PRINTFORML 「我が国で起きたパンデミックはもはやテロです。そしてその首謀者をあの博士は吐きました」
+		PRINTFORMW 「それは企業連合代表企業参加の、とある製薬会社だったのです」
+		PRINTL
+		PRINTFORML 「地上戦における兵力の増強のため、ゾンビマイクロマシンを散布し、操作できるゾンビ兵を作り上げる。それが製薬会社の目的だったのです」
+		PRINTFORML 「その実験現場として選ばれたのが、我が国の第九都市現場だったのです」
+		PRINTFORMW 「これは明確なテロです！早速我が国は企業連合に対し抗議いたしました。しかし奴らは事もあろうにしらを切り、天罰などとのたまったのです！」
+		PRINTL
+		PRINTFORML コップを机に叩きつけんばかりに激昂する政府高官。それは演技なのか本気なのか、%CALLNAME:MASTER%には判断できなかった
+		PRINTFORML 「しかし悔しいことに我々には企業連合に対抗する戦力を持ちません。奴らもそれがわかっていて、おざなりな対応をしているのでしょう」
+		PRINTFORMW 「我々は奴らを見返してやりたい。戦争になっても構わない。我々を差し置き天罰などとのたまった奴らがこの宇宙に存在することなど到底許されない！」
+		PRINTL
+		PRINTFORML 「我が国の首脳部は、満場一致で聖戦を実行することを決定しました。聖戦、平たく言えば、戦争です」
+		PRINTFORML 「そのための先兵に%CALLNAME:MASTER%は選ばれました」
+		PRINTFORMW 「拒否することは許されません。%CALLNAME:MASTER%は今すぐ軍備を整え、我が国の識別信号をつけ、二つある奴らの艦隊を撃滅するのです」
+		PRINTL
+		PRINTFORML 狂った老人達の狂った眼差しが向けられる。到底拒否できる雰囲気ではない……
+		PRINTFORMW %CALLNAME:MASTER%は渋々うなずいた
+		PRINTL
+		PRINTFORML システム：聖戦が開始されました。%CALLNAME:MASTER%は一時的に企業連合と敵対関係になります
+		PRINTFORMW システム：クエストの完了と同時に企業連合との関係値は元に戻ります
+		企業連合友好度 = REL_LIKE_COUNTRY:国家ID_企業連合:国家ID_プレイヤー
+		REL_LIKE_COUNTRY:国家ID_企業連合:国家ID_プレイヤー = -1000
+		QUEST_PROGRESS:QUEST_ID = 1
+	CASE 1
+		PRINTFORML 「よくぞやってくれましたな！」
+		PRINTFORML 応接間に通された%CALLNAME:MASTER%を出迎えたのは、満面の笑みを浮かべた件の政府高官だった
+		PRINTFORMW 「企業連合は即座に我々に対し、テロの関係者を差し出し、謝罪と賠償金を支払うことに同意しました」
+		PRINTL
+		PRINTFORML 「この聖戦は我々の勝ちと言って差し支えないでしょう」
+		PRINTFORML 「全ては一重に%CALLNAME:MASTER%のおかげと言って過言ではありません」
+		PRINTFORMW 「この恩にどうやって報いるか……」
+		PRINTL
+		PRINTFORML 「そうですなぁ……」
+		
+		LOCAL:1 = 0
+		FOR LOCAL, 0, CHARANUM
+			SIF TALENT:LOCAL:正妻
+				LOCAL:1 = LOCAL
+		NEXT
+		;結婚している場合
+		IF LOCAL:1
+			PRINTFORML 「%CALLNAME:MASTER%さんはご結婚されておりましたな。お相手の名前は確か……%NAME:(LOCAL:1)%さんとおっしゃりましたか」
+			PRINTFORMW 「どうでしょう。今後も%NAME:(LOCAL:1)%さんと幸せに暮らせる権利が報酬、というのは」
+			PRINTL
+			PRINTFORML 色めき立つ%CALLNAME:MASTER%に、周りに控えていた聖騎士達が武器を構える
+			PRINTFORML 緊張感の中でも、高官は表情を変えずゆったりとした口調で話し続ける
+			PRINTFORMW 「すでに私の部下が%NAME:(LOCAL:1)%さんの元におりますゆえ、あまり変な行動はされない方がいいでしょう」
+		ELSE
+			PRINTFORML 「どうでしょう。生きてここを帰れる権利が報酬、というのは」
+			PRINTFORML 色めき立つ%CALLNAME:MASTER%に、周りに控えていた聖騎士達が武器を構える
+			PRINTFORML 緊張感の中でも、高官は表情を変えずゆったりとした口調で話し続ける
+			PRINTFORMW 「あまり変な行動は取られない方がいい。ここに集まっているのは喧嘩っ早い聖騎士ばかりですので、事故があっては大変だ」
+		ENDIF
+		PRINTL
+		PRINTFORMW 「さて、我々の報酬、快く受け取ってくれますな？」
+		;宇宙最強の男に勝っていた場合
+		IF QUEST_PROGRESS:87 >= 8 
+			PRINTFORML 次の瞬間、部屋の扉が開かれると同時に、死体と化した聖騎士が数人地面と水平に吹き飛んで%CALLNAME:MASTER%の目の前を通過していった
+			PRINTFORML 轟音、悲鳴、そしてすぐに訪れる静寂と入り口に集まる視線
+			PRINTFORMW そこにいたのは、%CALLNAME:MASTER%がかつて目指し、そして死闘を繰り広げた男
+			PRINTFORMW 宇宙最強の男がそこにいた
+			PRINTL
+			PRINTFORML 「よお、チャンピョン。おめえが面白いことしてるって聞いたからきてやったぜ。でも、役者はおめえ以外たいしたことねえな」
+			PRINTFORML 「な、なんだ貴様は！」
+			PRINTFORMW 先ほどまでの落ち着きはどこへやら、鬼のような形相を浮かべた高官が宇宙最強の男を指差して怒鳴り散らす
+			PRINTL
+			PRINTFORML しかし宇宙最強の男は名乗らなかった。代わりに上着を脱いで上半身裸になると、ファイティングポーズをとってみせる
+			PRINTFORML その気迫たるや、一瞬で場の空気が沸騰し、この場の全員がもれなく汗が噴き出るのを止められなかった
+			PRINTFORMW 「俺かぁ？ 俺はチャンピョンの味方で、おめえ達の敵だよ」
+			PRINTL
+			IF LOCAL:1
+				PRINTFORML 「そうだ、安心しなチャンピョン。おめえの連れはおめえが散々のしてきた地上最強やら元チャンピョンやらが守ってるよ」
+				PRINTFORMW 「リベンジマッチの前にお前さんがくたばっちまったんじゃ、話にならねえからな。みんな乗り気だったぜ」
+				PRINTL
+			ENDIF
+			PRINTFORMW 「さあ、いい加減能書きは十分だろう。やろうぜ、本番の時間だ！」
+  		;白兵戦参加メンバーの初期化
+  		CALL CC_INIT()
+			CALL CC_ADDCHARA("ATTACKER", MASTER)
+			CALL CC_ADDMOB("ATTACKER", "宇宙最強の男", 8000, 8000, 300)
+			CALL CC_ADDMOB("DEFENDER", "聖騎士1", 2000, 2000, 100)
+			CALL CC_ADDMOB("DEFENDER", "聖騎士2", 2000, 2000, 100)
+			CALL CC_ADDMOB("DEFENDER", "聖騎士3", 2000, 2000, 100)
+			CALL CC_ADDMOB("DEFENDER", "聖騎士4", 2000, 2000, 100)
+			CALL CC_ADDMOB("DEFENDER", "聖騎士5", 2000, 2000, 100)
+			CALL CC_ADDMOB("DEFENDER", "聖騎士6", 2000, 2000, 100)
+			CALL CLOSE_COMBAT()
+			SIF RESULT == 2
+				CALL GAMEOVER_46
+			PRINTFORML 「楽しいなあチャンピョン。こんな楽しいのは久々だぜ」
+			PRINTFORML 地下闘技場で使われる即効性のある回復薬を%CALLNAME:MASTER%に手渡し、宇宙最強の男は微笑む。いや、微笑むというにはあまりに邪悪な笑みだった
+			PRINTFORMW あたりには肉塊と化した聖騎士達。そして小便を撒き散らして腰を抜かしている政府高官
+			PRINTL
+			PRINTFORML 騒ぎを聞きつけ続々と集まる追加の聖騎士達
+			PRINTFORML 「何十人だって何百人だってかかってこい。こんな奴ら、俺たちの相手じゃねえよ」
+			PRINTFORML 「か、かかれ！敵はたった二人だ！」
+  		CALL CC_INIT()
+			CALL CC_ADDCHARA("ATTACKER", MASTER)
+			CALL CC_ADDMOB("ATTACKER", "宇宙最強の男", 8000, 8000, 300)
+			CALL CC_ADDMOB("DEFENDER", "聖騎士7", 2000, 2000, 100)
+			CALL CC_ADDMOB("DEFENDER", "聖騎士8", 2000, 2000, 100)
+			CALL CC_ADDMOB("DEFENDER", "聖騎士9", 2000, 2000, 100)
+			CALL CC_ADDMOB("DEFENDER", "聖騎士10", 2000, 2000, 100)
+			CALL CC_ADDMOB("DEFENDER", "聖騎士11", 2000, 2000, 100)
+			CALL CC_ADDMOB("DEFENDER", "聖騎士12", 2000, 2000, 100)
+			CALL CLOSE_COMBAT()
+			SIF RESULT == 2
+				CALL GAMEOVER_46
+  		CALL CC_INIT()
+			CALL CC_ADDCHARA("ATTACKER", MASTER)
+			CALL CC_ADDMOB("ATTACKER", "宇宙最強の男", 8000, 8000, 300)
+			CALL CC_ADDMOB("DEFENDER", "聖騎士13", 2000, 2000, 100)
+			CALL CC_ADDMOB("DEFENDER", "聖騎士14", 2000, 2000, 100)
+			CALL CC_ADDMOB("DEFENDER", "聖騎士15", 2000, 2000, 100)
+			CALL CC_ADDMOB("DEFENDER", "聖騎士16", 2000, 2000, 100)
+			CALL CC_ADDMOB("DEFENDER", "聖騎士17", 2000, 2000, 100)
+			CALL CC_ADDMOB("DEFENDER", "聖騎士18", 2000, 2000, 100)
+			CALL CLOSE_COMBAT()
+			SIF RESULT == 2
+				CALL GAMEOVER_46
+  		CALL CC_INIT()
+			CALL CC_ADDCHARA("ATTACKER", MASTER)
+			CALL CC_ADDMOB("ATTACKER", "宇宙最強の男", 8000, 8000, 300)
+			CALL CC_ADDMOB("DEFENDER", "聖騎士19", 2000, 2000, 100)
+			CALL CC_ADDMOB("DEFENDER", "聖騎士20", 2000, 2000, 100)
+			CALL CC_ADDMOB("DEFENDER", "聖騎士21", 2000, 2000, 100)
+			CALL CC_ADDMOB("DEFENDER", "聖騎士22", 2000, 2000, 100)
+			CALL CC_ADDMOB("DEFENDER", "聖騎士23", 2000, 2000, 100)
+			CALL CC_ADDMOB("DEFENDER", "聖騎士24", 2000, 2000, 100)
+			CALL CLOSE_COMBAT()
+			SIF RESULT == 2
+				CALL GAMEOVER_46
+  		CALL CC_INIT()
+			CALL CC_ADDCHARA("ATTACKER", MASTER)
+			CALL CC_ADDMOB("ATTACKER", "宇宙最強の男", 8000, 8000, 300)
+			CALL CC_ADDMOB("DEFENDER", "聖騎士25", 2000, 2000, 100)
+			CALL CC_ADDMOB("DEFENDER", "聖騎士26", 2000, 2000, 100)
+			CALL CC_ADDMOB("DEFENDER", "聖騎士27", 2000, 2000, 100)
+			CALL CC_ADDMOB("DEFENDER", "聖騎士28", 2000, 2000, 100)
+			CALL CC_ADDMOB("DEFENDER", "聖騎士29", 2000, 2000, 100)
+			CALL CC_ADDMOB("DEFENDER", "聖騎士30", 2000, 2000, 100)
+			CALL CLOSE_COMBAT()
+			SIF RESULT == 2
+				CALL GAMEOVER_46
+			PRINTFORML 「う、嘘だ……小隊規模はいた聖騎士がたったの二人に……！」
+			PRINTFORML 「嘘じゃねえよ。なんならお前も試してみるか？……なんてな、文官相手にやるつもりはねえよ」
+			PRINTFORML 「それよりチャンピョン。外に出ようぜ。もっと面白いのが待ち構えているみたいだからよ」
+			PRINTFORMW 言われて外を見る。応接室から広がる眼下には警察官、軍人、メック、思考戦車、ありとあらゆる闘う者たちがそろい踏みだった
+			PRINTW ………………
+			PRINTW …………
+			PRINTW ……
+			PRINTFORML 「止まれ貴様ら！少しでも動いたら撃つ！」
+			PRINTFORML 「そういやチャンピョン、悪いがチャンピョンの乗ってきた艦、勝手にここに呼び寄せてもらったぜ。迎えの足が欲しいところだったからな」
+			PRINTFORML 「貴様！話を聞いているのか!?」
+			PRINTFORMW 静止を求める軍人や警官の言葉に一切耳をかさず、宇宙最強の男は呑気におしゃべりを続ける
+			PRINTL
+			PRINTFORML 「だからよぉ、迎えが来るまでしばらくここでどんぱちしてよぉや。幸い、遊び相手には困らなさそうだな」
+			PRINTFORMW 「いくぜチャンピョン。第二ラウンドの始まりだ！」
+			PRINTW ………………
+			PRINTW …………
+			PRINTW ……
+  		CALL CC_INIT()
+			CALL CC_ADDCHARA("ATTACKER", MASTER)
+			CALL CC_ADDMOB("ATTACKER", "宇宙最強の男", 8000, 8000, 300)
+			CALL CC_ADDMOB("DEFENDER", "メック", 8000, 8000, 100)
+			CALL CC_ADDMOB("DEFENDER", "思考戦車", 4000, 4000, 100)
+			CALL CC_ADDMOB("DEFENDER", "軍人1", 2000, 2000, 60)
+			CALL CC_ADDMOB("DEFENDER", "軍人2", 2000, 2000, 60)
+			CALL CC_ADDMOB("DEFENDER", "警察官1", 1500, 1500, 45)
+			CALL CC_ADDMOB("DEFENDER", "警察官2", 1500, 1500, 45)
+			CALL CLOSE_COMBAT()
+			SIF RESULT == 2
+				CALL GAMEOVER_46
+  		CALL CC_INIT()
+			CALL CC_ADDCHARA("ATTACKER", MASTER)
+			CALL CC_ADDMOB("ATTACKER", "宇宙最強の男", 8000, 8000, 300)
+			CALL CC_ADDMOB("DEFENDER", "メック", 8000, 8000, 100)
+			CALL CC_ADDMOB("DEFENDER", "思考戦車", 4000, 4000, 100)
+			CALL CC_ADDMOB("DEFENDER", "軍人1", 2000, 2000, 60)
+			CALL CC_ADDMOB("DEFENDER", "軍人2", 2000, 2000, 60)
+			CALL CC_ADDMOB("DEFENDER", "警察官1", 1500, 1500, 45)
+			CALL CC_ADDMOB("DEFENDER", "警察官2", 1500, 1500, 45)
+			CALL CLOSE_COMBAT()
+			SIF RESULT == 2
+				CALL GAMEOVER_46
+  		CALL CC_INIT()
+			CALL CC_ADDCHARA("ATTACKER", MASTER)
+			CALL CC_ADDMOB("ATTACKER", "宇宙最強の男", 8000, 8000, 300)
+			CALL CC_ADDMOB("DEFENDER", "メック", 8000, 8000, 100)
+			CALL CC_ADDMOB("DEFENDER", "思考戦車", 4000, 4000, 100)
+			CALL CC_ADDMOB("DEFENDER", "軍人1", 2000, 2000, 60)
+			CALL CC_ADDMOB("DEFENDER", "軍人2", 2000, 2000, 60)
+			CALL CC_ADDMOB("DEFENDER", "警察官1", 1500, 1500, 45)
+			CALL CC_ADDMOB("DEFENDER", "警察官2", 1500, 1500, 45)
+			CALL CLOSE_COMBAT()
+			SIF RESULT == 2
+				CALL GAMEOVER_46
+  		CALL CC_INIT()
+			CALL CC_ADDCHARA("ATTACKER", MASTER)
+			CALL CC_ADDMOB("ATTACKER", "宇宙最強の男", 8000, 8000, 300)
+			CALL CC_ADDMOB("DEFENDER", "メック", 6000, 6000, 80)
+			CALL CC_ADDMOB("DEFENDER", "思考戦車", 4000, 4000, 100)
+			CALL CC_ADDMOB("DEFENDER", "軍人1", 2000, 2000, 60)
+			CALL CC_ADDMOB("DEFENDER", "軍人2", 2000, 2000, 60)
+			CALL CC_ADDMOB("DEFENDER", "警察官1", 1500, 1500, 45)
+			CALL CC_ADDMOB("DEFENDER", "警察官2", 1500, 1500, 45)
+			CALL CLOSE_COMBAT()
+			SIF RESULT == 2
+				CALL GAMEOVER_46
+			PRINTFORML 「嘘だろ！？　なんで人間がメックや思考戦車を破壊できるんだ！？」
+			PRINTFORML 「もう4台もやられてる……人間業じゃない!」
+			PRINTFORMW 「ええい、ばらけるな！　まとめて前に出ろ！」
+  		CALL CC_INIT()
+			CALL CC_ADDCHARA("ATTACKER", MASTER)
+			CALL CC_ADDMOB("ATTACKER", "宇宙最強の男", 8000, 8000, 300)
+			CALL CC_ADDMOB("DEFENDER", "メック", 6000, 6000, 80)
+			CALL CC_ADDMOB("DEFENDER", "思考戦車", 4000, 4000, 100)
+			CALL CC_ADDMOB("DEFENDER", "軍人1", 2000, 2000, 60)
+			CALL CC_ADDMOB("DEFENDER", "軍人2", 2000, 2000, 60)
+			CALL CC_ADDMOB("DEFENDER", "警察官1", 1500, 1500, 45)
+			CALL CC_ADDMOB("DEFENDER", "警察官2", 1500, 1500, 45)
+			CALL CLOSE_COMBAT()
+			SIF RESULT == 2
+				CALL GAMEOVER_46
+  		CALL CC_INIT()
+			CALL CC_ADDCHARA("ATTACKER", MASTER)
+			CALL CC_ADDMOB("ATTACKER", "宇宙最強の男", 8000, 8000, 300)
+			CALL CC_ADDMOB("DEFENDER", "メック", 6000, 6000, 80)
+			CALL CC_ADDMOB("DEFENDER", "思考戦車", 4000, 4000, 100)
+			CALL CC_ADDMOB("DEFENDER", "軍人1", 2000, 2000, 60)
+			CALL CC_ADDMOB("DEFENDER", "軍人2", 2000, 2000, 60)
+			CALL CC_ADDMOB("DEFENDER", "警察官1", 1500, 1500, 45)
+			CALL CC_ADDMOB("DEFENDER", "警察官2", 1500, 1500, 45)
+			CALL CLOSE_COMBAT()
+			SIF RESULT == 2
+				CALL GAMEOVER_46
+  		CALL CC_INIT()
+			CALL CC_ADDCHARA("ATTACKER", MASTER)
+			CALL CC_ADDMOB("ATTACKER", "宇宙最強の男", 8000, 8000, 300)
+			CALL CC_ADDMOB("DEFENDER", "メック", 6000, 6000, 80)
+			CALL CC_ADDMOB("DEFENDER", "思考戦車", 4000, 4000, 100)
+			CALL CC_ADDMOB("DEFENDER", "軍人1", 2000, 2000, 60)
+			CALL CC_ADDMOB("DEFENDER", "軍人2", 2000, 2000, 60)
+			CALL CC_ADDMOB("DEFENDER", "警察官1", 1500, 1500, 45)
+			CALL CC_ADDMOB("DEFENDER", "警察官2", 1500, 1500, 45)
+			CALL CLOSE_COMBAT()
+			SIF RESULT == 2
+				CALL GAMEOVER_46
+  		CALL CC_INIT()
+			CALL CC_ADDCHARA("ATTACKER", MASTER)
+			CALL CC_ADDMOB("ATTACKER", "宇宙最強の男", 8000, 8000, 300)
+			CALL CC_ADDMOB("DEFENDER", "メック", 6000, 6000, 80)
+			CALL CC_ADDMOB("DEFENDER", "思考戦車", 4000, 4000, 100)
+			CALL CC_ADDMOB("DEFENDER", "軍人1", 2000, 2000, 60)
+			CALL CC_ADDMOB("DEFENDER", "軍人2", 2000, 2000, 60)
+			CALL CC_ADDMOB("DEFENDER", "警察官1", 1500, 1500, 45)
+			CALL CC_ADDMOB("DEFENDER", "警察官2", 1500, 1500, 45)
+			CALL CLOSE_COMBAT()
+			SIF RESULT == 2
+				CALL GAMEOVER_46
+			PRINTFORML 「現役のメックと思考戦車だぞ！大学生のロボコンで出てくるオンボロロボットじゃないんだ！それが、それが……！」
+			PRINTFORMW 「ロボットなら腐る程倒してきたからな。なあチャンピョン」
+			PRINTL
+			PRINTFORML 「おっと、お出迎え見たいだぜ」
+			PRINTFORML 空を見ると、%CALLNAME:MASTER%が乗ってきた旗艦の機影がはっきりと雲の陰から覗いていた
+			PRINTFORML もはやその場に%CALLNAME:MASTER%と宇宙最強の男に立ち向かおうとする者はいなくなっていた
+			PRINTFORML 機械ならまだしも、本能を持つ人間ならば、束になったところで勝てないと悟ってしまったのだ
+			PRINTFORMW こうして%CALLNAME:MASTER%と宇宙最強の男は、世紀の大脱走に成功した
+			QUEST_PROGRESS:QUEST_ID = 3
+		ELSE
+			PRINTFORML ここはうなずくしかあるまい
+			PRINTFORMW %CALLNAME:MASTER%は血の滲む思いで拳を強く握り締めながら、うなずいて見せた
+			PRINTL
+			PRINTFORML 「誠に結構。それでは私はこの後約束があるので失礼いたします」
+			PRINTFORMW 「本当に助かりましたぞ、英雄殿」
+			QUEST_PROGRESS:QUEST_ID = 2
+		ENDIF
+		PRINTW ………………
+		PRINTW …………
+		PRINTW ……
+		PRINTFORMW 企業連合との友好度が元に戻った
+		REL_LIKE_COUNTRY:国家ID_企業連合:国家ID_プレイヤー = 企業連合友好度
+	CASE 3
+		PRINTFORML 旗艦の中で、%CALLNAME:MASTER%と宇宙最強の男は向かい合って座っていた
+		PRINTFORML 「お前の艦隊がアレスの識別信号で企業連合を襲撃したって聞いた時から、嫌な予感はしていたんだ。アレスの奴らは録でもない連中ばかりだからな」
+		PRINTFORML 「だからちょっと調べてみたら、大当たりだ。今度から気をつけることだな、チャンピョン」
+		PRINTFORML 「それで、このあとどうするんだ？」
+		CALL ASK_YN("アレスを潰す", "アレスを潰す")
+		PRINTFORML 「そうかいそうかい、それじゃあ俺は自分の艦から見届けさせてもらうよ。お前さんがアレスをどう料理するかを。まあ、やり方なんて一つだろうけどな」
+		PRINTFORMW そういうと、宇宙最強男は邪悪な笑みを浮かべた
+		PRINTL
+		PRINTFORMW アレス宗教国家と戦争状態になりました
+		REL_LIKE_COUNTRY:国家ID_アレス宗教:国家ID_プレイヤー = -1000
+		QUEST_PROGRESS:QUEST_ID = 4
+	CASE 4
+		PRINTFORML アレス宗教国家の首都を空爆していると、当のアレス宗教国家から降伏の連絡が入った
+		PRINTFORML とてもじゃないが信じられない
+		PRINTFORMW %CALLNAME:MASTER%は連絡を切ると、念入りに空爆を続けた
+		PRINTW ………………
+		PRINTW …………
+		PRINTW ……
+		PRINTFORML 空爆は三日三晩続いた。持ちうる補給艦、資金をフル動員し、都市区画を原始時代へ逆戻りさせていく
+		PRINTFORMW 結局アレス宗教国家にある知り合いのシスター遊女からやめてくれと連絡が入るまで、爆撃を続けた
+		PRINTL
+		PRINTFORML 最終的にアレスの外交官とつけた決着は以下のとおりだ
+		PRINTFORML 賠償金は$1,000,000,000,000
+		PRINTFORML それとは別に企業連合を潰した報酬として$1,000,000,000,000
+		PRINTFORMW しばらくアレスは未曾有のデフレに陥ることだろう
+		PRINTFORMW アレス宗教国家との戦争状態が解けました
+		MONEY += 2000000000000
+		MONEY:国家ID_アレス宗教 -= 2000000000000
+		REL_LIKE_COUNTRY:国家ID_アレス宗教:国家ID_プレイヤー = -900
+		QUEST_PROGRESS:QUEST_ID = 5
+ENDSELECT

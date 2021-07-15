@@ -76,3 +76,6 @@
 
 ;88 PMC_設立
 #DIM SAVEDATA PMC_名声
+
+;89
+#DIM SAVEDATA 企業連合友好度

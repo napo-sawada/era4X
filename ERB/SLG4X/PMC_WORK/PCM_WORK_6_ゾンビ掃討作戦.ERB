@@ -1,0 +1,202 @@
+﻿;----------------------------
+; 報復作戦
+;----------------------------
+
+;----------------------------
+; 受注可能か
+;----------------------------
+@PMC_QUEST_ACCEPTABLE_6
+CALL GET_STAR_ID_FROM_POS(CHARACTER_POSITION)
+RETURN RESULT == 8 && STAR_OWNER:RESULT == 国家ID_アレス宗教 && SPAWN_ZOMBIE && !CAPTURE_DOCTOR
+
+;----------------------------
+; クエスト名
+;----------------------------
+@PMC_QUEST_NAME_6
+RESULTS = ゾンビ掃討作戦(難易度4)
+RETURN
+
+;----------------------------
+; クエスト本体
+;----------------------------
+@PMC_QUEST_BODY_6
+#DIM _BATTLE_UNIT_ID
+#DIM DYNAMIC _RETIER
+#DIM DYNAMIC _SCORE
+#DIM DYNAMIC _LINE_CHAN
+#DIMS _DIC, MAX_PMC_UNIT, MAX_PMC_UNIT_MEMBER
+#DIM _EXP
+#DIM DYNAMIC _MESSAGE
+
+FOR LOCAL, 0, MAX_PMC_UNIT
+  VARSET _DIC:LOCAL:0, "-1"
+NEXT
+
+PRINTFORML ブリーフィングを受けますか？
+CALL ASK_YN
+SIF !RESULT
+  CALL PMC_QUEST_BRIEFING_6
+CALL PMC_EDIT_UNIT
+
+PRINTFORML 地獄が眼前に広がっている
+PRINTFORML ゾンビ、ゾンビ、ゾンビ、襲われる一般人、ゾンビ、ミュータント
+PRINTFORMW 正規軍は防衛陣地の安全地帯から近寄ってくるものをゾンビも人も関係なく撃ちまくっている
+PRINTL
+PRINTFORMW %CALLNAME:MASTER%の部隊は背中から撃たれないよう気をつけながら、ゾンビ達の只中で殲滅作戦を実行することだ
+PRINTL ………………
+PRINTL …………
+PRINTL ……
+CALL SELECT_PMC_BATTLE_UNIT
+_BATTLE_UNIT_ID = RESULT
+IF _BATTLE_UNIT_ID == -1
+  PRINTFORMW 戦闘に参加できるユニットがいない
+  PRINTFORMW ユニットを編成してから再度クエストを受けよう
+  RETURN
+ENDIF
+
+WHILE !_RETIER
+  ;白兵戦参加メンバーの初期化
+  CALL CC_INIT()
+  ;前の戦いの記録が残っていたら上書き
+  IF _DIC:_BATTLE_UNIT_ID:0 != "-1" && _LINE_CHAN == 1
+    FOR LOCAL, 0, FINDELEMENT(CC_ATTACKER_LIST, "-1")
+      CC_ATTACKER_LIST:LOCAL = %DIC_SET(CC_ATTACKER_LIST:LOCAL, "体力", DIC_GET(_DIC:_BATTLE_UNIT_ID:LOCAL, "体力"))%
+      CC_ATTACKER_LIST:LOCAL = %DIC_SET(CC_ATTACKER_LIST:LOCAL, "状態", "待機")%
+    NEXT
+  ELSE
+    FOR LOCAL, 0, CHARANUM
+      SIF UNIT_ID:LOCAL == _BATTLE_UNIT_ID
+        CALL CC_ADDCHARA("ATTACKER", LOCAL)
+    NEXT
+    IF _DIC:_BATTLE_UNIT_ID:0 != "-1"
+      FOR LOCAL, 0, FINDELEMENT(CC_ATTACKER_LIST, "-1")
+        CC_ATTACKER_LIST:LOCAL = %DIC_SET(CC_ATTACKER_LIST:LOCAL, "体力", DIC_GET(_DIC:_BATTLE_UNIT_ID:LOCAL, "体力"))%
+        CC_ATTACKER_LIST:LOCAL = %DIC_SET(CC_ATTACKER_LIST:LOCAL, "状態", "待機")%
+      NEXT
+    ENDIF 
+  ENDIF
+  IF _SCORE < 625 * 15 * 1
+    CALL CC_ADDMOB("DEFENDER", "ゾンビ兵1", 3000, 3000, 10)
+    CALL CC_ADDMOB("DEFENDER", "ゾンビ兵2", 3000, 3000, 10)
+    CALL CC_ADDMOB("DEFENDER", "ゾンビ兵3", 3000, 3000, 10)
+    CALL CC_ADDMOB("DEFENDER", "ゾンビ兵4", 3000, 3000, 10)
+    CALL CC_ADDMOB("DEFENDER", "ゾンビ兵5", 3000, 3000, 10)
+    CALL CC_ADDMOB("DEFENDER", "ミュータント", 10000, 10000, 15)
+    _EXP = 12
+    _SCORE += POWER(10, 2) * 5 + POWER(15, 2)
+  ENDIF
+  ;白兵戦イベント呼出
+  CALL CLOSE_COMBAT()
+  SIF RESULT == 2
+    CALL GAMEOVER_46
+  CALL CC_ADD_COMBAT_EXP(_EXP)
+  FOR LOCAL, 0, FINDELEMENT(CC_ATTACKER_LIST, "-1")
+    _DIC:_BATTLE_UNIT_ID:LOCAL = %CC_ATTACKER_LIST:LOCAL%
+  NEXT
+
+  IF _SCORE >= (625 * 15 * 1) && !_MESSAGE
+    PRINTFORML %CALLNAME:MASTER%達の部隊がかつての敵拠点本部に到達すると、そこには白衣を着た男と、それを守る数人の兵士がいた
+    PRINTFORML 「ふむ、第一作戦は成功だが、理性を維持できた個体はいなかったようだな……ん？」
+    PRINTFORMW そこで%CALLNAME:MASTER%達の存在に気がついた部隊と博士が、一斉に色めき立つ
+    PRINTL
+    PRINTFORML 「軍……は出てきてないはず……PMCか。少しゆっくりしすぎたな」
+    PRINTFORML 「お前達、処理を頼んだぞ」
+    PRINTFORMW 博士の命令一下、敵部隊が武器を構える。反射的に%CALLNAME:MASTER%の部隊も武器を構え、交戦が開始された
+    _MESSAGE = 1
+    _LINE_CHAN = 0
+    CALL SELECT_PMC_BATTLE_UNIT
+    _BATTLE_UNIT_ID = RESULT
+    ;白兵戦参加メンバーの初期化
+    CALL CC_INIT()
+    ;前の戦いの記録が残っていたら上書き
+    IF _DIC:_BATTLE_UNIT_ID:0 != "-1" && _LINE_CHAN == 1
+      FOR LOCAL, 0, FINDELEMENT(CC_ATTACKER_LIST, "-1")
+        CC_ATTACKER_LIST:LOCAL = %DIC_SET(CC_ATTACKER_LIST:LOCAL, "体力", DIC_GET(_DIC:_BATTLE_UNIT_ID:LOCAL, "体力"))%
+        CC_ATTACKER_LIST:LOCAL = %DIC_SET(CC_ATTACKER_LIST:LOCAL, "状態", "待機")%
+      NEXT
+    ELSE
+      FOR LOCAL, 0, CHARANUM
+        SIF UNIT_ID:LOCAL == _BATTLE_UNIT_ID
+          CALL CC_ADDCHARA("ATTACKER", LOCAL)
+      NEXT
+      IF _DIC:_BATTLE_UNIT_ID:0 != "-1"
+        FOR LOCAL, 0, FINDELEMENT(CC_ATTACKER_LIST, "-1")
+          CC_ATTACKER_LIST:LOCAL = %DIC_SET(CC_ATTACKER_LIST:LOCAL, "体力", DIC_GET(_DIC:_BATTLE_UNIT_ID:LOCAL, "体力"))%
+          CC_ATTACKER_LIST:LOCAL = %DIC_SET(CC_ATTACKER_LIST:LOCAL, "状態", "待機")%
+        NEXT
+      ENDIF 
+    ENDIF
+    CALL CC_ADDMOB("DEFENDER", "兵士1", 3000, 3000, 100)
+    CALL CC_ADDMOB("DEFENDER", "兵士2", 3000, 3000, 100)
+    CALL CC_ADDMOB("DEFENDER", "兵士3", 3000, 3000, 100)
+    CALL CC_ADDMOB("DEFENDER", "兵士4", 3000, 3000, 100)
+    CALL CC_ADDMOB("DEFENDER", "兵士5", 3000, 3000, 100)
+    CALL CC_ADDMOB("DEFENDER", "兵士6", 3000, 3000, 100)
+    _EXP = 24
+    _SCORE += POWER(30, 2) * 6
+    ;白兵戦イベント呼出
+    CALL CLOSE_COMBAT()
+    SIF RESULT == 2
+      CALL GAMEOVER_46
+    CALL CC_ADD_COMBAT_EXP(_EXP)
+    FOR LOCAL, 0, FINDELEMENT(CC_ATTACKER_LIST, "-1")
+      _DIC:_BATTLE_UNIT_ID:LOCAL = %CC_ATTACKER_LIST:LOCAL%
+    NEXT
+    CAPTURE_DOCTOR = 1
+    PRINTFORML 兵士たちを殲滅すると、%CALLNAME:MASTER%達の部隊は逃げようとする博士を捕獲した
+    PRINTFORML 「何をする、離せ！ 離せ！ ワシを誰だと思っている！」
+    PRINTFORMW 明らかに重要人物だ。この事件についてもよく知っているだろう。%CALLNAME:MASTER%達はこの男を国軍に引き渡すべく、撤退を決めた
+    _SCORE += 10000000
+    LOCALS = %TOSTR(_SCORE, "$###,###")%
+    PRINTFORMW 報酬として%LOCALS%手に入れた。
+    MONEY += _SCORE
+    DAY ++
+    RETURN
+  ENDIF
+
+  DRAWLINE
+  PRINTBUTTON "[連戦]", 0
+  PRINTBUTTON "[チーム変更]", 1
+  PRINTBUTTON "[撤退]", 3
+  PRINTL
+  DRAWLINE
+  INPUT
+  _LINE_CHAN = 0
+  IF RESULT == 0
+    ;連戦フラグオン
+    CALL CC_SET_FLAG(LINE_CHAN, "1")
+    _LINE_CHAN = 1
+  ELSEIF RESULT == 1
+    CALL SELECT_PMC_BATTLE_UNIT
+    _BATTLE_UNIT_ID = RESULT
+  ELSE
+    _RETIER = 1
+  ENDIF
+WEND
+DRAWLINE
+IF _SCORE == 0
+  LOCALS = $0
+ELSE
+  LOCALS = %TOSTR(_SCORE, "$###,###")%
+ENDIF
+PRINTFORMW 報酬として%LOCALS%手に入れた。
+MONEY += _SCORE
+DAY ++
+
+;----------------------------
+; クエスト説明
+;----------------------------
+@PMC_QUEST_BRIEFING_6
+SETCOLOR 0X666666
+CUSTOMDRAWLINE ///
+RESETCOLOR
+PRINTFORML 先の作戦で第九都市建設予定地は地獄と化した
+PRINTFORML ゾンビとミュータントが徘徊し、およそ人の住める土地ではなくなってしまった
+PRINTFORMW そこでゾンビとミュータントを殲滅し、この地を人の手に戻すのが今回の作戦だ
+PRINTL
+PRINTFORMW なお、人をゾンビ化させるナノマシンに対抗するナノマシンはすでに開発されたので、必ず注射してから出撃すること
+SETCOLOR 0X666666
+CUSTOMDRAWLINE ///
+RESETCOLOR
+
+
