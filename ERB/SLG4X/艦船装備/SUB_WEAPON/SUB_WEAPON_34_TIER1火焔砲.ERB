@@ -1,0 +1,46 @@
+﻿;-----------------------------------
+; サブウェポン
+;-----------------------------------
+@GET_SUB_WEAPON_NAME_34
+RESULTS = TIER1火焔砲
+
+@GET_SUB_WEAPON_STATUS_34(STATUS)
+#DIM REF STATUS
+
+STATUS:DAMAGE = 10
+STATUS:FIRE_RATE = 2
+STATUS:ANTI_AIR = 30
+STATUS:HIT_RATE = 80
+STATUS:FIRE_RANGE = 3
+STATUS:SIZE = 1
+STATUS:WEAPON_TYPE = ビーム
+STATUS:PRICE = 15000
+
+;-----------------------------------
+; サブウェポンの説明
+;-----------------------------------
+@GET_SUB_WEAPON_DESCRIPTION_34
+#DIM STATUS, STATUS_LENGTH
+
+CALL GET_SUB_WEAPON_STATUS_34(STATUS)
+CALL GET_SUB_WEAPON_NAME_34
+PRINTFORML %RESULTS%
+PRINTFORML プラズマ化させた特殊ガスを投射する装備。
+PRINTFORML 元々は対人使用を主眼にした近接防御用兵装であり、見た目こそ派手だが威力はそうでもない。
+PRINTFORML ダメージ  : {STATUS:DAMAGE}
+PRINTFORML 射撃レート: {STATUS:FIRE_RATE}発/ターン
+PRINTFORML 対空攻撃力: {STATUS:ANTI_AIR}
+PRINTFORML 命中率    : {STATUS:HIT_RATE}
+PRINTFORML 有効距離  : {STATUS:FIRE_RANGE}
+PRINTFORML サイズ    : {STATUS:SIZE}
+
+;-----------------------------------
+; サブウェポンの資材
+;-----------------------------------
+@GET_SUB_WEAPON_RESOURCE_34(USE_RESOURCE)
+#DIM REF USE_RESOURCE
+
+USE_RESOURCE:武装合金 = 1
+USE_RESOURCE:武装制御機器 = 1
+USE_RESOURCE:耐熱合金 = 1
+USE_RESOURCE:超電導回路 = 1

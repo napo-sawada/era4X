@@ -1,0 +1,36 @@
+﻿;-----------------------------------
+; コンピューター
+;-----------------------------------
+@GET_COMPUTER_NAME_90
+RESULTS = 次元ヒューリスティックAI
+
+@GET_COMPUTER_STATUS_90(STATUS)
+#DIM REF STATUS
+
+STATUS:AVOID = 30
+
+STATUS:PRICE = 9999999
+
+;-----------------------------------
+; コンピューターの説明
+;-----------------------------------
+@GET_COMPUTER_DESCRIPTION_90(STATUS)
+#DIM STATUS, STATUS_LENGTH
+
+CALL GET_COMPUTER_STATUS_90(STATUS)
+CALL GET_COMPUTER_NAME_90
+PRINTFORML %RESULTS%
+PRINTFORML 次元確率ヒューリスティックＡＩ。
+PRINTFORML 隣接次元を観測することにより、非常に高い精度での未来予測を行うことが可能。
+PRINTFORML 現代の技術では複製はおろか解析すら難しい。
+PRINTFORML 回避    : {STATUS:AVOID}
+
+;-----------------------------------
+; AIの資材
+;-----------------------------------
+@GET_COMPUTER_RESOURCE_90(USE_RESOURCE)
+#DIM REF USE_RESOURCE
+
+
+@IS_SALE_COMPUTER_90
+RETURN 0

@@ -1,0 +1,108 @@
+﻿;------------------------
+; 機兵『セラハン・ジート』
+;------------------------
+@GET_SHIP_NAME_71
+RESULTS = 機兵『セラハン・ジート』
+
+@GET_SHIP_STATUS_71(STATUS)
+#DIM REF STATUS
+
+STATUS:CATEGORY = コルベット
+STATUS:SHIP_HP = 500
+STATUS:SHIP_AVOID = 85
+STATUS:SHIP_MAIN_WEAPON_SIZE = 2
+STATUS:SHIP_SUB_WEAPON_SIZE = 1
+STATUS:SHIP_SIELD_SIZE = 2
+STATUS:SHIP_ARMOR_SIZE = 1
+STATUS:SHIP_ENGIN_SIZE = 1
+STATUS:SHIP_PRICE = 130000000
+STATUS:SHIP_CREW = 1
+
+STATUS:SHIP_MAIN_WEAPON_SLOT = 2
+STATUS:SHIP_SUB_WEAPON_SLOT = 2
+STATUS:SHIP_SIELD_SLOT = 1
+STATUS:SHIP_ARMOR_SLOT = 1
+STATUS:SHIP_OPTION_SLOT = 1
+
+@GET_SHIP_DESCRIPTION_71
+#DIM SHIP_STATUS, SHIP_STATUS_LENGTH
+CALL GET_SHIP_NAME_71
+PRINTFORML %RESULTS%
+SETCOLOR 0X666666
+DRAWLINE
+RESETCOLOR
+CALL GET_SHIP_STATUS_71(SHIP_STATUS)
+PRINTFORML %"HP", 20, LEFT% {SHIP_STATUS:SHIP_HP, 12, RIGHT}
+PRINTFORML %"回避", 20, LEFT% {SHIP_STATUS:SHIP_AVOID, 12, RIGHT}
+PRINTFORML %"主砲サイズ", 20, LEFT% {SHIP_STATUS:SHIP_MAIN_WEAPON_SIZE, 12, RIGHT}
+PRINTFORML %"副砲サイズ", 20, LEFT% {SHIP_STATUS:SHIP_SUB_WEAPON_SIZE, 12, RIGHT}
+PRINTFORML %"シールドサイズ", 20, LEFT% {SHIP_STATUS:SHIP_SIELD_SIZE, 12, RIGHT}
+PRINTFORML %"装甲サイズ", 20, LEFT% {SHIP_STATUS:SHIP_ARMOR_SIZE, 12, RIGHT}
+PRINTFORML %"エンジンサイズ", 20, LEFT% {SHIP_STATUS:SHIP_ENGIN_SIZE, 12, RIGHT}
+PRINTFORML %"主砲スロット", 20, LEFT% {SHIP_STATUS:SHIP_MAIN_WEAPON_SLOT, 12, RIGHT}
+PRINTFORML %"副砲スロット", 20, LEFT% {SHIP_STATUS:SHIP_SUB_WEAPON_SLOT, 12, RIGHT}
+PRINTFORML %"シールドスロット", 20, LEFT% {SHIP_STATUS:SHIP_SIELD_SLOT, 12, RIGHT}
+PRINTFORML %"アーマースロット", 20, LEFT% {SHIP_STATUS:SHIP_ARMOR_SLOT, 12, RIGHT}
+PRINTFORML %"塔乗可能人数", 20, LEFT% {SHIP_STATUS:SHIP_CREW, 12, RIGHT}
+PRINTFORML %"値段", 20, LEFT% %TOSTR(SHIP_STATUS:SHIP_PRICE, "$###,###,###,###"), 12, RIGHT%
+PRINTFORML ハールバルズ王国製の人型兵器。
+PRINTFORML 初の全領域対応型機兵であり、他国からは大型機動歩兵に分類される。
+PRINTFORML 戦列甲冑シリーズの開発成功後、皇国の機動武者から着想を得た先代国王の勅命により
+PRINTFORML 歴史史料同然の儀仗用装備であった「機兵」を戦闘兵器として生まれ変わらせる計画が開始された際、
+PRINTFORML 白羽の矢が立ったのが、比較的良好な状態で残されていた『セラハン・ジン・ジート』であった。
+PRINTFORML ただ、そもそも「機兵」は一見各国のメックに似てはいるが
+PRINTFORML 王国成立以前のハールバルズで建造されており、
+PRINTFORML 技術解析どころかメンテナンスすらまともに行われていなかったため、現存機の改修は早々に頓挫。
+PRINTFORML 外観だけ似せられた事実上の新規設計機となっている。
+PRINTL
+PRINTFORML 「戦列甲冑以上の運動性と高い耐久性を持つ機動武者クラスの人型兵器」という性能要求は
+PRINTFORML かなりの無茶振りと呼べるものであり、甲冑技師たちが解決策として選択したのは
+PRINTFORML 引火・爆発しやすい欠点を持つ人工筋肉に代わり、民主主義国家の小型機動歩兵に用いられている
+PRINTFORML 総機械製内部フレームによる可動構造を大型機動歩兵サイズに巨大化させる、という
+PRINTFORML これまた斜め上の解決策であった。
+PRINTFORML また、王国は複雑化した機体を制御するためのソフトウェア技術を保有しておらず、
+PRINTFORML ブラックボックス化していたオリジナルの「機兵」のものを強引に流用している。
+PRINTFORML 武装面では王国艦船の運用思想を受け継いでおり、高出力ジェネレータを搭載することで
+PRINTFORML 複数の船舶用武装に相当する火器を運用することが可能。
+PRINTFORML 更に専用装備として、駆逐艦用シールド発生装置を内蔵する
+PRINTFORML スクトゥム状の大型シールドも開発された。
+PRINTL
+PRINTFORML 結果的にコルベットを上回る運動性と、ある程度のダメコン能力を両立させることには成功したが、
+PRINTFORML 開発コストは青天井に跳ね上がり、更に新規生産が不可能なパーツまで利用している弊害で
+PRINTFORML 巡洋艦並の建造費を食う上に量産効果がまったく見込めない代物となってしまった。
+PRINTFORML とはいえ、機械の骨格に騎士の全身鎧を着せたような優美な外観は王国貴族にすこぶる好評であり、
+PRINTFORML 先代国王の放蕩財政下で新規艦隊編成レベルの予算が組まれ、20機ほどが建造されている。
+PRINTL 
+SETCOLOR カラー_選択不可
+PRINTFORML 連中のフネの名の標準語訳を見たときから、正直イヤな予感はしていたんだ。
+PRINTFORML ――　惑星アース出身の技術顧問
+RESETCOLOR
+PRINTL
+
+@GET_SHIP_RESOURCE_71(USE_RESOURCE)
+#DIM REF USE_RESOURCE
+
+USE_RESOURCE:武装合金 = 130
+USE_RESOURCE:装甲合金 = 80
+USE_RESOURCE:シールド発生装置 = 80
+USE_RESOURCE:武装制御機器 = 200
+USE_RESOURCE:合金加工剤 = 150
+USE_RESOURCE:耐熱合金 = 100
+USE_RESOURCE:超電導回路 = 999
+USE_RESOURCE:タイラーセンサー = 300
+
+@SET_SHIP_PRESET_71(SHIP_ID)
+#DIM SHIP_ID
+
+SHIP_EQUIP:主砲:0:SHIP_ID = 81
+SHIP_EQUIP:主砲:1:SHIP_ID = 81
+SHIP_EQUIP:副砲:0:SHIP_ID = 37
+SHIP_EQUIP:副砲:1:SHIP_ID = 41
+SHIP_EQUIP:シールド:0:SHIP_ID = 3
+SHIP_EQUIP:装甲:0:SHIP_ID = 38
+SHIP_EQUIP:エンジン:0:SHIP_ID = 9
+SHIP_EQUIP:AI:0:SHIP_ID = 90
+SHIP_EQUIP:センサー:0:SHIP_ID = 2
+
+@IS_SALE_SHIP_71
+RETURN 0

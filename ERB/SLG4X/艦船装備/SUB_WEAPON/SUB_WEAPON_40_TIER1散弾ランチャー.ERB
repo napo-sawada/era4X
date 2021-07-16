@@ -1,0 +1,45 @@
+﻿;-----------------------------------
+; サブウェポン
+;-----------------------------------
+@GET_SUB_WEAPON_NAME_40
+RESULTS = TIER1散弾ランチャー
+
+@GET_SUB_WEAPON_STATUS_40(STATUS)
+#DIM REF STATUS
+
+STATUS:DAMAGE = 15
+STATUS:FIRE_RATE = 1
+STATUS:ANTI_AIR = 100
+STATUS:HIT_RATE = 100
+STATUS:FIRE_RANGE = 1
+STATUS:SIZE = 3
+STATUS:WEAPON_TYPE = 実体弾
+STATUS:PRICE = 40000
+
+;-----------------------------------
+; サブウェポンの説明
+;-----------------------------------
+@GET_SUB_WEAPON_DESCRIPTION_40
+#DIM STATUS, STATUS_LENGTH
+
+CALL GET_SUB_WEAPON_STATUS_40(STATUS)
+CALL GET_SUB_WEAPON_NAME_40
+PRINTFORML %RESULTS%
+PRINTFORML 加害範囲を重視した散弾を発射する独立式の近接防御兵器。
+PRINTFORML 迎撃レールガンに比べ小型だが射程距離は短い。
+PRINTFORML ダメージ  : {STATUS:DAMAGE}
+PRINTFORML 射撃レート: {STATUS:FIRE_RATE}発/ターン
+PRINTFORML 対空攻撃力: {STATUS:ANTI_AIR}
+PRINTFORML 命中率    : {STATUS:HIT_RATE}
+PRINTFORML 有効距離  : {STATUS:FIRE_RANGE}
+PRINTFORML サイズ    : {STATUS:SIZE}
+
+;-----------------------------------
+; サブウェポンの資材
+;-----------------------------------
+@GET_SUB_WEAPON_RESOURCE_40(USE_RESOURCE)
+#DIM REF USE_RESOURCE
+
+USE_RESOURCE:武装合金 = 1
+USE_RESOURCE:武装制御機器 = 2
+USE_RESOURCE:超電導回路 = 1

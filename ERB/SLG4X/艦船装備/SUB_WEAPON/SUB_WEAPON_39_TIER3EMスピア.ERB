@@ -1,0 +1,45 @@
+﻿;-----------------------------------
+; サブウェポン
+;-----------------------------------
+@GET_SUB_WEAPON_NAME_39
+RESULTS = TIER3ＥＭスピア
+
+@GET_SUB_WEAPON_STATUS_39(STATUS)
+#DIM REF STATUS
+
+STATUS:DAMAGE = 200
+STATUS:FIRE_RATE = 1
+STATUS:ANTI_AIR = 50
+STATUS:HIT_RATE = 70
+STATUS:FIRE_RANGE = 1
+STATUS:SIZE = 1
+STATUS:WEAPON_TYPE = 実体弾
+STATUS:PRICE = 40000
+
+;-----------------------------------
+; サブウェポンの説明
+;-----------------------------------
+@GET_SUB_WEAPON_DESCRIPTION_39
+#DIM STATUS, STATUS_LENGTH
+
+CALL GET_SUB_WEAPON_STATUS_39(STATUS)
+CALL GET_SUB_WEAPON_NAME_39
+PRINTFORML %RESULTS%
+PRINTFORML 大型機動歩兵用の射出機構付きスピア。
+PRINTFORML 射出機構を電磁投射式とし、貫通力を大幅に高めたモデル。
+PRINTFORML 基部に重機関砲を搭載することで若干の対空迎撃能力が付与されている。
+PRINTFORML ダメージ  : {STATUS:DAMAGE}
+PRINTFORML 射撃レート: {STATUS:FIRE_RATE}発/ターン
+PRINTFORML 対空攻撃力: {STATUS:ANTI_AIR}
+PRINTFORML 命中率    : {STATUS:HIT_RATE}
+PRINTFORML 有効距離  : {STATUS:FIRE_RANGE}
+PRINTFORML サイズ    : {STATUS:SIZE}
+
+;-----------------------------------
+; サブウェポンの資材
+;-----------------------------------
+@GET_SUB_WEAPON_RESOURCE_39(USE_RESOURCE)
+#DIM REF USE_RESOURCE
+
+USE_RESOURCE:武装合金 = 8
+USE_RESOURCE:武装制御機器 = 4

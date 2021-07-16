@@ -1,0 +1,46 @@
+﻿;-----------------------------------
+; サブウェポン
+;-----------------------------------
+@GET_SUB_WEAPON_NAME_38
+RESULTS = TIER2コールドスピア
+
+@GET_SUB_WEAPON_STATUS_38(STATUS)
+#DIM REF STATUS
+
+STATUS:DAMAGE = 85
+STATUS:FIRE_RATE = 1
+STATUS:ANTI_AIR = 50
+STATUS:HIT_RATE = 60
+STATUS:FIRE_RANGE = 1
+STATUS:SIZE = 1
+STATUS:WEAPON_TYPE = 実体弾
+STATUS:PRICE = 15000
+
+;-----------------------------------
+; サブウェポンの説明
+;-----------------------------------
+@GET_SUB_WEAPON_DESCRIPTION_38
+#DIM STATUS, STATUS_LENGTH
+
+CALL GET_SUB_WEAPON_STATUS_38(STATUS)
+CALL GET_SUB_WEAPON_NAME_38
+PRINTFORML %RESULTS%
+PRINTFORML 大型機動歩兵用の射出機構付きスピア。
+PRINTFORML 低コストかつエネルギーブレード等に比べ命中はさせやすいものの、
+PRINTFORML 発熱機構やシールド形成器の類は搭載していないため威力は大きく落ちる。
+PRINTFORML 基部に重機関砲を搭載することで若干の対空迎撃能力が付与されている。
+PRINTFORML ダメージ  : {STATUS:DAMAGE}
+PRINTFORML 射撃レート: {STATUS:FIRE_RATE}発/ターン
+PRINTFORML 対空攻撃力: {STATUS:ANTI_AIR}
+PRINTFORML 命中率    : {STATUS:HIT_RATE}
+PRINTFORML 有効距離  : {STATUS:FIRE_RANGE}
+PRINTFORML サイズ    : {STATUS:SIZE}
+
+;-----------------------------------
+; サブウェポンの資材
+;-----------------------------------
+@GET_SUB_WEAPON_RESOURCE_38(USE_RESOURCE)
+#DIM REF USE_RESOURCE
+
+USE_RESOURCE:武装合金 = 3
+USE_RESOURCE:武装制御機器 = 2

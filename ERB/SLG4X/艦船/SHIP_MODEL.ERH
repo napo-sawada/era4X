@@ -49,12 +49,17 @@
 #DIM CONST 千鳥級戦闘艇 = 48
 #DIM CONST バルキリー級戦闘艇 = 49
 #DIM CONST 改ダモクレス級戦闘艇 = 50
+#DIM CONST ウィッカーマン戦列甲冑 = 51
 #DIM CONST オクスタン級生体艦 = 52
 #DIM CONST ケンツバ級生体艦 = 53
 #DIM CONST バイシザー強襲生体艦 = 54
 #DIM CONST 生体巡洋艦 = 55
 #DIM CONST ブリストル級巡洋戦艦 = 60
 #DIM CONST センチュリオン機動歩兵 = 61
+#DIM CONST フェイツィⅫ機動歩兵 = 62
+#DIM CONST レギネッタ戦列甲冑 = 63
+#DIM CONST ヴェレス級強襲揚陸艇 = 70
+#DIM CONST 機兵『セラハン・ジート』 = 71
 #DIM CONST 河童級機動漁師 = 85
 #DIM CONST 標準型機動漁師 = 86
 #DIM CONST 青龍級機動漁師 = 87

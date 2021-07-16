@@ -1,0 +1,52 @@
+﻿;-----------------------------------
+; メインウェポン
+;-----------------------------------
+@GET_MAIN_WEAPON_NAME_151
+RESULTS = 『ノイ・サバーカ』
+
+@GET_MAIN_WEAPON_STATUS_151(STATUS)
+#DIM REF STATUS
+
+STATUS:DAMAGE = 90
+STATUS:FIRE_RATE = 1
+STATUS:HIT_RATE = 70
+STATUS:FIRE_RANGE = 1
+STATUS:SIZE = 2
+STATUS:AIR_SHIP_HP = 150
+STATUS:ANTI_AIR = 50
+STATUS:AIR_SHIP_COUNT = 20
+STATUS:WEAPON_TYPE = 艦載機
+STATUS:PRICE = 10000
+
+;-----------------------------------
+; メインウェポンの説明
+;-----------------------------------
+@GET_MAIN_WEAPON_DESCRIPTION_151
+#DIM STATUS, STATUS_LENGTH
+
+CALL GET_MAIN_WEAPON_STATUS_151(STATUS)
+CALL GET_MAIN_WEAPON_NAME_151
+PRINTFORML %RESULTS%
+PRINTFORML 人民連邦製機動歩兵『サバーカ』シリーズの宙間戦闘（0気圧0重力）対応モデル。
+PRINTFORML 武装軽車両並のコスト・パワードスーツ並の装甲・戦車に迫る打撃力という特徴を引き継ぐ一方、
+PRINTFORML この対艦猟兵装備は「人型であることの利点」をほぼ捨て去っており、
+PRINTFORML 現場の兵士から「スラスター付きのコイルガン」と揶揄されていた。
+PRINTFORML ダメージ     : {STATUS:DAMAGE}
+PRINTFORML 射撃レート   : {STATUS:FIRE_RATE}発/ターン
+PRINTFORML 命中率    　: {STATUS:HIT_RATE}
+PRINTFORML 有効距離  　: {STATUS:FIRE_RANGE}
+PRINTFORML サイズ    　: {STATUS:SIZE}
+PRINTFORML 耐久      　: {STATUS:AIR_SHIP_HP}
+PRINTFORML 空対空攻撃力: {STATUS:ANTI_AIR}
+PRINTFORML 搭載数    　: {STATUS:AIR_SHIP_COUNT}
+
+;-----------------------------------
+; メインウェポンの資材
+;-----------------------------------
+@GET_MAIN_WEAPON_RESOURCE_151(USE_RESOURCE)
+#DIM REF USE_RESOURCE
+
+USE_RESOURCE:武装合金 = 1
+USE_RESOURCE:耐熱合金 = 1
+USE_RESOURCE:武装制御機器 = 3
+USE_RESOURCE:ジェットガス = 2
