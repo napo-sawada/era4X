@@ -45,6 +45,9 @@ PRINTFORML %"シールドスロット", 20, LEFT% {SHIP_STATUS:SHIP_SIELD_SLOT, 
 PRINTFORML %"アーマースロット", 20, LEFT% {SHIP_STATUS:SHIP_ARMOR_SLOT, 12, RIGHT}
 PRINTFORML %"塔乗可能人数", 20, LEFT% {SHIP_STATUS:SHIP_CREW, 12, RIGHT}
 PRINTFORML %"値段", 20, LEFT% %TOSTR(SHIP_STATUS:SHIP_PRICE, "$###,###,###,###"), 12, RIGHT%
+CALL GET_SHIP_DESCRIPTION_F_99
+
+@GET_SHIP_DESCRIPTION_F_99
 PRINTFORML 古代遺跡から発掘された古代のタイタン級戦艦
 PRINTFORML 仮想敵が想定できないほどの強力な性能を有しいる
 PRINTFORML コア部分には強力な超能力エネルギーと繋がる次元門が設置されているが、その正体は現代のテクノロジーでは解析できない

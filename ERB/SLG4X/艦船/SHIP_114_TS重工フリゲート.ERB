@@ -45,6 +45,9 @@ PRINTFORML %"シールドスロット", 20, LEFT% {SHIP_STATUS:SHIP_SIELD_SLOT, 
 PRINTFORML %"アーマースロット", 20, LEFT% {SHIP_STATUS:SHIP_ARMOR_SLOT, 12, RIGHT}
 PRINTFORML %"塔乗可能人数", 20, LEFT% {SHIP_STATUS:SHIP_CREW, 12, RIGHT}
 PRINTFORML %"値段", 20, LEFT% %TOSTR(SHIP_STATUS:SHIP_PRICE, "$###,###,###,###"), 12, RIGHT%
+CALL GET_SHIP_DESCRIPTION_F_114
+
+@GET_SHIP_DESCRIPTION_F_114
 PRINTFORML 汎用フリゲートにTS重工製のパワーアップキットを適用した第三世代フリゲート
 PRINTFORML 通常のフリゲートより一回り大きいものの機動性も向上しており、操作性もいい
 PRINTFORML 強みはないが欠点も存在しないため、艦隊の予備戦力として期待されている

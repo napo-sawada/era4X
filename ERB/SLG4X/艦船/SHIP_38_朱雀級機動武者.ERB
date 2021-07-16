@@ -45,6 +45,9 @@ PRINTFORML %"シールドスロット", 20, LEFT% {SHIP_STATUS:SHIP_SIELD_SLOT, 
 PRINTFORML %"アーマースロット", 20, LEFT% {SHIP_STATUS:SHIP_ARMOR_SLOT, 12, RIGHT}
 PRINTFORML %"塔乗可能人数", 20, LEFT% {SHIP_STATUS:SHIP_CREW, 12, RIGHT}
 PRINTFORML %"値段", 20, LEFT% %TOSTR(SHIP_STATUS:SHIP_PRICE, "$###,###,###,###"), 12, RIGHT%
+CALL GET_SHIP_DESCRIPTION_F_38
+
+@GET_SHIP_DESCRIPTION_F_38
 PRINTFORML 拠点制圧、防衛を主目的とした大型機動歩兵。
 PRINTFORML 元々は地上戦用メックを宇宙空間に対応させただけの転用機体であったが、根本設計から大幅な改良が施されている。
 PRINTFORML 四肢を用いた姿勢制御と、それに伴う高い運動性能は敵ＦＣＳによる機動予測を困難にし、回避性能が非常に高い。

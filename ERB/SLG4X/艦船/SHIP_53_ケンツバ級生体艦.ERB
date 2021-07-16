@@ -45,6 +45,9 @@ PRINTFORML %"シールドスロット", 20, LEFT% {SHIP_STATUS:SHIP_SIELD_SLOT, 
 PRINTFORML %"アーマースロット", 20, LEFT% {SHIP_STATUS:SHIP_ARMOR_SLOT, 12, RIGHT}
 PRINTFORML %"塔乗可能人数", 20, LEFT% {SHIP_STATUS:SHIP_CREW, 12, RIGHT}
 PRINTFORML %"値段", 20, LEFT% %TOSTR(SHIP_STATUS:SHIP_PRICE, "$###,###,###,###"), 12, RIGHT%
+CALL GET_SHIP_DESCRIPTION_F_53
+
+@GET_SHIP_DESCRIPTION_F_53
 PRINTFORML 　「太古の時代、拳闘に使われていたとかいう武器を模した生体艦だな」
 PRINTFORML 　「こやつの特徴はとにかく硬いことだ。後方のオクスタン級が蹴散らすまでの間耐え続ける……」
 PRINTFORML 　「つまり、オクスタン級さえ倒せばあとはカカシよ、ナニ？　カカシって何ぞだと？」

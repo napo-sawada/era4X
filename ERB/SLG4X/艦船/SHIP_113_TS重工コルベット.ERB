@@ -45,6 +45,9 @@ PRINTFORML %"シールドスロット", 20, LEFT% {SHIP_STATUS:SHIP_SIELD_SLOT, 
 PRINTFORML %"アーマースロット", 20, LEFT% {SHIP_STATUS:SHIP_ARMOR_SLOT, 12, RIGHT}
 PRINTFORML %"塔乗可能人数", 20, LEFT% {SHIP_STATUS:SHIP_CREW, 12, RIGHT}
 PRINTFORML %"値段", 20, LEFT% %TOSTR(SHIP_STATUS:SHIP_PRICE, "$###,###,###,###"), 12, RIGHT%
+CALL GET_SHIP_DESCRIPTION_F_113
+
+@GET_SHIP_DESCRIPTION_F_113
 PRINTFORML 汎用コルベットにコンペで優勝した企業の改良キットを適用した企業連合の第三世代コルベット
 PRINTFORML 各国の新艦建造レースに乗り遅れぬよう開発されたが、ドクトリンに基づいて開発されていないため役割が存在しない
 

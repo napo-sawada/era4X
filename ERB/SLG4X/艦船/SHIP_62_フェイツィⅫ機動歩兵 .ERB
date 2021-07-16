@@ -45,6 +45,9 @@ PRINTFORML %"シールドスロット", 20, LEFT% {SHIP_STATUS:SHIP_SIELD_SLOT, 
 PRINTFORML %"アーマースロット", 20, LEFT% {SHIP_STATUS:SHIP_ARMOR_SLOT, 12, RIGHT}
 PRINTFORML %"塔乗可能人数", 20, LEFT% {SHIP_STATUS:SHIP_CREW, 12, RIGHT}
 PRINTFORML %"値段", 20, LEFT% %TOSTR(SHIP_STATUS:SHIP_PRICE, "$###,###,###,###"), 12, RIGHT%
+CALL GET_SHIP_DESCRIPTION_F_62
+
+@GET_SHIP_DESCRIPTION_F_62
 PRINTFORML 皇国内戦において新政府軍で活躍した『仁王級機動武者』の設計母体となった
 PRINTFORML 企業連合製メック『ガンレン歩行戦車』を宙間戦闘用に再設計した大型機動歩兵。
 PRINTFORML アサルト・ウォーカーの系譜に属するが、機体特性はむしろ皇国の旧式機動武者に近い。

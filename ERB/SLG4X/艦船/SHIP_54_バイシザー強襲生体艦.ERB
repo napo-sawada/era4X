@@ -45,6 +45,9 @@ PRINTFORML %"シールドスロット", 20, LEFT% {SHIP_STATUS:SHIP_SIELD_SLOT, 
 PRINTFORML %"アーマースロット", 20, LEFT% {SHIP_STATUS:SHIP_ARMOR_SLOT, 12, RIGHT}
 PRINTFORML %"塔乗可能人数", 20, LEFT% {SHIP_STATUS:SHIP_CREW, 12, RIGHT}
 PRINTFORML %"値段", 20, LEFT% %TOSTR(SHIP_STATUS:SHIP_PRICE, "$###,###,###,###"), 12, RIGHT%
+CALL GET_SHIP_DESCRIPTION_F_54
+
+@GET_SHIP_DESCRIPTION_F_54
 PRINTFORML 　バイシザー強襲揚陸生体艦を戦闘用に改造したもの。
 PRINTFORML 　コロニーを制圧したオールドオーダーの暗殺の為に用意した急造艦ではあるが、思ったよりは使えるのでは？
 PRINTFORML 　そう考えたアノニムは急遽戦闘用の改造を加え、戦列に加える事にした。

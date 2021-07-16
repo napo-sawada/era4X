@@ -1,0 +1,20 @@
+era4X用船体フレーバー表示パッチ
+※本体に取り込まれた段階で諸々の権利は放棄され、本体ライセンスに帰属します。
+
+○内容
+
+様々なフレーバーも増えた現状、購入時にしか設定テキストを見ることが出来ないのが残念だったので、
+艦船情報に船体情報を追加し、船体フレーバーを表示します。
+
+各艦船ファイルに以下を追記
+CALL GET_SHIP_DESCRIPTION_F_X
+@GET_SHIP_DESCRIPTION_F_X
+
+GET_SHIP_DESCRIPTION_F_Xをフレーバーテキスト用に新たに組み込みました。
+
+SHIP.ERB202行目に
+PRINTFORML 船体情報:
+TRYCALLFORM GET_SHIP_DESCRIPTION_F_{SHIP_MODEL:SHIP_ID}
+を追記しています。
+
+まだ取り込み前であるスレ１１７の機体は既存の天狗級を除き別に分けています。
