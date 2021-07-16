@@ -10,100 +10,48 @@
 ;貨物スペースの初期化
 ;-----------------------------------
 @INIT_CARGO()
-VARSET SHIP_CARGO_ITEM_ID, -1
-VARSET SHIP_CARGO_ITEM_NUM, 0
+VARSET SHIP_CARGO, 0
 RETURN 0
 ;-----------------------------------
 ;搭載中の貨物の総サイズ
 ;-----------------------------------
-@SUM_CARGO_SIZE(TargetShip)
-#DIM TargetShip
-#DIM cargoSum
+@SUM_CARGO_SIZE(SHIP_ID)
+#DIM SHIP_ID
+#DIM DYNAMIC CARGO_SUM
 
-cargoSum = 0
-FOR LOCAL, 0, ITEM_TYPE_PER_SHIP
-    SIF SHIP_CARGO_ITEM_ID:TargetShip:LOCAL == -1
-        BREAK
-    CALL GET_ITEM_INFO(SHIP_CARGO_ITEM_ID:TargetShip:LOCAL, CARGO_SIZE)
-    cargoSum += RESULT * SHIP_CARGO_ITEM_NUM:TargetShip:LOCAL
+FOR LOCAL, 0, ITEM_LENGTH
+    CARGO_SUM += SHIP_CARGO:SHIP_ID:LOCAL
 NEXT
 
-RETURN cargoSum
+RETURN CARGO_SUM
 
 ;-----------------------------------
 ;TargetShipの空き貨物スペース
 ;-----------------------------------
-@GET_VACANT_CARGO_SIZE(TargetShip)
-#DIM TargetShip
-#DIM totalCargoSize
-#DIM SHIP_STATUS, SHIP_STATUS_LENGTH
+@GET_VACANT_CARGO_SIZE(SHIP_ID)
+#DIM SHIP_ID
+#DIM TOTAL_CARGO_SIZE
+#DIM DYNAMIC SHIP_STATUS, SHIP_STATUS_LENGTH
 #DIM ITER 
 
-CALL SUM_CARGO_SIZE(TargetShip)
-totalCargoSize = RESULT
+CALL SUM_CARGO_SIZE(SHIP_ID)
+TOTAL_CARGO_SIZE = RESULT
 
-VARSET SHIP_STATUS:0
-TRYCALLFORM GET_SHIP_STATUS_{SHIP_MODEL:TargetShip}(SHIP_STATUS)
+TRYCALLFORM GET_SHIP_STATUS_{SHIP_MODEL:SHIP_ID}(SHIP_STATUS)
 FOR ITER, 0, SHIP_STATUS:SHIP_OPTION_SLOT
-    TRYCALLFORM GET_OPTION_EQUIP_EFFECT_{SHIP_EQUIP:オプション:ITER:TargetShip}(SHIP_STATUS)
+    TRYCALLFORM GET_OPTION_EQUIP_EFFECT_{SHIP_EQUIP:オプション:ITER:SHIP_ID}(SHIP_STATUS)
 NEXT
-RETURN SHIP_STATUS:SHIP_CAPACITY - totalCargoSize
-
-;-----------------------------------
-;TargetShipに積めるアイテムの数を返す
-;RESULT:0　積める数。
-;RESULT:1　積み込み先の配列番号
-;-----------------------------------
-@GET_LOADABLE_ITEM_NUM(TargetShip, ItemID)
-#DIM TargetShip
-#DIM ItemID
-#DIM Compartment
-#DIM loadableNum
-#DIM CargoSize
-Compartment = GET_COMPARTMENT_FOR_LOADING(TargetShip, ItemID)
-SIF Compartment == -1
-    RETURN 0
-
-CALL GET_ITEM_INFO(ItemID, CARGO_SIZE)
-CargoSize = RESULT
-
-CALL GET_VACANT_CARGO_SIZE(TargetShip)
-loadableNum = RESULT / CargoSize
-
-RESULT:1 = Compartment
-
-RETURN loadableNum
-;-----------------------------------
-;Itemを積む位置の取得
-;TargetShipにItemIDが積まれていればその位置を返す
-;積まれていなければ空きスペースを返す
-;空きが無ければ-1を返す
-;-----------------------------------
-@GET_COMPARTMENT_FOR_LOADING(TargetShip, ItemID)
-#FUNCTION
-#DIM TargetShip
-#DIM ItemID
-FOR LOCAL, 0, ITEM_TYPE_PER_SHIP
-    SIF SHIP_CARGO_ITEM_ID:TargetShip:LOCAL == ItemID || SHIP_CARGO_ITEM_ID:TargetShip:LOCAL == -1
-        RETURNF LOCAL
-NEXT
-
-RETURNF -1
+RETURN SHIP_STATUS:SHIP_CAPACITY - TOTAL_CARGO_SIZE
 
 ;-----------------------------------
 ;TargetShipから降ろせるItemの数
 ;-----------------------------------
-@GET_CARGO_ITEM_NUM(TargetShip, ItemID)
+@GET_CARGO_ITEM_NUM(SHIP_ID, ITEM_ID)
 #FUNCTION
-#DIM TargetShip
-#DIM ItemID
-#DIM Compartment
+#DIM SHIP_ID
+#DIM ITEM_ID
 
-Compartment = GET_COMPARTMENT_POS(TargetShip, ItemID)
-SIF Compartment == -1
-    RETURNF 0
-
-RETURNF SHIP_CARGO_ITEM_NUM:TargetShip:Compartment
+RETURNF SHIP_CARGO:SHIP_ID:ITEM_ID
 
 ;-----------------------------------
 ;TargetShipとCompornentを指定して、
@@ -136,66 +84,29 @@ RETURNF -1
 ;船への貨物の積み込み
 ;返り値：積み込めたアイテム数
 ;-----------------------------------
-@LOAD_TO_SHIP(TargetShip, ItemID, ItemNum)
-#DIM TargetShip
-#DIM Compartment
-#DIM ItemID
-#DIM ItemNum
-#DIM LoadableNum
+@LOAD_TO_SHIP(SHIP_ID, ITEM_ID, ITEM_NUM)
+#DIM SHIP_ID
+#DIM ITEM_ID
+#DIM ITEM_NUM
 
-SIF ItemNum < 1
-    RETURN ItemNum
+CALL GET_VACANT_CARGO_SIZE(SHIP_ID)
 
-CALL GET_LOADABLE_ITEM_NUM(TargetShip, ItemID)
+SHIP_CARGO:SHIP_ID:ITEM_ID += MIN(ITEM_NUM, RESULT)
 
-SIF RESULT:0 < 1
-    RETURN 0
-
-LoadableNum = MIN(ItemNum, RESULT:0)
-Compartment = RESULT:1
-
-SHIP_CARGO_ITEM_ID:TargetShip:Compartment = ItemID
-SHIP_CARGO_ITEM_NUM:TargetShip:Compartment += LoadableNum
-
-RETURN LoadableNum
+RETURN MIN(ITEM_NUM, RESULT)
 
 ;-----------------------------------
 ;船からの貨物の積み出し
 ;数量を省略すると全部積みだす
 ;返り値：積み出せたアイテム数
 ;-----------------------------------
-@UNLOAD_FROM_SHIP(TargetShip, ItemID, ItemNum = -1)
+@UNLOAD_FROM_SHIP(SHIP_ID, ITEM_ID, ITEM_NUM = -1)
 #FUNCTION
-#DIM TargetShip
-#DIM Compartment
-#DIM ItemID
-#DIM ItemNum
-#DIM unloadableItemNum
-
-Compartment = GET_COMPARTMENT_POS(TargetShip, ItemID)
-SIF Compartment == -1
-    RETURNF 0
-
-SIF ItemNum == -1
-    ItemNum = GET_CARGO_ITEM_NUM(TargetShip, ItemID)
-
-unloadableItemNum = MIN(ItemNum, SHIP_CARGO_ITEM_NUM:TargetShip:Compartment)
-SHIP_CARGO_ITEM_NUM:TargetShip:Compartment -= unloadableItemNum
-
-;アイテム数が0になる場合は配列を詰める
-IF SHIP_CARGO_ITEM_NUM:TargetShip:Compartment == 0
-    FOR LOCAL, Compartment, ITEM_TYPE_PER_SHIP -1
-        SHIP_CARGO_ITEM_ID:TargetShip:LOCAL = SHIP_CARGO_ITEM_ID:TargetShip:(LOCAL + 1)
-        SHIP_CARGO_ITEM_NUM:TargetShip:LOCAL = SHIP_CARGO_ITEM_NUM:TargetShip:(LOCAL + 1)
-        ;整列されていることが前提なので、次が-1なら以降も-1としてこれ以上見ない
-        IF SHIP_CARGO_ITEM_ID:TargetShip:(LOCAL + 1) == -1
-            BREAK
-        ENDIF
-    NEXT
-    ;最終要素をクリア
-    SHIP_CARGO_ITEM_ID:TargetShip:(ITEM_TYPE_PER_SHIP -1) = -1
-    SHIP_CARGO_ITEM_NUM:TargetShip:(ITEM_TYPE_PER_SHIP -1) = 0
-ENDIF
-
-RETURNF unloadableItemNum
+#DIM SHIP_ID
+#DIM ITEM_ID
+#DIM ITEM_NUM
+SIF ITEM_NUM == -1
+    ITEM_NUM = SHIP_CARGO:SHIP_ID:ITEM_ID
+SHIP_CARGO:SHIP_ID:ITEM_ID -= MIN(SHIP_CARGO:SHIP_ID:ITEM_ID, ITEM_NUM)
+RETURNF MIN(SHIP_CARGO:SHIP_ID:ITEM_ID, ITEM_NUM)
 
