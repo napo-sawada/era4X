@@ -3,7 +3,7 @@
 ;これにコンフィグ項目の発生頻度がかけられるので、必ずしもこの通りにはならない
 ;---------------------
 @EVENT_DAILY_MOSER_SHOKAI_RATE()
-RETURN 70
+RETURN 1000
 
 
 ;---------------------
@@ -1046,7 +1046,7 @@ CUSTOMDRAWLINE ///
 RESETCOLOR
 
 PRINTL
-IF RESULT:1 >= 100
+IF LOCAL:1 >= 100
   PRINTBUTTON "[オーネスワイン100セット $45,000]", 0
 ELSE
   PRINT [オーネスワイン100セット $40,000] - 輸送できない!
@@ -1061,7 +1061,7 @@ CUSTOMDRAWLINE ///
 RESETCOLOR
 INPUT
 
-IF (RESULT == 0 && RESULT:1 >= 100) || RESULT == 1
+IF (RESULT == 0 && LOCAL:1 >= 100) || RESULT == 1
   PRINTFORML 安さに不安を覚えながらも興味本位で振り込みを済ませると、無人運搬機が速やかに商品を送って来る。
   PRINTFORML クルーに確認させると、モノは確かであることがわかった。
   PRINTFORMW 安物買いの銭失いではなく、単に良心的価格だったようだ。
@@ -1120,7 +1120,7 @@ CUSTOMDRAWLINE ///
 RESETCOLOR
 
 PRINTL
-IF RESULT:1 >= 200
+IF LOCAL:1 >= 200
   PRINTBUTTON "[トルス酒200セット $80,000]", 0
 ELSE
   PRINT [トルス酒200セット $80,000] - 輸送できない!
@@ -1135,7 +1135,7 @@ CUSTOMDRAWLINE ///
 RESETCOLOR
 INPUT
 
-IF (RESULT == 0 && RESULT:1 >= 200) || RESULT == 1
+IF (RESULT == 0 && LOCAL:1 >= 200) || RESULT == 1
   PRINTFORML 『はい、お買い上げありがとうございます～。すぐに商品を配送しますねぇ』
   PRINTFORML 購入手続きを終えると、前回と同じように無人機で運ばれてきた荷物をクルーにチェックさせる。
   PRINTFORMW 問題がないことを確認した%CALLNAME:MASTER%は、ふと思いついて、クルーに一つ指示を出した。
