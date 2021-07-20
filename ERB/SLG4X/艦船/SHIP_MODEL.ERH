@@ -34,7 +34,7 @@
 #DIM CONST ブリギッド級戦艦 = 33
 #DIM CONST ルー級空母 = 34
 #DIM CONST 宇宙ししゃも = 35
-#DIM CONST アンビシャス試験艦 = 36
+#DIM CONST アンビシャス級試験艦 = 36
 #DIM CONST フリーダム級輸送船 = 37
 #DIM CONST 朱雀級機動武者 = 38
 #DIM CONST 軍用大型輸送船 = 39
