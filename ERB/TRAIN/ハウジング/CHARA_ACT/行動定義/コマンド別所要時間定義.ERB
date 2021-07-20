@@ -1,0 +1,22 @@
+﻿;-------------------------------------------------
+;コマンド実行に要する時間定義(ターンで定義)
+;未定義の場合は1ターン
+;-------------------------------------------------
+@HO_GET_COM_DURATION
+;会話する
+IF GROUPMATCH(SELECTCOM, 300)
+    RETURN 3
+;待機
+ELSEIF GROUPMATCH(SELECTCOM, 700)
+    RETURN 4
+;なにもしない 一緒に遊ぶ 休憩する
+ELSEIF GROUPMATCH(SELECTCOM, 292, 703, 705)
+    RETURN 6
+;食事する
+ELSEIF GROUPMATCH(SELECTCOM, 704)
+    RETURN 9
+;酒池肉林
+ELSEIF GROUPMATCH(SELECTCOM, 51)
+    RETURN 12
+ENDIF
+RETURN 2

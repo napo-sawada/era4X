@@ -1,0 +1,56 @@
+﻿;-------------------------------------------------
+;キャラクターの行動定義
+;-------------------------------------------------
+@HO_行動定義_ウフフ目撃(CHARA_ID)
+#DIM CHARA_ID
+#DIM  DYNAMIC CHARA_IDX
+#DIM  DYNAMIC ROOM_IDX
+#DIMS DYNAMIC _LIST_移動先候補
+#DIMS DYNAMIC 現在の行動 
+
+;IDXを取得
+CALL HO_GET_CHARAIDX(CHARA_ID)
+CHARA_IDX = RESULT
+;キャラが現在いる部屋を取得
+CALL HO_GET_CHARADATA(CHARA_IDX, "ROOM_IDX")
+ROOM_IDX = RESULT
+CALL HO_GET_CHARADATA(CHARA_IDX, "ACTION")
+現在の行動 = %RESULTS%
+
+{
+    SELECTCASE IFRAND(
+        "1",1,
+        "2",現在の行動 == "待機" && ROOM_IDX != TCVAR:CHARA_ID:ウフフ目撃場所
+        )
+}
+    CASE 1 ;情事を目撃したのでとりあえず逃げる
+        ;今使っているモジュールの使用を停止させる
+        CALL HO_STOP_USE_MODULE(CHARA_ID)
+        CALL HO_SET_CHARADATA(CHARA_IDX, "ACTION", "待機")
+        ;現在地から移動可能な部屋を取得
+        CALL HO_GET_PATH(ROOM_IDX)
+        _LIST_移動先候補 = %RESULTS%
+        ;情事を目撃した場所を移動先から除外
+        _LIST_移動先候補 = %LIST_REMOVEALL(_LIST_移動先候補, TOSTR(TCVAR:CHARA_ID:ウフフ目撃場所))%
+        ;移動可能な候補からランダムに選出してMOVELISTに登録
+        SIF LIST_COUNT(_LIST_移動先候補) > 0
+            CALL HO_SET_MOVELIST(CHARA_ID, LIST_SET((LIST_GET(_LIST_移動先候補, RAND(0,LIST_COUNT(_LIST_移動先候補))))))
+    CASE 2 ;待機状態なら適当に休憩
+        CALL HO_TRY_USE_MODULE(CHARA_ID, "休憩")
+        IF RESULT == 1
+            CALL HO_SET_CHARADATA(CHARA_IDX, "ACTION", "休憩中")
+            TCVAR:CHARA_ID:疲労度 -= 100
+            ;1時間から2時間強の間で
+            TCVAR:CHARA_ID:行動待機時間 = RAND(12, 28) * HO_単位時間
+            ;ウフフ目撃フラグを解除
+            TCVAR:CHARA_ID:ウフフ目撃フラグ = 0
+        ELSE
+            TCVAR:CHARA_ID:行動失敗カウンタ ++
+            ;10回休憩を試みても休憩できる場所がなかった
+            IF TCVAR:CHARA_ID:行動失敗カウンタ == 10
+                TCVAR:CHARA_ID:ウフフ目撃フラグ = 0
+            ENDIF
+        ENDIF
+    CASEELSE
+ENDSELECT
+

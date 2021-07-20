@@ -6,7 +6,11 @@
 @COM_NAME24
 ;挿入中
 
-LOCALS:0 = 指フェラ
+IF FLAG:調教モード != 調教_居住区
+	LOCALS:0 = 指フェラ
+ELSE
+	LOCALS:0 = 指舐め
+ENDIF
 
 RESULTS:0 = %LOCALS:0%する
 RESULTS:1 = %LOCALS:0%させられる
@@ -197,7 +201,17 @@ PRINTFORML %EQUIP_PLAYER_ANAME(ARG:0)%が%EQUIP_TARGET_ANAME(ARG:0)%の指を口
 @COM_ORDER_PLAYER24(ARG:0)
 ;実行値の設定
 TCVAR:(ARG:0):25 = 85
+CALL COM_ORDER_COMMON24(ARG:0)
+RETURN 1
 
+@COM_ORDER_TARGET24(ARG:0)
+IF FLAG:調教モード == 調教_居住区
+	TCVAR:(ARG:0):25 = 65
+	CALL COM_ORDER_COMMON24(ARG:0)
+	RETURN 1
+ENDIF
+
+@COM_ORDER_COMMON24(ARG:0)
 ;共通部分
 CALL COM_ORDER(ARG:0)
 
@@ -333,7 +347,11 @@ NEXT
 ;-------------------------------------------------
 
 @COM_AVAILABLE_WHEN24
-RETURN コマンド_ウフフ
+IF FLAG:調教モード != 調教_居住区
+	RETURN コマンド_ウフフ
+ELSE
+	RETURN コマンド_居住区
+ENDIF
 
 ;--------------------
 ;性嗜好用関数

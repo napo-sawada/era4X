@@ -16,7 +16,13 @@ FOR LOCAL, 0, MTAR_NUM
 		LOCALS:1 = 
 	ENDIF
 NEXT
-
+LOCALS:2 =
+IF FLAG:調教モード == 調教_居住区
+	CALL HO_CHECK_USE_MODULE_ELEM(MASTER, "机")
+	IF RESULT == 1
+		LOCALS:2 = 机下
+	ENDIF
+ENDIF
 IF MTAR_NUM > 3
 	LOCALS:0 = %LOCALS:1%輪フェラ
 ELSEIF MTAR_NUM == 3
@@ -47,12 +53,12 @@ NEXT
 SIF !LOCAL:1
 	LOCALS:0 = ペニバン%LOCALS:0%
 
-RESULTS:0 = %LOCALS:0%する
-RESULTS:1 = %LOCALS:0%させられる
-RESULTS:2 = %LOCALS:0%させる
-RESULTS:3 = %LOCALS:0%される
-RESULTS:4 = %LOCALS:0%させる
-RESULTS:5 = %LOCALS:0%見せつけ
+RESULTS:0 = %LOCALS:2%%LOCALS:0%する
+RESULTS:1 = %LOCALS:2%%LOCALS:0%させられる
+RESULTS:2 = %LOCALS:2%%LOCALS:0%させる
+RESULTS:3 = %LOCALS:2%%LOCALS:0%される
+RESULTS:4 = %LOCALS:2%%LOCALS:0%させる
+RESULTS:5 = %LOCALS:2%%LOCALS:0%見せつけ
 
 ;-------------------------------------------------
 ;選択可否判定
@@ -298,7 +304,15 @@ NEXT
 ;継続中の表示
 ;-------------------------------------------------
 @EQUIP_MESSAGE11(ARG:0)
-RESULTS = %EQUIP_PLAYER_ANAME(ARG:0)%が%EQUIP_TARGET_ANAME(ARG:0)%にフェラ中
+IF FLAG:調教モード == 調教_居住区
+	CALL HO_CHECK_USE_MODULE_ELEM(MASTER, "机")
+	IF RESULT == 1
+		LOCALS:0 = 机下
+	ELSE
+		LOCALS:0 '= ""
+	ENDIF
+ENDIF
+RESULTS = %EQUIP_PLAYER_ANAME(ARG:0)%が%EQUIP_TARGET_ANAME(ARG:0)%に%LOCALS:0%フェラ中
 
 ;-------------------------------------------------
 ;継続中の地の文(前文)
@@ -740,8 +754,11 @@ NEXT
 ;-------------------------------------------------
 
 @COM_AVAILABLE_WHEN11
-RETURN コマンド_ウフフ
-
+IF FLAG:調教モード != 調教_居住区
+	RETURN コマンド_ウフフ
+ELSE
+	RETURN コマンド_居住区
+ENDIF
 ;--------------------
 ;性嗜好用関数
 ;--------------------

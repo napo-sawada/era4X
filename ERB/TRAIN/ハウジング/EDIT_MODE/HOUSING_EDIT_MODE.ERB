@@ -1,0 +1,623 @@
+﻿;-------------------------------------------------
+; 居住区編集モード
+;-------------------------------------------------
+@HOUSING_EDIT_MODE_MAIN
+#DIMS DYNAMIC ROOM_NAME
+#DIM PRINTED_LINE
+
+HO_有効マップID = 0
+CALL HO_LOAD_MAPDATA(HO_有効マップID)
+PRINTED_LINE = LINECOUNT
+HO_EDIT_選択中アイテム = HO_MAXVAL
+WHILE 1
+
+    CALL HO_EDIT_DRAW_HEADER
+    CALL HO_EDIT_DRAW_MAP_WINDOW
+    CALL HO_EDIT_DRAW_MODULE_WINDOW
+    CALL WndMgr_DisplayAll()
+    CALL HO_EDIT_DRAW_BOTTOM_MENU
+    REDRAW 1
+    CALL HO_EDIT_INPUT
+    ;編集完了またはキャンセルボタンが押下された
+    IF RESULT == -1
+        CALL WndMgr_DestroyWindow(-1)
+        RETURN 
+    ENDIF
+    CALL HO_EDIT_FORMAT_PATH
+    REDRAW 0
+    CLEARLINE LINECOUNT - PRINTED_LINE
+WEND
+
+@HO_EDIT_DRAW_HEADER
+#DIM  DYNAMIC BTN_ID
+#DIMS DYNAMIC ROOM_NAME
+#DIM  DYNAMIC FCOLOR, 2
+
+CUSTOMDRAWLINE ─
+CALL TITLE_CATEGORY_GENERAL(@"%SHIP_NAME:(BOARDING_SHIP_ID:MASTER)%艦内居住区")
+PRINTL
+PRINTFORM ★エディットモード
+PRINTL
+PRINTL
+BTN_ID = HO_TOPボタンID
+IF HO_EDIT_MODE == 0
+    FCOLOR:0 = カラー_選択中
+    FCOLOR:1 = カラー_白
+ELSE
+    FCOLOR:0 = カラー_白
+    FCOLOR:1 = カラー_選択中
+ENDIF
+CALLF FuncTagSetText_Print(@"@C:{FCOLOR:0}@@B:{BTN_ID}@[ルーム編集]@/B@@/C@  @C:{FCOLOR:1}@@B:{BTN_ID + 1}@[モジュール編集]@/B@@/C@", 5)
+
+@HO_EDIT_DRAW_BOTTOM_MENU
+#DIM BTN_ID
+#DIM FCOL
+#DIMS DYNAMIC ROOM_NAME
+#DIMS DYNAMIC _LIST_ROOM_TAG
+#DIM DYNAMIC MODULE_ID
+BTN_ID = HO_編集アイテムID
+
+PRINTL
+IF HO_EDIT_MODE == 0
+    CALLF FuncTagSetText_Print(@"@C:{カラー_選択不可}@ルーム間をクリックして通路の有無を切替@/C@", 1)
+ELSE
+    PRINTL
+ENDIF
+CUSTOMDRAWLINE ─
+
+IF HO_EDIT_MODE == 0
+    CALL TITLE_CATEGORY_GENERAL(@"設置可能なルーム")
+    PRINTL
+    PRINTL
+    LOCAL:0 = 0
+    IF HO_EDIT_選択中アイテム == 0
+        FCOL = カラー_選択中
+    ELSE
+        FCOL= カラー_白
+    ENDIF
+    CALLF FuncTagSetText_Print(@"@C:{FCOL}@@B:{BTN_ID}@[撤去]@/B@@/C@  ", 4)
+    WHILE 1
+        IF LOCAL == HO_EDIT_選択中アイテム
+            FCOL = カラー_選択中
+        ELSE
+            FCOL= カラー_白
+        ENDIF
+        TRYCCALLFORM HO_ROOM_DATA_{LOCAL:0}
+            IF HO_ROOM_STOCK:(LOCAL:0) > 0
+                CALL HO_GET_ROOM_DATA(LOCAL:0, "ROOM_NAME")
+                CALLF FuncTagSetText_Print(@"@C:{FCOL}@@B:{BTN_ID + LOCAL:0}@[%RESULTS%  × {HO_ROOM_STOCK:(LOCAL:0)}]@/B@@/C@  ", 4)
+            ENDIF
+        CATCH
+            BREAK
+        ENDCATCH
+        LOCAL:0 ++
+    WEND
+ELSE
+    CALL HO_GET_ROOM_NAME(HO_EDIT_選択中ルームIDX)
+    ROOM_NAME = %RESULTS%
+    CALL HO_GET_ROOM_TAG(HO_EDIT_選択中ルームIDX)
+    _LIST_ROOM_TAG = %RESULTS%
+    PRINTFORM %ROOM_NAME%のルームタグ:
+    FOR LOCAL, 0, LIST_COUNT(_LIST_ROOM_TAG)
+        LOCALS = %LIST_GET(_LIST_ROOM_TAG, LOCAL)%
+        PRINTFORM <%LOCALS%>  
+    NEXT
+    PRINTL
+    CUSTOMDRAWLINE ─
+    CALL TITLE_CATEGORY_GENERAL(@"モジュール一覧")
+    PRINTL
+    PRINTL
+    LOCAL:0 = 0
+    IF HO_EDIT_選択中アイテム == 0
+        FCOL = カラー_選択中
+    ELSE
+        FCOL= カラー_白
+    ENDIF
+    CALLF FuncTagSetText_Print(@"@C:{FCOL}@@B:{BTN_ID}@[撤去]@/B@@/C@  ", 4)
+    WHILE 1
+        IF LOCAL == HO_EDIT_選択中アイテム
+            FCOL = カラー_選択中
+        ELSE
+            FCOL= カラー_白
+        ENDIF
+        TRYCCALLFORM HO_ROOM_MODULE_DATA_{LOCAL:0}
+            IF HO_MODULE_STOCK:(LOCAL:0) > 0
+                CALL HO_GET_MODULE_DATA(LOCAL:0, "MODULE_NAME")
+                CALLF FuncTagSetText_Print(@"@C:{FCOL}@@B:{BTN_ID + LOCAL:0}@[%RESULTS%  × {HO_MODULE_STOCK:(LOCAL:0)}]@/B@@/C@  ", 4)
+            ENDIF
+        CATCH
+            BREAK
+        ENDCATCH
+        LOCAL:0 ++
+    WEND
+    PRINTL
+    IF HO_EDIT_選択中アイテム != 0 && HO_EDIT_選択中アイテム != HO_MAXVAL
+        MODULE_ID = HO_EDIT_選択中アイテム
+        PRINTL
+        CALL TITLE_CATEGORY_GENERAL(@"概要")
+        PRINTL
+        CALL HO_GET_MODULE_DATA(MODULE_ID, "MODULE_NAME")
+        LOCALS:0 = %RESULTS%
+        CALL HO_GET_MODULE_DATA(MODULE_ID, "人数")
+        LOCALS:1 = %TOSTR(RESULT)%
+        CALL HO_GET_MODULE_DATA(MODULE_ID, "制限")
+        LOCALS:2 = %RESULTS%
+        TRYCALLFORM HO_ROOM_MODULE_DESC_{MODULE_ID}
+        LOCALS:4 = %RESULTS%
+        PRINTFORML ◆%LOCALS:0%
+        SIF LIST_COUNT(LOCALS:2) > 0
+            PRINTFORM 設置可能タグ:
+        FOR LOCAL, 0, LIST_COUNT(LOCALS:2)
+            LOCALS:3 = %LIST_GET(LOCALS:2, LOCAL)%
+            PRINTFORM <%LOCALS:3%>  
+        NEXT
+        PRINTL
+        PRINTFORML 定員：%LOCALS:1%名
+        PRINTFORML %LOCALS:4%
+    ENDIF
+ENDIF
+;
+;-------------------------------------------------
+PRINTL
+PRINTL
+SETCOLOR カラー_選択不可
+CUSTOMDRAWLINE ─
+RESETCOLOR
+BTN_ID = HO_BTMボタンID
+CALLF FuncTagSetText_Print(@"@B:{BTN_ID}@[編集内容を保存]@/B@@/C@      ", 4)
+CALLF FuncTagSetText_Print(@"@B:{BTN_ID + 1}@[キャンセル]@/B@@/C@", 4)
+
+;エディット画面の入力処理
+@HO_EDIT_INPUT
+#DIM DYNAMIC ROOM_IDX
+#DIM DYNAMIC ROOM_ID
+#DIM DYNAMIC ROOM_CAP
+#DIM DYNAMIC MODULE_IDX
+#DIM DYNAMIC MODULE_ID
+#DIMS DYNAMIC _LIST_MODULE
+
+ONEINPUTS
+SIF ISNUMERIC(RESULTS)
+    RESULT = TOINT(RESULTS)
+;編集モード切り替え
+IF RESULT >= HO_TOPボタンID && RESULT <= HO_TOPボタンID + 1
+    INVERTBIT HO_EDIT_MODE, 0
+    HO_EDIT_選択中アイテム = HO_MAXVAL
+;;ルーム編集モード
+;-------------------------------------------------
+;通路の編集
+;4*4サイズのマップの通路数は0-31
+ELSEIF RESULT >= HO_通路ボタンID && RESULT <= HO_通路ボタンID + 31 && HO_EDIT_MODE == 0
+    CALL HO_EDIT_CHANGE_ROOM_PATH(RESULT - HO_通路ボタンID)
+ELSEIF RESULT >= HO_編集アイテムID && HO_EDIT_MODE == 0
+    ROOM_ID = RESULT - HO_編集アイテムID
+    ;値の妥当性チェック
+    CALL HO_GET_ROOM_DATA(ROOM_ID, "ROOM_NAME")
+    IF RESULT == -1 || ROOM_ID == HO_EDIT_選択中アイテム
+        HO_EDIT_選択中アイテム = HO_MAXVAL
+        RETURN
+    ENDIF
+    HO_EDIT_選択中アイテム = ROOM_ID
+;ルームの置き換え
+ELSEIF RESULT >= HO_マップボタンID && RESULT <= HO_マップボタンID + HO_MAX_ROOMNUM &&  HO_EDIT_MODE == 0
+    ROOM_IDX = RESULT - HO_マップボタンID
+    HO_EDIT_選択中ルームIDX = ROOM_IDX
+    ;値の妥当性チェック
+    SIF HO_EDIT_選択中アイテム == HO_MAXVAL
+        RETURN
+    CALL HO_GET_ROOM_ID(ROOM_IDX)
+    ROOM_ID = RESULT
+    CALL HO_GET_MAPDATA(HO_有効マップID, ROOM_IDX, "MODULE_LIST")
+    _LIST_MODULE = %RESULTS%
+    ;ルームが既に配置済みで一つ以上モジュールが配置されているならば、置き換え前に警告メッセージを出す
+    IF ROOM_ID != 0 && LIST_COUNT(_LIST_MODULE) > 0
+        CALL COLOR_PRINTL("ルームを置き換えます。配置済みのモジュールは初期化されますがよろしいですか？", カラー_注意)
+        CALL ASK_YN()
+        SIF RESULT
+            RETURN 
+    ENDIF
+    ;配置済みのルームを在庫に戻す
+    SIF ROOM_ID != 0
+        HO_ROOM_STOCK:ROOM_ID ++
+    CALL HO_EDIT_UNDEPLOY_ALL_MODULE(ROOM_IDX)
+    CALL HO_SET_MAPDATA(ROOM_IDX, "ROOM_ID", TOSTR(HO_EDIT_選択中アイテム))
+    HO_ROOM_STOCK:HO_EDIT_選択中アイテム --
+    IF HO_ROOM_STOCK:HO_EDIT_選択中アイテム == 0
+        HO_EDIT_選択中アイテム = HO_MAXVAL
+    ENDIF
+;;モジュール編集モード
+;-------------------------------------------------
+;編集対象の部屋を選択
+ELSEIF RESULT >= HO_マップボタンID && RESULT <= HO_マップボタンID + HO_MAX_ROOMNUM - 1&&  HO_EDIT_MODE == 1
+    HO_EDIT_選択中ルームIDX = RESULT - HO_マップボタンID
+;押下されたモジュールを選択済みに
+ELSEIF  RESULT >= HO_編集アイテムID && RESULT <= HO_編集アイテムID + HO_MAX_MODULETYPE && HO_EDIT_MODE == 1
+    HO_EDIT_選択中アイテム = RESULT - HO_編集アイテムID
+    ;値の妥当性チェック
+    IF HO_MODULE_STOCK:HO_EDIT_選択中アイテム < 1 && HO_EDIT_選択中アイテム != 0
+        HO_EDIT_選択中アイテム = HO_MAXVAL
+        RETURN
+    ENDIF
+;モジュールウィンドウクリック時の処理
+ELSEIF RESULT >= HO_モジュールボタンID && RESULT <= HO_モジュールボタンID + HO_MAX_MODULENUM -1 &  HO_EDIT_MODE == 1
+    SIF HO_EDIT_選択中アイテム == HO_MAXVAL
+        RETURN
+    MODULE_IDX = RESULT - HO_モジュールボタンID
+    CALL HO_GET_MAPDATA(HO_有効マップID, HO_EDIT_選択中ルームIDX, "ROOM_ID")
+    ROOM_ID = RESULT
+    CALL HO_GET_ROOM_DATA(ROOM_ID, "ROOM_CAPACITY")
+    ROOM_CAP = RESULT
+    ;ROOMのCAPACITYを超えるMODULE_IDXが投入された場合はRETURN
+    SIF MODULE_IDX > ROOM_CAP
+        RETURN
+    CALL HO_GET_MODULE_ID(HO_EDIT_選択中ルームIDX, MODULE_IDX)
+    MODULE_ID = RESULT
+    ;モジュール撤去モード
+    IF MODULE_ID != -1 && HO_EDIT_選択中アイテム == 0
+        CALL HO_GET_MAPDATA(HO_有効マップID, HO_EDIT_選択中ルームIDX, "MODULE_LIST")
+        _LIST_MODULE = %RESULTS%
+        _LIST_MODULE = %LIST_REMOVEAT(_LIST_MODULE, MODULE_IDX)%
+        CALL HO_SET_MAPDATA(HO_EDIT_選択中ルームIDX, "MODULE_LIST", _LIST_MODULE)
+        HO_MODULE_STOCK:MODULE_ID ++
+    ;モジュール設置モード
+    ELSEIF HO_EDIT_選択中アイテム != 0
+        CALL HO_EDIT_CHECK_MODULE_DEPLOYABLE(HO_EDIT_選択中ルームIDX, HO_EDIT_選択中アイテム)
+        SIF RESULT == 0
+            RETURN
+        CALL HO_GET_MAPDATA(HO_有効マップID, HO_EDIT_選択中ルームIDX, "MODULE_LIST")
+        _LIST_MODULE = %RESULTS%
+        IF LIST_GET(_LIST_MODULE, MODULE_IDX) != ""
+            _LIST_MODULE = %LIST_INSERTAT(_LIST_MODULE, MODULE_IDX, TOSTR(HO_EDIT_選択中アイテム))%
+        ELSE
+            _LIST_MODULE = %LIST_ADD(_LIST_MODULE, TOSTR(HO_EDIT_選択中アイテム))%
+        ENDIF
+        CALL HO_SET_MAPDATA(HO_EDIT_選択中ルームIDX, "MODULE_LIST", _LIST_MODULE)
+        HO_MODULE_STOCK:HO_EDIT_選択中アイテム --
+        IF HO_MODULE_STOCK:HO_EDIT_選択中アイテム == 0
+            HO_EDIT_選択中アイテム = HO_MAXVAL
+        ENDIF
+    ENDIF
+;;底部ボタンの処理
+;-------------------------------------------------
+ELSEIF RESULT >= HO_BTMボタンID && RESULT <= HO_BTMボタンID + 1
+    IF RESULT == HO_BTMボタンID
+        CALL COLOR_PRINTL("編集内容を保存して交流画面に戻ります。よろしいですか？", カラー_注意)
+        CALL ASK_YN()
+        IF !RESULT
+            CALL HO_EDIT_CHECK_ERROR
+            IF RESULT
+                CALL HO_EDIT_SAVE_MAPDATA
+                RETURN -1
+            ELSE
+                RETURN
+            ENDIF
+        ELSE
+            RETURN
+        ENDIF
+    ELSEIF RESULT == HO_BTMボタンID + 1
+        CALL COLOR_PRINTL("編集内容を破棄して交流画面に戻ります。よろしいですか？", カラー_注意)
+        CALL ASK_YN()
+        IF !RESULT
+            RETURN -1
+        ELSE
+            RETURN
+        ENDIF
+    ENDIF
+ENDIF
+
+;対象のルームに設置済みのモジュールをすべて在庫に戻す
+@HO_EDIT_UNDEPLOY_ALL_MODULE(ROOM_IDX)
+#DIM ROOM_IDX
+#DIM DYNAMIC MODULE_IDX
+#DIM DYNAMIC MODULE_ID
+#DIMS DYNAMIC _LIST_MODULE
+
+CALL HO_GET_MAPDATA(HO_有効マップID, ROOM_IDX, "MODULE_LIST")
+_LIST_MODULE = %RESULTS%
+FOR LOCAL, 0, LIST_COUNT(_LIST_MODULE) 
+    MODULE_ID = TOINT(LIST_GET(_LIST_MODULE, 0))
+    _LIST_MODULE = %LIST_REMOVEAT(_LIST_MODULE, 0)%
+    HO_MODULE_STOCK:MODULE_ID ++
+NEXT
+CALL HO_SET_MAPDATA(ROOM_IDX, "MODULE_LIST", _LIST_MODULE)
+
+RETURN
+
+;対象のルームにモジュールが配置可能か調べる
+@HO_EDIT_CHECK_MODULE_DEPLOYABLE(ROOM_IDX, MODULE_ID)
+#DIM ROOM_IDX
+#DIM MODULE_ID
+#DIM DYNAMIC ROOM_ID
+#DIM DYNAMIC ROOM_CAP
+#DIMS DYNAMIC _LIST_MODULE
+#DIMS DYNAMIC _LIST_制限リスト
+#DIMS DYNAMIC _LIST_ROOM_TAG
+
+CALL HO_GET_MAPDATA(HO_有効マップID, HO_EDIT_選択中ルームIDX, "ROOM_ID")
+ROOM_ID = RESULT
+CALL HO_GET_ROOM_DATA(ROOM_ID, "ROOM_CAPACITY")
+ROOM_CAP = RESULT
+CALL HO_GET_MAPDATA(HO_有効マップID, HO_EDIT_選択中ルームIDX, "MODULE_LIST")
+_LIST_MODULE = %RESULTS%
+;既にルームの設置上限までモジュールを配置してる場合不可
+IF LIST_COUNT(_LIST_MODULE) == ROOM_CAP
+    CALL COLOR_PRINTW("このルームにモジュールを設置可能なスペースがありません", カラー_注意)
+    CLEARLINE 1
+    RETURN 0
+ENDIF
+CALL HO_GET_MODULE_DATA(MODULE_ID, "制限")
+_LIST_制限リスト = %RESULTS%
+;制限リストに登録がない場合は設置可
+SIF LIST_COUNT(_LIST_制限リスト) == 0
+    RETURN 1
+CALL HO_GET_ROOM_TAG(ROOM_IDX)
+_LIST_ROOM_TAG = %RESULTS%
+
+FOR LOCAL, 0, LIST_COUNT(_LIST_制限リスト)
+    LOCALS = %LIST_GET(_LIST_制限リスト, LOCAL)%
+    ;制限リストとルームタグが合致する場合は設置可
+    SIF LIST_INDEXOF(_LIST_ROOM_TAG, LOCALS) != -1
+        RETURN 1
+NEXT
+
+;制限リストと合致するルームタグがない
+CALL COLOR_PRINTW("このルームには設置できないモジュールです", カラー_注意)
+CLEARLINE 1
+RETURN 0
+
+
+@HO_EDIT_CHANGE_ROOM_PATH(PATH_ID)
+#DIM PATH_ID
+#DIM DYNAMIC ROOM_IDX
+#DIMS DYNAMIC _LIST_PATH
+ROOM_IDX = PATH_ID / 2
+SIF ROOM_IDX > HO_MAX_ROOMNUM
+    RETURN 
+
+
+;横列の通路の処理
+IF PATH_ID % 2 == 0
+    ;"なし"の部屋との通路は編集できないように
+    CALL HO_GET_ROOM_ID(ROOM_IDX)
+    SIF RESULT == 0
+        RETURN
+    CALL HO_GET_ROOM_ID(ROOM_IDX + 1)
+    SIF RESULT == 0
+        RETURN
+    CALL HO_GET_PATH(ROOM_IDX)
+    _LIST_PATH = %RESULTS%
+    ;右隣の部屋へのパスが存在するか？
+    IF LIST_INDEXOF(_LIST_PATH, TOSTR(ROOM_IDX + 1)) != -1
+        ;右隣の部屋へのパスを削除
+        _LIST_PATH = %LIST_REMOVEAT(_LIST_PATH, LIST_INDEXOF(_LIST_PATH, TOSTR(ROOM_IDX + 1)))%
+        CALL HO_SET_MAPDATA(ROOM_IDX, "ROOM_PATH", _LIST_PATH)
+        ;右隣の部屋から左隣の部屋へのパスも削除
+        CALL HO_GET_PATH(ROOM_IDX + 1)
+        _LIST_PATH = %RESULTS%
+        _LIST_PATH = %LIST_REMOVEAT(_LIST_PATH, LIST_INDEXOF(_LIST_PATH, TOSTR(ROOM_IDX)))%
+        CALL HO_SET_MAPDATA(ROOM_IDX + 1, "ROOM_PATH", _LIST_PATH)
+    ;存在しないならばパスを追加
+    ELSE
+        ;右隣の部屋へのパスを追加
+        _LIST_PATH = %LIST_ADD(_LIST_PATH, TOSTR(ROOM_IDX + 1))%
+        CALL HO_SET_MAPDATA(ROOM_IDX, "ROOM_PATH", _LIST_PATH)
+        ;右隣の部屋から左隣の部屋へのパスも追加
+        CALL HO_GET_PATH(ROOM_IDX + 1)
+        _LIST_PATH = %RESULTS%
+        _LIST_PATH = %LIST_ADD(_LIST_PATH, TOSTR(ROOM_IDX))%
+        CALL HO_SET_MAPDATA(ROOM_IDX + 1, "ROOM_PATH", _LIST_PATH)
+    ENDIF
+;縦列の通路の処理
+ELSE
+    ;"なし"の部屋との通路は編集できないように
+    CALL HO_GET_ROOM_ID(ROOM_IDX)
+    SIF RESULT == 0
+        RETURN
+    CALL HO_GET_ROOM_ID(ROOM_IDX + 4)
+    SIF RESULT == 0
+        RETURN
+    CALL HO_GET_PATH(ROOM_IDX)
+    _LIST_PATH = %RESULTS%
+    ;下隣の部屋へのパスが存在するか？
+    IF LIST_INDEXOF(_LIST_PATH, TOSTR(ROOM_IDX + 4)) != -1
+        ;下隣の部屋へのパスを削除
+        _LIST_PATH = %LIST_REMOVEAT(_LIST_PATH, LIST_INDEXOF(_LIST_PATH, TOSTR(ROOM_IDX + 4)))%
+        CALL HO_SET_MAPDATA(ROOM_IDX, "ROOM_PATH", _LIST_PATH)
+        ;下隣の部屋から上隣の部屋へのパスも削除
+        CALL HO_GET_PATH(ROOM_IDX + 4)
+        _LIST_PATH = %RESULTS%
+        _LIST_PATH = %LIST_REMOVEAT(_LIST_PATH, LIST_INDEXOF(_LIST_PATH, TOSTR(ROOM_IDX)))%
+        CALL HO_SET_MAPDATA(ROOM_IDX + 4, "ROOM_PATH", _LIST_PATH)
+    ;存在しないならばパスを追加
+    ELSE
+        ;右隣の部屋へのパスを追加
+        _LIST_PATH = %LIST_ADD(_LIST_PATH, TOSTR(ROOM_IDX + 4))%
+        CALL HO_SET_MAPDATA(ROOM_IDX, "ROOM_PATH", _LIST_PATH)
+        ;右隣の部屋から左隣の部屋へのパスも追加
+        CALL HO_GET_PATH(ROOM_IDX + 4)
+        _LIST_PATH = %RESULTS%
+        _LIST_PATH = %LIST_ADD(_LIST_PATH, TOSTR(ROOM_IDX))%
+        CALL HO_SET_MAPDATA(ROOM_IDX + 4, "ROOM_PATH", _LIST_PATH)
+    ENDIF
+ENDIF
+
+;EMPTYと接続している不正なパスを纏めて消去する
+@HO_EDIT_FORMAT_PATH
+#DIM PATH_ID
+#DIM DYNAMIC ROOM_IDX
+#DIMS DYNAMIC _LIST_PATH
+FOR LOCAL, 0, HO_MAX_ROOMNUM
+    CALL HO_GET_ROOM_ID(LOCAL:0)
+    IF RESULT == 0
+        CALL HO_SET_MAPDATA(LOCAL:0, "ROOM_PATH", "")
+    ELSE
+        CALL HO_GET_PATH(LOCAL)
+        _LIST_PATH = %RESULTS%
+        FOR LOCAL:1, 0, LIST_COUNT(_LIST_PATH)
+            ROOM_IDX = TOINT(LIST_GET(_LIST_PATH, LOCAL:1))
+            CALL HO_GET_ROOM_ID(ROOM_IDX)
+            SIF RESULT == 0
+                _LIST_PATH = %LIST_REMOVEAT(_LIST_PATH, LOCAL:1)%
+        NEXT
+        CALL HO_SET_MAPDATA(LOCAL:0, "ROOM_PATH", _LIST_PATH)
+    ENDIF
+NEXT
+
+;編集結果が妥当か調べる
+@HO_EDIT_CHECK_ERROR
+#DIM DYNAMIC ROOM_IDX
+#DIM DYNAMIC 私室がある
+#DIM DYNAMIC クルー私室がある
+#DIM DYNAMIC 食堂がある
+#DIM DYNAMIC ERR_CNT
+FOR ROOM_IDX, 0, HO_MAX_ROOMNUM
+    CALL HO_CHECK_ROOM_TAG(ROOM_IDX, "プレイヤー私室")
+    SIF RESULT 
+        私室がある ++
+    CALL HO_CHECK_ROOM_TAG(ROOM_IDX, "クルー私室")
+    SIF RESULT 
+        クルー私室がある ++
+    CALL HO_CHECK_ROOM_TAG(ROOM_IDX, "食堂")
+    SIF RESULT 
+        食堂がある ++
+NEXT
+IF 私室がある == 0
+    CALL COLOR_PRINTL("ルームタグ<プレイヤー私室>を持つルームが最低一つ必要です(私室など)", カラー_注意)
+    ERR_CNT ++
+ENDIF
+IF クルー私室がある == 0
+    CALL COLOR_PRINTL("ルームタグ<クルー私室>を持つルームが最低一つ必要です(クルー私室など)", カラー_注意)
+    ERR_CNT ++
+ENDIF
+IF 食堂がある == 0
+    CALL COLOR_PRINTL("ルームタグ<食堂>を持つルームが最低一つ必要です(ラウンジなど)", カラー_注意)
+    ERR_CNT ++
+ENDIF
+IF ERR_CNT != 0
+    WAIT
+    RETURN 0
+ELSE
+    RETURN 1
+ENDIF
+@HO_EDIT_DRAW_MAP_WINDOW
+#DIM DYNAMIC WINDOW_ID
+#DIM CONST WND_WIDTH  = 16
+#DIM CONST WND_HEIGHT = 5
+#DIM BTN_ID
+CALL WndMgr_DestroyWindow(-1)
+
+FOR LOCAL, 0, HO_MAX_ROOMNUM
+    CALL WndMgr_CreateWindow(WINDOW_ID, (LOCAL % 4 * WND_WIDTH), (LOCAL / 4 * WND_HEIGHT), WND_WIDTH, WND_HEIGHT, 2)
+    CALL HO_EDIT_SET_MAP_WINDOW_TEXT(WINDOW_ID, LOCAL)
+    CALL HO_GET_ROOM_NAME(LOCAL)
+    ; IF RESULTS == "EMPTY"
+    ;     CALL WndMgr_Attribute(WINDOW_ID, "Disabled", 1)
+    ; ENDIF
+    WINDOW_ID ++
+NEXT
+BTN_ID =  HO_通路ボタンID
+FOR LOCAL, 0, HO_MAX_ROOMNUM
+    CALL HO_GET_PATH(LOCAL)
+    IF LIST_INDEXOF(RESULTS, TOSTR(LOCAL + 1)) != -1 && LOCAL % 4 != 3
+    ;横列の通路
+        WINDOW_ID ++
+        CALL WndMgr_CreateWindow(WINDOW_ID,(WND_WIDTH - 1) + (WND_WIDTH * (LOCAL % 4)), 1 + (LOCAL / 4 * WND_HEIGHT), 3, 3, 0)
+        CALL WndMgr_TextSet(WINDOW_ID, 0, @"@B:{BTN_ID}@￣@/B@")
+        CALL WndMgr_TextSet(WINDOW_ID, 1, @"@B:{BTN_ID}@　@/B@")
+        CALL WndMgr_TextSet(WINDOW_ID, 2, @"@B:{BTN_ID}@＿@/B@")
+    ELSEIF LOCAL % 4 != 3
+        WINDOW_ID ++
+        CALL WndMgr_CreateWindow(WINDOW_ID,(WND_WIDTH - 2) + (WND_WIDTH * (LOCAL % 4)), 1 + (LOCAL / 4 * WND_HEIGHT), 3, 3, 0)
+        CALL WndMgr_TextSet(WINDOW_ID, 0, @"@B:{BTN_ID}@｜｜@/B@")
+        CALL WndMgr_TextSet(WINDOW_ID, 1, @"@B:{BTN_ID}@｜｜@/B@")
+        CALL WndMgr_TextSet(WINDOW_ID, 2, @"@B:{BTN_ID}@｜｜@/B@")
+    ENDIF
+    BTN_ID ++
+    CALL HO_GET_PATH(LOCAL)
+    IF LIST_INDEXOF(RESULTS, TOSTR(LOCAL + 4)) != -1 && LOCAL / 4 != 3
+    ;縦列の通路
+        WINDOW_ID ++
+        CALL WndMgr_CreateWindow(WINDOW_ID,(WND_WIDTH / 2 - 3) + (WND_WIDTH * (LOCAL % 4)), WND_HEIGHT - 1 + (LOCAL / 4 * WND_HEIGHT), 3, 2, 0)
+        CALL WndMgr_TextSet(WINDOW_ID, 0, @"@B:{BTN_ID}@┐  ┌@/B@")
+        CALL WndMgr_TextSet(WINDOW_ID, 1, @"@B:{BTN_ID}@┘  └@/B@")
+    ELSEIF LOCAL / 4 != 3
+        WINDOW_ID ++
+        CALL WndMgr_CreateWindow(WINDOW_ID,(WND_WIDTH / 2 - 2) + (WND_WIDTH * (LOCAL % 4)), WND_HEIGHT - 1 + (LOCAL / 4 * WND_HEIGHT), 3, 2, 0)
+        CALL WndMgr_TextSet(WINDOW_ID, 0, @"@B:{BTN_ID}@――@/B@")
+        CALL WndMgr_TextSet(WINDOW_ID, 1, @"@B:{BTN_ID}@――@/B@")
+    ENDIF
+    BTN_ID ++
+NEXT
+
+@HO_EDIT_DRAW_MODULE_WINDOW
+#DIM CONST WND_WIDTH  = 40
+#DIM CONST WND_HEIGHT = 20
+#DIM DYNAMIC WINDOW_ID
+#DIM DYNAMIC L_CNT
+
+#DIMS DYNAMIC ROOM_NAME
+#DIMS DYNAMIC _LIST_MODULE_LIST
+#DIM DYNAMIC MODULE_IDX
+#DIM DYNAMIC MODULE_ID
+#DIM DYNAMIC ROOM_ID
+#DIM DYNAMIC ROOM_CAP
+#DIM DYNAMIC _ID
+#DIM DYNAMIC CAPACITY
+#DIM DYNAMIC USER_COUNT
+#DIM DYNAMIC BTN_ID
+
+CALL WndMgr_VacantId()
+WINDOW_ID = RESULT
+
+CALL HO_GET_ROOM_NAME(HO_EDIT_選択中ルームIDX)
+ROOM_NAME = %RESULTS%
+CALL WndMgr_CreateWindow(WINDOW_ID, 68, 0, WND_WIDTH, WND_HEIGHT, 2)
+CALL WndMgr_WindowTitle( WINDOW_ID, ROOM_NAME)
+CALL HO_GET_MAPDATA(HO_有効マップID, HO_EDIT_選択中ルームIDX, "MODULE_LIST")
+_LIST_MODULE_LIST = %RESULTS%
+CALL HO_GET_MAPDATA(HO_有効マップID, HO_EDIT_選択中ルームIDX, "ROOM_ID")
+ROOM_ID = RESULT
+CALL HO_GET_ROOM_DATA(ROOM_ID, "ROOM_CAPACITY")
+ROOM_CAP = RESULT
+FOR MODULE_IDX, 0, ROOM_CAP
+    BTN_ID = MODULE_IDX + HO_モジュールボタンID
+    CALL HO_GET_MODULE_ID(HO_EDIT_選択中ルームIDX, MODULE_IDX)
+    IF RESULT != -1
+        MODULE_ID = RESULT
+        CALL HO_GET_MODULE_DATA(MODULE_ID, "MODULE_NAME")
+        CALL WndMgr_TextSet(WINDOW_ID, L_CNT, @"@B:{BTN_ID}@◇ [%RESULTS%]@/B@")
+    ELSE
+        CALL WndMgr_TextSet(WINDOW_ID, L_CNT, @"@C:{カラー_選択不可}@@B:{BTN_ID}@◇ [------]@/B@@/C@")
+    ENDIF
+    L_CNT ++
+    ;CALL HO_STR_MODULE_CAPACITY_INDICATOR(MODULE_IDX)
+    ;CALL WndMgr_TextSet(WINDOW_ID, L_CNT, @"%RESULTS%")
+    L_CNT ++
+NEXT
+RETURN
+
+
+@HO_EDIT_SET_MAP_WINDOW_TEXT(WINDOW_ID, ROOM_IDX)
+#DIM WINDOW_ID
+#DIM ROOM_IDX
+#DIM  DYNAMIC BTN_ID
+#DIMS DYNAMIC ROOM_NAME
+#DIM  DYNAMIC ROOM_ID
+#DIM  DYNAMIC FCOL
+CALL HO_GET_ROOM_NAME(ROOM_IDX)
+ROOM_NAME = %RESULTS%
+IF ROOM_IDX == HO_EDIT_選択中ルームIDX
+    FCOL = カラー_選択中
+ELSEIF ROOM_NAME == "EMPTY"
+    FCOL = カラー_選択不可
+ELSE
+    FCOL = カラー_白
+ENDIF
+BTN_ID = ROOM_IDX + HO_マップボタンID
+LOCALS = %FuncTagSetText_ShapeSize(@"@C:{FCOL}@@B:{BTN_ID}@[%ROOM_NAME%]@/B@@/C@", 12, 1, 2)%
+CALL WndMgr_TextSet(WINDOW_ID, 0, LOCALS)
+
+@HO_EDIT_SAVE_MAPDATA
+FOR LOCAL, 0, HO_MAX_ROOMNUM
+    _DIC_HO_SAVED_MAPDATA:HO_有効マップID:LOCAL = %_DIC_HO_MAPDATA:HO_有効マップID:LOCAL%
+NEXT

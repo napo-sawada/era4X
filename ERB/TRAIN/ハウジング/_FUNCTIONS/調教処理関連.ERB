@@ -1,0 +1,486 @@
+﻿;-------------------------------------------------
+;ハウジングモードでの調教時に使用する関数
+;-------------------------------------------------
+;一緒に行動できるキャラクターをまとめてMTARに登録する
+@HO_SET_MTAR_PLAY_WITH(ACTION)
+#DIMS ACTION
+#DIMS DYNAMIC _LIST_MEMBER
+#DIM DYNAMIC MEMBER_NUM
+#DIM DYNAMIC CHARA_ID
+
+CALL CLEAR_MTAR
+CALL HO_GET_COMPANION_LIST
+MEMBER_NUM = RESULT
+_LIST_MEMBER = %RESULTS%
+FOR LOCAL, 0, MEMBER_NUM
+    CHARA_ID = TOINT(LIST_GET(_LIST_MEMBER, LOCAL))
+    ;同行者は無条件で追加
+    IF TCVAR:CHARA_ID:相席フラグ != 1
+        CALL ADD_MTAR(CHARA_ID)
+    ELSE
+    ;相席者は引数で指定した行動に合致していたら追加
+        CALL HO_GET_CHARAACT(CHARA_ID)
+        SIF RESULTS == ACTION
+            CALL ADD_MTAR(CHARA_ID)
+    ENDIF
+NEXT
+
+RETURN
+
+
+;-------------------------------------------------
+;第三者から見られているかを確認
+;行為を見られても許容出来る相手かも確認
+;-------------------------------------------------
+@HO_CHECK_PUBULIC_EYE(MPLY_ID)
+#DIM MPLY_ID
+#DIM DYNAMIC CHARA_ID
+#DIMS DYNAMIC _LIST_VISIBLE
+
+CALL HO_GET_WHO_VISIBLE(MPLY_ID)
+_LIST_VISIBLE = %RESULTS%
+IF RESULT == 0
+    RETURN 0
+ELSE
+    FOR LOCAL, 0, LIST_COUNT(_LIST_VISIBLE)
+        CHARA_ID = TOINT(LIST_GET(_LIST_VISIBLE, LOCAL))
+        ;とりあえず合意済みであれば見られても問題なしとする
+        IF TALENT:CHARA_ID:合意 != 1
+            RETURN 1
+        ENDIF
+    NEXT
+ENDIF
+RETURN 0
+;-------------------------------------------------
+;第三者から見られているかを確認
+;-------------------------------------------------
+@HO_GET_WHO_VISIBLE(MPLY_ID)
+#DIM MPLY_ID
+#DIM DYNAMIC CHARA_IDX
+#DIM DYNAMIC CHARA_ID
+#DIMS DYNAMIC _LIST_VISIBLE
+
+VARSET RESULTS
+WHILE _DIC_HO_CHARALIST:CHARA_IDX != "-1"
+    CALL HO_GET_CHARADATA(CHARA_IDX, "CHARA_ID")
+    CHARA_ID = RESULT
+    ;自分自身はチェックしない
+    IF MPLY_ID == CHARA_ID 
+        CHARA_IDX ++
+        CONTINUE
+    ENDIF
+    CALL HO_IS_TARGET_VISIBLE(MPLY_ID, CHARA_ID)
+    SIF RESULT
+        _LIST_VISIBLE = %LIST_ADD(_LIST_VISIBLE, TOSTR(CHARA_ID))%
+    CHARA_IDX ++
+WEND
+
+RESULTS = %_LIST_VISIBLE%
+RETURN LIST_COUNT(_LIST_VISIBLE)
+
+;-------------------------------------------------
+;ウフフ目撃判定
+;-------------------------------------------------
+@HO_CHECK_UFUFU(CHARA_ID)
+#DIM CHARA_ID
+#DIM  DYNAMIC キャラ現在地
+#DIMS DYNAMIC _LIST_MEMBER
+
+;非押し倒しで情事扱いするコマンド
+#DIM CONST UFUFU_COM_LIST = 10, 11, 106, 107, 330, 332
+
+;キャラが現在いる部屋を取得
+CALL HO_GET_CHARAPLACE(CHARA_ID)
+キャラ現在地 = RESULT
+;ウフフ目撃判定
+IF HO_MASTER現在地 == キャラ現在地
+    CALL HO_GET_CHARAACT(CHARA_ID)
+    IF RESULTS != "同行中"
+    ;見えない位置にいるのなら判定しなくて良い
+        CALL HO_IS_TARGET_VISIBLE(CHARA_ID, MASTER)
+        SIF RESULT != 1
+            RETURN 0
+        ;押し倒し中の場合は情事扱い
+        IF FLAG:ウフフフラグ == 1
+            TCVAR:CHARA_ID:ウフフ目撃フラグ = 1
+            TCVAR:CHARA_ID:ウフフ目撃場所 = キャラ現在地
+            RETURN 1
+        ELSE
+            ;;押し倒し以外の情事判定
+            ;単発コマンドの判定 MTARにもMPLYにも絡んでいなければ目撃判定
+            IF FINDELEMENT(UFUFU_COM_LIST, SELECTCOM) != -1
+                IF IS_MTAR(CHARA_ID) != 1 && IS_MPLY(CHARA_ID) != 1
+                    TCVAR:CHARA_ID:ウフフ目撃フラグ = 1
+                    TCVAR:CHARA_ID:ウフフ目撃場所 = キャラ現在地
+                    RETURN 1
+                ENDIF
+            ENDIF
+            ; CALL HO_GET_COMPANION_LIST
+            ; _LIST_MEMBER = %RESULTS%
+            ; ;プレイヤーもチェック対象に
+            ; _LIST_MEMBER = %LIST_ADD(_LIST_MEMBER, TOSTR(MASTER))%
+            ; FOR LOCAL, 0, LIST_COUNT(_LIST_MEMBER)
+            LOCAL:1 = 0
+            LOCAL:2 = 0
+            FOR LOCAL:0, 0, VARSIZE("UFUFU_COM_LIST")
+                SIF IS_EQUIP(MASTER, UFUFU_COM_LIST:(LOCAL:0))
+                    LOCAL:1 ++
+            NEXT
+            ;MASTERが情事に該当する行為のMPLYでもMTARでもなければRETURN
+            SIF LOCAL:1 == 0
+                RETURN 0
+            FOR LOCAL:0, 0, VARSIZE("UFUFU_COM_LIST")
+                SIF IS_EQUIP(CHARA_ID, UFUFU_COM_LIST:(LOCAL:0))
+                    LOCAL:2 ++
+            NEXT
+            ;MASTERが情事に該当する行為のMPLYかMTARで、CHARA_IDが行為に関わっていなければ目撃者扱い
+            IF LOCAL:2 == 0
+                TCVAR:CHARA_ID:ウフフ目撃フラグ = 1
+                TCVAR:CHARA_ID:ウフフ目撃場所 = キャラ現在地
+                RETURN 1
+            ENDIF
+            ; NEXT
+        ENDIF
+    ENDIF
+ENDIF
+RETURN 0
+
+;-------------------------------------------------
+;居住区モードの調教終了処理
+;-------------------------------------------------
+@HOUSING_EVENTEND
+;体力気力を0～最大値の範囲に収める
+CALL LIFE_LIMIT
+
+TRAIN_PLACE = 
+
+FLAG:夜這い = 0
+
+IF FLAG:調教モード == 調教_慰安
+    SELECTCASE FLAG:慰安モード
+        CASE 1
+            CALL EVENTEND_IAN
+        CASE 2
+            CALL EVENTEND_ATEGAU
+    ENDSELECT
+    FLAG:慰安モード = 0
+ENDIF
+
+SIF FLAG:調教モード == 調教_逆調教特殊 && IS_SP_COUNTRY(CFLAG:MASTER:捕虜先)
+    CALL EVENTEND_SP_COUNTRY()
+
+
+CUSTOMDRAWLINE ─
+CALL TITLE_CATEGORY_GENERAL("今回の調教")
+PRINTL 
+CALL COLOR_LINE
+FOR LOCAL:0, 0, CHARANUM
+    SIF !IS_PARTICIPATE_TRAIN(LOCAL)
+        CONTINUE
+    PRINTFORML ■%ANAME(LOCAL)%:
+    CALL NEW_PRINT_ORGASM(LOCAL)
+    CALL COLOR_LINE
+NEXT
+WAIT
+
+;慰安用のモブはここで削除する
+LOCAL:2 = CHARANUM
+FOR LOCAL:0, 0, LOCAL:2
+    LOCAL:1 = LOCAL:2 - LOCAL:0 - 1
+    IF CFLAG:(LOCAL:1):慰安モブ
+        CALL DELETE_CHARA(LOCAL:1)
+    ENDIF
+NEXT
+
+
+;カメラ撮影していた場合
+SIF TFLAG:70
+    CALL EVENTEND_VIDEO()
+
+
+;体力気力の成長
+FOR LOCAL, 0, CHARANUM
+    SIF !IS_PARTICIPATE_TRAIN(LOCAL) || IS_SP_CHARA(LOCAL)
+        CONTINUE
+
+    LOCAL:1 = MIN(SUM_EX(LOCAL) / 5, 20)
+    LOCAL:1 += RAND:MAX(TCVAR:LOCAL:21, 1)
+    SELECTCASE MAXBASE:LOCAL:体力
+        CASE IS > 5000
+            LOCAL:1 /= 10
+        CASE IS > 3000
+            LOCAL:1 /= 4
+    ENDSELECT
+
+    SIF LOCAL:1 <= 0
+        GOTO STR_GROW_END
+
+    PRINTFORML %ANAME(LOCAL)%の体力 + {LOCAL:1}
+    MAXBASE:LOCAL:体力 += LOCAL:1
+
+    $STR_GROW_END
+
+    LOCAL:1 = MIN(SUM_EX(LOCAL) / 5, 10)
+    LOCAL:1 += RAND:MAX(TCVAR:LOCAL:22, 1)
+
+    SELECTCASE MAXBASE:LOCAL:気力
+        CASE IS > 5000
+            LOCAL:1 /= 10
+        CASE IS > 3000
+            LOCAL:1 /= 4
+    ENDSELECT
+
+    SIF LOCAL:1 <= 0
+        GOTO WILL_GROW_END
+
+    MAXBASE:LOCAL:気力 += LOCAL:1
+    PRINTFORML %ANAME(LOCAL)%の気力 + {LOCAL:1}
+
+    $WILL_GROW_END
+NEXT
+
+
+;初対面のキャラの対面済みフラグをＯＮ
+FOR LOCAL:0, 0, CHARANUM
+    SIF LOCAL != MASTER && IS_PARTICIPATE_TRAIN(LOCAL) && !CFLAG:(LOCAL:0):面識
+        CFLAG:(LOCAL:0):面識 = 1
+NEXT
+
+;調教参加者同士の印象値が改善される
+FOR LOCAL:0, 0, CHARANUM
+    SIF !IS_PARTICIPATE_TRAIN(LOCAL)
+        CONTINUE
+    FOR LOCAL:1, 0, CHARANUM
+        SIF LOCAL:1 == LOCAL || !IS_PARTICIPATE_TRAIN(LOCAL:1)
+            CONTINUE
+        CALL TRAIN_CHANGE_RELATION(LOCAL:0, LOCAL:1)
+    NEXT
+NEXT
+
+;現在の酔いを酔い合計値に加算
+FOR LOCAL:0, 0, CHARANUM
+    SIF IS_PARTICIPATE_TRAIN(LOCAL) && !IS_SP_CHARA(LOCAL)
+        CFLAG:(LOCAL:0):酔い累積値 += PALAM:(LOCAL:0):酔い
+NEXT
+
+
+FOR LOCAL:0, 0, CHARANUM
+    SIF CFLAG:LOCAL:強制友好化
+        CFLAG:LOCAL:強制友好化 = 0
+    SIF CFLAG:LOCAL:調教中BASE減らない
+        CFLAG:LOCAL:調教中BASE減らない = 0
+NEXT
+
+;性知識アップ
+FOR LOCAL:0, 0, CHARANUM
+    IF IS_PARTICIPATE_TRAIN(LOCAL) && ABL:(LOCAL:0):性知識 < 4
+        LOCAL:1 = MIN(SUM_EX(LOCAL:0) / MAX(ABL:(LOCAL:0):性知識 * 2, 1), 100)
+        CALL PRINT_ADD_EXP(LOCAL:0, "性知識経験値", LOCAL:1, 1)
+        CALL TRAIN_AUTO_ABLUP(LOCAL:0)
+    ENDIF
+NEXT
+
+FOR LOCAL:0, 0, CHARANUM
+    IF IS_PARTICIPATE_TRAIN(LOCAL) && !IS_SP_CHARA(LOCAL:0)
+		;素質変化に関する処理(恋慕の取得など)
+        CALL TALENT_CHECK(LOCAL:0)
+    ENDIF
+NEXT
+
+FOR LOCAL:0, 0, CHARANUM
+    IF IS_PARTICIPATE_TRAIN(LOCAL)
+		;性的嗜好の変化
+		;あてがった場合はロックフラグを立てる
+        CALL CHECK_SEXUAL_PREFERENCE(LOCAL:0)
+    ENDIF
+NEXT
+
+IF CONFIG:42
+    FOR LOCAL:0, 0, CHARANUM
+        CALL 性癖一括変更(LOCAL,10000)
+        CALL 性癖一括変更(LOCAL,12000)
+        CALL 性癖一括変更(LOCAL,14000)
+    NEXT
+ENDIF
+;追加アイテムの削除
+FOR LOCAL:0, 500, 999
+    ITEM:(LOCAL:0) = 0
+NEXT
+
+;助手記録を削除
+FOR LOCAL:0, 0, CHARANUM
+    SIF CFLAG:LOCAL:捕虜調教の助手
+        CFLAG:LOCAL:捕虜調教の助手 = 0
+    SIF CFLAG:LOCAL:夜這いの助手
+        CFLAG:LOCAL:夜這いの助手 = 0
+    SIF CFLAG:LOCAL:調教中帰らない
+        CFLAG:LOCAL:調教中帰らない = 0
+NEXT
+
+FOR LOCAL, 0, CHARANUM
+    SIF CFLAG:LOCAL:能力固定フラグ
+        CFLAG:LOCAL:能力固定フラグ = 0
+NEXT
+
+;催眠フラグだけは折る(VIRGIN_COMMONなどにおけるTCVAR:催眠中での強制上書きが、他のところに影響しないよう)
+FOR LOCAL:0, 0, CHARANUM
+    TCVAR:LOCAL:催眠中 = 0
+NEXT
+
+;閨逆調教フラグを折る
+FLAG:閨逆調教 = 0
+
+;主導除外フラグを削除 
+FOR LOCAL, 0, CHARANUM
+    SIF CFLAG:LOCAL:主導除外 
+        CFLAG:LOCAL:主導除外  = 0
+NEXT
+
+;プレイヤーとターゲットをクリア
+CALL CLEAR_MPLY
+CALL CLEAR_MTAR
+
+;捕虜調教のターゲットをクリア
+VARSET PRISONER_TARGET, -1
+
+FLAG:調教モード = 調教_居住区
+FLAG:ウフフフラグ = 0
+
+RETURN
+
+
+;-------------------------------------------------
+;ハウジングモードで押し倒し実行時の判定
+;-------------------------------------------------
+@HO_JUDGE_PUSHDOWN(MTAR_ID)
+#DIM MTAR_ID
+;●実行値の計算
+CVARSET TCVAR, 24, -10000
+CVARSET TCVAR, 25, 10000
+
+;実行値の設定
+TCVAR:(MTAR_ID):25 = 100
+
+CALL COM_ORDER(MTAR_ID)
+
+CALL COM_ORDER_ELEMENT(MTAR_ID, "欲情", GET_PALAMLV(PALAM:(MTAR_ID):欲情))
+IF HAS_VAGINA(MTAR_ID)
+    CALL COM_ORDER_ELEMENT(MTAR_ID, "潤滑", GET_PALAMLV(PALAM:(MTAR_ID):潤滑))
+ENDIF
+CALL COM_ORDER_ELEMENT(MTAR_ID, "欲望", ABL:(MTAR_ID):欲望 * 4)
+CALL COM_ORDER_ELEMENT(MTAR_ID, "奉仕", ABL:(MTAR_ID):奉仕 * 2)
+
+IF TALENT:(MTAR_ID):貞操観念
+    CALL COM_ORDER_ELEMENT(MTAR_ID, "貞操観念", -10)
+ENDIF
+
+IF TALENT:(MTAR_ID):貞操無頓着
+    CALL COM_ORDER_ELEMENT(MTAR_ID, "貞操無頓着", 10)
+ENDIF
+
+IF TALENT:(MTAR_ID):恥じらい
+    CALL COM_ORDER_ELEMENT(MTAR_ID, "恥じらい", -6)
+ENDIF
+
+IF TALENT:(MTAR_ID):恥薄い
+    CALL COM_ORDER_ELEMENT(MTAR_ID, "恥薄い", 3)
+ENDIF
+
+IF TALENT:(MTAR_ID):快感に素直
+    CALL COM_ORDER_ELEMENT(MTAR_ID, "快感に素直", 5)
+ENDIF
+
+IF TALENT:(MTAR_ID):快感の否定
+    CALL COM_ORDER_ELEMENT(MTAR_ID, "快感の否定", -5)
+ENDIF
+
+IF TALENT:(MTAR_ID):一線越えない
+    CALL COM_ORDER_ELEMENT(MTAR_ID, "一線越えない", -15)
+ENDIF
+
+IF TALENT:(MTAR_ID):恋慕
+    CALL COM_ORDER_ELEMENT(MTAR_ID, "恋慕", 12)
+ENDIF
+
+IF TALENT:(MTAR_ID):親友
+    CALL COM_ORDER_ELEMENT(MTAR_ID, "親友", 6)
+ENDIF
+
+IF TALENT:(MTAR_ID):親愛
+    CALL COM_ORDER_ELEMENT(MTAR_ID, "親愛", 20)
+ENDIF
+
+IF TALENT:(MTAR_ID):恋人
+    CALL COM_ORDER_ELEMENT(MTAR_ID, "恋人", 6)
+ENDIF
+
+IF TALENT:(MTAR_ID):キス未経験
+    CALL COM_ORDER_ELEMENT(MTAR_ID, "キス未経験", -5)
+ENDIF
+
+; ;ムードボーナス
+; IF TFLAG:37 < 60
+; 	CALL COM_ORDER_ELEMENT(MTAR_ID, "ムード", 0)
+; ELSE
+; 	CALL COM_ORDER_ELEMENT(MTAR_ID, "ムード", 5 + TFLAG:37 / 30)
+; ENDIF
+
+;好感度
+IF CFLAG:(MTAR_ID):2 < 700
+    IF CFLAG:(MTAR_ID):2 < 300
+        LOCAL:0 = -20
+    ELSEIF CFLAG:(MTAR_ID):2 < 500
+        LOCAL:0 = -10
+    ELSE
+        LOCAL:0 = -5
+    ENDIF
+    CALL COM_ORDER_ELEMENT(MTAR_ID, "好感度不足", LOCAL:0)
+ENDIF
+
+;第三者　○○に恋慕に関する処理
+;CALL JUDGE_PUSHDOWN_SUB
+
+;性知識
+IF ABL:(MTAR_ID):性知識 == 0
+    CALL COM_ORDER_ELEMENT(MTAR_ID, "性知識なし", 80)
+ENDIF
+
+;合意
+IF TALENT:(MTAR_ID):合意
+    CALL COM_ORDER_ELEMENT(MTAR_ID, "合意", 10)
+ENDIF
+
+;判定結果を表示
+PRINTFORMW  = {TCVAR:(MTAR_ID):24} %TOSTR_COMPARE(TCVAR:(MTAR_ID):24, TCVAR:(MTAR_ID):25)% 実行値{TCVAR:(MTAR_ID):25}
+
+;実行判定
+IF TCVAR:(MTAR_ID):24 >= TCVAR:(MTAR_ID):25
+	;既に[合意]済み
+    IF TALENT:(MTAR_ID):合意
+        CALL KOJO_EVENT(MTAR_ID, 7)
+
+	;酔いによる補正を除いても成功
+    ELSEIF TCVAR:(MTAR_ID):24 - PALAM:(MTAR_ID):酔い / 150 >= 100
+        TFLAG:48 = 0
+        CALL KOJO_EVENT(MTAR_ID, 5)
+        IF TCVAR:(MTAR_ID):催眠中 <= 0
+            PRINTFORMW %ANAME(MTAR_ID)%の<合意>を得た
+            TALENT:(MTAR_ID):合意 = 1
+        ENDIF
+
+	;酔った勢いで成功
+    ELSE
+        TFLAG:48 = 1
+        CALL KOJO_EVENT(MTAR_ID, 4)
+    ENDIF
+    RETURN 1
+
+;失敗
+ELSE
+    CALL KOJO_EVENT(MTAR_ID, 6)
+    IF !TALENT:(MTAR_ID):合意 && !TALENT:(MTAR_ID):恋慕 && !TALENT:(MTAR_ID):親友
+        PRINTFORMW %ANAME(MTAR_ID)%の好感度が100下がりました
+        CFLAG:(MTAR_ID):2 -= 100
+    ENDIF
+    RETURN 0
+ENDIF

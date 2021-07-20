@@ -1,0 +1,172 @@
+﻿;-------------------------------------------------
+;コマンド名称
+;-------------------------------------------------
+@COM_NAME703
+RESULTS:0 = 一緒に遊ぶ
+RESULTS:1 = 一緒に遊ぶ
+RESULTS:2 = 一緒に遊ぶ
+RESULTS:3 = 一緒に遊ぶ
+RESULTS:4 = 一緒に遊ぶ
+RESULTS:5 = 一緒に遊ぶ
+
+;-------------------------------------------------
+;選択可否判定
+;-------------------------------------------------
+@COM_ABLE703
+#DIM DYNAMIC _LIST_MEMBER
+#DIM DYNAMIC MEMBER_NUM
+#DIM DYNAMIC CHARA_ID
+;共通部分
+CALL COM_ABLE_COMMON(703)
+SIF RESULT == 0
+	RETURN 0
+LOCAL:1 = 0
+;遊べる場所にいる
+CALL HO_CHECK_USE_MODULE_USAGE(MASTER, "遊戯")
+SIF RESULT == 0
+	RETURN 0
+;一緒に遊べる相手が最低一人は必要
+CALL HO_CHECK_PLAY_WITH("遊戯中")
+SIF RESULT == 0
+	RETURN 0
+;主人公がプレイヤーのとき限定
+SIF MPLY:0 != MASTER
+	RETURN 0
+;主人公に主導権があるとき限定
+SIF FLAG:主導権所有者 != MASTER && FLAG:主導権所有者 != -1
+	RETURN 0
+;プレイヤーの口が塞がっているなら不可
+SIF IS_M_HOLD(MPLY:0)
+	RETURN 0
+RETURN 1
+
+;-------------------------------------------------
+;メイン処理
+;-------------------------------------------------
+@COM703
+#DIMS DYNAMIC _LIST_MEMBER
+#DIM DYNAMIC MEMBER_NUM
+#DIM DYNAMIC CHARA_ID
+
+MPLY:0 = MASTER
+;一度MTARを初期化
+CALL CLEAR_MTAR()
+;実行対象のキャラを纏めてMTARに登録
+CALL HO_SET_MTAR_PLAY_WITH("遊戯中")
+;実行対象のキャラを取得
+CALL HO_CHECK_PLAY_WITH("遊戯中")
+_LIST_MEMBER = %RESULTS%
+MEMBER_NUM = RESULT
+
+;コマンドの成否をTFLAG:18にセット
+CALL JUDGE_COM_RESULT(MTAR:0, 5, 5)
+
+;;MASTERの処理
+;-------------------------------------------------
+;固定で入るソース
+SOURCE:(MPLY:0):接触 = 40
+;親密に応じた歓楽のソース追加
+SOURCE:(MPLY:0):歓楽 = 10
+CALL ADD_SOURCE_KANRAKU(MPLY:0, 180)
+SOURCE:(MPLY:0):歓楽 = MAX(SOURCE:(MPLY:0):歓楽, 0)
+;主導権に応じたソースの追加
+CALL ADD_SOURCE_INITIATIVE_N(MPLY:0, 50, 50)
+;失敗
+IF TFLAG:18 == -1
+	TIMES SOURCE:(MPLY:0):歓楽, 0.20
+	TIMES SOURCE:(MPLY:0):愛情, 0.20
+	SOURCE:(MPLY:0):不満 += 500
+;成功
+ELSEIF TFLAG:18 == 0
+;大成功
+ELSE
+	TIMES SOURCE:(MPLY:0):歓楽, 2.00
+	TIMES SOURCE:(MPLY:0):愛情, 2.00
+ENDIF
+DOWNBASE:(MPLY:0):体力 += 200
+
+;;ターゲットの処理
+;-------------------------------------------------
+FOR LOCAL,0 ,MEMBER_NUM
+	;固定で入るソース
+	SOURCE:(MTAR:LOCAL):接触 = 40
+
+	;親密に応じた歓楽のソース追加
+	SOURCE:(MTAR:LOCAL):歓楽 = 20
+	CALL ADD_SOURCE_KANRAKU(MTAR:LOCAL, 180)
+	SOURCE:(MTAR:LOCAL):歓楽 = MAX(SOURCE:(MTAR:LOCAL):歓楽, 0)
+
+	;ターゲットが子供なら歓楽が多めに
+	IF TALENT:(MTAR:LOCAL):幼児 || TALENT:(MTAR:LOCAL):幼稚
+		TIMES SOURCE:(MTAR:LOCAL):歓楽, 1.20
+		TIMES SOURCE:(MTAR:LOCAL):愛情, 0.70
+	ENDIF
+
+	;主導権に応じたソースの追加
+	CALL ADD_SOURCE_INITIATIVE_N(MTAR:LOCAL, 50, 50)
+
+	;失敗
+	IF TFLAG:18 == -1
+		TIMES SOURCE:(MTAR:LOCAL):歓楽, 0.20
+		TIMES SOURCE:(MTAR:LOCAL):愛情, 0.20
+		SOURCE:(MTAR:LOCAL):不満 += 500
+
+	;成功
+	ELSEIF TFLAG:18 == 0
+
+	;大成功
+	ELSE
+		TIMES SOURCE:(MTAR:LOCAL):歓楽, 2.00
+		TIMES SOURCE:(MTAR:LOCAL):愛情, 2.00
+		TFLAG:37 += 5
+	ENDIF
+	DOWNBASE:(MTAR:LOCAL):体力 += 200
+NEXT
+;ゲームに勝ってもボーナスなどはつかないのでただのフレーバー
+LOCAL:0 = RAND(0, MEMBER_NUM + 1)
+IF LOCAL:0 <= MEMBER_NUM
+	TFLAG:コマンド代表者 = TOINT(LIST_GET(_LIST_MEMBER, LOCAL:0))
+ELSE
+	TFLAG:コマンド代表者 = MASTER
+ENDIF
+
+;主導度変化基準値
+TFLAG:49 = 2
+
+;倒錯度変化基準値
+TFLAG:50 = -2
+
+RETURN 1
+
+;-------------------------------------------------
+;地の文(前文)
+;-------------------------------------------------
+@COM_TEXT_BEFORE703
+#DIMS DYNAMIC _LIST_MEMBER
+#DIM DYNAMIC MEMBER_NUM
+#DIM DYNAMIC CHARA_ID
+CALL HO_CHECK_PLAY_WITH("遊戯中")
+_LIST_MEMBER = %RESULTS%
+MEMBER_NUM = RESULT
+CALL HO_GET_USE_MODULE_INFO(MASTER)
+IF STRFINDU(RESULTS, "テーブル") != -1
+	LOCALS = %SPLIT_RAND("ポーカー/セブンブリッジ/ババ抜き/ブラックジャック",1)%
+	PRINTFORML %ANAME(MASTER)%は%ANAME(TOINT(LIST_GET(_LIST_MEMBER, 0)), MEMBER_NUM)%と一緒に%LOCALS%に興じた
+	PRINTFORML ゲームの勝者は%ANAME(TFLAG:コマンド代表者)%のようだ
+ELSEIF STRFINDU(RESULTS, "ビリヤード") != -1
+	PRINTFORML 見事⑨ボールを射落としたのは%ANAME(TFLAG:コマンド代表者)%のようだ
+ELSE
+	PRINTFORML %ANAME(MASTER)%は%ANAME(TOINT(LIST_GET(_LIST_MEMBER, 0)), MEMBER_NUM)%と一緒にゲームに興じた
+	PRINTFORML このラウンドを制したのは%ANAME(TFLAG:コマンド代表者)%のようだ
+ENDIF
+;-------------------------------------------------
+;地の文(パラメータ・刻印変動後)
+;-------------------------------------------------
+@COM_TEXT_LAST703
+
+;-------------------------------------------------
+
+;コマンド区分
+;-------------------------------------------------
+@COM_AVAILABLE_WHEN703
+RETURN コマンド_居住区

@@ -1,0 +1,87 @@
+﻿;拉致
+
+;-------------------------------------------------
+;コマンド名称
+;-------------------------------------------------
+@COM_NAME851
+RESULTS:0 = 押し倒す
+
+
+;-------------------------------------------------
+;選択可否判定
+;-------------------------------------------------
+@COM_ABLE851
+#DIMS DYNAMIC _LIST_MEMBER
+#DIM DYNAMIC MEMBER_NUM
+#DIM DYNAMIC CHARA_ID
+
+;共通部分
+CALL COM_ABLE_COMMON(851)
+SIF RESULT == 0
+	RETURN 0
+;主人公がプレイヤーのとき限定
+SIF MPLY:0 != MASTER
+	RETURN 0
+;ターゲットがいない時不可
+SIF MTAR_NUM == 0
+	RETURN 0
+;同行者が一人でも衆目の目に晒されている場合不可
+CALL HO_GET_COMPANION_LIST()
+_LIST_MEMBER = %RESULTS%
+MEMBER_NUM = RESULT
+FOR LOCAL:0, 0, MEMBER_NUM
+	CHARA_ID = TOINT(LIST_GET(_LIST_MEMBER, LOCAL:0))
+	CALL HO_CHECK_PUBULIC_EYE(CHARA_ID)
+	SIF RESULT == 1
+		RETURN 0
+NEXT
+RETURN 1
+
+;-------------------------------------------------
+;メイン処理
+;-------------------------------------------------
+@COM851
+;●実行値の計算
+;実行判定
+CALL COM_ORDER_COMMON
+SIF RESULT == 0
+	RETURN 0
+
+LOCAL:1 = 0
+FOR LOCAL:0, 0, MTAR_NUM
+	CALL HO_JUDGE_PUSHDOWN(MTAR:(LOCAL:0))
+	SIF RESULT == 0
+		LOCAL:1 ++
+NEXT
+SIF LOCAL:1 > 0
+	RETURN 0
+
+
+;相席状態で押し倒した場合は同行状態にする
+FOR LOCAL:0, 0, MTAR_NUM
+	IF TCVAR:(MTAR:LOCAL):相席フラグ == 1 && CFLAG:(MTAR:LOCAL):調教参加フラグ == 1
+		TCVAR:(MTAR:LOCAL):相席フラグ = 0
+		CALL HO_SET_CHARAACT((MTAR:LOCAL), "同行中")
+		TCVAR:(MTAR:LOCAL):行動待機時間 = 0
+	ENDIF
+NEXT
+
+FLAG:ウフフフラグ = 1
+FLAG:調教モード = 1
+RETURN 1
+
+
+
+;-------------------------------------------------
+;地の文(前文)
+;-------------------------------------------------
+@COM_TEXT_BEFORE851
+PRINTFORMW %ANAME(MPLY:0)%は%ANAME(MTAR:0, MTAR_NUM)%を押し倒した……
+
+;-------------------------------------------------
+
+;コマンド区分
+;-------------------------------------------------
+
+@COM_AVAILABLE_WHEN851
+RETURN コマンド_居住区

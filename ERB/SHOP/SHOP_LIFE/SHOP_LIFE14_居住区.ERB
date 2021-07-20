@@ -1,0 +1,164 @@
+﻿;-------------------------------------------------
+;「居住区」の名称
+;-------------------------------------------------
+@SHOP_LIFE_NAME14
+RESULTS:0 '= "居住区"
+
+;-------------------------------------------------
+;「居住区」の選択可否
+;-------------------------------------------------
+@SHOP_LIFE_CHECK14
+SIF CFLAG:MASTER:捕虜先
+    RETURN 0
+RETURN 1
+;-------------------------------------------------
+;「居住区」の左カラムメニューの入力処理
+;-------------------------------------------------
+@SHOP_LIFE_EVENTBUY14
+FLAG:拠点フェイズページ = 1
+FLAG:夜這い = 0
+RETURN 0
+
+;-------------------------------------------------
+;「居住区」の右カラム表示処理
+;-------------------------------------------------
+@SHOP_LIFE_EVENTBUY_SHOW14
+#DIMS DYNAMIC _LIST_MEMBER
+#DIM DYNAMIC CHARA_ID
+
+SIF FLAG:居住区初回呼出フラグ == 0
+    CALL HOUSING_MODE_INIT_STOCK
+
+CALL COLOR_PRINT(@"%"★居住区", 20, LEFT%", カラー_白)
+CALL COLOR_PRINT("※全行動回数を消費", カラー_注釈)
+CALL COLUMN_RIGHT_PRINTL
+CALL COLUMN_RIGHT_LINE
+CALL COLUMN_RIGHT_PRINTL
+;標準的なキャラリストとページ移動
+PRINTBUTTON @"%"[居住区へ行く]", 20, LEFT%", 0
+CALL COLOR_PRINT("同乗しているクルーたちと艦内居住区で交流します", カラー_注釈)
+CALL COLUMN_RIGHT_PRINTL
+CALL COLUMN_RIGHT_PRINTL
+CALL COLOR_PRINT(@"◇ %SHIP_NAME:(BOARDING_SHIP_ID:MASTER)%艦内の交流に参加可能なクルー ◇", カラー_注釈)
+CALL COLUMN_RIGHT_PRINTL
+
+;同乗してるキャラクターの一覧を出力
+CALL GET_BOARDING_MEMBER_LIST
+_LIST_MEMBER = %RESULTS%
+FOR LOCAL, 0, LIST_COUNT(RESULTS)
+    CHARA_ID = TOINT(LIST_GET(_LIST_MEMBER, LOCAL))
+    ;交流に参加可能か詳細チェック
+    CALL HOUSING_MODE_CHECK_CHARA_JOINABLE(CHARA_ID)
+    SIF RESULT == 0
+        CONTINUE
+    CALL COLOR_PRINT(@"[%SNAME(CHARA_ID)%]  ", カラー_選択不可)
+    SIF (LOCAL + 1) % 8 == 0
+        CALL COLUMN_RIGHT_PRINTL
+NEXT
+
+CALL COLUMN_RIGHT_PRINTL
+CALL COLUMN_RIGHT_LINE
+CALL COLUMN_RIGHT_PRINTL
+CALL COLUMN_RIGHT_PRINTL
+PRINTBUTTON @"%"[居住区を編集する]", 20, LEFT%", 1
+CALL COLOR_PRINT("居住区内のルームやモジュールの配置を変更します", カラー_注釈)
+CALL COLUMN_RIGHT_PRINTL
+CALL COLUMN_RIGHT_PRINTL
+SETCOLOR カラー_選択不可
+PRINTBUTTON @"%"[クラフト(未実装)]", 20, LEFT%", 2
+RESETCOLOR
+CALL COLOR_PRINT("素材から艦内居住区用のルームやモジュールを新たに作成します", カラー_注釈)
+CALL COLUMN_RIGHT_PRINTL
+CALL COLUMN_RIGHT_PRINTL
+CALL COLUMN_RIGHT_CLEAR
+RETURN
+
+;-------------------------------------------------
+;「あてがう」の右カラムボタン入力処理
+;-------------------------------------------------
+@SHOP_LIFE_EVENTBUY_SUB14(ARG:0)
+;このメンバーで決定
+SELECTCASE ARG:0
+    CASE 0
+        CALL HOUSING_MODE_START
+    CASE 1
+        CALL HOUSING_EDIT_MODE_MAIN
+    CASE 2
+        RETURN 0
+    CASEELSE
+        RETURN 0
+ENDSELECT
+
+;-------------------------------------------------
+;「ハウジングモード」
+;-------------------------------------------------
+@HOUSING_MODE_START
+#DIM CHARA_ID
+#DIMS _LIST_MEMBER
+
+;交流に参加可能なクルーが一人もいない場合はハウジングモードを開始しない
+LOCAL:1 = 0
+;同乗してるキャラクターの一覧を取得
+CALL GET_BOARDING_MEMBER_LIST
+_LIST_MEMBER = %RESULTS%
+FOR LOCAL, 0, LIST_COUNT(RESULTS)
+    CHARA_ID = TOINT(LIST_GET(_LIST_MEMBER, LOCAL))
+    ;交流に参加可能か詳細チェック
+    CALL HOUSING_MODE_CHECK_CHARA_JOINABLE(CHARA_ID)
+    SIF RESULT == 0
+        CONTINUE
+    LOCAL:1 ++
+NEXT
+IF LOCAL:1 == 0
+    CALL COLOR_PRINTW("交流に参加可能なクルーが一人もいません……", カラー_注意)
+    RETURN
+ENDIF
+
+FLAG:調教モード = 8
+FLAG:ウフフフラグ = 0
+FLAG:ハウジングモード = 1
+CALL CLEAR_MPLY()
+CALL CLEAR_MTAR()
+
+;マップに登場するキャラを初期化
+CALL HO_INIT_DATA
+;内部的には分で扱う
+HO_TIME = 420
+
+;全行動回数を消費。START_TRAIN_COMMON内部でもSHOP_TIMEが+1されるため-1で相殺
+SHOP_TIME += CALC_SHOP_TIME() - SHOP_TIME - 1
+CALL START_TRAIN_COMMON
+
+;-------------------------------------------------
+;キャラクターが参加可能か確認
+;-------------------------------------------------
+@HOUSING_MODE_CHECK_CHARA_JOINABLE(CHARA_ID)
+#DIM CHARA_ID
+SIF CHECK91(CHARA_ID, 2, CFLAG:(CHARA_ID):所属 == CFLAG:MASTER:所属 && (CHARA_ID == MASTER || CFLAG:(CHARA_ID):所属) && !CFLAG:(CHARA_ID):捕虜先 && !IS_ANIMAL(CHARA_ID) && !IS_MECH(CHARA_ID) && CFLAG:(CHARA_ID):行動不能状態 != 行動不能_子供) == 2
+    RETURN 0
+RETURN 1
+
+;-------------------------------------------------
+;居住区の初回呼出処理
+;-------------------------------------------------
+@HOUSING_MODE_INIT_STOCK
+;居住区モード初回呼出時に、ルームとモジュールの初期在庫を追加する
+;;初期で追加配置可能なルーム
+;廊下
+HO_ROOM_STOCK:7 = 1
+;貨物室
+HO_ROOM_STOCK:8 = 1
+;医務室
+HO_ROOM_STOCK:9 = 1
+;;初期で追加配置可能なモジュール
+;ソファ
+HO_MODULE_STOCK:2 = 2
+;トイレ
+HO_MODULE_STOCK:9 = 1
+;カーテン付きベッド
+HO_MODULE_STOCK:10 = 1
+;ちゃぶ台
+HO_MODULE_STOCK:11 = 1
+;貨物コンテナ
+HO_MODULE_STOCK:12 = 1
+FLAG:居住区初回呼出フラグ = 1

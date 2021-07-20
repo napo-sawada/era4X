@@ -411,3 +411,24 @@ FOR LOCAL, 0, LIST_COUNT(POSID_LIST)
 NEXT
 
 RETURN TOINT(LIST_GET(POSID_LIST, MIN_IDX))
+
+;-------------------------------------------------
+;CHARA_IDに指定したキャラクターと同じ艦に同乗しているクルーを取得しリスト形式で返却する
+;CHARA_ID:艦長のキャラクターID(未指定でプレイヤー)
+;RESULT:0  同乗しているキャラクターの数
+;RESULTS:0 同乗しているキャラクターID(_LIST形式)
+;-------------------------------------------------
+@GET_BOARDING_MEMBER_LIST(CHARA_ID = -1)
+#DIM CHARA_ID
+#DIMS DYNAMIC _LIST_MEMBER
+VARSET RESULTS
+SIF CHARA_ID == -1
+	CHARA_ID = MASTER
+FOR LOCAL, 0, CHARANUM
+	IF BOARDING_SHIP_ID:CHARA_ID == RIDING_WITH:LOCAL
+		_LIST_MEMBER = %LIST_ADD(_LIST_MEMBER, TOSTR(LOCAL))%
+	ENDIF
+NEXT
+
+RESULTS = %_LIST_MEMBER%
+RETURN LIST_COUNT(_LIST_MEMBER)

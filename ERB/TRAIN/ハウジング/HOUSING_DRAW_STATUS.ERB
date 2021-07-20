@@ -1,0 +1,115 @@
+﻿;-------------------------------------------------
+; FLAG:調教モード =8 居住区関連ステータス描画モード
+; いまいち用途が定まってない画面
+;-------------------------------------------------
+@HO_DRAW_STATUS_WINDOW
+CALL WndMgr_DestroyWindow(-1)
+CALL HO_DRAW_STATUS_WINDOW_LEFT
+CALL HO_DRAW_STATUS_WINDOW_RIGHT
+CALL WndMgr_DisplayAll()
+
+@HO_DRAW_STATUS_WINDOW_LEFT
+#DIM CONST WINDOW_ID = 0
+#DIM CONST WND_WIDTH  = 60
+#DIM CONST WND_HEIGHT = 20
+#DIM DYNAMIC L_CNT
+#DIM DYNAMIC BTN_ID
+
+#DIMS DYNAMIC _LIST_MEMBER
+#DIM DYNAMIC MEMBER_NUM
+#DIM DYNAMIC CHARA_ID
+#DIM DYNAMIC F_COLOR
+
+BTN_ID = HO_ステータスボタンID
+
+CALL WndMgr_CreateWindow(WINDOW_ID, 0, 0, WND_WIDTH, WND_HEIGHT, 0)
+L_CNT ++
+CALL HO_GET_COMPANION_LIST
+_LIST_MEMBER = %RESULTS%
+;MASTERを追加するので+1
+MEMBER_NUM = RESULT + 1
+_LIST_MEMBER = %LIST_INSERTAT(_LIST_MEMBER, 0, TOSTR(MASTER))%
+FOR LOCAL, 0, MEMBER_NUM
+    CHARA_ID = TOINT(LIST_GET(_LIST_MEMBER, LOCAL))
+    IF CHARA_ID == HO_ステータス描画対象
+        F_COLOR = カラー_選択中
+    ELSE
+        F_COLOR = カラー_白
+    ENDIF
+    LOCALS:0 '= @"@C:{F_COLOR}@@B:{CHARA_ID + BTN_ID}@%ANAME(CHARA_ID)%@/B@@/C@"
+    LOCALS:0 = %FuncTagSetText_ShapeSize(@"%LOCALS:0%", 15, 1, 0)%
+    LOCALS:1 = 体力:%FuncTagSetText_CreateColorBarText(BASE:CHARA_ID:体力, MAXBASE:CHARA_ID:体力, 8, 0xEE6600, 0xFFFF98, 0x000000, 1, "▰")%
+    LOCALS:2 = %FuncTagSetText_ShapeSize("", 15, 1, 0)%
+    LOCALS:3 = 気力:%FuncTagSetText_CreateColorBarText(BASE:CHARA_ID:気力, MAXBASE:CHARA_ID:気力, 8, 0x00FFFF, 0xf2fcfe, 0x000000, 1, "▰")%
+    CALL WndMgr_TextSet(WINDOW_ID, L_CNT, @"%LOCALS:0%")
+    CALL WndMgr_TextAdd(WINDOW_ID, L_CNT, @"%LOCALS:1%")
+    L_CNT  ++
+    CALL WndMgr_TextSet(WINDOW_ID, L_CNT, @"%LOCALS:2%")
+    CALL WndMgr_TextAdd(WINDOW_ID, L_CNT, @"%LOCALS:3%")
+    L_CNT ++
+NEXT
+
+@HO_DRAW_STATUS_WINDOW_RIGHT
+#DIM CONST WINDOW_ID = 1
+#DIM CONST WND_WIDTH  = 50
+#DIM CONST WND_HEIGHT = 20
+#DIM DYNAMIC L_CNT
+#DIM CHARA_ID
+#DIMS LINES, 100
+VARSET LINES, "-1"
+
+CHARA_ID = HO_ステータス描画対象
+CALL WndMgr_CreateWindow(WINDOW_ID, 60, 0, WND_WIDTH, WND_HEIGHT, 2)
+CALL WndMgr_TextSet(WINDOW_ID, 0, @"@C:{カラー_注釈}@◇%ANAME(CHARA_ID)%の状態◇@/C@")
+CALL HO_GET_空腹度描写(CHARA_ID)
+LINES:0 = %RESULTS% 
+L_CNT ++
+CALL WndMgr_TextSet(WINDOW_ID, L_CNT, @"%LINES:0%")
+L_CNT ++
+L_CNT ++
+VARSET LINES, "-1"
+;精液描写
+CALL HO_GET_精液描写(CHARA_ID, 射精部位_髪)
+LINES:0 = %RESULTS%
+CALL HO_GET_精液描写(CHARA_ID, 射精部位_顔)
+LINES:1 = %RESULTS%
+CALL HO_GET_精液描写(CHARA_ID, 射精部位_口)
+LINES:2 = %RESULTS%
+CALL HO_GET_精液描写(CHARA_ID, 射精部位_胸)
+LINES:3 = %RESULTS%
+CALL HO_GET_精液描写(CHARA_ID, 射精部位_腋)
+LINES:4 = %RESULTS%
+CALL HO_GET_精液描写(CHARA_ID, 射精部位_手)
+LINES:5 = %RESULTS%
+CALL HO_GET_精液描写(CHARA_ID, 射精部位_尻)
+LINES:6 = %RESULTS%
+CALL HO_GET_精液描写(CHARA_ID, 射精部位_膣内)
+LINES:7 = %RESULTS%
+CALL HO_GET_精液描写(CHARA_ID, 射精部位_アナル)
+LINES:8 = %RESULTS%
+CALL HO_GET_精液描写(CHARA_ID, 射精部位_足)
+LINES:9 = %RESULTS%
+CALL HO_GET_精液描写(CHARA_ID, 射精部位_尻尾)
+LINES:10 = %RESULTS%
+
+LOCAL:0 = 0
+WHILE LINES:(LOCAL:0) != "-1"
+    IF LINES:(LOCAL:0) == ""
+        LOCAL:0 ++
+        CONTINUE
+    ENDIF
+    CALL WndMgr_TextSet(WINDOW_ID, L_CNT++, @"%LINES:(LOCAL:0)%")
+    LOCAL:0 ++
+WEND
+
+;衣装の状態
+; CALL WndMgr_TextSet(WINDOW_ID, L_CNT, @"@C:{カラー_注釈}@◇%ANAME(CHARA_ID)%の衣服の状態◇@/C@")
+; L_CNT ++
+; FOR LOCAL, 0, CLOTH_PART_NUM
+;     CALL GET_CLOTH_NAME(LOCAL, 調教用衣装:CHARA_ID:LOCAL)
+;     SIF RESULTS == "なし" 
+;         CONTINUE
+;     LOCALS = %RESULTS%
+;     CALL WndMgr_TextSet(WINDOW_ID, L_CNT, LOCALS)
+;     L_CNT ++
+; NEXT

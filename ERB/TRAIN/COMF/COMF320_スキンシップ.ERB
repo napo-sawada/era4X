@@ -25,6 +25,9 @@ ENDIF
 CALL COM_ABLE_COMMON(320)
 SIF RESULT == 0
 	RETURN 0
+;プレイヤーとターゲットが1人以上
+SIF MPLY_NUM <= 0 || MTAR_NUM <= 0
+	RETURN 0
 ;主人公以外が実行する場合、好感度が500以上必要
 SIF MPLY:0 != MASTER && CFLAG:(MPLY:0):2 < 500
 	RETURN 0
@@ -291,4 +294,8 @@ CALL COM_TEXT_LAST_LIFE
 ;-------------------------------------------------
 
 @COM_AVAILABLE_WHEN320
-RETURN コマンド_日常
+IF FLAG:調教モード != 調教_居住区
+	RETURN コマンド_日常
+ELSE
+	RETURN コマンド_居住区
+ENDIF

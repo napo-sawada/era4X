@@ -211,11 +211,6 @@ FOR LOCAL:0, 0, 1000
 	NEXT
 
 	TRYCALLFORM COM_NAME{LOCAL}
-	;改行処理
-	IF LOCAL:2 >= 1 && LOCAL:2 % 2 == 0
-		PRINTL 
-	ENDIF
-	LOCAL:2 ++
 
 	;主導権に応じて表示するメッセージを変更
 	IF IS_MPLY(MASTER)
@@ -245,6 +240,7 @@ FOR LOCAL:0, 0, 1000
 	ENDIF
 
 	IF COM_ABLE_FLAG:LOCAL
+		LOCAL:2 ++
 		;コマンドの継続タイプを取得
 		RESULT = 0
 		TRYCALLFORM COM_IS_EQUIP{LOCAL}
@@ -288,16 +284,20 @@ FOR LOCAL:0, 0, 1000
 		ELSE
 			PRINTPLAINFORM %TOSTR_SPACE(8)%
 		ENDIF
-	ELSE
-		SETCOLOR カラー_選択不可
-		PRINTPLAINFORM %LOCALS:1, 26, RIGHT%    [----]     [----]
-		RESETCOLOR
-		IF COM_CONFLICT_FLAG:(LOCAL:0) == 1
-			PRINTBUTTON " [干渉]", LOCAL:0 + 10000
-			PRINTPLAINFORM %TOSTR_SPACE(1)%
-		ELSE
-			PRINTPLAINFORM %TOSTR_SPACE(8)%
+	;改行処理
+		IF LOCAL:2 >= 1 && LOCAL:2 % 2 == 0
+			PRINTL 
 		ENDIF
+	ELSE
+		; SETCOLOR カラー_選択不可
+		; PRINTPLAINFORM %LOCALS:1, 26, RIGHT%    [----]     [----]
+		; ; RESETCOLOR
+		; IF COM_CONFLICT_FLAG:(LOCAL:0) == 1
+		; 	PRINTBUTTON " [干渉]", LOCAL:0 + 10000
+		; 	PRINTPLAINFORM %TOSTR_SPACE(1)%
+		; ELSE
+			;PRINTPLAINFORM %TOSTR_SPACE(8)%
+		; ENDIF
 	ENDIF
 NEXT
 PRINTL 
@@ -338,6 +338,13 @@ ELSEIF FLAG:調教モード == 調教_会う
 	PRINTPLAIN  
 ELSEIF FLAG:調教モード == 調教_捕虜会話
 	CALL PRINT_SELECT_BUTTON("{交流}", 2007, TFLAG:7 == 7)
+	PRINTPLAIN  
+	CALL PRINT_SELECT_BUTTON("{特殊}", 2006, TFLAG:7 == 6)
+	PRINTPLAIN  
+ELSEIF FLAG:調教モード == 調教_居住区
+	CALL PRINT_SELECT_BUTTON("{交流}", 2009, TFLAG:7 == 9)
+	PRINTPLAIN  
+	CALL PRINT_SELECT_BUTTON("{性接触}", 2010, TFLAG:7 == 10)
 	PRINTPLAIN  
 	CALL PRINT_SELECT_BUTTON("{特殊}", 2006, TFLAG:7 == 6)
 	PRINTPLAIN  
@@ -442,7 +449,8 @@ IF !GROUPMATCH(FLAG:調教モード, 調教_逆調教特殊, 調教_逆調教通
 	ELSE
 		IF IS_MPLY(ARG:0)
 			PRINT <実行>
-		ELSEIF IS_MTAR(ARG:0)
+;		ELSEIF IS_MTAR(ARG:0)
+		ELSE
 			PRINT <対象>
 		ENDIF
 	ENDIF
@@ -492,7 +500,7 @@ IF FLAG:調教モード == 調教_会う
 	CALL PRINT_SHORT_DRUNK(ARG:0)
 ENDIF
 ;ウフフ中のみ
-IF FLAG:ウフフフラグ
+IF FLAG:ウフフフラグ || FLAG:ハウジングモード
 	CALL PRINT_SHORT_BASE1(ARG:0, 0, "体")
 	CALL PRINT_SHORT_BASE2(ARG:0, 1, "気")
 
@@ -971,7 +979,7 @@ ELSEIF RESULT >= 4100 && RESULT < 4120
 	RETURN 0
 
 ;行動側反転
-ELSEIF RESULT == 5900 && GROUPMATCH(FLAG:調教モード, 調教_会う, 調教_閨, 調教_捕虜調教, 調教_捕虜会話)
+ELSEIF RESULT == 5900 && GROUPMATCH(FLAG:調教モード, 調教_会う, 調教_閨, 調教_捕虜調教, 調教_捕虜会話, 調教_居住区)
 	FOR LOCAL:0, 0, MPLY_NUM
 		LOCAL:(LOCAL:0 + 20) = MPLY:(LOCAL:0)
 	NEXT
@@ -993,7 +1001,7 @@ ELSEIF RESULT == 5900 && GROUPMATCH(FLAG:調教モード, 調教_会う, 調教_
 	RETURN 1
 
 ;命令させろ
-ELSEIF RESULT == 5901 && GROUPMATCH(FLAG:調教モード, 調教_会う, 調教_閨, 調教_捕虜調教, 調教_捕虜会話)
+ELSEIF RESULT == 5901 && GROUPMATCH(FLAG:調教モード, 調教_会う, 調教_閨, 調教_捕虜調教, 調教_捕虜会話, 調教_居住区)
 	CALL CLEAR_MPLY
 	CALL CLEAR_MTAR
 	;調教参加者全員をターゲットに追加
@@ -1055,6 +1063,11 @@ ELSEIF RESULT == 5996
 
 ;行動終了
 ELSEIF RESULT == 5999
+	;ハウジングモード時の処理
+	IF FLAG:ハウジングモード == 1
+		CALL TRAIN_EXIT(1)
+		RETURN 1
+	ENDIF
 	;逆調教・主人公が行動不能のときは自分の意志で終了できない
 	[IF_DEBUG]
 	PRINTFORMW (デバッグ_調教を終了します)
@@ -1094,8 +1107,8 @@ ELSEIF RESULT == 5998
 	CALL TRAIN_SHOP
 
 ;タブ設定
-ELSEIF RESULT >= 2000 && RESULT <= 2008
-	IF FLAG:ウフフフラグ || (FLAG:調教モード == 調教_会う && GROUPMATCH(RESULT, 2007, 2008, 2006)) || (FLAG:調教モード == 調教_子育て && GROUPMATCH(RESULT, 2007)) || (FLAG:調教モード == 調教_捕虜会話 && GROUPMATCH(RESULT, 2007, 2008))
+ELSEIF RESULT >= 2000 && RESULT <= 2010
+	IF FLAG:ウフフフラグ || (FLAG:調教モード == 調教_会う && GROUPMATCH(RESULT, 2007, 2008, 2006)) || (FLAG:調教モード == 調教_子育て && GROUPMATCH(RESULT, 2007)) || (FLAG:調教モード == 調教_捕虜会話 && GROUPMATCH(RESULT, 2007, 2008)) || (FLAG:調教モード == 調教_居住区 && GROUPMATCH(RESULT, 2006, 2009, 2010))
 		TFLAG:7 = RESULT - 2000
 	ENDIF
 	CLEARLINE LINECOUNT - LINES_TRAIN
@@ -1172,6 +1185,9 @@ ELSEIF RESULT >= 0 && RESULT < 2000
 			DOTRAIN LOCAL
 		ENDIF
 	ENDIF
+;ハウジング関連の処理実行
+ELSEIF (FLAG:調教モード == 調教_居住区  || FLAG:ハウジングモード == 1) && RESULT >= HO_キャラボタンID
+	CALL HOUSING_TRAIN_INPUT(RESULT)
 ENDIF
 RETURN 0
 

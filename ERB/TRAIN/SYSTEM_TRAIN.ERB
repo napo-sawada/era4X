@@ -36,6 +36,13 @@ FOR LOCAL:0, 0, CHARANUM
 	ENDIF
 NEXT
 
+;衣装データを一時領域にコピー
+FOR LOCAL:0, 0, CHARANUM
+	FOR LOCAL:1, 0, CLOTH_PART_NUM
+		調教用衣装:(LOCAL:0):(LOCAL:1) = CLOTH:(LOCAL:0):(LOCAL:1)
+	NEXT
+NEXT
+
 ;「会いに行く」モード
 IF FLAG:調教モード == 0
 	FOR LOCAL:0, 0, CHARANUM
@@ -78,6 +85,8 @@ ELSEIF FLAG:調教モード == 調教_子育て
 ELSEIF FLAG:調教モード == 調教_捕虜会話
 	TFLAG:56 = 10
 ELSEIF FLAG:ウフフフラグ
+	TFLAG:56 = 20
+ELSEIF FLAG:調教モード == 調教_居住区
 	TFLAG:56 = 20
 ENDIF
 
@@ -181,6 +190,11 @@ IF FLAG:調教モード == 調教_会う
 	NEXT
 ENDIF
 
+;ハウジングモード用の初期化処理
+IF  FLAG:調教モード == 調教_居住区
+	CALL HO_INIT_DATA_EVENTTRAIN_START
+ENDIF
+
 ;プレイヤーとターゲットをクリア
 CALL CLEAR_MPLY
 CALL CLEAR_MTAR
@@ -201,6 +215,8 @@ TFLAG:31 = -1
 SELECTCASE FLAG:調教モード
 	CASE 調教_会う, 調教_子育て, 調教_捕虜会話
 		TFLAG:7 = 7
+	CASE 調教_居住区
+		TFLAG:7 = 9
 	CASEELSE
 		TFLAG:7 = 0
 ENDSELECT
@@ -549,11 +565,24 @@ PREVCOM_NAME = %SELECTCOM_NAME%
 PREVCOM_TYPE = SELECTCOM_TYPE
 
 ;時間経過
-[IF_NDEBUG]
-TFLAG:55 ++
-[ENDIF]
-IF TFLAG:57 > 0
-	TFLAG:57 ++
+IF !FLAG:ハウジングモード
+	[IF_NDEBUG]
+	TFLAG:55 ++
+	[ENDIF]
+	IF TFLAG:57 > 0
+		TFLAG:57 ++
+	ENDIF
+ENDIF
+
+;ハウジング関連のコマンド実行後処理
+IF FLAG:調教モード == 8 || FLAG:ハウジングモード == 1
+	CALL HOUSING_TIME_PROGRESS
+;ハウジングモードの定刻(27:00)による時間切れ
+	IF HO_TIME >= 1620
+		CALL TRAIN_EXIT(0)
+		LINES_TRAIN = LINECOUNT
+		RETURN
+	ENDIF
 ENDIF
 
 ;継続状態の継続ターンを加算
@@ -565,8 +594,10 @@ NEXT
 
 IF GROUPMATCH(FLAG:調教モード, 2, 4, 5)
 	LOCALS:0 = 調教
-ELSEIF FLAG:ウフフフラグ
+ELSEIF FLAG:ウフフフラグ && FLAG:ハウジングモード != 1
 	LOCALS:0 = 夜伽
+ELSEIF FLAG:ウフフフラグ && FLAG:ハウジングモード == 1
+	LOCALS:0 = 逢瀬
 ELSE
 	LOCALS:0 = 行動
 ENDIF
@@ -591,18 +622,23 @@ IF !GROUPMATCH(FLAG:調教モード, 4, 5, 7) && !IS_PLAYABLE(MASTER)
 			ENDIF
 		NEXT
 	ENDIF
-	IF LOCAL:20 <= 0
+	IF LOCAL:20 <= 0 && FLAG:ハウジングモード != 1
 		WAIT
 		PRINTL
 		PRINTFORMW （%ANAME(MASTER)%が行動不能であるため、%LOCALS:0%を終了します）
 		BEGIN AFTERTRAIN
 		RETURN
-	ELSEIF LOCAL:21 == LOCAL:20
+	ELSEIF LOCAL:21 == LOCAL:20 && FLAG:ハウジングモード != 1
 		WAIT
 		PRINTL
 		PRINTFORMW （%LOCALS:0%は終了しました）
 		BEGIN AFTERTRAIN
 		RETURN
+	ELSEIF LOCAL:20 <= 0 && FLAG:ハウジングモード == 1
+		WAIT
+		PRINTL
+		PRINTFORMW （%ANAME(MASTER)%が行動不能であるため、%LOCALS:0%を終了します）
+		CALL HOUSING_EVENTEND
 	ENDIF
 ENDIF
 
@@ -634,7 +670,7 @@ FOR LOCAL:0, 0, CHARANUM
 NEXT
 
 ;調教参加者全員が行動不能
-IF LOCAL:2 && !TFLAG:8
+IF LOCAL:2 && !TFLAG:8 && FLAG:調教モード != 調教_居住区
 	WAIT
 	PRINTL
 
@@ -783,6 +819,24 @@ LINES_TRAIN = LINECOUNT
 @TRAIN_EXIT(ARG:0)
 ;EQUIPの初期化
 CALL INIT_EQUIP()
+
+;ハウジングモードでの調教終了処理
+IF FLAG:ハウジングモード && FLAG:調教モード != 調教_居住区 && ARG:0 == 1
+		;ウフフフラグをＯＦＦ
+	FLAG:ウフフフラグ = 0
+		;タブ設定をリセット
+	TFLAG:7 = 8
+	FLAG:調教モード = 調教_居住区
+	RETURN
+ELSEIF FLAG:調教モード == 調教_居住区 && ARG:0 == 1
+	PRINTL 
+	PRINTFORMW (居住区での交流を終了します)
+	BEGIN AFTERTRAIN
+ELSEIF (FLAG:調教モード == 調教_居住区 || FLAG:ハウジングモード) && ARG:0 == 0
+	PRINTL 
+	PRINTFORMW (すっかり夜も更けたため、居住区での交流を終了します)
+	BEGIN AFTERTRAIN
+ENDIF
 
 ;子育てモード
 IF FLAG:調教モード == 3

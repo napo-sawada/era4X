@@ -1,0 +1,204 @@
+﻿;-------------------------------------------------
+; FLAG:調教モード =8 居住区関連処理
+; 関数の命名について
+; 基本的に居住区システム内部で完結しない、外部から呼ばれる可能性のある関数はHOUSING
+; 内部で完結する関数は略称のHOを接頭する。でもCOM周辺がちょっとあやふや
+;-------------------------------------------------
+@HOUSING_SHOW_MEMBER
+#DIM DYNAMIC CHARA_ID
+#DIM DYNAMIC CHARA_IDX
+#DIM DYNAMIC IS_VISIBLE
+
+WHILE _DIC_HO_CHARALIST:CHARA_IDX != "-1"
+    CALL HO_GET_CHARADATA(CHARA_IDX, "CHARA_ID")
+    CHARA_ID = RESULT
+    CALL HO_GET_CHARADATA(CHARA_IDX, "ROOM_IDX")
+    IF RESULT == HO_MASTER現在地
+        CALL HO_IS_TARGET_VISIBLE(MASTER, CHARA_ID)
+        IS_VISIBLE = RESULT
+        ;同行中
+        IF CFLAG:CHARA_ID:調教参加フラグ == 1 && TCVAR:CHARA_ID:相席フラグ != 1
+            CALLF FuncTagSetText_Print(@"@C:{カラー_シアン}@@B:{CHARA_ID + HO_キャラボタンID}@👁[%SNAME(CHARA_ID)%]@/C@ @/B@ ", 4)
+        ;相席中
+        ELSEIF CFLAG:CHARA_ID:調教参加フラグ == 1 && TCVAR:CHARA_ID:相席フラグ == 1
+            CALLF FuncTagSetText_Print(@"@C:{カラー_黄緑}@@B:{CHARA_ID + HO_キャラボタンID}@👁[%SNAME(CHARA_ID)%]@/C@ @/B@ ", 4)
+        ELSEIF IS_VISIBLE
+            CALLF FuncTagSetText_Print(@"@B:{CHARA_ID + HO_キャラボタンID}@👁[%SNAME(CHARA_ID)%]@/B@ ", 4)
+        ELSE
+            CALLF FuncTagSetText_Print(@"@C:{カラー_選択不可}@🛇[%SNAME(CHARA_ID)%]@/C@ ", 4)
+        ENDIF
+    ENDIF
+    CHARA_IDX ++
+WEND
+
+@HOUSING_TRAIN_INPUT(INPUT_VALUE)
+#DIM INPUT_VALUE
+#DIM CHARA_ID
+#DIM DYNAMIC ROOM_IDX
+#DIM DYNAMIC MODULE_IDX
+#DIMS DYNAMIC _LIST_MODULE_LIST
+
+CLEARLINE 1
+;キャラボタンのクリック処理
+IF INPUT_VALUE >= HO_キャラボタンID && INPUT_VALUE < HO_マップボタンID && FLAG:調教モード == 調教_居住区
+    CHARA_ID = INPUT_VALUE - HO_キャラボタンID
+    ;値の有効性チェック
+    CALL HO_GET_CHARAIDX(CHARA_ID)
+    SIF RESULT == -1
+        RETURN
+    CALL HO_GET_MASTER_DATA("MODULE_USAGE")
+    MODULE_IDX = RESULT
+    IF CFLAG:CHARA_ID:調教参加フラグ != 1 && MODULE_IDX == -1
+        CALL HO_ADD_COMPANION(CHARA_ID)
+    ELSEIF CFLAG:CHARA_ID:調教参加フラグ == 1 && TCVAR:CHARA_ID:相席フラグ == 1
+        CALL HO_ADD_COMPANION(CHARA_ID)
+    ELSEIF CFLAG:CHARA_ID:調教参加フラグ != 1 && MODULE_IDX != -1
+        CALL HO_MASTER_TRY_INVITE(CHARA_ID)
+    ELSEIF CFLAG:CHARA_ID:調教参加フラグ == 1 
+        CALL HO_REMOVE_COMPANION(CHARA_ID)
+    ENDIF
+;マップボタンのクリック処理
+ELSEIF INPUT_VALUE >= HO_マップボタンID && INPUT_VALUE <= HO_マップボタンID + HO_MAX_ROOMNUM && FLAG:調教モード == 調教_居住区
+    ROOM_IDX = INPUT_VALUE - HO_マップボタンID
+    SIF ROOM_IDX > HO_MAX_ROOMNUM
+        RETURN
+    SIF ROOM_IDX == HO_MASTER現在地
+        RETURN 
+    CALL HO_MOVE_MASTER(ROOM_IDX)
+;モジュールボタンのクリック処理
+ELSEIF INPUT_VALUE >= HO_モジュールボタンID && INPUT_VALUE < HO_TOPボタンID && FLAG:調教モード == 調教_居住区
+    ROOM_IDX = HO_MASTER現在地
+    MODULE_IDX = INPUT_VALUE - HO_モジュールボタンID
+    ;値の妥当性チェック
+    CALL HO_GET_MAPDATA(HO_有効マップID, ROOM_IDX, "MODULE_LIST")
+    _LIST_MODULE_LIST = %RESULTS%
+    SIF INPUT_VALUE > HO_モジュールボタンID + LIST_COUNT(_LIST_MODULE_LIST)
+        RETURN
+    CALL HO_MASTER_USE_MODULE(ROOM_IDX, MODULE_IDX)
+;GUIボタンクリック処理
+ELSEIF INPUT_VALUE >= HO_TOPボタンID && INPUT_VALUE <= HO_TOPボタンID + 1
+    INVERTBIT HO_DRAW_GUI_MODE, 0
+ELSEIF INPUT_VALUE >= HO_ステータスボタンID && INPUT_VALUE <= HO_ステータスボタンID + MAX_CHARANUM
+    CHARA_ID = INPUT_VALUE - HO_ステータスボタンID
+    ;値の有効性チェック
+    CALL HO_GET_CHARAIDX(CHARA_ID)
+    SIF RESULT == -1 && CHARA_ID != MASTER
+        RETURN
+    HO_ステータス描画対象 = CHARA_ID
+ENDIF
+
+
+;-------------------------------------------------
+;ハウジング部分のターン経過処理
+;SELECTCOMの内容に応じて時間を経過させる
+;移動などSELECTCOM以外の用途でターンを経過させる場合は
+;引数に経過ターンを与え,COM以外の実行 = 1とすることで経過時間取得処理をバイパスする
+;-------------------------------------------------
+@HOUSING_TIME_PROGRESS(経過ターン = 1, COM以外の実行 = 0)
+#DIM 経過ターン
+#DIM COM以外の実行
+IF COM以外の実行 == 0
+    CALL HO_GET_COM_DURATION
+    経過ターン = RESULT
+ENDIF
+
+;MASTERにクールタイムが設定されている場合経過ターンを加算
+経過ターン += HO_MASTERクールタイム
+HO_MASTERクールタイム = 0
+
+FOR LOCAL, 0, 経過ターン
+    HO_TIME += HO_単位時間
+    CALL HOUSING_CHARAACT_CONTROL_MAIN
+NEXT
+
+;離席等により二人きりでMTAR:0が-1の場合は同行者をMTARにセット
+IF TFLAG:44 == 1 && MTAR:0 == -1
+    CALL HO_GET_COMPANION_LIST
+    MTAR:0 = TOINT(LIST_GET(RESULTS, 0))
+ENDIF
+
+
+;各種データの初期化
+@HO_INIT_DATA
+#DIM DYNAMIC IDX
+#DIM DYNAMIC CHARA_ID
+#DIM DYNAMIC 初期位置
+#DIMS DYNAMIC _LIST_MEMBER
+
+;小さいフォントが参照可能なら使用可能な状態にする
+GETFONT
+CHKFONT "Microsoft Himalaya"
+IF RESULT
+    HO_SFONT '= "Microsoft Himalaya"
+ELSE
+    HO_SFONT '= "ＭＳ ゴシック"
+ENDIF
+
+;;マップデータをセット
+;今はマップが一つしか無いので0固定
+HO_有効マップID = 0
+CALL HO_LOAD_MAPDATA(HO_有効マップID)
+
+;ステータス画面の描写対象をMASTERに
+HO_ステータス描画対象 = MASTER
+
+
+;交流に参加するクルーの初期ステータスを設定
+CALL HO_FIND_ROOM_BY_TAG("クルー私室")
+初期位置 = RESULT
+CALL GET_BOARDING_MEMBER_LIST
+_LIST_MEMBER = %RESULTS%
+FOR LOCAL, 0, LIST_COUNT(RESULTS)
+    CHARA_ID = TOINT(LIST_GET(_LIST_MEMBER, LOCAL))
+    ;交流に参加可能か詳細チェック
+    CALL HOUSING_MODE_CHECK_CHARA_JOINABLE(CHARA_ID)
+    SIF RESULT == 0
+        CONTINUE
+    _DIC_HO_CHARALIST:IDX '= @"[CHARA_ID:{CHARA_ID}][ROOM_IDX:{初期位置}][ACTION:待機]"
+    IDX ++
+NEXT
+;キャラリスト末尾を示す"-1"をセット
+_DIC_HO_CHARALIST:IDX '= "-1"
+HO_マップ内キャラ数 = FINDELEMENT(_DIC_HO_CHARALIST, "-1")
+
+;プレイヤーの初期位置を設定
+CALL HO_FIND_ROOM_BY_TAG("プレイヤー私室")
+初期位置 = RESULT
+HO_MASTER現在地 = 初期位置
+
+CALL HO_REGIST_CREW_PRIVATE_ROOM
+
+;"クルー私室"タグを持つ部屋に登場キャラの数だけ私室モジュールを登録する
+@HO_REGIST_CREW_PRIVATE_ROOM
+#DIM  DYNAMIC CHARA_IDX
+#DIM  DYNAMIC ROOM_IDX
+#DIMS DYNAMIC _LIST_MODULE_IDX
+CALL HO_FIND_ROOM_BY_TAG("クルー私室")
+ROOM_IDX = RESULT
+
+WHILE _DIC_HO_CHARALIST:(CHARA_IDX) != "-1"
+    _LIST_MODULE_IDX = %LIST_ADD(_LIST_MODULE_IDX, TOSTR(HO_CREW_PRIVATE_ROOM_ID))%
+    CHARA_IDX ++
+WEND
+CALL HO_SET_MAPDATA(ROOM_IDX, "MODULE_LIST", _LIST_MODULE_IDX)
+RETURN
+
+;-------------------------------------------------
+;;BEGINTRAIN後に@EVENTTRAINで実行される初期化処理
+;TCVAR等BEGINTRAINで初期化される変数の初期値はこの関数で設定する
+;-------------------------------------------------
+@HO_INIT_DATA_EVENTTRAIN_START
+;起床時は空腹状態でスタート
+;TCVAR:701 空腹度
+CVARSET TCVAR, 701, 300
+
+;-------------------------------------------------
+;;EVENT_AFTERで実行される終了処理
+;-------------------------------------------------
+@HOUSING_EXIT
+CALL WndMgr_DestroyWindow(-1)
+;各種データを初期化
+VARSET _DIC_HO_MASTER_DATA
+VARSET _DIC_HO_MAPDATA
+VARSET _DIC_HO_CHARALIST
+FLAG:ハウジングモード = 0

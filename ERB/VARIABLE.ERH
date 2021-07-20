@@ -75,6 +75,7 @@
 #DIM コマンド_日常   = 1
 #DIM コマンド_育児   = 2
 #DIM コマンド_共通   = 3
+#DIM コマンド_居住区 = 4
 
 ;性的嗜好の値がどういう嗜好を示すかを対応づける定数
 
@@ -561,6 +562,7 @@
 #DIM CONST 調教_逆調教通常 = 5
 #DIM CONST 調教_捕虜会話 = 6
 #DIM CONST 調教_慰安 = 7
+#DIM CONST 調教_居住区 = 8
 
 {
 	#DIMS CONST IAN_PLACE = 

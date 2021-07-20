@@ -1,0 +1,49 @@
+﻿;-------------------------------------------------
+;キャラクターの行動基準となるスケジュール定義ファイル
+;-------------------------------------------------
+;自由行動。基本的にこれ
+@HO_SCH_FREE(CHARA_ID)
+#DIM CHARA_ID
+#DIM  DYNAMIC SCH
+#DIMS DYNAMIC ACT
+#DIM  DYNAMIC CLOCK
+CLOCK = HO_TIME /60 * 100 + HO_TIME % 60
+SELECTCASE CLOCK
+    CASE 0 TO 700
+        ACT '= "就寝"
+    CASE 701 TO 900
+        ACT '= "食事"
+    CASE 901 TO 1159
+        ACT '= "自由"
+    CASE 1200 TO 1330
+        ACT '= "食事"
+    CASE 1331 TO 1459
+        ACT '= "自由"
+    CASE 1500 TO 1630
+        ACT '= "自由"
+    CASE 1631 TO 1759
+        ACT '= "自由"
+    CASE 1800 TO 2000
+        ACT '= "食事"
+    CASE 2001 TO 2100
+        ACT '= "入浴"
+    CASE 2101 TO 2300
+        ACT '= "自由"
+    CASE 2301 TO 2500
+        IF !RAND:3
+            ACT '= "休憩"
+        ELSEIF !RAND:2
+            ACT '= "飲酒"
+        ELSE
+            ACT '= "就寝"
+        ENDIF
+        ;マウロ氏限定処理。試験的に
+        IF CHARA_ID == 6
+            ACT '= "バーテンダー"
+        ENDIF
+    CASEELSE
+        ACT '= "就寝"
+ENDSELECT
+SIF ACT == ""
+    ACT '= "自由"
+RESULTS = %ACT%

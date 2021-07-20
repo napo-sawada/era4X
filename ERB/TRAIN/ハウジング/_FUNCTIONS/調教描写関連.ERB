@@ -1,0 +1,126 @@
+﻿;-------------------------------------------------
+;ハウジングモードでの調教描写に使用する関数(文字列の描写中心)
+;-------------------------------------------------
+;空腹度に関する描写
+@HO_GET_空腹度描写(CHARA_ID)
+#DIM CHARA_ID
+IF CHARA_ID == MASTER
+    IF TCVAR:CHARA_ID:空腹度 < 150
+        LOCALS:0 = は満腹だ
+    ELSEIF TCVAR:CHARA_ID:空腹度 < 300
+        LOCALS:0 = は小腹が空いている
+    ELSE
+        LOCALS:0 = は空腹だ
+    ENDIF
+ELSE
+    IF TCVAR:CHARA_ID:空腹度 < 150
+        LOCALS:0 = は満腹のようだ
+    ELSEIF TCVAR:CHARA_ID:空腹度 < 300
+        LOCALS:0 = は小腹が空いているようだ
+    ELSE
+        LOCALS:0 = は空腹のようだ
+    ENDIF
+ENDIF
+RESULTS = %ANAME(CHARA_ID)%%LOCALS%
+
+@HO_GET_精液描写(CHARA_ID, 射精部位)
+#DIM CHARA_ID
+#DIM 射精部位
+
+VARSET RESULTS
+SELECTCASE 射精部位
+    CASE 射精部位_膣内
+        IF CUM_GET_AMOUNT:CHARA_ID:射精部位_膣内 == 0
+            RETURN
+        ELSEIF CUM_GET_AMOUNT:CHARA_ID:射精部位_膣内 < 10
+            RESULTS = 陰部が白濁液で湿っている
+        ELSEIF CUM_GET_AMOUNT:CHARA_ID:射精部位_膣内 < 25
+            RESULTS = 雌穴は精液で満たされている
+        ELSEIF CUM_GET_AMOUNT:CHARA_ID:射精部位_膣内 < 35
+            RESULTS = 雌穴から溢れた精液が大腿を伝って垂れている
+        ELSE
+            RESULTS = 溢れた精液が雌穴から糸を引いて滴っている
+        ENDIF
+    CASE 射精部位_アナル
+        IF CUM_GET_AMOUNT:CHARA_ID:射精部位_アナル == 0
+            RETURN
+        ELSEIF CUM_GET_AMOUNT:CHARA_ID:射精部位_アナル < 10
+            RESULTS = 肛孔から雄汁が垂れている
+        ELSEIF CUM_GET_AMOUNT:CHARA_ID:射精部位_アナル < 25
+            RESULTS = 肛孔は雄汁で満たされている
+        ELSEIF CUM_GET_AMOUNT:CHARA_ID:射精部位_アナル < 35
+            RESULTS = 肛孔から溢れた精液が大腿を伝って垂れている
+        ELSE
+            RESULTS = 肛孔から止めどなく白濁が溢れている
+        ENDIF
+    CASE 射精部位_口
+        IF CUM_GET_AMOUNT:CHARA_ID:射精部位_口 == 0
+            RETURN
+        ELSEIF CUM_GET_AMOUNT:CHARA_ID:射精部位_口 < 10
+            RESULTS = 口元に僅かな量の精液がこびりついている
+        ELSEIF CUM_GET_AMOUNT:CHARA_ID:射精部位_口 < 25
+            RESULTS = 口内は雄臭を放つ白濁で満たされている
+        ELSE
+            RESULTS = 口内に大量の白濁汁が注がれている
+        ENDIF
+    CASE 射精部位_顔
+        IF CUM_GET_AMOUNT:CHARA_ID:射精部位_顔 == 0
+            RETURN
+        ELSEIF CUM_GET_AMOUNT:CHARA_ID:射精部位_顔 < 10
+            RESULTS = 頬に僅かな量の精液がこびりついている
+        ELSEIF CUM_GET_AMOUNT:CHARA_ID:射精部位_顔 < 25
+            RESULTS = 顔面に淫らな白濁がべったりとこびりついている
+        ELSE
+            RESULTS = 白濁がすっかり顔を覆ってしまっている
+        ENDIF
+    CASE 射精部位_胸
+        IF CUM_GET_AMOUNT:CHARA_ID:射精部位_胸 == 0
+            RETURN
+        ELSEIF CUM_GET_AMOUNT:CHARA_ID:射精部位_胸 < 10
+            RESULTS = 胸元に僅かな量の淫汁がこびりついている
+        ELSEIF CUM_GET_AMOUNT:CHARA_ID:射精部位_胸 < 25
+            RESULTS = 胸元に雄臭を放つ白濁がこびりついている
+        ELSE
+            RESULTS = 胸元は大量の雄汁でぐちゃぐちゃに汚されている
+        ENDIF
+    CASE 射精部位_髪
+        IF CUM_GET_AMOUNT:CHARA_ID:射精部位_髪 == 0
+            RETURN
+        ELSEIF CUM_GET_AMOUNT:CHARA_ID:射精部位_髪 < 10
+            RESULTS = 髪に僅かな量の白濁が付着している
+        ELSEIF CUM_GET_AMOUNT:CHARA_ID:射精部位_髪 < 25
+            RESULTS = 髪から雄臭を放つ白濁が滴っている
+        ELSE
+            RESULTS = 髪は大量の雄汁でぐちゃぐちゃに汚されている
+        ENDIF
+    CASE 射精部位_足
+        IF CUM_GET_AMOUNT:CHARA_ID:射精部位_足 == 0
+            RETURN
+        ELSEIF CUM_GET_AMOUNT:CHARA_ID:射精部位_足 < 10
+            RESULTS = 足元が僅かな量の精液で濡れている
+        ELSEIF CUM_GET_AMOUNT:CHARA_ID:射精部位_足 < 25
+            RESULTS = 大腿から雄臭を放つ白濁が滴っている
+        ELSE
+            RESULTS = 大腿から足先まで白濁でまみれている
+        ENDIF
+    CASE 射精部位_尻
+        IF CUM_GET_AMOUNT:CHARA_ID:射精部位_尻 == 0
+            RETURN
+        ELSEIF CUM_GET_AMOUNT:CHARA_ID:射精部位_尻 < 10
+            RESULTS = 尻が少量の精液で濡れている
+        ELSEIF CUM_GET_AMOUNT:CHARA_ID:射精部位_尻 < 25
+            RESULTS = 尻の曲線に沿って雄臭を放つ白濁が滴っている
+        ELSE
+            RESULTS = 尻は大量の白濁液でドロドロに濡れている
+        ENDIF
+    CASE 射精部位_手
+        IF CUM_GET_AMOUNT:CHARA_ID:射精部位_手 == 0
+            RETURN
+        ELSEIF CUM_GET_AMOUNT:CHARA_ID:射精部位_手 < 10
+            RESULTS = 僅かな量の精液が指の間で糸を引いている
+        ELSEIF CUM_GET_AMOUNT:CHARA_ID:射精部位_手 < 25
+            RESULTS = 手は雄臭を放つ白濁でまみれていれる
+        ELSE
+            RESULTS = 手は大量の白濁でまみれていれる
+        ENDIF
+ENDSELECT

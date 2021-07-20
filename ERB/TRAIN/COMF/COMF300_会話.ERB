@@ -15,12 +15,22 @@ RESULTS:1 = 話を聞かされる
 CALL COM_ABLE_COMMON(300)
 SIF RESULT == 0
 	RETURN 0
+;プレイヤーとターゲットが1人以上
+SIF MPLY_NUM <= 0 || MTAR_NUM <= 0
+	RETURN 0
 ;主人公がプレイヤーのとき限定
 SIF MPLY:0 != MASTER
 	RETURN 0
-;キス中は不可
-SIF IS_EQUIP(MPLY:0, 342)
+;ターゲットがいなければ不可
+SIF MTAR:0 == -1 || TFLAG:44 == 0
 	RETURN 0
+;ディープキス中は不可
+IF IS_EQUIP(MPLY:0, 342) && FLAG:調教モード != 調教_居住区
+	RETURN 0
+;居住区モードではプレイヤーまたはターゲットの口が塞がっているなら不可
+ELSEIF IS_M_HOLD(MPLY:0) || IS_M_HOLD(MTAR:0)
+	RETURN 0
+ENDIF
 RETURN 1
 
 ;-------------------------------------------------
@@ -213,4 +223,8 @@ CALL COM_TEXT_LAST_LIFE
 ;-------------------------------------------------
 
 @COM_AVAILABLE_WHEN300
-RETURN コマンド_日常
+IF FLAG:調教モード != 調教_居住区
+	RETURN コマンド_日常
+ELSE
+	RETURN コマンド_居住区
+ENDIF

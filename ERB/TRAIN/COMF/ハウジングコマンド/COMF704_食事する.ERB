@@ -1,0 +1,176 @@
+﻿;-------------------------------------------------
+;コマンド名称
+;-------------------------------------------------
+@COM_NAME704
+RESULTS:0 = 食事する
+RESULTS:1 = 食事する
+RESULTS:2 = 食事する
+RESULTS:3 = 食事する
+RESULTS:4 = 食事する
+RESULTS:5 = 食事する
+
+;-------------------------------------------------
+;選択可否判定
+;-------------------------------------------------
+@COM_ABLE704
+#DIM DYNAMIC _LIST_MEMBER
+#DIM DYNAMIC MEMBER_NUM
+#DIM DYNAMIC CHARA_ID
+;共通部分
+CALL COM_ABLE_COMMON(704)
+SIF RESULT == 0
+	RETURN 0
+;食事できる場所にいる
+CALL HO_CHECK_USE_MODULE_USAGE(MASTER, "食事")
+SIF RESULT == 0
+	RETURN 0
+;主人公が空腹のときのみ
+SIF TCVAR:MASTER:空腹度 < 300
+	RETURN 0
+;主人公がプレイヤーのとき限定
+SIF MPLY:0 != MASTER
+	RETURN 0
+;主人公に主導権があるとき限定
+SIF FLAG:主導権所有者 != MASTER && FLAG:主導権所有者 != -1
+	RETURN 0
+;プレイヤーの口が塞がっているなら不可
+SIF IS_M_HOLD(MPLY:0)
+	RETURN 0
+RETURN 1
+
+;-------------------------------------------------
+;メイン処理
+;-------------------------------------------------
+@COM704
+#DIMS DYNAMIC _LIST_MEMBER
+#DIM DYNAMIC MEMBER_NUM
+#DIM DYNAMIC CHARA_ID
+
+MPLY:0 = MASTER
+TCVAR:MASTER:空腹度 = 0
+;一度MTARを初期化
+CALL CLEAR_MTAR()
+CALL HO_GET_COMPANION_LIST()
+_LIST_MEMBER = %RESULTS%
+MEMBER_NUM = RESULT
+
+FOR LOCAL, 0, MEMBER_NUM
+	CHARA_ID = TOINT(LIST_GET(_LIST_MEMBER, LOCAL))
+	;同行中なら空腹時のみMTARに追加
+	IF TCVAR:CHARA_ID:相席フラグ != 1
+		IF TCVAR:CHARA_ID:空腹度 >= 300
+			CALL ADD_MTAR(CHARA_ID)
+			TCVAR:CHARA_ID:空腹度 = 0
+		ENDIF
+	;食事中ならMTARに追加。食事中アクション実行時に空腹度は0になってるため空腹度は初期化しない
+	ELSE
+		CALL HO_GET_CHARAACT(CHARA_ID)
+		IF RESULTS == "食事中"
+			CALL ADD_MTAR(CHARA_ID)
+		ENDIF 
+	ENDIF
+NEXT
+
+;MTARが誰もいない場合はMTARに自分自身を指定
+SIF MTAR_NUM == 0
+	MTAR:0 = MPLY:0
+
+;コマンドの成否をTFLAG:18にセット
+CALL JUDGE_COM_RESULT(MTAR:0, 5, 5)
+
+;;MASTERの処理
+;-------------------------------------------------
+;固定で入るソース
+SOURCE:(MPLY:0):接触 = 80
+;親密に応じた歓楽のソース追加
+CALL ADD_SOURCE_KANRAKU(MPLY:0, 200)
+SOURCE:(MPLY:0):歓楽 = MAX(SOURCE:(MPLY:0):歓楽, 0)
+
+;主導権に応じたソースの追加
+CALL ADD_SOURCE_INITIATIVE_N(MPLY:0, 50, 50)
+;失敗
+IF TFLAG:18 == -1
+	TIMES SOURCE:(MPLY:0):歓楽, 0.20
+	TIMES SOURCE:(MPLY:0):愛情, 0.20
+;成功
+ELSEIF TFLAG:18 == 0
+;大成功
+ELSE
+	TIMES SOURCE:(MPLY:0):歓楽, 2.00
+	TIMES SOURCE:(MPLY:0):愛情, 2.00
+ENDIF
+
+;体力・気力を回復
+BASE:(MPLY:0):体力 = LIMIT(BASE:(MPLY:0):体力 + 400, BASE:(MPLY:0):体力, MAXBASE:(MPLY:0):体力)
+BASE:(MPLY:0):気力 = LIMIT(BASE:(MPLY:0):気力 + 300, BASE:(MPLY:0):気力, MAXBASE:(MPLY:0):気力)
+
+;;ターゲットの処理
+;-------------------------------------------------
+FOR LOCAL,0 , MTAR_NUM
+	;MTARがMASTERならMPLYで処理済みのはずなので処理しない
+	SIF MTAR:LOCAL == MASTER
+		CONTINUE
+	;固定で入るソース
+	SOURCE:(MTAR:LOCAL):接触 = 80
+
+	;親密に応じた歓楽のソース追加
+	SOURCE:(MTAR:LOCAL):歓楽 = 10
+	CALL ADD_SOURCE_KANRAKU(MTAR:LOCAL, 200)
+	SOURCE:(MTAR:LOCAL):歓楽 = MAX(SOURCE:(MTAR:LOCAL):歓楽, 0)
+
+	;親密に応じた愛情のソース追加
+	CALL ADD_SOURCE_AIZYOU(MTAR:LOCAL, 60)
+
+	;主導権に応じたソースの追加
+	CALL ADD_SOURCE_INITIATIVE_N(MTAR:LOCAL, 50, 50)
+
+	;失敗
+	IF TFLAG:18 == -1
+		TIMES SOURCE:(MTAR:LOCAL):歓楽, 0.20
+		TIMES SOURCE:(MTAR:LOCAL):愛情, 0.20
+	;成功
+	ELSEIF TFLAG:18 == 0
+
+	;大成功
+	ELSE
+		TIMES SOURCE:(MTAR:LOCAL):歓楽, 2.00
+		TIMES SOURCE:(MTAR:LOCAL):愛情, 2.00
+		TFLAG:37 += 5
+	ENDIF
+
+	;体力・気力を回復
+	BASE:(MTAR:LOCAL):体力 = LIMIT(BASE:(MTAR:LOCAL):体力 + 400, BASE:(MTAR:LOCAL):体力, MAXBASE:(MTAR:LOCAL):体力)
+	BASE:(MTAR:LOCAL):気力 = LIMIT(BASE:(MTAR:LOCAL):気力 + 300, BASE:(MTAR:LOCAL):気力, MAXBASE:(MTAR:LOCAL):気力)
+NEXT
+
+;主導度変化基準値
+TFLAG:49 = 2
+
+;倒錯度変化基準値
+TFLAG:50 = -2
+
+RETURN 1
+
+;-------------------------------------------------
+;地の文(前文)
+;-------------------------------------------------
+@COM_TEXT_BEFORE704
+IF MTAR:0 == MASTER
+	PRINTFORML %ANAME(MASTER)%は一人で食事をとった
+ELSE
+	PRINTFORML %ANAME(MASTER)%は%ANAME(MTAR:0, MTAR_NUM)%と一緒に食事をとった
+ENDIF
+SETCOLOR カラー_注釈
+PRINTFORML 体力+400 気力+300
+RESETCOLOR
+;-------------------------------------------------
+;地の文(パラメータ・刻印変動後)
+;-------------------------------------------------
+@COM_TEXT_LAST704
+
+;-------------------------------------------------
+
+;コマンド区分
+;-------------------------------------------------
+@COM_AVAILABLE_WHEN704
+RETURN コマンド_居住区

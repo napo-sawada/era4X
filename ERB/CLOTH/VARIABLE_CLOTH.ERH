@@ -2,18 +2,19 @@
 #DIM CONST COVER_PART_NUM = 14
 #DIM CONST MAX_CLOTH_ID = 100
 #DIM SAVEDATA CHARADATA CLOTH, CLOTH_PART_NUM
+#DIM CHARADATA 調教用衣装, CLOTH_PART_NUM
 
 {
-#DIMS CONST CLOTH_PART_NAME = 
-"頭", "首", "上服", "下服", "上着", 
-"上下服", "下着上", "下着下", "上下下着",
- "腕", "靴下", "靴", "アクセサリ","白兵武器"
+    #DIMS CONST CLOTH_PART_NAME = 
+        "頭", "首", "上服", "下服", "上着", 
+        "上下服", "下着上", "下着下", "上下下着",
+        "腕", "靴下", "靴", "アクセサリ","白兵武器"
 }
 {
-#DIMS CONST CLOTH_PART_NAME_ENG = 
-"HEAD", "NECK", "TOP", "BOTTOM", "OUTER",
-"BODYSUIT", "INNER_TOP", "INNER_BOTTOM", "INNER_BODYSUIT",
-"GLOVE", "SOCKS", "SHOES", "ACCESSORY", "WEAPON"
+    #DIMS CONST CLOTH_PART_NAME_ENG = 
+        "HEAD", "NECK", "TOP", "BOTTOM", "OUTER",
+        "BODYSUIT", "INNER_TOP", "INNER_BOTTOM", "INNER_BODYSUIT",
+        "GLOVE", "SOCKS", "SHOES", "ACCESSORY", "WEAPON"
 }
 
 #DIM SAVEDATA HAVE_CLOTH, MAX_CLOTH_ID

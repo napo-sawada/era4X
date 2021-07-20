@@ -10,6 +10,16 @@ ELSE
 	LOCALS:0 = 泡踊り
 ENDIF
 
+IF FLAG:ハウジングモード
+	CALL HO_CHECK_USE_MODULE_USAGE(MASTER, "浴室")
+	IF RESULT
+		IF MPLY_NUM >= 2
+			LOCALS:0 = Ｗソーププレイ
+		ELSE
+			LOCALS:0 = ソーププレイ
+		ENDIF
+	ENDIF
+ENDIF
 RESULTS:0 = %LOCALS:0%する
 RESULTS:1 = %LOCALS:0%させられる
 RESULTS:2 = %LOCALS:0%させる
@@ -32,8 +42,14 @@ SIF MPLY_NUM <= 0 || MPLY_NUM > 2
 SIF MTAR_NUM <= 0 || MTAR_NUM > 1
 	RETURN 0
 ;ローションが必要
-SIF !ITEM:ローション && !ITEM:A_ローション
+IF !ITEM:ローション && !ITEM:A_ローション && !FLAG:ハウジングモード
 	RETURN 0
+ELSEIF !ITEM:ローション && !ITEM:A_ローション
+	CALL HO_CHECK_USE_MODULE_USAGE(MASTER, "浴室")
+	IF !RESULT
+		RETURN 0
+	ENDIF
+ENDIF
 
 FOR LOCAL:0, 0, MPLY_NUM
 	SIF !CAN_REACH_BODY(MPLY:(LOCAL:0) , MTAR:0)
@@ -57,8 +73,16 @@ CALL COM_ORDER_COMMON
 SIF RESULT == 0
 	RETURN 0
 
-SIF !ITEM:A_ローション
-	ITEM:ローション -= 1
+IF !FLAG:ハウジングモード
+	SIF !ITEM:A_ローション
+		ITEM:ローション -= 1
+ELSE
+	CALL HO_CHECK_USE_MODULE_USAGE(MASTER, "浴室")
+	IF !RESULT
+		SIF !ITEM:A_ローション
+			ITEM:ローション -= 1
+	ENDIF
+ENDIF
 
 ;●人数補正の設定
 LOCAL:10 = 100
@@ -191,8 +215,16 @@ NEXT
 ;継続中の表示
 ;-------------------------------------------------
 @EQUIP_MESSAGE5(ARG:0)
-RESULTS = %EQUIP_PLAYER_ANAME(ARG:0)%が%EQUIP_TARGET_ANAME(ARG:0)%に泡踊り中
-
+IF !FLAG:ハウジングモード
+	RESULTS = %EQUIP_PLAYER_ANAME(ARG:0)%が%EQUIP_TARGET_ANAME(ARG:0)%に泡踊り中
+ELSE
+	CALL HO_CHECK_USE_MODULE_USAGE(MASTER, "浴室")
+	IF !RESULT
+		RESULTS = %EQUIP_PLAYER_ANAME(ARG:0)%が%EQUIP_TARGET_ANAME(ARG:0)%に泡踊り中
+	ELSE
+		RESULTS = %EQUIP_PLAYER_ANAME(ARG:0)%が%EQUIP_TARGET_ANAME(ARG:0)%にソーププレイ中
+	ENDIF
+ENDIF
 ;-------------------------------------------------
 ;継続中の地の文(前文)
 ;-------------------------------------------------
@@ -251,19 +283,37 @@ IF MPLY_NUM == 2
 	ELSE
 		LOCALS:1 = 肌を
 	ENDIF
-	SELECTCASE GET_COM_INITIATIVE()
+	IF FLAG:ハウジングモード
+		CALL HO_CHECK_USE_MODULE_USAGE(MASTER, "浴室")
+		LOCAL:0 = RESULT
+	ENDIF
+	IF !FLAG:ハウジングモード || (FLAG:ハウジングモード && !LOCAL:0)
+		SELECTCASE GET_COM_INITIATIVE()
 		;プレイヤーに主導権
-		CASE 0
-			PRINTFORMW %ANAME(MPLY:0)%と%ANAME(MPLY:1)%は全身にローションを塗り付けると、%ANAME(MTAR:0)%の体を前後から挟み込み、%LOCALS:1%擦り付けて責め立て%TARGET_STR("た", "てきた")%…
+			CASE 0
+				PRINTFORMW %ANAME(MPLY:0)%と%ANAME(MPLY:1)%は全身にローションを塗り付けると、%ANAME(MTAR:0)%の体を前後から挟み込み、%LOCALS:1%擦り付けて責め立て%TARGET_STR("た", "てきた")%…
 		;ターゲットに主導権
-		CASE 1
-			PRINTFORMW %ANAME(MTAR:0)%は%ANAME(MPLY:0)%と%ANAME(MPLY:1)%の全身にローションを塗り付けると、二人に前後から%LOCALS:1%擦り付けさせて奉仕させた…
+			CASE 1
+				PRINTFORMW %ANAME(MTAR:0)%は%ANAME(MPLY:0)%と%ANAME(MPLY:1)%の全身にローションを塗り付けると、二人に前後から%LOCALS:1%擦り付けさせて奉仕させた…
 		;第三者に主導権
-		CASEELSE
-			PRINTFORML %ANAME(TFLAG:45)%は%ANAME(MPLY:0)%と%ANAME(MPLY:1)%の全身にローションを塗り付けると、%ANAME(MTAR:0)%に泡踊りするように命令した
-			PRINTFORMW %ANAME(MPLY:0)%と%ANAME(MPLY:1)%は%ANAME(MTAR:0)%の体を前後から挟み込み、ローションでヌメる%LOCALS:1%擦り付けた
-	ENDSELECT
-
+			CASEELSE
+				PRINTFORML %ANAME(TFLAG:45)%は%ANAME(MPLY:0)%と%ANAME(MPLY:1)%の全身にローションを塗り付けると、%ANAME(MTAR:0)%に泡踊りするように命令した
+				PRINTFORMW %ANAME(MPLY:0)%と%ANAME(MPLY:1)%は%ANAME(MTAR:0)%の体を前後から挟み込み、ローションでヌメる%LOCALS:1%擦り付けた
+		ENDSELECT
+	ELSE		
+		SELECTCASE GET_COM_INITIATIVE()
+		;プレイヤーに主導権
+			CASE 0
+				PRINTFORMW %ANAME(MPLY:0)%と%ANAME(MPLY:1)%は全身に石鹸の泡を塗りたくると、%ANAME(MTAR:0)%の体を前後から挟み込み、%LOCALS:1%擦り付けて責め立て%TARGET_STR("た", "てきた")%…
+		;ターゲットに主導権
+			CASE 1
+				PRINTFORMW %ANAME(MTAR:0)%は%ANAME(MPLY:0)%と%ANAME(MPLY:1)%の全身に石鹸の泡を塗りたくらせ、二人に前後から%LOCALS:1%擦り付けさせて奉仕させた…
+		;第三者に主導権
+			CASEELSE
+				PRINTFORML %ANAME(TFLAG:45)%は%ANAME(MPLY:0)%と%ANAME(MPLY:1)%の全身に石鹸の泡を塗りたくらせ、%ANAME(MTAR:0)%に身体で奉仕するように命令した
+				PRINTFORMW %ANAME(MPLY:0)%と%ANAME(MPLY:1)%は%ANAME(MTAR:0)%の体を前後から挟み込み、泡でヌメる%LOCALS:1%擦り付けた
+		ENDSELECT
+	ENDIF
 ;プレイヤーが１人
 ELSE
 	IF GET_INMOU_LEVEL(MPLY:0) >= 1
@@ -271,18 +321,37 @@ ELSE
 	ELSE
 		LOCALS:1 = 肌を
 	ENDIF
-	SELECTCASE GET_COM_INITIATIVE()
+	IF FLAG:ハウジングモード
+		CALL HO_CHECK_USE_MODULE_USAGE(MASTER, "浴室")
+		LOCAL:0 = RESULT
+	ENDIF
+	IF !FLAG:ハウジングモード || (FLAG:ハウジングモード && !LOCAL:0)
+		SELECTCASE GET_COM_INITIATIVE()
 		;プレイヤーに主導権
-		CASE 0
-			PRINTFORMW %ANAME(MPLY:0)%は全身にローションを塗り付けると、%ANAME(MTAR:0)%の体に%LOCALS:1%擦り付けて責め立て%TARGET_STR("た", "てきた")%…
+			CASE 0
+				PRINTFORMW %ANAME(MPLY:0)%は全身にローションを塗り付けると、%ANAME(MTAR:0)%の体に%LOCALS:1%擦り付けて責め立て%TARGET_STR("た", "てきた")%…
 		;ターゲットに主導権
-		CASE 1
-			PRINTFORMW %ANAME(MTAR:0)%は%ANAME(MPLY:0)%の全身にローションを塗り付けると、%LOCALS:1%擦り付けさせ泡踊りで奉仕させた…
+			CASE 1
+				PRINTFORMW %ANAME(MTAR:0)%は%ANAME(MPLY:0)%の全身にローションを塗り付けると、%LOCALS:1%擦り付けさせ泡踊りで奉仕させた…
 		;第三者に主導権
-		CASEELSE
-			PRINTFORML %ANAME(TFLAG:45)%は%ANAME(MPLY:0)%の全身にローションを塗り付けると、%ANAME(MTAR:0)%に泡踊りするように命令した
-			PRINTFORMW %ANAME(MPLY:0)%は%ANAME(MTAR:0)%の体に、ローションでヌメる%LOCALS:1%擦り付けた
-	ENDSELECT
+			CASEELSE
+				PRINTFORML %ANAME(TFLAG:45)%は%ANAME(MPLY:0)%の全身にローションを塗り付けると、%ANAME(MTAR:0)%に泡踊りするように命令した
+				PRINTFORMW %ANAME(MPLY:0)%は%ANAME(MTAR:0)%の体に、ローションでヌメる%LOCALS:1%擦り付けた
+		ENDSELECT
+	ELSE
+		SELECTCASE GET_COM_INITIATIVE()
+		;プレイヤーに主導権
+			CASE 0
+				PRINTFORMW %ANAME(MPLY:0)%は全身に石鹸の泡を塗りたくると、%ANAME(MTAR:0)%の体に%LOCALS:1%擦り付けて責め立て%TARGET_STR("た", "てきた")%…
+		;ターゲットに主導権
+			CASE 1
+				PRINTFORMW %ANAME(MTAR:0)%は%ANAME(MPLY:0)%の全身に石鹸の泡を塗りたくらせ、%LOCALS:1%擦り付けさせ身体で奉仕させた…
+		;第三者に主導権
+			CASEELSE
+				PRINTFORML %ANAME(TFLAG:45)%は%ANAME(MPLY:0)%の全身に石鹸の泡を塗りたくらせ、%ANAME(MTAR:0)%に身体で奉仕するように命令した
+				PRINTFORMW %ANAME(MPLY:0)%は%ANAME(MTAR:0)%の体に、泡でヌメる%LOCALS:1%擦り付けた
+		ENDSELECT
+	ENDIF
 ENDIF
 
 ;--------------------------------------------------------
@@ -320,7 +389,11 @@ ENDIF
 ;-------------------------------------------------
 
 @COM_AVAILABLE_WHEN5
-RETURN コマンド_ウフフ
+IF FLAG:調教モード != 調教_居住区
+	RETURN コマンド_ウフフ
+ELSE
+	RETURN コマンド_居住区
+ENDIF
 
 ;--------------------
 ;性嗜好用関数

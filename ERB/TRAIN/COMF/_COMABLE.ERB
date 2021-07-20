@@ -91,6 +91,44 @@ IF CONFIG:201
 	ENDIF
 ENDIF
 
+;;ハウジングモード用の判定
+;交流系コマンド
+IF FLAG:調教モード == 調教_居住区
+	;700:待機、704:食事する　以外は一人での実行不可
+	IF !GROUPMATCH(ARG, 700,704)
+		IF MTAR:0 == MASTER && MPLY:0 == MASTER
+			RETURN 0
+		ENDIF
+	ENDIF
+ENDIF
+;調教系コマンド
+IF FLAG:ハウジングモード == 1
+	;コマンドで外出できる環境ではないので露出プレイは不可
+	SIF GROUPMATCH(ARG, 112)
+		RETURN 0
+	;モジュール属性による体位の制限
+	CALL HO_CHECK_USE_MODULE_ELEM(MASTER, "立位まで")
+	IF RESULT == 1
+		;立ったままでは実行不可と思われるコマンドを制限
+		SIF GROUPMATCH(ARG, 14, 30, 31, 32, 33, 34, 35, 37, 38, 40, 41, 42, 43, 44, 45, 47, 48, 101, 102, 103, 104, 105, 110)
+			RETURN 0
+	ENDIF
+	CALL HO_CHECK_USE_MODULE_ELEM(MASTER, "座位まで")
+	IF RESULT == 1
+		;立ったまま・座ったままでは実行不可と思われるコマンドを制限
+		SIF GROUPMATCH(ARG, 30, 31, 34, 35, 37, 38, 40, 41, 44, 45, 47, 48, 101, 102, 105, 110)
+			RETURN 0
+	ENDIF
+	IF FLAG:調教モード == 調教_居住区
+		;公衆の目があるときに一律実行不可とする行為を指定
+		IF GROUPMATCH(ARG, 0, 1, 4, 10, 11, 24, 106, 107)
+			CALL HO_CHECK_PUBULIC_EYE(MASTER)
+			IF RESULT == 1
+				RETURN 0
+			ENDIF
+		ENDIF
+	ENDIF
+ENDIF
 CALL CHECK_COM_AVAILABLE(ARG:0)
 RETURN RESULT
 
@@ -109,9 +147,11 @@ SELECTCASE RESULT
 	CASE コマンド_育児
 		RETURN FLAG:調教モード == 調教_子育て
 	CASE コマンド_日常
-		RETURN !FLAG:ウフフフラグ && FLAG:調教モード != 調教_子育て
+		RETURN !FLAG:ウフフフラグ && FLAG:調教モード != 調教_子育て && FLAG:調教モード != 調教_居住区
+	CASE コマンド_居住区
+		RETURN FLAG:調教モード == 調教_居住区
 	CASE コマンド_共通
-		RETURN 1
+		RETURN FLAG:調教モード != 調教_居住区
 ENDSELECT
 RETURN 0
 
