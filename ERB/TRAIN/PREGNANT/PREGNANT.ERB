@@ -31,6 +31,9 @@ IF CFLAG:(ARG:0):妊娠期間 >= 1
 	RETURN
 ENDIF
 
+SIF TALENT:(ARG:0):妊娠不能
+	RETURN
+
 SIF CFLAG:(ARG:0):避妊薬残ターン
 	RETURN
 
