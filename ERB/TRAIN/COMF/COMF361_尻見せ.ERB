@@ -1,0 +1,566 @@
+﻿;尻見せ
+
+;-------------------------------------------------
+;コマンド名称
+;-------------------------------------------------
+@COM_NAME361
+RESULTS:0 = 尻を見せつける
+RESULTS:1 = 尻を強調させられる
+RESULTS:2 = 尻を強調してもらう
+RESULTS:3 = 尻を見せつけられる
+
+;-------------------------------------------------
+;選択可否判定
+;-------------------------------------------------
+@COM_ABLE361
+;共通部分
+CALL COM_ABLE_COMMON(361)
+SIF RESULT == 0
+	RETURN 0
+;プレイヤーとターゲットが1人以上
+SIF MPLY_NUM <= 0 || MTAR_NUM <= 0
+	RETURN 0
+;怪我なら不可
+SIF CFLAG:(MTAR:0):行動不能状態 == 3
+	RETURN 0
+RETURN 1
+
+;-------------------------------------------------
+;メイン処理
+;-------------------------------------------------
+@COM361
+;実行判定
+CALL COM_ORDER_COMMON
+SIF RESULT == 0
+	RETURN 0
+	
+;ここからプレイヤー
+LOCAL:0 = 0
+LOCAL:8 = 0
+FOR LOCAL:5, 0, MPLY_NUM
+	LOCAL:6 = MPLY:(LOCAL:5)
+	
+	;プレイヤーの露出、欲望に応じてプレイヤーに歓楽ソースが多く入る
+	;あと、いくら実行条件を満たしているとはいっても、スケベ不寛容だと反感が多く入る
+	LOCAL:3 = 20
+	SELECTCASE ABL:(LOCAL:6):露出
+		CASE 0
+			TIMES LOCAL:3, 0.50
+		CASE 1
+			TIMES LOCAL:3, 1.00
+		CASE 2
+			TIMES LOCAL:3, 1.50
+		CASE 3
+			TIMES LOCAL:3, 2.00
+		CASE 4
+			TIMES LOCAL:3, 2.50
+		CASEELSE
+			LOCAL:3 = LOCAL:3 * ((ABL:(MPLY:0):露出 - 5) * 10 + 250) / 100
+	ENDSELECT
+	
+	SELECTCASE ABL:(LOCAL:6):欲望
+		CASE 0
+			TIMES LOCAL:3, 0.75
+		CASE 1
+			TIMES LOCAL:3, 1.00
+		CASE 2
+			TIMES LOCAL:3, 1.25
+		CASE 3
+			TIMES LOCAL:3, 1.50
+		CASE 4
+			TIMES LOCAL:3, 1.75
+		CASEELSE
+			LOCAL:3 = LOCAL:3 * ((ABL:(MPLY:0):欲望 - 5) * 10 + 175) / 100
+	ENDSELECT
+	
+	LOCAL:4 = 60
+	
+	IF TALENT:(LOCAL:6):自制心
+		TIMES LOCAL:3, 0.80
+		TIMES LOCAL:4, 1.30
+	ENDIF
+	IF TALENT:(LOCAL:6):好奇心
+		TIMES LOCAL:3, 1.20
+		TIMES LOCAL:4, 0.90
+	ENDIF
+	IF TALENT:(LOCAL:6):保守的
+		TIMES LOCAL:3, 0.70
+		TIMES LOCAL:4, 1.50
+	ENDIF
+	IF TALENT:(LOCAL:6):目立ちたがり
+		TIMES LOCAL:3, 2.00
+		TIMES LOCAL:4, 0.50
+	ENDIF
+	IF TALENT:(LOCAL:6):貞操観念
+		TIMES LOCAL:3, 0.50
+		TIMES LOCAL:4, 2.00
+	ENDIF
+	IF TALENT:(LOCAL:6):貞操無頓着
+		TIMES LOCAL:3, 1.50
+		TIMES LOCAL:4, 0.70
+	ENDIF
+	IF TALENT:(LOCAL:6):抑圧
+		TIMES LOCAL:3, 0.60
+		TIMES LOCAL:4, 1.80
+	ENDIF
+	IF TALENT:(LOCAL:6):解放
+		TIMES LOCAL:3, 1.10
+		TIMES LOCAL:4, 0.90
+	ENDIF
+	IF TALENT:(LOCAL:6):孤高
+		TIMES LOCAL:3, 0.25
+		TIMES LOCAL:4, 4.00
+	ENDIF
+	IF TALENT:(LOCAL:6):恥じらい
+		TIMES LOCAL:3, 0.80
+		TIMES LOCAL:4, 1.30
+	ENDIF
+	IF TALENT:(LOCAL:6):恥薄い
+		TIMES LOCAL:3, 1.20
+		TIMES LOCAL:4, 0.80
+	ENDIF
+	IF TALENT:(LOCAL:6):快感に素直
+		TIMES LOCAL:3, 1.30
+		TIMES LOCAL:4, 0.70
+	ENDIF
+	IF TALENT:(LOCAL:6):快感の否定
+		TIMES LOCAL:3, 0.25
+		TIMES LOCAL:4, 4.00
+	ENDIF
+	IF GETBIT(TALENT:(LOCAL:6):淫乱系, 素質_淫乱_淫乱)
+		TIMES LOCAL:3, 2.00
+		TIMES LOCAL:4, 0.50
+	ENDIF
+	IF GETBIT(TALENT:(LOCAL:6):淫乱系, 素質_淫乱_露出狂)
+		TIMES LOCAL:3, 4.00
+		TIMES LOCAL:4, 0.25
+	ENDIF
+	
+	;ターゲットの射精感
+	;プレイヤーの露出、欲望によってターゲットのもよおす射精感が高くなる
+	;見せるだけで即射精とか相当ハイレベルなので、かなり低く抑えるべき
+	LOCAL:7 = 100
+	SELECTCASE ABL:(LOCAL:6):露出
+		CASE 0
+			TIMES LOCAL:7, 0.50
+		CASE 1
+			TIMES LOCAL:7, 1.00
+		CASE 2
+			TIMES LOCAL:7, 1.60
+		CASE 3
+			TIMES LOCAL:7, 2.20
+		CASE 4
+			TIMES LOCAL:7, 2.80
+		CASEELSE
+			LOCAL:7 = LOCAL:7 * ((ABL:(LOCAL:6):露出 - 5) * 10 + 290) / 100
+	ENDSELECT
+	
+	SELECTCASE ABL:(MPLY:0):欲望
+		CASE 0
+			TIMES LOCAL:7, 0.70
+		CASE 1
+			TIMES LOCAL:7, 1.00
+		CASE 2
+			TIMES LOCAL:7, 1.30
+		CASE 3
+			TIMES LOCAL:7, 1.60
+		CASE 4
+			TIMES LOCAL:7, 2.00
+		CASEELSE
+			LOCAL:7 = LOCAL:7 * ((ABL:(LOCAL:6):欲望 - 5) * 10 + 210) / 100
+	ENDSELECT
+
+	;ここまで出た数値に場所で補正をかける
+	;遊泳場。水着姿
+	IF GET_PLACENAME(TFLAG:54) == "遊泳場"
+		TIMES LOCAL:7, 1.50
+		TIMES LOCAL:3, 1.00;プレイヤーが露出好きなら歓楽に補正あってもいいがここでさらにその辺加味した倍率かけると大きくなりすぎる懸念から
+		TIMES LOCAL:4, 1.50;反感は初期値で頭打ちなのでそのまま倍率かける
+	ENDIF
+	
+	;温泉。すっぽんぽん
+	IF GET_PLACENAME(TFLAG:54) != "温泉"
+		TIMES LOCAL:7, 2.00
+		TIMES LOCAL:3, 1.00;同上
+		TIMES LOCAL:4, 2.00
+	ENDIF
+
+	SOURCE:(LOCAL:6):露出 = 300
+	SOURCE:(LOCAL:6):逸脱 = 20
+	SOURCE:(LOCAL:6):歓楽 = LOCAL:3
+	SOURCE:(LOCAL:6):反感 = LOCAL:4
+	
+	;主導権に応じたソースの追加
+	CALL ADD_SOURCE_INITIATIVE_N(LOCAL:6, 50, 50)
+	
+	EXP:(LOCAL:6):露出経験値 += 1
+	
+	LOCAL:0 += LOCAL:7
+	
+	;プレイヤーに男が混じってる検知
+	SIF !IS_FEMALE(LOCAL:6)
+		LOCAL:8 += 1
+NEXT
+
+
+;ここからターゲット
+FOR LOCAL:5, 0, MTAR_NUM
+	LOCAL:6 = MTAR:(LOCAL:5)
+	
+	;ターゲットの欲望に応じてターゲットに歓楽ソースが多く入る
+	;スケベに寛容な気質だとさらに１倍以上の倍率がかかる
+	;逆の気質があると１倍未満の倍率がかかるし、反感ソースが多く入る
+	LOCAL:1 = 25
+	SELECTCASE ABL:(LOCAL:6):欲望
+		CASE 0
+			TIMES LOCAL:1, 0.50
+		CASE 1
+			TIMES LOCAL:1, 1.00
+		CASE 2
+			TIMES LOCAL:1, 1.50
+		CASE 3
+			TIMES LOCAL:1, 2.00
+		CASE 4
+			TIMES LOCAL:1, 2.50
+		CASEELSE
+			LOCAL:1 = LOCAL:1 * ((ABL:(LOCAL:6):欲望 - 5) * 10 + 250) / 100
+	ENDSELECT
+	
+	LOCAL:2 = 55
+	
+	IF TALENT:(LOCAL:6):自制心
+		TIMES LOCAL:1, 0.80
+		TIMES LOCAL:2, 1.30
+	ENDIF
+	IF TALENT:(LOCAL:6):好奇心
+		TIMES LOCAL:1, 1.20
+		TIMES LOCAL:2, 0.90
+	ENDIF
+	IF TALENT:(LOCAL:6):保守的
+		TIMES LOCAL:1, 0.70
+		TIMES LOCAL:2, 1.50
+	ENDIF
+	IF TALENT:(LOCAL:6):貞操観念
+		TIMES LOCAL:1, 0.50
+		TIMES LOCAL:2, 2.00
+	ENDIF
+	IF TALENT:(LOCAL:6):貞操無頓着
+		TIMES LOCAL:1, 1.50
+		TIMES LOCAL:2, 0.70
+	ENDIF
+	IF TALENT:(LOCAL:6):抑圧
+		TIMES LOCAL:1, 0.60
+		TIMES LOCAL:2, 1.80
+	ENDIF
+	IF TALENT:(LOCAL:6):解放
+		TIMES LOCAL:1, 1.10
+		TIMES LOCAL:2, 0.90
+	ENDIF
+	IF TALENT:(LOCAL:6):孤高
+		TIMES LOCAL:1, 0.25
+		TIMES LOCAL:2, 4.00
+	ENDIF
+	IF TALENT:(LOCAL:6):恥じらい
+		TIMES LOCAL:1, 0.80
+		TIMES LOCAL:2, 1.30
+	ENDIF
+	IF TALENT:(LOCAL:6):恥薄い
+		TIMES LOCAL:1, 1.20
+		TIMES LOCAL:2, 0.80
+	ENDIF
+	IF TALENT:(LOCAL:6):快感に素直
+		TIMES LOCAL:1, 1.30
+		TIMES LOCAL:2, 0.70
+	ENDIF
+	IF TALENT:(LOCAL:6):快感の否定
+		TIMES LOCAL:1, 0.25
+		TIMES LOCAL:2, 4.00
+	ENDIF
+	IF GETBIT(TALENT:(LOCAL:6):淫乱系, 素質_淫乱_淫乱)
+		TIMES LOCAL:1, 2.00
+		TIMES LOCAL:2, 0.50
+	ENDIF
+	
+	
+	;ここまで出た数値に場所で補正をかける
+	;遊泳場。水着姿
+	IF GET_PLACENAME(TFLAG:54) == "遊泳場"
+		TIMES LOCAL:1, 1.50
+		TIMES LOCAL:2, 1.50
+	ENDIF
+	
+	;温泉。すっぽんぽん
+	IF GET_PLACENAME(TFLAG:54) != "温泉"
+		TIMES LOCAL:1, 2.00
+		TIMES LOCAL:2, 2.00
+	ENDIF
+	
+	;俺はホモじゃねえ！補正。ここまでが台無しになるレベルの激烈な補正
+	IF !LOCAL:8 == 0 && !TALENT:(LOCAL:6):両刀
+		TIMES LOCAL:1, 0.25
+		TIMES LOCAL:2, 16.00
+	ENDIF
+	
+	;まず感応に加算
+	SOURCE:(LOCAL:6):感応 = LOCAL:0
+	
+	;ちんこがあったら射精感
+	IF HAS_PENIS(LOCAL:6)
+		;男が混じってないか
+		IF LOCAL:8 == 0
+			LOCAL:7 = PALAM:(LOCAL:6):射精 + LOCAL:0
+			PALAM:(LOCAL:6):射精 = LOCAL:7
+			;射精寸前だったら最後の一押し
+			IF LOCAL:7 >= 10000
+				SOURCE:(LOCAL:6):快Ｐ = 1
+			ENDIF
+		ELSE
+			;混じってても両刀ならイケます
+			IF TALENT:(LOCAL:6):両刀
+				LOCAL:7 = PALAM:(LOCAL:6):射精 + LOCAL:0
+				PALAM:(LOCAL:6):射精 = LOCAL:7
+				;射精寸前だったら最後の一押し
+				IF LOCAL:7 >= 10000
+					SOURCE:(LOCAL:6):快Ｐ = 1
+				ENDIF
+			ENDIF
+		ENDIF
+	ENDIF
+	
+	SOURCE:(LOCAL:6):歓楽 = LOCAL:1
+	SOURCE:(LOCAL:6):反感 = LOCAL:2
+	
+	;主導権に応じたソースの追加
+	CALL ADD_SOURCE_INITIATIVE_N(LOCAL:6, 50, 50)
+NEXT
+
+
+;主導度変化基準値
+TFLAG:49 = 2
+
+;倒錯度変化基準値
+TFLAG:50 = 1
+
+RETURN 1
+
+;-------------------------------------------------
+;固有の実行判定(プレイヤー側)
+;-------------------------------------------------
+@COM_ORDER_PLAYER361(ARG:0)
+CVARSET TCVAR, 24, -10000
+CVARSET TCVAR, 25, 10000
+
+TCVAR:(ARG:0):25 = 70
+
+CALL COM_ORDER_BASE(ARG:0)
+
+IF TALENT:(ARG:0):反抗的
+	CALL COM_ORDER_ELEMENT(ARG:0, "反抗的", -5)
+ENDIF
+IF TALENT:(ARG:0):プライド高い
+	CALL COM_ORDER_ELEMENT(ARG:0, "プライド高い", -15)
+ENDIF
+IF TALENT:(ARG:0):プライド低い
+	CALL COM_ORDER_ELEMENT(ARG:0, "プライド低い", 5)
+ENDIF
+IF TALENT:(ARG:0):自制心
+	CALL COM_ORDER_ELEMENT(ARG:0, "自制心", -15)
+ENDIF
+IF TALENT:(ARG:0):好奇心
+	CALL COM_ORDER_ELEMENT(ARG:0, "好奇心", 10)
+ENDIF
+IF TALENT:(ARG:0):保守的
+	CALL COM_ORDER_ELEMENT(ARG:0, "保守的", -10)
+ENDIF
+IF TALENT:(ARG:0):楽観的
+	CALL COM_ORDER_ELEMENT(ARG:0, "楽観的", 5)
+ENDIF
+IF TALENT:(ARG:0):悲観的
+	CALL COM_ORDER_ELEMENT(ARG:0, "悲観的", -10)
+ENDIF
+IF TALENT:(ARG:0):目立ちたがり
+	CALL COM_ORDER_ELEMENT(ARG:0, "目立ちたがり", 15)
+ENDIF
+IF TALENT:(ARG:0):貞操観念
+	CALL COM_ORDER_ELEMENT(ARG:0, "貞操観念", -15)
+ENDIF
+IF TALENT:(ARG:0):貞操無頓着
+	CALL COM_ORDER_ELEMENT(ARG:0, "貞操無頓着", 10)
+ENDIF
+IF TALENT:(ARG:0):抑圧
+	CALL COM_ORDER_ELEMENT(ARG:0, "抑圧", -10)
+ENDIF
+IF TALENT:(ARG:0):解放
+	CALL COM_ORDER_ELEMENT(ARG:0, "解放", 10)
+ENDIF
+IF TALENT:(ARG:0):孤高
+	CALL COM_ORDER_ELEMENT(ARG:0, "孤高", -(20 * KOKOU_RATE(ARG:0) / 100))
+ENDIF
+IF TALENT:(ARG:0):恥じらい
+	CALL COM_ORDER_ELEMENT(ARG:0, "恥じらい", -20)
+ENDIF
+IF TALENT:(ARG:0):恥薄い
+	CALL COM_ORDER_ELEMENT(ARG:0, "恥薄い", 10)
+ENDIF
+IF TALENT:(ARG:0):快感に素直
+	CALL COM_ORDER_ELEMENT(ARG:0, "快感に素直", 5)
+ENDIF
+IF TALENT:(ARG:0):快感の否定
+	CALL COM_ORDER_ELEMENT(ARG:0, "快感の否定", -35)
+ENDIF
+IF GETBIT(TALENT:(ARG:0):淫乱系, 素質_淫乱_淫乱)
+	CALL COM_ORDER_ELEMENT(ARG:0, "淫乱", 20)
+ENDIF
+;ドストライク。これがある状態のヤツがこの程度を嫌がるわけがない
+IF GETBIT(TALENT:(ARG:0):淫乱系, 素質_淫乱_露出狂)
+	CALL COM_ORDER_ELEMENT(ARG:0, "露出狂", 100)
+ENDIF
+
+IF IS_SAMESEX(MTAR:0, ARG:0)
+	;女性同士はともかく、男同士で互いにセクシーポーズ見せつけて射精感はハードル高えぞオイ！
+	IF HAS_PENIS(ARG:0)
+		IF TALENT:(ARG:0):両刀
+			CALL COM_ORDER_ELEMENT(ARG:0, "両刀", 30)
+		ELSE
+			CALL COM_ORDER_ELEMENT(ARG:0, "両刀ではない", -30)
+		ENDIF
+	ELSE
+		CALL COM_ORDER_ELEMENT(ARG:0, "同性", 30)
+	ENDIF
+ELSE
+	IF TALENT:(ARG:0):一線越えない
+		CALL COM_ORDER_ELEMENT(ARG:0, "一線越えない", -15)
+	ENDIF
+ENDIF
+
+IF TALENT:(ARG:0):親愛
+	CALL COM_ORDER_ELEMENT(ARG:0, "親愛", 25)
+ELSEIF TALENT:(ARG:0):恋慕
+	CALL COM_ORDER_ELEMENT(ARG:0, "恋慕", 10)
+ENDIF
+
+IF TALENT:(ARG:0):恋人
+	CALL COM_ORDER_ELEMENT(ARG:0, "恋人", 20)
+ELSEIF TALENT:(ARG:0):親友
+	CALL COM_ORDER_ELEMENT(ARG:0, "親友", 20)
+ENDIF
+
+IF TALENT:(ARG:0):隷属
+	CALL COM_ORDER_ELEMENT(ARG:0, "隷属", 25)
+ELSEIF TALENT:(ARG:0):服従
+	CALL COM_ORDER_ELEMENT(ARG:0, "服従", 10)
+ENDIF
+
+IF TALENT:(ARG:0):烙印
+	CALL COM_ORDER_ELEMENT(ARG:0, "烙印", 20)
+ENDIF
+
+IF TALENT:(ARG:0):所有者
+	CALL COM_ORDER_ELEMENT(ARG:0, "所有者", 25)
+ELSEIF TALENT:(ARG:0):主人
+	CALL COM_ORDER_ELEMENT(ARG:0, "主人", 10)
+ENDIF
+
+IF TALENT:(ARG:0):合意
+	CALL COM_ORDER_ELEMENT(ARG:0, "合意", 15)
+ENDIF
+
+IF TALENT:(ARG:0):プライド高い
+	LOCAL:0 = 4
+ELSEIF TALENT:(ARG:0):プライド低い
+	LOCAL:0 = 1
+ELSE
+	LOCAL:0 = 2
+ENDIF
+IF MARK:(ARG:0):既成事実 >= 1
+	CALL COM_ORDER_ELEMENT(ARG:0, @"既成事実Lv{MARK:(ARG:0):既成事実}", MARK:(ARG:0):既成事実 * 3 * LOCAL:0)
+ENDIF
+
+IF TALENT:MASTER:魅惑
+	CALL COM_ORDER_ELEMENT(ARG:0, "主人公の魅惑", 6)
+ENDIF
+IF TALENT:MASTER:謎の魅力
+	CALL COM_ORDER_ELEMENT(ARG:0, "主人公の謎の魅力", 6)
+ENDIF
+
+IF PALAM:(ARG:0):酔い >= 150
+	CALL COM_ORDER_ELEMENT(ARG:0, "酔い", PALAM:(ARG:0):酔い / 150)
+ENDIF
+
+IF GET_PLACENAME(TFLAG:54) == "遊泳場"
+	CALL COM_ORDER_ELEMENT(ARG:0, "遊泳場", -10)
+ENDIF
+
+IF GET_PLACENAME(TFLAG:54) == "温泉"
+	CALL COM_ORDER_ELEMENT(ARG:0, "温泉", -30)
+ENDIF
+
+;判定結果を表示
+;PRINTFORMW  = {TCVAR:(ARG:0):24} %TOSTR_COMPARE(TCVAR:(ARG:0):24, TCVAR:(ARG:0):25)% 実行値{TCVAR:(ARG:0):25}
+
+RETURN TCVAR:(ARG:0):24 - TCVAR:(ARG:0):25
+
+
+;-------------------------------------------------
+;地の文(前文)
+;-------------------------------------------------
+@COM_TEXT_BEFORE361
+
+LOCALS:3 = 
+
+LOCALS:0 = ポーズをとっ
+
+IF MTAR_NUM == 1
+	LOCALS:1 = %ANAME(MTAR:0)%
+ELSEIF MTAR_NUM == 2
+	LOCALS:1 = %ANAME(MTAR:0)%と%ANAME(MTAR:1)%
+ELSE
+	LOCALS:1 = %ANAME(MTAR:0)%たち
+ENDIF
+
+IF MPLY_NUM == 1
+	LOCALS:2 = %ANAME(MPLY:0)%
+ELSEIF MPLY_NUM == 2
+	LOCALS:2 = %ANAME(MPLY:0)%と%ANAME(MPLY:1)%
+ELSE
+	LOCALS:2 = %ANAME(MPLY:0)%たち
+ENDIF
+
+IF GET_PLACENAME(TFLAG:54) == "遊泳場"
+	LOCALS:3 = 水着姿の
+ELSEIF GET_PLACENAME(TFLAG:54) == "温泉"
+	LOCALS:3 = 裸の
+ENDIF
+
+SELECTCASE GET_COM_INITIATIVE()
+	;プレイヤーに主導権
+	CASE 0
+		PRINTFORMW %LOCALS:2%は%LOCALS:1%に向かって、%LOCALS:3%尻をじっくり見せつけるような%LOCALS:0%た…
+	;ターゲットに主導権
+	CASE 1
+		PRINTFORML %LOCALS:1%は、%LOCALS:3%尻を強調してほしいと%LOCALS:2%にリクエストした
+		PRINTFORMW %LOCALS:2%は言われるまま、%LOCALS:1%の目の前で%LOCALS:0%た…
+	;第三者に主導権
+	CASEELSE
+		PRINTFORML %ANAME(TFLAG:45)%は%LOCALS:2%に対して、%LOCALS:1%に%LOCALS:3%尻を強調するポーズを見せるように言った
+		PRINTFORMW %LOCALS:2%は言われるまま、%LOCALS:1%の目の前で見せつけるように%LOCALS:0%た…
+ENDSELECT
+
+;-------------------------------------------------
+;地の文(パラメータ・刻印変動後)
+;-------------------------------------------------
+@COM_TEXT_LAST361
+;日常コマンドに共通の地の文
+CALL COM_TEXT_LAST_LIFE
+
+;-------------------------------------------------
+
+;コマンド区分
+;-------------------------------------------------
+
+@COM_AVAILABLE_WHEN361
+IF FLAG:調教モード != 調教_居住区
+	RETURN コマンド_日常
+ELSE
+	RETURN コマンド_居住区
+ENDIF
