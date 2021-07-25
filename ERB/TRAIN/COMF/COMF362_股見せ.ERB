@@ -179,7 +179,7 @@ FOR LOCAL:5, 0, MPLY_NUM
 	ENDIF
 	
 	;温泉。すっぽんぽん
-	IF GET_PLACENAME(TFLAG:54) != "温泉"
+	IF GET_PLACENAME(TFLAG:54) == "温泉"
 		TIMES LOCAL:7, 2.00
 		TIMES LOCAL:3, 1.00;同上
 		TIMES LOCAL:4, 2.00
@@ -290,13 +290,14 @@ FOR LOCAL:5, 0, MTAR_NUM
 	ENDIF
 	
 	;温泉。すっぽんぽん
-	IF GET_PLACENAME(TFLAG:54) != "温泉"
+	IF GET_PLACENAME(TFLAG:54) == "温泉"
 		TIMES LOCAL:1, 2.00
 		TIMES LOCAL:2, 2.00
 	ENDIF
 	
 	;俺はホモじゃねえ！補正。ここまでが台無しになるレベルの激烈な補正
-	IF !LOCAL:8 == 0 && !TALENT:(LOCAL:6):両刀
+	;股見せに男が混じってる＆両刀じゃない＆女じゃない
+	IF !LOCAL:8 == 0 && !TALENT:(LOCAL:6):両刀 && !IS_FEMALE(LOCAL:6)
 		TIMES LOCAL:1, 0.25
 		TIMES LOCAL:2, 16.00
 	ENDIF
@@ -431,6 +432,10 @@ ELSE
 	IF TALENT:(ARG:0):一線越えない
 		CALL COM_ORDER_ELEMENT(ARG:0, "一線越えない", -15)
 	ENDIF
+ENDIF
+
+IF ABL:(ARG:0):性知識 == 0
+	CALL COM_ORDER_ELEMENT(ARG:0, "性知識なし", 30)
 ENDIF
 
 IF TALENT:(ARG:0):親愛
