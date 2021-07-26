@@ -1,0 +1,47 @@
+﻿;-----------------------------------
+; メインウェポン
+;-----------------------------------
+@GET_MAIN_WEAPON_NAME_210
+RESULTS = TIER6高密度エネルギーブレード
+
+@GET_MAIN_WEAPON_STATUS_210(STATUS)
+#DIM REF STATUS
+
+STATUS:DAMAGE = 12000
+STATUS:FIRE_RATE = 1
+STATUS:HIT_RATE = 85
+STATUS:FIRE_RANGE = 3
+STATUS:SIZE = 1
+STATUS:WEAPON_TYPE = ビーム
+STATUS:PRICE = 12000000
+
+;-----------------------------------
+; メインウェポンの説明
+;-----------------------------------
+@GET_MAIN_WEAPON_DESCRIPTION_210
+#DIM STATUS, STATUS_LENGTH
+
+CALL GET_MAIN_WEAPON_STATUS_210(STATUS)
+CALL GET_MAIN_WEAPON_NAME_210
+PRINTFORML %RESULTS%
+PRINTFORML シールド形成機能を応用した、非常に強力なエネルギーブレードの展開機構。
+PRINTFORML ブレード状に展開する高密度エネルギーフィールドは干渉時の切断能力に優れ、大型艦に対しても致命的な損傷を与える。
+PRINTFORML 旧大国時代に設計されたオーバーテクノロジーのサイオニック兵装であり、未知のエネルギー技術が利用されている。
+PRINTFORML サイオニックジェネレーターの最大出力で展開されるこのブレードは、大型艦クラスでさえ致命的だろう。
+PRINTFORML 建国帝はジャンプドライブによる接近からの一撃離脱戦法によって、多くの敵艦を撃沈している。
+;草薙剣イメージ。
+;『神と人』のボス、ヤタガラス専用兵装。船体に対しわりと即死攻撃。
+PRINTFORML ダメージ  : {STATUS:DAMAGE}
+PRINTFORML 射撃レート: {STATUS:FIRE_RATE}発/ターン
+PRINTFORML 命中率    : {STATUS:HIT_RATE}
+PRINTFORML 有効距離  : {STATUS:FIRE_RANGE}
+PRINTFORML サイズ    : {STATUS:SIZE}
+
+;-----------------------------------
+; メインウェポンの資材
+;-----------------------------------
+@GET_MAIN_WEAPON_RESOURCE_210(USE_RESOURCE)
+#DIM REF USE_RESOURCE
+
+@IS_SALE_MAIN_WEAPON_210
+RETURN 0

@@ -1,0 +1,36 @@
+﻿;-----------------------------------
+; コンピューター
+;-----------------------------------
+@GET_COMPUTER_NAME_5
+RESULTS = TIER6サイオニックリンク
+
+@GET_COMPUTER_STATUS_5(STATUS)
+#DIM REF STATUS
+
+STATUS:AVOID = 15
+
+STATUS:PRICE = 50000000
+
+;-----------------------------------
+; コンピューターの説明
+;-----------------------------------
+@GET_COMPUTER_DESCRIPTION_5(STATUS)
+#DIM STATUS, STATUS_LENGTH
+
+CALL GET_COMPUTER_STATUS_5(STATUS)
+CALL GET_COMPUTER_NAME_5
+PRINTFORML %RESULTS%
+PRINTFORML 搭乗者の思念を読み取るサイオニックインターフェイスユニット。
+PRINTFORML 搭乗者のPSI能力を増大させ、脳波リンクによる機体の完全制御を可能とする。
+PRINTFORML 戦闘用にカスタマイズされた非常に高度な管理AIも搭載されており、現行AIを超える自律機動を行える。
+PRINTFORML 回避    : {STATUS:AVOID}
+
+;-----------------------------------
+; AIの資材
+;-----------------------------------
+@GET_COMPUTER_RESOURCE_5(USE_RESOURCE)
+#DIM REF USE_RESOURCE
+
+
+@IS_SALE_COMPUTER_5
+RETURN 0

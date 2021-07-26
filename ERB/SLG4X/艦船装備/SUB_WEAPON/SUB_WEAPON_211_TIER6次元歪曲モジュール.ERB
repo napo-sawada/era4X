@@ -1,0 +1,50 @@
+﻿;-----------------------------------
+; サブウェポン
+;-----------------------------------
+@GET_SUB_WEAPON_NAME_211
+RESULTS = TIER6空間歪曲モジュール
+
+@GET_SUB_WEAPON_STATUS_211(STATUS)
+#DIM REF STATUS
+
+STATUS:DAMAGE = 0
+STATUS:FIRE_RATE = 10
+STATUS:ANTI_AIR = 300
+STATUS:HIT_RATE = 40
+STATUS:FIRE_RANGE = 1
+STATUS:SIZE = 1
+STATUS:WEAPON_TYPE = ビーム
+STATUS:PRICE = 6000000
+
+;-----------------------------------
+; サブウェポンの説明
+;-----------------------------------
+@GET_SUB_WEAPON_DESCRIPTION_211
+#DIM STATUS, STATUS_LENGTH
+
+CALL GET_SUB_WEAPON_STATUS_211(STATUS)
+CALL GET_SUB_WEAPON_NAME_211
+PRINTFORML %RESULTS%
+PRINTFORML 機体本体から自動展開される特殊力場の渦。
+PRINTFORML 未知の技術による空間歪曲と強力なエネルギー干渉により、周囲の空間を歪ませ、電子機器をショートさせる。
+PRINTFORML 戦闘艦艇クラスのECM防御能力がなければこの力場によって制御系を狂わされるだろう。
+PRINTFORML 空間歪曲は軽度であるが、その運動性能もあり、FCSによる照準に大きな悪影響を与える。
+PRINTFORML 
+PRINTFORML 空間歪曲を自在に操ることは難しく、かつてほどの力はないものの、それでも十分過ぎる効力を発揮する。
+;渦で八尺瓊勾玉モチーフ。
+PRINTFORML ダメージ  : {STATUS:DAMAGE}
+PRINTFORML 射撃レート: {STATUS:FIRE_RATE}発/ターン
+PRINTFORML 対空攻撃力: {STATUS:ANTI_AIR}
+PRINTFORML 命中率    : {STATUS:HIT_RATE}
+PRINTFORML 有効距離  : {STATUS:FIRE_RANGE}
+PRINTFORML サイズ    : {STATUS:SIZE}
+
+;-----------------------------------
+; サブウェポンの資材
+;-----------------------------------
+@GET_SUB_WEAPON_RESOURCE_211(USE_RESOURCE)
+#DIM REF USE_RESOURCE
+
+
+@IS_SALE_SUB_WEAPON_211
+RETURN 0

@@ -1,0 +1,47 @@
+﻿;-----------------------------------
+; メインウェポン
+;-----------------------------------
+@GET_MAIN_WEAPON_NAME_211
+RESULTS = TIER6空間遮断モジュール
+
+@GET_MAIN_WEAPON_STATUS_211(STATUS)
+#DIM REF STATUS
+
+STATUS:DAMAGE = 2100
+STATUS:FIRE_RATE = 4
+STATUS:HIT_RATE = 65
+STATUS:FIRE_RANGE = 3
+STATUS:SIZE = 1
+STATUS:WEAPON_TYPE = 実体弾
+STATUS:PRICE = 12000000
+
+;-----------------------------------
+; メインウェポンの説明
+;-----------------------------------
+@GET_MAIN_WEAPON_DESCRIPTION_211
+#DIM STATUS, STATUS_LENGTH
+
+CALL GET_MAIN_WEAPON_STATUS_211(STATUS)
+CALL GET_MAIN_WEAPON_NAME_211
+PRINTFORML %RESULTS%
+PRINTFORML 艦隊戦で展開されるシールド力場の破壊を目的に作成されたと思われる円盤形の特殊モジュール。
+PRINTFORML 膨大なエネルギーを利用した特殊力場を生成、空間遮断による破壊攻撃を行なう。
+PRINTFORML 性質上、高密度実体を巻き込む空間遮断は抵抗が大きく、力場破壊に主眼を置かれている。
+PRINTFORML 特殊力場の展開範囲の関係上、影響範囲は狭く、近距離運用を前提とした限定的なもの。
+PRINTFORML 建国帝はジャンプドライブによる一撃離脱戦法によって、このデメリットを無効化している。
+;八咫鏡イメージ。
+;『神と人』のボス、ヤタガラス専用兵装。シールドをガリガリ削る。
+PRINTFORML ダメージ  : {STATUS:DAMAGE}
+PRINTFORML 射撃レート: {STATUS:FIRE_RATE}発/ターン
+PRINTFORML 命中率    : {STATUS:HIT_RATE}
+PRINTFORML 有効距離  : {STATUS:FIRE_RANGE}
+PRINTFORML サイズ    : {STATUS:SIZE}
+
+;-----------------------------------
+; メインウェポンの資材
+;-----------------------------------
+@GET_MAIN_WEAPON_RESOURCE_211(USE_RESOURCE)
+#DIM REF USE_RESOURCE
+
+@IS_SALE_MAIN_WEAPON_211
+RETURN 0

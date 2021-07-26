@@ -1,0 +1,41 @@
+﻿;-----------------------------------
+; シールド
+;-----------------------------------
+@GET_SIELD_NAME_211
+RESULTS = TIER5超大型シールド
+
+@GET_SIELD_STATUS_211(STATUS)
+#DIM REF STATUS
+
+STATUS:SIELD = 25600
+STATUS:SIELD_RECOVER = 248
+STATUS:SIZE = 4
+STATUS:PRICE = 32000000
+
+;-----------------------------------
+; シールドの説明
+;-----------------------------------
+@GET_SIELD_DESCRIPTION_211
+#DIM STATUS, STATUS_LENGTH
+
+CALL GET_SIELD_STATUS_211(STATUS)
+CALL GET_SIELD_NAME_211
+PRINTFORML %RESULTS%
+PRINTFORML 旧文明において使用されていた大型艦船用シールド。
+PRINTFORML その常軌を逸した強固さは現行大型艦艇とは比較にならず、都市の防護シールドにさえ匹敵する。
+PRINTFORML 当時の莫大なコアジェネレーター出力があればこそのシールドだろう。
+PRINTFORML シールド    : {STATUS:SIELD}
+PRINTFORML シールド回復: {STATUS:SIELD_RECOVER}/ターン
+PRINTFORML サイズ      : {STATUS:SIZE}
+
+;-----------------------------------
+; シールドの資材
+;-----------------------------------
+@GET_SIELD_RESOURCE_211(USE_RESOURCE)
+#DIM REF USE_RESOURCE
+
+USE_RESOURCE:シールド発生装置 = 96
+
+@IS_SALE_SIELD_211
+RETURN 0
+

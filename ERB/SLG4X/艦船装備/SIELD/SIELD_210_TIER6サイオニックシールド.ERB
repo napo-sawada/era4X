@@ -1,0 +1,40 @@
+﻿;-----------------------------------
+; シールド
+;-----------------------------------
+@GET_SIELD_NAME_210
+RESULTS = TIER6サイオニックシールド
+
+@GET_SIELD_STATUS_210(STATUS)
+#DIM REF STATUS
+
+STATUS:SIELD = 12000
+STATUS:SIELD_RECOVER = 100
+STATUS:SIZE = 1
+STATUS:PRICE = 20000000
+
+;-----------------------------------
+; シールドの説明
+;-----------------------------------
+@GET_SIELD_DESCRIPTION_210
+#DIM STATUS, STATUS_LENGTH
+
+CALL GET_SIELD_STATUS_210(STATUS)
+CALL GET_SIELD_NAME_210
+PRINTFORML %RESULTS%
+PRINTFORML 膨大な各部センサーと脳波リンクを同調させた非常に高度なシールド展開機構。
+PRINTFORML 高密度ブレードに匹敵する強度の局所的シールドを自機の周囲に流動的に展開する。
+PRINTFORML 攻撃を感知した際の防壁展開レスポンス、瞬間出力は現行シールドと比較にならない。
+PRINTFORML シールド    : {STATUS:SIELD}
+PRINTFORML シールド回復: {STATUS:SIELD_RECOVER}/ターン
+PRINTFORML サイズ      : {STATUS:SIZE}
+
+;-----------------------------------
+; シールドの資材
+;-----------------------------------
+@GET_SIELD_RESOURCE_210(USE_RESOURCE)
+#DIM REF USE_RESOURCE
+
+USE_RESOURCE:シールド発生装置 = 80
+
+@IS_SALE_SIELD_210
+RETURN 0

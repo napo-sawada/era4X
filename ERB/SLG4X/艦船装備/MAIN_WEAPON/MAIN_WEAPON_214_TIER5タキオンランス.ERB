@@ -1,0 +1,43 @@
+﻿;-----------------------------------
+; メインウェポン
+;-----------------------------------
+@GET_MAIN_WEAPON_NAME_214
+RESULTS = TIER5タキオンランス
+
+@GET_MAIN_WEAPON_STATUS_214(STATUS)
+#DIM REF STATUS
+
+STATUS:DAMAGE = 15000
+STATUS:FIRE_RATE = 1
+STATUS:HIT_RATE = 70
+STATUS:FIRE_RANGE = 4
+STATUS:SIZE = 4
+STATUS:WEAPON_TYPE = ビーム
+STATUS:PRICE = 64000000
+
+;-----------------------------------
+; メインウェポンの説明
+;-----------------------------------
+@GET_MAIN_WEAPON_DESCRIPTION_214
+#DIM STATUS, STATUS_LENGTH
+
+CALL GET_MAIN_WEAPON_STATUS_214(STATUS)
+CALL GET_MAIN_WEAPON_NAME_214
+PRINTFORML %RESULTS%
+PRINTFORML 現在ではロストテクノロジーとされている強大な粒子加速砲。
+PRINTFORML 時空間をねじ曲げた粒子加速器内で、超光速まで加速させた粒子を照射する。
+PRINTFORML その破壊力は現行ビーム兵器とは比較にならず、当時はこの存在からシールド能力が最重要視された。
+PRINTFORML ダメージ  : {STATUS:DAMAGE}
+PRINTFORML 射撃レート: {STATUS:FIRE_RATE}発/ターン
+PRINTFORML 命中率    : {STATUS:HIT_RATE}
+PRINTFORML 有効距離  : {STATUS:FIRE_RANGE}
+PRINTFORML サイズ    : {STATUS:SIZE}
+
+;-----------------------------------
+; メインウェポンの資材
+;-----------------------------------
+@GET_MAIN_WEAPON_RESOURCE_214(USE_RESOURCE)
+#DIM REF USE_RESOURCE
+
+@IS_SALE_MAIN_WEAPON_214
+RETURN 0

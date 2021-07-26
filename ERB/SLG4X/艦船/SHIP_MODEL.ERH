@@ -93,3 +93,12 @@
 #DIM CONST アインシュタイン級砲艦 = 117
 #DIM CONST エジソン級軽空母 = 118
 
+#DIM CONST 建国帝のシールド突撃艇 = 130
+#DIM CONST 建国帝の小型砲撃艦 = 131
+#DIM CONST 建国帝のミサイル打撃艦 = 132
+#DIM CONST ヤタガラスフレーム = 133
+#DIM CONST 八咫烏級機動武者『叢雲』 = 134
+#DIM CONST 旧大国のタイタン = 135
+#DIM CONST 旧大国の重砲撃艦 = 136
+#DIM CONST 旧大国の軽砲撃艦 = 137
+#DIM CONST 旧大国の火力拠点 = 138

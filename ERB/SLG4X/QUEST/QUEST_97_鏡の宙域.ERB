@@ -1,0 +1,969 @@
+﻿;--------------------------
+; クエスト番号97
+; 鏡の宙域
+; QUEST_60_BATTLE_FUNCTIONの関数を使わせてもらっています。
+; 1 == クエスト条件。
+; @QUEST_97_1_START
+; 2 == 受けた。
+; 3 == 軍事要塞を四つ角のいずれかに生成。
+;		侵入開始。
+; @QUEST_97_3_BATTLE
+; 4 == 艦隊戦。
+; @QUEST_97_4_BATTLE
+; 5 == 艦隊戦2。
+; @QUEST_97_5_SCENE
+; 6 == エピローグ。
+; @QUEST_97_6_END
+; 7 == 鏡の宙域クリア。
+; 8 == 以降VS建国帝イベント。
+;--------------------------
+@QUEST_DESCRIPTION_97
+IF QUEST_PROGRESS:97 == 1
+	PRINTFORML 皇国において恐れられている魔の宙域。
+	PRINTFORML そこに、目的の軍事要塞が存在しているらしい。
+	PRINTFORML 
+	CALL COLOR_PRINTL(" 難易度の高い艦隊戦クエストです", カラー_注意)
+ELSEIF QUEST_PROGRESS:97 == 6
+	PRINTFORML 軍事要塞を起動した。
+	PRINTFORML 咲耶に報告に行こう。
+ENDIF
+RETURN
+
+;--------------------------
+; クエスト受注可能か
+;--------------------------
+@QUEST_ACCEPTABLE_97
+SIF QUEST_PROGRESS:97 < 1
+	RETURN 0
+SIF QUEST_PROGRESS:97 > 6
+	RETURN 0
+RETURN 1
+;--------------------------
+; クエストの名前を返却
+;--------------------------
+@QUEST_NAME_97
+RESULTS = 鏡の宙域
+RETURN
+
+
+;--------------------------
+; マップでの表示を設定する
+; @QUEST_SET_TILE_  : マップ上対象地点にマークを出す。
+; @QUEST_MAP_INFO_  : 右下小窓にメッセージを出す
+; 引数１： ARG:0 SSXXYY　座標データ　マップ上でクリックされた座標。表示条件分岐に。
+;--------------------------
+;;;マップ画面上での表示。 隠したかったら関数コメントアウトか RETURN 0
+;;;色を替えたかったらSETCOLORしておけば後の処理で色反映します
+@QUEST_SET_TILE_97 (ARG:0)
+	RESULTS '= "◇"
+	SETCOLOR 0x6C0C00
+RETURN 1
+
+;;;右下小窓に出す。隠したければ関数コメントアウトか RETURN 0
+@QUEST_MAP_INFO_97 (ARG:0 )
+#DIM QUEST_ID = 97
+IF QUEST_PROGRESS:QUEST_ID >= 12
+		RESULTS:0 '= "建国帝の軍事要塞だ。"
+		RESULTS:1 '= "咲耶によって管理され、休止している。"
+		RESULTS:2 '= ""
+		RESULTS:3 '= ""
+		RESULTS:4 '= ""
+ELSEIF QUEST_PROGRESS:QUEST_ID >= 8
+		RESULTS:0 '= "建国帝の軍事要塞だ。"
+		RESULTS:1 '= "完全に戦闘態勢を整えている。"
+		RESULTS:2 '= ""
+		RESULTS:3 '= ""
+		RESULTS:4 '= ""
+ELSEIF QUEST_PROGRESS:QUEST_ID >= 4
+		RESULTS:0 '= "旧文明の軍事要塞に向かうための座標だ。"
+		RESULTS:1 '= "次元に歪みが生じている。"
+		RESULTS:2 '= ""
+		RESULTS:3 '= ""
+		RESULTS:4 '= ""
+ELSE
+		RESULTS:0 '= "旧文明の軍事要塞に向かうための座標らしい。"
+		RESULTS:1 '= "次元に歪みが生じているようだ。"
+		RESULTS:2 '= ""
+		RESULTS:3 '= ""
+		RESULTS:4 '= ""
+ENDIF
+RETURN 1
+
+;-----------------------
+; マップ上からQUEST_BODYを実行する処理
+; @QUEST_SHOW_COMMAND_x : ここで指定した文字列のコマンドを現地で表示する
+; 　　　　　　　　　　 ：(調査する||捜索する||採集する||待ち伏せする||挑戦する)といったフレーバー
+; @QUEST_PLACE_CHECK_x ： 設定マスを踏んだら呼び出される。不要ならば消すか無処理で返す
+;--------------------------
+@QUEST_SHOW_COMMAND_97 ()
+#DIM QUEST_ID = 97
+IF QUEST_PROGRESS:QUEST_ID < 10
+	RESULTS '= "進入する"
+ENDIF
+RETURN 1
+
+@QUEST_REACH_PLACE_97 ()
+#DIM QUEST_ID = 97
+
+IF QUEST_PROGRESS:QUEST_ID == 3
+	DRAWLINE
+	PRINTFORML 
+	PRINTFORML ここが咲耶の言っていた座標であるらしい。
+	PRINTFORML 各センサーは異常な数値を示しており、時空間異常を訴えている。
+	PRINTFORML 電波、重力、磁気、光学。
+	PRINTFORML 時空間異常ではなく、艦船発見を目的にスキャンすると反応。
+	PRINTFORML 未確認の戦闘艦艇の存在がおぼろげながら確認出来る。
+	PRINTFORML 事前情報がなければセンサーの誤作動と勘違いしただろう。
+	PRINTFORMW 侵入すれば、即座に旧文明の防衛艦隊と戦いとなることは間違いない。
+	PRINTFORML 
+	CALL COLOR_PRINTL(" [Q] 進入する　コマンドで続きます", カラー_注意)
+	PRINTFORML
+	PRINTW
+ELSEIF QUEST_PROGRESS:QUEST_ID == 4
+	DRAWLINE
+	PRINTFORML 
+	PRINTFORML 敵の先鋒を打ち破ったことで警戒している様子が窺える。
+	PRINTFORML 照合する限り、シールド突撃艇が２０、小型砲撃艦が１０、そしてミサイル打撃艦が五隻。
+	PRINTFORMW この先に進むにはこれらの艦艇を撃滅しなければならないだろう。
+	PRINTFORML 
+	CALL COLOR_PRINTL(" [Q] 進入する　コマンドで続きます", カラー_注意)
+	PRINTFORML
+	PRINTW
+ELSEIF QUEST_PROGRESS:QUEST_ID == 5
+	DRAWLINE
+	PRINTFORML 
+	PRINTFORML 敵防衛部隊はひとまず排除した。
+	PRINTFORML 要塞からの砲撃もなく、AIも警告を発しない。
+	PRINTFORMW 注意深く進むべきだが、一段落と言えるだろう。
+	PRINTFORML 
+	CALL COLOR_PRINTL(" [Q] 進入する　コマンドで続きます", カラー_注意)
+	PRINTFORML
+	PRINTW
+ELSEIF QUEST_PROGRESS:QUEST_ID == 8
+	PRINTFORML VS建国帝でもう一回来る。
+ENDIF
+RETURN
+
+;--------------------------------------------------
+; クエスト本体
+;蠢く惑星→触手少女→今ここ
+;使わせて頂きます……。
+;--------------------------------------------------
+@QUEST_BODY_97
+#DIM POSID
+#DIM SECTOR_ID
+#DIM X_POS
+#DIM Y_POS
+#DIM ITER
+#DIM CONST DISTANCE_FROM_STAR = 6
+#DIM QUEST_ID = 97
+
+
+;あなた座標
+CALL ID2POS (CHARACTER_POSITION:MASTER)
+SECTOR_ID = RESULT:0
+X_POS = RESULT:1
+Y_POS = RESULT:2
+;マップ上のクエスト座標から呼び出される処理
+IF (QUESTMAP:(SECTOR_ID):(X_POS):(Y_POS) == QUEST_ID) && (QUEST_PROGRESS:QUEST_ID == 3)
+	IF QUEST_PROGRESS:QUEST_ID == 3
+			CALL QUEST_97_3_BATTLE
+	ELSE
+		PRINTFORMW 今は用が無い
+	ENDIF
+	RETURN 
+ELSEIF (QUESTMAP:(SECTOR_ID):(X_POS):(Y_POS) == QUEST_ID) && (QUEST_PROGRESS:QUEST_ID == 4)
+	IF QUEST_PROGRESS:QUEST_ID == 4
+			CALL QUEST_97_4_BATTLE
+	ELSE
+		PRINTFORMW 今は用が無い
+	ENDIF
+	RETURN 
+ELSEIF (QUESTMAP:(SECTOR_ID):(X_POS):(Y_POS) == QUEST_ID) && (QUEST_PROGRESS:QUEST_ID == 5)
+	IF QUEST_PROGRESS:QUEST_ID == 5
+			CALL QUEST_97_5_SCENE
+	ELSE
+		PRINTFORMW 今は用が無い
+	ENDIF
+	RETURN 
+ELSEIF (QUESTMAP:(SECTOR_ID):(X_POS):(Y_POS) == QUEST_ID) && (QUEST_PROGRESS:QUEST_ID == 6)
+		PRINTFORMW 今は用が無い
+	RETURN 
+ELSEIF (QUESTMAP:(SECTOR_ID):(X_POS):(Y_POS) == QUEST_ID) && (QUEST_PROGRESS:QUEST_ID == 7)
+		PRINTFORMW 今は用が無い
+	RETURN 
+;マップから呼び出される処理（星系港から呼び出される）
+ELSEIF QUEST_PROGRESS:QUEST_ID >= 1
+	SELECTCASE QUEST_PROGRESS:QUEST_ID
+		CASE 1 ;スタート（注意喚起）
+			CALL QUEST_97_1_START
+		CASE 6 ;エンド
+			CALL QUEST_97_6_END
+		CASEELSE
+			CALL QUEST_97_0_NAIYO
+	ENDSELECT
+ENDIF
+
+;このセクターの隅に惑星を生成
+IF QUEST_PROGRESS:QUEST_ID == 2
+	CALL QUEST_97_SET_QUEST_POINT_ON_MAP(QUEST_ID, SECTOR_ID, DISTANCE_FROM_STAR,)
+	QUEST_PROGRESS:QUEST_ID = 3
+ENDIF
+
+;--------------------------------------------------
+;目的地作成
+;--------------------------------------------------
+@QUEST_97_SET_QUEST_POINT_ON_MAP(QUEST_ID, SECTOR_ID, DISTANCE_FROM_STAR,)
+#DIM QUEST_ID
+#DIM POSID
+#DIM SECTOR_ID
+#DIM DISTANCE_FROM_STAR
+#DIM X_POS
+#DIM Y_POS
+#DIM ITER
+;四つ角埋まることはないはず……。
+FOR ITER, 0 ,6
+	IF ITER == 6
+		CALL COLOR_PRINTW(@"エラー：マップ上にクエストを生成可能な領域が存在しません", カラー_警告)
+		FORCEWAIT
+	ELSEIF ITER == 4
+		X_POS = 14
+		Y_POS = 14
+		POSID = SECTOR_ID * 10000 + X_POS * 100 + Y_POS
+		;↓が被り確認処理。
+		CALL QUEST_SET_POINT(QUEST_ID, POSID)
+		SIF RESULT == -1
+			CONTINUE
+		CALL POS2ID(SECTOR_ID, X_POS, Y_POS)
+			QUEST_97_旧文明の軍事要塞 = RESULT
+		CLEARMAP:SECTOR_ID:X_POS:Y_POS = 明瞭
+		QUEST_PROGRESS:QUEST_ID = 3
+		RETURN
+	ELSEIF ITER == 3
+		X_POS = 0
+		Y_POS = 0
+		POSID = SECTOR_ID * 10000 + X_POS * 100 + Y_POS
+		CALL QUEST_SET_POINT(QUEST_ID, POSID)
+		SIF RESULT == -1
+			CONTINUE
+		CALL POS2ID(SECTOR_ID, X_POS, Y_POS)
+			QUEST_97_旧文明の軍事要塞 = RESULT
+		CLEARMAP:SECTOR_ID:X_POS:Y_POS = 明瞭
+		QUEST_PROGRESS:QUEST_ID = 3
+		RETURN
+	ELSEIF ITER == 2
+		X_POS = 14
+		Y_POS = 0
+		POSID = SECTOR_ID * 10000 + X_POS * 100 + Y_POS
+		CALL QUEST_SET_POINT(QUEST_ID, POSID)
+		SIF RESULT == -1
+			CONTINUE
+		CALL POS2ID(SECTOR_ID, X_POS, Y_POS)
+			QUEST_97_旧文明の軍事要塞 = RESULT
+		CLEARMAP:SECTOR_ID:X_POS:Y_POS = 明瞭
+		QUEST_PROGRESS:QUEST_ID = 3
+		RETURN
+	ELSE
+		X_POS = 0
+		Y_POS = 14
+		POSID = SECTOR_ID * 10000 + X_POS * 100 + Y_POS
+		CALL QUEST_SET_POINT(QUEST_ID, POSID)
+		SIF RESULT == -1
+			CONTINUE
+		CALL POS2ID(SECTOR_ID, X_POS, Y_POS)
+			QUEST_97_旧文明の軍事要塞 = RESULT
+		CLEARMAP:SECTOR_ID:X_POS:Y_POS = 明瞭
+		QUEST_PROGRESS:QUEST_ID = 3
+		RETURN
+	ENDIF
+NEXT
+;--------------------------------------------------
+;クエスト開始
+;--------------------------------------------------
+@QUEST_97_1_START
+#DIM QUEST_ID = 97
+	PRINTFORMW この星系の外周部に存在する、秘匿された軍事要塞。
+	PRINTFORML 表向き知られておらず、咲耶が『鍵』となる鏡に残されたデータから読み取ったものらしい。
+	PRINTFORML かつて調査船が消息不明となったと言われている座標であり、皇国では魔の宙域と恐れられている。
+	PRINTFORMW 未知の次元の歪みが存在するという考えられたようで、皇国でも再調査は見送られている。
+	PRINTFORML 
+	PRINTFORMW 話から推察するに、軍事要塞の防衛システムは現在でも一部稼働している可能性が高い。
+	PRINTFORML 現代と比べても遙かに進んでいたとされる、旧き大国由来の軍事要塞。
+	PRINTFORML 本稼働状態とは思えないが、その防衛能力は決して舐めて掛からない方が良いだろう。
+	PRINTFORMW 少なくとも近づくには、軍事要塞の防衛網を貫くに足る相応の戦闘艦艇が必要となるはずだ。
+	PRINTFORML 
+	PRINTFORMW 自分の艦隊戦力、資金を計算し、不足の状況に対応出来るかを考える。
+	PRINTFORMW 急がなければならないほど切羽詰まっている訳ではないが――
+CALL ASK_YN("大丈夫なはずだ","まだ不安が残る")
+	IF RESULT == 1
+		PRINTFORMW 慎重に慎重を重ねた方が良い。
+		PRINTFORMW 相手は旧き大国の未知の艦艇――相応の戦力を揃えよう。
+		PRINTFORMW こちらに余力が出来てからで構わないはずだ
+		RETURN
+	ENDIF
+		PRINTFORMW %CALLNAME:MASTER%の艦隊戦力、資産であれば、ある程度の問題は解消出来る。
+		PRINTFORML 相手が旧文明の軍事要塞とはいえ、大きな問題はないだろう。
+		PRINTFORML 
+		PRINTFORMW  ………………
+		PRINTFORMW  …………
+		PRINTFORMW  ……
+		PRINTFORML 
+		SETCOLOR 0xBE81F7
+		PRINTFORMW 「……そうですか、軍事要塞に」
+		PRINTFORML 霧深き森のかくりよにて、咲耶は真面目な顔で頷く。
+		PRINTFORML 「わたくしが依頼したこととは言え、本当にお気を付けて。ご武運をお祈りします」
+		PRINTFORMW 咲耶は深々と頭を下げる。
+		PRINTFORML 
+		PRINTFORMW 「接近、侵入段階まで行けば、セキュリティはどうにか出来ます。問題はそこまで」
+		PRINTFORML ここでデータを探しているようだが、詳細なデータまでは見つけられていないらしい。
+		PRINTFORML 「一応、お役に立てる情報はいくつかあるのですが……」
+		PRINTFORMW 彼女はそう続ける。
+		PRINTFORML 
+		PRINTFORMW 例の軍事要塞は旧き大国のもので、最終的に建国帝によって占領された。
+		PRINTFORMW 防衛に残されているのは、建国帝が設計、量産した皇国仕様の艦隊であるらしい。
+		PRINTFORML 
+		PRINTFORMW 「主に小型艦を設計されていたようですね。資金的な意味で、大型艦を建造出来なかったのか……」
+		PRINTFORMW 咲耶はサイオニックを行使し、宙にウインドウを開いてみせる。
+		PRINTFORML 
+		PRINTFORMW 建国帝が設計した、シールド突撃艇、小型砲撃艦、ミサイル打撃艦のデータ。
+		PRINTFORML 現在からすれば圧倒的なジェネレーター出力を有するものだが、全長はミサイル打撃艦でさえ駆逐艦相当。
+		PRINTFORMW 確かに彼女の言うとおり、随分と小型な戦闘艦艇を設計していたらしい。
+		PRINTFORML 
+		PRINTFORMW 船体強度の低さが少し気になるが、圧倒的なジェネレーター出力から来る強固なシールド。
+		PRINTFORMW そしてシールド突撃艇を除けば、大型艦クラスの実弾主砲、ミサイルを多数装備していた。
+		PRINTFORMW 弱点に思えるのは、副砲の少なさだろう。あまりに対空防御が軽視されている。
+		PRINTFORML 
+		PRINTFORMW 「専門外ですので、解説出来るほどではないのですが……少しでもお役に立てれば」
+		PRINTFORML 彼女は少し疲れているように見えた。
+		PRINTFORML 恐らくは、こうしたデータを探すために苦労していたのだろう。
+		PRINTFORMW この空間でクラウド化された膨大なデータを、手作業で探るようなもの。
+		PRINTFORMW そして一つ調べるだけでも力を消耗することを考えれば、彼女ほどのサイオニックとは言え負担は大きいだろう。
+		PRINTFORML 
+		PRINTFORMW 無理はするなと口にすると、無理をお頼みする側ですから、と咲耶は苦笑する。
+		PRINTFORML 
+		PRINTFORMW 「それは建国帝が搭乗したとされる大型パワードスーツの一種のようですね、いくつか記述が」
+		PRINTFORML 
+		PRINTFORMW ヤタガラスフレーム――人型機動兵器のようだが、現行のそれとは根本設計から異なる。
+		PRINTFORML 未知の装備、サイオニックジェネレーター、そして短距離ジャンプドライブ。
+		PRINTFORMW 分かることは非常に強力な技術を用いた兵器が搭載されていることくらいだ。
+		PRINTFORML 
+		PRINTFORMW 「建国帝はこれによって、当時の獣尾人達を啓蒙し、臣従させたのだと記されています」
+		PRINTFORML 人型である大きな理由はそこだろう。帝は皇国において神の如く扱われている。
+		PRINTFORMW 地上しか知らない原住民を啓蒙するに、これほど分かりやすい形状もない。
+		PRINTFORML 
+		PRINTFORMW 「建国帝の強力なサイオニックも合わさり、多くの戦果を挙げたそうですが……詳細は」
+		PRINTFORML ただ、これに関しては大丈夫でしょう、と苦笑する。
+		PRINTFORMW 「乗り手がいない今、防衛用として出てくるとは考えられませんし」
+		PRINTFORML 確かに、いかにも強力な機体ではある。
+		PRINTFORMW だが、この機体が自律起動しこちらに襲いかかるということは考えにくい。
+		;後のフラグ。
+		PRINTFORML 
+		PRINTFORMW 「とはいえ、入念な準備を行なった方が良いでしょう」
+		PRINTFORML 全てが終わった後に相応のお礼は致します、と彼女は告げる。
+		PRINTFORML 打算的な考えだが、上手く行けば咲耶は実権を握り、皇国を支配下に置く。
+		PRINTFORML 大きなリスクの対価としては、十分考慮に値するだろう。
+		PRINTFORMW 全てが終わった後、こちらを用済みと切り捨てるような人間には見えなかった。
+		PRINTFORML 
+		RESETCOLOR
+		PRINTFORML 
+		PRINTFORMW  ………………
+		PRINTFORMW  …………
+		PRINTFORMW  ……
+		PRINTFORML 
+		SETCOLOR 0xDF7401
+		PRINTFORML 
+		IF QUEST_PROGRESS:40 == 5
+			PRINTFORML 
+			CALL FUCK(MASTER, "性技, 性交, Ｃ, 射精", "童貞喪失, キス喪失, Ｖ挿入", 0, "静流の唇", "", "静流の膣", "和姦")
+			PRINTFORMW それからしばらく彼女と話をしていたものの、例の如く、静流に跨がられて起こされた。
+			PRINTFORML 静流は年中発情期――咲耶に会うためによく訪れるせいか箍が外れ、近頃は実に遠慮がない。
+			PRINTFORML そろそろ話しておくべきだろう。
+			PRINTFORMW お仕置きをしてひとまず、%CALLNAME:MASTER%は落ち着いた心でそう考える。
+			PRINTFORML 
+			PRINTFORML 口が軽い女ではないし、%CALLNAME:MASTER%の不利益になるようなことはしないだろう。
+			PRINTFORMW 朝食を取った後、改まって二人きりで話をする。
+			PRINTFORML 
+			PRINTFORMW 「……なるほど、道理で。近頃旦那様の様子がおかしいと感じていました」
+			PRINTFORML 本当にそう感じていたのか、と尋ねると、静流は頷く。
+			PRINTFORML 「じ、実は、寝言で他の女性の名前を……もしや帝さまは、咲耶さまと？」
+			PRINTFORML 頷くと、そういうことでしたか、とほっと胸を撫で下ろす。
+			PRINTFORMW 他に皇国で良い女が出来たのではないか――静流は気が気でなかったらしい。
+			PRINTFORML 
+			PRINTFORMW 「宇宙を駆ける旦那様が多くの女性をお抱きになることは仕方ないことと」
+			PRINTFORML とはいえ同じ皇国で女がいるとなると嫉妬するのだと静流は告げる。
+			PRINTFORMW どうにも、それもあって近頃は毎回のように男根を咥え込んで起こしていたようだ。
+			PRINTFORML 
+			PRINTFORMW 「とはいえ、お相手が帝さまとなれば……静流としても喜ばしいところ」
+			PRINTFORML 静流の目に狂いはありませんでしたと笑みを浮かべ、%CALLNAME:MASTER%を見つめる。
+			PRINTFORMW 深い愛情と強い執着に満ちた赤い瞳。
+			PRINTFORML 
+			PRINTFORMW 「静流は、旦那様こそいずれ皇国を支配される方だと思っておりましたから……♥」
+			PRINTFORML 
+			PRINTFORMW 囁くような声音は冗談を滲ませない、真剣な色を帯びていた。
+			PRINTFORMW 「獣尾人は強い獣の本性を宿すもの。……強い牡には惹かれるのです」
+			PRINTFORMW きっと帝さまもそれを感じておられるはず、と身を寄せ、耳元で囁く。
+			PRINTFORML 
+			PRINTFORMW 「静流がはっきりと理解したのは旦那様に抱かれて。その時、己が牝だと理解しました」
+			PRINTFORML 肌をなぞるように、指先を%CALLNAME:MASTER%の腕に滑らせる。
+			PRINTFORMW 「今は無自覚なのかも……けれどきっと、帝さまも静流と同じです」
+			PRINTFORML 確信を持って告げる静流を見返すと、当たらずとも遠からずだと彼女は答えた。
+			PRINTFORMW 「帝さまは直感だと仰ったでしょう？　静流が旦那様に口にしたように」
+			PRINTFORMW 静流は楽しそうに肩を揺らして笑う。
+			PRINTFORML 
+			PRINTFORML 
+			PRINTFORML 
+			PRINTFORMW 「なるほど……旦那様はこれから、そんな危険な戦いに」
+			PRINTFORML 先ほどの目覚まし発情兎モードは落ち着いた様子で、神妙な顔で考え込む。
+			PRINTFORMW 今回の仕事について語ると、ようやく静流も真剣になり始めた。
+		ELSEIF QUEST_PROGRESS:40 == 6
+			CALL FUCK(MASTER, "性技, 性交, Ｃ, 射精", "童貞喪失, キス喪失, Ｖ挿入", 0, "静流の唇", "", "静流の膣", "和姦")
+			PRINTFORMW それからしばらく彼女と話をしていたものの、例の如く、静流に跨がられて起こされた。
+			PRINTFORML 静流は年中発情期――咲耶に会うためによく訪れるせいか箍が外れ、近頃は実に遠慮がない。
+			PRINTFORML 何度も言っているものだが、お仕置きが足らないのか、お仕置きがお仕置きになっていないのか。
+			PRINTFORMW 朝から風呂に入らねばならぬほど犯し抜き、落ち着いた心で一息をつく。
+			PRINTFORML 
+			PRINTFORML 
+			PRINTFORML 
+			PRINTFORMW 「なるほど……旦那様はこれから、そんな危険な戦いに」
+			PRINTFORML 先ほどの目覚まし発情兎モードは落ち着いた様子で、神妙な顔で考え込む。
+			PRINTFORMW 今回の仕事について語ると、ようやく静流も真剣になり始めた。
+		ELSEIF QUEST_PROGRESS:40 == 11
+			PRINTFORML 工事中
+		ELSEIF QUEST_PROGRESS:40 == 12
+			PRINTFORML 工事中
+		ENDIF
+		PRINTFORML 
+		PRINTFORMW 「建国帝の設計した戦闘艦艇……なるべく詳細に教えて頂けますか？」
+		PRINTFORML こういう時、データごと持ってこられないことは不便であった。
+		PRINTFORMW 頭を捻り、先ほど閲覧した内容を口にしていくと、静流はデバイスに情報を打ち込んでいく。
+		PRINTFORML 
+		PRINTFORMW 「なるほど。極端で面白い設計ですね」
+		PRINTFORML 面白い？　と尋ねると、彼女は目的がはっきりとしています、と口にする。
+		PRINTFORMW そして新しく急須に湯を注ぎながら続けた。
+		PRINTFORML 
+		PRINTFORMW 「艦船設計、装備を見れば、仮想敵が見えてくるもの……やはりかの大国は大型艦が主体だったのでしょう」
+		PRINTFORML 皇国がする成立以前、旧き大国が支配していた時代は大艦巨砲の全盛期。
+		PRINTFORML 強力な砲撃艦で戦列を組み、一方的に敵艦隊を殲滅する――そういう戦術が主流であったらしい。
+		PRINTFORMW 平和な時代が長く続いたせいもあるだろう、と彼女は告げる。
+		PRINTFORML 
+		PRINTFORMW 「絶大な技術と力を持った旧き大国が滅びた理由は傲慢さにあったと、僅かな記録では語られています」
+		PRINTFORML 技術の高さと権威を示すため、旧き大国は徐々に、戦闘艦艇を大型化。
+		PRINTFORML その威容を見れば逆らうものもいなくなる――兵器としての実用性よりも示威を重視していったのだという。
+		PRINTFORMW そして長く平和な時代が、その愚かさに気付かなかった。
+		PRINTFORML 
+		PRINTFORMW 「窮鼠猫を噛む。建国帝はそうした大型艦に対し、数と機動力で上回ろうとしたのでしょう」
+		PRINTFORML シールド突撃艇と小型砲撃艦を前面に出して主砲を散らし、後方からはミサイルの飽和攻撃。
+		PRINTFORMW 主砲頼りの大型艦には確かに厳しい相手だろう。
+		PRINTFORML 
+		PRINTFORMW 「戦列砲艦の全盛期――恐らく誘導兵器や空母も当時は軽視されていたのでしょう」
+		PRINTFORML 建国帝の設計した戦闘艦艇は対空火器がほとんど搭載されていなかった。
+		PRINTFORML そして建国帝がミサイルを主力にした点もそこに理由があると彼女は告げる。
+		PRINTFORMW 旧き大国もまた、対空砲を重視していなかったのだろうと。
+		PRINTFORML 
+		PRINTFORMW 「どれも強力なシールドに保護された優秀な機体ですが、そうした事情故か弱点も多いですね」
+		PRINTFORML 
+		PRINTFORML シールド突撃艇は文字通り、大型艦艇への突撃、シールド破壊のみを重視。
+		PRINTFORMW シールド突撃の性質上、運動性能の高い同じ小型艦に対しては無力に等しいだろう。
+		PRINTFORML 
+		PRINTFORML 小型砲撃艦は強力な近距離砲撃を行えるものの、シールド突撃艇と同じく対空迎撃能力は皆無。
+		PRINTFORMW 誘導兵器や艦載機を用いれば一網打尽に出来る。
+		PRINTFORML 
+		PRINTFORML ミサイル打撃艦は強力ながらミサイルに頼る関係上、対空砲火を重視すれば被害を抑えられる。
+		PRINTFORMW 強固なシールドを除けば機動性、耐久性も悪く、至近まで迫れば撃沈は難しくない。
+		PRINTFORML 
+		PRINTFORML 「もっとも注意すべきはミサイル打撃艦ですね。飽和攻撃は対空砲の盾だけでは厳しいでしょう」
+		PRINTFORMW 彼女は眉間に皺を寄せる。
+		PRINTFORMW 「敵がこの混成艦隊であるという前提で考えれば、機動力に長けた小型艦をしっかりと用意すべきです」
+		PRINTFORMW 機動力に欠ける大型艦を中心とした編成では大きな被害を被るだろう、と彼女は続けた。
+		PRINTFORML 
+		PRINTFORMW 「そしてどの艦も防御を極端なまでにシールドに頼っています。なるべく実弾兵器を」
+		PRINTFORML 強固なシールドが存在する関係上、レーザーやビーム兵器は有効ではない。
+		PRINTFORMW シールドを抜けば撃沈は容易い以上、両者は避けるべきだと彼女は告げる。
+		PRINTFORML 
+		PRINTFORMW 「目には目を……恐らくはミサイルが効果的でしょう。この通りならば、敵の対空砲火は脆弱です」
+		PRINTFORML 空母を用意出来るなら艦載機も良いですね、と彼女は続けた。
+		PRINTFORML 対空能力に長けた小型艦を重視し、シールド貫通能力に長けた実弾を主体、主力はミサイルと艦載機。
+		PRINTFORMW それがもっともベターであるらしい。
+		PRINTFORML 
+		PRINTFORMW 「……一番重要なのは、大型艦隊を撃滅するために建国帝が編成した艦艇だということです」
+		PRINTFORML 決して大型艦を前面には出さないように、と念を押すように彼女は言った。
+		PRINTFORML 確かに、罠に自ら頭を突っ込むようなもの。
+		PRINTFORMW 可能な限り、小型艦を盾に進むべきではあった。
+		PRINTFORML 
+		PRINTFORMW 「ひとまず、データから分かることはこのくらいですね……」
+		PRINTFORMW どうかご武運を、と静流は%CALLNAME:MASTER%を見つめた。
+		PRINTFORML 
+		PRINTFORMW ………………。
+		PRINTFORMW …………。
+		PRINTFORMW ……。
+		PRINTFORML 
+		PRINTFORML 座標は既に分かっている
+		PRINTFORML 向かうなら万全を期すべきだろう。
+		PRINTFORML 
+		CALL COLOR_PRINTL(@"　マップ上に軍事要塞の座標が追加された", カラー_注意)
+		PRINTFORML 
+		PRINTFORMW 
+		RESETCOLOR
+		QUEST_PROGRESS:QUEST_ID = 2
+
+
+;--------------------------------------------------
+;戦闘一回目
+;--------------------------------------------------
+@QUEST_97_3_BATTLE
+#DIM QUEST_ID = 97
+#DIM SECTOR_ID
+#DIM SHIP_ID
+#DIM POS_ID
+#DIM X_POS
+#DIM Y_POS
+CALL ID2POS(QUEST_97_旧文明の軍事要塞)
+SECTOR_ID = RESULT:0
+X_POS = RESULT:1
+Y_POS = RESULT:2
+CALL POS2ID(SECTOR_ID, X_POS, Y_POS)
+QUEST_97_旧文明の軍事要塞 = RESULT
+		FOR LOCAL, 0, 10
+			CALL INIT_PRESET_SHIP(10, QUEST_97_旧文明の軍事要塞, 建国帝のシールド突撃艇, "建国帝のシールド突撃艇", 建国帝のシールド突撃艇)
+		NEXT
+		FOR LOCAL, 0, 10
+			CALL INIT_PRESET_SHIP(10, QUEST_97_旧文明の軍事要塞, 建国帝の小型砲撃艦, "建国帝の小型砲撃艦", 建国帝の小型砲撃艦)
+		NEXT
+CALL COMBAT(QUEST_97_旧文明の軍事要塞)
+
+CALL QUEST_ANONYM_BATTLE_RESULT(QUEST_97_旧文明の軍事要塞)
+; アノニム作者さんの関数ありがたや……。
+IF RESULT == 99
+	PRINTFORML 
+	PRINTFORML 進入口周辺にいた防衛部隊はこれで沈められたようだ。
+	PRINTFORML とはいえ、この奥にはこちらを警戒している更なる敵艦の存在が確認出来た。
+	PRINTFORML 照合する限り、シールド突撃艇が２０、小型砲撃艦が１０、そしてミサイル打撃艦が五隻。
+	PRINTFORMW これを突破するのは中々骨が折れそうだ。
+	QUEST_PROGRESS:QUEST_ID = 4
+ELSE
+	PRINTFORML 
+	PRINTFORML 所詮は骨董品――心のどこかに侮りがあったのだろう。
+	PRINTFORML 敵防衛部隊部隊の猛攻にあった%CALLNAME:MASTER%は、管理AIの悲鳴のような警告を聞きながら息を吐く。
+	PRINTFORML 正面から、シールドを展開した突撃艇が突っ込んでくるのが見えた。
+	PRINTFORMW しかし、もはやそれを回避する術はない。
+	CALL ANONYM_GAME_OVER
+ENDIF
+;--------------------------------------------------
+;戦闘二回目
+;--------------------------------------------------
+@QUEST_97_4_BATTLE
+#DIM QUEST_ID = 97
+#DIM SECTOR_ID
+#DIM SHIP_ID
+#DIM POS_ID
+#DIM X_POS
+#DIM Y_POS
+CALL ID2POS(QUEST_97_旧文明の軍事要塞)
+SECTOR_ID = RESULT:0
+X_POS = RESULT:1
+Y_POS = RESULT:2
+CALL POS2ID(SECTOR_ID, X_POS, Y_POS)
+QUEST_97_旧文明の軍事要塞 = RESULT
+		FOR LOCAL, 0, 20
+			CALL INIT_PRESET_SHIP(10, QUEST_97_旧文明の軍事要塞, 建国帝のシールド突撃艇, "建国帝のシールド突撃艇", 建国帝のシールド突撃艇)
+		NEXT
+		FOR LOCAL, 0, 10
+			CALL INIT_PRESET_SHIP(10, QUEST_97_旧文明の軍事要塞, 建国帝の小型砲撃艦, "建国帝の小型砲撃艦", 建国帝の小型砲撃艦)
+		NEXT
+		FOR LOCAL, 0, 5
+			CALL INIT_PRESET_SHIP(10, QUEST_97_旧文明の軍事要塞, 建国帝のミサイル打撃艦, "建国帝のミサイル打撃艦", 建国帝のミサイル打撃艦)
+		NEXT
+CALL COMBAT(QUEST_97_旧文明の軍事要塞)
+
+CALL QUEST_ANONYM_BATTLE_RESULT(QUEST_97_旧文明の軍事要塞)
+; アノニム作者さんの関数ありがたや……。
+IF RESULT == 99
+	PRINTFORML 
+	PRINTFORML ひとまずこれで、稼働中の敵防衛部隊は沈められたようだ。
+	PRINTFORML 幸いにも軍事要塞からの攻撃はないらしい。
+	PRINTFORML 若干安堵をしながらも、警戒心を残したままゆっくりと軍事要塞へと近づいていく。
+	PRINTFORMW 
+	QUEST_PROGRESS:QUEST_ID = 5
+ELSE
+	PRINTFORML 
+	PRINTFORML 所詮は骨董品――心のどこかに侮りがあったのだろう。
+	PRINTFORML 敵防衛部隊部隊の猛攻にあった%CALLNAME:MASTER%は、管理AIの悲鳴のような警告を聞きながら息を吐く。
+	PRINTFORML 正面から、大量のミサイルが向かってくるのが見えた。
+	PRINTFORMW しかし、もはやそれを回避する術はない。
+	CALL ANONYM_GAME_OVER
+ENDIF
+;--------------------------------------------------
+;要塞内部１
+;--------------------------------------------------
+@QUEST_97_5_SCENE
+#DIM QUEST_ID = 97
+	PRINTFORML 
+	PRINTFORMW ………………。
+	PRINTFORMW …………。
+	PRINTFORMW ……。
+	PRINTFORML 
+	PRINTFORML 『PSI認証が承認されました。指定ドックへの入港をお願いします』
+	PRINTFORML 
+	PRINTFORML 恐らくは咲耶から持たされたサイオニックキーによるものだろう。
+	PRINTFORML 近づくとあちらからそのような通信が入る。
+	PRINTFORMW ひとまず問題なく、入場を許されたらしい。
+	PRINTFORML 
+	PRINTFORML ドックへ入り、若干の安堵を深めつつも、警戒は怠らないまま先へと進む。
+	PRINTFORML まるで%CALLNAME:MASTER%を招き入れるかのように、奥への扉が開いていく。
+	PRINTFORMW あるいは警戒されているのか――不要な場所へと立ち入らせないように。
+	PRINTFORML 
+	PRINTFORMW そうして到達したのはここの中枢、コントロールセンターだろう。
+	PRINTFORML 無数の操作デバイスが設置されており、要塞各部の情報が表示されていた。
+	PRINTFORML やはり現状は休止中。最低限の防衛能力を維持した状態で本稼働ではないらしい。
+	PRINTFORML 要塞に配備されている防衛設備の数々を見ると、肝が冷えた。
+	PRINTFORMW タキオンランスにワープカノン――現在ではロストテクノロジーとされる兵器が無数に配備されている。
+	PRINTFORML 
+	PRINTFORML 中央奥にある発見したメインパネルに近づくと、パネルの上に鏡の立体モデルが投影された。
+	PRINTFORMW %CALLNAME:MASTER%は鏡の形をしたサイオニックインターフェイスを展開。
+	PRINTFORMW そのモデルへと重ね合わせると、周囲に音声が響き渡る。
+	PRINTFORML 
+	PRINTFORMW 『ようこそ、私の子よ。あるいは私の子の使いだろうか』
+	PRINTFORML 
+	PRINTFORML 前方に投影されたのは、犬の耳をした獣尾人の男であった。
+	PRINTFORMW いつのものかは知らないが、記録映像なのだろう。
+	PRINTFORML 
+	PRINTFORMW 『私はかつて豊秋津皇国という国家を建国し……彼らから帝と呼ばれていたものだ』
+	PRINTFORML 
+	PRINTFORML 容姿の整った獣尾人――少なくとも、映像で見る限り、他に特筆した部分はない。
+	PRINTFORMW 咲耶の祖先と言われて一致するのは端正な顔の造りと犬の獣耳くらいのものだろう。
+	PRINTFORML
+	PRINTFORMW 『事情は分からないが、この軍事要塞を再稼働させるということは、きっと力を求めているのだろう』
+	PRINTFORMW 『恐らくかくりよでの記録を見た上で決断したに違いない』
+	PRINTFORMW 『私が封じた三つのものがどういうものか、理解した上で必要とあれば仕方はない』
+	PRINTFORML 
+	PRINTFORMW 『しかしまず、君にはこの映像を見てもらいたいと思う』
+	PRINTFORMW 『我々の独立戦争、その当時の映像だ』
+	PRINTFORML 
+	PRINTFORMW 彼がそう告げると、前方に映像が投影された。
+	PRINTFORMW 昔報道された中継映像か――当時の艦隊戦を映したものであるらしい。
+	PRINTFORML 
+	PRINTFORMW ………………。
+	PRINTFORMW …………。
+	PRINTFORMW ……。
+	PRINTFORML 
+		;敵が強力なので下駄を履かせる。
+		;最終的なラスボス戦編成は下駄抜き。
+		FOR LOCAL, 0, 20
+			CALL INIT_PRESET_SHIP(国家ID_豊秋津皇国 , 0, 建国帝のシールド突撃艇, "建国帝のシールド突撃艇", 建国帝のシールド突撃艇)
+			SHIP_EQUIP:オプション:0:RESULT = 7
+			SHIP_EQUIP:AI:0:RESULT = 5
+		NEXT
+		FOR LOCAL, 0, 10
+			CALL INIT_PRESET_SHIP(国家ID_豊秋津皇国 , 0, 建国帝の小型砲撃艦, "建国帝の小型砲撃艦", 建国帝の小型砲撃艦)
+			SHIP_EQUIP:オプション:0:RESULT = 7
+			SHIP_EQUIP:AI:0:RESULT = 5
+		NEXT
+		FOR LOCAL, 0, 10
+			CALL INIT_PRESET_SHIP(国家ID_豊秋津皇国 , 0, 建国帝のミサイル打撃艦, "建国帝のミサイル打撃艦", 建国帝のミサイル打撃艦)
+		NEXT
+		FOR LOCAL, 0, 3
+			CALL INIT_PRESET_SHIP(国家ID_豊秋津皇国 , 0, 旧大国の火力拠点, "軍事要塞の火力拠点", 旧大国の火力拠点)
+		NEXT
+		FOR LOCAL, 0, 1
+			CALL INIT_PRESET_SHIP(国家ID_豊秋津皇国 , 0, ヤタガラスフレーム, "ヤタガラスフレーム", ヤタガラスフレーム)
+			SHIP_EQUIP:オプション:0:RESULT = 7
+		NEXT
+
+		FOR LOCAL, 0, 20
+			CALL INIT_PRESET_SHIP(国家ID_一般海賊 , 0, 旧大国の軽砲撃艦, "旧大国の軽砲撃艦", 旧大国の軽砲撃艦)
+		NEXT
+		FOR LOCAL, 0, 12
+			CALL INIT_PRESET_SHIP(国家ID_一般海賊 , 0, 旧大国の重砲撃艦, "旧大国の重砲撃艦", 旧大国の重砲撃艦)
+		NEXT
+		CALL INIT_PRESET_SHIP(国家ID_一般海賊 , 0, 旧大国のタイタン, "旧大国のタイタン", 旧大国のタイタン)
+		CALL BATTLE(国家ID_豊秋津皇国, 国家ID_一般海賊, 0, 1)
+		FOR LOCAL, 0, MAX_SHIP
+			SIF SHIP_COUNTRY:LOCAL != 国家ID_豊秋津皇国 && SHIP_COUNTRY:LOCAL != 国家ID_一般海賊
+				CONTINUE
+			SIF SHIP_POSITION:LOCAL != 0
+				CONTINUE
+			CALL GET_SHIP_TOTAL_HP(LOCAL)
+			SHIP_DAMAGE:LOCAL = RESULT
+		NEXT
+		CALL RETIRE_BROKEN_SHIP
+	PRINTFORML 
+	PRINTFORMW ………………。
+	PRINTFORMW …………。
+	PRINTFORMW ……。
+	PRINTFORML 
+	PRINTFORMW 建国帝率いる獣尾人達と、旧き大国の戦い。
+	PRINTFORML 現在からは想像も出来ない技術を用いた、大規模艦隊戦。
+	PRINTFORMW ロストテクノロジーとなった様々な兵器が当然のように運用されていた。
+	PRINTFORML 
+	PRINTFORMW 現存の大型戦艦を一撃で破壊するだろうタキオンランスやワープカノン。
+	PRINTFORMW 実戦レベルで運用される短距離ジャンプドライブ。
+	PRINTFORMW 兵器開発者が見たならば恐らく垂涎ものだろう。
+	PRINTFORML 
+	PRINTFORMW 『多くの獣尾人達を率い、私は彼らからの独立を目指した』
+	PRINTFORMW 『対価は命だ。……長い戦争の間に、獣尾人達は億を超える死者を出した』
+	PRINTFORMW 『その意味が分かるだろうか？』
+	PRINTFORML 
+	PRINTFORMW 『私は今も考える。これは正しい戦争であったのかと』
+	PRINTFORMW 『私が変えようとしなければ、多くは救われ、失われずに済んだのかも知れない』
+	PRINTFORMW 『あれは正しかったと繰り返す度、そんなことを考える』
+	PRINTFORML 
+	PRINTFORMW 『だからこそ君には、よく考えてもらいたい』
+	PRINTFORMW 『力は時に多くの者から人生を奪っていくもの』
+	PRINTFORMW 『かの大国が崩壊した後、故に私はかつての技術の多くを封じた』
+	PRINTFORMW 『その意味をどうか、君にも理解してもらいたい』
+	PRINTFORML 
+	PRINTFORMW 『……私からそちらは見えないが、少なくとも、この国は良い国だ』
+	PRINTFORMW 『家畜のように扱われていた我らが、人として生きることを許されているのだ』
+	PRINTFORMW 『皆大いに喜んでいる。多少の問題こそあるが、多くの問題は私の代で解決出来ると思っている』
+	PRINTFORMW 『彼らの神としてではなく、彼らの仲間として』
+	PRINTFORML 
+	PRINTFORMW 『だから、これはあくまで、聞かれることを目的としていないメッセージ』
+	PRINTFORMW 『そうなってくれることを切に願うが、それでも聞くものがあるならば一言だけ』
+	PRINTFORML 
+	PRINTFORMW 『大いなる力には、大いなる責任が伴う』
+	PRINTFORMW 『そんな言葉を贈りたい』
+	PRINTFORML 
+	PRINTFORMW メッセージはそこで終わり、建国帝の姿は消える。
+	PRINTFORMW 話を聞いている限りでは随分と人道的な人間であったのだろう。
+	PRINTFORML 
+	PRINTFORMW ともあれ、仕事は完了したようだ。
+	PRINTFORMW 無数のディスプレイのインジケーターが起動しはじめ、システムの再起動シークエンスに入る。
+	PRINTFORML 
+	PRINTFORMW とはいえ与えられたサブマスター権限ではまだ、データアクセスは行えないらしい。
+	PRINTFORML 恐らくはデータの宝物庫であるが、マスター権限を持つはずの咲耶に頼むほかないだろう。
+	PRINTFORML 彼女が自由になってからの話――彼女がこのデータをどう扱うかも問題であったが、
+	PRINTFORMW 少なくとも、相応の謝礼はもらえるに違いない。
+	PRINTFORML 
+	PRINTFORMW そうしてドックに戻る途中、ふと視界の端に作業用エリアへの入り口を見つける。
+	PRINTFORMW 当時使われていた作業用のパワードスーツがいくつも鎮座していた。
+	PRINTFORML どうにも戦闘艦艇などと違って、こちらにはロックが掛かっていないらしい。
+	PRINTFORMW 軽く調べたところ、技術的にはロストテクノロジーとは言えないもの代物であったが、
+	PRINTFORMW 現在の高級パワードスーツを上回る水準のものが無数に並んでいた。
+	PRINTFORML 
+	PRINTFORML 恐らく当時は、このレベルのパワードスーツが大量生産され使われていたのだろう。
+	PRINTFORMW 船の修復費用の足しにはなる、とパワードスーツを回収すると、そのまま要塞を後にした。
+	PRINTFORML 
+	QUEST_PROGRESS:QUEST_ID = 6
+;--------------------------------------------------
+;鏡の宙域エピローグ
+;--------------------------------------------------
+@QUEST_97_6_END
+#DIM QUEST_ID = 97
+SETCOLOR 0xDF7401
+IF TALENT:MASTER:性別 == 0
+	PRINTFORML 
+	PRINTFORMW ………………。
+	PRINTFORMW …………。
+	PRINTFORMW ……。
+	PRINTFORML 
+	SETCOLOR 0xDF7401
+	PRINTFORMW 「だんなさま……♥　今日は静流が精一杯ご奉仕させて頂きますね……♥♥♥」
+	PRINTFORML 
+	PRINTFORML 咲耶への報告も兼ねて静流の家に訪れると、静流は熱心な奉仕で%CALLNAME:MASTER%に尽くした
+	PRINTFORML 命懸けの戦いで、知らず気が昂ぶっていたのもそうだろうし、安堵したのもあるだろう。
+	PRINTFORMW 何だかんだ言いながら、自分の快楽が最優先な彼女には珍しいほど熱心な奉仕。
+	PRINTFORML 
+	PRINTFORMW 「ん♥　　旦那様……今日はいつもよりガチガチですね……♥」
+	PRINTFORML 
+	PRINTFORMW 豊かな乳房に挟み込み、上下に擦り上げながら先端にキスを落とす。
+	PRINTFORML ちゅっちゅっと射精を促すような静流の頭を押さえつけると、そのまま男根を咥え込ませた。
+	PRINTFORML まずは一発、溜まったものを注ぎ込んでやると、静流はそのまま喉を鳴らす。
+	PRINTFORMW そして、射精の余韻を引き延ばすように、射精の律動に合わせて乳房で刺激する。
+	PRINTFORML 
+	PRINTFORMW 「もう、そんなに何度も言わずとも、分かって……♥　ん……おりますよ……♥」
+	PRINTFORML 
+	PRINTFORML 今日は随分、静流も体を火照らしているらしい。
+	PRINTFORMW 明日は起こしてくれるなよ、と告げると静流は男根を舐めながら答えた。
+	PRINTFORML 本当に分かっているのかは怪しいものであった。
+	PRINTFORMW 静流はそのまま失礼しますね、と上に跨がり、ゆっくりと男根を咥え込む。
+	PRINTFORML 
+	PRINTFORMW 白い髪が揺れて、汗ばんだ肉感的な体をぎゅう、と縮めた。
+	PRINTFORML 紅潮した真白い肌と、熱情に潤んだ赤い大きな瞳。
+	PRINTFORML 愛おしげにこちらを見つめる顔は美しく、普段の行状はともかく良い女であった。
+	PRINTFORMW 男根を確かめるように、入り口から奥へと段階的に男根を締め付け、子宮口を押しつける。
+	PRINTFORML 
+	PRINTFORMW 「ただ、こんなにした旦那様が、帝様にご無礼を働いてしまわないかと心配で……♥」
+	PRINTFORML 
+	PRINTFORMW 蠱惑的な美貌を悪戯な笑みで歪ませ、男根を弄ぶように牝肉を脈動させる。
+	PRINTFORML 
+	PRINTFORMW 「帝様に変な気を起こさないよう、しっかりと、旦那様に溜まった牡の欲求を受け止めておこうかと……♥」
+	PRINTFORML 
+	PRINTFORMW 腰を動かさないまま内側を脈動させ、言葉とは裏腹に煽るようだった。
+	PRINTFORML 
+	PRINTFORMW 「ぁん♥　ふふ……♥　だんなさまは、ん♥　動いちゃ駄目ですよ……♥」
+	PRINTFORML 
+	PRINTFORML 軽く突き上げて、よほど自分に手を出させたいらしいな、と静流に告げる。
+	PRINTFORMW 静流は微笑み、興奮した様子でぎちぎちと男根を絞り上げる。
+	PRINTFORML 
+	PRINTFORMW 「だって、見てみたくて……♥　皆から崇められる帝様も、静流と同じ牝なんだって……♥」
+	PRINTFORML 
+	PRINTFORMW ゆっくりと動き始めると、静流は子宮を揺すらせるように、その入り口を擦りつけた。
+	PRINTFORML 
+	PRINTFORMW 「静流は小さな頃から、他の獣尾人達からその面汚しみたいな目で見られておりましたから……♥」
+	PRINTFORML 
+	PRINTFORMW 盛るしか脳がないと嘲られる、獣尾人の底辺。
+	PRINTFORMW 優しい家族に恵まれ、愛情を注がれたとは言え、鬱屈した感情はあるのだろう。
+	PRINTFORML 
+	PRINTFORMW 「沢山色んな努力をしても……♥　静流は結局兎だからって、そういう扱いです……♥」
+	PRINTFORML 
+	PRINTFORML 実際そう告げるだけあって、静流は随分と優秀であった。
+	PRINTFORML しかしそうして十分な条件を満たしても、兎の女は場を乱すと士官学校には辞退を求められたらしい。
+	PRINTFORMW 兎は体を使って楽しませるだけの生き物なのだと笑って告げる。
+	PRINTFORML 
+	PRINTFORMW 「でも、ん♥　皆隠しているだけで……きっと静流と一緒だと思うんです……♥」
+	PRINTFORML 
+	PRINTFORMW 粘ついた音を響かせながら、子宮口を押しつぶすように亀頭へとキスさせる。
+	PRINTFORMW 兎だけじゃなく、皆そうだと微笑みながら。
+	PRINTFORML 
+	PRINTFORMW 「皆から、崇められる帝様だって、ぁ♥　一皮剥けばきっと同じで……♥」
+	PRINTFORML 
+	PRINTFORMW それを見てみたいのだと静流は続けた。
+	PRINTFORML 
+	PRINTFORMW 「全部が終わったら、静流と、っ♥　帝様を……♥　並べて犯してくださいませんか？」
+	PRINTFORML 
+	PRINTFORMW 動物みたいに四つん這いで、と言いながら、静流は想像してか、膣肉を大きく脈動させた。
+	PRINTFORMW 白い腹部が淫靡に痙攣し、男根を型取りでもするように蕩けた肉襞が収縮と弛緩を繰り返す。
+	PRINTFORML 
+	PRINTFORMW 「はぁ、はぁ……♥　旦那様の牡の部分をおねだりして、腰を振る帝様を見てみたくて……♥」
+	PRINTFORML 
+	PRINTFORMW 咲耶の穢れのない無垢な微笑みを思い出し、そして犬のように尻を突き上げる姿を想像する。
+	PRINTFORMW 男根に力が張って、それを感じた静流が再び体を震わせる。
+	PRINTFORMW そして、興奮しちゃいました？　と静流は嬉しそうに目を細める。
+	PRINTFORML 
+	PRINTFORMW 「ふふ、旦那様なら、きっとすぐに叶えられますよ……♥」
+	PRINTFORML 
+	PRINTFORMW そして男根を深くくわえ込んだまま体を倒し、%CALLNAME:MASTER%に口付ける。
+	PRINTFORMW 白を這わせ、内側に――艶めかしく舌を絡めた。
+	RESETCOLOR
+	PRINTFORML 
+	PRINTFORMW ………………。
+	PRINTFORMW …………。
+	PRINTFORMW ……。
+	PRINTFORML 
+	SETCOLOR 0xBE81F7
+	PRINTFORMW そうして、霧深いかくりよへ。
+	PRINTFORMW こちらを認めた咲耶は黒い耳をぴんと立て、尻尾を左右に揺らしながら近づいて来る。
+	PRINTFORML 
+	PRINTFORMW 「ご無事で何よりです。成功したのは気付いていたのですけれど、お怪我がないか心配で……？」
+	PRINTFORML 先ほどの交わりでの想像もあり、やはりどうにもそういう目で見てしまう。
+	PRINTFORMW 散々出したはずだが、この世界は肉体的な影響はそれほどないのかも知れない。
+	PRINTFORML 
+	PRINTFORMW 咲耶は小首を傾げ、静かに近づきすんすんと匂いを嗅ぐような仕草。
+	PRINTFORMW 思えば、会う度に彼女は%CALLNAME:MASTER%の匂いを嗅いでいた。
+	PRINTFORML 
+	PRINTFORMW 「いえ、何となく、癖のようなもので……いつも兎の方の匂いが、その……」
+	PRINTFORML 恥ずかしそうに目を泳がせ、咲耶は上目遣いに尋ねる。
+	PRINTFORML 「あの兎の方は……まれびとさまの恋人……なのでしょうか？」
+	PRINTFORML 似たようなものだ、と答えると、なるほどそれで、と彼女は頷く。
+	PRINTFORMW 表情は変わらないものの、咲耶の耳がほんの少し折れていた。
+	PRINTFORML 
+	PRINTFORMW 「わたくしは……思念の残り香のようなものを、嗅ぎ分けることができますので」
+	PRINTFORML 何を嗅いでいるのかと尋ねると帰ってきたのはそのような言葉。
+	PRINTFORML それを縁と呼んでいるらしい。
+	PRINTFORMW PSIの超感覚は獣の部分に出やすいそうだが、彼女は嗅覚なのだろう。
+	PRINTFORML 
+	PRINTFORMW 「兎の方は……その、このことをご存じで？」
+	PRINTFORML 頷くと、彼女は心配するように%CALLNAME:MASTER%を見つめた。
+	PRINTFORML 「怒っていらっしゃったり……とか、そのようなことは？」
+	PRINTFORMW 怒ってはいないだろう、と彼女の様子を思い浮かべて正直に告げる。
+	PRINTFORMW その考えは邪悪ではあったものの、咲耶を嫌っている様子もない。
+	PRINTFORML 
+	PRINTFORMW 「それは良かった……一度、わたくしからお話した方が良いかも知れませんね」
+	PRINTFORML 出来るのかと尋ねると彼女は頷く。
+	PRINTFORMW 元々ここに迷い込んでいた彼女と会話を交わすのは、その気になれば簡単らしい。
+	PRINTFORML 
+	PRINTFORMW 静流の発言内容を思い出し、大丈夫なのかと不安に思うものの、外面は大和撫子。
+	PRINTFORML 少なくとも帝を相手に、滅多なことはしないだろう。
+	PRINTFORMW 伝えておく、と頷くと、彼女はお願いします、と頭を下げる。
+	PRINTFORMW やはり少しばかり、その耳が折れていた。
+ENDIF
+	PRINTFORML 
+	PRINTFORMW ………………。
+	PRINTFORMW …………。
+	PRINTFORMW ……。
+	PRINTFORML 
+	PRINTFORMW 「大いなる力には、大いなる責任が伴う……確かに、重い言葉ですね」
+	PRINTFORML 
+	PRINTFORMW 軍事要塞でのことを説明すると真面目な顔で彼女は告げる。
+	PRINTFORMW 色々と思うところはあるのだろう。
+	PRINTFORML 
+	PRINTFORMW 「……確かに仰る通り、迷うところがない訳ではありません」
+	PRINTFORML 咲耶はそう口にして、かくりよのぼやけたような空を見上げる。
+	PRINTFORML 「わたくしが行動することで、更なる混乱を生む可能性もあるでしょう」
+	PRINTFORMW 一歩間違えば内乱を引き起こすかも知れないのだ。彼女の葛藤は理解出来た。
+	PRINTFORML 
+	PRINTFORMW 「流れに任せるのも一つの手。けれど、後悔はきっと、行動に移さずとも同じことでしょう」
+	PRINTFORML 様々な問題を抱えたまま、いつ爆発するとも分からない現状。
+	PRINTFORML このまま何もせずに放置し、誰かに委ねるならば、自分の存在意義はないと彼女は告げる。
+	PRINTFORMW 「いつかその問題が大きくなったとき、結局代償は別の誰かが払わなければなりません」
+	PRINTFORML 
+	PRINTFORMW 貴族や武家の関係、平民達の民主化運動。
+	PRINTFORMW 皇国には多くの火種が存在し、あちこちで燻っていた。
+	PRINTFORMW 確かに、彼女の他にそれらを解決出来る存在は、現在の皇国にはいないだろう。
+	PRINTFORML 
+	PRINTFORMW 「建国帝もまた、そう思ったからこそ立ち上がったのではないかと思うのです」
+	PRINTFORML 建国帝がいなければ、獣尾人達がどうなっていたか。
+	PRINTFORMW あるいは上手く生き延びることは出来ていたのかも知れないが、悪い想像もいくらでも出来る。
+	PRINTFORML 
+	PRINTFORMW 「……覚悟は出来ているつもりです。どうか、もう少しだけ……お力を貸して頂けませんか？」
+	PRINTFORML 咲耶はそう告げて、深々と頭を下げた。
+	PRINTFORMW 責任感が強く、真面目で――あの建国帝もこんな人間であったのかも知れない。
+	PRINTFORMW 乗りかかった船だと頷くと、彼女は嬉しそうに微笑んだ。
+	PRINTFORML 
+	PRINTFORMW それから彼女は続ける。
+	PRINTFORML 
+	PRINTFORMW 「建国帝も、わたくしがそうすることを望んでいるように思うのです」
+	PRINTFORML 
+	PRINTFORMW 首を傾げると、咲耶は幼い頃、このかくりよで声を聞いたのだという。
+	PRINTFORMW その声のおかげで咲耶はかくりよのことを知り、ここの多くの記録を目に出来たらしい。
+	PRINTFORML 
+	PRINTFORMW 「随分と昔のことなのですけれど……もしかしたら、それが建国帝の声であったのではないか、と」
+	PRINTFORML ここはあちらの世界とは異なる場所――そうした不思議なことがあり得てもおかしくはない。
+	PRINTFORMW 建国帝は想像を絶するような、強力なサイオニックであったと聞く。
+	PRINTFORMW 今も思念としてこの世界を漂っている可能性もあるのだろうか。
+	PRINTFORML 
+	PRINTFORMW 皇国の行く末を見守るために――あるいは。
+	PRINTFORML 
+	PRINTFORMW 「どうかなさいましたか……？」
+	PRINTFORMW いや、と首を振り、尋ねた。
+	PRINTFORMW 「建国帝は……そうですね、最期は病に倒れたのだと。その当時の記録はここにもなくて」
+	PRINTFORMW 当時、想像を絶するような技術と、神のような力を持ったサイオニック。
+	PRINTFORMW メッセージを聞く限り、多くの力を手放して、恐らくは人として暮らすことを決めたのだろう。
+	PRINTFORML 
+	PRINTFORMW しかし、多くの問題は今なお残る。
+	PRINTFORMW 当時から大きく変わらない社会形態――そこから生じる歪み。
+	PRINTFORMW 今なお崇められる、象徴として飼われる帝の存在。
+	PRINTFORMW 彼のメッセージを見る限り、現状はちぐはぐであった。
+	PRINTFORML 
+	PRINTFORMW 果たして病に倒れた帝は何を思っていたのだろう。
+	PRINTFORMW そもそも、それは病であったのだろうか。
+	PRINTFORMW もし、彼の死が――
+	PRINTFORML 
+	PRINTFORMW 「っ、どうされました？」
+	PRINTFORML 目眩のようなものを感じて眉を顰め、支える咲耶に礼を言う。
+	PRINTFORML そして今し方考えていたことを思い出そうとして首を傾げる。
+	PRINTFORMW ――果たして、何を考えていたのだったか。
+	PRINTFORML 
+	PRINTFORMW 「まれびとさま……？」
+	PRINTFORML 大丈夫だ、と笑って、『まぁいいだろう』と気持ちを切り替える。
+	PRINTFORML 色々とあって少し疲れたのかも知れない。
+	PRINTFORMW 今日はもう休むとする、と彼女に告げると、心配そうにしながらも咲耶は頷いた。
+	RESETCOLOR
+	PRINTFORML 
+	PRINTFORML 
+	PRINTFORML 
+	PRINTFORMW 
+	PRINTFORMW 軍事要塞から入手した大量のパワードスーツや備品は、合計で$30,000,000になったようだ。
+	MONEY += 30000000
+	QUEST_PROGRESS:QUEST_ID = 7
+	QUEST_PROGRESS:98 = 1
+
+
+;--------------------------------------------------
+;鏡の宙域エピローグ
+;--------------------------------------------------
+@QUEST_97_0_NAIYO
+PRINTFORML 
+PRINTFORML 軍事要塞の座標は分かっている。
+PRINTFORMW 後は準備して進むだけだ。
+
