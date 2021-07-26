@@ -58,6 +58,12 @@
 #DIM CONST センチュリオン機動歩兵 = 61
 #DIM CONST フェイツィⅫ機動歩兵 = 62
 #DIM CONST レギネッタ戦列甲冑 = 63
+#DIM CONST パンチャー級フリゲート = 64
+#DIM CONST スラッシャー級駆逐艦 = 65
+#DIM CONST レギオン級コルベット = 66
+#DIM CONST ネフィリム級巡洋艦 = 67
+#DIM CONST デミウルゴス級戦艦 = 68
+#DIM CONST バアル・ゼブル級空母 = 69
 #DIM CONST ヴェレス級強襲揚陸艇 = 70
 #DIM CONST 機兵『セラハン・ジート』 = 71
 #DIM CONST 河童級機動漁師 = 85

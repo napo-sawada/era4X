@@ -1,0 +1,43 @@
+﻿;-----------------------------------
+; サブウェポン
+;-----------------------------------
+@GET_SUB_WEAPON_NAME_43
+RESULTS = TIER1中型機関砲
+
+@GET_SUB_WEAPON_STATUS_43(STATUS)
+#DIM REF STATUS
+
+STATUS:DAMAGE = 6
+STATUS:FIRE_RATE = 10
+STATUS:ANTI_AIR = 13
+STATUS:HIT_RATE = 75
+STATUS:FIRE_RANGE = 1
+STATUS:SIZE = 2
+STATUS:WEAPON_TYPE = 実体弾
+STATUS:PRICE = 30000
+
+;-----------------------------------
+; サブウェポンの説明
+;-----------------------------------
+@GET_SUB_WEAPON_DESCRIPTION_43
+#DIM STATUS, STATUS_LENGTH
+
+CALL GET_SUB_WEAPON_STATUS_43(STATUS)
+CALL GET_SUB_WEAPON_NAME_43
+PRINTFORML %RESULTS%
+PRINTFORML 中型艦用に設計された、大口径の実体弾発射機構。
+PRINTFORML ダメージ  : {STATUS:DAMAGE}
+PRINTFORML 射撃レート: {STATUS:FIRE_RATE}発/ターン
+PRINTFORML 対空攻撃力: {STATUS:ANTI_AIR}
+PRINTFORML 命中率    : {STATUS:HIT_RATE}
+PRINTFORML 有効距離  : {STATUS:FIRE_RANGE}
+PRINTFORML サイズ    : {STATUS:SIZE}
+
+;-----------------------------------
+; サブウェポンの資材
+;-----------------------------------
+@GET_SUB_WEAPON_RESOURCE_43(USE_RESOURCE)
+#DIM REF USE_RESOURCE
+
+USE_RESOURCE:武装合金 = 4
+USE_RESOURCE:武装制御機器 = 2

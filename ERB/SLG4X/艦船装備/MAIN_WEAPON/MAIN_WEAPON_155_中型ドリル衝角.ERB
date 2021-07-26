@@ -1,32 +1,31 @@
 ﻿;-----------------------------------
 ; メインウェポン
 ;-----------------------------------
-@GET_MAIN_WEAPON_NAME_9
-RESULTS = TIER3大型汎用連装コイルガン
+@GET_MAIN_WEAPON_NAME_155
+RESULTS = 中型ドリル衝角
 
-@GET_MAIN_WEAPON_STATUS_9(STATUS)
+@GET_MAIN_WEAPON_STATUS_155(STATUS)
 #DIM REF STATUS
 
-STATUS:DAMAGE = 300
-STATUS:FIRE_RATE = 10
-STATUS:HIT_RATE = 80
+STATUS:DAMAGE = 1500
+STATUS:FIRE_RATE = 1
+STATUS:HIT_RATE = 30
 STATUS:FIRE_RANGE = 1
 STATUS:SIZE = 3
 STATUS:WEAPON_TYPE = 実体弾
-STATUS:PRICE = 160000
+STATUS:PRICE = 30000
 
 ;-----------------------------------
 ; メインウェポンの説明
 ;-----------------------------------
-@GET_MAIN_WEAPON_DESCRIPTION_9
+@GET_MAIN_WEAPON_DESCRIPTION_155
 #DIM STATUS, STATUS_LENGTH
 
-CALL GET_MAIN_WEAPON_STATUS_9(STATUS)
-CALL GET_MAIN_WEAPON_NAME_9
+CALL GET_MAIN_WEAPON_STATUS_155(STATUS)
+CALL GET_MAIN_WEAPON_NAME_155
 PRINTFORML %RESULTS%
-PRINTFORML コイルを用いた電気回路により、質量弾を電磁投射する旧式兵器。
-PRINTFORML 現代技術により威力を向上させている
-PRINTFORML 冷却と砲門数を改善し、連射性を飛躍的に増大させている。
+PRINTFORML 金属加工用のドリルをそのまま取り付けた原始的な旧式兵器。
+PRINTFORML 安価さに比べ威力は高いが、敵艦艇への接触を前提とした兵器のため、取り扱いが非常に難しい。
 PRINTFORML ダメージ  : {STATUS:DAMAGE}
 PRINTFORML 射撃レート: {STATUS:FIRE_RATE}発/ターン
 PRINTFORML 命中率    : {STATUS:HIT_RATE}
@@ -36,8 +35,9 @@ PRINTFORML サイズ    : {STATUS:SIZE}
 ;-----------------------------------
 ; メインウェポンの資材
 ;-----------------------------------
-@GET_MAIN_WEAPON_RESOURCE_9(USE_RESOURCE)
+@GET_MAIN_WEAPON_RESOURCE_155(USE_RESOURCE)
 #DIM REF USE_RESOURCE
 
-USE_RESOURCE:武装合金 = 32
-USE_RESOURCE:武装制御機器 = 16
+USE_RESOURCE:武装合金 = 4
+USE_RESOURCE:武装制御機器 = 4
+

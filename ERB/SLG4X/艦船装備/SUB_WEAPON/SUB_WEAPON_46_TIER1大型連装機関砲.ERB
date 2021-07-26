@@ -1,0 +1,44 @@
+﻿;-----------------------------------
+; サブウェポン
+;-----------------------------------
+@GET_SUB_WEAPON_NAME_46
+RESULTS = TIER1大型連装機関砲
+
+@GET_SUB_WEAPON_STATUS_46(STATUS)
+#DIM REF STATUS
+
+STATUS:DAMAGE = 13
+STATUS:FIRE_RATE = 10
+STATUS:ANTI_AIR = 17
+STATUS:HIT_RATE = 70
+STATUS:FIRE_RANGE = 2
+STATUS:SIZE = 3
+STATUS:WEAPON_TYPE = 実体弾
+STATUS:PRICE = 80000
+
+;-----------------------------------
+; サブウェポンの説明
+;-----------------------------------
+@GET_SUB_WEAPON_DESCRIPTION_46
+#DIM STATUS, STATUS_LENGTH
+
+CALL GET_SUB_WEAPON_STATUS_46(STATUS)
+CALL GET_SUB_WEAPON_NAME_46
+PRINTFORML %RESULTS%
+PRINTFORML 速射砲と同じ砲弾を用いた連装機関砲。
+;PRINTFORML はっきりいってあたまおかしい
+PRINTFORML ダメージ  : {STATUS:DAMAGE}
+PRINTFORML 射撃レート: {STATUS:FIRE_RATE}発/ターン
+PRINTFORML 対空攻撃力: {STATUS:ANTI_AIR}
+PRINTFORML 命中率    : {STATUS:HIT_RATE}
+PRINTFORML 有効距離  : {STATUS:FIRE_RANGE}
+PRINTFORML サイズ    : {STATUS:SIZE}
+
+;-----------------------------------
+; サブウェポンの資材
+;-----------------------------------
+@GET_SUB_WEAPON_RESOURCE_46(USE_RESOURCE)
+#DIM REF USE_RESOURCE
+
+USE_RESOURCE:武装合金 = 4
+USE_RESOURCE:武装制御機器 = 4

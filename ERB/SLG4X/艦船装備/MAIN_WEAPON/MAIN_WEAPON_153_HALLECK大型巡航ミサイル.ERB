@@ -1,0 +1,48 @@
+﻿;-----------------------------------
+; メインウェポン
+;-----------------------------------
+@GET_MAIN_WEAPON_NAME_153
+RESULTS = HALLECK大型巡航ミサイル
+
+@GET_MAIN_WEAPON_STATUS_153(STATUS)
+#DIM REF STATUS
+
+STATUS:DAMAGE = 6600
+STATUS:FIRE_RATE = 2
+STATUS:HIT_RATE = 66
+STATUS:FIRE_RANGE = 3
+STATUS:SIZE = 4
+STATUS:WEAPON_TYPE = 魚雷
+STATUS:PRICE = 6660000
+
+;-----------------------------------
+; メインウェポンの説明
+;-----------------------------------
+@GET_MAIN_WEAPON_DESCRIPTION_153
+#DIM STATUS, STATUS_LENGTH
+
+CALL GET_MAIN_WEAPON_STATUS_153(STATUS)
+CALL GET_MAIN_WEAPON_NAME_153
+PRINTFORML %RESULTS%
+PRINTFORML 洗脳した人間やムニュムニュを生体演算装置とした純粋水爆弾頭の大型巡航ミサイル。
+PRINTFORML 大型過ぎて戦艦や要塞にしか搭載出来ず、弾道特性も魚雷寄り。
+PRINTFORML 当然ながら製造過程そのものが非人道的な兵器であり、事実上パロス教団専用の兵器である。
+PRINTFORML ダメージ  : {STATUS:DAMAGE}
+PRINTFORML 射撃レート: {STATUS:FIRE_RATE}発/ターン
+PRINTFORML 命中率    : {STATUS:HIT_RATE}
+PRINTFORML 有効距離  : {STATUS:FIRE_RANGE}
+PRINTFORML サイズ    : {STATUS:SIZE}
+
+;-----------------------------------
+; メインウェポンの資材
+;-----------------------------------
+@GET_MAIN_WEAPON_RESOURCE_153(USE_RESOURCE)
+#DIM REF USE_RESOURCE
+
+USE_RESOURCE:重武装合金 = 66
+USE_RESOURCE:耐熱合金 = 66
+USE_RESOURCE:武装制御機器 = 66
+USE_RESOURCE:ジェットガス = 66
+
+@IS_SALE_MAIN_WEAPON_153
+RETURN 0
