@@ -1,0 +1,290 @@
+﻿;-------------------------------------------------
+;マップに配置可能な各種ルームのデータ
+;いずれファイルごとに分割するかもしれないが、データ仕様が固まりきってないので一旦ひとまとめ
+;-------------------------------------------------
+;なし
+@HO_ROOM_DATA_0
+RESULTS '= "[ROOM_NAME:EMPTY]"
+
+;-------------------------------------------------
+;ラウンジ
+;-------------------------------------------------
+@HO_ROOM_DATA_1
+#DIMS _DIC_ROOM_DATA
+_DIC_ROOM_DATA '= "[ROOM_NAME:ラウンジ][ROOM_TAG:食堂,休憩所,][ROOM_CAPACITY:8]"
+RESULTS = %_DIC_ROOM_DATA%
+;ルームの作成条件
+@HO_ROOM_IS_CRAFTABLE_1
+RETURN 0
+;クラフトモードで要求する作成コスト
+@HO_ROOM_CRAFT_RESOURCE_1(USE_RESOURCE)
+#DIM REF USE_RESOURCE
+#DIM USE_MONEY = 1000000
+USE_RESOURCE:合金加工剤 = 50
+USE_RESOURCE:耐熱合金 = 200
+RETURN USE_MONEY
+;ルームの内容説明
+@HO_ROOM_DESC_1
+RESULTS '= "クルーたちが集うラウンジ"
+
+;-------------------------------------------------
+;プレイヤー私室
+;-------------------------------------------------
+@HO_ROOM_DATA_2
+#DIMS _DIC_ROOM_DATA
+_DIC_ROOM_DATA '= "[ROOM_NAME:私室][ROOM_TAG:プレイヤー私室,][ROOM_CAPACITY:6]"
+RESULTS = %_DIC_ROOM_DATA%
+;ルームの作成条件
+@HO_ROOM_IS_CRAFTABLE_2
+RETURN 0
+;クラフトモードで要求する作成コスト
+@HO_ROOM_CRAFT_RESOURCE_2(USE_RESOURCE)
+#DIM REF USE_RESOURCE
+#DIM USE_MONEY = 1000000
+USE_RESOURCE:合金加工剤 = 50
+USE_RESOURCE:耐熱合金 = 200
+RETURN USE_MONEY
+;ルームの内容説明
+@HO_ROOM_DESC_2
+RESULTS '= @"%ANAME(MASTER)%の部屋"
+
+;-------------------------------------------------
+;クルー私室
+;-------------------------------------------------
+@HO_ROOM_DATA_3
+#DIMS _DIC_ROOM_DATA
+_DIC_ROOM_DATA '= "[ROOM_NAME:クルー私室][ROOM_TAG:クルー私室,][ROOM_CAPACITY:0]"
+RESULTS = %_DIC_ROOM_DATA%
+;ルームの作成条件
+@HO_ROOM_IS_CRAFTABLE_3
+RETURN 0
+;クラフトモードで要求する作成コスト
+@HO_ROOM_CRAFT_RESOURCE_3(USE_RESOURCE)
+#DIM REF USE_RESOURCE
+#DIM USE_MONEY = 1000000
+USE_RESOURCE:合金加工剤 = 50
+USE_RESOURCE:耐熱合金 = 200
+RETURN USE_MONEY
+;ルームの内容説明
+@HO_ROOM_DESC_3
+RESULTS '= "クルーたちの個室。このルームにモジュールを置くことはできない"
+
+;-------------------------------------------------
+;浴室
+;-------------------------------------------------
+@HO_ROOM_DATA_4
+#DIMS _DIC_ROOM_DATA
+_DIC_ROOM_DATA '= "[ROOM_NAME:浴室][ROOM_TAG:浴室,][ROOM_CAPACITY:6]"
+RESULTS = %_DIC_ROOM_DATA%
+;ルームの作成条件
+@HO_ROOM_IS_CRAFTABLE_4
+RETURN 1
+;クラフトモードで要求する作成コスト
+@HO_ROOM_CRAFT_RESOURCE_4(USE_RESOURCE)
+#DIM REF USE_RESOURCE
+#DIM USE_MONEY = 1000000
+USE_RESOURCE:合金加工剤 = 50
+USE_RESOURCE:耐熱合金 = 200
+RETURN USE_MONEY
+;ルームの内容説明
+@HO_ROOM_DESC_4
+RESULTS '= "シャワー室や浴槽を配置することで身体を清めることができる"
+
+;-------------------------------------------------
+;娯楽室
+;-------------------------------------------------
+@HO_ROOM_DATA_5
+#DIMS _DIC_ROOM_DATA
+_DIC_ROOM_DATA '= "[ROOM_NAME:娯楽室][ROOM_TAG:娯楽室,][ROOM_CAPACITY:6]"
+RESULTS = %_DIC_ROOM_DATA%
+;ルームの作成条件
+@HO_ROOM_IS_CRAFTABLE_5
+RETURN 1
+;クラフトモードで要求する作成コスト
+@HO_ROOM_CRAFT_RESOURCE_5(USE_RESOURCE)
+#DIM REF USE_RESOURCE
+#DIM USE_MONEY = 1500000
+USE_RESOURCE:合金加工剤 = 50
+USE_RESOURCE:耐熱合金 = 200
+USE_RESOURCE:ナイ・ゲーム機 = 10
+RETURN USE_MONEY
+;ルームの内容説明
+@HO_ROOM_DESC_5
+RESULTS '= "遊具を配置することでクルーたちに娯楽を提供できるだろう"
+
+;-------------------------------------------------
+;更衣室
+;-------------------------------------------------
+@HO_ROOM_DATA_6
+#DIMS _DIC_ROOM_DATA
+_DIC_ROOM_DATA '= "[ROOM_NAME:更衣室][ROOM_TAG:衣装室,][ROOM_CAPACITY:6]"
+RESULTS = %_DIC_ROOM_DATA%
+;ルームの作成条件
+@HO_ROOM_IS_CRAFTABLE_6
+RETURN 1
+;クラフトモードで要求する作成コスト
+@HO_ROOM_CRAFT_RESOURCE_6(USE_RESOURCE)
+#DIM REF USE_RESOURCE
+#DIM USE_MONEY = 1000000
+USE_RESOURCE:合金加工剤 = 50
+USE_RESOURCE:耐熱合金 = 200
+USE_RESOURCE:ロック布 = 50
+RETURN USE_MONEY
+;ルームの内容説明
+@HO_ROOM_DESC_6
+RESULTS '= "衣服を着替えるための部屋"
+
+;-------------------------------------------------
+;廊下
+;-------------------------------------------------
+@HO_ROOM_DATA_7
+#DIMS _DIC_ROOM_DATA
+_DIC_ROOM_DATA '= "[ROOM_NAME:廊下][ROOM_TAG:通路,][ROOM_CAPACITY:6]"
+RESULTS = %_DIC_ROOM_DATA%
+;ルームの作成条件
+@HO_ROOM_IS_CRAFTABLE_7
+RETURN 1
+;クラフトモードで要求する作成コスト
+@HO_ROOM_CRAFT_RESOURCE_7(USE_RESOURCE)
+#DIM REF USE_RESOURCE
+#DIM USE_MONEY = 750000
+USE_RESOURCE:合金加工剤 = 50
+USE_RESOURCE:耐熱合金 = 150
+RETURN USE_MONEY
+;ルームの内容説明
+@HO_ROOM_DESC_7
+RESULTS '= "ルーム間を接続する通路"
+
+;-------------------------------------------------
+;貨物室
+;-------------------------------------------------
+@HO_ROOM_DATA_8
+#DIMS _DIC_ROOM_DATA
+_DIC_ROOM_DATA '= "[ROOM_NAME:貨物室][ROOM_TAG:倉庫,][ROOM_CAPACITY:6]"
+RESULTS = %_DIC_ROOM_DATA%
+;ルームの作成条件
+@HO_ROOM_IS_CRAFTABLE_8
+RETURN 1
+;クラフトモードで要求する作成コスト
+@HO_ROOM_CRAFT_RESOURCE_8(USE_RESOURCE)
+#DIM REF USE_RESOURCE
+#DIM USE_MONEY = 1500000
+USE_RESOURCE:合金加工剤 = 100
+USE_RESOURCE:耐熱合金 = 250
+RETURN USE_MONEY
+;ルームの内容説明
+@HO_ROOM_DESC_8
+RESULTS '= "貨物を保管するための部屋"
+
+;-------------------------------------------------
+;医務室
+;-------------------------------------------------
+@HO_ROOM_DATA_9
+#DIMS _DIC_ROOM_DATA
+_DIC_ROOM_DATA '= "[ROOM_NAME:医務室][ROOM_TAG:仕事場,医務室,][ROOM_CAPACITY:6]"
+RESULTS = %_DIC_ROOM_DATA%
+;ルームの作成条件
+@HO_ROOM_IS_CRAFTABLE_9
+RETURN 1
+;クラフトモードで要求する作成コスト
+@HO_ROOM_CRAFT_RESOURCE_9(USE_RESOURCE)
+#DIM REF USE_RESOURCE
+#DIM USE_MONEY = 1000000
+USE_RESOURCE:合金加工剤 = 50
+USE_RESOURCE:耐熱合金 = 200
+USE_RESOURCE:ロック布 = 50
+RETURN USE_MONEY
+;ルームの内容説明
+@HO_ROOM_DESC_9
+RESULTS '= "怪我人を治療するための部屋"
+
+;-------------------------------------------------
+;予備艦橋
+;-------------------------------------------------
+@HO_ROOM_DATA_10
+#DIMS _DIC_ROOM_DATA
+_DIC_ROOM_DATA '= "[ROOM_NAME:予備艦橋][ROOM_TAG:仕事場,][ROOM_CAPACITY:8]"
+RESULTS = %_DIC_ROOM_DATA%
+;ルームの作成条件
+@HO_ROOM_IS_CRAFTABLE_10
+RETURN 1
+;クラフトモードで要求する作成コスト
+@HO_ROOM_CRAFT_RESOURCE_10(USE_RESOURCE)
+#DIM REF USE_RESOURCE
+#DIM USE_MONEY = 3000000
+USE_RESOURCE:合金加工剤      = 50
+USE_RESOURCE:耐熱合金        = 200
+USE_RESOURCE:超電導回路      = 10
+USE_RESOURCE:武装制御機器    = 10
+RETURN USE_MONEY
+;ルームの内容説明
+@HO_ROOM_DESC_10
+RESULTS '= "臨時の指揮所。平時は演習などの用途に使われる"
+
+;-------------------------------------------------
+;艦内緑地
+;-------------------------------------------------
+@HO_ROOM_DATA_11
+#DIMS _DIC_ROOM_DATA
+_DIC_ROOM_DATA '= "[ROOM_NAME:艦内緑地][ROOM_TAG:休憩所,緑地,][ROOM_CAPACITY:8]"
+RESULTS = %_DIC_ROOM_DATA%
+;ルームの作成条件
+@HO_ROOM_IS_CRAFTABLE_11
+RETURN 1
+;クラフトモードで要求する作成コスト
+@HO_ROOM_CRAFT_RESOURCE_11(USE_RESOURCE)
+#DIM REF USE_RESOURCE
+#DIM USE_MONEY = 3000000
+USE_RESOURCE:合金加工剤        = 50
+USE_RESOURCE:耐熱合金          = 200
+USE_RESOURCE:異星生物育成キット = 10
+USE_RESOURCE:MR観光セット      = 10
+RETURN USE_MONEY
+;ルームの内容説明
+@HO_ROOM_DESC_11
+RESULTS '= "密閉空間での生活ストレスの緩和を目的に、惑星の自然環境を艦内で再現した施設"
+
+;-------------------------------------------------
+;ライブラリ
+;-------------------------------------------------
+@HO_ROOM_DATA_12
+#DIMS _DIC_ROOM_DATA
+_DIC_ROOM_DATA '= "[ROOM_NAME:ライブラリ][ROOM_TAG:書庫,仕事場,][ROOM_CAPACITY:8]"
+RESULTS = %_DIC_ROOM_DATA%
+;ルームの作成条件
+@HO_ROOM_IS_CRAFTABLE_12
+RETURN 1
+;クラフトモードで要求する作成コスト
+@HO_ROOM_CRAFT_RESOURCE_12(USE_RESOURCE)
+#DIM REF USE_RESOURCE
+#DIM USE_MONEY = 2500000
+USE_RESOURCE:合金加工剤        = 50
+USE_RESOURCE:耐熱合金          = 150
+USE_RESOURCE:超電導回路        = 50
+RETURN USE_MONEY
+;ルームの内容説明
+@HO_ROOM_DESC_12
+RESULTS '= "多種多様な記憶媒体で保存された情報を集積するための部屋"
+
+;-------------------------------------------------
+;トレーニング室
+;-------------------------------------------------
+@HO_ROOM_DATA_13
+#DIMS _DIC_ROOM_DATA
+_DIC_ROOM_DATA '= "[ROOM_NAME:トレーニング室][ROOM_TAG:トレーニング室,仕事場,][ROOM_CAPACITY:8]"
+RESULTS = %_DIC_ROOM_DATA%
+;ルームの作成条件
+@HO_ROOM_IS_CRAFTABLE_13
+RETURN 1
+;クラフトモードで要求する作成コスト
+@HO_ROOM_CRAFT_RESOURCE_13(USE_RESOURCE)
+#DIM REF USE_RESOURCE
+#DIM USE_MONEY = 2500000
+USE_RESOURCE:合金加工剤        = 50
+USE_RESOURCE:耐熱合金          = 150
+USE_RESOURCE:パワードスーツ    = 30
+USE_RESOURCE:思考戦車          = 30
+RETURN USE_MONEY
+;ルームの内容説明
+@HO_ROOM_DESC_13
+RESULTS '= "筋力を維持するためのトレーニング機器や模擬戦用のモジュールが設置可能な部屋"

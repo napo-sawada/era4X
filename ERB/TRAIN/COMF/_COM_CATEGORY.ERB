@@ -87,7 +87,11 @@ RETURN 0
 
 ;足コキ
 @COM_CATEGORY14
-RETURN 0
+IF FLAG:調教モード != 調教_居住区
+    RETURN 0
+ELSE
+    RETURN 10
+ENDIF
 
 ;尻コキ
 @COM_CATEGORY15

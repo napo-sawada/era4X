@@ -47,6 +47,7 @@ ELSE
         ;とりあえず合意済みであれば見られても問題なしとする
         IF TALENT:CHARA_ID:合意 != 1
             RETURN 1
+
         ENDIF
     NEXT
 ENDIF
@@ -80,14 +81,19 @@ RETURN LIST_COUNT(_LIST_VISIBLE)
 
 ;-------------------------------------------------
 ;ウフフ目撃判定
+;引数のキャラクタが実行されたコマンドを情事を目撃したと認識するか判定する
+;RETURN 0=見ていない、気がついていない 1=情事露見 2=情事ほどではないが意識してしまう行為
 ;-------------------------------------------------
 @HO_CHECK_UFUFU(CHARA_ID)
 #DIM CHARA_ID
 #DIM  DYNAMIC キャラ現在地
+#DIM  DYNAMIC ウフフチェック済み
 #DIMS DYNAMIC _LIST_MEMBER
 
 ;非押し倒しで情事扱いするコマンド
-#DIM CONST UFUFU_COM_LIST = 10, 11, 106, 107, 330, 332
+#DIM CONST UFUFU_COM_LIST = 10, 11, 14, 106, 107, 330, 332
+;非押し倒しで情事扱いではないが意識してしまう行為
+#DIM CONST DOKIDOKI_COM_LIST = 20, 341, 342
 
 ;キャラが現在いる部屋を取得
 CALL HO_GET_CHARAPLACE(CHARA_ID)
@@ -107,39 +113,94 @@ IF HO_MASTER現在地 == キャラ現在地
             RETURN 1
         ELSE
             ;;押し倒し以外の情事判定
+            ;-------------------------------------------------
             ;単発コマンドの判定 MTARにもMPLYにも絡んでいなければ目撃判定
             IF FINDELEMENT(UFUFU_COM_LIST, SELECTCOM) != -1
+                ;一部の机下行為は露見しない
+                CALL HO_CHECK_USE_MODULE_ELEM(MASTER, "机")
+                IF RESULT && GROUPMATCH(SELECTCOM, 10, 11, 106, 107, 330, 332)
+                    ウフフチェック済み = 1
+                ELSEIF RESULT
+                    IF IS_MTAR(CHARA_ID) != 1 && IS_MPLY(CHARA_ID) != 1
+                        TCVAR:CHARA_ID:ウフフ目撃フラグ = 1
+                        TCVAR:CHARA_ID:ウフフ目撃場所 = キャラ現在地
+                        RETURN 1
+                    ENDIF
+                ENDIF
+                ;一部の卓下行為は露見しない
+                CALL HO_CHECK_USE_MODULE_ELEM(MASTER, "卓")
+                IF RESULT && GROUPMATCH(SELECTCOM, 14)
+                    ウフフチェック済み = 1
+                ELSEIF RESULT
+                    IF IS_MTAR(CHARA_ID) != 1 && IS_MPLY(CHARA_ID) != 1
+                        TCVAR:CHARA_ID:ウフフ目撃フラグ = 1
+                        TCVAR:CHARA_ID:ウフフ目撃場所 = キャラ現在地
+                        RETURN 1
+                    ENDIF
+                ENDIF
+                IF !ウフフチェック済み
+                    IF IS_MTAR(CHARA_ID) != 1 && IS_MPLY(CHARA_ID) != 1
+                        TCVAR:CHARA_ID:ウフフ目撃フラグ = 1
+                        TCVAR:CHARA_ID:ウフフ目撃場所 = キャラ現在地
+                        RETURN 1
+                    ENDIF
+                ENDIF
+            ;ドキドキ判定
+            ELSEIF  FINDELEMENT(DOKIDOKI_COM_LIST, SELECTCOM) != -1
                 IF IS_MTAR(CHARA_ID) != 1 && IS_MPLY(CHARA_ID) != 1
-                    TCVAR:CHARA_ID:ウフフ目撃フラグ = 1
-                    TCVAR:CHARA_ID:ウフフ目撃場所 = キャラ現在地
-                    RETURN 1
+                    RETURN 2
                 ENDIF
             ENDIF
-            ; CALL HO_GET_COMPANION_LIST
-            ; _LIST_MEMBER = %RESULTS%
-            ; ;プレイヤーもチェック対象に
-            ; _LIST_MEMBER = %LIST_ADD(_LIST_MEMBER, TOSTR(MASTER))%
-            ; FOR LOCAL, 0, LIST_COUNT(_LIST_MEMBER)
-            LOCAL:1 = 0
-            LOCAL:2 = 0
+            ;継続中コマンドの判定 MTARにもMPLYにも絡んでいなければ目撃判定
+            ;-------------------------------------------------
+            VARSET LOCAL
             FOR LOCAL:0, 0, VARSIZE("UFUFU_COM_LIST")
+                ;一部の机下行為は露見しない
+                CALL HO_CHECK_USE_MODULE_ELEM(MASTER, "机")
+                SIF RESULT && GROUPMATCH(UFUFU_COM_LIST:(LOCAL:0), 10, 11, 106, 107, 330, 332)
+                    CONTINUE
+                ;一部の卓下行為は露見しない
+                CALL HO_CHECK_USE_MODULE_ELEM(MASTER, "卓")
+                SIF RESULT && GROUPMATCH(UFUFU_COM_LIST:(LOCAL:0), 14)
+                    CONTINUE
                 SIF IS_EQUIP(MASTER, UFUFU_COM_LIST:(LOCAL:0))
                     LOCAL:1 ++
             NEXT
-            ;MASTERが情事に該当する行為のMPLYでもMTARでもなければRETURN
-            SIF LOCAL:1 == 0
-                RETURN 0
+            ; ;MASTERが情事に該当する行為のMPLYでもMTARでもなければRETURN
+            ; SIF LOCAL:1 == 0
+            ;     RETURN 0
             FOR LOCAL:0, 0, VARSIZE("UFUFU_COM_LIST")
+                ;一部の机下行為は露見しない
+                CALL HO_CHECK_USE_MODULE_ELEM(CHARA_ID, "机")
+                SIF RESULT && GROUPMATCH(UFUFU_COM_LIST:(LOCAL:0), 10, 11, 106, 107, 330, 332)
+                    CONTINUE
+                CALL HO_CHECK_USE_MODULE_ELEM(CHARA_ID, "卓")
+                SIF RESULT && GROUPMATCH(UFUFU_COM_LIST:(LOCAL:0), 14)
+                    CONTINUE
                 SIF IS_EQUIP(CHARA_ID, UFUFU_COM_LIST:(LOCAL:0))
                     LOCAL:2 ++
             NEXT
-            ;MASTERが情事に該当する行為のMPLYかMTARで、CHARA_IDが行為に関わっていなければ目撃者扱い
-            IF LOCAL:2 == 0
+            ;MASTERが情事に該当する行為のMPLYかMTARで、CHARA_IDが行為に関わっていない第三者であれば目撃者扱い
+            IF LOCAL:1 > 0 && LOCAL:2 == 0
                 TCVAR:CHARA_ID:ウフフ目撃フラグ = 1
                 TCVAR:CHARA_ID:ウフフ目撃場所 = キャラ現在地
                 RETURN 1
             ENDIF
-            ; NEXT
+            VARSET LOCAL
+            ;;継続コマンドのドキドキ判定
+            FOR LOCAL:0, 0, VARSIZE("DOKIDOKI_COM_LIST")
+                SIF IS_EQUIP(MASTER, DOKIDOKI_COM_LIST:(LOCAL:0))
+                    LOCAL:1 ++
+            NEXT
+            ;MASTERがドキドキに該当する行為のMPLYでもMTARでもなければRETURN
+            FOR LOCAL:0, 0, VARSIZE("DOKIDOKI_COM_LIST")
+                SIF IS_EQUIP(CHARA_ID, DOKIDOKI_COM_LIST:(LOCAL:0))
+                    LOCAL:2 ++
+            NEXT
+            ;MASTERがドキドキに該当する行為のMPLYかMTARで、CHARA_IDが行為に関わっていない第三者であれば目撃者扱い
+            IF LOCAL:1 > 0 && LOCAL:2 == 0
+                RETURN 2
+            ENDIF
         ENDIF
     ENDIF
 ENDIF

@@ -121,9 +121,20 @@ IF FLAG:ハウジングモード == 1
 	ENDIF
 	IF FLAG:調教モード == 調教_居住区
 		;公衆の目があるときに一律実行不可とする行為を指定
-		IF GROUPMATCH(ARG, 0, 1, 4, 10, 11, 24, 106, 107)
+		IF GROUPMATCH(ARG, 0, 1, 4, 10, 11, 14, 24, 106, 107, 334, 335)
 			CALL HO_CHECK_PUBULIC_EYE(MASTER)
 			IF RESULT == 1
+				;MPLYが特定の条件を満たす場合、一部のコマンドを実行可に。それ以外は実行不可
+				FOR LOCAL:0, 0, MPLY_NUM
+					;机の下でも実行できるコマンド
+					CALL HO_CHECK_USE_MODULE_ELEM(MASTER, "机")
+					SIF RESULT && GROUPMATCH(ARG, 10, 11, 106, 107, 330, 332) && TALENT:(MPLY:(LOCAL:0)):合意
+						RETURN 1
+					;テーブルの下でも実行できるコマンド
+					CALL HO_CHECK_USE_MODULE_ELEM(MASTER, "卓")
+					SIF RESULT && GROUPMATCH(ARG, 14) && TALENT:(MPLY:(LOCAL:0)):合意
+						RETURN 1
+				NEXT
 				RETURN 0
 			ENDIF
 		ENDIF

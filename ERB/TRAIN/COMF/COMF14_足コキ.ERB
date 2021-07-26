@@ -4,6 +4,13 @@
 ;コマンド名称
 ;-------------------------------------------------
 @COM_NAME14
+LOCALS:1 =
+IF FLAG:調教モード == 調教_居住区
+	CALL HO_CHECK_USE_MODULE_ELEM(MASTER, "卓")
+	IF RESULT == 1
+		LOCALS:1 = 卓下
+	ENDIF
+ENDIF
 IF MTAR_NUM == 2
 	LOCALS:0 = 同時足コキ
 ELSEIF MPLY_NUM == 3
@@ -14,12 +21,12 @@ ELSE
 	LOCALS:0 = 足コキ
 ENDIF
 
-RESULTS:0 = %LOCALS:0%する
-RESULTS:1 = %LOCALS:0%させられる
-RESULTS:2 = %LOCALS:0%させる
-RESULTS:3 = %LOCALS:0%される
-RESULTS:4 = %LOCALS:0%させる
-RESULTS:5 = %LOCALS:0%見せつけ
+RESULTS:0 = %LOCALS:1%%LOCALS:0%する
+RESULTS:1 = %LOCALS:1%%LOCALS:0%させられる
+RESULTS:2 = %LOCALS:1%%LOCALS:0%させる
+RESULTS:3 = %LOCALS:1%%LOCALS:0%される
+RESULTS:4 = %LOCALS:1%%LOCALS:0%させる
+RESULTS:5 = %LOCALS:1%%LOCALS:0%見せつけ
 
 ;-------------------------------------------------
 ;選択可否判定
@@ -396,7 +403,11 @@ ENDIF
 ;-------------------------------------------------
 
 @COM_AVAILABLE_WHEN14
-RETURN コマンド_ウフフ
+IF FLAG:調教モード != 調教_居住区
+	RETURN コマンド_ウフフ
+ELSE
+	RETURN コマンド_居住区
+ENDIF
 
 ;--------------------
 ;性嗜好用関数

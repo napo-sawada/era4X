@@ -10,6 +10,8 @@ RESULTS:0 '= "居住区"
 @SHOP_LIFE_CHECK14
 SIF CFLAG:MASTER:捕虜先
     RETURN 0
+SIF BOARDING_SHIP_ID:MASTER == -1
+    RETURN 0
 RETURN 1
 ;-------------------------------------------------
 ;「居住区」の左カラムメニューの入力処理
@@ -64,9 +66,7 @@ PRINTBUTTON @"%"[居住区を編集する]", 20, LEFT%", 1
 CALL COLOR_PRINT("居住区内のルームやモジュールの配置を変更します", カラー_注釈)
 CALL COLUMN_RIGHT_PRINTL
 CALL COLUMN_RIGHT_PRINTL
-SETCOLOR カラー_選択不可
-PRINTBUTTON @"%"[クラフト(未実装)]", 20, LEFT%", 2
-RESETCOLOR
+PRINTBUTTON @"%"[クラフト]", 20, LEFT%", 2
 CALL COLOR_PRINT("素材から艦内居住区用のルームやモジュールを新たに作成します", カラー_注釈)
 CALL COLUMN_RIGHT_PRINTL
 CALL COLUMN_RIGHT_PRINTL
@@ -84,7 +84,7 @@ SELECTCASE ARG:0
     CASE 1
         CALL HOUSING_EDIT_MODE_MAIN
     CASE 2
-        RETURN 0
+        CALL HOUSING_CRAFT_MODE_MAIN
     CASEELSE
         RETURN 0
 ENDSELECT

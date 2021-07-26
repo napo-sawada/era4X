@@ -43,6 +43,8 @@ SELECTCASE ACTIONTYPE
         PRINTFORML %ANAME(CHARA_ID)%は%MODULE_NAME%でグラスを磨いている
     CASE "飲酒中"
         PRINTFORML %ANAME(CHARA_ID)%は%MODULE_NAME%でお酒を飲んでいる
+    CASE "読書中"
+        PRINTFORML %ANAME(CHARA_ID)%は%MODULE_NAME%で本を読んでいる
     CASE "遊戯中"
         IF STRFINDU(MODULE_NAME, "テーブル") != -1
             PRINTFORML %ANAME(CHARA_ID)%は%MODULE_NAME%でカードゲームをしている

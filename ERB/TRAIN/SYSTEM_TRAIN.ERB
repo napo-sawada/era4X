@@ -553,6 +553,12 @@ NEXT
 
 ;実行したコマンドの知識を獲得
 FOR LOCAL:0, 0, CHARANUM
+	;居住区モードで情事を目撃していない場合獲得できない
+	IF FLAG:ハウジングモード == 1 && FLAG:調教モード == 調教_居住区 && LOCAL:0 != MASTER && IS_PARTICIPATE_TRAIN(LOCAL:0)
+		CALL HO_CHECK_UFUFU(LOCAL:0)
+		SIF !RESULT
+			CONTINUE 
+	ENDIF
 	;調教に参加していても、行動不能だと獲得できない
 	IF IS_PARTICIPATE_TRAIN(LOCAL:0) && IS_PLAYABLE(LOCAL:0)
 		CALL SET_COM_KNOWLEDGE(LOCAL:0, SELECTCOM)
@@ -1740,7 +1746,7 @@ IF TALENT:(MTAR:0):恋慕
 				CALL KISS_COMMON(MTAR:0, @"%ANAME(MPLY:0)%の唇", "告白を受けての和姦", 0)
 				CALL KISS_COMMON(MPLY:0, @"%ANAME(MTAR:0)%の唇", "告白を受けての和姦", 0)
 			ENDIF
-			
+
 			;恋人になる処理
 			CALL GET_LOVERS(MTAR:0)
 

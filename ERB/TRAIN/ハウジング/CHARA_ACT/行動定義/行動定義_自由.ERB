@@ -34,13 +34,18 @@ CALL HO_GET_CHARADATA(CHARA_IDX, "ACTION")
         _LIST_移動先候補 = %RESULTS%
         ;移動可能な候補からランダムに選出してMOVELISTに登録
         CALL HO_SET_MOVELIST(CHARA_ID, LIST_SET((LIST_GET(_LIST_移動先候補, RAND(0,LIST_COUNT(_LIST_移動先候補))))))
-    CASE 2 ;待機状態なら適当に遊ぶ
-        CALL HO_TRY_USE_MODULE(CHARA_ID, "遊戯")
-        IF RESULT == 1
-            CALL HO_SET_CHARADATA(CHARA_IDX, "ACTION", "遊戯中")
-            TCVAR:CHARA_ID:疲労度 += 100
-            ;1時間から2時間強の間で
-            TCVAR:CHARA_ID:行動待機時間 = RAND(12, 28) * HO_単位時間
+    CASE 2 ;待機状態なら適当に暇をつぶさせる
+        ;300,成長型,;0=万能 1=知将 2=学士 3=両道 4=武官 5=軍師 6=文官 7=芸能 8=料理 9=天才
+        IF GROUPMATCH(TALENT:CHARA_ID:成長型, 1, 2, 4, 5, 6, 9) && RAND:3
+            CALL HO_行動定義_読書(CHARA_ID)
+        ELSE
+            CALL HO_TRY_USE_MODULE(CHARA_ID, "遊戯")
+            IF RESULT == 1
+                CALL HO_SET_CHARADATA(CHARA_IDX, "ACTION", "遊戯中")
+                TCVAR:CHARA_ID:疲労度 += 100
+                ;1時間から2時間強の間で
+                TCVAR:CHARA_ID:行動待機時間 = RAND(12, 28) * HO_単位時間
+            ENDIF
         ENDIF
     CASEELSE
 ENDSELECT

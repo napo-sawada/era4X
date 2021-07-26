@@ -1,0 +1,54 @@
+﻿;-------------------------------------------------
+;キャラクターの行動定義
+;-------------------------------------------------
+@HO_行動定義_読書(CHARA_ID)
+#DIM CHARA_ID
+#DIM  DYNAMIC CHARA_IDX
+#DIM  DYNAMIC ROOM_IDX
+#DIM  DYNAMIC 移動先ROOM_IDX
+#DIMS DYNAMIC _LIST_移動先候補
+#DIMS DYNAMIC 現在の行動 
+
+;IDXを取得
+CALL HO_GET_CHARAIDX(CHARA_ID)
+CHARA_IDX = RESULT
+;キャラが現在いる部屋を取得
+CALL HO_GET_CHARADATA(CHARA_IDX, "ROOM_IDX")
+ROOM_IDX = RESULT
+CALL HO_GET_CHARADATA(CHARA_IDX, "ACTION")
+現在の行動 = %RESULTS%
+
+CALL HO_FIND_NEAREST_ROOM_BY_MODULE_USAGE("読書", ROOM_IDX)
+IF RESULT != -1
+    移動先ROOM_IDX = RESULT
+ELSE
+    RETURN -1
+ENDIF
+CALL HO_GET_ROUTE(ROOM_IDX, 移動先ROOM_IDX)
+_LIST_移動先候補 = %RESULTS%
+IF RESULT != 0
+    CALL HO_STOP_USE_MODULE(CHARA_ID)
+    CALL HO_SET_MOVELIST(CHARA_ID, _LIST_移動先候補)
+ELSEIF RESULT == -1
+    RETURN -1
+ELSE
+    CALL HO_STOP_USE_MODULE(CHARA_ID)
+    CALL HO_TRY_USE_MODULE(CHARA_ID, "読書")
+    IF RESULT == 1
+        CALL HO_SET_CHARADATA(CHARA_IDX, "ACTION", "読書中")
+        TCVAR:CHARA_ID:行動待機時間 = RAND(9, 16) * HO_単位時間
+        TCVAR:CHARA_ID:疲労度 += 100
+    ELSE
+        ;他の部屋に候補が無いか探してみる
+        CALL HO_FIND_NEAREST_ROOM_BY_MODULE_USAGE("読書", ROOM_IDX, 1)
+        IF RESULT != -1
+            移動先ROOM_IDX = RESULT
+            CALL HO_GET_ROUTE(ROOM_IDX, 移動先ROOM_IDX)
+            _LIST_移動先候補 = %RESULTS%
+            CALL HO_SET_MOVELIST(CHARA_ID, _LIST_移動先候補)
+        ELSE
+            RETURN -1
+        ENDIF
+    ENDIF
+ENDIF
+

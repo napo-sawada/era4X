@@ -35,11 +35,8 @@ FOR LOCAL:0, 0, LIST_COUNT(_LIST_HO_行動順リスト)
     CALL HO_GET_CHARADATA(CHARA_IDX, "CHARA_ID")
     CHARA_ID = RESULT
 
-    ;;ターン経過で必ず起きるイベント
-    ;空腹度上昇,通常だいたい6時間程度で空腹(300)になるように
-    TCVAR:CHARA_ID:空腹度 += 5
-    TCVAR:CHARA_ID:疲労度 += 5
-
+    ;;ターン経過で起きるキャラステータスの変動
+    CALL HO_CALC_PALAM_BEFORE_ACT(CHARA_ID)
 
     ;ウフフ目撃判定
     CALL HO_CHECK_UFUFU(CHARA_ID)
@@ -89,156 +86,71 @@ CALL HO_GET_CHARADATA(CHARA_IDX, "ROOM_IDX")
         "D0,4",  行動パターン == "入浴",
         "D0,50", 行動パターン == "バーテンダー",
         "D0TO50,90",  TCVAR:CHARA_ID:51 == 1 || TCVAR:CHARA_ID:52 == 1,
-        "D0TO50,91",   HO_CHECK_CUM_AMOUNT(CHARA_ID) >= 30,
+        "D0TO50,91",   HO_CHECK_CUM_AMOUNT(CHARA_ID) >= 30 || TCVAR:CHARA_ID:汗量 >= 12000,
         "D0TO50,92",   TCVAR:CHARA_ID:ウフフ目撃フラグ == 1,
         "D0TO50,99",  行動パターン == "就寝"
         )
 }
-    ;ここのCASE処理どんどん長くなるはずなので将来的には行動定義_XXXの形式で外出しするように
     CASE 1 ;食事
-        CALL HO_FIND_ROOM_BY_TAG("食堂")
-        移動先ROOM_IDX = RESULT
-        CALL HO_GET_ROUTE(キャラ現在地, 移動先ROOM_IDX)
-        _LIST_移動先候補 = %RESULTS%
-        IF RESULT != 0
-            CALL HO_STOP_USE_MODULE(CHARA_ID)
-            CALL HO_SET_MOVELIST(CHARA_ID, _LIST_移動先候補)
-        ELSE
-            CALL HO_STOP_USE_MODULE(CHARA_ID)
-            CALL HO_TRY_USE_MODULE(CHARA_ID, "食事")
-            IF RESULT == 1
-                CALL HO_SET_CHARADATA(CHARA_IDX, "ACTION", "食事中")
-                TCVAR:CHARA_ID:空腹度 = 0
-                TCVAR:CHARA_ID:疲労度 += 300 ;食休みさせる
-                BASE:(CHARA_ID):体力 = LIMIT(BASE:(CHARA_ID):体力 + 200, BASE:(CHARA_ID):体力, MAXBASE:(CHARA_ID):体力)
-                BASE:(CHARA_ID):気力 = LIMIT(BASE:(CHARA_ID):気力 + 150, BASE:(CHARA_ID):気力, MAXBASE:(CHARA_ID):気力)
-                TCVAR:CHARA_ID:行動待機時間 = RAND(9, 16) * HO_単位時間
-            ENDIF
-        ENDIF
+        CALL HO_行動定義_食事(CHARA_ID)
+        SIF RESULT == -1
+            CALL HO_行動定義_自由(CHARA_ID)
     CASE 2 ;"休憩"
-        CALL HO_FIND_ROOM_BY_TAG("食堂")
-        移動先ROOM_IDX = RESULT
-        CALL HO_GET_ROUTE(キャラ現在地, 移動先ROOM_IDX)
-        _LIST_移動先候補 = %RESULTS%
-        IF RESULT != 0
-            CALL HO_STOP_USE_MODULE(CHARA_ID)
-            CALL HO_SET_MOVELIST(CHARA_ID, _LIST_移動先候補)
-        ELSE
-            CALL HO_STOP_USE_MODULE(CHARA_ID)
-            CALL HO_TRY_USE_MODULE(CHARA_ID, "休憩")
-            IF RESULT == 1
-                CALL HO_SET_CHARADATA(CHARA_IDX, "ACTION", "休憩中")
-                TCVAR:CHARA_ID:疲労度 = 0
-                BASE:(CHARA_ID):体力 = LIMIT(BASE:(CHARA_ID):体力 + 100, BASE:(CHARA_ID):体力, MAXBASE:(CHARA_ID):体力)
-                BASE:(CHARA_ID):気力 = LIMIT(BASE:(CHARA_ID):気力 + 50, BASE:(CHARA_ID):気力, MAXBASE:(CHARA_ID):気力)
-                TCVAR:CHARA_ID:行動待機時間 = RAND(6, 12) * HO_単位時間
-            ENDIF
-        ENDIF
+        CALL HO_行動定義_休憩(CHARA_ID)
+        SIF RESULT == -1
+            CALL HO_行動定義_自由(CHARA_ID)
     CASE 3 ;"飲酒"
-        CALL HO_FIND_ROOM_BY_TAG("食堂")
-        移動先ROOM_IDX = RESULT
-        CALL HO_GET_ROUTE(キャラ現在地, 移動先ROOM_IDX)
-        _LIST_移動先候補 = %RESULTS%
-        IF RESULT != 0
-            CALL HO_STOP_USE_MODULE(CHARA_ID)
-            CALL HO_SET_MOVELIST(CHARA_ID, _LIST_移動先候補)
-        ELSE
-            CALL HO_STOP_USE_MODULE(CHARA_ID)
-            CALL HO_TRY_USE_MODULE(CHARA_ID, "飲酒")
-            IF RESULT == 1
-                CALL HO_SET_CHARADATA(CHARA_IDX, "ACTION", "飲酒中")
-                TCVAR:CHARA_ID:疲労度 += 100
-                TCVAR:CHARA_ID:行動待機時間 = RAND(9, 16) * HO_単位時間
-            ENDIF
-        ENDIF
+        CALL HO_行動定義_飲酒(CHARA_ID)
+        SIF RESULT == -1
+            CALL HO_行動定義_自由(CHARA_ID)
     CASE 4 ;"入浴"
-        CALL HO_FIND_ROOM_BY_TAG("浴室")
-        移動先ROOM_IDX = RESULT
-        CALL HO_GET_ROUTE(キャラ現在地, 移動先ROOM_IDX)
-        _LIST_移動先候補 = %RESULTS%
-        IF RESULT != 0
-            CALL HO_STOP_USE_MODULE(CHARA_ID)
-            CALL HO_SET_MOVELIST(CHARA_ID, _LIST_移動先候補)
-        ELSE
-            CALL HO_STOP_USE_MODULE(CHARA_ID)
-            CALL HO_TRY_USE_MODULE(CHARA_ID, "浴室")
-            IF RESULT == 1
-                CALL HO_SET_CHARADATA(CHARA_IDX, "ACTION", "入浴中")
-                CALL HO_WASH(CHARA_ID)
-                TCVAR:CHARA_ID:疲労度 += 100
-                TCVAR:CHARA_ID:行動待機時間 = RAND(6, 9) * HO_単位時間
-            ENDIF
-        ENDIF
+        CALL HO_行動定義_入浴(CHARA_ID)
+        SIF RESULT == -1
+            CALL HO_行動定義_自由(CHARA_ID)
+    CASE 50 ;"バーテンダー"
+        CALL HO_行動定義_バーテンダー(CHARA_ID)
+        SIF RESULT == -1
+            CALL HO_行動定義_自由(CHARA_ID)
     CASE 90 ;"仮眠"
-        CALL HO_FIND_ROOM_BY_TAG("クルー私室")
-        移動先ROOM_IDX = RESULT
-        CALL HO_GET_ROUTE(キャラ現在地, 移動先ROOM_IDX)
-        _LIST_移動先候補 = %RESULTS%
-        IF RESULT != 0
-            CALL HO_STOP_USE_MODULE(CHARA_ID)
-            CALL HO_SET_MOVELIST(CHARA_ID, _LIST_移動先候補)
-        ELSE
-            CALL HO_STOP_USE_MODULE(CHARA_ID)
-            CALL HO_TRY_USE_MODULE(CHARA_ID, "仮眠")
-            CALL HO_SET_CHARADATA(CHARA_IDX, "ACTION", "睡眠中")
-            TCVAR:CHARA_ID:51 = 0
-            TCVAR:CHARA_ID:52 = 0
-            BASE:(CHARA_ID):体力 = LIMIT(BASE:(CHARA_ID):体力 + 1200, BASE:(CHARA_ID):体力, MAXBASE:(CHARA_ID):体力)
-            BASE:(CHARA_ID):気力 = LIMIT(BASE:(CHARA_ID):気力 + 900, BASE:(CHARA_ID):気力, MAXBASE:(CHARA_ID):気力)
-            TCVAR:CHARA_ID:行動待機時間 = RAND(36, 72) * HO_単位時間
-        ENDIF
+        CALL HO_行動定義_仮眠(CHARA_ID)
+        SIF RESULT == -1
+            CALL HO_行動定義_自由(CHARA_ID)
     CASE 91 ;"汚れ超過による洗浄"
-        CALL HO_FIND_ROOM_BY_TAG("浴室")
-        移動先ROOM_IDX = RESULT
-        CALL HO_GET_ROUTE(キャラ現在地, 移動先ROOM_IDX)
-        _LIST_移動先候補 = %RESULTS%
-        IF RESULT != 0
-            CALL HO_STOP_USE_MODULE(CHARA_ID)
-            CALL HO_SET_MOVELIST(CHARA_ID, _LIST_移動先候補)
-        ELSE
-            CALL HO_STOP_USE_MODULE(CHARA_ID)
-            CALL HO_TRY_USE_MODULE(CHARA_ID, "浴室")
-            IF RESULT == 1
-                CALL HO_SET_CHARADATA(CHARA_IDX, "ACTION", "入浴中")
-                CALL HO_WASH(CHARA_ID)
-                TCVAR:CHARA_ID:疲労度 += 100
-                TCVAR:CHARA_ID:行動待機時間 = RAND(6, 9) * HO_単位時間
-            ENDIF
-        ENDIF
+        CALL HO_行動定義_洗浄(CHARA_ID)
+        SIF RESULT == -1
+            CALL HO_行動定義_自由(CHARA_ID)
     CASE 92 ;ウフフ目撃
         CALL HO_行動定義_ウフフ目撃(CHARA_ID)
     CASE 99 ;"就寝"
-        CALL HO_FIND_ROOM_BY_TAG("クルー私室")
-        移動先ROOM_IDX = RESULT
-        CALL HO_GET_ROUTE(キャラ現在地, 移動先ROOM_IDX)
-        _LIST_移動先候補 = %RESULTS%
-        IF RESULT != 0
-            CALL HO_STOP_USE_MODULE(CHARA_ID)
-            CALL HO_SET_MOVELIST(CHARA_ID, _LIST_移動先候補)
-        ELSE
-            CALL HO_STOP_USE_MODULE(CHARA_ID)
-            CALL HO_TRY_USE_MODULE(CHARA_ID, "就寝")
-            CALL HO_SET_CHARADATA(CHARA_IDX, "ACTION", "睡眠中")
-            TCVAR:CHARA_ID:行動待機時間 = 72 * HO_単位時間
-        ENDIF
-    CASE 50 ;"バーテンダー"
-        CALL HO_FIND_ROOM_BY_TAG("食堂")
-        移動先ROOM_IDX = RESULT
-        CALL HO_GET_ROUTE(キャラ現在地, 移動先ROOM_IDX)
-        _LIST_移動先候補 = %RESULTS%
-        IF RESULT != 0
-            CALL HO_STOP_USE_MODULE(CHARA_ID)
-            CALL HO_SET_MOVELIST(CHARA_ID, _LIST_移動先候補)
-        ELSE
-            CALL HO_STOP_USE_MODULE(CHARA_ID)
-            CALL HO_TRY_USE_MODULE(CHARA_ID, "飲酒")
-            IF RESULT == 1
-                CALL HO_SET_CHARADATA(CHARA_IDX, "ACTION", "バーテンダー")
-                TCVAR:CHARA_ID:行動待機時間 = RAND(9, 16) * HO_単位時間
-                TCVAR:CHARA_ID:疲労度 += 100
-            ENDIF
-        ENDIF
+        CALL HO_行動定義_就寝(CHARA_ID)
+        SIF RESULT == -1
+            CALL HO_行動定義_自由(CHARA_ID)
     CASEELSE
         CALL HO_行動定義_自由(CHARA_ID)
 ENDSELECT
 RETURN
+
+
+;;ターン経過で必ず起きるイベント
+@HO_CALC_PALAM_BEFORE_ACT(CHARA_ID)
+#DIM CHARA_ID
+#DIMS DYNAMIC ACTION
+
+;空腹度上昇,通常だいたい6時間程度で空腹(300)になるように
+TCVAR:CHARA_ID:空腹度 += 5
+TCVAR:CHARA_ID:疲労度 += 5
+
+CALL HO_GET_CHARAACT(CHARA_ID)
+ACTION = %RESULTS%
+
+;欲情の減衰
+IF GROUPMATCH(ACTION, "待機", "休憩中")
+    IF PALAM:CHARA_ID:欲情 > PALAMLV:3
+        PALAM:CHARA_ID:欲情 = MAX(PALAMLV:3, PALAM:CHARA_ID:欲情 - RAND(400, 600))
+    ENDIF
+ENDIF
+
+;汗量の増大
+IF GROUPMATCH(ACTION, "同行中") && FLAG:ウフフフラグ == 1
+    TCVAR:CHARA_ID:汗量 += RAND(500, 600)
+ENDIF
