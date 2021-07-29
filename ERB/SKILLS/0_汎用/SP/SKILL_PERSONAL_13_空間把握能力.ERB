@@ -20,7 +20,7 @@ RESULTS = 自艦の命中回避、敵回避が超能力によってランダム�
 #DIM CLASS
 #DIM CHARA_ID
 
-	LOCAL = RAND(ABL:CHARA_ID:超能力)
+	LOCAL = RAND(MAX(ABL:CHARA_ID:超能力, 1))
 	IF LOCAL < 10
 	;おっとそれは勘違いだ。上げにくさから強め。
 		SIF TYPE == TYPE_命中

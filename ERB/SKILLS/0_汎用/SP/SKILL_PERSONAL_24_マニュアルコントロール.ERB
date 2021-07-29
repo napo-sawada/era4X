@@ -21,7 +21,7 @@ RESULTS = 自艦能力が操艦能力によってランダム増減。推奨最�
 #DIM CHARA_ID
 
 
-	LOCAL = RAND(ABL:CHARA_ID:操艦)
+	LOCAL = RAND(MAX(ABL:CHARA_ID:操艦, 1))
 	;死番で致命的な操縦ミス。
 	IF LOCAL == 4
 		SIF TYPE == TYPE_与ダメージ
