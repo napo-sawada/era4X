@@ -1,0 +1,210 @@
+﻿;-----------------------------------
+;基本値計算に先んじて処理するもの
+;-----------------------------------
+@SKILL_0_PERSONAL_24_EXIST
+RETURN 1
+
+@SKILL_0_PERSONAL_24_NAME
+RESULTS = マニュアルコントロール
+
+;レベルは1-5まで
+@SKILL_0_PERSONAL_24_LEVEL
+RETURN 3
+
+@SKILL_0_PERSONAL_24_EXPLANATION
+RESULTS = 自艦能力が操艦能力によってランダム増減。推奨最低操艦８０。
+
+@SKILL_0_PERSONAL_24_EFFECT(VALUE, TYPE, CLASS, CHARA_ID)
+#DIM VALUE
+#DIM TYPE
+#DIM CLASS
+#DIM CHARA_ID
+
+
+	LOCAL = RAND(ABL:CHARA_ID:操艦)
+	;死番で致命的な操縦ミス。
+	IF LOCAL == 4
+		SIF TYPE == TYPE_与ダメージ
+			TIMES VALUE, 0.10
+		SIF TYPE == TYPE_命中
+			TIMES VALUE, 0.10
+		SIF TYPE == TYPE_回避
+			TIMES VALUE, 0.10
+		SIF TYPE == TYPE_被ダメージ
+			TIMES VALUE, 2
+	;5未満で結構な操縦ミス。わりと出る。
+	ELSEIF LOCAL < 5
+		SIF TYPE == TYPE_与ダメージ
+			TIMES VALUE, 0.60
+		SIF TYPE == TYPE_命中
+			TIMES VALUE, 0.60
+		SIF TYPE == TYPE_回避
+			TIMES VALUE, 0.60
+		SIF TYPE == TYPE_被ダメージ
+			TIMES VALUE, 1.5
+	ELSEIF LOCAL < 10
+		SIF TYPE == TYPE_与ダメージ
+			TIMES VALUE, 0.90
+		SIF TYPE == TYPE_命中
+			TIMES VALUE, 0.90
+		SIF TYPE == TYPE_回避
+			TIMES VALUE, 0.90
+		SIF TYPE == TYPE_被ダメージ
+			TIMES VALUE, 1.2
+	;上記は手動操縦故のミス。
+	ELSEIF LOCAL < 20
+		SIF TYPE == TYPE_与ダメージ
+			TIMES VALUE, 1.05
+		SIF TYPE == TYPE_命中
+			TIMES VALUE, 1.05
+		SIF TYPE == TYPE_回避
+			TIMES VALUE, 1.05
+	;以降力業。１０刻みで倍率５%加算
+	ELSEIF LOCAL < 30
+		SIF TYPE == TYPE_与ダメージ
+			TIMES VALUE, 1.1
+		SIF TYPE == TYPE_命中
+			TIMES VALUE, 1.1
+		SIF TYPE == TYPE_回避
+			TIMES VALUE, 1.1
+		SIF TYPE == TYPE_被ダメージ
+			TIMES VALUE, 0.90
+	ELSEIF LOCAL < 40
+		SIF TYPE == TYPE_与ダメージ
+			TIMES VALUE, 1.15
+		SIF TYPE == TYPE_命中
+			TIMES VALUE, 1.15
+		SIF TYPE == TYPE_回避
+			TIMES VALUE, 1.15
+		SIF TYPE == TYPE_被ダメージ
+			TIMES VALUE, 0.85
+	ELSEIF LOCAL < 50
+		SIF TYPE == TYPE_与ダメージ
+			TIMES VALUE, 1.20
+		SIF TYPE == TYPE_命中
+			TIMES VALUE, 1.20
+		SIF TYPE == TYPE_回避
+			TIMES VALUE, 1.20
+		SIF TYPE == TYPE_被ダメージ
+			TIMES VALUE, 0.80
+	ELSEIF LOCAL < 60
+		SIF TYPE == TYPE_与ダメージ
+			TIMES VALUE, 1.25
+		SIF TYPE == TYPE_命中
+			TIMES VALUE, 1.25
+		SIF TYPE == TYPE_回避
+			TIMES VALUE, 1.25
+		SIF TYPE == TYPE_被ダメージ
+			TIMES VALUE, 0.75
+	ELSEIF LOCAL < 70
+		SIF TYPE == TYPE_与ダメージ
+			TIMES VALUE, 1.30
+		SIF TYPE == TYPE_命中
+			TIMES VALUE, 1.30
+		SIF TYPE == TYPE_回避
+			TIMES VALUE, 1.30
+		SIF TYPE == TYPE_被ダメージ
+			TIMES VALUE, 0.70
+	ELSEIF LOCAL < 80
+		SIF TYPE == TYPE_与ダメージ
+			TIMES VALUE, 1.35
+		SIF TYPE == TYPE_命中
+			TIMES VALUE, 1.35
+		SIF TYPE == TYPE_回避
+			TIMES VALUE, 1.35
+		SIF TYPE == TYPE_被ダメージ
+			TIMES VALUE, 0.65
+	ELSEIF LOCAL < 90
+	;多分操艦９０あればリスクリターン踏まえ実用レベル？
+		SIF TYPE == TYPE_与ダメージ
+			TIMES VALUE, 1.40
+		SIF TYPE == TYPE_命中
+			TIMES VALUE, 1.40
+		SIF TYPE == TYPE_回避
+			TIMES VALUE, 1.40
+		SIF TYPE == TYPE_被ダメージ
+			TIMES VALUE, 0.60
+	ELSEIF LOCAL < 100
+		SIF TYPE == TYPE_与ダメージ
+			TIMES VALUE, 1.45
+		SIF TYPE == TYPE_命中
+			TIMES VALUE, 1.45
+		SIF TYPE == TYPE_回避
+			TIMES VALUE, 1.45
+		SIF TYPE == TYPE_被ダメージ
+			TIMES VALUE, 0.55
+	ELSEIF LOCAL < 120
+		SIF TYPE == TYPE_与ダメージ
+			TIMES VALUE, 1.50
+		SIF TYPE == TYPE_命中
+			TIMES VALUE, 1.50
+		SIF TYPE == TYPE_回避
+			TIMES VALUE, 1.50
+		SIF TYPE == TYPE_被ダメージ
+			TIMES VALUE, 0.50
+	ELSEIF LOCAL < 140
+	;以降与ダメージは据え置き。被ダメージの軽減率増加を１／２。
+		SIF TYPE == TYPE_与ダメージ
+			TIMES VALUE, 1.50
+		SIF TYPE == TYPE_命中
+			TIMES VALUE, 1.60
+		SIF TYPE == TYPE_回避
+			TIMES VALUE, 1.60
+		SIF TYPE == TYPE_被ダメージ
+			TIMES VALUE, 0.45
+	ELSEIF LOCAL < 160
+		SIF TYPE == TYPE_与ダメージ
+			TIMES VALUE, 1.50
+		SIF TYPE == TYPE_命中
+			TIMES VALUE, 1.70
+		SIF TYPE == TYPE_回避
+			TIMES VALUE, 1.70
+		SIF TYPE == TYPE_被ダメージ
+			TIMES VALUE, 0.40
+	ELSEIF LOCAL < 180
+		SIF TYPE == TYPE_与ダメージ
+			TIMES VALUE, 1.50
+		SIF TYPE == TYPE_命中
+			TIMES VALUE, 1.80
+		SIF TYPE == TYPE_回避
+			TIMES VALUE, 1.80
+		SIF TYPE == TYPE_被ダメージ
+			TIMES VALUE, 0.35
+	ELSEIF LOCAL < 200
+		SIF TYPE == TYPE_与ダメージ
+			TIMES VALUE, 1.50
+		SIF TYPE == TYPE_命中
+			TIMES VALUE, 1.90
+		SIF TYPE == TYPE_回避
+			TIMES VALUE, 1.90
+		SIF TYPE == TYPE_被ダメージ
+			TIMES VALUE, 0.30
+	ELSEIF LOCAL >= 200
+	;多分超絶技巧で防いでる。テストプレイ結果と確率的に操艦３００でも集中砲火は死ぬ。
+		SIF TYPE == TYPE_与ダメージ
+			TIMES VALUE, 1.50
+		SIF TYPE == TYPE_命中
+			TIMES VALUE, 2
+		SIF TYPE == TYPE_回避
+			TIMES VALUE, 2
+		SIF TYPE == TYPE_被ダメージ
+			TIMES VALUE, 0
+			
+	ENDIF
+RETURN VALUE
+
+
+
+
+@SKILL_0_PERSONAL_24_RATE(発動者, 発動番号, 発動側, 発動勢力, 発動部隊, 対象勢力, 対象部隊)
+#DIM 発動者
+#DIM 発動番号
+#DIM スキル
+#DIMS ジャンル
+#DIM 発動側
+#DIM 発動勢力
+#DIM 発動部隊
+#DIM 対象側
+#DIM 対象勢力
+#DIM 対象部隊
+RETURN 800
