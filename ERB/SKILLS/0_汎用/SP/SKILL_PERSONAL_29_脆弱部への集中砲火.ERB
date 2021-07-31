@@ -1,18 +1,18 @@
 ﻿;-----------------------------------
 ;基本値計算に先んじて処理するもの
 ;-----------------------------------
-@SKILL_0_UNIQUE_0_EXIST
+@SKILL_0_PERSONAL_29_EXIST
 RETURN 1
 
-@SKILL_0_UNIQUE_0_NAME
-RESULTS = 聖女
+@SKILL_0_PERSONAL_29_NAME
+RESULTS = 脆弱部への集中砲火
 
 ;レベルは1-5まで
-@SKILL_0_UNIQUE_0_LEVEL
-RETURN 5
+@SKILL_0_PERSONAL_29_LEVEL
+RETURN 3
 
 ;対象選択
-@SKILL_0_UNIQUE_0_SETTARGET(発動者, 発動番号, 発動側, 発動勢力, 発動部隊, 対象勢力, 対象部隊)
+@SKILL_0_PERSONAL_29_SETTARGET(発動者, 発動番号, 発動側, 発動勢力, 発動部隊, 対象勢力, 対象部隊)
 #DIM 発動者
 #DIM 発動番号
 #DIM スキル
@@ -29,7 +29,7 @@ SIF BATTLE_COMMANDER_NUM:対象側 == 0
 RETURN 1
 
 ;発動判定
-@SKILL_0_UNIQUE_0_CAN_INVOKE(発動者, 発動番号, 発動側, 発動勢力, 発動部隊, 対象勢力, 対象部隊)
+@SKILL_0_PERSONAL_29_CAN_INVOKE(発動者, 発動番号, 発動側, 発動勢力, 発動部隊, 対象勢力, 対象部隊)
 #DIM 発動者
 #DIM 発動番号
 #DIM スキル
@@ -46,14 +46,14 @@ RETURN 1
 ;発動テキストをオーバライドしたいときに。
 ;「誰それのスキル発動！　○○した！」の「○○した！」の部分を実装したい場合は、
 ;これじゃなくてINVOKEで書けばいいです。
-;@SKILL_0_UNIQUE_0_INVOKE_TEXT(発動者, スキル, ジャンル)
+;@SKILL_0_PERSONAL_29_INVOKE_TEXT(発動者, スキル, ジャンル)
 ;#DIM 発動者
 ;#DIM スキル
 ;#DIMS ジャンル
 
 
 ;効果をここに記述
-@SKILL_0_UNIQUE_0_INVOKE(発動者, 発動番号, 発動側, 発動勢力, 発動部隊, 対象勢力, 対象部隊)
+@SKILL_0_PERSONAL_29_INVOKE(発動者, 発動番号, 発動側, 発動勢力, 発動部隊, 対象勢力, 対象部隊)
 #DIM 発動者
 #DIM 発動番号
 #DIM スキル
@@ -68,31 +68,27 @@ RETURN 1
 PRINTFORML 自部隊の攻撃力が上昇！
 TIMES BATTLE_ATK:発動側, 1.01
 
-@SKILL_0_UNIQUE_0_EXPLANATION
-RESULTS = 艦隊の与ダメージ+40~60\%
+@SKILL_0_PERSONAL_29_EXPLANATION
+RESULTS = 自艦の与ダメージ+15\%(必要知略70)
 
-
-@SKILL_0_UNIQUE_0_EFFECT(VALUE, TYPE, CLASS)
+@SKILL_0_PERSONAL_29_EFFECT(VALUE, TYPE, CLASS, CHARA_ID)
 #DIM VALUE
 #DIM TYPE
 #DIM CLASS
+#DIM CHARA_ID
 
-IF TYPE == TYPE_与ダメージ
-	SELECTCASE RAND:3
-		CASE 0
-			TIMES VALUE, 1.40
-		CASE 1
-			TIMES VALUE, 1.50
-		CASE 2
-			TIMES VALUE, 1.60
-	ENDSELECT
-ENDIF
+LOCAL = ABL:CHARA_ID:操艦
+	IF LOCAL >= 70
+		SIF TYPE == TYPE_与ダメージ
+			TIMES VALUE, 1.15
+	ELSE
+		SIF TYPE == TYPE_与ダメージ
+			TIMES VALUE, 1.03
+	ENDIF
 RETURN VALUE
 
-@SKILL_0_UNIQUE_0_CANT_TELL
 
-
-@SKILL_0_UNIQUE_0_RATE(発動者, 発動番号, 発動側, 発動勢力, 発動部隊, 対象勢力, 対象部隊)
+@SKILL_0_PERSONAL_29_RATE(発動者, 発動番号, 発動側, 発動勢力, 発動部隊, 対象勢力, 対象部隊)
 #DIM 発動者
 #DIM 発動番号
 #DIM スキル

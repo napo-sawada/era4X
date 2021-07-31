@@ -12,7 +12,7 @@ RESULTS = ハエ叩き
 RETURN 1
 
 @SKILL_0_PERSONAL_15_EXPLANATION
-RESULTS = 自艦の対空命中率と対空ダメージ+10\%
+RESULTS = 自艦の対空命中率と対空ダメージ+10\%(必要操艦40)
 
 ;効果をここに記述
 @SKILL_0_PERSONAL_15_EFFECT(VALUE, TYPE, CLASS, CHARA_ID)
@@ -21,11 +21,20 @@ RESULTS = 自艦の対空命中率と対空ダメージ+10\%
 #DIM CLASS
 #DIM CHARA_ID
 
-IF TYPE == TYPE_対空命中
-	TIMES VALUE, 1.10
-ELSEIF TYPE == TYPE_対空ダメージ
-	TIMES VALUE, 1.10
-ENDIF
+LOCAL = ABL:CHARA_ID:操艦
+	IF LOCAL >= 40
+		IF TYPE == TYPE_対空命中
+			TIMES VALUE, 1.10
+		ELSEIF TYPE == TYPE_対空ダメージ
+			TIMES VALUE, 1.10
+		ENDIF
+	ELSE
+		IF TYPE == TYPE_対空命中
+			TIMES VALUE, 1.05
+		ELSEIF TYPE == TYPE_対空ダメージ
+			TIMES VALUE, 1.05
+		ENDIF
+	ENDIF
 RETURN VALUE
 
 @SKILL_0_PERSONAL_15_RATE(発動者, 発動番号, 発動側, 発動勢力, 発動部隊, 対象勢力, 対象部隊)

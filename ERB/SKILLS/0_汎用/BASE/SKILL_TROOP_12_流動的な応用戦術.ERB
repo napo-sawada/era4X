@@ -1,0 +1,99 @@
+﻿;-----------------------------------
+;基本値計算に先んじて処理するもの
+;-----------------------------------
+@SKILL_0_TROOP_12_EXIST
+RETURN 1
+
+@SKILL_0_TROOP_12_NAME
+RESULTS = 流動的な応用戦術
+
+;レベルは1-5まで
+@SKILL_0_TROOP_12_LEVEL
+RETURN 2
+	
+@SKILL_0_TROOP_12_EXPLANATION
+RESULTS = 艦隊の与/被ダメージ、命中、回避率が『知略』によってランダム増減。(推奨知略80)
+
+
+@SKILL_0_TROOP_12_EFFECT(VALUE, TYPE, CLASS, CH_ID)
+#DIM VALUE
+#DIM TYPE
+#DIM CLASS
+#DIM CH_ID
+
+
+LOCAL = RAND(MAX(ABL:CH_ID:知略, 1))
+	;鍛え上げられた知略用に天井の高い戦術。
+	IF LOCAL < 5
+		SIF TYPE == TYPE_与ダメージ
+			TIMES VALUE, 0.90
+		SIF TYPE == TYPE_命中
+			TIMES VALUE, 0.90
+		SIF TYPE == TYPE_回避
+			TIMES VALUE, 0.90
+		SIF TYPE == TYPE_被ダメージ
+			TIMES VALUE, 1.2
+	ELSEIF LOCAL < 10
+		SIF TYPE == TYPE_与ダメージ
+			TIMES VALUE, 0.95
+		SIF TYPE == TYPE_命中
+			TIMES VALUE, 0.95
+		SIF TYPE == TYPE_回避
+			TIMES VALUE, 0.95
+		SIF TYPE == TYPE_被ダメージ
+			TIMES VALUE, 1.1
+	;上記は戦術失敗。
+	ELSEIF LOCAL < 40
+		SIF TYPE == TYPE_与ダメージ
+			TIMES VALUE, 1.05
+		SIF TYPE == TYPE_命中
+			TIMES VALUE, 1.05
+		SIF TYPE == TYPE_回避
+			TIMES VALUE, 1.05
+		SIF TYPE == TYPE_被ダメージ
+			TIMES VALUE, 0.95
+	ELSEIF LOCAL < 80
+		SIF TYPE == TYPE_与ダメージ
+			TIMES VALUE, 1.10
+		SIF TYPE == TYPE_命中
+			TIMES VALUE, 1.10
+		SIF TYPE == TYPE_回避
+			TIMES VALUE, 1.10
+		SIF TYPE == TYPE_被ダメージ
+			TIMES VALUE, 0.90
+	ELSEIF LOCAL < 120
+		SIF TYPE == TYPE_命中
+			TIMES VALUE, 1.15
+		SIF TYPE == TYPE_対空命中
+			TIMES VALUE, 1.15
+		SIF TYPE == TYPE_回避
+			TIMES VALUE, 1.15
+		SIF TYPE == TYPE_敵回避
+			TIMES VALUE, 0.85
+	ELSEIF LOCAL >= 120
+	;影響力を考え最大でも抑えめ。
+		SIF TYPE == TYPE_命中
+			TIMES VALUE, 1.20
+		SIF TYPE == TYPE_対空命中
+			TIMES VALUE, 1.20
+		SIF TYPE == TYPE_回避
+			TIMES VALUE, 1.20
+		SIF TYPE == TYPE_敵回避
+			TIMES VALUE, 0.8
+	ENDIF
+RETURN VALUE
+
+
+
+@SKILL_0_TROOP_12_RATE(発動者, 発動番号, 発動側, 発動勢力, 発動部隊, 対象勢力, 対象部隊)
+#DIM 発動者
+#DIM 発動番号
+#DIM スキル
+#DIMS ジャンル
+#DIM 発動側
+#DIM 発動勢力
+#DIM 発動部隊
+#DIM 対象側
+#DIM 対象勢力
+#DIM 対象部隊
+RETURN 1000

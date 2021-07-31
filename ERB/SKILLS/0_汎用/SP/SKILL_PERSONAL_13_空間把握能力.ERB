@@ -12,7 +12,7 @@ RESULTS = 空間把握能力
 RETURN 3
 
 @SKILL_0_PERSONAL_13_EXPLANATION
-RESULTS = 自艦の命中回避、敵回避が超能力によってランダム増減。推奨最低超能力30。
+RESULTS = 自艦の命中回避、敵回避率が『超能力』によってランダム増減。(推奨超能力30)
 
 @SKILL_0_PERSONAL_13_EFFECT(VALUE, TYPE, CLASS, CHARA_ID)
 #DIM VALUE
@@ -20,7 +20,7 @@ RESULTS = 自艦の命中回避、敵回避が超能力によってランダム�
 #DIM CLASS
 #DIM CHARA_ID
 
-	LOCAL = RAND(MAX(ABL:CHARA_ID:超能力, 1))
+LOCAL = RAND(MAX(ABL:CHARA_ID:超能力, 1))
 	IF LOCAL < 10
 	;おっとそれは勘違いだ。上げにくさから強め。
 		SIF TYPE == TYPE_命中

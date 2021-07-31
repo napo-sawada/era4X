@@ -1,18 +1,18 @@
 ﻿;-----------------------------------
 ;基本値計算に先んじて処理するもの
 ;-----------------------------------
-@SKILL_0_PERSONAL_8_EXIST
+@SKILL_0_PERSONAL_33_EXIST
 RETURN 1
 
-@SKILL_0_PERSONAL_8_NAME
-RESULTS = 達人指揮官
+@SKILL_0_PERSONAL_33_NAME
+RESULTS = 未来予知
 
 ;レベルは1-5まで
-@SKILL_0_PERSONAL_8_LEVEL
+@SKILL_0_PERSONAL_33_LEVEL
 RETURN 3
 
 ;対象選択
-@SKILL_0_PERSONAL_8_SETTARGET(発動者, 発動番号, 発動側, 発動勢力, 発動部隊, 対象勢力, 対象部隊)
+@SKILL_0_PERSONAL_33_SETTARGET(発動者, 発動番号, 発動側, 発動勢力, 発動部隊, 対象勢力, 対象部隊)
 #DIM 発動者
 #DIM 発動番号
 #DIM スキル
@@ -29,7 +29,7 @@ SIF BATTLE_COMMANDER_NUM:対象側 == 0
 RETURN 1
 
 ;発動判定
-@SKILL_0_PERSONAL_8_CAN_INVOKE(発動者, 発動番号, 発動側, 発動勢力, 発動部隊, 対象勢力, 対象部隊)
+@SKILL_0_PERSONAL_33_CAN_INVOKE(発動者, 発動番号, 発動側, 発動勢力, 発動部隊, 対象勢力, 対象部隊)
 #DIM 発動者
 #DIM 発動番号
 #DIM スキル
@@ -46,14 +46,14 @@ RETURN 1
 ;発動テキストをオーバライドしたいときに。
 ;「誰それのスキル発動！　○○した！」の「○○した！」の部分を実装したい場合は、
 ;これじゃなくてINVOKEで書けばいいです。
-;@SKILL_0_PERSONAL_8_INVOKE_TEXT(発動者, スキル, ジャンル)
+;@SKILL_0_PERSONAL_33_INVOKE_TEXT(発動者, スキル, ジャンル)
 ;#DIM 発動者
 ;#DIM スキル
 ;#DIMS ジャンル
 
 
 ;効果をここに記述
-@SKILL_0_PERSONAL_8_INVOKE(発動者, 発動番号, 発動側, 発動勢力, 発動部隊, 対象勢力, 対象部隊)
+@SKILL_0_PERSONAL_33_INVOKE(発動者, 発動番号, 発動側, 発動勢力, 発動部隊, 対象勢力, 対象部隊)
 #DIM 発動者
 #DIM 発動番号
 #DIM スキル
@@ -68,21 +68,31 @@ RETURN 1
 PRINTFORML 自部隊の攻撃力が上昇！
 TIMES BATTLE_ATK:発動側, 1.01
 
-@SKILL_0_PERSONAL_8_EXPLANATION
-RESULTS = 自艦の与ダメージ+30\%
+@SKILL_0_PERSONAL_33_EXPLANATION
+RESULTS = 敵艦の命中、回避率-15\%(必要超能力90)
 
-@SKILL_0_PERSONAL_8_EFFECT(VALUE, TYPE, CLASS, CHARA_ID)
+@SKILL_0_PERSONAL_33_EFFECT(VALUE, TYPE, CLASS, CHARA_ID)
 #DIM VALUE
 #DIM TYPE
 #DIM CLASS
 #DIM CHARA_ID
 
-SIF TYPE == TYPE_与ダメージ
-	TIMES VALUE, 1.30
+LOCAL = ABL:CHARA_ID:超能力
+	IF LOCAL >= 90
+		SIF TYPE == TYPE_敵回避
+			TIMES VALUE, 0.85
+		SIF TYPE == TYPE_敵命中
+			TIMES VALUE, 0.85
+	ELSE
+		SIF TYPE == TYPE_敵回避
+			TIMES VALUE, 0.99
+		SIF TYPE == TYPE_敵命中
+			TIMES VALUE, 0.99
+	ENDIF
 RETURN VALUE
 
 
-@SKILL_0_PERSONAL_8_RATE(発動者, 発動番号, 発動側, 発動勢力, 発動部隊, 対象勢力, 対象部隊)
+@SKILL_0_PERSONAL_33_RATE(発動者, 発動番号, 発動側, 発動勢力, 発動部隊, 対象勢力, 対象部隊)
 #DIM 発動者
 #DIM 発動番号
 #DIM スキル

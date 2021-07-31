@@ -12,22 +12,34 @@ RESULTS = 一撃離脱ドクトリン
 RETURN 3
 
 @SKILL_0_TROOP_7_EXPLANATION
-RESULTS = 艦隊の巡洋艦と戦艦の与ダメージ-20\%、艦隊のコルベットとフリゲートの回避率+10\% 艦隊のコルベットとフリゲートの命中率+10\％
+RESULTS = 艦隊の巡洋艦と戦艦の与ダメージ-20\%、コルベットとフリゲートの回避、命中率+10\％(必要知略60)
 
 
-@SKILL_0_TROOP_7_EFFECT(VALUE, TYPE, CLASS)
+@SKILL_0_TROOP_7_EFFECT(VALUE, TYPE, CLASS, CH_ID)
 #DIM VALUE
 #DIM TYPE
 #DIM CLASS
+#DIM CH_ID
 
-IF TYPE == TYPE_与ダメージ && (CLASS == 巡洋艦 || CLASS == 戦艦)
-	TIMES VALUE, 0.80
-ELSEIF TYPE == TYPE_回避 && (CLASS == コルベット || CLASS == フリゲート)
-	TIMES VALUE, 1.10
-ELSEIF TYPE == TYPE_命中 && (CLASS == コルベット || CLASS == フリゲート)
-	TIMES VALUE, 1.10
-ENDIF
 
+LOCAL = ABL:CH_ID:知略
+	IF LOCAL >= 60
+		IF TYPE == TYPE_与ダメージ && (CLASS == 巡洋艦 || CLASS == 戦艦)
+			TIMES VALUE, 0.80
+		ELSEIF TYPE == TYPE_回避 && (CLASS == コルベット || CLASS == フリゲート)
+			TIMES VALUE, 1.10
+		ELSEIF TYPE == TYPE_命中 && (CLASS == コルベット || CLASS == フリゲート)
+			TIMES VALUE, 1.10
+		ENDIF
+	ELSE
+		IF TYPE == TYPE_与ダメージ && (CLASS == 巡洋艦 || CLASS == 戦艦)
+			TIMES VALUE, 0.70
+		ELSEIF TYPE == TYPE_回避 && (CLASS == コルベット || CLASS == フリゲート)
+			TIMES VALUE, 1.05
+		ELSEIF TYPE == TYPE_命中 && (CLASS == コルベット || CLASS == フリゲート)
+			TIMES VALUE, 1.05
+		ENDIF
+	ENDIF
 RETURN VALUE
 
 @SKILL_0_TROOP_7_RATE(発動者, 発動番号, 発動側, 発動勢力, 発動部隊, 対象勢力, 対象部隊)

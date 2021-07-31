@@ -1,0 +1,29 @@
+era4X用スキル調整、追加パッチ
+※本体に取り込まれた段階で諸々の権利は放棄され、本体ライセンスに帰属します。
+
+○内容
+・能力対応
+多くのスキルに基準能力値を設定。
+内容的に不要だと思われるもの（元々リスクがある、もしくは限定的）には付与していません。
+全体的な数値として安定度が高いため、やや下方修正されています。
+身の丈に合わないスキルは大幅に弱体化しますが、効果の低いものの方が技能不足時の効果が高くなります。
+また、知略や超能力対応の艦隊スキルと自艦スキルを追加しています。
+
+・名称変更
+複数同属性（名人＋達人等）をセットした場合の違和感をなくすことを目的に、一部名称変更を行なっています。
+ファイル名変更となりましたので、取り込み前にSPスキルフォルダの削除をお願いします。
+また、_敵命中が機能していなかった問題も修正しています。
+
+
+○修正箇所
+INITIALIZE_GENERAL_SKILL.ERB
+>16
+CALL LEARN_SKILL_GENERAL_BY_NAME(ARG:0,"鮮やかな姿勢制御")
+名称変更に伴い記述変更。
+
+SLG_COMBAT.ERB
+>861
+TRYCALLFORM SKILL_0_TROOP_{SKILL_ID_SLOT:(COMMANDER:SIDE):スキル_ジャンル_TROOP:SKILL_ID}_EFFECT(VALUE, TYPE, CLASS, CH_ID)
+>865
+TRYCALLFORM SKILL_0_UNIQUE_{SKILL_ID_SLOT:(COMMANDER:SIDE):スキル_ジャンル_UNIQUE:SKILL_ID}_EFFECT(VALUE, TYPE, CLASS, CH_ID)
+※艦隊スキル、ユニーク用にコマンダーのCH_ID送り。スキル側にも追記
