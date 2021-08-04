@@ -1,0 +1,96 @@
+﻿;------------------------
+; 艦内雑務
+;------------------------
+@WORK_KANNAI(ID)
+#DIM ID
+#DIM 報酬
+
+報酬 = CFLAG:ID:好感度 / 10
+
+PRINTFORM 今週の%CALLNAME:ID%は
+SELECTCASE RAND:5
+	CASE 0
+		; 基礎
+		PRINTL 艦内雑務をしっかりとこなしたようだ。
+		報酬 += ABL:ID:料理 * 5
+		報酬 += ABL:ID:知略 * 5
+		報酬 += ABL:ID:目星 * 20
+		SIF ID > 0
+			CFLAG:ID:好感度 = RAND:20
+		EXP:ID:料理経験値 += 1
+		EXP:ID:知略経験値 += 1
+		EXP:ID:目星経験値 += 2
+		SETCOLOR カラー_注釈
+		PRINTL 料理経験値+1
+		PRINTL 知略経験値+1
+		PRINTL 目星経験値+2
+	CASE 1
+		PRINTL 艦内の資材整理を行なったようだ。
+		報酬 += ABL:ID:料理 * 5
+		報酬 += ABL:ID:知略 * 10
+		報酬 += ABL:ID:目星 * 10
+		SIF ID > 0
+			CFLAG:ID:好感度 = RAND:20
+		EXP:ID:料理経験値 += 1
+		EXP:ID:知略経験値 += 2
+		EXP:ID:目星経験値 += 3
+		SETCOLOR カラー_注釈
+		PRINTL 料理経験値+1
+		PRINTL 知略経験値+2
+		PRINTL 目星経験値+3
+	CASE 2
+		PRINTL 艦内雑務の傍ら、料理担当として頑張ったようだ。
+		報酬 += ABL:ID:料理 * 1
+		報酬 += ABL:ID:目星 * 1
+		SIF CFLAG:ID > 0
+			CFLAG:ID:好感度 = RAND:20 + 10
+		EXP:ID:料理経験値 += 6
+		EXP:ID:目星経験値 += 1
+		SETCOLOR カラー_注釈
+		PRINTL 料理経験値+6
+		PRINTL 知略経験値+1
+		PRINTL 目星経験値+1
+	CASE 3
+		PRINTL 艦内設備のチェックをしっかりと行なったようだ。
+		報酬 += ABL:ID:知略 * 10
+		報酬 += ABL:ID:目星 * 30
+		SIF ID > 0
+			CFLAG:ID:好感度 = RAND:20
+		EXP:ID:知略経験値 += 2
+		EXP:ID:目星経験値 += 3
+		SETCOLOR カラー_注釈
+		PRINTL 知略経験値+2
+		PRINTL 目星経験値+3
+	CASE 4
+		PRINTL 仕事の傍ら様々な勉強やトレーニングに励んだようだ。
+		報酬 += ABL:ID:料理 * 5
+		報酬 += ABL:ID:知略 * 5
+		報酬 += ABL:ID:目星 * 5
+		SIF ID > 0
+			CFLAG:ID:好感度 = RAND:20
+		EXP:ID:操艦経験値 += 4
+		EXP:ID:白兵経験値 += 4
+		EXP:ID:料理経験値 += 4
+		EXP:ID:知略経験値 += 4
+		EXP:ID:目星経験値 += 4
+		SETCOLOR カラー_注釈
+		PRINTL 料理経験値+1
+		PRINTL 知略経験値+2
+		PRINTL 目星経験値+3
+ENDSELECT
+IF MONEY > 10000000
+	TIMES 報酬, 0.3
+ELSEIF MONEY > 1000000
+	TIMES 報酬, 0.2
+ELSE
+	TIMES 報酬, 0.1
+ENDIF
+; 共通経験値
+RESETCOLOR
+PRINTFORML ------------%CALLNAME:ID%の働き------------ 
+PRINTFORML 今回の艦内雑務で経費が随分と浮いたようだ。
+SIF ID > 0
+	PRINTFORML 働きぶりを褒められた%CALLNAME:ID%は喜んでいるようだ。
+PRINTFORML --------------------------------------------
+
+RETURN 報酬

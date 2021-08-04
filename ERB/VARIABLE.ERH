@@ -386,10 +386,14 @@
 
 #DIM CONST 労働_キャバクラ = 1
 #DIM CONST 労働_Vアイドル = 2
-#DIM CONST 労働_広報 = 3
-#DIM CONST 労働_街宣 = 4
-#DIM CONST 労働_炊き出し = 5
-#DIM CONST 労働_ライブ = 6
+;#DIM CONST 労働_広報 = 3
+;#DIM CONST 労働_街宣 = 4
+#DIM CONST 労働_操艦講座 = 3
+#DIM CONST 労働_白兵講座 = 4
+;#DIM CONST 労働_炊き出し = 5
+;#DIM CONST 労働_ライブ = 6
+#DIM CONST 労働_ビジネス = 5
+#DIM CONST 労働_艦内雑務 = 6
 #DIM CONST 労働_娼館 = 7
 #DIM CONST 労働_ＡＶ = 8
 #DIM CONST 労働_搾乳 = 9

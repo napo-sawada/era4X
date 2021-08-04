@@ -63,32 +63,32 @@ SIF TALENT:ID:求心力
 	魅力値 += 1000
 
 IF 魅力値 / 3 < 1000
-	PRINTFORML %CALLNAME:ID%はキャバクラで小間使いとして頑張った
+	PRINTFORML %CALLNAME:ID%は民間船を相手に艦内キャバクラで小間使いとして頑張った
 	SETCOLOR カラー_注釈
 	PRINTFORML 話術経験値+1
 	PRINTFORML 社交経験値+1
 	RESETCOLOR
 	EXP:ID:話術経験値 += 1
 	EXP:ID:社交経験値 += 1
-	CFLAG:ID:キャバクラ人気 += 1
+	CFLAG:ID:キャバクラ人気 += 7
 ELSEIF 魅力値 / 3 < 2000
-	PRINTFORML %CALLNAME:ID%はキャバクラのサブキャストとして頑張った
+	PRINTFORML %CALLNAME:ID%は民間船を相手に艦内キャバクラのサブキャストとして頑張った
 	SETCOLOR カラー_注釈
 	PRINTFORML 話術経験値+2
 	PRINTFORML 社交経験値+2
 	RESETCOLOR
 	EXP:ID:話術経験値 += 2
 	EXP:ID:社交経験値 += 2
-	CFLAG:ID:キャバクラ人気 += 2
+	CFLAG:ID:キャバクラ人気 += 14
 ELSE
-	PRINTFORML %CALLNAME:ID%はキャバクラのメインキャストとして頑張った
+	PRINTFORML %CALLNAME:ID%は民間船を相手に艦内キャバクラのメインキャストとして頑張った
 	SETCOLOR カラー_注釈
 	PRINTFORML 話術経験値+3
 	PRINTFORML 社交経験値+3
 	RESETCOLOR
 	EXP:ID:話術経験値 += 3
 	EXP:ID:社交経験値 += 3
-	CFLAG:ID:キャバクラ人気 += 3
+	CFLAG:ID:キャバクラ人気 += 21
 ENDIF
 
 CFLAG:ID:キャバクラ人気 = LIMIT(CFLAG:ID:キャバクラ人気, 0, 100000)

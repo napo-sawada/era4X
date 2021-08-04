@@ -1,7 +1,7 @@
 ﻿;------------------------
-; バーチャルアイドル
+; 操艦通信講座
 ;------------------------
-@WORK_VIDOL(ID)
+@WORK_SOUKAN(ID)
 #DIM ID
 #DIM 魅力値
 #DIM 視聴者数
@@ -9,14 +9,14 @@
 #DIM ランダム流入
 #DIM 報酬
 
-登録者 = CFLAG:ID:Vアイドル人気
+登録者 = CFLAG:ID:教官人気
 視聴者数 = 0
 
 ; ベースの人気
 ; 技能
-魅力値 = ABL:ID:話術 * 20
-魅力値 += ABL:ID:社交 * 7
-魅力値 += ABL:ID:露出 * 200
+魅力値 = ABL:ID:操艦 * 20
+魅力値 += ABL:ID:話術 * 5
+魅力値 += ABL:ID:社交 * 10
 
 ;TALENT
 SIF TALENT:ID:臆病
@@ -31,20 +31,10 @@ SIF TALENT:ID:生意気
 	魅力値 -= 100
 SIF TALENT:ID:無関心
 	魅力値 -= 100
-SIF TALENT:ID:感情乏しい
-	魅力値 -= 100
 SIF TALENT:ID:保守的
-	魅力値 -= 100
-SIF TALENT:ID:貞操観念
-	魅力値 -= 100
-SIF TALENT:ID:抑圧
-	魅力値 -= 100
-SIF TALENT:ID:孤高
 	魅力値 -= 100
 SIF TALENT:ID:サボり魔
 	魅力値 -= 100
-SIF TALENT:ID:男嫌い
-	魅力値 -= 200
 SIF TALENT:ID:気丈
 	魅力値 += 100
 SIF TALENT:ID:好奇心
@@ -54,58 +44,66 @@ SIF TALENT:ID:目立ちたがり
 SIF TALENT:ID:解放
 	魅力値 += 100
 SIF TALENT:ID:献身的
-	魅力値 += 200
-SIF TALENT:ID:人気
-	魅力値 += 300
+	魅力値 += 100
 SIF TALENT:ID:魅惑
-	魅力値 += 300
+	魅力値 += 200
 SIF TALENT:ID:謎の魅力
 	魅力値 += 500
-SIF TALENT:ID:美脚
-	魅力値 += 300
-SIF TALENT:ID:美尻
-	魅力値 += 300
 SIF TALENT:ID:天の御遣い
 	魅力値 += 1000
 SIF TALENT:ID:求心力
 	魅力値 += 1000
 ; 今回の配信
 PRINTFORM %CALLNAME:ID%は
-SELECTCASE RAND:4
+SELECTCASE RAND:5
 	CASE 0
-		; 料理動画
-		PRINTL 料理放送を行ったようだ
-		魅力値 += ABL:ID:料理 * 200
-		EXP:ID:料理経験値 += 1
-		EXP:ID:話術経験値 += 2
+		; 基礎
+		PRINTL 艦船運用基礎講座を行ったようだ
+		魅力値 += ABL:ID:操艦 * 100
+		魅力値 += ABL:ID:話術 * 100
+		EXP:ID:話術経験値 += 1
+		EXP:ID:操艦経験値 += 1
 		SETCOLOR カラー_注釈
-		PRINTL 料理経験値+1
+		PRINTL 操艦経験値+3
 		PRINTL 話術経験値+2
 	CASE 1
-		; 歌動画
-		PRINTL 生歌放送を行ったようだ
-		魅力値 += ABL:ID:歌唱 * 200
-		EXP:ID:歌唱経験値 += 1
+		PRINTL 艦船運用応用講座を行ったようだ
+		魅力値 += ABL:ID:操艦 * 150
+		魅力値 += ABL:ID:話術 * 50
+		EXP:ID:操艦経験値 += 3
 		EXP:ID:話術経験値 += 2
 		SETCOLOR カラー_注釈
-		PRINTL 歌唱経験値+1
+		PRINTL 操艦経験値+4
 		PRINTL 話術経験値+2
 	CASE 2
-		; 雑談動画
-		PRINTL 雑談放送を行ったようだ
-		魅力値 += ABL:ID:話術 * 200
+		; 歴史
+		PRINTL 艦船に関する歴史講義を行ったようだ
+		魅力値 += ABL:ID:操艦 * 50
+		魅力値 += ABL:ID:話術 * 150
+		EXP:ID:話術経験値 += 2
+		EXP:ID:操艦経験値 += 1
 		SETCOLOR カラー_注釈
-		PRINTL 話術経験値+3
-		EXP:ID:話術経験値 += 3
+		PRINTL 操艦経験値+1
+		PRINTL 話術経験値+2
 	CASE 3
-		; 歌動画
-		PRINTL ヴァーチャルライブを行ったようだ
-		魅力値 += ABL:ID:歌唱 * 250
-		EXP:ID:歌唱経験値 += 3
+		; 航宙機講義
+		PRINTL 小型航宙機に関する講義を行ったようだ
+		魅力値 += ABL:ID:操艦 * 50
+		魅力値 += ABL:ID:話術 * 150
+		EXP:ID:話術経験値 += 2
+		EXP:ID:操艦経験値 += 2
+		SETCOLOR カラー_注釈
+		PRINTL 操艦経験値+2
+		PRINTL 話術経験値+2
+	CASE 4
+		; 豆知識
+		PRINTL 艦船にまつわる豆知識を語ったようだ
+		魅力値 += ABL:ID:操艦 * 100
+		魅力値 += ABL:ID:話術 * 100
 		EXP:ID:話術経験値 += 1
 		SETCOLOR カラー_注釈
-		PRINTL 歌唱経験値+3
-		PRINTL 話術経験値+1
+		PRINTL 操艦経験値+2
+		PRINTL 話術経験値+2
 ENDSELECT
 ; 共通経験値
 RESETCOLOR
@@ -122,17 +120,17 @@ RESETCOLOR
 
 ; ベースの人気から算出して一定の割合で登録者になる
 IF 魅力値 < 1000
-	登録者 += ランダム流入 / 10
+	登録者 += ランダム流入 / 20
 ELSEIF 魅力値 < 2000
-	登録者 += ランダム流入 / 6
+	登録者 += ランダム流入 / 12
 ELSEIF 魅力値 < 3000
-	登録者 += ランダム流入 / 3
+	登録者 += ランダム流入 / 6
 ELSE
-	登録者 += ランダム流入 / 2
+	登録者 += ランダム流入 / 4
 ENDIF
 
 ; 放送再生による報酬
-報酬 = 視聴者数 / 200 + 1
+報酬 = 視聴者数 / 150 + 1
 
 ; スパ〇
 FOR LOCAL, 0, 視聴者数 / 100
@@ -149,12 +147,13 @@ FOR LOCAL, 0, 視聴者数 / 100
 			報酬 += 100
 	ENDSELECT
 NEXT
+
 PRINTFORML ------------%CALLNAME:ID%の生放送------------ 
-PRINTFORML 今週の生放送の視聴者は{視聴者数}だった
-PRINTFORML チャンネル登録者が{登録者 - CFLAG:ID:1003}人増えた
+PRINTFORML 今週の講座の受講者は{視聴者数}だった
+PRINTFORML チャンネル登録者が{登録者 - CFLAG:ID:1011}人増えた
 PRINTFORML 現在のチャンネル登録者数 {登録者}
 PRINTFORML --------------------------------------------
 
 ; 登録者数追加
-CFLAG:ID:1003 = 登録者
+CFLAG:ID:1011 = 登録者
 RETURN 報酬
