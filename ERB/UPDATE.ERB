@@ -70,6 +70,10 @@ FOR LOCAL, 0, CHARANUM
 		FLAG:陥落人数 += 1
 		CFLAG:LOCAL:陥落済み = 1
 	ENDIF
+	IF CFLAG:(LOCAL):行動不能状態 == 行動不能_臨月
+		SIF CFLAG:(LOCAL):妊娠期間 <  (GETBIT(TALENT:(LOCAL):淫乱系, 素質_淫乱_良質母胎) ? 80 # 196)
+		CFLAG:(LOCAL):行動不能状態 = 0
+	ENDIF
 NEXT
 
 FOR SHIP_ID, 0, MAX_SHIP
