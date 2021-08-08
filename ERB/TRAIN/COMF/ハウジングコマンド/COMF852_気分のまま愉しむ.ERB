@@ -1,0 +1,84 @@
+﻿;気分のまま愉しむ
+
+;-------------------------------------------------
+;コマンド名称
+;-------------------------------------------------
+@COM_NAME852
+RESULTS:0 = 気分のまま愉しむ
+
+
+;-------------------------------------------------
+;選択可否判定
+;-------------------------------------------------
+@COM_ABLE852
+#DIMS DYNAMIC _LIST_MEMBER
+#DIM DYNAMIC MEMBER_NUM
+#DIM DYNAMIC CHARA_ID
+
+;共通部分
+CALL COM_ABLE_COMMON(852)
+SIF RESULT == 0
+	RETURN 0
+;主人公がプレイヤーのとき限定
+SIF MPLY:0 != MASTER
+	RETURN 0
+;ターゲットがいない時不可
+SIF MTAR_NUM == 0
+	RETURN 0
+;当事者以外、誰も見ておらず入っても来ない状況のみ可とする
+;使用中の設備が自動施錠でないなら不可
+CALL HO_CHECK_USE_MODULE_ELEM(MPLY:0, "自動施錠")
+SIF RESULT == 0
+	RETURN 0
+;使用中の設備が遮蔽でないなら不可
+CALL HO_CHECK_USE_MODULE_ELEM(MPLY:0, "遮蔽")
+SIF RESULT == 0
+	RETURN 0
+;同行者全員の欲情が9以上になっていない場合不可
+CALL HO_GET_COMPANION_LIST()
+MEMBER_NUM = RESULT
+FOR LOCAL:0, 0, MEMBER_NUM
+	SIF PALAM:(LOCAL:0):欲情 < PALAMLV:9
+		RETURN 0
+NEXT
+RETURN 1
+
+;-------------------------------------------------
+;メイン処理
+;-------------------------------------------------
+@COM852
+;●実行値の計算
+;実行判定
+;当コマンドを実行できるようになった時点で、無条件でウフフ可能
+
+;相席状態で押し倒した場合は同行状態にする
+FOR LOCAL:0, 0, MTAR_NUM
+	IF TCVAR:(MTAR:LOCAL):相席フラグ == 1 && CFLAG:(MTAR:LOCAL):調教参加フラグ == 1
+		TCVAR:(MTAR:LOCAL):相席フラグ = 0
+		CALL HO_SET_CHARAACT((MTAR:LOCAL), "同行中")
+		TCVAR:(MTAR:LOCAL):行動待機時間 = 0
+	ENDIF
+NEXT
+
+;整合性をややこしくしないため全EQUIP解除
+CALL INIT_EQUIP
+
+FLAG:ウフフフラグ = 1
+FLAG:調教モード = 1
+RETURN 1
+
+
+
+;-------------------------------------------------
+;地の文(前文)
+;-------------------------------------------------
+@COM_TEXT_BEFORE852
+PRINTFORMW %ANAME(MPLY:0)%たちは淫らな気分に押し流されることにした……
+
+;-------------------------------------------------
+
+;コマンド区分
+;-------------------------------------------------
+
+@COM_AVAILABLE_WHEN852
+RETURN コマンド_居住区

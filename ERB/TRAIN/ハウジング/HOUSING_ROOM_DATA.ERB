@@ -288,3 +288,25 @@ RETURN USE_MONEY
 ;ルームの内容説明
 @HO_ROOM_DESC_13
 RESULTS '= "筋力を維持するためのトレーニング機器や模擬戦用のモジュールが設置可能な部屋"
+
+;-------------------------------------------------
+;高電力娯楽室
+;-------------------------------------------------
+@HO_ROOM_DATA_14
+#DIMS _DIC_ROOM_DATA
+_DIC_ROOM_DATA '= "[ROOM_NAME:高電力娯楽室][ROOM_TAG:高電力娯楽室,][ROOM_CAPACITY:4]"
+RESULTS = %_DIC_ROOM_DATA%
+;ルームの作成条件
+@HO_ROOM_IS_CRAFTABLE_14
+RETURN 1
+;クラフトモードで要求する作成コスト
+@HO_ROOM_CRAFT_RESOURCE_14(USE_RESOURCE)
+#DIM REF USE_RESOURCE
+#DIM USE_MONEY = 1400000
+USE_RESOURCE:合金加工剤 = 50
+USE_RESOURCE:耐熱合金 = 200
+USE_RESOURCE:超電導回路      = 10
+RETURN USE_MONEY
+;ルームの内容説明
+@HO_ROOM_DESC_14
+RESULTS '= "何らかの専門的な設備を設置する用途の娯楽スペース。主に場所と電力を食うものを設置するのに使う"

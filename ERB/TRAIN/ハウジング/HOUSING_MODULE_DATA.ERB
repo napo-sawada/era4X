@@ -402,6 +402,39 @@ RETURN USE_MONEY
 RETURN 1
 
 ;-------------------------------------------------
+;撮影設備
+;-------------------------------------------------
+@HO_MODULE_DATA_14
+#DIMS _DIC_MODULE_DATA
+_DIC_MODULE_DATA '= "[MODULE_NAME:撮影設備][人数:9][用途:撮影,][制限:高電力娯楽室,][属性:施錠可,自動施錠,遮蔽,]"
+RESULTS = %_DIC_MODULE_DATA%
+;モジュールの使用/停止時に呼び出される地の文
+@HO_MODULE_USE_MESSAGE_14(CHARA_ID, STOP_USE = 0)
+#DIM CHARA_ID
+#DIM STOP_USE
+IF !STOP_USE
+    RESULTS '= @"%ANAME(CHARA_ID)%は撮影設備のブース内に入った" 
+ELSE
+    RESULTS '= @"%ANAME(CHARA_ID)%は撮影ブース内から立ち去った" 
+ENDIF
+;モジュールの内容説明
+@HO_MODULE_DESC_14
+RESULTS '= "撮影を行う専門的な設備を集めたブース。カメラも衣装も小道具も揃っている"
+;クラフトモードで要求する作成コスト
+@HO_MODULE_CRAFT_RESOURCE_14(USE_RESOURCE)
+#DIM REF USE_RESOURCE
+#DIM USE_MONEY = 1000000
+;USE_RESOURCE:ロック布        = 40
+USE_RESOURCE:合金加工剤      = 20
+USE_RESOURCE:耐熱合金        = 100
+USE_RESOURCE:超電導回路      = 10
+;USE_RESOURCE:ゴルンミスト発生器      = 5
+RETURN USE_MONEY
+;モジュールの作成条件
+@HO_MODULE_IS_CRAFTABLE_14
+RETURN 1
+
+;-------------------------------------------------
 ;クルー私室
 ;-------------------------------------------------
 @HO_MODULE_DATA_1000
