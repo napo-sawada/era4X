@@ -15,8 +15,6 @@ SELECTCASE RAND:5
 		報酬 += ABL:ID:料理 * 5
 		報酬 += ABL:ID:知略 * 5
 		報酬 += ABL:ID:目星 * 20
-		SIF ID > 0
-			CFLAG:ID:好感度 = RAND:20
 		EXP:ID:料理経験値 += 1
 		EXP:ID:知略経験値 += 1
 		EXP:ID:目星経験値 += 2
@@ -29,8 +27,6 @@ SELECTCASE RAND:5
 		報酬 += ABL:ID:料理 * 5
 		報酬 += ABL:ID:知略 * 10
 		報酬 += ABL:ID:目星 * 10
-		SIF ID > 0
-			CFLAG:ID:好感度 = RAND:20
 		EXP:ID:料理経験値 += 1
 		EXP:ID:知略経験値 += 2
 		EXP:ID:目星経験値 += 3
@@ -42,8 +38,6 @@ SELECTCASE RAND:5
 		PRINTL 艦内雑務の傍ら、料理担当として頑張ったようだ。
 		報酬 += ABL:ID:料理 * 1
 		報酬 += ABL:ID:目星 * 1
-		SIF CFLAG:ID > 0
-			CFLAG:ID:好感度 = RAND:20 + 10
 		EXP:ID:料理経験値 += 6
 		EXP:ID:目星経験値 += 1
 		SETCOLOR カラー_注釈
@@ -54,8 +48,6 @@ SELECTCASE RAND:5
 		PRINTL 艦内設備のチェックをしっかりと行なったようだ。
 		報酬 += ABL:ID:知略 * 10
 		報酬 += ABL:ID:目星 * 30
-		SIF ID > 0
-			CFLAG:ID:好感度 = RAND:20
 		EXP:ID:知略経験値 += 2
 		EXP:ID:目星経験値 += 3
 		SETCOLOR カラー_注釈
@@ -66,8 +58,6 @@ SELECTCASE RAND:5
 		報酬 += ABL:ID:料理 * 5
 		報酬 += ABL:ID:知略 * 5
 		報酬 += ABL:ID:目星 * 5
-		SIF ID > 0
-			CFLAG:ID:好感度 = RAND:20
 		EXP:ID:操艦経験値 += 4
 		EXP:ID:白兵経験値 += 4
 		EXP:ID:料理経験値 += 4
@@ -91,6 +81,7 @@ PRINTFORML ------------%CALLNAME:ID%の働き------------
 PRINTFORML 今回の艦内雑務で経費が随分と浮いたようだ。
 SIF ID > 0
 	PRINTFORML 働きぶりを褒められた%CALLNAME:ID%は喜んでいるようだ。
+	CFLAG:ID:好感度 += RAND:20 + 10
 PRINTFORML --------------------------------------------
 
 RETURN 報酬
