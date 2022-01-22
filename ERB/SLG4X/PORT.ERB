@@ -768,10 +768,16 @@ ELSEIF RESULT == 9
         GOTO INPUT_LOOP
     ENDIF
 ELSEIF RESULT == 10
-    IF SPACE_FORCE_BUILD
+; 商店の処理をコピペして宇宙軍基地の有無を判定ｺｺｶﾗ
+    IF PORT_POSITION_ID:PORT_ID == CHARACTER_POSITION && IS_RELEASED_SPACE_FORCE_BASE_MODULE_PORT(PORT_ID)
         PRINTFORMW すでに宇宙軍基地は建てられています
         RETURN
     ENDIF
+    IF 星系座標ID:PORT_ID == CHARACTER_POSITION && IS_RELEASED_SPACE_FORCE_BASE_MODULE(PORT_ID)
+        PRINTFORMW すでに宇宙軍基地は建てられています
+        RETURN
+    ENDIF
+;変更したのｺｺﾏﾃﾞ
     CALL SLOT_CHANGE_DIALOG("宇宙軍基地", 5000000)
     SPACE_FORCE_BUILD = 1
     IF RESULT == 1
@@ -1829,6 +1835,21 @@ RETURNF ITER
 ;-------------------------------------
 ; 宇宙軍基地が設置されているか
 ;-------------------------------------
+; 独立宇宙港での処理を追記。商店のもののコピペ。
+@IS_RELEASED_SPACE_FORCE_BASE_MODULE_PORT(PORT_ID)
+#FUNCTION
+#DIM PORT_ID
+#DIM DYNAMIC ITER
+
+FOR LOCAL, 0, STAR_PORT_SLOT_NUM
+    SIF PORT_SLOT:PORT_ID:LOCAL == 宇宙軍基地
+        ITER ++
+NEXT
+
+RETURNF ITER
+
+; 惑星の宇宙港での処理（元々あったもの）
+; 関数名の変更も考えたけど SLG_SHOP.ERB も弄るのは遠慮して既存のものはそのまま。
 @IS_RELEASED_SPACE_FORCE_BASE_MODULE(STAR_ID)
 #FUNCTION
 #DIM STAR_ID
