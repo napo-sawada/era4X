@@ -43,7 +43,7 @@ SELECTCASE QUEST_PROGRESS:15
 		参加人数 = RESULT
 
 		PRINTFORML %CALLNAME:MASTER%は仲間たちと共に大破した宇宙船の前にいた
-		PRINTFORML 全時代的な旧式の艦だが、れっきとした戦艦だ。その巨体と穴の開いた装甲の分厚さは、宇宙の旅に耐えうる強度を誇っていたことを如実に語っている
+		PRINTFORML 前時代的な旧式の艦だが、れっきとした戦艦だ。その巨体と穴の開いた装甲の分厚さは、宇宙の旅に耐えうる強度を誇っていたことを如実に語っている
 		PRINTFORMW この艦を修復するのに、どれだけの資材と金が必要になるのか……
 		PRINTL
 		PRINTFORML とりあえず動き出さないことには何も始まらない
@@ -89,7 +89,7 @@ SELECTCASE QUEST_PROGRESS:15
 			PRINTFORMW 困っている人を助けたり、労働をしたりして地道に稼ぐことになるだろう
 			QUEST_PROGRESS:15 = 2
 		ELSE
-			PRINTFORML %CALLNAME:MASTER%のチームの次なる目標は、戦艦内部を修理するための資金$1,000,000を集めることだ
+			PRINTFORML %CALLNAME:MASTER%のチームの当面の目標は、外部装甲を修理するための資金$500,000を集めることだ
 			PRINTFORMW 困っている人を助けたり、労働をしたりして地道に稼ぐことになるだろう
 		ENDIF
 	CASE 2
@@ -122,7 +122,7 @@ SELECTCASE QUEST_PROGRESS:15
 			PRINTFORMW 困っている人を助けたり、労働をしたりして地道に稼ぐことになるだろう
 			QUEST_PROGRESS:15 = 3
 		ELSE
-			PRINTFORML %CALLNAME:MASTER%の最後の目標は、エンジン、AI、センサーを買うための資金$100,000を集めることだ
+			PRINTFORML %CALLNAME:MASTER%のチームの次なる目標は、戦艦内部を修理するための資金$1,000,000を集めることだ
 			PRINTFORMW 困っている人を助けたり、労働をしたりして地道に稼ぐことになるだろう
 		ENDIF
 	CASE 3

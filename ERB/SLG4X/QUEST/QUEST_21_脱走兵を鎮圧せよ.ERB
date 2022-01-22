@@ -47,47 +47,49 @@ IF QUEST_PROGRESS:21 == 0
 	IF RAND:100 < 90
 		PRINTFORML 「敵の構成は汎用フリゲートを旗艦とした、フリゲート1隻、コルベット3隻の1個偵察分隊規模だ」
 		PRINTFORML 「武装は標準装備のままだから、高級装備のコルベットが3隻もあれば余裕だろう」			
-		CALL INIT_PRESET_SHIP(10, POS_ID, 汎用コルベット, "脱走軍フリゲート", 汎用フリゲート)
+		CALL INIT_PRESET_SHIP(10, POS_ID, 汎用フリゲート, "脱走軍フリゲート", 汎用フリゲート)
 		QUEST_FLAG_SHIP_ID:21 = RESULT
 		CALL INIT_PRESET_SHIP(10, POS_ID, 汎用コルベット, "脱走軍コルベット", 汎用コルベット)
 		CALL INIT_PRESET_SHIP(10, POS_ID, 汎用コルベット, "脱走軍コルベット", 汎用コルベット)
 		CALL INIT_PRESET_SHIP(10, POS_ID, 汎用コルベット, "脱走軍コルベット", 汎用コルベット)
-
+		QUEST_PROGRESS:21 = 1
 	ELSEIF RAND:100 < 90
 		PRINTFORML 「敵の構成は汎用フリゲートを旗艦とした、フリゲート2隻、コルベット6隻の2個偵察分隊規模だ」
 		PRINTFORML 「武装は標準装備のままだが、こちらもフリゲートが欲しい編成だな」
-		CALL INIT_PRESET_SHIP(10, POS_ID, 汎用コルベット, "脱走軍フリゲート", 汎用フリゲート)
+		CALL INIT_PRESET_SHIP(10, POS_ID, 汎用フリゲート, "脱走軍フリゲート", 汎用フリゲート)
 		QUEST_FLAG_SHIP_ID:21 = RESULT
 		CALL INIT_PRESET_SHIP(10, POS_ID, 汎用コルベット, "脱走軍フリゲート", 汎用フリゲート)
 		CALL INIT_PRESET_SHIP(10, POS_ID, 汎用コルベット, "脱走軍コルベット", 汎用コルベット)
 		CALL INIT_PRESET_SHIP(10, POS_ID, 汎用コルベット, "脱走軍コルベット", 汎用コルベット)
 		CALL INIT_PRESET_SHIP(10, POS_ID, 汎用コルベット, "脱走軍コルベット", 汎用コルベット)
-		CALL INIT_PRESET_SHIP(10, POS_ID, 汎用コルベット, "脱走軍フリゲート", 汎用フリゲート)
+		CALL INIT_PRESET_SHIP(10, POS_ID, 汎用フリゲート, "脱走軍フリゲート", 汎用フリゲート)
 		CALL INIT_PRESET_SHIP(10, POS_ID, 汎用コルベット, "脱走軍コルベット", 汎用コルベット)
 		CALL INIT_PRESET_SHIP(10, POS_ID, 汎用コルベット, "脱走軍コルベット", 汎用コルベット)
 		CALL INIT_PRESET_SHIP(10, POS_ID, 汎用コルベット, "脱走軍コルベット", 汎用コルベット)
+		QUEST_PROGRESS:21 = 2
 	ELSE
 		PRINTFORML 「敵の構成は汎用駆逐艦を旗艦とした、駆逐艦1隻、フリゲート3隻、コルベット9隻の1個偵察小隊規模だ」
 		PRINTFORML 「間違ってもコルベットだけで突っ込むんじゃないぞ。駆逐艦の主砲であっという間にやられてしまうからな」
-		CALL INIT_PRESET_SHIP(10, POS_ID, 汎用コルベット, "脱走軍駆逐艦", 汎用駆逐艦)
+		CALL INIT_PRESET_SHIP(10, POS_ID, 汎用駆逐艦, "脱走軍駆逐艦", 汎用駆逐艦)
 		QUEST_FLAG_SHIP_ID:21 = RESULT
-		CALL INIT_PRESET_SHIP(10, POS_ID, 汎用コルベット, "脱走軍フリゲート", 汎用フリゲート)
-		CALL INIT_PRESET_SHIP(10, POS_ID, 汎用コルベット, "脱走軍フリゲート", 汎用フリゲート)
-		CALL INIT_PRESET_SHIP(10, POS_ID, 汎用コルベット, "脱走軍フリゲート", 汎用フリゲート)
+		CALL INIT_PRESET_SHIP(10, POS_ID, 汎用フリゲート, "脱走軍フリゲート", 汎用フリゲート)
+		CALL INIT_PRESET_SHIP(10, POS_ID, 汎用フリゲート, "脱走軍フリゲート", 汎用フリゲート)
+		CALL INIT_PRESET_SHIP(10, POS_ID, 汎用フリゲート, "脱走軍フリゲート", 汎用フリゲート)
 		CALL INIT_PRESET_SHIP(10, POS_ID, 汎用コルベット, "脱走軍コルベット", 汎用コルベット)
 		CALL INIT_PRESET_SHIP(10, POS_ID, 汎用コルベット, "脱走軍コルベット", 汎用コルベット)
 		CALL INIT_PRESET_SHIP(10, POS_ID, 汎用コルベット, "脱走軍コルベット", 汎用コルベット)
-		CALL INIT_PRESET_SHIP(10, POS_ID, 汎用コルベット, "脱走軍フリゲート", 汎用フリゲート)
+		CALL INIT_PRESET_SHIP(10, POS_ID, 汎用フリゲート, "脱走軍フリゲート", 汎用フリゲート)
 		CALL INIT_PRESET_SHIP(10, POS_ID, 汎用コルベット, "脱走軍コルベット", 汎用コルベット)
 		CALL INIT_PRESET_SHIP(10, POS_ID, 汎用コルベット, "脱走軍コルベット", 汎用コルベット)
 		CALL INIT_PRESET_SHIP(10, POS_ID, 汎用コルベット, "脱走軍コルベット", 汎用コルベット)
 		CALL INIT_PRESET_SHIP(10, POS_ID, 汎用コルベット, "脱走軍コルベット", 汎用コルベット)
 		CALL INIT_PRESET_SHIP(10, POS_ID, 汎用コルベット, "脱走軍コルベット", 汎用コルベット)
 		CALL INIT_PRESET_SHIP(10, POS_ID, 汎用コルベット, "脱走軍コルベット", 汎用コルベット)
+		QUEST_PROGRESS:21 = 3
 	ENDIF
 	PRINTFORML 「頼んだぞ！」
 	PRINTFORML %CALLNAME:MASTER%は脱走兵鎮圧のミッションを請負った
-	QUEST_PROGRESS:21 = 1
+
 ELSE
 	IF SHIP_COUNTRY:(QUEST_FLAG_SHIP_ID:21) == 国家ID_一般海賊
 		CALL ID2POS(SHIP_POSITION:(QUEST_FLAG_SHIP_ID:21))
@@ -99,10 +101,22 @@ ELSE
 	PRINTFORML %CALLNAME:MASTER%は士官らしき男にクエスト完了の旨を伝えた
 	PRINTFORML 「おお、よくやってくれた。これでこの国の不安事項を一つ取り除くことができた」
 	PRINTFORML 「ほら、少ないが報酬だ。国からの印象もよくなっただろう」
-	PRINTW 所持金 +$100,000
-	CALL GET_STAR_ID_FROM_POS(CHARACTER_POSITION)
-	REL_LIKE_COUNTRY:(STAR_OWNER:RESULT):国家ID_プレイヤー += 15
-	MONEY += 100000
+	IF QUEST_PROGRESS:21 == 1
+		PRINTW 所持金 +$100,000
+		CALL GET_STAR_ID_FROM_POS(CHARACTER_POSITION)
+		REL_LIKE_COUNTRY:(STAR_OWNER:RESULT):国家ID_プレイヤー += 15
+		MONEY += 100000
+	ELSEIF QUEST_PROGRESS:21 == 2
+		PRINTW 所持金 +$250,000
+		CALL GET_STAR_ID_FROM_POS(CHARACTER_POSITION)
+		REL_LIKE_COUNTRY:(STAR_OWNER:RESULT):国家ID_プレイヤー += 30
+		MONEY += 250000
+	ELSE
+		PRINTW 所持金 +$500,000
+		CALL GET_STAR_ID_FROM_POS(CHARACTER_POSITION)
+		REL_LIKE_COUNTRY:(STAR_OWNER:RESULT):国家ID_プレイヤー += 50
+		MONEY += 500000
+	ENDIF
 	PRINTFORML 
 	QUEST_PROGRESS:21 = 0
 	QUEST_COMPLETE_DATE:21 = DAY
