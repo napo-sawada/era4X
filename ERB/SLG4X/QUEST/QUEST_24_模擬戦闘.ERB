@@ -52,6 +52,8 @@ PRINTFORMW 話は早い方がいい。早速%CALLNAME:MASTER%は模擬戦に向�
 PRINTW ………
 PRINTW ……
 PRINTW …
+;内訳：皇国ドクトリン6(並5強1)　近隣国ドクトリン(銀河人民統一連邦・民主主義国家・ハースバルズ王国・パロス教団各1)
+敵艦隊装備傾向 = RAND:10
 POSITION_ID = CHARACTER_POSITION
 LOCAL = 1
 WHILE LOCAL
@@ -68,6 +70,7 @@ CALL POS2ID(SECTOR_ID, X_POS, Y_POS)
 皇国好感度 = REL_LIKE_COUNTRY:国家ID_豊秋津皇国:国家ID_プレイヤー
 REL_LIKE_COUNTRY:国家ID_豊秋津皇国:国家ID_プレイヤー = -1000
 
+
 SHIP_COUNT = 0
 DESTROYED_COUNT = 0
 
@@ -83,16 +86,393 @@ FOR SHIP_ID, 0, MAX_SHIP
 	SELECTCASE SHIP_CATEGORY:SHIP_ID
 		CASE コルベット
 			CALL INIT_PRESET_SHIP(国家ID_豊秋津皇国, 模擬戦座標, 汎用コルベット, "皇国コルベット", 汎用コルベット)
+			SELECTCASE 敵艦隊装備傾向
+				CASE 0 TO 4 ;皇国制式(並)　ベースは各国初期装備(皇国上級は最終装備)だが、装備調整で可能な限り元艦に特徴を寄せる　回避微減
+					SHIP_EQUIP:主砲:0:RESULT = 31
+					SHIP_EQUIP:副砲:0:RESULT = 2
+					SHIP_EQUIP:シールド:0:RESULT = 5
+					SHIP_EQUIP:装甲:0:RESULT = 5
+					SHIP_EQUIP:エンジン:0:RESULT = 5
+				CASE 5 ;皇国制式(強)
+					SHIP_EQUIP:主砲:0:RESULT = 32
+					SHIP_EQUIP:副砲:0:RESULT = 3
+					SHIP_EQUIP:シールド:0:RESULT = 9
+					SHIP_EQUIP:装甲:0:RESULT = 9
+					SHIP_EQUIP:エンジン:0:RESULT = 9
+					SHIP_EQUIP:AI:0:RESULT = 2
+				CASE 6 ;銀河人民統一連邦風　全体的に安っぽく
+					SHIP_EQUIP:主砲:0:RESULT = 2
+					SHIP_EQUIP:副砲:0:RESULT = 2
+					SHIP_EQUIP:シールド:0:RESULT = 5
+					SHIP_EQUIP:装甲:0:RESULT = 34
+				CASE 7 ;民主主義国家風　機動力を水増し
+					SHIP_EQUIP:主砲:0:RESULT = 37
+					SHIP_EQUIP:副砲:0:RESULT = 20
+					SHIP_EQUIP:シールド:0:RESULT = 5
+					SHIP_EQUIP:装甲:0:RESULT = 34
+					SHIP_EQUIP:エンジン:0:RESULT = 5
+					SHIP_EQUIP:AI:0:RESULT = 3
+				CASE 8 ;ハースバルズ王国風　コルベットを採用していない為ネヴァン級を元にでっち上げる
+					SHIP_EQUIP:主砲:0:RESULT = 2
+					SHIP_EQUIP:副砲:0:RESULT = 2
+					SHIP_EQUIP:シールド:0:RESULT = 5
+					SHIP_EQUIP:装甲:0:RESULT = 18
+				CASE 9 ;パロス教団風
+					SHIP_EQUIP:主砲:0:RESULT = 152
+					SHIP_EQUIP:副砲:0:RESULT = 34
+					SHIP_EQUIP:装甲:0:RESULT = 14
+			ENDSELECT
 		CASE フリゲート
 			CALL INIT_PRESET_SHIP(国家ID_豊秋津皇国, 模擬戦座標, 汎用フリゲート, "皇国フリゲート", 汎用フリゲート)
+			SELECTCASE 敵艦隊装備傾向
+				CASE 0 TO 4 ;皇国制式(並)　回避をガッツリ下げる。火力が死ぬため副砲の没収はしない
+					SHIP_EQUIP:主砲:0:RESULT = 34
+					SHIP_EQUIP:副砲:0:RESULT = 2
+					SHIP_EQUIP:副砲:1:RESULT = 2
+					SHIP_EQUIP:シールド:0:RESULT = 6
+					SHIP_EQUIP:装甲:0:RESULT = 6
+				CASE 5 ;皇国制式(強)
+					SHIP_EQUIP:主砲:0:RESULT = 35
+					SHIP_EQUIP:副砲:0:RESULT = 3
+					SHIP_EQUIP:副砲:1:RESULT = 3
+					SHIP_EQUIP:シールド:0:RESULT = 10
+					SHIP_EQUIP:装甲:0:RESULT = 10
+					SHIP_EQUIP:エンジン:0:RESULT = 6
+					SHIP_EQUIP:AI:0:RESULT = 2
+				CASE 6 ;銀河人民統一連邦風　全体的に安っぽく
+					SHIP_EQUIP:主砲:0:RESULT = 6
+					SHIP_EQUIP:副砲:0:RESULT = 2
+					SHIP_EQUIP:副砲:1:RESULT = 2
+					SHIP_EQUIP:シールド:0:RESULT = 6
+					SHIP_EQUIP:装甲:0:RESULT = 35
+				CASE 7 ;民主主義国家風　機動力を水増し
+					SHIP_EQUIP:主砲:0:RESULT = 25
+					SHIP_EQUIP:副砲:0:RESULT = 20
+					SHIP_EQUIP:副砲:1:RESULT = 20
+					SHIP_EQUIP:シールド:0:RESULT = 6
+					SHIP_EQUIP:装甲:0:RESULT = 35
+					SHIP_EQUIP:エンジン:0:RESULT = 10
+					SHIP_EQUIP:AI:0:RESULT = 2
+				CASE 8 ;ハースバルズ王国風　回避を引き下げつつ装甲を重装化する
+					SHIP_EQUIP:主砲:0:RESULT = 6
+					SHIP_EQUIP:副砲:0:RESULT = 2
+					SHIP_EQUIP:副砲:1:RESULT = 2
+					SHIP_EQUIP:シールド:0:RESULT = 6
+					SHIP_EQUIP:装甲:0:RESULT = 23
+				CASE 9 ;パロス教団風
+					SHIP_EQUIP:主砲:0:RESULT = 153
+					SHIP_EQUIP:副砲:0:RESULT = 34
+					SHIP_EQUIP:副砲:1:RESULT = 34
+					SHIP_EQUIP:装甲:0:RESULT = 15
+			ENDSELECT
 		CASE 駆逐艦
 			CALL INIT_PRESET_SHIP(国家ID_豊秋津皇国, 模擬戦座標, 汎用駆逐艦, "皇国駆逐艦", 汎用駆逐艦)
+			SELECTCASE 敵艦隊装備傾向
+				CASE 0 TO 4 ;皇国制式(並)　副砲１門封印。回避微減
+					SHIP_EQUIP:主砲:0:RESULT = 16
+					SHIP_EQUIP:主砲:1:RESULT = 16
+					SHIP_EQUIP:副砲:0:RESULT = 5
+					SHIP_EQUIP:副砲:1:RESULT = 0
+					SHIP_EQUIP:シールド:0:RESULT = 6
+					SHIP_EQUIP:装甲:0:RESULT = 6
+					SHIP_EQUIP:装甲:1:RESULT = 6
+					SHIP_EQUIP:AI:0:RESULT = 2
+				CASE 5 ;皇国制式(強)
+					SHIP_EQUIP:主砲:0:RESULT = 19
+					SHIP_EQUIP:主砲:1:RESULT = 19
+					SHIP_EQUIP:副砲:0:RESULT = 6
+					SHIP_EQUIP:副砲:1:RESULT = 0
+					SHIP_EQUIP:シールド:0:RESULT = 10
+					SHIP_EQUIP:装甲:0:RESULT = 10
+					SHIP_EQUIP:装甲:1:RESULT = 10
+					SHIP_EQUIP:エンジン:0:RESULT = 6
+					SHIP_EQUIP:AI:0:RESULT = 3
+				CASE 6 ;銀河人民統一連邦風　重装甲化
+					SHIP_EQUIP:主砲:0:RESULT = 6
+					SHIP_EQUIP:主砲:1:RESULT = 6
+					SHIP_EQUIP:副砲:0:RESULT = 29
+					SHIP_EQUIP:副砲:1:RESULT = 29
+					SHIP_EQUIP:シールド:0:RESULT = 6
+					SHIP_EQUIP:装甲:0:RESULT = 10
+					SHIP_EQUIP:装甲:1:RESULT = 6
+					SHIP_EQUIP:エンジン:0:RESULT = 6
+					SHIP_EQUIP:AI:0:RESULT = 2
+				CASE 7 ;民主主義国家風　スロット不足から主砲を強化。装甲と機動力を微調整。本来装備されていない副砲を撤廃。
+					SHIP_EQUIP:主砲:0:RESULT = 28
+					SHIP_EQUIP:主砲:1:RESULT = 28
+					SHIP_EQUIP:副砲:0:RESULT = 0
+					SHIP_EQUIP:副砲:1:RESULT = 0
+					SHIP_EQUIP:シールド:0:RESULT = 6
+					SHIP_EQUIP:装甲:0:RESULT = 23
+					SHIP_EQUIP:装甲:1:RESULT = 35
+					SHIP_EQUIP:エンジン:0:RESULT = 6
+					SHIP_EQUIP:AI:0:RESULT = 2
+				CASE 8 ;ハースバルズ王国風　回避を引き下げつつ装甲を重装化する
+					SHIP_EQUIP:主砲:0:RESULT = 16
+					SHIP_EQUIP:主砲:1:RESULT = 16
+					SHIP_EQUIP:副砲:0:RESULT = 5
+					SHIP_EQUIP:副砲:1:RESULT = 5
+					SHIP_EQUIP:シールド:0:RESULT = 6
+					SHIP_EQUIP:装甲:0:RESULT = 10
+					SHIP_EQUIP:装甲:1:RESULT = 19
+					SHIP_EQUIP:エンジン:0:RESULT = 6
+					SHIP_EQUIP:AI:0:RESULT = 2
+				CASE 9 ;パロス教団風　直衛艦仕様１装備。装甲を徹底的に削ってシールドを2TIER上げる
+					SHIP_EQUIP:主砲:0:RESULT = 37
+					SHIP_EQUIP:主砲:1:RESULT = 37
+					SHIP_EQUIP:副砲:0:RESULT = 28
+					SHIP_EQUIP:副砲:1:RESULT = 28
+					SHIP_EQUIP:シールド:0:RESULT = 34
+					SHIP_EQUIP:装甲:0:RESULT = 15
+					SHIP_EQUIP:装甲:1:RESULT = 15
+			ENDSELECT
 		CASE 巡洋艦
 			CALL INIT_PRESET_SHIP(国家ID_豊秋津皇国, 模擬戦座標, 汎用巡洋艦, "皇国巡洋艦", 汎用巡洋艦)
+			SELECTCASE 敵艦隊装備傾向
+				CASE 0 TO 4 ;皇国制式(並)　力技でシールド強化。装甲を削る。
+					SHIP_EQUIP:主砲:0:RESULT = 17
+					SHIP_EQUIP:主砲:1:RESULT = 17
+					SHIP_EQUIP:副砲:0:RESULT = 26
+					SHIP_EQUIP:副砲:1:RESULT = 26
+					SHIP_EQUIP:副砲:2:RESULT = 26
+					SHIP_EQUIP:シールド:0:RESULT = 31
+					SHIP_EQUIP:シールド:1:RESULT = 31
+					SHIP_EQUIP:装甲:0:RESULT = 7
+					SHIP_EQUIP:装甲:1:RESULT = 3
+					SHIP_EQUIP:エンジン:0:RESULT = 7
+					SHIP_EQUIP:AI:0:RESULT = 2
+					SHIP_EQUIP:オプション:0:RESULT = 4
+				CASE 5 ;皇国制式(強)
+					SHIP_EQUIP:主砲:0:RESULT = 20
+					SHIP_EQUIP:主砲:1:RESULT = 20
+					SHIP_EQUIP:副砲:0:RESULT = 27
+					SHIP_EQUIP:副砲:1:RESULT = 27
+					SHIP_EQUIP:副砲:2:RESULT = 27
+					SHIP_EQUIP:シールド:0:RESULT = 35
+					SHIP_EQUIP:シールド:1:RESULT = 35
+					SHIP_EQUIP:装甲:0:RESULT = 10
+					SHIP_EQUIP:装甲:1:RESULT = 7
+					SHIP_EQUIP:エンジン:0:RESULT = 11
+					SHIP_EQUIP:AI:0:RESULT = 3
+					SHIP_EQUIP:オプション:0:RESULT = 4
+				CASE 6 ;銀河人民統一連邦風　元が存在しないためマーチ級駆逐艦を元にしてでっちあげる
+					SHIP_EQUIP:主砲:0:RESULT = 9
+					SHIP_EQUIP:主砲:1:RESULT = 9
+					SHIP_EQUIP:副砲:0:RESULT = 43
+					SHIP_EQUIP:副砲:1:RESULT = 43
+					SHIP_EQUIP:副砲:2:RESULT = 43
+					SHIP_EQUIP:シールド:0:RESULT = 7
+					SHIP_EQUIP:シールド:1:RESULT = 7
+					SHIP_EQUIP:装甲:0:RESULT = 40
+					SHIP_EQUIP:装甲:1:RESULT = 20
+					SHIP_EQUIP:エンジン:0:RESULT = 7
+					SHIP_EQUIP:AI:0:RESULT = 2
+				CASE 7 ;民主主義国家風　シールド強化。副砲を1門封印。
+					SHIP_EQUIP:主砲:0:RESULT = 7
+					SHIP_EQUIP:主砲:1:RESULT = 7
+					SHIP_EQUIP:副砲:0:RESULT = 14
+					SHIP_EQUIP:副砲:1:RESULT = 14
+					SHIP_EQUIP:副砲:2:RESULT = 0
+					SHIP_EQUIP:シールド:0:RESULT = 10
+					SHIP_EQUIP:シールド:1:RESULT = 7
+					SHIP_EQUIP:装甲:0:RESULT = 7
+					SHIP_EQUIP:装甲:1:RESULT = 7
+					SHIP_EQUIP:エンジン:0:RESULT = 7
+					SHIP_EQUIP:AI:0:RESULT = 2
+				CASE 8 ;ハースバルズ王国風　装甲を重装化する。
+					SHIP_EQUIP:主砲:0:RESULT = 17
+					SHIP_EQUIP:主砲:1:RESULT = 17
+					SHIP_EQUIP:副砲:0:RESULT = 26
+					SHIP_EQUIP:副砲:1:RESULT = 26
+					SHIP_EQUIP:副砲:2:RESULT = 26
+					SHIP_EQUIP:シールド:0:RESULT = 7
+					SHIP_EQUIP:シールド:1:RESULT = 7
+					SHIP_EQUIP:装甲:0:RESULT = 11
+					SHIP_EQUIP:装甲:1:RESULT = 7
+					SHIP_EQUIP:エンジン:0:RESULT = 7
+					SHIP_EQUIP:AI:0:RESULT = 2
+				CASE 9 ;パロス教団風　装甲を削る。副砲が１機足りない分TEARを1つ上げる
+					SHIP_EQUIP:主砲:0:RESULT = 42
+					SHIP_EQUIP:主砲:1:RESULT = 42
+					SHIP_EQUIP:副砲:0:RESULT = 47
+					SHIP_EQUIP:副砲:1:RESULT = 47
+					SHIP_EQUIP:副砲:2:RESULT = 47
+					SHIP_EQUIP:シールド:0:RESULT = 27
+					SHIP_EQUIP:シールド:1:RESULT = 27
+					SHIP_EQUIP:装甲:0:RESULT = 16
+					SHIP_EQUIP:装甲:1:RESULT = 16
+			ENDSELECT
 		CASE 戦艦
 			CALL INIT_PRESET_SHIP(国家ID_豊秋津皇国, 模擬戦座標, 汎用戦艦, "皇国戦艦", 汎用戦艦)
+			SELECTCASE 敵艦隊装備傾向
+				;いよいよもってでっち上げが厳しくなってきたのが見え見えだが妥協。
+				CASE 0 TO 4 ;皇国制式(並)　装甲とシールド増強。主砲はどうやっても無理なので諦める
+					SHIP_EQUIP:主砲:0:RESULT = 14
+					SHIP_EQUIP:主砲:1:RESULT = 14
+					SHIP_EQUIP:副砲:0:RESULT = 26
+					SHIP_EQUIP:副砲:1:RESULT = 26
+					SHIP_EQUIP:副砲:2:RESULT = 26
+					SHIP_EQUIP:副砲:3:RESULT = 26
+					SHIP_EQUIP:シールド:0:RESULT = 32
+					SHIP_EQUIP:シールド:1:RESULT = 32
+					SHIP_EQUIP:装甲:0:RESULT = 12
+					SHIP_EQUIP:装甲:1:RESULT = 12
+					SHIP_EQUIP:装甲:2:RESULT = 8
+					SHIP_EQUIP:エンジン:0:RESULT = 8
+					SHIP_EQUIP:AI:0:RESULT = 2
+					SHIP_EQUIP:オプション:0:RESULT = 4
+				CASE 5 ;皇国制式(強)
+					SHIP_EQUIP:主砲:0:RESULT = 14
+					SHIP_EQUIP:主砲:1:RESULT = 14
+					SHIP_EQUIP:副砲:0:RESULT = 27
+					SHIP_EQUIP:副砲:1:RESULT = 27
+					SHIP_EQUIP:副砲:2:RESULT = 27
+					SHIP_EQUIP:副砲:3:RESULT = 27
+					SHIP_EQUIP:シールド:0:RESULT = 36
+					SHIP_EQUIP:シールド:1:RESULT = 36
+					SHIP_EQUIP:装甲:0:RESULT = 29
+					SHIP_EQUIP:装甲:1:RESULT = 29
+					SHIP_EQUIP:装甲:2:RESULT = 29
+					SHIP_EQUIP:エンジン:0:RESULT = 12
+					SHIP_EQUIP:AI:0:RESULT = 3
+					SHIP_EQUIP:オプション:0:RESULT = 4
+				CASE 6 ;銀河人民統一連邦風　スロットの差異が大きくマルタ級風にするのは正直厳しいため、とりあえず実弾兵装として連装レールガンを積む
+					SHIP_EQUIP:主砲:0:RESULT = 54
+					SHIP_EQUIP:主砲:1:RESULT = 54
+					SHIP_EQUIP:副砲:0:RESULT = 45
+					SHIP_EQUIP:副砲:1:RESULT = 45
+					SHIP_EQUIP:副砲:2:RESULT = 45
+					SHIP_EQUIP:副砲:3:RESULT = 45
+					SHIP_EQUIP:シールド:0:RESULT = 8
+					SHIP_EQUIP:シールド:1:RESULT = 8
+					SHIP_EQUIP:装甲:0:RESULT = 8
+					SHIP_EQUIP:装甲:1:RESULT = 8
+					SHIP_EQUIP:装甲:2:RESULT = 8
+					SHIP_EQUIP:エンジン:0:RESULT = 8
+					SHIP_EQUIP:AI:0:RESULT = 2
+				CASE 7 ;民主主義国家風　メルカバー級をベースにした近接ガン殴り仕様
+					SHIP_EQUIP:主砲:0:RESULT = 9
+					SHIP_EQUIP:主砲:1:RESULT = 9
+					SHIP_EQUIP:副砲:0:RESULT = 15
+					SHIP_EQUIP:副砲:1:RESULT = 15
+					SHIP_EQUIP:副砲:2:RESULT = 15
+					SHIP_EQUIP:副砲:3:RESULT = 15
+					SHIP_EQUIP:シールド:0:RESULT = 8
+					SHIP_EQUIP:シールド:1:RESULT = 8
+					SHIP_EQUIP:装甲:0:RESULT = 8
+					SHIP_EQUIP:装甲:1:RESULT = 8
+					SHIP_EQUIP:装甲:2:RESULT = 8
+					SHIP_EQUIP:エンジン:0:RESULT = 8
+					SHIP_EQUIP:AI:0:RESULT = 2
+				CASE 8 ;ハースバルズ王国風　耐久性に特化。副砲を２門封印。
+					SHIP_EQUIP:主砲:0:RESULT = 14
+					SHIP_EQUIP:主砲:1:RESULT = 14
+					SHIP_EQUIP:副砲:0:RESULT = 26
+					SHIP_EQUIP:副砲:1:RESULT = 26
+					SHIP_EQUIP:副砲:2:RESULT = 0
+					SHIP_EQUIP:副砲:3:RESULT = 0
+					SHIP_EQUIP:シールド:0:RESULT = 36
+					SHIP_EQUIP:シールド:1:RESULT = 36
+					SHIP_EQUIP:装甲:0:RESULT = 12
+					SHIP_EQUIP:装甲:1:RESULT = 8
+					SHIP_EQUIP:装甲:2:RESULT = 8
+					SHIP_EQUIP:エンジン:0:RESULT = 8
+					SHIP_EQUIP:AI:0:RESULT = 2
+					SHIP_EQUIP:オプション:0:RESULT = 4
+				CASE 9 ;パロス教団風　非人道兵器は流石に用意できず、艦砲仕様は皇国軍が嫌がったためコイルガン仕様。民主主義国家風の劣化とか言わない
+					SHIP_EQUIP:主砲:0:RESULT = 9
+					SHIP_EQUIP:主砲:1:RESULT = 9
+					SHIP_EQUIP:副砲:0:RESULT = 47
+					SHIP_EQUIP:副砲:1:RESULT = 47
+					SHIP_EQUIP:副砲:2:RESULT = 47
+					SHIP_EQUIP:副砲:3:RESULT = 47
+					SHIP_EQUIP:シールド:0:RESULT = 32
+					SHIP_EQUIP:シールド:1:RESULT = 28
+					SHIP_EQUIP:装甲:0:RESULT = 8
+					SHIP_EQUIP:装甲:1:RESULT = 4
+					SHIP_EQUIP:装甲:2:RESULT = 4
+			ENDSELECT
 		CASE 空母
 			CALL INIT_PRESET_SHIP(国家ID_豊秋津皇国, 模擬戦座標, 汎用空母, "皇国空母", 汎用空母)
+			SELECTCASE 敵艦隊装備傾向
+				CASE 0 TO 4 ;皇国制式(並)　副砲を１門封印
+					SHIP_EQUIP:主砲:0:RESULT = 108
+					SHIP_EQUIP:主砲:1:RESULT = 108
+					SHIP_EQUIP:副砲:0:RESULT = 26
+					SHIP_EQUIP:副砲:1:RESULT = 26
+					SHIP_EQUIP:副砲:2:RESULT = 26
+					SHIP_EQUIP:副砲:3:RESULT = 0
+					SHIP_EQUIP:シールド:0:RESULT = 8
+					SHIP_EQUIP:シールド:1:RESULT = 8
+					SHIP_EQUIP:装甲:0:RESULT = 8
+					SHIP_EQUIP:装甲:1:RESULT = 8
+					SHIP_EQUIP:エンジン:0:RESULT = 8
+					SHIP_EQUIP:AI:0:RESULT = 2
+				CASE 5 ;皇国制式(強)
+					SHIP_EQUIP:主砲:0:RESULT = 109
+					SHIP_EQUIP:主砲:1:RESULT = 109
+					SHIP_EQUIP:副砲:0:RESULT = 27
+					SHIP_EQUIP:副砲:1:RESULT = 27
+					SHIP_EQUIP:副砲:2:RESULT = 27
+					SHIP_EQUIP:副砲:3:RESULT = 0
+					SHIP_EQUIP:シールド:0:RESULT = 12
+					SHIP_EQUIP:シールド:1:RESULT = 12
+					SHIP_EQUIP:装甲:0:RESULT = 12
+					SHIP_EQUIP:装甲:1:RESULT = 12
+					SHIP_EQUIP:エンジン:0:RESULT = 12
+					SHIP_EQUIP:AI:0:RESULT = 3
+				CASE 6 ;銀河人民統一連邦風　ジーナ級風の対空仕様にする
+					SHIP_EQUIP:主砲:0:RESULT = 108
+					SHIP_EQUIP:主砲:1:RESULT = 108
+					SHIP_EQUIP:副砲:0:RESULT = 44
+					SHIP_EQUIP:副砲:1:RESULT = 44
+					SHIP_EQUIP:副砲:2:RESULT = 44
+					SHIP_EQUIP:副砲:3:RESULT = 44
+					SHIP_EQUIP:シールド:0:RESULT = 8
+					SHIP_EQUIP:シールド:1:RESULT = 8
+					SHIP_EQUIP:装甲:0:RESULT = 8
+					SHIP_EQUIP:装甲:1:RESULT = 8
+					SHIP_EQUIP:エンジン:0:RESULT = 8
+					SHIP_EQUIP:AI:0:RESULT = 2
+				CASE 7 ;民主主義国家風　副砲の再現は無理なのでTIERを目一杯上げる
+					SHIP_EQUIP:主砲:0:RESULT = 105
+					SHIP_EQUIP:主砲:1:RESULT = 105
+					SHIP_EQUIP:副砲:0:RESULT = 15
+					SHIP_EQUIP:副砲:1:RESULT = 15
+					SHIP_EQUIP:副砲:2:RESULT = 15
+					SHIP_EQUIP:副砲:3:RESULT = 15
+					SHIP_EQUIP:シールド:0:RESULT = 12
+					SHIP_EQUIP:シールド:1:RESULT = 12
+					SHIP_EQUIP:装甲:0:RESULT = 12
+					SHIP_EQUIP:装甲:1:RESULT = 12
+					SHIP_EQUIP:エンジン:0:RESULT = 8
+					SHIP_EQUIP:AI:0:RESULT = 2
+				CASE 8 ;ハースバルズ王国風　耐久性に特化。副砲を1門封印
+					SHIP_EQUIP:主砲:0:RESULT = 108
+					SHIP_EQUIP:主砲:1:RESULT = 108
+					SHIP_EQUIP:副砲:0:RESULT = 26
+					SHIP_EQUIP:副砲:1:RESULT = 26
+					SHIP_EQUIP:副砲:2:RESULT = 26
+					SHIP_EQUIP:副砲:3:RESULT = 0
+					SHIP_EQUIP:シールド:0:RESULT = 36
+					SHIP_EQUIP:シールド:1:RESULT = 36
+					SHIP_EQUIP:装甲:0:RESULT = 12
+					SHIP_EQUIP:装甲:1:RESULT = 12
+					SHIP_EQUIP:エンジン:0:RESULT = 8
+					SHIP_EQUIP:AI:0:RESULT = 2
+					SHIP_EQUIP:オプション:0:RESULT = 4
+				CASE 9 ;パロス教団風　耐久重視。副砲を１門封印
+					SHIP_EQUIP:主砲:0:RESULT = 105
+					SHIP_EQUIP:主砲:1:RESULT = 105
+					SHIP_EQUIP:副砲:0:RESULT = 47
+					SHIP_EQUIP:副砲:1:RESULT = 47
+					SHIP_EQUIP:副砲:2:RESULT = 47
+					SHIP_EQUIP:副砲:3:RESULT = 0
+					SHIP_EQUIP:シールド:0:RESULT = 32
+					SHIP_EQUIP:シールド:1:RESULT = 28
+					SHIP_EQUIP:装甲:0:RESULT = 8
+					SHIP_EQUIP:装甲:1:RESULT = 4
+			ENDSELECT
 	ENDSELECT
 	SHIP_COUNT ++
 	; あなたの艦隊を指定座標に移動
@@ -133,18 +513,32 @@ REL_LIKE_COUNTRY:国家ID_豊秋津皇国:国家ID_プレイヤー = 皇国好�
 PRINTFORMW 戦闘後、ブリーフィングルームにて評価が行われていた
 PRINTL
 IF SHIP_COUNT == DESTROYED_COUNT
-	PRINTFORML 「全艦撃破判定か……貴殿の実力を見誤っていたのか、我が軍が予想以上に弱かったのか……」
-	PRINTFORML 「どちらにしろ、戦闘に参加した我が軍の兵士たちは今まで以上に厳しくしごきあげなくてはならないようですな」
-	PRINTFORMW 上官らしき男の言葉に、戦闘に参加していた皇国軍の兵士たちの顔が一斉に暗くなる
-	PRINTL
-	PRINTFORML 「貴殿には我が軍の問題点を大いに洗い出していただいた点を評価し、報酬には色を付けさせてもらう」
+	SELECTCASE 敵艦隊装備傾向
+		CASE 0 TO 5 ;皇国軍編成。従来通り兵士たちは受難。
+			PRINTFORML 「全艦撃破判定か……貴殿の実力を見誤っていたのか、我が軍が予想以上に弱かったのか……」
+			PRINTFORML 「どちらにしろ、戦闘に参加した我が軍の兵士たちは今まで以上に厳しくしごきあげなくてはならないようですな」
+			PRINTFORMW 上官らしき男の言葉に、戦闘に参加していた皇国軍の兵士たちの顔が一斉に暗くなる
+			PRINTL
+			PRINTFORML 「貴殿には我が軍の問題点を大いに洗い出していただいた点を評価し、報酬には色を付けさせてもらう」
+		CASE 6 TO 9 ;他国風編成。他国艦隊との交戦データのようなものが取れたため兵士たちはお咎めなし
+			PRINTFORML 「全艦撃破判定か……なるほど、このような戦術もあるのか……」
+			PRINTFORML 「よし、今回の戦闘データの再検証を行う。有用と思わしき場所はすべて洗い出して記録するように」
+			PRINTFORMW 上官らしき男の言葉に、それなりの地位にいると思わしき兵士たちが戦闘データの検証や相談を始めた
+			PRINTL
+			PRINTFORML 「今回は実に有意義な訓練が行われたため、貴殿の報酬には色を付けさせてもらう」
+	ENDSELECT
 	PRINTFORMW 「今後も定期的に演習を行う予定なので、是非参加してほしい」
 	PRINTL
-	報酬額 = SHIP_COUNT * 11000
-	報酬好感度 = SHIP_COUNT * 2
+	SELECTCASE 敵艦隊装備傾向
+		CASE 0 TO 7 ;その他。従来通り一割アップ。
+			報酬額 = SHIP_COUNT * 11000
+			報酬好感度 = SHIP_COUNT * 2
+		CASE 8 TO 9 ;かつて敗北した敵国と現在の敵性勢力。報酬25％＆好感度が追加で1アップ。
+			報酬額 = SHIP_COUNT * 12500
+			報酬好感度 = SHIP_COUNT * 3
+	ENDSELECT
 ELSE
 	PRINTFORML 「互いにいい経験になりましたな」
-	PRINTFORML 「貴殿には我が軍の問題点を大いに洗い出していただいた点を評価し、報酬には色を付けさせてもらう」
 	PRINTFORMW 「今後も定期的に演習を行う予定なので、是非参加してほしい」
 	報酬額 = DESTROYED_COUNT * 10000
 	報酬好感度 = DESTROYED_COUNT * 2

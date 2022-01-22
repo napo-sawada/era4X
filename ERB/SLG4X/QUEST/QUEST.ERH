@@ -22,6 +22,9 @@
 ;博士への投資額
 #DIM SAVEDATA INVESTING_DOCTOR
 
+;汎用武装ランダム化
+#DIM SAVEDATA 敵艦隊装備傾向
+
 ;05 ソラのゴミ拾い
 #DIM SAVEDATA QUEST_05_FLAG , 4
 
