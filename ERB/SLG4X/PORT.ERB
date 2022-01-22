@@ -498,7 +498,30 @@ ENDIF
 #DIM PORT_ID
 #DIM IS_STAR
 #DIM SLOT_ID
+; ---- スロット技術関連追加分ｺｺｶﾗ ----
+#DIM PORT_SLOT_TECH_PLUS
+#DIM PLAYER_PORT_SLOT_NUM
+; ---- スロット技術関連追加分ｺｺﾏﾃﾞ ----
 #DIMS SLOT_NAME
+
+; ---- スロット技術関連追加分ｺｺｶﾗ ----
+; ここを通る都度初期化しないとリセットされるタイミングの都合上、
+; 操作手順によっては減算の重複が発生しスロットが初期の20個より減ります。
+PORT_SLOT_TECH_PLUS = 0
+
+; 当該のうち未研究の技術があるか見て、その分だけ扱えるスロットを減らす。
+SIF !IS_COMPLETE_TECH:13
+      PORT_SLOT_TECH_PLUS -= 4
+SIF !IS_COMPLETE_TECH:26
+      PORT_SLOT_TECH_PLUS -= 4
+SIF !IS_COMPLETE_TECH:33
+      PORT_SLOT_TECH_PLUS -= 4
+
+PLAYER_PORT_SLOT_NUM = STAR_PORT_SLOT_NUM + PORT_SLOT_TECH_PLUS
+
+; 実の所 PORT_SLOT_TECH_PLUS は使わなくても直に PLAYER_PORT_SLOT_NUM に STAR_PORT_SLOT_NUM を入れてから、
+; 未研究技術の減算処理を行えばいいのだが、何をどうしているか明確にしておきたかったので分けました。
+; ---- スロット技術関連追加分ｺｺﾏﾃﾞ ----
 
 $INPUT_LOOP
 
@@ -510,7 +533,10 @@ PRINTBUTTON "[101] 指定のリソースの移動", 101
 PRINTL
 PRINTL
 PRINTL ◆スロット編集
-FOR SLOT_ID, 0, STAR_PORT_SLOT_NUM
+; スロット技術関連の変更
+; STAR_PORT_SLOT_NUM を PLAYER_PORT_SLOT_NUM に置き換え
+;FOR SLOT_ID, 0, STAR_PORT_SLOT_NUM
+FOR SLOT_ID, 0, PLAYER_PORT_SLOT_NUM
     LOCAL = IS_STAR ? STAR_PORT_SLOT:PORT_ID:SLOT_ID # PORT_SLOT:PORT_ID:SLOT_ID
     SELECTCASE LOCAL
         CASE 空
@@ -557,7 +583,11 @@ PRINTBUTTON "[99] 戻る", 99
 
 INPUT
 
-IF RESULT >= 0 && RESULT < STAR_PORT_SLOT_NUM
+; スロット技術関連の変更
+; STAR_PORT_SLOT_NUM を PLAYER_PORT_SLOT_NUM に置き換え
+; STAR_PORT_SLOT_NUM のままだと数値を直打ちしたら技術で増えてないスロットにもモジュールをねじ込めてしまう（多分）。
+;IF RESULT >= 0 && RESULT < STAR_PORT_SLOT_NUM
+IF RESULT >= 0 && RESULT < PLAYER_PORT_SLOT_NUM
     CALL SELECT_SLOT_ITEM(PORT_ID, RESULT, IS_STAR)
     GOTO INPUT_LOOP
 ELSEIF RESULT == 99
@@ -739,7 +769,7 @@ ELSEIF RESULT == 9
     ENDIF
 ELSEIF RESULT == 10
     IF SPACE_FORCE_BUILD
-        PRINTFORMW すでに宇宙軍基地は建てらています
+        PRINTFORMW すでに宇宙軍基地は建てられています
         RETURN
     ENDIF
     CALL SLOT_CHANGE_DIALOG("宇宙軍基地", 5000000)
@@ -777,11 +807,11 @@ ELSEIF RESULT == 12
     ENDIF
 ELSEIF RESULT == 13
     IF PORT_POSITION_ID:PORT_ID == CHARACTER_POSITION && IS_RELEASED_PORT_SHOP(PORT_ID)
-        PRINTFORMW すでに商店は建てらています
+        PRINTFORMW すでに商店は建てられています
         RETURN
     ENDIF
     IF 星系座標ID:PORT_ID == CHARACTER_POSITION && IS_RELEASED_STAR_PORT_SHOP(PORT_ID)
-        PRINTFORMW すでに商店は建てらています
+        PRINTFORMW すでに商店は建てられています
         RETURN
     ENDIF
     CALL SLOT_CHANGE_DIALOG("商店", 1000000)
@@ -1852,4 +1882,3 @@ FOR LOCAL, 0, STAR_PORT_SLOT_NUM
 NEXT
 
 RETURNF ITER
-
