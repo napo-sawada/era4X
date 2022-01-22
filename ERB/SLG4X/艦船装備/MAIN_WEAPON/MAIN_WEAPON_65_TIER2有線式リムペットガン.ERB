@@ -1,0 +1,52 @@
+﻿;-----------------------------------
+; メインウェポン
+;-----------------------------------
+@GET_MAIN_WEAPON_NAME_64
+RESULTS = TIER2有線式リムペットガン
+@GET_MAIN_WEAPON_STATUS_64(STATUS)
+#DIM REF STATUS
+
+STATUS:DAMAGE = 900
+STATUS:FIRE_RATE = 1
+STATUS:HIT_RATE = 60
+STATUS:FIRE_RANGE = 1
+STATUS:SIZE = 1
+STATUS:WEAPON_TYPE = 実体弾
+STATUS:PRICE = 40000
+
+;-----------------------------------
+; メインウェポンの説明
+;-----------------------------------
+@GET_MAIN_WEAPON_DESCRIPTION_64
+#DIM STATUS, STATUS_LENGTH
+
+CALL GET_MAIN_WEAPON_STATUS_64(STATUS)
+CALL GET_MAIN_WEAPON_NAME_64
+PRINTFORML %RESULTS%
+PRINTFORML 解体用有線爆弾が実戦に使用されたとの報告が相次いだことから、
+PRINTFORML 解体用有線爆弾を戦闘用兵器として再設計したモデル。
+PRINTFORML 新開発した炸薬を採用したことで、威力を据え置いたまま弾頭部の飛躍的な小型化に成功し、
+PRINTFORML 巻き上げ機能を内蔵した専用の射出機からの発射を可能とした。
+PRINTFORML 
+PRINTFORML その結果、ワイヤーの長さの制約から射程の問題こそあるものの、
+PRINTFORML 機動歩兵用の小火器と変わりない感覚で動体目標に命中させることが可能となった。
+PRINTFORML 
+PRINTFORML 唯一の問題として、新技術をふんだんに取り入れた事から
+PRINTFORML 生産コストが高沸してしまった点が上げられるものの、
+PRINTFORML 市場では『運用のしやすさと引き換えなら些細な問題』と、大半の顧客から高評価を受けている。
+PRINTFORML 
+PRINTFORML ダメージ  : {STATUS:DAMAGE}
+PRINTFORML 射撃レート: {STATUS:FIRE_RATE}発/ターン
+PRINTFORML 命中率    : {STATUS:HIT_RATE}
+PRINTFORML 有効距離  : {STATUS:FIRE_RANGE}
+PRINTFORML サイズ    : {STATUS:SIZE}
+
+;-----------------------------------
+; メインウェポンの資材
+;-----------------------------------
+@GET_MAIN_WEAPON_RESOURCE_64(USE_RESOURCE)
+#DIM REF USE_RESOURCE
+
+USE_RESOURCE:武装合金 = 4
+USE_RESOURCE:武装制御機器 = 10
+USE_RESOURCE:ジェットガス = 10

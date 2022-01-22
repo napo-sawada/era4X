@@ -1,0 +1,50 @@
+﻿;-----------------------------------
+; メインウェポン
+;-----------------------------------
+@GET_MAIN_WEAPON_NAME_65
+RESULTS = TIER2対艦用有線爆弾
+
+@GET_MAIN_WEAPON_STATUS_65(STATUS)
+#DIM REF STATUS
+
+STATUS:DAMAGE = 2000
+STATUS:FIRE_RATE = 1
+STATUS:HIT_RATE = 20
+STATUS:FIRE_RANGE = 1
+STATUS:SIZE = 1
+STATUS:WEAPON_TYPE = 実体弾
+STATUS:PRICE = 40000
+
+;-----------------------------------
+; メインウェポンの説明
+;-----------------------------------
+@GET_MAIN_WEAPON_DESCRIPTION_65
+#DIM STATUS, STATUS_LENGTH
+
+CALL GET_MAIN_WEAPON_STATUS_65(STATUS)
+CALL GET_MAIN_WEAPON_NAME_65
+PRINTFORML %RESULTS%
+PRINTFORML 有線式リムペットガンの発売後、ごく一部のユーザーから寄せられた
+PRINTFORML 「威力が従来モデルと大差ない」というクレームに対応する形で開発された新型の有線爆弾。
+PRINTFORML 有線式リムペットガンの炸薬を転用し、炸薬部の小型化・投擲に向いた形状への改良を行い、
+PRINTFORML 大幅に破砕力を上げつつ、戦闘用兵器としての実用性を向上させたモデルとして完成した。
+PRINTFORML 
+PRINTFORML なお、新式の炸薬を大量に使用したことから、
+PRINTFORML 解体用の炸薬としてのコストパフォーマンスは大きく見劣りするものとなっており、
+PRINTFORML 戦闘用の兵器としては相変わらず非常に癖が強い事から、開発コストの回収は難航している。
+PRINTFORML 
+PRINTFORML ダメージ  : {STATUS:DAMAGE}
+PRINTFORML 射撃レート: {STATUS:FIRE_RATE}発/ターン
+PRINTFORML 命中率    : {STATUS:HIT_RATE}
+PRINTFORML 有効距離  : {STATUS:FIRE_RANGE}
+PRINTFORML サイズ    : {STATUS:SIZE}
+
+;-----------------------------------
+; メインウェポンの資材
+;-----------------------------------
+@GET_MAIN_WEAPON_RESOURCE_65(USE_RESOURCE)
+#DIM REF USE_RESOURCE
+
+USE_RESOURCE:武装合金 = 6
+USE_RESOURCE:武装制御機器 = 6
+USE_RESOURCE:ジェットガス = 20

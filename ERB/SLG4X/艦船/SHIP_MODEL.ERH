@@ -93,6 +93,14 @@
 #DIM CONST アインシュタイン級砲艦 = 117
 #DIM CONST エジソン級軽空母 = 118
 
+#DIM CONST デボラ級輸送船 = 120
+#DIM CONST ギデオン級作業船 = 121
+#DIM CONST モーセ級探査船 = 122
+#DIM CONST URL‐48M級作業船 = 123
+#DIM CONST マルチパーパス2級作業船 = 124
+#DIM CONST ヘイロタイ型作業機 = 125
+#DIM CONST EF・コール級作業機 = 126
+
 #DIM CONST 建国帝のシールド突撃艇 = 130
 #DIM CONST 建国帝の小型砲撃艦 = 131
 #DIM CONST 建国帝のミサイル打撃艦 = 132

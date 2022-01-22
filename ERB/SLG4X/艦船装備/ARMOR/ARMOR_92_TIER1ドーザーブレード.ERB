@@ -1,0 +1,37 @@
+﻿;-----------------------------------
+; アーマー
+;-----------------------------------
+@GET_ARMOR_NAME_92
+RESULTS = TIER1ドーザーブレード
+
+@GET_ARMOR_STATUS_1(STATUS)
+#DIM REF STATUS
+
+STATUS:ARMOR = 100
+STATUS:SIZE = 1
+STATUS:PRICE = 10000
+
+;-----------------------------------
+; アーマーの説明
+;-----------------------------------
+@GET_ARMOR_DESCRIPTION_92
+#DIM STATUS, STATUS_LENGTH
+
+CALL GET_ARMOR_STATUS_1(STATUS)
+CALL GET_ARMOR_NAME_1
+PRINTFORML %RESULTS%
+PRINTFORML ヘイロタイ級作業機の車体前部に装備されているドーザーブレード。
+PRINTFORML 無重力下においてはほぼ無意味なパーツであるが、
+PRINTFORML それなりの強度があるため増加装甲代わりとして取り外されずに運用される事が多い。
+PRINTFORML 装甲      : {STATUS:ARMOR}
+PRINTFORML サイズ    : {STATUS:SIZE}
+
+;-----------------------------------
+; 装甲の資材
+;-----------------------------------
+@GET_ARMOR_RESOURCE_92(USE_RESOURCE)
+#DIM REF USE_RESOURCE
+
+;あくまでも陸上用作業機のパーツなので、当然ながら非売品
+@IS_SALE_ARMOR_92
+RETURN 0

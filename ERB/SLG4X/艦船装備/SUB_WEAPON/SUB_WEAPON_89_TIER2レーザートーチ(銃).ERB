@@ -1,0 +1,50 @@
+﻿;-----------------------------------
+; サブウェポン
+;-----------------------------------
+@GET_SUB_WEAPON_NAME_89
+RESULTS = TIER2レーザートーチ(銃)
+
+@GET_SUB_WEAPON_STATUS_89(STATUS)
+#DIM REF STATUS
+
+STATUS:DAMAGE = 10
+STATUS:FIRE_RATE = 3
+STATUS:ANTI_AIR = 10
+STATUS:HIT_RATE = 75
+STATUS:FIRE_RANGE = 1
+STATUS:SIZE = 1
+STATUS:WEAPON_TYPE = レーザー
+STATUS:PRICE = 20000
+
+;-----------------------------------
+; サブウェポンの説明
+;-----------------------------------
+@GET_SUB_WEAPON_DESCRIPTION_89
+#DIM STATUS, STATUS_LENGTH
+
+CALL GET_SUB_WEAPON_STATUS_89(STATUS)
+CALL GET_SUB_WEAPON_NAME_89
+PRINTFORML %RESULTS%
+PRINTFORML 一般的な作業機に搭載されている、溶断・溶接用レーザートーチ。
+PRINTFORML 
+PRINTFORML 基本的には工作用機材の域を出ない装備ではあるが、
+PRINTFORML レーザー刃の延長・レーザーガンとして使用可能・
+PRINTFORML レーザー発信器を射出して有線による遠隔操作が可能等、
+PRINTFORML 戦闘用途を前提とした内部機構を仕込んでいるモデルも数多く見られる。
+PRINTFORML 
+PRINTFORML このモデルはレーザーガンとしての使用が可能。
+PRINTFORML ダメージ  : {STATUS:DAMAGE}
+PRINTFORML 射撃レート: {STATUS:FIRE_RATE}発/ターン
+PRINTFORML 対空攻撃力: {STATUS:ANTI_AIR}
+PRINTFORML 命中率    : {STATUS:HIT_RATE}
+PRINTFORML 有効距離  : {STATUS:FIRE_RANGE}
+PRINTFORML サイズ    : {STATUS:SIZE}
+
+;-----------------------------------
+; サブウェポンの資材
+;-----------------------------------
+@GET_SUB_WEAPON_RESOURCE_89(USE_RESOURCE)
+#DIM REF USE_RESOURCE
+
+@IS_SALE_SUB_WEAPON_89
+RETURN 0

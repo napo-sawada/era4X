@@ -1,0 +1,52 @@
+﻿;-----------------------------------
+; メインウェポン
+;-----------------------------------
+@GET_MAIN_WEAPON_NAME_63
+RESULTS = TIER1解体用有線爆弾
+
+@GET_MAIN_WEAPON_STATUS_63(STATUS)
+#DIM REF STATUS
+
+STATUS:DAMAGE = 800
+STATUS:FIRE_RATE = 1
+STATUS:HIT_RATE = 15
+STATUS:FIRE_RANGE = 1
+STATUS:SIZE = 1
+STATUS:WEAPON_TYPE = 実体弾
+STATUS:PRICE = 10000
+
+;-----------------------------------
+; メインウェポンの説明
+;-----------------------------------
+@GET_MAIN_WEAPON_DESCRIPTION_63
+#DIM STATUS, STATUS_LENGTH
+
+CALL GET_MAIN_WEAPON_STATUS_63(STATUS)
+CALL GET_MAIN_WEAPON_NAME_63
+PRINTFORML %RESULTS%
+PRINTFORML 企業連合のある中堅メーカーの傘下企業が生産している、大型の有線爆弾。
+PRINTFORML 
+PRINTFORML 主に老朽化した大型艦や宇宙港・大型のデブリ、
+PRINTFORML 犯罪者が立て籠ったシェルター等を爆破処理するために用いられており、
+PRINTFORML 廉価ながら暴発・不発が少なく優秀な品質を誇り、各国に広く流通している。
+PRINTFORML 
+PRINTFORML ただし、本来は静止目標に隣接して設置し、安全域まで離れてから爆破する機材であるため
+PRINTFORML 戦闘用の武器として使用する事を想定しておらず、戦闘においては「機動歩兵で投擲」したり、
+PRINTFORML 「快速の小型艇の外装に取り付け、急接近して切り離してから爆破」
+PRINTFORML …等といった無理矢理な運用を強いられており、動体目標に命中させることは困難を極める。
+PRINTFORML 
+PRINTFORML ダメージ  : {STATUS:DAMAGE}
+PRINTFORML 射撃レート: {STATUS:FIRE_RATE}発/ターン
+PRINTFORML 命中率    : {STATUS:HIT_RATE}
+PRINTFORML 有効距離  : {STATUS:FIRE_RANGE}
+PRINTFORML サイズ    : {STATUS:SIZE}
+
+;-----------------------------------
+; メインウェポンの資材
+;-----------------------------------
+@GET_MAIN_WEAPON_RESOURCE_63(USE_RESOURCE)
+#DIM REF USE_RESOURCE
+
+USE_RESOURCE:武装合金 = 2
+USE_RESOURCE:武装制御機器 = 2
+USE_RESOURCE:ジェットガス = 5

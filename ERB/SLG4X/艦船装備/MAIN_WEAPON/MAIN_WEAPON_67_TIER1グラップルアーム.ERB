@@ -1,0 +1,48 @@
+﻿;-----------------------------------
+; メインウェポン
+;-----------------------------------
+@GET_MAIN_WEAPON_NAME_67
+RESULTS = TIER1グラップルアーム
+
+@GET_MAIN_WEAPON_STATUS_67(STATUS)
+#DIM REF STATUS
+
+STATUS:DAMAGE = 80
+STATUS:FIRE_RATE = 2
+STATUS:HIT_RATE = 45
+STATUS:FIRE_RANGE = 1
+STATUS:SIZE = 1
+STATUS:WEAPON_TYPE = 実体弾
+STATUS:PRICE = 5000
+
+;-----------------------------------
+; メインウェポンの説明
+;-----------------------------------
+@GET_MAIN_WEAPON_DESCRIPTION_67
+#DIM STATUS, STATUS_LENGTH
+
+CALL GET_MAIN_WEAPON_STATUS_67(STATUS)
+CALL GET_MAIN_WEAPON_NAME_67
+PRINTFORML %RESULTS%
+PRINTFORML ヘイロタイ級作業機に搭載されている、最も大型の作業用アーム。
+PRINTFORML 大型重機からの転用品であり、資材の運搬・組み立てや残骸の撤去などに用いられている。
+PRINTFORML 
+PRINTFORML また、軍用の機動歩兵とも組み合えるだけの強度・馬力を有しており、
+PRINTFORML ヘイロタイ級作業機の中では戦闘用の武器として転用可能な性能がある数少ない機材である。
+PRINTFORML 流石に艦船の装甲に穴が開けられるほどの威力はないものの、
+PRINTFORML 小型砲塔を掴んでもぎ取ったり、センサーや通信用アンテナを殴って壊す事ぐらいなら可能。
+PRINTFORML 
+PRINTFORML ダメージ  : {STATUS:DAMAGE}
+PRINTFORML 射撃レート: {STATUS:FIRE_RATE}発/ターン
+PRINTFORML 命中率    : {STATUS:HIT_RATE}
+PRINTFORML 有効距離  : {STATUS:FIRE_RANGE}
+PRINTFORML サイズ    : {STATUS:SIZE}
+
+;-----------------------------------
+; メインウェポンの資材
+;-----------------------------------
+@GET_MAIN_WEAPON_RESOURCE_67(USE_RESOURCE)
+#DIM REF USE_RESOURCE
+
+@IS_SALE_MAIN_WEAPON_67
+RETURN 0

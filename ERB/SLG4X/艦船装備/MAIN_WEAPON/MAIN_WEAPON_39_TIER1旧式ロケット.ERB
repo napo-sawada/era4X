@@ -1,0 +1,47 @@
+﻿;-----------------------------------
+; メインウェポン
+;-----------------------------------
+@GET_MAIN_WEAPON_NAME_39
+RESULTS = TIER1旧式ロケット
+
+@GET_MAIN_WEAPON_STATUS_39(STATUS)
+#DIM REF STATUS
+
+STATUS:DAMAGE = 80
+STATUS:FIRE_RATE = 4
+STATUS:HIT_RATE = 30
+STATUS:FIRE_RANGE = 1
+STATUS:SIZE = 1
+STATUS:WEAPON_TYPE = 魚雷
+STATUS:PRICE = 5000
+
+;-----------------------------------
+; メインウェポンの説明
+;-----------------------------------
+@GET_MAIN_WEAPON_DESCRIPTION_39
+#DIM STATUS, STATUS_LENGTH
+
+CALL GET_MAIN_WEAPON_STATUS_39(STATUS)
+CALL GET_MAIN_WEAPON_NAME_39
+PRINTFORML %RESULTS%
+PRINTFORML 民間に払い下げられた、旧式の対艦ロケット砲。
+PRINTFORML 保存状態が悪い事から極めて信憑性が低く、
+PRINTFORML 不発が相次ぐうえに、正確に直進する弾頭の方が珍しいレベルで精度が悪い。
+PRINTFORML 
+PRINTFORML とはいえ、小さなデブリや小惑星を粉砕する分には十分な威力があることから、
+PRINTFORML 一部の国家では作業補助用として未だに現役で使われている。
+PRINTFORML ダメージ  : {STATUS:DAMAGE}
+PRINTFORML 射撃レート: {STATUS:FIRE_RATE}発/ターン
+PRINTFORML 命中率    : {STATUS:HIT_RATE}
+PRINTFORML 有効距離  : {STATUS:FIRE_RANGE}
+PRINTFORML サイズ    : {STATUS:SIZE}
+
+;-----------------------------------
+; メインウェポンの資材
+;-----------------------------------
+@GET_MAIN_WEAPON_RESOURCE_39(USE_RESOURCE)
+#DIM REF USE_RESOURCE
+
+
+@IS_SALE_MAIN_WEAPON_39
+RETURN 0

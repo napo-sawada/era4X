@@ -1,0 +1,52 @@
+﻿;-----------------------------------
+; メインウェポン
+;-----------------------------------
+@GET_MAIN_WEAPON_NAME_69
+RESULTS = TIER1ネイルガン
+
+@GET_MAIN_WEAPON_STATUS_69(STATUS)
+#DIM REF STATUS
+
+STATUS:DAMAGE = 40
+STATUS:FIRE_RATE = 5
+STATUS:HIT_RATE = 75
+STATUS:FIRE_RANGE = 1
+STATUS:SIZE = 1
+STATUS:WEAPON_TYPE = 実体弾
+STATUS:PRICE = 10000
+
+;-----------------------------------
+; メインウェポンの説明
+;-----------------------------------
+@GET_MAIN_WEAPON_DESCRIPTION_69
+#DIM STATUS, STATUS_LENGTH
+
+CALL GET_MAIN_WEAPON_STATUS_69(STATUS)
+CALL GET_MAIN_WEAPON_NAME_69
+PRINTFORML %RESULTS%
+PRINTFORML 企業連合製の人型作業機向けの大型工具。
+PRINTFORML 主に溶接前の仮止めや応急処置に使われているが、
+PRINTFORML 多様なタイプの釘に対応しており、装填する釘次第で幅広い用途に扱うことが出来る。
+;一例：遠隔起爆式の爆薬が仕込まれた釘を打ち込んで資源衛星の切り出し　ビーコンが仕込まれた釘をこっそり目標に打ち込んで尾行の支援
+PRINTFORML 
+PRINTFORML また、メーカー純正品以外の他国製の釘の一部にも対応しており、
+PRINTFORML グリップ部分のサイズ調節も容易と、他国への輸出も見据えた設計となっている。
+PRINTFORML 
+PRINTFORML …なお、機材内部での釘の破損を防ぐために出力調整が可能だが、
+PRINTFORML 何故か出力上限が異様に高く設計されており、
+PRINTFORML 最大出力にすると軍用兵器並みの射程・貫徹力を発揮する。
+PRINTFORML この事から『作業用ニードルガン』と揶揄されることも多い。
+PRINTFORML ダメージ  : {STATUS:DAMAGE}
+PRINTFORML 射撃レート: {STATUS:FIRE_RATE}発/ターン
+PRINTFORML 命中率    : {STATUS:HIT_RATE}
+PRINTFORML 有効距離  : {STATUS:FIRE_RANGE}
+PRINTFORML サイズ    : {STATUS:SIZE}
+
+;-----------------------------------
+; メインウェポンの資材
+;-----------------------------------
+@GET_MAIN_WEAPON_RESOURCE_69(USE_RESOURCE)
+#DIM REF USE_RESOURCE
+
+@IS_SALE_MAIN_WEAPON_69
+RETURN 0

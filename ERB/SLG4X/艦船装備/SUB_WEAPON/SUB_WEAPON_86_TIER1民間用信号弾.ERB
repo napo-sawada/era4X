@@ -1,0 +1,46 @@
+﻿;-----------------------------------
+; サブウェポン
+;-----------------------------------
+@GET_SUB_WEAPON_NAME_86
+RESULTS = TIER1民間用信号弾
+
+@GET_SUB_WEAPON_STATUS_86(STATUS)
+#DIM REF STATUS
+
+STATUS:DAMAGE = 3
+STATUS:FIRE_RATE = 2
+STATUS:ANTI_AIR = 30
+STATUS:HIT_RATE = 55
+STATUS:FIRE_RANGE = 1
+STATUS:SIZE = 1
+STATUS:WEAPON_TYPE = ミサイル
+STATUS:PRICE = 5000
+
+;-----------------------------------
+; サブウェポンの説明
+;-----------------------------------
+@GET_SUB_WEAPON_DESCRIPTION_86
+#DIM STATUS, STATUS_LENGTH
+
+CALL GET_SUB_WEAPON_STATUS_86(STATUS)
+CALL GET_SUB_WEAPON_NAME_86
+PRINTFORML %RESULTS%
+PRINTFORML 民間船において一般的に使用されている廉価な信号弾。
+PRINTFORML 
+PRINTFORML コストを抑えるために燃焼式が採用されており、辛うじてフレアの代用品として使用可能。
+PRINTFORML ダメージ  : {STATUS:DAMAGE}
+PRINTFORML 射撃レート: {STATUS:FIRE_RATE}発/ターン
+PRINTFORML 対空攻撃力: {STATUS:ANTI_AIR}
+PRINTFORML 命中率    : {STATUS:HIT_RATE}
+PRINTFORML 有効距離  : {STATUS:FIRE_RANGE}
+PRINTFORML サイズ    : {STATUS:SIZE}
+
+;-----------------------------------
+; サブウェポンの資材
+;-----------------------------------
+@GET_SUB_WEAPON_RESOURCE_86(USE_RESOURCE)
+#DIM REF USE_RESOURCE
+
+;性能が微妙すぎることもあり、作業機限定にして一般販売はしない
+@IS_SALE_SUB_WEAPON_86
+RETURN 0
