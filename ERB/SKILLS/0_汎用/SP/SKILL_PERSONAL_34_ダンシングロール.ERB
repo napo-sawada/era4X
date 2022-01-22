@@ -1,0 +1,119 @@
+﻿;-----------------------------------
+;基本値計算に先んじて処理するもの
+;-----------------------------------
+@SKILL_0_PERSONAL_34_EXIST
+RETURN 1
+
+@SKILL_0_PERSONAL_34_NAME
+RESULTS = ダンシングロール
+
+;レベルは1-5まで
+@SKILL_0_PERSONAL_34_LEVEL
+RETURN 3
+
+;対象選択
+@SKILL_0_PERSONAL_34_SETTARGET(発動者, 発動番号, 発動側, 発動勢力, 発動部隊, 対象勢力, 対象部隊)
+#DIM 発動者
+#DIM 発動番号
+#DIM スキル
+#DIMS ジャンル
+#DIM 発動側
+#DIM 発動勢力
+#DIM 発動部隊
+#DIM 対象側
+#DIM 対象勢力
+#DIM 対象部隊
+対象側 = !発動側
+SIF BATTLE_COMMANDER_NUM:対象側 == 0
+	RETURN 0
+RETURN 1
+
+;発動判定
+@SKILL_0_PERSONAL_34_CAN_INVOKE(発動者, 発動番号, 発動側, 発動勢力, 発動部隊, 対象勢力, 対象部隊)
+#DIM 発動者
+#DIM 発動番号
+#DIM スキル
+#DIMS ジャンル
+#DIM 発動側
+#DIM 発動勢力
+#DIM 発動部隊
+#DIM 対象側
+#DIM 対象勢力
+#DIM 対象部隊
+対象側 = !発動側
+RETURN 1
+
+;発動テキストをオーバライドしたいときに。
+;「誰それのスキル発動！　○○した！」の「○○した！」の部分を実装したい場合は、
+;これじゃなくてINVOKEで書けばいいです。
+;@SKILL_0_PERSONAL_34_INVOKE_TEXT(発動者, スキル, ジャンル)
+;#DIM 発動者
+;#DIM スキル
+;#DIMS ジャンル
+
+
+;効果をここに記述
+@SKILL_0_PERSONAL_34_INVOKE(発動者, 発動番号, 発動側, 発動勢力, 発動部隊, 対象勢力, 対象部隊)
+#DIM 発動者
+#DIM 発動番号
+#DIM スキル
+#DIMS ジャンル
+#DIM 発動側
+#DIM 発動勢力
+#DIM 発動部隊
+#DIM 対象側
+#DIM 対象勢力
+#DIM 対象部隊
+対象側 = !発動側
+PRINTFORML 自部隊の攻撃力が上昇！
+TIMES BATTLE_ATK:発動側, 1.01
+
+@SKILL_0_PERSONAL_34_EXPLANATION
+RESULTS = 駆逐艦以下の小型艦搭乗時、自艦の回避、敵艦の命中率が3～9\%の範囲で変動する(必要COOL60～100)
+
+@SKILL_0_PERSONAL_34_EFFECT(VALUE, TYPE, CLASS, CHARA_ID)
+#DIM VALUE
+#DIM TYPE
+#DIM CLASS
+#DIM CHARA_ID
+
+LOCAL = ABL:CHARA_ID:演技力ＣＯ
+	IF LOCAL >= 100
+		IF TYPE == TYPE_敵命中 && (CLASS == コルベット || CLASS == フリゲート || CLASS == 駆逐艦)
+			TIMES VALUE, 0.91
+		ELSEIF TYPE == TYPE_回避 && (CLASS == コルベット || CLASS == フリゲート || CLASS == 駆逐艦)
+			TIMES VALUE, 0.88
+		ENDIF
+	ELSEIF LOCAL >= 80
+		IF TYPE == TYPE_敵命中 && (CLASS == コルベット || CLASS == フリゲート || CLASS == 駆逐艦)
+			TIMES VALUE, 0.94
+		ELSEIF TYPE == TYPE_回避 && (CLASS == コルベット || CLASS == フリゲート || CLASS == 駆逐艦)
+			TIMES VALUE, 0.92
+		ENDIF
+	ELSEIF LOCAL >= 60
+		IF TYPE == TYPE_敵命中 && (CLASS == コルベット || CLASS == フリゲート || CLASS == 駆逐艦)
+			TIMES VALUE, 0.97
+		ELSEIF TYPE == TYPE_回避 && (CLASS == コルベット || CLASS == フリゲート || CLASS == 駆逐艦)
+			TIMES VALUE, 0.96
+		ENDIF
+	ELSE
+		IF TYPE == TYPE_敵命中 && (CLASS == コルベット || CLASS == フリゲート || CLASS == 駆逐艦)
+			TIMES VALUE, 0.99
+		ELSEIF TYPE == TYPE_回避 && (CLASS == コルベット || CLASS == フリゲート || CLASS == 駆逐艦)
+			TIMES VALUE, 0.98
+		ENDIF
+	ENDIF
+RETURN VALUE
+
+@SKILL_0_PERSONAL_34_RATE(発動者, 発動番号, 発動側, 発動勢力, 発動部隊, 対象勢力, 対象部隊)
+#DIM 発動者
+#DIM 発動番号
+#DIM スキル
+#DIMS ジャンル
+#DIM 発動側
+#DIM 発動勢力
+#DIM 発動部隊
+#DIM 対象側
+#DIM 対象勢力
+#DIM 対象部隊
+RETURN 1000

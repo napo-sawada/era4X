@@ -1,0 +1,54 @@
+﻿;-----------------------------------
+;基本値計算に先んじて処理するもの
+;-----------------------------------
+@SKILL_0_TROOP_15_EXIST
+RETURN 1
+
+@SKILL_0_TROOP_15_NAME
+RESULTS = 超銀河アイドル
+
+;レベルは1-5まで
+@SKILL_0_TROOP_15_LEVEL
+RETURN 2
+	
+@SKILL_0_TROOP_15_EXPLANATION
+RESULTS = 敵命中が『アイドル人気』によって-4～12\%の範囲で低下する。(必要アイドル人気10～30万)
+
+
+@SKILL_0_TROOP_15_EFFECT(VALUE, TYPE, CLASS, CH_ID)
+#DIM VALUE
+#DIM TYPE
+#DIM CLASS
+#DIM CH_ID
+
+
+LOCAL = P_アイドル人気:CH_ID:0 
+	IF LOCAL >= 300000
+		SIF TYPE == TYPE_敵命中
+			TIMES VALUE, 0.88
+	ELSEIF LOCAL >= 200000
+		SIF TYPE == TYPE_敵命中
+			TIMES VALUE, 0.92
+	ELSEIF LOCAL >= 100000
+		SIF TYPE == TYPE_敵命中
+			TIMES VALUE, 0.96
+	ELSE
+		SIF TYPE == TYPE_敵命中
+			TIMES VALUE, 1.02
+	ENDIF
+RETURN VALUE
+
+
+
+@SKILL_0_TROOP_15_RATE(発動者, 発動番号, 発動側, 発動勢力, 発動部隊, 対象勢力, 対象部隊)
+#DIM 発動者
+#DIM 発動番号
+#DIM スキル
+#DIMS ジャンル
+#DIM 発動側
+#DIM 発動勢力
+#DIM 発動部隊
+#DIM 対象側
+#DIM 対象勢力
+#DIM 対象部隊
+RETURN 1000

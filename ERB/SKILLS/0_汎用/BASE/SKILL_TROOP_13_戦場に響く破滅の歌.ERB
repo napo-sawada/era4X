@@ -1,0 +1,62 @@
+﻿;-----------------------------------
+;基本値計算に先んじて処理するもの
+;-----------------------------------
+@SKILL_0_TROOP_13_EXIST
+RETURN 1
+
+@SKILL_0_TROOP_13_NAME
+RESULTS = 戦場に響く破滅の歌
+
+;レベルは1-5まで
+@SKILL_0_TROOP_13_LEVEL
+RETURN 2
+	
+@SKILL_0_TROOP_13_EXPLANATION
+RESULTS = 艦隊の命中率が+10\%。戦場全艦の与/被ダメージ+20\%、回避率が-10\%。(必要歌唱100)
+
+
+@SKILL_0_TROOP_13_EFFECT(VALUE, TYPE, CLASS, CH_ID)
+#DIM VALUE
+#DIM TYPE
+#DIM CLASS
+#DIM CH_ID
+
+LOCAL = ABL:CH_ID:歌唱
+	IF LOCAL >= 100
+		SIF TYPE == TYPE_与ダメージ
+			TIMES VALUE, 1.20
+		SIF TYPE == TYPE_命中
+			TIMES VALUE, 1.10
+		SIF TYPE == TYPE_回避
+			TIMES VALUE, 0.90
+		SIF TYPE == TYPE_敵回避
+			TIMES VALUE, 0.90
+		SIF TYPE == TYPE_被ダメージ
+			TIMES VALUE, 1.20
+	ELSE
+		SIF TYPE == TYPE_与ダメージ
+			TIMES VALUE, 1.05
+		SIF TYPE == TYPE_命中
+			TIMES VALUE, 1.02
+		SIF TYPE == TYPE_回避
+			TIMES VALUE, 0.98
+		SIF TYPE == TYPE_敵回避
+			TIMES VALUE, 0.98
+		SIF TYPE == TYPE_被ダメージ
+			TIMES VALUE, 1.05
+	ENDIF
+RETURN VALUE
+
+
+@SKILL_0_TROOP_13_RATE(発動者, 発動番号, 発動側, 発動勢力, 発動部隊, 対象勢力, 対象部隊)
+#DIM 発動者
+#DIM 発動番号
+#DIM スキル
+#DIMS ジャンル
+#DIM 発動側
+#DIM 発動勢力
+#DIM 発動部隊
+#DIM 対象側
+#DIM 対象勢力
+#DIM 対象部隊
+RETURN 1000
