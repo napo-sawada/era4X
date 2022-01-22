@@ -147,7 +147,7 @@ SOURCE:(LOCAL:3):露出 += 100
 SOURCE:(LOCAL:3):性行動 += 150
 
 ;性交系の共通処理
-CALL COM_COMMON_SEX_V(LOCAL:3, LOCAL:2)
+CALL COM_COMMON_USEX_U(LOCAL:3, LOCAL:2)
 
 ;奉仕経験値を得られるコマンドのフラグ
 TCVAR:(LOCAL:3):4 = 1
@@ -193,6 +193,7 @@ SELECTCASE RAND:2
 			ENDSELECT
 		ENDIF
 ENDSELECT
+
 
 ;-------------------------------------------------
 ;継続を解除したときの地の文
@@ -249,32 +250,54 @@ ENDIF
 
 ;ペニスバンド装着中
 IF IS_EQUIP_PLAYER(MPLY:0, 50)
-	SELECTCASE GET_COM_INITIATIVE()
-			;プレイヤーに主導権
+SELECTCASE GET_COM_INITIATIVE()
+		;プレイヤーに主導権
 		CASE 0
-			PRINTFORMW %ANAME(MPLY:0)%は%ANAME(MTAR:0)%を押し倒すと、%LOCALS:1%装着した張り型を%ANAME(MTAR:0)%の%LOCALS:0%に突き入れ%TARGET_STR("た", "てきた")%…
-			;ターゲットに主導権
+			PRINTFORM %ANAME(MPLY:0)%は%ANAME(MTAR:0)%%SPLIT_RAND("に挿入したまま/の腰を掴み/の脚を抱えると", 1)%、%LOCALS:1%
+			SELECTCASE IFRAND("0, 1", 1, "2, 3", ABL:(MPLY:0):性交 >= ランク閾値:ランク_その他:ランク_C)
+				CASE 0
+					PRINTFORMW さらに激しく腰を動かし%TARGET_STR("た", "てきた")%…
+				CASE 1
+					PRINTFORMW さらに激しく張り形を突き入れ%TARGET_STR("た", "てきた")%…
+				CASE 2
+					PRINTFORMW 巧みな腰使いで弱点を執拗に攻め立て%TARGET_STR("た", "てきた")%…
+				CASE 3
+					PRINTFORMW 猛烈なピストンで尿道を掻き回し%TARGET_STR("た", "てきた")%…
+			ENDSELECT
+		;ターゲットに主導権
 		CASE 1
-			PRINTFORMW %ANAME(MTAR:0)%は%ANAME(MPLY:0)%の下になって、%LOCALS:1%自身の%LOCALS:0%へと張り型を導いて挿入させた…
-			;第三者に主導権
+			PRINTFORML %ANAME(MTAR:0)%は%ANAME(MPLY:0)%の腰に足を絡めながら、さらに激しく腰を動かすように要求した
+			PRINTFORMW %ANAME(MPLY:0)%は%ANAME(MTAR:0)%に求められるまま、%LOCALS:1%何度も腰を打ち付けて%ANAME(MTAR:0)%の膀胱を突いた…
+		;第三者に主導権
 		CASEELSE
-			PRINTFORML %ANAME(TFLAG:45)%は%ANAME(MPLY:0)%に、正常位で%ANAME(MTAR:0)%を犯すように命令した
-			PRINTFORMW %ANAME(MPLY:0)%は%ANAME(MTAR:0)%を押し倒すと、%LOCALS:1%装着した張り型を%ANAME(MTAR:0)%の%LOCALS:0%に突き入れた…
+			PRINTFORML %ANAME(TFLAG:45)%は%ANAME(MTAR:0)%に正常位で挿入している%ANAME(MPLY:0)%に対し、もっと激しく腰を動かすように命令した
+			PRINTFORMW %ANAME(MPLY:0)%は言われるまま腰の動きを激しくし、%LOCALS:1%何度も%ANAME(MTAR:0)%の膀胱を突いた…
 	ENDSELECT
 
 ;ペニスバンド不使用
 ELSE
-	SELECTCASE GET_COM_INITIATIVE()
-			;プレイヤーに主導権
+SELECTCASE GET_COM_INITIATIVE()
+		;プレイヤーに主導権
 		CASE 0
-			PRINTFORMW %ANAME(MPLY:0)%は%ANAME(MTAR:0)%を押し倒すと、%ANAME(MTAR:0)%の%LOCALS:0%にペニスを突き入れ%LOCALS:1%腰を動かし%TARGET_STR("た", "てきた")%…
-			;ターゲットに主導権
+			PRINTFORM %ANAME(MPLY:0)%は%ANAME(MTAR:0)%%SPLIT_RAND("に挿入したまま/の腰を掴み/の脚を抱えると", 1)%、%LOCALS:1%
+			SELECTCASE IFRAND("0, 1", 1, "2, 3", ABL:(MPLY:0):性交 >= ランク閾値:ランク_その他:ランク_C)
+				CASE 0
+					PRINTFORMW さらに激しく腰を動かし%TARGET_STR("た", "てきた")%…
+				CASE 1
+					PRINTFORMW さらに激しくペニスを突き入れ%TARGET_STR("た", "てきた")%…
+				CASE 2
+					PRINTFORMW 巧みな腰使いで弱点を執拗に攻め立て%TARGET_STR("た", "てきた")%…
+				CASE 3
+					PRINTFORMW 猛烈なピストンで尿道を掻き回し%TARGET_STR("た", "てきた")%…
+			ENDSELECT
+		;ターゲットに主導権
 		CASE 1
-			PRINTFORMW %ANAME(MTAR:0)%は%ANAME(MPLY:0)%の下になって、%LOCALS:1%ペニスを自身の%LOCALS:0%へと導いて挿入させた…
-			;第三者に主導権
+			PRINTFORML %ANAME(MTAR:0)%は%ANAME(MPLY:0)%の腰に足を絡めながら、さらに激しく腰を動かすように要求した
+			PRINTFORMW %ANAME(MPLY:0)%は%ANAME(MTAR:0)%に求められるまま、%LOCALS:1%何度も腰を打ち付けて%ANAME(MTAR:0)%の膀胱を突いた…
+		;第三者に主導権
 		CASEELSE
-			PRINTFORML %ANAME(TFLAG:45)%は%ANAME(MPLY:0)%に、正常位で%ANAME(MTAR:0)%を犯すように命令した
-			PRINTFORMW %ANAME(MPLY:0)%は%ANAME(MTAR:0)%を押し倒すと、%LOCALS:1%ペニスを%ANAME(MTAR:0)%の%LOCALS:0%に突き入れて腰を動かした…
+			PRINTFORML %ANAME(TFLAG:45)%は%ANAME(MTAR:0)%に正常位で挿入している%ANAME(MPLY:0)%に対し、もっと激しく腰を動かすように命令した
+			PRINTFORMW %ANAME(MPLY:0)%は言われるまま腰の動きを激しくし、%LOCALS:1%何度も%ANAME(MTAR:0)%の膀胱を突いた…
 	ENDSELECT
 ENDIF
 
@@ -285,12 +308,16 @@ ENDIF
 SIF IS_PIERCED(MPLY:0, ピアス_ペニス)
 	PRINTFORML %ANAME(MPLY:0)%のペニスに取り付けられたピアスが、%ANAME(MTAR:0)%の尿道をごりごりと抉っていく……
 
-IF NOWEX:(MTAR:0):Ｖ絶頂 >= 8
-	SELECTCASE RAND:2
+IF NOWEX:(MTAR:0):Ｕ絶頂 >= 8
+	SELECTCASE RAND:4
 		CASE 0
 			PRINTFORML %ANAME(MTAR:0)%は汗にまみれた%STR_BODY("身体", MTAR:0)%を震わせながら、蕩けた雌の顔で快楽を受け止めている…
 		CASE 1
 			PRINTFORML %ANAME(MTAR:0)%は弓なりになってビクビクと痙攣しながら、強烈な絶頂を全身で味わっている…
+		CASE 2
+			PRINTFORML %ANAME(MTAR:0)%は%ANAME(MPLY:0)%のペニスを痛いほど締め上げながら、強烈な絶頂へと至った…
+		CASE 3
+			PRINTFORML %ANAME(MTAR:0)%は強すぎる尿道絶頂により悲鳴を上げているが、その声は明らかに艶の混じった声だった…
 	ENDSELECT
 ENDIF
 

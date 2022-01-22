@@ -554,6 +554,11 @@ FOR LOCAL, 0, VARSIZE("追加処理")
 		CONTINUE
 	ENDIF
 
+	IF 追加処理:LOCAL == "Ｕ処女喪失"
+		CALL VIRGIN_COMMON_U(対象, セックス相手, シチュ)
+		CONTINUE
+	ENDIF
+
 	IF 追加処理:LOCAL == "童貞喪失"
 		CALL DOUTEI_COMMON(対象, 童貞相手, シチュ)
 		CONTINUE

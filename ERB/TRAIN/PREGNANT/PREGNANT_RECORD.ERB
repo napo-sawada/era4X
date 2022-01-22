@@ -128,6 +128,8 @@ CALL SHOW_SIBLING(ARG:0)
 CALL SHOW_STOMACH_SPERM(ARG:0)
 CALL SHOW_WOMB_SPERM(ARG:0)
 CALL SHOW_ANUS_SPERM(ARG:0)
+CALL SHOW_BLADDER_SPERM(ARG:0)
+
 
 ;---------------------------------------------------------
 ; ARG:0番のキャラの子供を一括表示する
@@ -380,7 +382,7 @@ FOR LOCAL, 0, WOMB_RECORD_MAX
 NEXT
 
 ;---------------------------------------------------------
-; 対象の子宮内精液量を表示する
+; 対象の腸内精液量を表示する
 ;---------------------------------------------------------
 @SHOW_ANUS_SPERM(ARG:0)
 #DIM 表示
@@ -407,7 +409,7 @@ SIF FIRST_LINE == LINECOUNT
 	PRINTFORML なし
 
 ;---------------------------------------------------------
-;子宮内の精液量を合算する
+;腸内の精液量を合算する
 ;---------------------------------------------------------
 @SUM_ANUS_SPERM_AMOUNT(対象)
 #FUNCTION
@@ -423,9 +425,53 @@ NEXT
 RETURNF 総量
 
 
+;---------------------------------------------------------
+; 対象の膀胱内精液量を表示する
+;---------------------------------------------------------
+@SHOW_BLADDER_SPERM(ARG:0)
+#DIM 表示
+#DIM 総量
+#DIM FIRST_LINE
+
+総量 = SUM_BLADDER_SPERM_AMOUNT(ARG:0)
+
+CALL COLOR_LINE
+PRINTFORM 〇%ANAME(ARG:0)%の膀胱内の精液〇 
+CALL PRINT_GRADATIONBAR(MIN(総量, CALC_BLADDER_SIZE(ARG:0)), CALC_BLADDER_SIZE(ARG:0), 10, 0xFFEDB8, , 1)
+PRINTFORML  {総量}/{CALC_BLADDER_SIZE(ARG:0)}ml 
+
+FIRST_LINE = LINECOUNT
+
+FOR LOCAL:0, 0, WOMB_RECORD_MAX
+	SIF BLADDER_SPERM_ID:(ARG:0):(LOCAL:0) == 0
+		CONTINUE
+	PRINTFORM %GET_SPERM_NAME(BLADDER_SPERM_ID:(ARG:0):(LOCAL:0)), MAX_CHARANAME_LENGTH, LEFT%:
+	PRINTFORML {BLADDER_SPERM_AMOUNT:(ARG:0):(LOCAL:0), 5, RIGHT} ml({BLADDER_SPERM_COUNT:(ARG:0):(LOCAL:0)}発分)
+NEXT
+
+SIF FIRST_LINE == LINECOUNT
+	PRINTFORML なし
 
 ;---------------------------------------------------------
-; 対象の子宮内精液量を表示する
+;膀胱内の精液量を合算する
+;---------------------------------------------------------
+@SUM_BLADDER_SPERM_AMOUNT(対象)
+#FUNCTION
+#DIM 対象
+#DIM 総量
+総量 = 0
+FOR LOCAL:0, 0, WOMB_RECORD_MAX
+	SIF BLADDER_SPERM_ID:対象:LOCAL == 0
+		CONTINUE
+	総量 += BLADDER_SPERM_AMOUNT:対象:LOCAL
+NEXT
+
+RETURNF 総量
+
+
+
+;---------------------------------------------------------
+; 対象の胃内精液量を表示する
 ;---------------------------------------------------------
 @SHOW_STOMACH_SPERM(ARG:0)
 #DIM 表示
@@ -452,7 +498,7 @@ SIF FIRST_LINE == LINECOUNT
 	PRINTFORML なし
 
 ;---------------------------------------------------------
-;子宮内の精液量を合算する
+;胃内の精液量を合算する
 ;---------------------------------------------------------
 @SUM_STOMACH_SPERM_AMOUNT(対象)
 #FUNCTION

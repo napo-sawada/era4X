@@ -371,6 +371,15 @@ IF !CSVTALENT(NO:(ARG:0), GETNUM(TALENT, "アナル処女"))
 		CALL VIRGINIZE(ARG:0, 初体験_アナル処女)
 	ENDIF
 ENDIF
+IF !CSVTALENT(NO:(ARG:0), GETNUM(TALENT, "尿道処女"))
+	PRINTFORML %TOSTR_SPACE(6)%%ANAME(ARG:0)%はデフォルトで尿道処女でないので、先ほどの選択で尿道処女を初期化しても非処女のままです
+	PRINTFORML %TOSTR_SPACE(6)%%ANAME(ARG:0)%の尿道処女を再生しますか？
+	CALL ASK_YN
+	IF RESULT == 0
+		PRINTFORML %TOSTR_SPACE(6)%%ANAME(ARG:0)%の尿道処女を再生しました
+		CALL VIRGINIZE(ARG:0, 初体験_尿道処女)
+	ENDIF
+ENDIF
 IF !CSVTALENT(NO:(ARG:0), GETNUM(TALENT, "童貞"))
 	PRINTFORML %TOSTR_SPACE(6)%%ANAME(ARG:0)%はデフォルトで童貞でないので、先ほどの選択で童貞を初期化しても童貞のままです
 	PRINTFORML %TOSTR_SPACE(6)%%ANAME(ARG:0)%の童貞を再生しますか？

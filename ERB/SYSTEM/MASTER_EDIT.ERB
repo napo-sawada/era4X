@@ -144,6 +144,15 @@ SELECTCASE 番号
 			SEXUAL_EXPERIENCE:対象:初体験_アナル処女 = 不明
 			SEXUAL_LAST_EXPERIENCE:対象:初体験_アナル処女 = 不明
 		ENDIF
+	CASE 4
+		TALENT:対象:尿道処女 = !TALENT:対象:尿道処女
+		IF TALENT:対象:尿道処女
+			SEXUAL_EXPERIENCE:対象:初体験_尿道処女 = ----
+			SEXUAL_LAST_EXPERIENCE:対象:初体験_尿道処女 = ----
+		ELSE
+			SEXUAL_EXPERIENCE:対象:初体験_尿道処女 = 不明
+			SEXUAL_LAST_EXPERIENCE:対象:初体験_尿道処女 = 不明
+		ENDIF
 ENDSELECT
 
 ;-------------------------
@@ -437,6 +446,7 @@ PRINTBUTTON TALENT:対象:童貞 ? "[ 童貞 ]" # "[非童貞]", 200
 PRINTBUTTON TALENT:対象:キス未経験 ? "[ キス未経験 ]" # "[キス経験済み]", 201
 PRINTBUTTON TALENT:対象:処女 ? "[ 処女 ]" # "[非処女]", 202
 PRINTBUTTON TALENT:対象:アナル処女 ? "[ Ａ処女 ]" # "[Ａ非処女]", 203
+PRINTBUTTON TALENT:対象:尿道処女 ? "[ Ｕ処女 ]" # "[Ｕ非処女]", 204
 PRINTL
 
 ;-------------------------

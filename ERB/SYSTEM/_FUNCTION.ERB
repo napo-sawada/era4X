@@ -52,6 +52,15 @@ ELSE
 	SEXUAL_LAST_EXPERIENCE:(ARG:0):初体験_アナル処女 = ----
 ENDIF
 
+IF !TALENT:(ARG:0):尿道処女
+	SEXUAL_EXPERIENCE:(ARG:0):初体験_尿道処女 = 不明
+	SEXUAL_LAST_EXPERIENCE:(ARG:0):初体験_尿道処女 = 不明
+ELSE
+	TALENT:(ARG:0):尿道処女 = 1
+	SEXUAL_EXPERIENCE:(ARG:0):初体験_尿道処女 = ----
+	SEXUAL_LAST_EXPERIENCE:(ARG:0):初体験_尿道処女 = ----
+ENDIF
+
 TALENT:(ARG:0):危険日 = RAND:5
 
 CALL SET_BODYSIZE(ARG:0)
@@ -328,6 +337,15 @@ ELSE
 	SEXUAL_EXPERIENCE_SITUATION:(ARG:0):初体験_アナル処女 =
 	SEXUAL_LAST_EXPERIENCE:(ARG:0):初体験_アナル処女 = 不明
 	SEXUAL_LAST_EXPERIENCE_SITUATION:(ARG:0):初体験_アナル処女 =
+ENDIF
+
+IF TALENT:(ARG:0):尿道処女
+	CALL VIRGINIZE(ARG:0, 初体験_尿道処女)
+ELSE
+	SEXUAL_EXPERIENCE:(ARG:0):初体験_尿道処女 = 不明
+	SEXUAL_EXPERIENCE_SITUATION:(ARG:0):初体験_尿道処女 =
+	SEXUAL_LAST_EXPERIENCE:(ARG:0):初体験_尿道処女 = 不明
+	SEXUAL_LAST_EXPERIENCE_SITUATION:(ARG:0):初体験_尿道処女 =
 ENDIF
 
 FOR LOCAL, 0, VARSIZE("COM_EXP")
@@ -2092,6 +2110,48 @@ SEXUAL_EXPERIENCE_SITUATION:対象:初体験_アナル処女 = %シチュ文字�
 
 TALENT:対象:アナル処女 = 0
 
+
+;-------------------------------------------------
+;尿道処女喪失の共通処理
+;対象が相手で処女喪失
+;シチュを指定すると文字列が付与される
+;ARG:2はメッセージを表示するフラグ 1で表示
+;-------------------------------------------------
+@VIRGIN_COMMON_U(対象, 相手, シチュ文字列 = "", ARG:2 = 1)
+#DIM 対象
+#DIMS 相手
+#DIMS シチュ文字列
+
+SIF TFLAG:54 == 8
+	シチュ文字列 = 公衆の面前で%シチュ文字列%
+SIF TFLAG:70 == 1
+	シチュ文字列 = 撮影中に%シチュ文字列%
+SIF TCVAR:対象:催眠中 > 1
+	シチュ文字列 = 催眠をかけられながら%シチュ文字列%
+
+
+SEXUAL_LAST_EXPERIENCE:対象:初体験_尿道処女 = %相手%
+SEXUAL_LAST_EXPERIENCE_SITUATION:対象:初体験_尿道処女 = %シチュ文字列%
+
+SIF !TALENT:対象:尿道処女
+	RETURN 0
+
+IF ARG:2
+	SETCOLOR カラー_注意
+	PRINTFORM %ANAME(対象)%は
+	SIF シチュ文字列 != ""
+		PRINTFORM %シチュ文字列%で
+	PRINTFORMW <尿道処女>を失った…
+	RESETCOLOR
+ENDIF
+
+SEXUAL_EXPERIENCE:対象:初体験_尿道処女 = %相手%
+SEXUAL_EXPERIENCE_SITUATION:対象:初体験_尿道処女 = %シチュ文字列%
+
+
+TALENT:対象:尿道処女 = 0
+
+
 ;-------------------------------------------------
 ;初体験を再生させる処理
 ;-------------------------------------------------
@@ -2106,6 +2166,8 @@ SELECTCASE 初体験
 		変更素質 = GETNUM(TALENT, "童貞")
 	CASE 初体験_アナル処女
 		変更素質 = GETNUM(TALENT, "アナル処女")
+	CASE 初体験_尿道処女
+		変更素質 = GETNUM(TALENT, "尿道処女")
 	CASE 初体験_キス
 		変更素質 = GETNUM(TALENT, "キス未経験")
 ENDSELECT
@@ -2134,6 +2196,8 @@ SELECTCASE 初体験
 		変更素質 = GETNUM(TALENT, "童貞")
 	CASE 初体験_アナル処女
 		変更素質 = GETNUM(TALENT, "アナル処女")
+	CASE 初体験_尿道処女
+		変更素質 = GETNUM(TALENT, "尿道処女")
 	CASE 初体験_キス
 		変更素質 = GETNUM(TALENT, "キス未経験")
 ENDSELECT

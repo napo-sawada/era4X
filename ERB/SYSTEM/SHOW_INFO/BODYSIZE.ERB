@@ -439,6 +439,25 @@ SIF GETBIT(TALENT:対象:淫乱系, 素質_淫乱_尻穴狂い)
 RETURNF サイズ
 
 ;-------------------------
+;膀胱
+;-------------------------
+@CALC_BLADDER_SIZE(対象)
+#FUNCTION
+#DIM 対象
+#DIM サイズ
+
+サイズ = LIMIT(BASE:対象:身長 / 16, 10, 100)
+
+SIF GETBIT(TALENT:対象:淫乱系, 素質_淫乱_尿道狂い)
+	TIMES サイズ, 1.5
+
+サイズ += SQRT(BLADDER_TOTAL_CREAMPIED_AMOUNT:対象:0 * 3)
+
+サイズ = LIMIT(サイズ, 0, BASE:対象:身長 * 3 / 10)
+
+RETURNF サイズ
+
+;-------------------------
 ;子供の重量の取得（妊娠時の体重に加算）
 ;-------------------------
 @GET_BABY_WEIGHT(対象)
