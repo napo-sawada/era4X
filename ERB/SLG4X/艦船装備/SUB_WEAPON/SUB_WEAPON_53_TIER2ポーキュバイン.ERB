@@ -1,0 +1,44 @@
+﻿;-----------------------------------
+; サブウェポン
+;-----------------------------------
+@GET_SUB_WEAPON_NAME_53
+RESULTS = TIER2ポーキュバイン
+
+@GET_SUB_WEAPON_STATUS_53(STATUS)
+#DIM REF STATUS
+
+STATUS:DAMAGE = 10
+STATUS:FIRE_RATE = 40
+STATUS:ANTI_AIR = 20
+STATUS:HIT_RATE = 35
+STATUS:FIRE_RANGE = 1
+STATUS:SIZE = 2
+STATUS:WEAPON_TYPE = 実体弾
+STATUS:PRICE = 80000
+
+;-----------------------------------
+; サブウェポンの説明
+;-----------------------------------
+@GET_SUB_WEAPON_DESCRIPTION_53
+#DIM STATUS, STATUS_LENGTH
+
+CALL GET_SUB_WEAPON_STATUS_53(STATUS)
+CALL GET_SUB_WEAPON_NAME_53
+PRINTFORML %RESULTS%
+PRINTFORML 多数の金属片を撒き散らして飛翔体を撃墜する近接迎撃兵装。
+PRINTFORML 発射弾数がさらに増加したが、有効射程と命中精度は改善していない。
+PRINTFORML ダメージ  : {STATUS:DAMAGE}
+PRINTFORML 射撃レート: {STATUS:FIRE_RATE}発/ターン
+PRINTFORML 対空攻撃力: {STATUS:ANTI_AIR}
+PRINTFORML 命中率    : {STATUS:HIT_RATE}
+PRINTFORML 有効距離  : {STATUS:FIRE_RANGE}
+PRINTFORML サイズ    : {STATUS:SIZE}
+
+;-----------------------------------
+; サブウェポンの資材
+;-----------------------------------
+@GET_SUB_WEAPON_RESOURCE_53(USE_RESOURCE)
+#DIM REF USE_RESOURCE
+
+USE_RESOURCE:武装合金 = 12
+USE_RESOURCE:武装制御機器 = 1

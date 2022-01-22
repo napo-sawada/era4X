@@ -1,0 +1,46 @@
+﻿;-----------------------------------
+; サブウェポン
+;-----------------------------------
+@GET_SUB_WEAPON_NAME_49
+RESULTS = TIER1クラスターレーザー
+
+@GET_SUB_WEAPON_STATUS_49(STATUS)
+#DIM REF STATUS
+
+STATUS:DAMAGE = 10
+STATUS:FIRE_RATE = 15
+STATUS:ANTI_AIR = 20
+STATUS:HIT_RATE = 70
+STATUS:FIRE_RANGE = 2
+STATUS:SIZE = 3
+STATUS:WEAPON_TYPE = レーザー
+STATUS:PRICE = 80000
+
+;-----------------------------------
+; サブウェポンの説明
+;-----------------------------------
+@GET_SUB_WEAPON_DESCRIPTION_49
+#DIM STATUS, STATUS_LENGTH
+
+CALL GET_SUB_WEAPON_STATUS_49(STATUS)
+CALL GET_SUB_WEAPON_NAME_49
+PRINTFORML %RESULTS%
+PRINTFORML 低威力のレーザーを多数同時発射する新型の小型レーザー砲塔。
+PRINTFORML 対空戦闘に特化した設計をしており、対艦用兵装としては火力不足。
+PRINTFORML ダメージ  : {STATUS:DAMAGE}
+PRINTFORML 射撃レート: {STATUS:FIRE_RATE}発/ターン
+PRINTFORML 対空攻撃力: {STATUS:ANTI_AIR}
+PRINTFORML 命中率    : {STATUS:HIT_RATE}
+PRINTFORML 有効距離  : {STATUS:FIRE_RANGE}
+PRINTFORML サイズ    : {STATUS:SIZE}
+
+;-----------------------------------
+; サブウェポンの資材
+;-----------------------------------
+@GET_SUB_WEAPON_RESOURCE_49(USE_RESOURCE)
+#DIM REF USE_RESOURCE
+
+USE_RESOURCE:武装合金 = 16
+USE_RESOURCE:武装制御機器 = 16
+USE_RESOURCE:耐熱合金 = 4
+USE_RESOURCE:超電導回路 = 4
